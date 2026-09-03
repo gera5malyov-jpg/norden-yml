@@ -25,7 +25,7 @@ ID_KEYS = ("id", "product_id", "productid", "offer_id", "offerid", "sku", "artic
 NAME_KEYS = ("name", "title", "product_name", "productname")
 PRICE_KEYS = ("price", "retail_price", "retailprice", "sale_price", "saleprice")
 OLDPRICE_KEYS = ("old_price", "oldprice", "compare_price", "compareprice")
-VENDOR_KEYS = ("vendor", "brand", "manufacturer", "producer")
+VENDOR_KEYS = ("vendor.name", "vendor", "brand", "manufacturer", "producer")
 VENDOR_CODE_KEYS = ("vendor_code", "vendorcode", "article", "articul", "sku", "code")
 BARCODE_KEYS = ("barcode", "bar_code", "ean", "ean13")
 URL_KEYS = ("url", "link", "product_url", "producturl")
@@ -161,26 +161,28 @@ def number(value: str) -> float | None:
 
 def boolean(value: str) -> bool | None:
     text = value.strip().lower()
-    if text in {"true", "yes", "y", "да", "1", "available", "in_stock", "instock", "in stock", "в наличии", "есть"}:
+    if text in {"true", "yes", "y", "да", "1", "available", "in_stock", "instock"}:
         return True
-    if text in {"false", "no", "n", "нет", "0", "unavailable", "out_of_stock", "outofstock", "out of stock", "нет в наличии"}:
+    if text in {"false", "no", "n", "нет", "0", "unavailable", "out_of_stock", "outofstock"}:
         return False
     return None
 
 
-def in_stock(flat: list[tuple[str, str]]) -> tuple[bool, list[str]]:
-    matched: set[str] = set()
-    positive = False
+def exact_value(flat: list[tuple[str, str]], paths: tuple[str, ...]) -> str | None:
+    wanted = {p.lower() for p in paths}
     for path, value in flat:
-        p = norm(path)
-        if any(h in p for h in NEGATIVE_STOCK_HINTS) or not any(h in p for h in STOCK_HINTS):
-            continue
-        matched.add(p)
-        b = boolean(value)
-        n = number(value)
-        if b is True or (n is not None and n > 0):
-            positive = True
-    return positive, sorted(matched)
+        if norm(path) in wanted and value.strip():
+            return value.strip()
+    return None
+
+
+def in_stock(flat: list[tuple[str, str]]) -> tuple[bool, list[str]]:
+    # Для сайта работаем только со складом Санкт-Петербурга.
+    spb_stock = exact_value(flat, ("stock.spb.value",))
+    if spb_stock is None:
+        return False, []
+    value = number(spb_stock)
+    return bool(value is not None and value > 0), ["stock.spb.value"]
 
 
 def identity(flat: list[tuple[str, str]], index: int) -> str:
@@ -194,8 +196,8 @@ def identity(flat: list[tuple[str, str]], index: int) -> str:
 def pictures(flat: list[tuple[str, str]]) -> list[str]:
     result: list[str] = []
     for path, value in flat:
-        leaf = norm(path).rsplit(".", 1)[-1]
-        if any(h in leaf for h in PICTURE_HINTS) and value.strip().startswith(("http://", "https://")) and value.strip() not in result:
+        p = norm(path)
+        if "images.url" in p and value.strip().startswith(("http://", "https://")) and value.strip() not in result:
             result.append(value.strip())
     return result
 
@@ -213,15 +215,16 @@ def build_offer(product: object, index: int) -> tuple[str, bytes, str | None, st
     name = first_value(flat, NAME_KEYS) or key
     category_id = first_value(flat, CATEGORY_ID_KEYS)
     category_name = first_value(flat, CATEGORY_NAME_KEYS)
+    retail_price = exact_value(flat, ("price.spb.valueretail",))
+    wholesale_price = exact_value(flat, ("price.spb.valueopt",))
+    spb_stock = exact_value(flat, ("stock.spb.value",)) or "0"
+
     lines = [f"<offer id={quoteattr(key)} available=\"true\">", tag("name", name)]
-    standard = (
-        ("url", first_value(flat, URL_KEYS)),
-        ("price", first_value(flat, PRICE_KEYS)),
-        ("oldprice", first_value(flat, OLDPRICE_KEYS)),
-    )
-    for element, value in standard:
-        if value:
-            lines.append(tag(element, value))
+    product_url = exact_value(flat, ("url", "link", "product_url", "producturl"))
+    if product_url:
+        lines.append(tag("url", product_url))
+    if retail_price:
+        lines.append(tag("price", retail_price))
     lines.append("<currencyId>RUR</currencyId>")
     if category_id:
         lines.append(tag("categoryId", category_id))
@@ -237,6 +240,13 @@ def build_offer(product: object, index: int) -> tuple[str, bytes, str | None, st
     description = first_value(flat, DESCRIPTION_KEYS)
     if description:
         lines.append(tag("description", description))
+
+    # Удобные нормализованные поля для импорта сайта + полный набор исходных полей API ниже.
+    lines.append(f"<param name=\"Остаток СПБ\">{escape(spb_stock)}</param>")
+    if wholesale_price:
+        lines.append(f"<param name=\"Оптовая цена СПБ\">{escape(wholesale_price)}</param>")
+    if retail_price:
+        lines.append(f"<param name=\"Розничная цена СПБ\">{escape(retail_price)}</param>")
     for path, value in flat:
         if path:
             lines.append(f"<param name={quoteattr(path)}>{escape(value)}</param>")
@@ -327,7 +337,7 @@ def main() -> int:
     changed = [key for key, digest in hashes.items() if previous.get(key) != digest]
     removed = [key for key in previous if key not in hashes]
 
-    # TD Andrey публикуем строго только при наличии. Нулевые остатки и tombstone в YML не добавляются.
+    # Важно: TD Andrey публикуем строго только при наличии на складе Санкт-Петербурга. Нулевые остатки и tombstone в YML не добавляются.
     body = b"\n" + b"\n".join(offers[key] for key in changed) + b"\n" if changed else b"\n"
     yml = prefix(categories) + body + b"</offers>\n  </shop>\n</yml_catalog>\n"
     output_changed = write_if_changed(OUTPUT_PATH, yml)
@@ -337,7 +347,7 @@ def main() -> int:
         "checked_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "api_format": response_format,
         "api_product_count": len(products),
-        "in_stock_offer_count": len(offers),
+        "in_stock_spb_offer_count": len(offers),
         "out_of_stock_filtered_count": filtered,
         "changed_count": len(changed),
         "removed_from_in_stock_count": len(removed),
@@ -351,7 +361,7 @@ def main() -> int:
     state_changed = write_if_changed(STATE_PATH, state_bytes)
 
     print(
-        f"[tdandrey] API={response_format}; всего={len(products)}; в_наличии={len(offers)}; "
+        f"[tdandrey] API={response_format}; всего={len(products)}; в_наличии_СПБ={len(offers)}; "
         f"без_наличия_отфильтровано={filtered}; изменено={len(changed)}; вышло_из_наличия={len(removed)}; "
         f"файл_изменен={output_changed}; состояние_изменено={state_changed}"
     )
