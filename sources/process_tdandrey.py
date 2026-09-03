@@ -23,18 +23,18 @@ PRODUCT_LIST_KEYS = ("products", "items", "data", "result", "results", "offers",
 PRODUCT_TAGS = {"product", "item", "offer", "good"}
 ID_KEYS = ("id", "product_id", "productid", "offer_id", "offerid", "sku", "article", "articul", "vendor_code", "vendorcode", "code")
 NAME_KEYS = ("name", "title", "product_name", "productname")
-PRICE_KEYS = ("price", "retail_price", "retailprice", "sale_price", "saleprice")
-OLDPRICE_KEYS = ("old_price", "oldprice", "compare_price", "compareprice")
 VENDOR_KEYS = ("vendor.name", "vendor", "brand", "manufacturer", "producer")
 VENDOR_CODE_KEYS = ("vendor_code", "vendorcode", "article", "articul", "sku", "code")
 BARCODE_KEYS = ("barcode", "bar_code", "ean", "ean13")
-URL_KEYS = ("url", "link", "product_url", "producturl")
 DESCRIPTION_KEYS = ("description", "desc", "text", "annotation")
 CATEGORY_ID_KEYS = ("category_id", "categoryid", "category.id")
 CATEGORY_NAME_KEYS = ("category_name", "categoryname", "category.name", "category_title", "categorytitle")
-PICTURE_HINTS = ("picture", "image", "photo")
-STOCK_HINTS = ("stock", "stocks", "quantity", "qty", "rest", "rests", "available", "availability", "in_stock", "instock", "warehouse", "warehouses", "остат", "налич", "склад")
-NEGATIVE_STOCK_HINTS = ("reserved", "reserve", "резерв")
+
+WAREHOUSES = (
+    ("spb", "СПБ", "Санкт-Петербург"),
+    ("msk", "Москва", "Москва"),
+    ("ptg", "Пятигорск", "Пятигорск"),
+)
 
 
 def add_query(url: str, **params: object) -> str:
@@ -149,6 +149,14 @@ def first_value(flat: list[tuple[str, str]], keys: tuple[str, ...]) -> str | Non
     return None
 
 
+def exact_value(flat: list[tuple[str, str]], paths: tuple[str, ...]) -> str | None:
+    wanted = {p.lower() for p in paths}
+    for path, value in flat:
+        if norm(path) in wanted and value.strip():
+            return value.strip()
+    return None
+
+
 def number(value: str) -> float | None:
     text = value.strip().replace("\u00a0", "").replace(" ", "").replace(",", ".")
     if not re.fullmatch(r"[-+]?\d+(?:\.\d+)?", text):
@@ -159,30 +167,32 @@ def number(value: str) -> float | None:
         return None
 
 
-def boolean(value: str) -> bool | None:
-    text = value.strip().lower()
-    if text in {"true", "yes", "y", "да", "1", "available", "in_stock", "instock"}:
-        return True
-    if text in {"false", "no", "n", "нет", "0", "unavailable", "out_of_stock", "outofstock"}:
-        return False
-    return None
-
-
-def exact_value(flat: list[tuple[str, str]], paths: tuple[str, ...]) -> str | None:
-    wanted = {p.lower() for p in paths}
-    for path, value in flat:
-        if norm(path) in wanted and value.strip():
-            return value.strip()
-    return None
+def warehouse_values(flat: list[tuple[str, str]]) -> dict[str, dict[str, str]]:
+    result: dict[str, dict[str, str]] = {}
+    for code, label, full_name in WAREHOUSES:
+        stock = exact_value(flat, (f"stock.{code}.value",)) or "0"
+        wholesale = exact_value(flat, (f"price.{code}.valueopt",)) or ""
+        retail = exact_value(flat, (f"price.{code}.valueretail",)) or ""
+        result[code] = {
+            "label": label,
+            "name": full_name,
+            "stock": stock,
+            "wholesale": wholesale,
+            "retail": retail,
+        }
+    return result
 
 
 def in_stock(flat: list[tuple[str, str]]) -> tuple[bool, list[str]]:
-    # Для сайта работаем только со складом Санкт-Петербурга.
-    spb_stock = exact_value(flat, ("stock.spb.value",))
-    if spb_stock is None:
-        return False, []
-    value = number(spb_stock)
-    return bool(value is not None and value > 0), ["stock.spb.value"]
+    warehouses = warehouse_values(flat)
+    paths: list[str] = []
+    has_stock = False
+    for code, _label, _full_name in WAREHOUSES:
+        paths.append(f"stock.{code}.value")
+        value = number(warehouses[code]["stock"])
+        if value is not None and value > 0:
+            has_stock = True
+    return has_stock, paths
 
 
 def identity(flat: list[tuple[str, str]], index: int) -> str:
@@ -211,13 +221,15 @@ def build_offer(product: object, index: int) -> tuple[str, bytes, str | None, st
     ok, stock_paths = in_stock(flat)
     if not ok:
         return None
+
     key = identity(flat, index)
     name = first_value(flat, NAME_KEYS) or key
     category_id = first_value(flat, CATEGORY_ID_KEYS)
     category_name = first_value(flat, CATEGORY_NAME_KEYS)
-    retail_price = exact_value(flat, ("price.spb.valueretail",))
-    wholesale_price = exact_value(flat, ("price.spb.valueopt",))
-    spb_stock = exact_value(flat, ("stock.spb.value",)) or "0"
+    warehouses = warehouse_values(flat)
+
+    # Основная цена YML: первая доступная розничная цена в порядке СПБ -> Москва -> Пятигорск.
+    retail_price = next((warehouses[code]["retail"] for code, _label, _name in WAREHOUSES if warehouses[code]["retail"]), None)
 
     lines = [f"<offer id={quoteattr(key)} available=\"true\">", tag("name", name)]
     product_url = exact_value(flat, ("url", "link", "product_url", "producturl"))
@@ -228,6 +240,7 @@ def build_offer(product: object, index: int) -> tuple[str, bytes, str | None, st
     lines.append("<currencyId>RUR</currencyId>")
     if category_id:
         lines.append(tag("categoryId", category_id))
+
     for element, value in (
         ("vendor", first_value(flat, VENDOR_KEYS)),
         ("vendorCode", first_value(flat, VENDOR_CODE_KEYS)),
@@ -235,21 +248,28 @@ def build_offer(product: object, index: int) -> tuple[str, bytes, str | None, st
     ):
         if value:
             lines.append(tag(element, value))
+
     for value in pictures(flat):
         lines.append(tag("picture", value))
+
     description = first_value(flat, DESCRIPTION_KEYS)
     if description:
         lines.append(tag("description", description))
 
-    # Удобные нормализованные поля для импорта сайта + полный набор исходных полей API ниже.
-    lines.append(f"<param name=\"Остаток СПБ\">{escape(spb_stock)}</param>")
-    if wholesale_price:
-        lines.append(f"<param name=\"Оптовая цена СПБ\">{escape(wholesale_price)}</param>")
-    if retail_price:
-        lines.append(f"<param name=\"Розничная цена СПБ\">{escape(retail_price)}</param>")
+    # Все три склада и цены каждого склада отдельными понятными полями.
+    for code, label, _full_name in WAREHOUSES:
+        data = warehouses[code]
+        lines.append(f"<param name={quoteattr('Остаток ' + label)}>{escape(data['stock'])}</param>")
+        if data["wholesale"]:
+            lines.append(f"<param name={quoteattr('Оптовая цена ' + label)}>{escape(data['wholesale'])}</param>")
+        if data["retail"]:
+            lines.append(f"<param name={quoteattr('Розничная цена ' + label)}>{escape(data['retail'])}</param>")
+
+    # Полный набор исходных полей API сохраняем без потерь.
     for path, value in flat:
         if path:
             lines.append(f"<param name={quoteattr(path)}>{escape(value)}</param>")
+
     lines.append("</offer>")
     return key, "\n".join(lines).encode("utf-8"), category_id, category_name, stock_paths
 
@@ -258,31 +278,41 @@ def fetch_all() -> tuple[list[object], str]:
     all_items: list[object] = []
     seen: set[str] = set()
     response_format = "unknown"
+
     for page in range(1, MAX_PAGES + 1):
         response = requests.get(
             add_query(SOURCE_URL, page=page, limit=PAGE_LIMIT),
             timeout=(20, 180),
-            headers={"User-Agent": "Megapolis-TDAndrey-YML/1.0", "Accept": "application/json,application/xml,text/xml,text/plain,*/*"},
+            headers={
+                "User-Agent": "Megapolis-TDAndrey-YML/1.1",
+                "Accept": "application/json,application/xml,text/xml,text/plain,*/*",
+            },
         )
         response.raise_for_status()
         items, response_format = parse_page(response)
         if not items:
             break
+
         fingerprint = hashlib.sha256(response.content).hexdigest()
         if fingerprint in seen:
             raise ValueError(f"API повторил страницу {page}; пагинация остановлена")
         seen.add(fingerprint)
         all_items.extend(items)
+
         if len(items) < PAGE_LIMIT:
             break
     else:
         raise ValueError(f"Превышен защитный лимит {MAX_PAGES} страниц")
+
     return all_items, response_format
 
 
 def prefix(categories: dict[str, str]) -> bytes:
     date = datetime.now().astimezone().isoformat(timespec="seconds")
-    cats = "".join(f"      <category id={quoteattr(k)}>{escape(v)}</category>\n" for k, v in sorted(categories.items()))
+    cats = "".join(
+        f"      <category id={quoteattr(k)}>{escape(v)}</category>\n"
+        for k, v in sorted(categories.items())
+    )
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<yml_catalog date="{escape(date)}">\n'
@@ -322,22 +352,31 @@ def main() -> int:
         if built is None:
             filtered += 1
             continue
+
         key, raw, category_id, category_name, paths = built
         stock_paths.update(paths)
         if key in offers:
             duplicates.append(key)
             key = f"{key}__duplicate__{index}"
-            raw = raw.replace(b"<offer id=", f"<offer id={quoteattr(key)} data-original-id=".encode("utf-8"), 1)
+            raw = raw.replace(
+                b"<offer id=",
+                f"<offer id={quoteattr(key)} data-original-id=".encode("utf-8"),
+                1,
+            )
         offers[key] = raw
         if category_id:
             categories[category_id] = category_name or category_id
 
-    hashes = {key: hashlib.sha256(re.sub(rb">\s+<", b"><", raw.strip())).hexdigest() for key, raw in offers.items()}
+    hashes = {
+        key: hashlib.sha256(re.sub(rb">\s+<", b"><", raw.strip())).hexdigest()
+        for key, raw in offers.items()
+    }
     previous = load_state().get("offers", {})
     changed = [key for key, digest in hashes.items() if previous.get(key) != digest]
     removed = [key for key in previous if key not in hashes]
 
-    # Важно: TD Andrey публикуем строго только при наличии на складе Санкт-Петербурга. Нулевые остатки и tombstone в YML не добавляются.
+    # В YML попадают только товары, у которых есть остаток хотя бы на одном из трех складов.
+    # Нулевые товары и tombstone для TD Andrey не публикуем.
     body = b"\n" + b"\n".join(offers[key] for key in changed) + b"\n" if changed else b"\n"
     yml = prefix(categories) + body + b"</offers>\n  </shop>\n</yml_catalog>\n"
     output_changed = write_if_changed(OUTPUT_PATH, yml)
@@ -347,26 +386,31 @@ def main() -> int:
         "checked_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "api_format": response_format,
         "api_product_count": len(products),
-        "in_stock_spb_offer_count": len(offers),
-        "out_of_stock_filtered_count": filtered,
+        "in_stock_any_warehouse_offer_count": len(offers),
+        "out_of_stock_all_warehouses_filtered_count": filtered,
         "changed_count": len(changed),
         "removed_from_in_stock_count": len(removed),
         "removed_from_in_stock_offer_keys": removed,
         "zero_stock_count": 0,
         "duplicate_offer_keys": duplicates,
-        "detected_stock_field_paths": sorted(stock_paths)[:100],
+        "detected_stock_field_paths": sorted(stock_paths),
+        "warehouses": [
+            {"code": code, "label": label, "name": full_name}
+            for code, label, full_name in WAREHOUSES
+        ],
         "offers": hashes,
     }
     state_bytes = (json.dumps(state, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
     state_changed = write_if_changed(STATE_PATH, state_bytes)
 
     print(
-        f"[tdandrey] API={response_format}; всего={len(products)}; в_наличии_СПБ={len(offers)}; "
-        f"без_наличия_отфильтровано={filtered}; изменено={len(changed)}; вышло_из_наличия={len(removed)}; "
-        f"файл_изменен={output_changed}; состояние_изменено={state_changed}"
+        f"[tdandrey] API={response_format}; всего={len(products)}; "
+        f"в_наличии_хотя_бы_на_1_складе={len(offers)}; "
+        f"без_наличия_на_всех_3_складах={filtered}; изменено={len(changed)}; "
+        f"вышло_из_наличия={len(removed)}; файл_изменен={output_changed}; "
+        f"состояние_изменено={state_changed}"
     )
-    if not stock_paths:
-        print("[tdandrey] ПРЕДУПРЕЖДЕНИЕ: не распознано ни одного поля остатка; YML будет пустым.", file=sys.stderr)
+
     return 0
 
 
