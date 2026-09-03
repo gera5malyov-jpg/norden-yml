@@ -1,4 +1,4 @@
-# Supplier delta feeds: keep supplier product data unchanged; publish only changed offers. v2
+# Supplier delta feeds: publish only changed offers. RedBlack/Riva/Everprof keep zero-stock tombstones for 7 days; TD Andrey publishes only in-stock items.
 name: Update supplier delta YML
 
 on:
@@ -8,6 +8,7 @@ on:
   push:
     paths:
       - 'sources/process_supplier_deltas.py'
+      - 'sources/process_tdandrey.py'
       - 'sources/yml_sources.json'
       - '.github/workflows/supplier-deltas.yml'
 
@@ -21,7 +22,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -40,6 +41,9 @@ jobs:
 
       - name: Build changed-only supplier feeds
         run: python sources/process_supplier_deltas.py
+
+      - name: Build TD Andrey in-stock delta YML
+        run: python sources/process_tdandrey.py
 
       - name: Commit changed feeds and comparison state
         run: |
