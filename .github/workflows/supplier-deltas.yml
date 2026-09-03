@@ -1,0 +1,56 @@
+name: Update supplier delta YML
+
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'sources/process_supplier_deltas.py'
+      - 'sources/yml_sources.json'
+      - '.github/workflows/supplier-deltas.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: supplier-deltas
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build changed-only supplier feeds
+        run: python sources/process_supplier_deltas.py
+
+      - name: Commit changed feeds and comparison state
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add sources/changed sources/state
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Update supplier delta YML"
+          git pull --rebase origin main
+          git push
