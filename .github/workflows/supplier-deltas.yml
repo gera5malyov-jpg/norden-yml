@@ -1,4 +1,4 @@
-# Supplier delta feeds: publish only changed offers. RedBlack/Riva/Everprof keep zero-stock tombstones for 7 days; TD Andrey publishes only in-stock items.
+# Supplier delta feeds: publish only changed offers. RedBlack/Riva/Everprof keep zero-stock tombstones for 7 days. TD Andrey is temporarily serving a frozen full initial in-stock snapshot until the first site import is confirmed.
 name: Update supplier delta YML
 
 on:
@@ -46,8 +46,8 @@ jobs:
       - name: Build one-time full TD Andrey initial YML
         run: python sources/build_tdandrey_initial_full.py
 
-      - name: Build TD Andrey in-stock delta YML
-        run: python sources/process_tdandrey.py
+      - name: Serve full TD Andrey initial YML until first import
+        run: cp sources/full/tdandrey_initial.xml sources/changed/tdandrey.xml
 
       - name: Commit changed feeds and comparison state
         run: |
