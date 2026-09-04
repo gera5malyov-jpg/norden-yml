@@ -1,4 +1,4 @@
-# Supplier delta feeds: publish only changed offers. RedBlack/Riva/Everprof keep zero-stock tombstones for 7 days. TD Andrey is temporarily serving a frozen full initial in-stock snapshot until the first site import is confirmed.
+# Supplier delta feeds: publish only changed offers. RedBlack/Riva/Everprof keep zero-stock tombstones for 7 days. TD Andrey now switches from the frozen initial full snapshot to changed-only mode.
 name: Update supplier delta YML
 
 on:
@@ -9,7 +9,6 @@ on:
     paths:
       - 'sources/process_supplier_deltas.py'
       - 'sources/process_tdandrey.py'
-      - 'sources/build_tdandrey_initial_full.py'
       - 'sources/yml_sources.json'
       - '.github/workflows/supplier-deltas.yml'
 
@@ -43,17 +42,17 @@ jobs:
       - name: Build changed-only supplier feeds
         run: python sources/process_supplier_deltas.py
 
-      - name: Build one-time full TD Andrey initial YML
-        run: python sources/build_tdandrey_initial_full.py
+      - name: Initialize TD Andrey delta baseline from imported snapshot
+        run: cp sources/state/tdandrey_initial.json sources/state/tdandrey.json
 
-      - name: Serve full TD Andrey initial YML until first import
-        run: cp sources/full/tdandrey_initial.xml sources/changed/tdandrey.xml
+      - name: Build TD Andrey changed-only YML
+        run: python sources/process_tdandrey.py
 
       - name: Commit changed feeds and comparison state
         run: |
           git config user.name github-actions
           git config user.email actions@github.com
-          git add sources/changed sources/state sources/full
+          git add sources/changed sources/state
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
