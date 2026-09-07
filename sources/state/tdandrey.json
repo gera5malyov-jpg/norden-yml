@@ -1,13 +1,15 @@
 {
   "api_format": "json",
   "api_product_count": 68900,
-  "changed_count": 142,
-  "checked_at_utc": "2026-09-07T21:32:22+00:00",
+  "changed_count": 0,
+  "checked_at_utc": "2026-09-07T21:48:03+00:00",
   "detected_stock_field_paths": [
     "stock.msk.value",
     "stock.ptg.value",
     "stock.spb.value"
   ],
+  "disappeared_from_api_count": 0,
+  "disappeared_from_api_offer_keys": [],
   "duplicate_offer_keys": [],
   "in_stock_any_warehouse_offer_count": 7977,
   "offers": {
@@ -7990,21 +7992,11 @@
     "9999": "072f4137b4e8d8bb9d196611862bd949f06768b6241dd6d392ed84eedc379653"
   },
   "out_of_stock_all_warehouses_filtered_count": 60923,
-  "removed_from_in_stock_count": 11,
-  "removed_from_in_stock_offer_keys": [
-    "105",
-    "10691",
-    "10897",
-    "11446",
-    "124435",
-    "128346",
-    "130222",
-    "13460",
-    "30144",
-    "57166",
-    "59"
-  ],
+  "removed_from_in_stock_count": 0,
+  "removed_from_in_stock_offer_keys": [],
   "source_url": "https://lk.tdandrey.ru/partner-export/v1/a163560406b5776bda46922e46cf300ce492",
+  "tombstones": {},
+  "unrecovered_removed_offer_keys": [],
   "warehouses": [
     {
       "code": "spb",
@@ -8022,5 +8014,9 @@
       "name": "Пятигорск"
     }
   ],
-  "zero_stock_count": 0
+  "zero_on_all_warehouses_count": 0,
+  "zero_on_all_warehouses_offer_keys": [],
+  "zero_stock_count": 0,
+  "zero_stock_offer_keys": [],
+  "zero_stock_retention_days": 7
 }
