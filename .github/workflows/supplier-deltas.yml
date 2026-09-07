@@ -1,4 +1,4 @@
-# Supplier delta feeds: publish only changed offers. RedBlack/Riva/Everprof keep zero-stock tombstones for 7 days. TD Andrey publishes only currently in-stock items that changed since the previous successful check.
+# Supplier delta feeds: publish only changed offers. RedBlack/Riva/Everprof keep zero-stock tombstones for 7 days. TD Andrey publishes changed-only plus a temporary current full in-stock feed for all three warehouses.
 name: Update supplier delta YML
 
 on:
@@ -9,6 +9,7 @@ on:
     paths:
       - 'sources/process_supplier_deltas.py'
       - 'sources/process_tdandrey.py'
+      - 'sources/build_tdandrey_current_full.py'
       - 'sources/yml_sources.json'
       - '.github/workflows/supplier-deltas.yml'
 
@@ -45,11 +46,14 @@ jobs:
       - name: Build TD Andrey changed-only YML
         run: python sources/process_tdandrey.py
 
-      - name: Commit changed feeds and comparison state
+      - name: Build TD Andrey current full in-stock YML
+        run: python sources/build_tdandrey_current_full.py
+
+      - name: Commit feeds and comparison state
         run: |
           git config user.name github-actions
           git config user.email actions@github.com
-          git add sources/changed sources/state
+          git add sources/changed sources/state sources/full
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
