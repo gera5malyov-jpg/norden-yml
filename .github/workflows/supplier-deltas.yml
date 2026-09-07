@@ -1,4 +1,4 @@
-# Supplier delta feeds: publish only changed offers. RedBlack/Riva/Everprof keep zero-stock tombstones for 7 days. TD Andrey publishes changed-only plus a temporary current full in-stock feed for all three warehouses.
+# Supplier delta feeds: changed offers plus 7-day zero-stock tombstones. TD Andrey also publishes a temporary current full in-stock feed for all three warehouses.
 name: Update supplier delta YML
 
 on:
@@ -9,6 +9,7 @@ on:
     paths:
       - 'sources/process_supplier_deltas.py'
       - 'sources/process_tdandrey.py'
+      - 'sources/process_tdandrey_with_tombstones.py'
       - 'sources/build_tdandrey_current_full.py'
       - 'sources/yml_sources.json'
       - '.github/workflows/supplier-deltas.yml'
@@ -43,8 +44,8 @@ jobs:
       - name: Build changed-only supplier feeds
         run: python sources/process_supplier_deltas.py
 
-      - name: Build TD Andrey changed-only YML
-        run: python sources/process_tdandrey.py
+      - name: Build TD Andrey changed-only YML with 7-day zero-stock retention
+        run: python sources/process_tdandrey_with_tombstones.py
 
       - name: Build TD Andrey current full in-stock YML
         run: python sources/build_tdandrey_current_full.py
