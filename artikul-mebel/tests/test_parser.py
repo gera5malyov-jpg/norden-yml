@@ -62,6 +62,20 @@ VARIANT_1760_HTML = '''
 </div></body></html>
 '''
 
+PRICE_OUTSIDE_DETAIL_HTML = '''
+<html><body><h1>Вешалка гардеробная разборная 30 крючков</h1>
+<div class="product-detail">
+  <div>Арт.: БП-00006350</div>
+  <p>Вешалка гардеробная разборная, рассчитана на 30 крючков. Низкая модификация.</p>
+</div>
+<div id="actual_price">
+  <div>Розничная стоимость</div>
+  <div>11 110 ₽ / шт</div>
+  <div>9 999 ₽ при заказе от 10 шт.</div>
+</div>
+</body></html>
+'''
+
 
 def test_parse_product_extracts_core_fields():
     p = parse_product(PRODUCT_HTML, 'https://artikul-mebel.ru/catalog/detail/stul-luna-f/', 'Мягкие стулья')
@@ -154,3 +168,10 @@ def test_load_one_expands_variants_and_uses_selected_prices(monkeypatch):
     assert high['bulk_price'] == 10104.30
     assert high['bulk_min_qty'] == 9
     assert high['params']['Модификация'] == 'Высота 1760 мм'
+
+
+def test_parse_product_reads_price_outside_detail_container():
+    product = parse_product(PRICE_OUTSIDE_DETAIL_HTML, VARIANT_1490_URL)
+    assert product['price'] == 11110.0
+    assert product['bulk_price'] == 9999.0
+    assert product['bulk_min_qty'] == 10
