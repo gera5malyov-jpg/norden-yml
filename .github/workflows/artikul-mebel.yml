@@ -43,26 +43,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Inspect variant markup
-        run: |
-          python - <<'PY'
-          import re
-          import requests
-
-          base = 'https://artikul-mebel.ru/catalog/detail/veshalka-garderobnaya-razbornaya-30-kryuchkov/'
-          for suffix in ('', '?oID=2640', '?oID=2641'):
-              url = base + suffix
-              r = requests.get(url, timeout=45, headers={'User-Agent': 'Mozilla/5.0'})
-              print('\n===', url, r.status_code, len(r.text), '===')
-              html = r.text
-              for pattern in (r'oID', r'2640', r'2641', r'БП-00006350', r'БП-00006347', r'Высота 1490', r'Высота 1760', r'OFFERS', r'JS_OFFERS', r'PRODUCT_ID'):
-                  positions = [m.start() for m in re.finditer(pattern, html, flags=re.I)][:8]
-                  print('PATTERN', pattern, 'COUNT', len(re.findall(pattern, html, flags=re.I)), 'POSITIONS', positions)
-                  for pos in positions[:3]:
-                      snippet = html[max(0, pos-350):pos+700].replace('\n', ' ').replace('\r', ' ')
-                      print(snippet)
-          PY
-
       - name: Run tests
         run: python -m pytest -q
 
