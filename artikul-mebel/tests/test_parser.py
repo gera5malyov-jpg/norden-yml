@@ -1,5 +1,7 @@
-from parser import parse_product, build_yml, parse_sitemap_urls
 import xml.etree.ElementTree as ET
+
+import parser
+from parser import build_yml, extract_variant_refs, load_one, parse_product, parse_sitemap_urls
 
 PRODUCT_HTML = '''
 <html><head>
@@ -22,6 +24,42 @@ PRODUCT_HTML = '''
   </table>
 </div>
 </body></html>
+'''
+
+BASE_VARIANT_URL = 'https://artikul-mebel.ru/catalog/detail/veshalka-garderobnaya-razbornaya-30-kryuchkov/'
+VARIANT_1490_URL = BASE_VARIANT_URL + '?oID=2640'
+VARIANT_1760_URL = BASE_VARIANT_URL + '?oID=2641'
+
+VARIANT_BASE_HTML = '''
+<html><body>
+<h1>Вешалка гардеробная разборная 30 крючков</h1>
+<div class="product-detail"><div>Цена по запросу</div></div>
+<script>
+var cfg = {'TREE_PROPS':[{'ID':'733','NAME':'Высота вешалки'}],
+'OFFERS':[{'ID':'2640','NAME':'Вешалка гардеробная разборная 30 крючков Высота 1490 мм','NAME_HTML':'Вешалка гардеробная разборная 30 крючков Высота 1490 мм','ARTICLE':'БП-00006350','ARTICLE_HTML':'БП-00006350','DETAIL_PAGE_URL':'/catalog/detail/veshalka-garderobnaya-razbornaya-30-kryuchkov/?oID=2640','CHECK_QUANTITY':false,'PRICE':{'PRICE':'11110'}},
+{'ID':'2641','NAME':'Вешалка гардеробная разборная 30 крючков Высота 1760 мм','NAME_HTML':'Вешалка гардеробная разборная 30 крючков Высота 1760 мм','ARTICLE':'БП-00006347','ARTICLE_HTML':'БП-00006347','DETAIL_PAGE_URL':'/catalog/detail/veshalka-garderobnaya-razbornaya-30-kryuchkov/?oID=2641','CHECK_QUANTITY':false,'PRICE':{'PRICE':'11227'}}]};
+</script>
+</body></html>
+'''
+
+VARIANT_1490_HTML = '''
+<html><body><h1>Вешалка гардеробная разборная 30 крючков</h1>
+<div class="product-detail">
+<div>Арт.: БП-00006350</div>
+<p>Вешалка гардеробная разборная, рассчитана на 30 крючков. Низкая модификация.</p>
+<div>Розничная стоимость 11 110 ₽ / шт</div>
+<div>9 999 ₽ при заказе от 10 шт.</div>
+</div></body></html>
+'''
+
+VARIANT_1760_HTML = '''
+<html><body><h1>Вешалка гардеробная разборная 30 крючков</h1>
+<div class="product-detail">
+<div>Арт.: БП-00006347</div>
+<p>Вешалка гардеробная разборная, рассчитана на 30 крючков. Высокая модификация.</p>
+<div>Розничная стоимость 11 227 ₽ / шт</div>
+<div>10 104.30 ₽ при заказе от 9 шт.</div>
+</div></body></html>
 '''
 
 
@@ -67,3 +105,52 @@ def test_parse_sitemap_urls_supports_urlset():
     urls, nested = parse_sitemap_urls(xml)
     assert urls == ['https://artikul-mebel.ru/catalog/detail/a/']
     assert nested == []
+
+
+def test_extract_variant_refs_from_bitrix_offers():
+    refs = extract_variant_refs(VARIANT_BASE_HTML, BASE_VARIANT_URL)
+    assert refs == [
+        {
+            'id': '2640',
+            'name': 'Вешалка гардеробная разборная 30 крючков Высота 1490 мм',
+            'sku': 'БП-00006350',
+            'url': VARIANT_1490_URL,
+            'variant': 'Высота 1490 мм',
+        },
+        {
+            'id': '2641',
+            'name': 'Вешалка гардеробная разборная 30 крючков Высота 1760 мм',
+            'sku': 'БП-00006347',
+            'url': VARIANT_1760_URL,
+            'variant': 'Высота 1760 мм',
+        },
+    ]
+
+
+def test_load_one_expands_variants_and_uses_selected_prices(monkeypatch):
+    pages = {
+        BASE_VARIANT_URL: VARIANT_BASE_HTML,
+        VARIANT_1490_URL: VARIANT_1490_HTML,
+        VARIANT_1760_URL: VARIANT_1760_HTML,
+    }
+    monkeypatch.setattr(parser, 'fetch', lambda url, **kwargs: pages[url])
+
+    products = load_one(BASE_VARIANT_URL)
+    assert len(products) == 2
+    by_sku = {p['sku']: p for p in products}
+
+    low = by_sku['БП-00006350']
+    assert low['name'].endswith('Высота 1490 мм')
+    assert low['url'] == VARIANT_1490_URL
+    assert low['price'] == 11110.0
+    assert low['bulk_price'] == 9999.0
+    assert low['bulk_min_qty'] == 10
+    assert low['params']['Модификация'] == 'Высота 1490 мм'
+
+    high = by_sku['БП-00006347']
+    assert high['name'].endswith('Высота 1760 мм')
+    assert high['url'] == VARIANT_1760_URL
+    assert high['price'] == 11227.0
+    assert high['bulk_price'] == 10104.30
+    assert high['bulk_min_qty'] == 9
+    assert high['params']['Модификация'] == 'Высота 1760 мм'
