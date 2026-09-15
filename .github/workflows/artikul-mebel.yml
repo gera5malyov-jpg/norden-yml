@@ -1,0 +1,83 @@
+name: Update Artikul-Mebel YML
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'artikul-mebel/parser.py'
+      - 'artikul-mebel/requirements.txt'
+      - 'artikul-mebel/tests/**'
+      - 'artikul-mebel/README.md'
+      - '.github/workflows/artikul-mebel.yml'
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: artikul-mebel-yml-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: artikul-mebel
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: artikul-mebel/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Generate catalog
+        env:
+          MIN_PRODUCTS: '100'
+          WORKERS: '4'
+          OUTPUT: 'catalog.yml'
+        run: python parser.py
+
+      - name: Validate generated YML
+        run: |
+          python - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+
+          path = 'catalog.yml'
+          root = ET.parse(path).getroot()
+          offers = root.findall('./shop/offers/offer')
+          if len(offers) < 100:
+              raise SystemExit(f'Unsafe feed: only {len(offers)} offers')
+          if os.path.getsize(path) < 10000:
+              raise SystemExit('Unsafe feed: file too small')
+          print(f'Validated offers: {len(offers)}')
+          PY
+
+      - name: Commit updated catalog
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add catalog.yml
+          if git diff --cached --quiet; then
+            echo "Catalog has not changed"
+            exit 0
+          fi
+          git commit -m "Update Artikul-Mebel catalog"
+          git pull --rebase origin main
+          git push origin HEAD:main
