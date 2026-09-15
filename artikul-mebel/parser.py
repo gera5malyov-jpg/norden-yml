@@ -327,20 +327,28 @@ def parse_product(page_html: str, url: str, category_hint: str | None = None) ->
 
     container = find_detail_container(soup)
     text = clean_text(container.get_text(' ', strip=True))
+    full_text = clean_text(soup.get_text(' ', strip=True))
 
     sku_match = re.search(r'Арт\.?\s*:?\s*([A-Za-zА-Яа-яЁё0-9._/\-]+)', text, flags=re.I)
     sku = sku_match.group(1).strip() if sku_match else ''
 
-    retail_match = re.search(r'Розничная\s+стоимость\s*([0-9\s\xa0]+(?:[.,][0-9]+)?)\s*₽', text, flags=re.I)
+    price_node = soup.select_one('#actual_price')
+    price_text = clean_text(price_node.get_text(' ', strip=True)) if price_node else full_text
+    retail_pattern = r'Розничная\s+стоимость\s*([0-9\s\xa0]+(?:[.,][0-9]+)?)\s*₽'
+    retail_match = re.search(retail_pattern, price_text, flags=re.I)
+    if retail_match is None and price_text != full_text:
+        retail_match = re.search(retail_pattern, full_text, flags=re.I)
     price = money_to_float(retail_match.group(1)) if retail_match else None
     if price is None:
         any_price = re.search(r'([0-9][0-9\s\xa0]*(?:[.,][0-9]+)?)\s*₽', text)
         price = money_to_float(any_price.group(1)) if any_price else 0.0
 
-    bulk_match = re.search(
-        r'([0-9\s\xa0]+(?:[.,][0-9]+)?)\s*₽\s*при\s+заказе\s+от\s*([0-9\s\xa0]+)\s*шт',
-        text, flags=re.I
-    )
+    bulk_pattern = r'([0-9\s\xa0]+(?:[.,][0-9]+)?)\s*₽\s*при\s+заказе\s+от\s*([0-9\s\xa0]+)\s*шт'
+    bulk_match = re.search(bulk_pattern, price_text, flags=re.I)
+    if bulk_match is None:
+        retail_anchor = re.search(r'Розничная\s+стоимость', full_text, flags=re.I)
+        bulk_scope = full_text[retail_anchor.start():retail_anchor.start() + 1000] if retail_anchor else text
+        bulk_match = re.search(bulk_pattern, bulk_scope, flags=re.I)
     bulk_price = money_to_float(bulk_match.group(1)) if bulk_match else None
     bulk_min_qty = int(re.sub(r'\D', '', bulk_match.group(2))) if bulk_match else None
 
