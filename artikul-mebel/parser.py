@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import concurrent.futures
 import hashlib
+import html as html_lib
 import os
 import re
 import sys
@@ -10,7 +11,7 @@ import zlib
 from collections import deque
 from datetime import datetime
 from typing import Iterable
-from urllib.parse import urljoin, urlparse, urlunparse
+from urllib.parse import parse_qs, urljoin, urlparse, urlunparse
 import xml.etree.ElementTree as ET
 
 import requests
@@ -25,7 +26,7 @@ WORKERS = max(1, int(os.getenv('WORKERS', '4')))
 REQUEST_TIMEOUT = int(os.getenv('REQUEST_TIMEOUT', '45'))
 USER_AGENT = os.getenv(
     'USER_AGENT',
-    'Mozilla/5.0 (compatible; MegapolisCatalogBot/1.0; +https://github.com/gera5malyov-jpg)'
+    'Mozilla/5.0 (compatible; MegapolisCatalogBot/1.1; +https://github.com/gera5malyov-jpg)'
 )
 
 SESSION = requests.Session()
@@ -64,7 +65,6 @@ def format_money(value: float | None) -> str:
 
 def canonical_url(url: str) -> str:
     p = urlparse(url)
-    # Keep query because Bitrix pagination can live there; drop fragments.
     return urlunparse((p.scheme or 'https', p.netloc, p.path, '', p.query, ''))
 
 
@@ -131,11 +131,11 @@ def discover_by_crawl(max_pages: int = 1200) -> list[str]:
             continue
         seen.add(url)
         try:
-            html = fetch(url)
+            page_html = fetch(url)
         except Exception as exc:
             print(f'[crawl] skip {url}: {exc}', file=sys.stderr)
             continue
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(page_html, 'html.parser')
         for a in soup.find_all('a', href=True):
             href = canonical_url(urljoin(url, a['href']))
             if not is_same_site(href):
@@ -145,7 +145,6 @@ def discover_by_crawl(max_pages: int = 1200) -> list[str]:
                 products.append(href)
                 continue
             if parsed.path.startswith('/catalog/'):
-                # Ignore filters/sorts, but preserve Bitrix PAGEN_* pagination.
                 if parsed.query and 'PAGEN_' not in parsed.query.upper():
                     continue
                 if href not in seen:
@@ -198,7 +197,7 @@ def extract_pictures(soup: BeautifulSoup, container) -> list[str]:
         candidates.append(og['content'])
 
     for img in container.find_all('img'):
-        for attr in ('data-src', 'data-lazy', 'src'):
+        for attr in ('data-src', 'data-big-src', 'data-lazy', 'src'):
             if img.get(attr):
                 candidates.append(img[attr])
                 break
@@ -258,8 +257,69 @@ def extract_description(soup: BeautifulSoup, container) -> str:
     return ''
 
 
-def parse_product(html: str, url: str, category_hint: str | None = None) -> dict:
-    soup = BeautifulSoup(html, 'html.parser')
+def _decode_js_text(value: str) -> str:
+    value = value.replace("\\'", "'").replace('\\/', '/').replace('\\\\', '\\')
+    return clean_text(html_lib.unescape(value))
+
+
+_OFFER_HEAD_RE = re.compile(
+    r"\{\s*'ID':'(?P<id>\d+)'\s*,\s*"
+    r"'NAME':'(?P<name>(?:\\.|[^'])*)'\s*,\s*"
+    r"'NAME_HTML':'(?:\\.|[^'])*'\s*,\s*"
+    r"'ARTICLE':'(?P<article>(?:\\.|[^'])*)'\s*,\s*"
+    r"'ARTICLE_HTML':'(?:\\.|[^'])*'\s*,\s*"
+    r"'DETAIL_PAGE_URL':'(?P<detail>(?:\\.|[^'])*)'",
+    re.S,
+)
+
+
+def extract_variant_refs(page_html: str, product_url: str) -> list[dict]:
+    """Extract Bitrix SKU/offer variants belonging to the current product only."""
+    soup = BeautifulSoup(page_html, 'html.parser')
+    h1 = soup.find('h1')
+    base_name = clean_text(h1.get_text(' ', strip=True) if h1 else '')
+    base_path = urlparse(product_url).path.rstrip('/') + '/'
+
+    matches = list(_OFFER_HEAD_RE.finditer(page_html))
+    refs: list[dict] = []
+    seen_ids: set[str] = set()
+
+    for match in matches:
+        offer_id_value = match.group('id')
+        if offer_id_value in seen_ids:
+            continue
+
+        detail = _decode_js_text(match.group('detail'))
+        absolute_url = canonical_url(urljoin(BASE_URL, detail))
+        parsed = urlparse(absolute_url)
+        offer_path = parsed.path.rstrip('/') + '/'
+        if offer_path != base_path:
+            continue
+        if parse_qs(parsed.query).get('oID') != [offer_id_value]:
+            continue
+
+        name = _decode_js_text(match.group('name'))
+        sku = _decode_js_text(match.group('article'))
+        variant = ''
+        if base_name and name.lower().startswith(base_name.lower()):
+            variant = clean_text(name[len(base_name):])
+        if not variant:
+            variant = f'oID {offer_id_value}'
+
+        refs.append({
+            'id': offer_id_value,
+            'name': name,
+            'sku': sku,
+            'url': absolute_url,
+            'variant': variant,
+        })
+        seen_ids.add(offer_id_value)
+
+    return refs
+
+
+def parse_product(page_html: str, url: str, category_hint: str | None = None) -> dict:
+    soup = BeautifulSoup(page_html, 'html.parser')
     h1 = soup.find('h1')
     name = clean_text(h1.get_text(' ', strip=True) if h1 else '')
     if not name:
@@ -377,12 +437,31 @@ def build_yml(products: Iterable[dict]) -> bytes:
     return ET.tostring(root, encoding='utf-8', xml_declaration=True)
 
 
-def load_one(url: str) -> dict | None:
+def load_one(url: str) -> list[dict]:
     try:
-        return parse_product(fetch(url), url)
+        base_html = fetch(url)
+        variant_refs = extract_variant_refs(base_html, url)
+        if not variant_refs:
+            return [parse_product(base_html, url)]
+
+        products: list[dict] = []
+        for ref in variant_refs:
+            try:
+                variant_html = fetch(ref['url'])
+                product = parse_product(variant_html, ref['url'])
+                product['name'] = ref['name'] or product['name']
+                product['sku'] = product['sku'] or ref['sku']
+                product.setdefault('params', {})['Модификация'] = ref['variant']
+                products.append(product)
+            except Exception as exc:
+                print(f"[variant] skip {ref['url']}: {exc}", file=sys.stderr)
+
+        if not products:
+            raise RuntimeError(f'Не удалось разобрать ни одной модификации для {url}')
+        return products
     except Exception as exc:
         print(f'[product] skip {url}: {exc}', file=sys.stderr)
-        return None
+        return []
 
 
 def main() -> None:
@@ -397,15 +476,14 @@ def main() -> None:
     with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as executor:
         futures = {executor.submit(load_one, url): url for url in urls}
         for i, future in enumerate(concurrent.futures.as_completed(futures), 1):
-            product = future.result()
-            if product:
-                products.append(product)
+            variants = future.result() or []
+            products.extend(variants)
             if i % 25 == 0 or i == len(futures):
-                print(f'Обработано {i}/{len(futures)}, успешно {len(products)}')
+                print(f'Обработано базовых карточек {i}/{len(futures)}, offers={len(products)}')
 
     if len(products) < MIN_PRODUCTS:
         raise RuntimeError(
-            f'Успешно разобрано только {len(products)} товаров; минимум {MIN_PRODUCTS}. '
+            f'Успешно разобрано только {len(products)} offers; минимум {MIN_PRODUCTS}. '
             'Предыдущий YML не будет перезаписан.'
         )
 
@@ -417,7 +495,7 @@ def main() -> None:
     with open(tmp, 'wb') as f:
         f.write(data)
     os.replace(tmp, OUTPUT)
-    print(f'Готово: {OUTPUT}; товаров={len(products)}; размер={len(data)} байт')
+    print(f'Готово: {OUTPUT}; offers={len(products)}; размер={len(data)} байт')
 
 
 if __name__ == '__main__':
