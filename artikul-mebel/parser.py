@@ -482,6 +482,57 @@ def extract_description(soup: BeautifulSoup, container) -> str:
     return ' '.join(parts)[:5000]
 
 
+def extract_additional_characteristics_text(soup: BeautifulSoup) -> str:
+    """Extract the content block displayed below technical characteristics (#text2)."""
+    section = soup.select_one('#text2 .text-content, #text2')
+    if not section:
+        return ''
+
+    parts: list[str] = []
+    paragraphs = section.find_all('p')
+    if paragraphs:
+        for paragraph in paragraphs:
+            text = clean_text(paragraph.get_text(' ', strip=True))
+            if text:
+                parts.append(text)
+    else:
+        text = clean_text(section.get_text(' ', strip=True))
+        if text:
+            parts.append(text)
+
+    return ' '.join(parts)[:8000]
+
+
+def compose_description(
+    base_description: str,
+    params: dict[str, str],
+    additional_text: str,
+    *,
+    include_characteristics: bool,
+) -> str:
+    if not include_characteristics:
+        return clean_text(base_description)[:12000]
+
+    parts: list[str] = []
+    base = clean_text(base_description)
+    if base:
+        parts.append(base)
+
+    technical_pairs = [
+        f'{clean_text(key)}: {clean_text(value)}'
+        for key, value in params.items()
+        if clean_text(key) and clean_text(value) and clean_text(key) != 'Модификация'
+    ]
+    if technical_pairs:
+        parts.append('Технические характеристики: ' + '; '.join(technical_pairs) + '.')
+
+    extra = clean_text(additional_text)
+    if extra:
+        parts.append(extra)
+
+    return clean_text(' '.join(parts))[:12000]
+
+
 def _decode_js_text(value: str) -> str:
     value = value.replace("\\'", "'").replace('\\/', '/').replace('\\\\', '\\')
     return clean_text(html_lib.unescape(value))
@@ -497,6 +548,18 @@ _OFFER_HEAD_RE = re.compile(
     re.S,
 )
 
+_SKU_LIST_CHARS_RE = re.compile(
+    r"'SKU_LIST_CHARS'\s*:\s*\[(?P<body>.*?)\]",
+    re.S,
+)
+
+_SKU_CHAR_RE = re.compile(
+    r"\{\s*'NAME':'(?P<name>(?:\\.|[^'])*)'\s*,\s*"
+    r"'VALUE':'(?P<value>(?:\\.|[^'])*)'"
+    r"(?:\s*,\s*'HINT':'(?:\\.|[^'])*')?\s*\}",
+    re.S,
+)
+
 
 def extract_variant_refs(page_html: str, product_url: str) -> list[dict]:
     """Extract Bitrix SKU/offer variants belonging to the current product only."""
@@ -509,7 +572,7 @@ def extract_variant_refs(page_html: str, product_url: str) -> list[dict]:
     refs: list[dict] = []
     seen_ids: set[str] = set()
 
-    for match in matches:
+    for match_index, match in enumerate(matches):
         offer_id_value = match.group('id')
         if offer_id_value in seen_ids:
             continue
@@ -531,13 +594,31 @@ def extract_variant_refs(page_html: str, product_url: str) -> list[dict]:
         if not variant:
             variant = f'oID {offer_id_value}'
 
-        refs.append({
+        segment_end = (
+            matches[match_index + 1].start()
+            if match_index + 1 < len(matches)
+            else min(len(page_html), match.start() + 60000)
+        )
+        segment = page_html[match.start():segment_end]
+        chars: dict[str, str] = {}
+        chars_block = _SKU_LIST_CHARS_RE.search(segment)
+        if chars_block:
+            for char_match in _SKU_CHAR_RE.finditer(chars_block.group('body')):
+                char_name = _decode_js_text(char_match.group('name'))
+                char_value = _decode_js_text(char_match.group('value'))
+                if char_name and char_value:
+                    chars[char_name] = char_value
+
+        ref = {
             'id': offer_id_value,
             'name': name,
             'sku': sku,
             'url': absolute_url,
             'variant': variant,
-        })
+        }
+        if chars:
+            ref['chars'] = chars
+        refs.append(ref)
         seen_ids.add(offer_id_value)
 
     return refs
@@ -588,6 +669,16 @@ def parse_product(page_html: str, url: str, category_hint: str | None = None) ->
     stock_match = re.search(r'В\s+наличии\s*:?\s*(\d+)', text, flags=re.I)
     stock = int(stock_match.group(1)) if stock_match else None
 
+    params = extract_params(soup, container)
+    base_description = extract_description(soup, container)
+    additional_characteristics = extract_additional_characteristics_text(soup)
+    description = compose_description(
+        base_description,
+        params,
+        additional_characteristics,
+        include_characteristics=bool(additional_characteristics),
+    )
+
     return {
         'url': url,
         'name': name,
@@ -597,9 +688,11 @@ def parse_product(page_html: str, url: str, category_hint: str | None = None) ->
         'bulk_price': bulk_price,
         'bulk_min_qty': bulk_min_qty,
         'stock': stock,
-        'description': extract_description(soup, container),
+        'description': description,
         'pictures': extract_pictures(soup, container),
-        'params': extract_params(soup, container),
+        'params': params,
+        '_base_description': base_description,
+        '_additional_characteristics': additional_characteristics,
     }
 
 
@@ -725,7 +818,18 @@ def load_one(url: str) -> list[dict]:
                 product = parse_product(variant_html, ref['url'])
                 product['name'] = ref['name'] or product['name']
                 product['sku'] = ref['sku'] or product['sku']
-                product.setdefault('params', {})['Модификация'] = ref['variant']
+                params = product.setdefault('params', {})
+                selected_chars = ref.get('chars') or {}
+                params.update(selected_chars)
+                product['description'] = compose_description(
+                    product.get('_base_description', product.get('description', '')),
+                    params,
+                    product.get('_additional_characteristics', ''),
+                    include_characteristics=bool(
+                        selected_chars or product.get('_additional_characteristics')
+                    ),
+                )
+                params['Модификация'] = ref['variant']
                 products.append(product)
             except Exception as exc:
                 print(f"[variant] skip {ref['url']}: {exc}", file=sys.stderr)
