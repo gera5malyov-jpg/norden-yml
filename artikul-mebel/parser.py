@@ -15,7 +15,7 @@ from urllib.parse import parse_qs, urljoin, urlparse, urlunparse
 import xml.etree.ElementTree as ET
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 BASE_URL = 'https://artikul-mebel.ru'
 CATALOG_URL = f'{BASE_URL}/catalog/'
@@ -190,71 +190,217 @@ def detect_category(soup: BeautifulSoup, fallback: str | None = None) -> str:
     return clean_text(fallback) or 'Каталог'
 
 
+def _append_unique(values: list[str], value: str | None) -> None:
+    text = clean_text(value)
+    if text and text not in values:
+        values.append(text)
+
+
+def _image_url(raw: str | None) -> str | None:
+    if not raw:
+        return None
+    url = urljoin(BASE_URL, html_lib.unescape(raw))
+    low = url.lower().split('?', 1)[0]
+    if not re.search(r'\.(?:jpe?g|png|webp)$', low):
+        return None
+    if not is_same_site(url):
+        return None
+    if any(bad in low for bad in ('logo', 'icon', 'sprite', 'favicon', 'loader', 'ufo.webp')):
+        return None
+    if '/upload/' not in low and '/images/' not in low:
+        return None
+    return url
+
+
 def extract_pictures(soup: BeautifulSoup, container) -> list[str]:
     candidates: list[str] = []
     og = soup.find('meta', attrs={'property': 'og:image'})
     if og and og.get('content'):
         candidates.append(og['content'])
 
+    selectors = [
+        '.wrapper-big-picture img',
+        '.big-picture img',
+        '[data-popup-gallery] img',
+        '[class*="photo-gallery"] img',
+        '[class*="photogallery"] img',
+        '[class*="product-gallery"] img',
+        '.product-detail img',
+        '.catalog-detail img',
+    ]
+    seen_nodes: set[int] = set()
+    for selector in selectors:
+        for img in soup.select(selector):
+            node_id = id(img)
+            if node_id in seen_nodes:
+                continue
+            seen_nodes.add(node_id)
+            for attr in ('data-big-src', 'data-src', 'data-lazy', 'src'):
+                if img.get(attr):
+                    candidates.append(img[attr])
+                    break
+
     for img in container.find_all('img'):
-        for attr in ('data-src', 'data-big-src', 'data-lazy', 'src'):
+        if id(img) in seen_nodes:
+            continue
+        for attr in ('data-big-src', 'data-src', 'data-lazy', 'src'):
             if img.get(attr):
                 candidates.append(img[attr])
                 break
-    for a in container.find_all('a', href=True):
+
+    for a in soup.select('.wrapper-big-picture a[href], .big-picture a[href], [class*="gallery"] a[href]'):
         candidates.append(a['href'])
 
-    result = []
+    result: list[str] = []
     for raw in candidates:
-        url = urljoin(BASE_URL, raw)
-        low = url.lower().split('?', 1)[0]
-        if not re.search(r'\.(?:jpe?g|png|webp)$', low):
-            continue
-        if not is_same_site(url):
-            continue
-        if any(bad in low for bad in ('logo', 'icon', 'sprite', 'favicon', 'loader')):
-            continue
-        if '/upload/' not in low and '/images/' not in low:
-            continue
-        if url not in result:
+        url = _image_url(raw)
+        if url and url not in result:
             result.append(url)
-        if len(result) >= 10:
+        if len(result) >= 20:
             break
     return result
 
 
-def extract_params(container) -> dict[str, str]:
+def _characteristics_section(soup: BeautifulSoup, container):
+    for selector in ('#chars', '#characteristics', '[id="characteristics"]', '[data-section="characteristics"]'):
+        node = soup.select_one(selector)
+        if node:
+            return node
+    return container
+
+
+def _add_param(params: dict[str, str], key: str | None, value: str | None) -> None:
+    key_text = clean_text(key)
+    value_text = clean_text(value)
+    if not key_text or not value_text or key_text == value_text:
+        return
+    if len(key_text) > 160 or len(value_text) > 2000:
+        return
+    if key_text.lower() in {'технические характеристики', 'характеристики'}:
+        return
+    params.setdefault(key_text, value_text)
+
+
+def extract_params(soup: BeautifulSoup, container) -> dict[str, str]:
+    section = _characteristics_section(soup, container)
     params: dict[str, str] = {}
-    for tr in container.find_all('tr'):
+
+    for tr in section.find_all('tr'):
         cells = [clean_text(c.get_text(' ', strip=True)) for c in tr.find_all(['th', 'td'])]
         cells = [c for c in cells if c]
         if len(cells) >= 2:
-            key, value = cells[0], cells[-1]
-            if key != value and len(key) <= 160 and value:
-                params[key] = value
-    for dl in container.find_all('dl'):
+            _add_param(params, cells[0], cells[-1])
+
+    for dl in section.find_all('dl'):
         dts = dl.find_all('dt')
         dds = dl.find_all('dd')
         for dt, dd in zip(dts, dds):
-            key = clean_text(dt.get_text(' ', strip=True))
-            value = clean_text(dd.get_text(' ', strip=True))
-            if key and value:
-                params.setdefault(key, value)
+            _add_param(params, dt.get_text(' ', strip=True), dd.get_text(' ', strip=True))
+
+    row_selectors = (
+        '.char-row', '[class*="char-row"]', '[class*="characteristic-row"]',
+        '[class*="property-row"]', '[class*="prop-row"]', '[class*="char-item"]'
+    )
+    for selector in row_selectors:
+        for row in section.select(selector):
+            name_node = row.select_one('[class*="name"], [class*="title"], [class*="label"]')
+            value_node = row.select_one('[class*="value"], [class*="val"]')
+            if name_node and value_node and name_node is not value_node:
+                _add_param(
+                    params,
+                    name_node.get_text(' ', strip=True),
+                    value_node.get_text(' ', strip=True),
+                )
+
+    for heading in section.find_all(['h3', 'h4', 'h5']):
+        title = clean_text(heading.get_text(' ', strip=True))
+        if not title or title.lower() in {'технические характеристики', 'характеристики'}:
+            continue
+        list_node = heading.find_next_sibling(['ul', 'ol'])
+        if list_node is None and heading.parent is not section:
+            list_node = heading.parent.find(['ul', 'ol'])
+        if list_node:
+            items = [clean_text(li.get_text(' ', strip=True)) for li in list_node.find_all('li')]
+            items = [item for item in items if item]
+            if items:
+                _add_param(params, title, '; '.join(items))
+
+    for node in section.find_all(['div', 'li']):
+        children = [child for child in node.find_all(recursive=False) if isinstance(child, Tag)]
+        if not (2 <= len(children) <= 3):
+            continue
+        texts = [clean_text(child.get_text(' ', strip=True)) for child in children]
+        texts = [text for text in texts if text]
+        if len(texts) < 2:
+            continue
+        key, value = texts[0], texts[-1]
+        if len(key) <= 80 and len(value) <= 500:
+            _add_param(params, key, value)
+
     return params
 
 
-def extract_description(soup: BeautifulSoup, container) -> str:
-    paragraphs = []
-    for p in container.find_all('p'):
-        text = clean_text(p.get_text(' ', strip=True))
-        if len(text) >= 30 and text not in paragraphs:
-            paragraphs.append(text)
+def _description_section_text(section) -> list[str]:
+    parts: list[str] = []
+    paragraphs = section.find_all('p')
     if paragraphs:
-        return ' '.join(paragraphs[:8])[:5000]
-    meta = soup.find('meta', attrs={'name': 'description'})
-    if meta and meta.get('content'):
-        return clean_text(meta['content'])[:5000]
-    return ''
+        for p in paragraphs:
+            text = clean_text(p.get_text(' ', strip=True))
+            if len(text) >= 20:
+                _append_unique(parts, text)
+        return parts
+
+    text = clean_text(section.get_text(' ', strip=True))
+    text = re.sub(r'^Описание\s*', '', text, flags=re.I)
+    if len(text) >= 20:
+        _append_unique(parts, text)
+    return parts
+
+
+def extract_description(soup: BeautifulSoup, container) -> str:
+    parts: list[str] = []
+
+    for node in soup.select('.detail-description, [itemprop="description"]'):
+        text = clean_text(node.get_text(' ', strip=True))
+        if len(text) >= 20:
+            _append_unique(parts, text)
+
+    for selector in ('#description', '#desc', '[data-section="description"]'):
+        section = soup.select_one(selector)
+        if section:
+            for text in _description_section_text(section):
+                _append_unique(parts, text)
+            break
+
+    if not any(soup.select_one(selector) for selector in ('#description', '#desc', '[data-section="description"]')):
+        heading = None
+        for candidate in soup.find_all(['h2', 'h3', 'h4', 'h5']):
+            if clean_text(candidate.get_text(' ', strip=True)).lower() == 'описание':
+                heading = candidate
+                break
+        if heading:
+            sibling = heading.find_next_sibling()
+            while sibling:
+                if isinstance(sibling, Tag) and sibling.name in {'h2', 'h3', 'h4', 'h5'}:
+                    break
+                if isinstance(sibling, Tag):
+                    text = clean_text(sibling.get_text(' ', strip=True))
+                    if len(text) >= 20:
+                        _append_unique(parts, text)
+                sibling = sibling.find_next_sibling()
+
+    if not parts:
+        for p in container.find_all('p'):
+            text = clean_text(p.get_text(' ', strip=True))
+            if len(text) >= 30:
+                _append_unique(parts, text)
+
+    if not parts:
+        meta = soup.find('meta', attrs={'name': 'description'})
+        if meta and meta.get('content'):
+            _append_unique(parts, meta['content'])
+
+    return ' '.join(parts)[:5000]
 
 
 def _decode_js_text(value: str) -> str:
@@ -330,6 +476,8 @@ def parse_product(page_html: str, url: str, category_hint: str | None = None) ->
     full_text = clean_text(soup.get_text(' ', strip=True))
 
     sku_match = re.search(r'Арт\.?\s*:?\s*([A-Za-zА-Яа-яЁё0-9._/\-]+)', text, flags=re.I)
+    if sku_match is None:
+        sku_match = re.search(r'Арт\.?\s*:?\s*([A-Za-zА-Яа-яЁё0-9._/\-]+)', full_text, flags=re.I)
     sku = sku_match.group(1).strip() if sku_match else ''
 
     price_node = soup.select_one('#actual_price')
@@ -366,7 +514,7 @@ def parse_product(page_html: str, url: str, category_hint: str | None = None) ->
         'stock': stock,
         'description': extract_description(soup, container),
         'pictures': extract_pictures(soup, container),
-        'params': extract_params(container),
+        'params': extract_params(soup, container),
     }
 
 
@@ -420,7 +568,7 @@ def build_yml(products: Iterable[dict]) -> bytes:
         ET.SubElement(offer, 'currencyId').text = 'RUR'
         category = clean_text(product.get('category')) or 'Каталог'
         ET.SubElement(offer, 'categoryId').text = cat_ids[category]
-        for picture in product.get('pictures', [])[:10]:
+        for picture in product.get('pictures', [])[:20]:
             ET.SubElement(offer, 'picture').text = picture
         ET.SubElement(offer, 'name').text = product['name']
         ET.SubElement(offer, 'vendor').text = 'Артикул-Мебель'
