@@ -102,6 +102,36 @@ RICH_PRODUCT_HTML = '''
 </body></html>
 '''
 
+ARTICLE_OUTSIDE_DETAIL_HTML = '''
+<html><body>
+<header>Артикул-Мебель</header>
+<h1>Стул MINI OFFICE 2 (МИНИ ОФИС)</h1>
+<div class="product-detail"><p>Карточка товара без артикула внутри этого контейнера.</p></div>
+<div class="detail-article">Арт.: БП-00016674</div>
+<div id="actual_price">Розничная стоимость 6 675 ₽ / шт</div>
+</body></html>
+'''
+
+REAL_CHARS_WRAPPERS_HTML = '''
+<html><body>
+<h1>Стул тестовый</h1>
+<div class="product-detail"><div>Арт.: TEST-1</div></div>
+<div id="actual_price">Розничная стоимость 1 000 ₽ / шт</div>
+<div id="chars">
+  <div class="cart-title"><div class="title">Технические характеристики</div><div class="line"></div></div>
+  <div class="cart-char">
+    <div class="row">
+      <div class="cart-char-table-wrap">
+        <table><tr><td class="left">Габариты (ГхШхВ)</td><td class="dotted"></td><td class="right bold">560х460x810 мм</td></tr></table>
+        <table><tr><td class="left">Вес</td><td class="dotted"></td><td class="right bold">5 кг</td></tr></table>
+      </div>
+      <div class="drawing"><div>Чертеж</div><div>Все габаритные размеры</div></div>
+    </div>
+  </div>
+</div>
+</body></html>
+'''
+
 
 def test_parse_product_extracts_core_fields():
     p = parse_product(PRODUCT_HTML, 'https://artikul-mebel.ru/catalog/detail/stul-luna-f/', 'Мягкие стулья')
@@ -221,3 +251,16 @@ def test_parse_product_combines_descriptions_characteristics_and_gallery():
         'https://artikul-mebel.ru/upload/catalog/mini-1.jpg',
         'https://artikul-mebel.ru/upload/catalog/mini-2.jpg',
     ]
+
+
+def test_parse_product_uses_real_article_marker_not_brand_name():
+    product = parse_product(ARTICLE_OUTSIDE_DETAIL_HTML, 'https://artikul-mebel.ru/catalog/detail/stul-mini-office-2/')
+    assert product['sku'] == 'БП-00016674'
+
+
+def test_characteristics_do_not_include_wrapper_or_drawing_junk():
+    product = parse_product(REAL_CHARS_WRAPPERS_HTML, 'https://artikul-mebel.ru/catalog/detail/test/')
+    assert product['params'] == {
+        'Габариты (ГхШхВ)': '560х460x810 мм',
+        'Вес': '5 кг',
+    }
