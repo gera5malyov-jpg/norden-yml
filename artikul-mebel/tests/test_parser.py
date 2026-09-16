@@ -76,6 +76,32 @@ PRICE_OUTSIDE_DETAIL_HTML = '''
 </body></html>
 '''
 
+RICH_PRODUCT_HTML = '''
+<html><head>
+<meta property="og:image" content="/upload/catalog/mini-og.jpg">
+</head><body>
+<div class="breadcrumbs"><a href="/catalog/">Каталог</a><a href="/catalog/stulya/">Стулья</a><a href="/catalog/ofisnye-stulya/">Офисные стулья</a></div>
+<h1>Стул MINI OFFICE 2 (МИНИ ОФИС)</h1>
+<div class="wrapper-big-picture">
+  <img data-src="/upload/resize_cache/mini-1.webp" data-big-src="/upload/catalog/mini-1.jpg">
+  <img data-src="/upload/resize_cache/mini-2.webp" data-big-src="/upload/catalog/mini-2.jpg">
+</div>
+<div class="product-detail">
+  <div>Арт.: БП-00016674</div>
+  <div class="detail-description">Стул MINI OFFICE - лаконичный дизайн и прекрасная эргономика для вашего офиса. Вы можете выбрать ножки самостоятельно.</div>
+</div>
+<div id="actual_price"><div>Розничная стоимость 6 675 ₽ / шт</div><div>6 007.50 ₽ при заказе от 15 шт.</div></div>
+<section id="chars">
+  <h2>Технические характеристики</h2>
+  <div class="char-row"><span class="char-name">Габариты (ГхШхВ)</span><span class="char-value">560х460x810 мм</span></div>
+  <div class="char-row"><span class="char-name">Вес</span><span class="char-value">5 кг</span></div>
+  <div class="char-group"><h3>Каркас</h3><ul><li>Труба круглая 25 х 1,2</li><li>Порошковая покраска.</li></ul></div>
+  <div class="char-group"><h3>Сиденье</h3><ul><li>Фанера 6мм, Поролон 5мм</li><li>Обивка кожзаменитель или ткань.</li></ul></div>
+</section>
+<section id="description"><h2>Описание</h2><p>Стул специально разработан для комфортной работы сотрудников офиса. Специальная прострочка на спинке подчеркивает минималистичный дизайн.</p></section>
+</body></html>
+'''
+
 
 def test_parse_product_extracts_core_fields():
     p = parse_product(PRODUCT_HTML, 'https://artikul-mebel.ru/catalog/detail/stul-luna-f/', 'Мягкие стулья')
@@ -175,3 +201,23 @@ def test_parse_product_reads_price_outside_detail_container():
     assert product['price'] == 11110.0
     assert product['bulk_price'] == 9999.0
     assert product['bulk_min_qty'] == 10
+
+
+def test_parse_product_combines_descriptions_characteristics_and_gallery():
+    product = parse_product(RICH_PRODUCT_HTML, 'https://artikul-mebel.ru/catalog/detail/stul-mini-office-2/')
+
+    assert product['description'] == (
+        'Стул MINI OFFICE - лаконичный дизайн и прекрасная эргономика для вашего офиса. '
+        'Вы можете выбрать ножки самостоятельно. '
+        'Стул специально разработан для комфортной работы сотрудников офиса. '
+        'Специальная прострочка на спинке подчеркивает минималистичный дизайн.'
+    )
+    assert product['params']['Габариты (ГхШхВ)'] == '560х460x810 мм'
+    assert product['params']['Вес'] == '5 кг'
+    assert product['params']['Каркас'] == 'Труба круглая 25 х 1,2; Порошковая покраска.'
+    assert product['params']['Сиденье'] == 'Фанера 6мм, Поролон 5мм; Обивка кожзаменитель или ткань.'
+    assert product['pictures'][:3] == [
+        'https://artikul-mebel.ru/upload/catalog/mini-og.jpg',
+        'https://artikul-mebel.ru/upload/catalog/mini-1.jpg',
+        'https://artikul-mebel.ru/upload/catalog/mini-2.jpg',
+    ]
