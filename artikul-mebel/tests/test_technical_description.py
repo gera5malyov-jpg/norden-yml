@@ -74,3 +74,5 @@ def test_load_one_adds_selected_characteristics_and_text2_to_description(monkeyp
     assert 'Труба плоскоовальная труба (Тип А - овал) 30 х 15 х 1,5' in description
     assert 'Посадочное место:' in description
     assert 'Сиденье PL Sigma' in description
+
+# Regression coverage for the live oID=3295 layout.
