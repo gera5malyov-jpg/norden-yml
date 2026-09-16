@@ -35,6 +35,11 @@ SESSION.headers.update({
     'Accept-Language': 'ru-RU,ru;q=0.9,en;q=0.5',
 })
 
+ARTICLE_RE = re.compile(
+    r'(?:^|\s)Арт\.?\s*:\s*([A-Za-zА-Яа-яЁё0-9._/\-]+)',
+    flags=re.I,
+)
+
 
 def clean_text(value: str | None) -> str:
     if not value:
@@ -77,9 +82,9 @@ def fetch(url: str, *, binary: bool = False):
     last_error = None
     for attempt in range(1, 4):
         try:
-            r = SESSION.get(url, timeout=REQUEST_TIMEOUT)
-            r.raise_for_status()
-            return r.content if binary else r.text
+            response = SESSION.get(url, timeout=REQUEST_TIMEOUT)
+            response.raise_for_status()
+            return response.content if binary else response.text
         except requests.RequestException as exc:
             last_error = exc
             if attempt < 3:
@@ -90,9 +95,14 @@ def fetch(url: str, *, binary: bool = False):
 def parse_sitemap_urls(xml_bytes: bytes) -> tuple[list[str], list[str]]:
     root = ET.fromstring(xml_bytes)
     tag = root.tag.split('}')[-1]
-    locs = [clean_text(e.text) for e in root.iter() if e.tag.split('}')[-1] == 'loc' and clean_text(e.text)]
+    locs = [
+        clean_text(element.text)
+        for element in root.iter()
+        if element.tag.split('}')[-1] == 'loc' and clean_text(element.text)
+    ]
     if tag == 'sitemapindex':
         return [], locs
+
     product_urls = []
     for url in locs:
         if '/catalog/detail/' in url:
@@ -104,6 +114,7 @@ def discover_from_sitemap() -> list[str]:
     queue = deque([SITEMAP_URL])
     seen_maps = set()
     products: list[str] = []
+
     while queue and len(seen_maps) < 50:
         sitemap = queue.popleft()
         if sitemap in seen_maps:
@@ -118,6 +129,7 @@ def discover_from_sitemap() -> list[str]:
                     queue.append(url)
         except Exception as exc:
             print(f'[sitemap] {exc}', file=sys.stderr)
+
     return list(dict.fromkeys(products))
 
 
@@ -125,32 +137,39 @@ def discover_by_crawl(max_pages: int = 1200) -> list[str]:
     queue = deque([CATALOG_URL])
     seen = set()
     products: list[str] = []
+
     while queue and len(seen) < max_pages:
         url = queue.popleft()
         if url in seen:
             continue
         seen.add(url)
+
         try:
             page_html = fetch(url)
         except Exception as exc:
             print(f'[crawl] skip {url}: {exc}', file=sys.stderr)
             continue
+
         soup = BeautifulSoup(page_html, 'html.parser')
-        for a in soup.find_all('a', href=True):
-            href = canonical_url(urljoin(url, a['href']))
+        for anchor in soup.find_all('a', href=True):
+            href = canonical_url(urljoin(url, anchor['href']))
             if not is_same_site(href):
                 continue
+
             parsed = urlparse(href)
             if '/catalog/detail/' in parsed.path:
                 products.append(href)
                 continue
+
             if parsed.path.startswith('/catalog/'):
                 if parsed.query and 'PAGEN_' not in parsed.query.upper():
                     continue
                 if href not in seen:
                     queue.append(href)
+
         if len(seen) % 25 == 0:
             print(f'[crawl] pages={len(seen)} products={len(set(products))}')
+
     return list(dict.fromkeys(products))
 
 
@@ -159,6 +178,7 @@ def discover_product_urls() -> list[str]:
     if len(products) >= MIN_PRODUCTS:
         print(f'Найдено через sitemap: {len(products)} товаров')
         return products
+
     print(f'Sitemap дал только {len(products)} товаров; запускаю обход каталога')
     crawled = discover_by_crawl()
     combined = list(dict.fromkeys(products + crawled))
@@ -168,8 +188,13 @@ def discover_product_urls() -> list[str]:
 
 def find_detail_container(soup: BeautifulSoup):
     selectors = [
-        '.product-detail', '.catalog-detail', '.detail-product', '.product_detail',
-        '[class*="catalog-detail"]', '[class*="product-detail"]', 'main'
+        '.product-detail',
+        '.catalog-detail',
+        '.detail-product',
+        '.product_detail',
+        '[class*="catalog-detail"]',
+        '[class*="product-detail"]',
+        'main',
     ]
     for selector in selectors:
         node = soup.select_one(selector)
@@ -180,14 +205,36 @@ def find_detail_container(soup: BeautifulSoup):
 
 def detect_category(soup: BeautifulSoup, fallback: str | None = None) -> str:
     candidates = []
-    for a in soup.select('[class*="breadcrumb"] a[href]'):
-        href = urljoin(BASE_URL, a.get('href', ''))
-        text = clean_text(a.get_text(' ', strip=True))
+    for anchor in soup.select('[class*="breadcrumb"] a[href]'):
+        href = urljoin(BASE_URL, anchor.get('href', ''))
+        text = clean_text(anchor.get_text(' ', strip=True))
         if '/catalog/' in href and '/detail/' not in href and text and text.lower() != 'каталог':
             candidates.append(text)
     if candidates:
         return candidates[-1]
     return clean_text(fallback) or 'Каталог'
+
+
+def extract_sku(soup: BeautifulSoup, container) -> str:
+    scopes: list[str] = []
+
+    article_node = soup.select_one('.detail-article')
+    if article_node:
+        scopes.append(clean_text(article_node.get_text(' ', strip=True)))
+
+    container_text = clean_text(container.get_text(' ', strip=True))
+    if container_text:
+        scopes.append(container_text)
+
+    full_text = clean_text(soup.get_text(' ', strip=True))
+    if full_text:
+        scopes.append(full_text)
+
+    for scope in scopes:
+        match = ARTICLE_RE.search(scope)
+        if match:
+            return match.group(1).strip()
+    return ''
 
 
 def _append_unique(values: list[str], value: str | None) -> None:
@@ -199,6 +246,7 @@ def _append_unique(values: list[str], value: str | None) -> None:
 def _image_url(raw: str | None) -> str | None:
     if not raw:
         return None
+
     url = urljoin(BASE_URL, html_lib.unescape(raw))
     low = url.lower().split('?', 1)[0]
     if not re.search(r'\.(?:jpe?g|png|webp)$', low):
@@ -214,6 +262,7 @@ def _image_url(raw: str | None) -> str | None:
 
 def extract_pictures(soup: BeautifulSoup, container) -> list[str]:
     candidates: list[str] = []
+
     og = soup.find('meta', attrs={'property': 'og:image'})
     if og and og.get('content'):
         candidates.append(og['content'])
@@ -228,28 +277,31 @@ def extract_pictures(soup: BeautifulSoup, container) -> list[str]:
         '.product-detail img',
         '.catalog-detail img',
     ]
+
     seen_nodes: set[int] = set()
     for selector in selectors:
-        for img in soup.select(selector):
-            node_id = id(img)
+        for image in soup.select(selector):
+            node_id = id(image)
             if node_id in seen_nodes:
                 continue
             seen_nodes.add(node_id)
             for attr in ('data-big-src', 'data-src', 'data-lazy', 'src'):
-                if img.get(attr):
-                    candidates.append(img[attr])
+                if image.get(attr):
+                    candidates.append(image[attr])
                     break
 
-    for img in container.find_all('img'):
-        if id(img) in seen_nodes:
+    for image in container.find_all('img'):
+        if id(image) in seen_nodes:
             continue
         for attr in ('data-big-src', 'data-src', 'data-lazy', 'src'):
-            if img.get(attr):
-                candidates.append(img[attr])
+            if image.get(attr):
+                candidates.append(image[attr])
                 break
 
-    for a in soup.select('.wrapper-big-picture a[href], .big-picture a[href], [class*="gallery"] a[href]'):
-        candidates.append(a['href'])
+    for anchor in soup.select(
+        '.wrapper-big-picture a[href], .big-picture a[href], [class*="gallery"] a[href]'
+    ):
+        candidates.append(anchor['href'])
 
     result: list[str] = []
     for raw in candidates:
@@ -262,7 +314,12 @@ def extract_pictures(soup: BeautifulSoup, container) -> list[str]:
 
 
 def _characteristics_section(soup: BeautifulSoup, container):
-    for selector in ('#chars', '#characteristics', '[id="characteristics"]', '[data-section="characteristics"]'):
+    for selector in (
+        '#chars',
+        '#characteristics',
+        '[id="characteristics"]',
+        '[data-section="characteristics"]',
+    ):
         node = soup.select_one(selector)
         if node:
             return node
@@ -285,21 +342,29 @@ def extract_params(soup: BeautifulSoup, container) -> dict[str, str]:
     section = _characteristics_section(soup, container)
     params: dict[str, str] = {}
 
-    for tr in section.find_all('tr'):
-        cells = [clean_text(c.get_text(' ', strip=True)) for c in tr.find_all(['th', 'td'])]
-        cells = [c for c in cells if c]
+    for row in section.find_all('tr'):
+        cells = [clean_text(cell.get_text(' ', strip=True)) for cell in row.find_all(['th', 'td'])]
+        cells = [cell for cell in cells if cell]
         if len(cells) >= 2:
             _add_param(params, cells[0], cells[-1])
 
-    for dl in section.find_all('dl'):
-        dts = dl.find_all('dt')
-        dds = dl.find_all('dd')
-        for dt, dd in zip(dts, dds):
-            _add_param(params, dt.get_text(' ', strip=True), dd.get_text(' ', strip=True))
+    for description_list in section.find_all('dl'):
+        terms = description_list.find_all('dt')
+        definitions = description_list.find_all('dd')
+        for term, definition in zip(terms, definitions):
+            _add_param(
+                params,
+                term.get_text(' ', strip=True),
+                definition.get_text(' ', strip=True),
+            )
 
     row_selectors = (
-        '.char-row', '[class*="char-row"]', '[class*="characteristic-row"]',
-        '[class*="property-row"]', '[class*="prop-row"]', '[class*="char-item"]'
+        '.char-row',
+        '[class*="char-row"]',
+        '[class*="characteristic-row"]',
+        '[class*="property-row"]',
+        '[class*="prop-row"]',
+        '[class*="char-item"]',
     )
     for selector in row_selectors:
         for row in section.select(selector):
@@ -316,26 +381,37 @@ def extract_params(soup: BeautifulSoup, container) -> dict[str, str]:
         title = clean_text(heading.get_text(' ', strip=True))
         if not title or title.lower() in {'технические характеристики', 'характеристики'}:
             continue
+
         list_node = heading.find_next_sibling(['ul', 'ol'])
         if list_node is None and heading.parent is not section:
             list_node = heading.parent.find(['ul', 'ol'])
         if list_node:
-            items = [clean_text(li.get_text(' ', strip=True)) for li in list_node.find_all('li')]
+            items = [clean_text(item.get_text(' ', strip=True)) for item in list_node.find_all('li')]
             items = [item for item in items if item]
             if items:
                 _add_param(params, title, '; '.join(items))
 
-    for node in section.find_all(['div', 'li']):
-        children = [child for child in node.find_all(recursive=False) if isinstance(child, Tag)]
-        if not (2 <= len(children) <= 3):
-            continue
-        texts = [clean_text(child.get_text(' ', strip=True)) for child in children]
-        texts = [text for text in texts if text]
-        if len(texts) < 2:
-            continue
-        key, value = texts[0], texts[-1]
-        if len(key) <= 80 and len(value) <= 500:
-            _add_param(params, key, value)
+    # Some product templates use only simple two-column divs and no tables/dl.
+    # Use this broad fallback only when the structured parsers above found nothing;
+    # otherwise parent wrappers and drawing links turn into false characteristics.
+    if not params:
+        for node in section.find_all(['div', 'li']):
+            children = [
+                child
+                for child in node.find_all(recursive=False)
+                if isinstance(child, Tag)
+            ]
+            if not (2 <= len(children) <= 3):
+                continue
+
+            texts = [clean_text(child.get_text(' ', strip=True)) for child in children]
+            texts = [text for text in texts if text]
+            if len(texts) < 2:
+                continue
+
+            key, value = texts[0], texts[-1]
+            if len(key) <= 80 and len(value) <= 500:
+                _add_param(params, key, value)
 
     return params
 
@@ -344,8 +420,8 @@ def _description_section_text(section) -> list[str]:
     parts: list[str] = []
     paragraphs = section.find_all('p')
     if paragraphs:
-        for p in paragraphs:
-            text = clean_text(p.get_text(' ', strip=True))
+        for paragraph in paragraphs:
+            text = clean_text(paragraph.get_text(' ', strip=True))
             if len(text) >= 20:
                 _append_unique(parts, text)
         return parts
@@ -365,19 +441,22 @@ def extract_description(soup: BeautifulSoup, container) -> str:
         if len(text) >= 20:
             _append_unique(parts, text)
 
+    explicit_description_found = False
     for selector in ('#description', '#desc', '[data-section="description"]'):
         section = soup.select_one(selector)
         if section:
+            explicit_description_found = True
             for text in _description_section_text(section):
                 _append_unique(parts, text)
             break
 
-    if not any(soup.select_one(selector) for selector in ('#description', '#desc', '[data-section="description"]')):
+    if not explicit_description_found:
         heading = None
         for candidate in soup.find_all(['h2', 'h3', 'h4', 'h5']):
             if clean_text(candidate.get_text(' ', strip=True)).lower() == 'описание':
                 heading = candidate
                 break
+
         if heading:
             sibling = heading.find_next_sibling()
             while sibling:
@@ -390,8 +469,8 @@ def extract_description(soup: BeautifulSoup, container) -> str:
                 sibling = sibling.find_next_sibling()
 
     if not parts:
-        for p in container.find_all('p'):
-            text = clean_text(p.get_text(' ', strip=True))
+        for paragraph in container.find_all('p'):
+            text = clean_text(paragraph.get_text(' ', strip=True))
             if len(text) >= 30:
                 _append_unique(parts, text)
 
@@ -474,29 +553,35 @@ def parse_product(page_html: str, url: str, category_hint: str | None = None) ->
     container = find_detail_container(soup)
     text = clean_text(container.get_text(' ', strip=True))
     full_text = clean_text(soup.get_text(' ', strip=True))
-
-    sku_match = re.search(r'Арт\.?\s*:?\s*([A-Za-zА-Яа-яЁё0-9._/\-]+)', text, flags=re.I)
-    if sku_match is None:
-        sku_match = re.search(r'Арт\.?\s*:?\s*([A-Za-zА-Яа-яЁё0-9._/\-]+)', full_text, flags=re.I)
-    sku = sku_match.group(1).strip() if sku_match else ''
+    sku = extract_sku(soup, container)
 
     price_node = soup.select_one('#actual_price')
     price_text = clean_text(price_node.get_text(' ', strip=True)) if price_node else full_text
+
     retail_pattern = r'Розничная\s+стоимость\s*([0-9\s\xa0]+(?:[.,][0-9]+)?)\s*₽'
     retail_match = re.search(retail_pattern, price_text, flags=re.I)
     if retail_match is None and price_text != full_text:
         retail_match = re.search(retail_pattern, full_text, flags=re.I)
     price = money_to_float(retail_match.group(1)) if retail_match else None
+
     if price is None:
         any_price = re.search(r'([0-9][0-9\s\xa0]*(?:[.,][0-9]+)?)\s*₽', text)
         price = money_to_float(any_price.group(1)) if any_price else 0.0
 
-    bulk_pattern = r'([0-9\s\xa0]+(?:[.,][0-9]+)?)\s*₽\s*при\s+заказе\s+от\s*([0-9\s\xa0]+)\s*шт'
+    bulk_pattern = (
+        r'([0-9\s\xa0]+(?:[.,][0-9]+)?)\s*₽\s*'
+        r'при\s+заказе\s+от\s*([0-9\s\xa0]+)\s*шт'
+    )
     bulk_match = re.search(bulk_pattern, price_text, flags=re.I)
     if bulk_match is None:
         retail_anchor = re.search(r'Розничная\s+стоимость', full_text, flags=re.I)
-        bulk_scope = full_text[retail_anchor.start():retail_anchor.start() + 1000] if retail_anchor else text
+        bulk_scope = (
+            full_text[retail_anchor.start():retail_anchor.start() + 1000]
+            if retail_anchor
+            else text
+        )
         bulk_match = re.search(bulk_pattern, bulk_scope, flags=re.I)
+
     bulk_price = money_to_float(bulk_match.group(1)) if bulk_match else None
     bulk_min_qty = int(re.sub(r'\D', '', bulk_match.group(2))) if bulk_match else None
 
@@ -528,10 +613,15 @@ def offer_id(product: dict, used: set[str]) -> str:
         candidate = re.sub(r'[^0-9A-Za-zА-Яа-яЁё._\-]+', '_', raw)[:80]
     else:
         candidate = hashlib.sha1(product['url'].encode('utf-8')).hexdigest()[:20]
+
     if candidate not in used:
         used.add(candidate)
         return candidate
-    candidate = f"{candidate[:65]}-{hashlib.sha1(product['url'].encode('utf-8')).hexdigest()[:10]}"
+
+    candidate = (
+        f"{candidate[:65]}-"
+        f"{hashlib.sha1(product['url'].encode('utf-8')).hexdigest()[:10]}"
+    )
     used.add(candidate)
     return candidate
 
@@ -547,31 +637,48 @@ def build_yml(products: Iterable[dict]) -> bytes:
     currencies = ET.SubElement(shop, 'currencies')
     ET.SubElement(currencies, 'currency', {'id': 'RUR', 'rate': '1'})
 
-    category_names = sorted({clean_text(p.get('category')) or 'Каталог' for p in products})
+    category_names = sorted({clean_text(product.get('category')) or 'Каталог' for product in products})
     categories = ET.SubElement(shop, 'categories')
-    cat_ids = {}
+    category_ids: dict[str, str] = {}
     for name in category_names:
         cid = category_id(name)
-        cat_ids[name] = cid
+        category_ids[name] = cid
         ET.SubElement(categories, 'category', {'id': cid}).text = name
 
     offers = ET.SubElement(shop, 'offers')
     used_ids: set[str] = set()
-    for product in sorted(products, key=lambda p: (p.get('category', ''), p.get('name', ''), p.get('url', ''))):
+
+    for product in sorted(
+        products,
+        key=lambda item: (
+            item.get('category', ''),
+            item.get('name', ''),
+            item.get('url', ''),
+        ),
+    ):
         price = float(product.get('price') or 0)
-        offer = ET.SubElement(offers, 'offer', {
-            'id': offer_id(product, used_ids),
-            'available': 'true' if price > 0 else 'false',
-        })
+        offer = ET.SubElement(
+            offers,
+            'offer',
+            {
+                'id': offer_id(product, used_ids),
+                'available': 'true' if price > 0 else 'false',
+            },
+        )
+
         ET.SubElement(offer, 'url').text = product['url']
         ET.SubElement(offer, 'price').text = format_money(price)
         ET.SubElement(offer, 'currencyId').text = 'RUR'
+
         category = clean_text(product.get('category')) or 'Каталог'
-        ET.SubElement(offer, 'categoryId').text = cat_ids[category]
+        ET.SubElement(offer, 'categoryId').text = category_ids[category]
+
         for picture in product.get('pictures', [])[:20]:
             ET.SubElement(offer, 'picture').text = picture
+
         ET.SubElement(offer, 'name').text = product['name']
         ET.SubElement(offer, 'vendor').text = 'Артикул-Мебель'
+
         if product.get('sku'):
             ET.SubElement(offer, 'vendorCode').text = product['sku']
         if product.get('description'):
@@ -579,11 +686,22 @@ def build_yml(products: Iterable[dict]) -> bytes:
 
         for key, value in product.get('params', {}).items():
             if clean_text(key) and clean_text(value):
-                ET.SubElement(offer, 'param', {'name': clean_text(key)}).text = clean_text(value)
+                ET.SubElement(
+                    offer,
+                    'param',
+                    {'name': clean_text(key)},
+                ).text = clean_text(value)
+
         if product.get('bulk_price') is not None:
-            ET.SubElement(offer, 'param', {'name': 'Оптовая цена'}).text = format_money(product['bulk_price'])
+            ET.SubElement(offer, 'param', {'name': 'Оптовая цена'}).text = format_money(
+                product['bulk_price']
+            )
         if product.get('bulk_min_qty') is not None:
-            ET.SubElement(offer, 'param', {'name': 'Минимальное количество для оптовой цены'}).text = str(product['bulk_min_qty'])
+            ET.SubElement(
+                offer,
+                'param',
+                {'name': 'Минимальное количество для оптовой цены'},
+            ).text = str(product['bulk_min_qty'])
         if product.get('stock') is not None:
             ET.SubElement(offer, 'param', {'name': 'Остаток'}).text = str(product['stock'])
         if price <= 0:
@@ -606,7 +724,7 @@ def load_one(url: str) -> list[dict]:
                 variant_html = fetch(ref['url'])
                 product = parse_product(variant_html, ref['url'])
                 product['name'] = ref['name'] or product['name']
-                product['sku'] = product['sku'] or ref['sku']
+                product['sku'] = ref['sku'] or product['sku']
                 product.setdefault('params', {})['Модификация'] = ref['variant']
                 products.append(product)
             except Exception as exc:
@@ -624,33 +742,37 @@ def main() -> None:
     urls = discover_product_urls()
     if len(urls) < MIN_PRODUCTS:
         raise RuntimeError(
-            f'Найдено только {len(urls)} ссылок на товары; минимум для безопасного обновления {MIN_PRODUCTS}. '
+            f'Найдено только {len(urls)} ссылок на товары; '
+            f'минимум для безопасного обновления {MIN_PRODUCTS}. '
             'Предыдущий YML не будет перезаписан.'
         )
 
     products: list[dict] = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as executor:
         futures = {executor.submit(load_one, url): url for url in urls}
-        for i, future in enumerate(concurrent.futures.as_completed(futures), 1):
+        for index, future in enumerate(concurrent.futures.as_completed(futures), 1):
             variants = future.result() or []
             products.extend(variants)
-            if i % 25 == 0 or i == len(futures):
-                print(f'Обработано базовых карточек {i}/{len(futures)}, offers={len(products)}')
+            if index % 25 == 0 or index == len(futures):
+                print(
+                    f'Обработано базовых карточек {index}/{len(futures)}, '
+                    f'offers={len(products)}'
+                )
 
     if len(products) < MIN_PRODUCTS:
         raise RuntimeError(
-            f'Успешно разобрано только {len(products)} offers; минимум {MIN_PRODUCTS}. '
-            'Предыдущий YML не будет перезаписан.'
+            f'Успешно разобрано только {len(products)} offers; '
+            f'минимум {MIN_PRODUCTS}. Предыдущий YML не будет перезаписан.'
         )
 
     data = build_yml(products)
     if len(data) < 10_000:
         raise RuntimeError(f'Сформированный YML подозрительно мал: {len(data)} байт')
 
-    tmp = OUTPUT + '.tmp'
-    with open(tmp, 'wb') as f:
-        f.write(data)
-    os.replace(tmp, OUTPUT)
+    temporary_path = OUTPUT + '.tmp'
+    with open(temporary_path, 'wb') as output_file:
+        output_file.write(data)
+    os.replace(temporary_path, OUTPUT)
     print(f'Готово: {OUTPUT}; offers={len(products)}; размер={len(data)} байт')
 
 
