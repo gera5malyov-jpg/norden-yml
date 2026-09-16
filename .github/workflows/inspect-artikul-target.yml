@@ -18,7 +18,6 @@ jobs:
         run: |
           python - <<'PY'
           import time, requests
-          from bs4 import BeautifulSoup
           url='https://artikul-mebel.ru/catalog/detail/stul-uchenicheskiy-reguliruemyy-praym-plastik/?oID=3295'
           r=None
           for i in range(5):
@@ -26,7 +25,18 @@ jobs:
               if r.status_code==200: break
               time.sleep(3*(i+1))
           r.raise_for_status()
-          soup=BeautifulSoup(r.text,'html.parser')
-          node=soup.select_one('#chars')
-          print(node.prettify()[:50000] if node else 'CHARS NOT FOUND')
+          text=r.text
+          needles=['3295','835-915','6,64','Труба плоскоовальная','Посадочное место','detail_sku_chars','sku-chars','OFFERS']
+          for needle in needles:
+              print('\n===== SEARCH', needle, '=====')
+              start=0
+              count=0
+              while True:
+                  i=text.find(needle,start)
+                  if i<0 or count>=8: break
+                  print(text[max(0,i-1800):min(len(text),i+6000)])
+                  print('\n-----')
+                  start=i+len(needle)
+                  count+=1
+              if count==0: print('NOT FOUND')
           PY
