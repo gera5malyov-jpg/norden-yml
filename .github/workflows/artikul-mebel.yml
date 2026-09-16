@@ -1,19 +1,8 @@
 name: Update Artikul-Mebel YML
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'artikul-mebel/parser.py'
-      - 'artikul-mebel/parser_core.py'
-      - 'artikul-mebel/requirements.txt'
-      - 'artikul-mebel/tests/**'
-      - 'artikul-mebel/README.md'
-      - '.github/workflows/artikul-mebel.yml'
   schedule:
-    - cron: '0 */6 * * *'
-  workflow_dispatch:
+    - cron: '0 0 1 * *'
 
 permissions:
   contents: write
