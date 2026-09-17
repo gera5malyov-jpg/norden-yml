@@ -1,4 +1,4 @@
-name: Samson KIT live diagnostic 1 once
+name: Samson KIT verify created SKU once
 
 on:
   push:
@@ -9,14 +9,10 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: samson-kit-live-diagnostic-one
-  cancel-in-progress: false
-
 jobs:
-  live1:
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,14 +23,34 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run tests
         run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
-      - name: Live sync exactly 1 Samson product
+      - name: Verify SAMS-100327 in KIT (read-only)
         env:
-          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          PYTHONPATH=samson-kit python -m samson_kit.cli --max-items 1 --report /tmp/samson-live1.json
-      - name: Print report
-        if: always()
-        run: cat /tmp/samson-live1.json || true
+          PYTHONPATH=samson-kit python - <<'PY'
+          import json, os
+          from samson_kit.http import SafeSession
+          from samson_kit.kit_client import KitClient
+          http=SafeSession(); kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
+          found=[]
+          for row in kit.iter_variants():
+              if str(row.get('sku','')).strip()=='SAMS-100327':
+                  found.append(row)
+          if len(found)!=1:
+              raise RuntimeError(f'Expected one SAMS-100327 variant, found {len(found)}')
+          row=found[0]
+          result={
+              'id':row.get('id'),
+              'sku':row.get('sku'),
+              'name':row.get('name'),
+              'product_id':row.get('product_id'),
+              'pricing':row.get('pricing'),
+              'stocks':row.get('stocks'),
+              'media_count':len(row.get('media') or []),
+              'characteristics_count':len(row.get('characteristics') or []),
+              'status':row.get('status'),
+          }
+          print('VERIFY='+json.dumps(result,ensure_ascii=False))
+          PY
