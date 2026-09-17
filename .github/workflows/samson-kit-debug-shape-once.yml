@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/samson-kit-debug-shape-once.yml'
-      - 'samson-kit/tests/test_core.py'
+      - 'samson-kit/tests/**'
       - 'samson-kit/samson_kit/mapper.py'
       - 'samson-kit/samson_kit/kit_client.py'
       - 'samson-kit/samson_kit/sync.py'
