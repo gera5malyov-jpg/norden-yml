@@ -97,6 +97,37 @@ class CoreTests(unittest.TestCase):
             self.assertEqual(part[2],'image/jpeg')
         finally:
             os.unlink(path)
+    def test_upload_file_sends_pdf_mime_type(self):
+        class FakeHttp:
+            def request_json(self,method,url,**kwargs):
+                self.method=method; self.url=url; self.files=kwargs.get('files'); return {'id':'file1','type':'OTHER','url':'https://kit.test/file'}
+        fake=FakeHttp(); kit=KitClient('token',fake)
+        with tempfile.NamedTemporaryFile(suffix='.pdf',delete=False) as fh:
+            fh.write(b'%PDF-test'); path=fh.name
+        try:
+            kit.upload_file(path)
+            self.assertEqual(fake.method,'POST')
+            self.assertTrue(fake.url.endswith('/v1/files'))
+            self.assertEqual(fake.files['file'][2],'application/pdf')
+        finally:
+            os.unlink(path)
+    def test_variant_attachment_client_contract(self):
+        class FakeHttp:
+            def __init__(self): self.calls=[]
+            def request_json(self,method,url,**kwargs):
+                self.calls.append((method,url,kwargs))
+                if method=='GET': return {'attachments':[{'file_id':'existing','title':'Старый','extension':'pdf','display_sequence':0}]}
+                return {'file_id':'file1','title':'Сертификат 1','extension':'pdf','display_sequence':1}
+        fake=FakeHttp(); kit=KitClient('token',fake)
+        rows=kit.list_variant_attachments('variant1')
+        self.assertEqual(rows[0]['file_id'],'existing')
+        created=kit.create_variant_attachment('variant1','file1','Сертификат 1',display_sequence=1)
+        self.assertEqual(created['file_id'],'file1')
+        self.assertEqual(fake.calls[0][0],'GET')
+        self.assertTrue(fake.calls[0][1].endswith('/v1/variants/variant1/attachments'))
+        self.assertEqual(fake.calls[1][0],'POST')
+        self.assertTrue(fake.calls[1][1].endswith('/v1/variants/variant1/attachments'))
+        self.assertEqual(fake.calls[1][2]['json_body'],{'file_id':'file1','title':'Сертификат 1','display_sequence':1})
     def test_category_chain(self):
         cats={'1':{'id':'1','name':'R','parent_id':None},'2':{'id':'2','name':'C','parent_id':'1'}}; self.assertEqual([x['name'] for x in category_chain('2',cats)],['R','C'])
     def test_price_payload_kit_semantics(self):
