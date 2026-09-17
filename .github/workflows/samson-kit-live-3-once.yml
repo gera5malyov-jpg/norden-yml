@@ -1,4 +1,4 @@
-name: Samson KIT verify created card once
+name: Samson KIT live and verify 3 once
 
 on:
   push:
@@ -10,44 +10,56 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  live3:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 90
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install requests
-      - name: Verify SAMS-100327 read-only
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+      - name: Live sync first 3 Samson products
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python -m samson_kit.cli --max-items 3 --report /tmp/samson-live3.json
+          cat /tmp/samson-live3.json
+      - name: Verify first 3 Samson SKUs read-only
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import json, os, requests
-          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
-          base='https://api.kit.yandex.net'
-          r=requests.get(base+'/v1/variants',headers=h,params={'page':1,'per_page':100},timeout=60)
-          r.raise_for_status(); p=r.json()
-          rows=p.get('variants',[]) if isinstance(p,dict) else p
-          found=[x for x in rows if str(x.get('sku','')).strip()=='SAMS-100327']
-          if len(found)!=1:
-              raise RuntimeError(f'SAMS-100327 not uniquely present in first 100 KIT variants: {len(found)}')
-          vid=str(found[0].get('id','')).strip()
-          d=requests.get(base+'/v1/variants/'+vid,headers=h,timeout=60); d.raise_for_status(); obj=d.json()
-          w=requests.get(base+'/v1/warehouses',headers=h,params={'page':1,'per_page':100,'status':'ACTIVE'},timeout=60); w.raise_for_status(); wp=w.json()
-          warehouses=wp.get('warehouses',[]) if isinstance(wp,dict) else wp
-          spb=[x for x in warehouses if str(x.get('title','')).strip()=='СПБ']
-          if len(spb)!=1: raise RuntimeError(f'Expected one СПБ warehouse, found {len(spb)}')
-          spb_id=str(spb[0].get('id',''))
-          stocks=[x for x in (obj.get('stocks') or []) if str(x.get('warehouse_id',''))==spb_id]
-          out={
-            'id':obj.get('id'), 'sku':obj.get('sku'), 'name':obj.get('name'), 'status':obj.get('status'),
-            'pricing':obj.get('pricing'), 'spb_stock':stocks,
-            'media_count':len(obj.get('media') or []),
-            'characteristics_count':len(obj.get('characteristics') or []),
-            'product_id':obj.get('product_id')
-          }
-          print('VERIFY='+json.dumps(out,ensure_ascii=False))
+          PYTHONPATH=samson-kit python - <<'PY'
+          import json, os
+          from samson_kit.http import SafeSession
+          from samson_kit.kit_client import KitClient
+          http=SafeSession(); kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
+          wanted={'SAMS-100327','SAMS-100329','SAMS-100337'}
+          warehouse_id=kit.resolve_warehouse_exact('СПБ')
+          found={}
+          for row in kit.iter_variants():
+              sku=str(row.get('sku','')).strip()
+              if sku in wanted: found[sku]=row
+          missing=sorted(wanted-set(found))
+          if missing: raise RuntimeError('Missing KIT variants: '+','.join(missing))
+          out=[]
+          for sku in sorted(wanted):
+              row=found[sku]
+              obj=kit._get('/v1/variants/'+str(row.get('id')))
+              stocks=[x for x in (obj.get('stocks') or []) if str(x.get('warehouse_id',''))==warehouse_id]
+              info={'sku':sku,'name':obj.get('name'),'status':obj.get('status'),'pricing':obj.get('pricing'),'spb_stock':stocks,'media_count':len(obj.get('media') or []),'characteristics_count':len(obj.get('characteristics') or [])}
+              if obj.get('status')!='PUBLISHED': raise RuntimeError(f'{sku} not PUBLISHED')
+              if not stocks: raise RuntimeError(f'{sku} has no СПБ stock')
+              if not (obj.get('pricing') or {}).get('manual_discount_price'): raise RuntimeError(f'{sku} has no sale price')
+              out.append(info)
+          print('VERIFY3='+json.dumps(out,ensure_ascii=False))
           PY
