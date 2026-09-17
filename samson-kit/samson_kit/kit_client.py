@@ -1,11 +1,24 @@
 import os
 
 def extract_items(payload):
-    if isinstance(payload, list): return payload
-    if not isinstance(payload, dict): return []
-    for key in ('items','data','results'):
+    if isinstance(payload, list):
+        return payload
+    if not isinstance(payload, dict):
+        return []
+    for key in ('items','results','variants','warehouses','categories','characteristics','products'):
         value = payload.get(key)
-        if isinstance(value, list): return value
+        if isinstance(value, list):
+            return value
+    data = payload.get('data')
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        nested = data.get('items')
+        if isinstance(nested, list):
+            return nested
+    for value in payload.values():
+        if isinstance(value, list):
+            return value
     return []
 
 def extract_total(payload):
