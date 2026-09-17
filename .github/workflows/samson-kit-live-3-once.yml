@@ -1,6 +1,6 @@
 name: Samson KIT characteristic mapping inspect once
 
-# TDD RED: duplicate titles from characteristic_list/facet_list must fail before mapper fix
+# TDD GREEN: verify duplicate titles are removed before live retry
 on:
   push:
     branches: [main]
@@ -37,21 +37,11 @@ jobs:
           from samson_kit.samson_client import SamsonClient
           from samson_kit.kit_client import KitClient
           from samson_kit.mapper import normalize_sku
-
-          http=SafeSession()
-          samson=SamsonClient(os.environ['SAMSON_API_KEY'],http)
-          kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
-          raw=next(samson.iter_skus())
-          item=normalize_sku(raw)
-          kit_chars=kit.list_characteristics()
-          rows=[]
+          http=SafeSession(); samson=SamsonClient(os.environ['SAMSON_API_KEY'],http); kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
+          item=normalize_sku(next(samson.iter_skus())); kit_chars=kit.list_characteristics(); rows=[]
           for title,values in item.characteristics:
               vals=[str(x).strip() for x in values if str(x).strip()]
-              matches=[]
-              for c in kit_chars:
-                  if str(c.get('title','')).strip().casefold()==str(title).strip().casefold():
-                      matches.append({k:c.get(k) for k in ('id','title','type','select_mode','unit')})
+              matches=[{k:c.get(k) for k in ('id','title','type','select_mode','unit')} for c in kit_chars if str(c.get('title','')).strip().casefold()==str(title).strip().casefold()]
               rows.append({'title':title,'value_count':len(vals),'values':vals[:5],'desired':'MULTIPLE_STRING' if len(vals)>1 else 'STRING','kit_matches':matches})
-          print('SAMSON_SKU='+item.kit_sku)
-          print('CHARACTERISTIC_MAP='+json.dumps(rows,ensure_ascii=False))
+          print('SAMSON_SKU='+item.kit_sku); print('CHARACTERISTIC_MAP='+json.dumps(rows,ensure_ascii=False))
           PY
