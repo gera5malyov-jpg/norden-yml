@@ -1,8 +1,10 @@
 import os, tempfile
 from decimal import Decimal, ROUND_CEILING
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 from .rules import calculate_prices, calculate_stock
 from .mapper import normalize_sku, category_chain
+
+_ALLOWED_DOCUMENT_EXTENSIONS={'.pdf','.doc','.docx','.xls','.xlsx','.rtf','.txt','.jpg','.jpeg','.png','.svg','.webp'}
 
 def _money(value):
     if value is None: return None
@@ -46,10 +48,18 @@ def absent_zero_updates(index,seen_skus,warehouse_id,*,complete):
 
 def _lower(value): return str(value).strip().casefold()
 
+def _document_parts(url,index):
+    name=unquote(os.path.basename(urlparse(str(url)).path)).strip()
+    stem,ext=os.path.splitext(name)
+    ext=ext.lower()
+    title=(stem or f'Сертификат {index}').replace(':','-').replace('/','-').strip()
+    if not title: title=f'Сертификат {index}'
+    return title,ext
+
 class SyncRunner:
     def __init__(self,samson,kit,http,*,warehouse_name='СПБ',dry_run=False,max_items=None):
         self.samson=samson; self.kit=kit; self.http=http; self.warehouse_name=warehouse_name; self.dry_run=bool(dry_run); self.max_items=int(max_items) if max_items not in (None,'',0,'0') else None; self.kit_categories=[]; self.kit_characteristics=[]
-        self.report={'dry_run':self.dry_run,'catalog_complete':False,'samson_products_seen':0,'new_products_created':0,'price_changes':0,'stock_changes':0,'active_zero_to_100':0,'withdrawn_to_zero':0,'absent_to_zero':0,'duplicate_kit_skus':0,'error_count':0,'errors':[],'warning_count':0,'warnings':[],'unmapped_source_keys':{},'minimum_price_mapping_unsupported_count':0,'minimum_price_examples':{}}
+        self.report={'dry_run':self.dry_run,'catalog_complete':False,'samson_products_seen':0,'new_products_created':0,'price_changes':0,'stock_changes':0,'active_zero_to_100':0,'withdrawn_to_zero':0,'absent_to_zero':0,'documents_attached':0,'documents_skipped':0,'duplicate_kit_skus':0,'error_count':0,'errors':[],'warning_count':0,'warnings':[],'unmapped_source_keys':{},'minimum_price_mapping_unsupported_count':0,'minimum_price_examples':{}}
     def _record_error(self,sku,exc):
         self.report['error_count']+=1
         if len(self.report['errors'])<200: self.report['errors'].append({'sku':sku,'message':str(exc)[:500]})
@@ -112,6 +122,43 @@ class SyncRunner:
                     if file_id: media.append({'type':'IMAGE','display_sequence':len(media),'image_id':file_id})
             except Exception as exc: self._warn(f'image skipped for {item.kit_sku}: {exc}')
         return media
+    def _attach_documents(self,item,variant_id):
+        if self.dry_run or not item.document_urls: return
+        try:
+            existing=self.kit.list_variant_attachments(variant_id)
+        except Exception as exc:
+            self._warn(f'documents skipped for {item.kit_sku}: cannot list KIT attachments: {exc}')
+            return
+        attached_ids={str(row.get('file_id','')).strip() for row in existing if isinstance(row,dict) and str(row.get('file_id','')).strip()}
+        occupied={int(row.get('display_sequence')) for row in existing if isinstance(row,dict) and isinstance(row.get('display_sequence'),int)}
+        count=len(existing)
+        for index,url in enumerate(item.document_urls,1):
+            if count>=10:
+                self.report['documents_skipped']+=1
+                self._warn(f'document limit reached for {item.kit_sku}; remaining certificates skipped')
+                break
+            title,ext=_document_parts(url,index)
+            if ext not in _ALLOWED_DOCUMENT_EXTENSIONS:
+                self.report['documents_skipped']+=1
+                self._warn(f'document skipped for {item.kit_sku}: unsupported extension {ext or "<none>"}')
+                continue
+            try:
+                with tempfile.TemporaryDirectory(prefix='samson-doc-') as td:
+                    path=os.path.join(td,'certificate'+ext)
+                    self.http.download_to_file(url,path)
+                    uploaded=self.kit.upload_file(path)
+                    file_id=str(uploaded.get('id','')).strip()
+                    if not file_id: raise RuntimeError('KIT did not return file id')
+                    if file_id in attached_ids:
+                        self.report['documents_skipped']+=1
+                        continue
+                    sequence=0
+                    while sequence in occupied: sequence+=1
+                    self.kit.create_variant_attachment(variant_id,file_id,title,display_sequence=sequence)
+                    attached_ids.add(file_id); occupied.add(sequence); count+=1; self.report['documents_attached']+=1
+            except Exception as exc:
+                self.report['documents_skipped']+=1
+                self._warn(f'document skipped for {item.kit_sku}: {exc}')
     def _new_payload(self,item,product_id,warehouse_id,characteristics,media):
         payload={'sku':item.kit_sku,'name':item.name,'description':item.description,'status':'PUBLISHED','product_id':str(product_id)}
         if item.brand: payload['brand']=item.brand
@@ -149,8 +196,10 @@ class SyncRunner:
                             product=self.kit.create_product(category_id); product_id=str(product.get('id','')).strip()
                             if not product_id: raise RuntimeError('KIT did not return product id')
                             created=self.kit.create_variant(self._new_payload(item,product_id,warehouse_id,chars,media))
-                            if not str(created.get('id','')).strip(): raise RuntimeError('KIT did not return variant id')
+                            variant_id=str(created.get('id','')).strip()
+                            if not variant_id: raise RuntimeError('KIT did not return variant id')
                             self.report['new_products_created']+=1
+                            self._attach_documents(item,variant_id)
                     except Exception as exc: self._record_error(item.kit_sku,exc)
                 if self.max_items and self.report['samson_products_seen']>=self.max_items: break
             else: complete=True
