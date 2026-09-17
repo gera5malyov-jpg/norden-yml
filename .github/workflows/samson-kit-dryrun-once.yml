@@ -1,6 +1,6 @@
 name: Samson KIT one-shot dry run
 
-# tdd red: real Samson field mapping test should fail before mapper fix
+# tdd green + safe dry-run after actual Samson field mapping fix
 on:
   push:
     branches:
@@ -18,7 +18,7 @@ concurrency:
 jobs:
   dryrun:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,3 +29,13 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run tests
         run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+      - name: Dry-run 20 Samson products
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python -m samson_kit.cli --dry-run --max-items 20 --report /tmp/samson-last-sync.json
+      - name: Print report
+        if: always()
+        run: cat /tmp/samson-last-sync.json || true
