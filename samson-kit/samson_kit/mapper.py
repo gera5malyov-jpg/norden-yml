@@ -19,7 +19,7 @@ def _flatten_strings(value):
     if isinstance(value,(str,int,float,bool)):
         s=str(value).strip(); return [s] if s else []
     if isinstance(value,dict):
-        for key in ('url','src','href','value','code','barcode','ean','path'):
+        for key in ('url','url_list','src','href','value','code','barcode','ean','path'):
             if key in value:
                 out.extend(_flatten_strings(value[key]))
                 if out: break
