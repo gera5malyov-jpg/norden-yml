@@ -1,6 +1,6 @@
 name: Samson KIT one-shot dry run
 
-# diagnostic: inspect safe Samson field shapes
+# tdd red: real Samson field mapping test should fail before mapper fix
 on:
   push:
     branches:
@@ -29,22 +29,3 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run tests
         run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
-      - name: Inspect Samson response shapes (read-only)
-        env:
-          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import json, os, requests
-          base='https://api.samsonopt.ru/v1'
-          key=os.environ['SAMSON_API_KEY']
-          def get(path):
-              r=requests.get(base+path, params={'api_key':key,'response_format':'json','pagination_page':1}, timeout=60)
-              r.raise_for_status(); p=r.json(); e=p[0] if isinstance(p,list) and len(p)==1 else p; return e.get('data',[])
-          sku=get('/sku/')[0]
-          safe={k:sku.get(k) for k in ('sku','name','category_list','price_list','stock_list','photo_list','characteristic_list','attribute_list','facet_list','manufacturer','brand','barcode','out_of_stock','remove_date','package_list','package_size','weight','volume')}
-          print('SKU_SAMPLE='+json.dumps(safe, ensure_ascii=False)[:30000])
-          cats=get('/category/')[:8]
-          print('CATEGORY_SAMPLE='+json.dumps(cats, ensure_ascii=False)[:30000])
-          PY
