@@ -1,6 +1,5 @@
-name: Samson KIT characteristic mapping inspect once
+name: Samson KIT live diagnostic 1 once
 
-# TDD GREEN: verify duplicate titles are removed before live retry
 on:
   push:
     branches: [main]
@@ -10,10 +9,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: samson-kit-live-diagnostic-one
+  cancel-in-progress: false
+
 jobs:
-  inspect:
+  live1:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,24 +27,14 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run tests
         run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
-      - name: Inspect first Samson SKU against KIT characteristics (read-only)
+      - name: Live sync exactly 1 Samson product
         env:
           SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          PYTHONPATH=samson-kit python - <<'PY'
-          import json, os
-          from samson_kit.http import SafeSession
-          from samson_kit.samson_client import SamsonClient
-          from samson_kit.kit_client import KitClient
-          from samson_kit.mapper import normalize_sku
-          http=SafeSession(); samson=SamsonClient(os.environ['SAMSON_API_KEY'],http); kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
-          item=normalize_sku(next(samson.iter_skus())); kit_chars=kit.list_characteristics(); rows=[]
-          for title,values in item.characteristics:
-              vals=[str(x).strip() for x in values if str(x).strip()]
-              matches=[{k:c.get(k) for k in ('id','title','type','select_mode','unit')} for c in kit_chars if str(c.get('title','')).strip().casefold()==str(title).strip().casefold()]
-              rows.append({'title':title,'value_count':len(vals),'values':vals[:5],'desired':'MULTIPLE_STRING' if len(vals)>1 else 'STRING','kit_matches':matches})
-          print('SAMSON_SKU='+item.kit_sku); print('CHARACTERISTIC_MAP='+json.dumps(rows,ensure_ascii=False))
-          PY
+          PYTHONPATH=samson-kit python -m samson_kit.cli --max-items 1 --report /tmp/samson-live1.json
+      - name: Print report
+        if: always()
+        run: cat /tmp/samson-live1.json || true
