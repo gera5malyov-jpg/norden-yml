@@ -1,5 +1,6 @@
 name: Samson KIT characteristic mapping inspect once
 
+# TDD RED: duplicate titles from characteristic_list/facet_list must fail before mapper fix
 on:
   push:
     branches: [main]
