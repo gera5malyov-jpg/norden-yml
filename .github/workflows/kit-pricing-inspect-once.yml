@@ -19,7 +19,7 @@ jobs:
           python-version: '3.12'
       - name: Install requests
         run: pip install requests
-      - name: Inspect KIT price-related fields (read-only)
+      - name: Inspect KIT variant detail price-related fields (read-only)
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         shell: bash
@@ -29,7 +29,8 @@ jobs:
           import json, os, requests
           token=os.environ['YANDEX_KIT_TOKEN']
           headers={'Authorization':f'Bearer {token}','Accept':'application/json'}
-          r=requests.get('https://api.kit.yandex.net/v1/variants',headers=headers,params={'page':1,'per_page':100},timeout=60)
+          base='https://api.kit.yandex.net'
+          r=requests.get(base+'/v1/variants',headers=headers,params={'page':1,'per_page':20},timeout=60)
           r.raise_for_status(); p=r.json()
           rows=[]
           if isinstance(p,list): rows=p
@@ -38,7 +39,13 @@ jobs:
                   v=p.get(k)
                   if isinstance(v,list): rows=v; break
                   if isinstance(v,dict) and isinstance(v.get('items'),list): rows=v['items']; break
-          paths=set(); examples=[]
+          if not rows: raise RuntimeError('no variants returned')
+          first=rows[0]
+          vid=str(first.get('id','')).strip()
+          if not vid: raise RuntimeError('variant id missing')
+          d=requests.get(base+'/v1/variants/'+vid,headers=headers,timeout=60)
+          d.raise_for_status(); detail=d.json()
+          paths=set()
           def walk(obj,prefix=''):
               if isinstance(obj,dict):
                   for k,v in obj.items():
@@ -48,11 +55,10 @@ jobs:
                       walk(v,path)
               elif isinstance(obj,list):
                   for v in obj[:3]: walk(v,prefix+'[]')
-          for row in rows:
-              walk(row)
-              if len(examples)<5 and isinstance(row,dict):
-                  keep={k:v for k,v in row.items() if ('price' in k.lower() or 'min' in k.lower() or k in ('sku','pricing'))}
-                  examples.append(keep)
-          print('PRICE_RELATED_PATHS='+json.dumps(sorted(paths),ensure_ascii=False))
-          print('TOP_LEVEL_EXAMPLES='+json.dumps(examples,ensure_ascii=False)[:30000])
+          walk(detail)
+          print('DETAIL_PRICE_RELATED_PATHS='+json.dumps(sorted(paths),ensure_ascii=False))
+          def select(obj):
+              if not isinstance(obj,dict): return obj
+              return {k:v for k,v in obj.items() if ('price' in k.lower() or 'min' in k.lower() or k in ('id','sku','pricing'))}
+          print('DETAIL_RELEVANT='+json.dumps(select(detail),ensure_ascii=False)[:30000])
           PY
