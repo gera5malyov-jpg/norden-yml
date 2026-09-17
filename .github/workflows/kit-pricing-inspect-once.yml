@@ -19,7 +19,7 @@ jobs:
           python-version: '3.12'
       - name: Install requests
         run: pip install requests
-      - name: Inspect KIT pricing shape (read-only)
+      - name: Inspect KIT price-related fields (read-only)
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         shell: bash
@@ -28,26 +28,31 @@ jobs:
           python - <<'PY'
           import json, os, requests
           token=os.environ['YANDEX_KIT_TOKEN']
-          url='https://api.kit.yandex.net/v1/variants'
           headers={'Authorization':f'Bearer {token}','Accept':'application/json'}
-          seen_keys=set(); examples=[]
-          for page in range(1,6):
-              r=requests.get(url,headers=headers,params={'page':page,'per_page':100},timeout=60)
-              r.raise_for_status(); p=r.json()
-              rows=[]
-              if isinstance(p,list): rows=p
-              elif isinstance(p,dict):
-                  for k in ('variants','items','data','results'):
-                      v=p.get(k)
-                      if isinstance(v,list): rows=v; break
-                      if isinstance(v,dict) and isinstance(v.get('items'),list): rows=v['items']; break
-              if not rows: break
-              for row in rows:
-                  pricing=row.get('pricing') if isinstance(row,dict) else None
-                  if isinstance(pricing,dict):
-                      seen_keys.update(pricing.keys())
-                      if len(examples)<10 and pricing:
-                          examples.append({'sku':row.get('sku'),'pricing':pricing})
-          print('PRICING_KEYS='+json.dumps(sorted(seen_keys),ensure_ascii=False))
-          print('PRICING_EXAMPLES='+json.dumps(examples,ensure_ascii=False)[:30000])
+          r=requests.get('https://api.kit.yandex.net/v1/variants',headers=headers,params={'page':1,'per_page':100},timeout=60)
+          r.raise_for_status(); p=r.json()
+          rows=[]
+          if isinstance(p,list): rows=p
+          elif isinstance(p,dict):
+              for k in ('variants','items','data','results'):
+                  v=p.get(k)
+                  if isinstance(v,list): rows=v; break
+                  if isinstance(v,dict) and isinstance(v.get('items'),list): rows=v['items']; break
+          paths=set(); examples=[]
+          def walk(obj,prefix=''):
+              if isinstance(obj,dict):
+                  for k,v in obj.items():
+                      path=f'{prefix}.{k}' if prefix else k
+                      lk=k.lower()
+                      if 'price' in lk or 'min' in lk: paths.add(path)
+                      walk(v,path)
+              elif isinstance(obj,list):
+                  for v in obj[:3]: walk(v,prefix+'[]')
+          for row in rows:
+              walk(row)
+              if len(examples)<5 and isinstance(row,dict):
+                  keep={k:v for k,v in row.items() if ('price' in k.lower() or 'min' in k.lower() or k in ('sku','pricing'))}
+                  examples.append(keep)
+          print('PRICE_RELATED_PATHS='+json.dumps(sorted(paths),ensure_ascii=False))
+          print('TOP_LEVEL_EXAMPLES='+json.dumps(examples,ensure_ascii=False)[:30000])
           PY
