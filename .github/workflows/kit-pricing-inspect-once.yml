@@ -1,0 +1,51 @@
+name: KIT pricing inspect once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-pricing-inspect-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Inspect KIT pricing shape (read-only)
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, requests
+          token=os.environ['YANDEX_KIT_TOKEN']
+          url='https://api.kit.yandex.net/v1/variants'
+          headers={'Authorization':f'Bearer {token}','Accept':'application/json'}
+          seen_keys=set(); examples=[]
+          for page in range(1,6):
+              r=requests.get(url,headers=headers,params={'page':page,'per_page':100},timeout=60)
+              r.raise_for_status(); p=r.json()
+              rows=[]
+              if isinstance(p,list): rows=p
+              elif isinstance(p,dict):
+                  for k in ('variants','items','data','results'):
+                      v=p.get(k)
+                      if isinstance(v,list): rows=v; break
+                      if isinstance(v,dict) and isinstance(v.get('items'),list): rows=v['items']; break
+              if not rows: break
+              for row in rows:
+                  pricing=row.get('pricing') if isinstance(row,dict) else None
+                  if isinstance(pricing,dict):
+                      seen_keys.update(pricing.keys())
+                      if len(examples)<10 and pricing:
+                          examples.append({'sku':row.get('sku'),'pricing':pricing})
+          print('PRICING_KEYS='+json.dumps(sorted(seen_keys),ensure_ascii=False))
+          print('PRICING_EXAMPLES='+json.dumps(examples,ensure_ascii=False)[:30000])
+          PY
