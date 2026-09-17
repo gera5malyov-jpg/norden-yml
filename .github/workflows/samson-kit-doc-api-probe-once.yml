@@ -12,40 +12,74 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install requests
-      - name: Read current KIT attachments
+      - run: pip install -r requirements.txt
+      - name: Inspect Samson certificates and KIT current card read-only
         env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import json, os, requests
-          base='https://api.kit.yandex.net'
-          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
-          r=requests.get(base+'/v1/variants',headers=h,params={'page':1,'per_page':100},timeout=60)
-          r.raise_for_status(); p=r.json(); rows=p.get('variants',[]) if isinstance(p,dict) else p
-          found=[x for x in rows if str(x.get('sku','')).strip()=='SAMS-100327']
-          if len(found)!=1: raise RuntimeError(f'Expected one SAMS-100327, found {len(found)}')
-          vid=str(found[0].get('id'))
-          rr=requests.get(base+f'/v1/variants/{vid}/attachments',headers=h,timeout=60)
-          print('ATTACHMENTS_STATUS='+str(rr.status_code))
-          print('ATTACHMENTS_BODY='+rr.text[:12000])
-          rr.raise_for_status()
+          PYTHONPATH=samson-kit python - <<'PY'
+          import json, os
+          from samson_kit.http import SafeSession
+          from samson_kit.samson_client import SamsonClient
+          from samson_kit.kit_client import KitClient
+          from samson_kit.mapper import normalize_sku
+
+          http=SafeSession()
+          samson=SamsonClient(os.environ['SAMSON_API_KEY'],http)
+          kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
+
+          source=None
+          for i,row in enumerate(samson.iter_skus(),1):
+              if str(row.get('sku','')).strip()=='100327':
+                  source=row; break
+              if i>=1000: break
+          if source is None: raise RuntimeError('Samson SKU 100327 not found in first 1000 rows')
+          item=normalize_sku(source)
+          print('SAMSON_DOCUMENT_URLS='+json.dumps(item.document_urls,ensure_ascii=False))
+          print('SAMSON_CERT_LIST='+json.dumps(source.get('certificate_list'),ensure_ascii=False)[:12000])
+          print('SAMSON_CERT_EXT_LIST='+json.dumps(source.get('certificate_extended_list'),ensure_ascii=False)[:12000])
+
+          variants=[v for v in kit.iter_variants() if str(v.get('sku','')).strip()=='SAMS-100327']
+          if len(variants)!=1: raise RuntimeError(f'Expected one SAMS-100327, found {len(variants)}')
+          variant=variants[0]; vid=str(variant.get('id'))
+          detail=kit._get('/v1/variants/'+vid)
+          chars=kit.list_characteristics()
+          char_titles={str(c.get('id')):str(c.get('title')) for c in chars}
+          mapped=[]
+          for row in detail.get('characteristics') or []:
+              cid=str(row.get('characteristic_id') or row.get('id') or '')
+              mapped.append({'characteristic_id':cid,'title':char_titles.get(cid),'row':row})
+          print('KIT_CHARACTERISTICS='+json.dumps(mapped,ensure_ascii=False)[:30000])
+          attachments=kit.list_variant_attachments(vid)
+          print('KIT_ATTACHMENTS='+json.dumps(attachments,ensure_ascii=False))
+          for a in attachments:
+              fid=str(a.get('file_id') or '')
+              if fid:
+                  try: print('KIT_FILE_'+fid+'='+json.dumps(kit._get('/v1/files/'+fid),ensure_ascii=False))
+                  except Exception as exc: print('KIT_FILE_ERROR_'+fid+'='+str(exc))
           PY
-      - name: Read exact attachment OpenAPI schemas offline
+      - name: Read exact UpdateVariant characteristic schema offline
         shell: bash
         run: |
           set -euo pipefail
           git clone --depth 1 https://github.com/ztemerbekov/a1-yandex-kit-skills.git /tmp/a1-kit
           cd /tmp/a1-kit
-          node skills/a1-yandex-kit-catalog/scripts/search_docs.mjs --operation GetVariantAttachments
-          node skills/a1-yandex-kit-catalog/scripts/search_docs.mjs --operation CreateVariantAttachment
-          node skills/a1-yandex-kit-catalog/scripts/search_docs.mjs --operation UpdateVariantAttachment
-          node skills/a1-yandex-kit-catalog/scripts/search_docs.mjs --operation DeleteVariantAttachment
-          node skills/a1-yandex-kit-catalog/scripts/search_docs.mjs --operation UploadFile
+          node skills/a1-yandex-kit-catalog/scripts/search_docs.mjs --operation UpdateVariant > /tmp/update-variant.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/update-variant.json'))
+          req=(d.get('request') or {}).get('schema') or {}
+          props=req.get('properties') or {}
+          print('UPDATE_VARIANT_CONTENT_TYPE='+str((d.get('request') or {}).get('contentType')))
+          print('CHARACTERISTICS_SCHEMA='+json.dumps(props.get('characteristics'),ensure_ascii=False,indent=2))
+          print('UPDATE_VARIANT_REQUIRED='+json.dumps(req.get('required'),ensure_ascii=False))
+          PY
