@@ -1,4 +1,4 @@
-name: Samson KIT live test 3 once
+name: Samson KIT live diagnostic 1 once
 
 on:
   push:
@@ -10,11 +10,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: samson-kit-live-3-once
+  group: samson-kit-live-diagnostic-one
   cancel-in-progress: false
 
 jobs:
-  live3:
+  live1:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -27,14 +27,14 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run tests
         run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
-      - name: Live sync exactly 3 Samson products
+      - name: Live diagnostic exactly 1 Samson product
         env:
           SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          PYTHONPATH=samson-kit python -m samson_kit.cli --max-items 3 --report /tmp/samson-live3.json
+          PYTHONPATH=samson-kit python -m samson_kit.cli --max-items 1 --report /tmp/samson-live1.json
       - name: Print report
         if: always()
-        run: cat /tmp/samson-live3.json || true
+        run: cat /tmp/samson-live1.json || true
