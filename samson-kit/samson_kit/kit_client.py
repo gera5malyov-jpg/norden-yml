@@ -57,6 +57,9 @@ class KitClient:
     def headers(self): return {'Authorization':f'Bearer {self.token}','Accept':'application/json'}
     def _get(self,path,params=None): return self.http.request_json('GET',self.base_url+path,params=params,headers=self.headers)
     def _post(self,path,body=None,files=None): return self.http.request_json('POST',self.base_url+path,headers=self.headers,json_body=body,files=files)
+    def _patch(self,path,body=None):
+        headers=dict(self.headers); headers['Content-Type']='application/merge-patch+json'
+        return self.http.request_json('PATCH',self.base_url+path,headers=headers,json_body=body)
     def _iter_collection(self,path,params=None):
         page=1; seen=0
         while True:
@@ -83,6 +86,7 @@ class KitClient:
         return self._post('/v1/characteristics',body)
     def create_product(self,category_id): return self._post('/v1/products',{'category_ids':[str(category_id)]})
     def create_variant(self,payload): return self._post('/v1/variants',payload)
+    def update_variant(self,variant_id,payload): return self._patch(f'/v1/variants/{str(variant_id).strip()}',payload)
     def upload_file(self,path):
         if not os.path.isfile(path): raise FileNotFoundError(path)
         mime=mimetypes.guess_type(path)[0] or 'application/octet-stream'
