@@ -176,7 +176,7 @@ def extract_characteristics(row):
     extra_lists={'file_list':'Файлы Samson','video_list':'Видео Samson','certificate_list':'Сертификаты','certificate_extended_list':'Расширенные сертификаты'}
     for key,title in extra_lists.items():
         values=_flatten_strings(row.get(key))
-        if values: add(title,values)
+        if values: add(title,'; '.join(values))
     return result
 
 def extract_images(row):
