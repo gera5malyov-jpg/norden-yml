@@ -1,5 +1,5 @@
 import os, tempfile
-from decimal import Decimal
+from decimal import Decimal, ROUND_CEILING
 from urllib.parse import urlparse
 from .rules import calculate_prices, calculate_stock
 from .mapper import normalize_sku, category_chain
@@ -7,6 +7,11 @@ from .mapper import normalize_sku, category_chain
 def _money(value):
     if value is None: return None
     try: return f'{Decimal(str(value)):.2f}'
+    except Exception: return None
+
+def _kit_money(value):
+    if value is None: return None
+    try: return Decimal(str(value)).quantize(Decimal('1'), rounding=ROUND_CEILING)
     except Exception: return None
 
 def _current_stock(variant,warehouse_id):
@@ -20,7 +25,7 @@ def build_price_update(item,variant):
     prices=calculate_prices(item.purchase_price)
     if not prices: return None
     desired_price=f'{prices.old:.2f}'; desired_discount=f'{prices.sale:.2f}'; pricing=variant.get('pricing') or {}
-    if _money(pricing.get('price'))==desired_price and _money(pricing.get('manual_discount_price'))==desired_discount: return None
+    if _kit_money(pricing.get('price'))==_kit_money(prices.old) and _kit_money(pricing.get('manual_discount_price'))==_kit_money(prices.sale): return None
     variant_id=str(variant.get('id','')).strip()
     return {'variant_id':variant_id,'price':desired_price,'manual_discount_price':desired_discount} if variant_id else None
 
