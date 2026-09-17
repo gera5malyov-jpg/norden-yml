@@ -18,33 +18,46 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: Inspect KIT variant and product document-related fields
+      - name: Inspect KIT file and document-related shapes
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json, os, requests
+          import json, os, requests, time
           base='https://api.kit.yandex.net'
           h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
-          r=requests.get(base+'/v1/variants',headers=h,params={'page':1,'per_page':100},timeout=60)
-          r.raise_for_status(); p=r.json(); rows=p.get('variants',[]) if isinstance(p,dict) else p
-          found=[x for x in rows if str(x.get('sku','')).strip()=='SAMS-100327']
-          if len(found)!=1: raise RuntimeError(f'Expected one SAMS-100327, found {len(found)}')
-          v=found[0]; vid=str(v.get('id')); pid=str(v.get('product_id'))
-          vd=requests.get(base+'/v1/variants/'+vid,headers=h,timeout=60); vd.raise_for_status(); vo=vd.json()
-          pd=requests.get(base+'/v1/products/'+pid,headers=h,timeout=60); print('PRODUCT_STATUS='+str(pd.status_code)); po=pd.json() if pd.ok else {'text':pd.text[:500]}
-          def inspect(label,obj):
-              if not isinstance(obj,dict):
-                  print(label+'_TYPE='+type(obj).__name__); return
-              print(label+'_KEYS='+json.dumps(sorted(obj.keys()),ensure_ascii=False))
-              interesting={}
-              for k,val in obj.items():
-                  kl=str(k).lower()
-                  if any(word in kl for word in ('doc','file','media','attach','cert')):
-                      interesting[k]=val
-              print(label+'_INTERESTING='+json.dumps(interesting,ensure_ascii=False)[:8000])
-          inspect('VARIANT',vo)
-          inspect('PRODUCT',po)
+
+          fr=requests.get(base+'/v1/files',headers=h,params={'page':1,'per_page':20},timeout=60)
+          print('FILES_STATUS='+str(fr.status_code))
+          if fr.ok:
+              fp=fr.json()
+              print('FILES_KEYS='+json.dumps(sorted(fp.keys()) if isinstance(fp,dict) else ['<list>'],ensure_ascii=False))
+              rows=fp.get('files',[]) if isinstance(fp,dict) else fp
+              print('FILES_SAMPLE='+json.dumps(rows[:3],ensure_ascii=False)[:12000])
+          else:
+              print('FILES_ERROR='+fr.text[:1000])
+
+          for path in ('/v1/files','/v1/variants'):
+              op=requests.options(base+path,headers=h,timeout=60)
+              print('OPTIONS '+path+' status='+str(op.status_code)+' allow='+str(op.headers.get('Allow'))+' body='+op.text[:500])
+
+          examples=[]
+          total_seen=0
+          for page in range(1,21):
+              r=requests.get(base+'/v1/variants',headers=h,params={'page':page,'per_page':100},timeout=60)
+              r.raise_for_status(); p=r.json(); rows=p.get('variants',[]) if isinstance(p,dict) else p
+              if not rows: break
+              total_seen += len(rows)
+              for row in rows:
+                  media=row.get('media') or []
+                  unusual=[m for m in media if isinstance(m,dict) and str(m.get('type','')).upper()!='IMAGE']
+                  if unusual:
+                      examples.append({'id':row.get('id'),'sku':row.get('sku'),'media':unusual})
+                      if len(examples)>=5: break
+              if len(examples)>=5: break
+              time.sleep(0.4)
+          print('SCANNED_VARIANTS='+str(total_seen))
+          print('NON_IMAGE_MEDIA='+json.dumps(examples,ensure_ascii=False)[:16000])
           PY
