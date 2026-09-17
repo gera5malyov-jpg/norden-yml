@@ -1,0 +1,52 @@
+name: Samson KIT shape debug once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/samson-kit-debug-shape-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Inspect first Samson SKU and KIT characteristic matches
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python - <<'PY'
+          import os, requests
+          from samson_kit.http import SafeSession
+          from samson_kit.samson_client import SamsonClient
+          from samson_kit.kit_client import KitClient
+          from samson_kit.mapper import normalize_sku
+          http=SafeSession()
+          samson=SamsonClient(os.environ['SAMSON_API_KEY'],http)
+          kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
+          raw=next(samson.iter_skus())
+          item=normalize_sku(raw)
+          chars=kit.list_characteristics()
+          print('SKU',item.kit_sku)
+          for title, values in item.characteristics:
+              vals=[str(x).strip() for x in values if str(x).strip()]
+              desired='MULTIPLE_STRING' if len(vals)>1 else 'STRING'
+              matches=[(str(x.get('id','')),str(x.get('type','')),str(x.get('select_mode',''))) for x in chars if str(x.get('title','')).strip().casefold()==str(title).strip().casefold()]
+              print('CHAR',repr(title),'COUNT',len(vals),'DESIRED',desired,'MATCHES',matches,'VALUES',vals[:5])
+          if item.image_urls:
+              r=requests.get(item.image_urls[0],timeout=60,allow_redirects=True)
+              print('IMAGE_STATUS',r.status_code,'SIZE',len(r.content),'TYPE',r.headers.get('Content-Type',''))
+          else:
+              print('NO_IMAGE')
+          PY
