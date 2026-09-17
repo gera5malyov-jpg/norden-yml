@@ -1,0 +1,40 @@
+name: Samson KIT live test 3 once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/samson-kit-live-3-once.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: samson-kit-live-3-once
+  cancel-in-progress: false
+
+jobs:
+  live3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+      - name: Live sync exactly 3 Samson products
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python -m samson_kit.cli --max-items 3 --report /tmp/samson-live3.json
+      - name: Print report
+        if: always()
+        run: cat /tmp/samson-live3.json || true
