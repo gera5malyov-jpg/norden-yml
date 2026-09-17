@@ -8,6 +8,7 @@ on:
       - 'samson-kit/tests/test_core.py'
       - 'samson-kit/samson_kit/mapper.py'
       - 'samson-kit/samson_kit/kit_client.py'
+      - 'samson-kit/samson_kit/sync.py'
 
 permissions:
   contents: read
