@@ -92,6 +92,10 @@ class CoreTests(unittest.TestCase):
         cats={'1':{'id':'1','name':'R','parent_id':None},'2':{'id':'2','name':'C','parent_id':'1'}}; self.assertEqual([x['name'] for x in category_chain('2',cats)],['R','C'])
     def test_price_payload_kit_semantics(self):
         item=normalize_sku({'sku':'1','name':'x','price':'2500','stock':1}); v={'id':'v','pricing':{'price':'4500.00','manual_discount_price':'3499.00'}}; self.assertEqual(build_price_update(item,v),{'variant_id':'v','price':'4500.00','manual_discount_price':'3500.00'})
+    def test_price_compare_accepts_kit_whole_ruble_rounding(self):
+        item=normalize_sku({'sku':'100327','name':'x','price':'61.19','stock':1})
+        variant={'id':'v','pricing':{'price':'111','manual_discount_price':'86'}}
+        self.assertIsNone(build_price_update(item,variant))
     def test_stock_and_absent_safety(self):
         item=normalize_sku({'sku':'1','name':'x','price':'1','stock':0}); self.assertEqual(build_stock_update(item,{'id':'v','stocks':[{'warehouse_id':'spb','quantity':0}]},'spb')['quantity'],100); idx={'SAMS-1':{'id':'v1','stocks':[{'warehouse_id':'spb','quantity':8}]},'SAMS-2':{'id':'v2','stocks':[{'warehouse_id':'spb','quantity':5}]}}; self.assertEqual(absent_zero_updates(idx,{'SAMS-1'},'spb',complete=False),[]); self.assertEqual(absent_zero_updates(idx,{'SAMS-1'},'spb',complete=True)[0]['quantity'],0)
 
