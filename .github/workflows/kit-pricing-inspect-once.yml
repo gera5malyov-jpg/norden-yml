@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install requests
+        run: pip install requests
       - name: Inspect KIT pricing shape (read-only)
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
