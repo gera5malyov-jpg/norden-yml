@@ -83,16 +83,15 @@ class SyncRunner:
         for title,values in item.characteristics:
             title=str(title).strip(); values=[str(x).strip() for x in values if str(x).strip()]
             if not title or not values: continue
-            matches=[x for x in self.kit_characteristics if _lower(x.get('title'))==_lower(title)]
+            desired='MULTIPLE_STRING' if len(values)>1 else 'STRING'
+            matches=[x for x in self.kit_characteristics if _lower(x.get('title'))==_lower(title) and str(x.get('type','')).strip().upper()==desired]
             if len(matches)>1:
-                desired='MULTIPLE_STRING' if len(values)>1 else 'STRING'; compatible=[x for x in matches if str(x.get('type',''))==desired]
-                if len(compatible)==1: matches=compatible
-                else: self._warn(f'ambiguous KIT characteristic skipped: {title}'); continue
+                self._warn(f'ambiguous KIT characteristic skipped: {title}'); continue
             if matches: char_id=str(matches[0].get('id','')).strip()
             elif self.dry_run:
-                char_id='dry-char-'+str(len(self.kit_characteristics)+1); self.kit_characteristics.append({'id':char_id,'title':title,'type':'MULTIPLE_STRING' if len(values)>1 else 'STRING'})
+                char_id='dry-char-'+str(len(self.kit_characteristics)+1); self.kit_characteristics.append({'id':char_id,'title':title,'type':desired,'select_mode':'MULTIPLE' if len(values)>1 else 'SINGLE'})
             else:
-                typ='MULTIPLE_STRING' if len(values)>1 else 'STRING'; mode='MULTIPLE' if len(values)>1 else 'SINGLE'; new=self.kit.create_characteristic(title,typ,mode); char_id=str(new.get('id','')).strip()
+                mode='MULTIPLE' if len(values)>1 else 'SINGLE'; new=self.kit.create_characteristic(title,desired,mode); char_id=str(new.get('id','')).strip()
                 if not char_id: self._warn(f'KIT characteristic creation failed: {title}'); continue
                 self.kit_characteristics.append(new)
             out.append({'characteristic_id':char_id,'value':values[0],'values':values})
