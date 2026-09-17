@@ -56,7 +56,7 @@ jobs:
 
           wanted_chars=[]
           for text in ('Сертификаты','Расширенные сертификаты'):
-              cp=kit._get('/v1/characteristics',{'page':1,'per_page':100,'search_text':text})
+              cp=kit._get('/v1/characteristics',{'page':1,'per_page':100,'status':['ACTIVE'],'search_text':text})
               wanted_chars.extend(extract_items(cp))
           char_titles={str(c.get('id')):str(c.get('title')) for c in wanted_chars}
           mapped=[]
