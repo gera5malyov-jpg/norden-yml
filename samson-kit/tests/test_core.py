@@ -3,7 +3,7 @@ from decimal import Decimal
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from samson_kit.rules import calculate_prices, calculate_stock, to_kit_sku
 from samson_kit.samson_client import parse_page
-from samson_kit.kit_client import resolve_exact_warehouse, index_samson_variants
+from samson_kit.kit_client import resolve_exact_warehouse, index_samson_variants, extract_items
 from samson_kit.mapper import normalize_sku, category_chain
 from samson_kit.sync import build_price_update, build_stock_update, absent_zero_updates
 
@@ -16,6 +16,10 @@ class CoreTests(unittest.TestCase):
     def test_samson_page(self):
         data,nxt=parse_page([{'data':[{'sku':'1'}],'meta':{'pagination':{'next':'https://api.samsonopt.ru/v1/sku/?pagination_page=2&api_key=SECRET'}}}]); self.assertEqual(data[0]['sku'],'1'); self.assertEqual(nxt,2)
     def test_warehouse_exact(self): self.assertEqual(resolve_exact_warehouse([{'id':'x','title':'СПБ'}],'СПБ'),'x')
+    def test_named_kit_collections(self):
+        self.assertEqual(extract_items({'warehouses':[{'id':'spb','title':'СПБ'}],'total_count':1}),[{'id':'spb','title':'СПБ'}])
+        self.assertEqual(extract_items({'data':{'items':[{'id':'x'}]}}),[{'id':'x'}])
+        self.assertEqual(extract_items({'categories':[{'id':'c1'}],'total_count':1}),[{'id':'c1'}])
     def test_duplicate_samson_index(self):
         idx,dup=index_samson_variants([{'id':'1','sku':'SAMS-1'},{'id':'2','sku':'SAMS-2'},{'id':'3','sku':'SAMS-2'},{'id':'4','sku':'ABC'}]); self.assertEqual(set(idx),{'SAMS-1'}); self.assertEqual(set(dup),{'SAMS-2'})
     def test_mapper(self):
