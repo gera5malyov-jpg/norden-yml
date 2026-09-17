@@ -5,7 +5,7 @@ from samson_kit.rules import calculate_prices, calculate_stock, to_kit_sku
 from samson_kit.samson_client import parse_page
 from samson_kit.kit_client import resolve_exact_warehouse, index_samson_variants, extract_items
 from samson_kit.mapper import normalize_sku, category_chain
-from samson_kit.sync import build_price_update, build_stock_update, absent_zero_updates
+from samson_kit.sync import build_price_update, build_stock_update, absent_zero_updates, SyncRunner
 
 class CoreTests(unittest.TestCase):
     def test_sku_prefix(self): self.assertEqual(to_kit_sku('531863'),'SAMS-531863')
@@ -56,6 +56,20 @@ class CoreTests(unittest.TestCase):
         self.assertFalse(item.withdrawn)
         removed=normalize_sku(dict(row,out_of_stock=1))
         self.assertTrue(removed.withdrawn)
+    def test_characteristic_reuse_requires_compatible_type(self):
+        class FakeKit:
+            def __init__(self): self.created=[]
+            def create_characteristic(self,title,char_type='STRING',select_mode='SINGLE',unit=None):
+                self.created.append((title,char_type,select_mode,unit))
+                return {'id':'new-multi','title':title,'type':char_type,'select_mode':select_mode}
+        kit=FakeKit()
+        runner=SyncRunner(None,kit,None,dry_run=False)
+        runner.kit_characteristics=[{'id':'existing-single','title':'Штрихкод','type':'STRING','select_mode':'SINGLE'}]
+        item=normalize_sku({'sku':'1','name':'x','category_id':'1','barcodes':['111','222']})
+        item.characteristics=[('Штрихкод',['111','222'])]
+        out=runner._ensure_characteristics(item)
+        self.assertEqual(out[0]['characteristic_id'],'new-multi')
+        self.assertEqual(kit.created[0][1],'MULTIPLE_STRING')
     def test_category_chain(self):
         cats={'1':{'id':'1','name':'R','parent_id':None},'2':{'id':'2','name':'C','parent_id':'1'}}; self.assertEqual([x['name'] for x in category_chain('2',cats)],['R','C'])
     def test_price_payload_kit_semantics(self):
