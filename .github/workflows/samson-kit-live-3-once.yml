@@ -1,4 +1,4 @@
-name: Samson KIT bootstrap diagnostic once
+name: Samson KIT verify created card once
 
 on:
   push:
@@ -10,28 +10,44 @@ permissions:
   contents: read
 
 jobs:
-  diagnose:
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run tests
-        run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
-      - name: Reproduce bootstrap in dry-run and print full report
+      - run: pip install requests
+      - name: Verify SAMS-100327 read-only
         env:
-          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         shell: bash
         run: |
-          set +e
-          PYTHONPATH=samson-kit python -m samson_kit.cli --dry-run --max-items 1 --report /tmp/samson-bootstrap.json
-          rc=$?
-          echo "CLI_RC=$rc"
-          cat /tmp/samson-bootstrap.json || true
-          exit 0
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, requests
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          base='https://api.kit.yandex.net'
+          r=requests.get(base+'/v1/variants',headers=h,params={'page':1,'per_page':100},timeout=60)
+          r.raise_for_status(); p=r.json()
+          rows=p.get('variants',[]) if isinstance(p,dict) else p
+          found=[x for x in rows if str(x.get('sku','')).strip()=='SAMS-100327']
+          if len(found)!=1:
+              raise RuntimeError(f'SAMS-100327 not uniquely present in first 100 KIT variants: {len(found)}')
+          vid=str(found[0].get('id','')).strip()
+          d=requests.get(base+'/v1/variants/'+vid,headers=h,timeout=60); d.raise_for_status(); obj=d.json()
+          w=requests.get(base+'/v1/warehouses',headers=h,params={'page':1,'per_page':100,'status':'ACTIVE'},timeout=60); w.raise_for_status(); wp=w.json()
+          warehouses=wp.get('warehouses',[]) if isinstance(wp,dict) else wp
+          spb=[x for x in warehouses if str(x.get('title','')).strip()=='СПБ']
+          if len(spb)!=1: raise RuntimeError(f'Expected one СПБ warehouse, found {len(spb)}')
+          spb_id=str(spb[0].get('id',''))
+          stocks=[x for x in (obj.get('stocks') or []) if str(x.get('warehouse_id',''))==spb_id]
+          out={
+            'id':obj.get('id'), 'sku':obj.get('sku'), 'name':obj.get('name'), 'status':obj.get('status'),
+            'pricing':obj.get('pricing'), 'spb_stock':stocks,
+            'media_count':len(obj.get('media') or []),
+            'characteristics_count':len(obj.get('characteristics') or []),
+            'product_id':obj.get('product_id')
+          }
+          print('VERIFY='+json.dumps(out,ensure_ascii=False))
+          PY
