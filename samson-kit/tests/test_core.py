@@ -128,6 +128,25 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(fake.calls[1][0],'POST')
         self.assertTrue(fake.calls[1][1].endswith('/v1/variants/variant1/attachments'))
         self.assertEqual(fake.calls[1][2]['json_body'],{'file_id':'file1','title':'Сертификат 1','display_sequence':1})
+    def test_attach_documents_preserves_existing_and_deduplicates(self):
+        class FakeHttp:
+            def download_to_file(self,url,path):
+                with open(path,'wb') as fh: fh.write(b'document')
+        class FakeKit:
+            def __init__(self): self.uploaded=0; self.created=[]
+            def list_variant_attachments(self,variant_id):
+                return [{'file_id':'existing-file','title':'Существующий','extension':'pdf','display_sequence':0}]
+            def upload_file(self,path):
+                self.uploaded += 1
+                return {'id':'existing-file' if self.uploaded==1 else 'new-file','type':'OTHER','url':'https://kit.test/file'}
+            def create_variant_attachment(self,variant_id,file_id,title,display_sequence=None):
+                self.created.append((variant_id,file_id,title,display_sequence))
+                return {'file_id':file_id,'title':title,'extension':'pdf','display_sequence':display_sequence}
+        item=normalize_sku({'sku':'1','name':'x','category_id':'1','certificate_list':[{'url':'https://a.test/cert-1.pdf'},{'url':'https://a.test/cert:2.pdf'}]})
+        kit=FakeKit(); runner=SyncRunner(None,kit,FakeHttp(),dry_run=False)
+        runner._attach_documents(item,'variant1')
+        self.assertEqual(kit.created,[('variant1','new-file','cert-2',1)])
+        self.assertEqual(runner.report['warning_count'],0)
     def test_category_chain(self):
         cats={'1':{'id':'1','name':'R','parent_id':None},'2':{'id':'2','name':'C','parent_id':'1'}}; self.assertEqual([x['name'] for x in category_chain('2',cats)],['R','C'])
     def test_price_payload_kit_semantics(self):
