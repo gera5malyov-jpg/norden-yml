@@ -173,7 +173,7 @@ def extract_characteristics(row):
     known={'weight':'Вес товара','volume':'Объем товара','manufacturer':'Страна производства','vendor_code':'Артикул производителя','manufacturer_code':'Код производителя','nds':'НДС','ban_not_multiple':'Запрет некратного набора','sale_date':'Дата ввода товара','remove_date':'Дата удаления','expiration_date':'Срок годности'}
     for key,title in known.items():
         if key in row and row[key] not in (None,''): add(title,row[key])
-    extra_lists={'file_list':'Файлы Samson','video_list':'Видео Samson','certificate_list':'Сертификаты','certificate_extended_list':'Расширенные сертификаты'}
+    extra_lists={'file_list':'Файлы Samson','video_list':'Видео Samson'}
     for key,title in extra_lists.items():
         values=_flatten_strings(row.get(key))
         if values: add(title,'; '.join(values))
@@ -182,6 +182,13 @@ def extract_characteristics(row):
 def extract_images(row):
     out=[]
     for key in ('photo_list','images','photos','pictures','image_urls','photo_urls','image','photo','picture'):
+        for value in _flatten_strings(row.get(key)):
+            if value.startswith(('http://','https://')) and value not in out: out.append(value)
+    return out
+
+def extract_documents(row):
+    out=[]
+    for key in ('certificate_list','certificate_extended_list'):
         for value in _flatten_strings(row.get(key)):
             if value.startswith(('http://','https://')) and value not in out: out.append(value)
     return out
@@ -195,7 +202,7 @@ def extract_barcodes(row):
 
 @dataclass
 class NormalizedSku:
-    source_code:str; kit_sku:str; name:str; category_id:Optional[str]; description:str; brand:str; purchase_price:Optional[Decimal]; stock_parts:Optional[list]; active:bool; withdrawn:bool; barcodes:list=field(default_factory=list); image_urls:list=field(default_factory=list); characteristics:list=field(default_factory=list); raw_keys:list=field(default_factory=list)
+    source_code:str; kit_sku:str; name:str; category_id:Optional[str]; description:str; brand:str; purchase_price:Optional[Decimal]; stock_parts:Optional[list]; active:bool; withdrawn:bool; barcodes:list=field(default_factory=list); image_urls:list=field(default_factory=list); document_urls:list=field(default_factory=list); characteristics:list=field(default_factory=list); raw_keys:list=field(default_factory=list)
 
 def normalize_sku(row,price_override=None,stock_override=None):
     code=_first(row,('sku','code','article','articul','vendor_code','id'))
@@ -212,7 +219,7 @@ def normalize_sku(row,price_override=None,stock_override=None):
     chars=extract_characteristics(row); barcodes=extract_barcodes(row)
     if barcodes: chars.append(('Штрихкод',barcodes))
     chars.append(('Samson ID/артикул',[code]))
-    return NormalizedSku(code,to_kit_sku(code),name,category_id,description,brand,purchase,stock_parts,active,withdrawn,barcodes,extract_images(row),chars,sorted(map(str,row.keys())))
+    return NormalizedSku(code,to_kit_sku(code),name,category_id,description,brand,purchase,stock_parts,active,withdrawn,barcodes,extract_images(row),extract_documents(row),chars,sorted(map(str,row.keys())))
 
 def category_chain(category_id,categories_by_id):
     if category_id in (None,''): return []
