@@ -4,6 +4,24 @@ import requests
 
 RETRY_STATUSES = {429, 500, 502, 503, 504}
 
+def _safe_error_detail(response, headers=None, params=None):
+    try:
+        text = (response.text or '').strip().replace('\r', ' ').replace('\n', ' ')
+    except Exception:
+        return ''
+    secrets = []
+    for value in (headers or {}).values():
+        value = str(value or '')
+        if value.lower().startswith('bearer '):
+            secrets.append(value[7:].strip())
+    for key, value in (params or {}).items():
+        if str(key).lower() in ('api_key', 'token', 'access_token'):
+            secrets.append(str(value or ''))
+    for secret in secrets:
+        if len(secret) >= 6:
+            text = text.replace(secret, '***')
+    return text[:1500]
+
 class SafeSession:
     def __init__(self, session=None, max_attempts=4, timeout=(10,60)):
         self.session = session or requests.Session()
@@ -23,7 +41,9 @@ class SafeSession:
                     continue
                 if not response.ok:
                     p = urlsplit(url)
-                    raise RuntimeError(f'HTTP {response.status_code} {method.upper()} {p.scheme}://{p.netloc}{p.path}')
+                    detail = _safe_error_detail(response, headers, params)
+                    suffix = f' :: {detail}' if detail else ''
+                    raise RuntimeError(f'HTTP {response.status_code} {method.upper()} {p.scheme}://{p.netloc}{p.path}{suffix}')
                 try:
                     return response.json()
                 except ValueError as exc:
