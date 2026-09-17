@@ -83,10 +83,20 @@ class KitClient:
         return self._post('/v1/characteristics',body)
     def create_product(self,category_id): return self._post('/v1/products',{'category_ids':[str(category_id)]})
     def create_variant(self,payload): return self._post('/v1/variants',payload)
-    def upload_image(self,path):
+    def upload_file(self,path):
         if not os.path.isfile(path): raise FileNotFoundError(path)
         mime=mimetypes.guess_type(path)[0] or 'application/octet-stream'
         with open(path,'rb') as fh: return self._post('/v1/files',files={'file':(os.path.basename(path),fh,mime)})
+    def upload_image(self,path): return self.upload_file(path)
+    def list_variant_attachments(self,variant_id):
+        payload=self._get(f'/v1/variants/{str(variant_id).strip()}/attachments')
+        if not isinstance(payload,dict): return []
+        rows=payload.get('attachments')
+        return [row for row in rows if isinstance(row,dict)] if isinstance(rows,list) else []
+    def create_variant_attachment(self,variant_id,file_id,title,display_sequence=None):
+        body={'file_id':str(file_id).strip(),'title':str(title).strip()}
+        if display_sequence is not None: body['display_sequence']=int(display_sequence)
+        return self._post(f'/v1/variants/{str(variant_id).strip()}/attachments',body)
     def bulk_update_prices(self,items):
         out=[]
         for start in range(0,len(items),5000): out.append(self._post('/v1/variants/prices/bulk_update',{'items':items[start:start+5000]}))
