@@ -51,7 +51,8 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(item.image_urls,['https://example.test/1.jpg','https://example.test/2.jpg'])
         self.assertEqual(item.brand,'ГАММА')
         self.assertIn(('Страна производства',['Россия']),item.characteristics)
-        self.assertIn(('Количество цветов в наборе',['6']),item.characteristics)
+        same_title=[x for x in item.characteristics if x[0]=='Количество цветов в наборе']
+        self.assertEqual(same_title,[('Количество цветов в наборе',['6 шт.'])])
         self.assertIn(('Высота упаковки',['1.8']),item.characteristics)
         self.assertFalse(item.withdrawn)
         removed=normalize_sku(dict(row,out_of_stock=1))
