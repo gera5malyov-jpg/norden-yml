@@ -1,43 +1,26 @@
-name: Samson KIT shape debug once
+name: Samson KIT regression tests once
 
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/samson-kit-debug-shape-once.yml'
+      - 'samson-kit/tests/test_core.py'
+      - 'samson-kit/samson_kit/mapper.py'
+      - 'samson-kit/samson_kit/kit_client.py'
 
 permissions:
   contents: read
 
 jobs:
-  inspect:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install requests
-      - name: Inspect existing KIT variant characteristics read-only
-        env:
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import os, json, requests
-          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
-          base='https://api.kit.yandex.net'
-          r=requests.get(base+'/v1/variants',headers=h,params={'page':1,'per_page':20},timeout=60); r.raise_for_status(); p=r.json()
-          rows=p.get('variants') if isinstance(p,dict) else p
-          if not rows: raise RuntimeError('no variants')
-          for row in rows:
-              vid=row.get('id')
-              if not vid: continue
-              d=requests.get(base+'/v1/variants/'+str(vid),headers=h,timeout=60); d.raise_for_status(); obj=d.json()
-              chars=obj.get('characteristics') or []
-              if chars:
-                  print('SKU',obj.get('sku'))
-                  print('CHARS',json.dumps(chars[:10],ensure_ascii=False))
-                  break
-          PY
+      - run: pip install -r requirements.txt
+      - name: Run Samson tests
+        run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
