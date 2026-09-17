@@ -1,3 +1,4 @@
+import mimetypes
 import os
 
 def extract_items(payload):
@@ -84,7 +85,8 @@ class KitClient:
     def create_variant(self,payload): return self._post('/v1/variants',payload)
     def upload_image(self,path):
         if not os.path.isfile(path): raise FileNotFoundError(path)
-        with open(path,'rb') as fh: return self._post('/v1/files',files={'file':(os.path.basename(path),fh)})
+        mime=mimetypes.guess_type(path)[0] or 'application/octet-stream'
+        with open(path,'rb') as fh: return self._post('/v1/files',files={'file':(os.path.basename(path),fh,mime)})
     def bulk_update_prices(self,items):
         out=[]
         for start in range(0,len(items),5000): out.append(self._post('/v1/variants/prices/bulk_update',{'items':items[start:start+5000]}))
