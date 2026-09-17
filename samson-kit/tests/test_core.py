@@ -71,9 +71,18 @@ class CoreTests(unittest.TestCase):
         out=runner._ensure_characteristics(item)
         self.assertEqual(out[0]['characteristic_id'],'new-multi')
         self.assertEqual(kit.created[0][1],'MULTIPLE_STRING')
-    def test_service_link_lists_are_single_text_values(self):
-        item=normalize_sku({'sku':'1','name':'x','category_id':'1','certificate_list':[{'url':'https://a.test/a.jpg'},{'url':'https://a.test/b.jpg'}]})
-        self.assertIn(('Сертификаты',['https://a.test/a.jpg; https://a.test/b.jpg']),item.characteristics)
+    def test_certificates_are_documents_not_characteristics(self):
+        item=normalize_sku({
+            'sku':'1','name':'x','category_id':'1',
+            'certificate_list':[{'url':'https://a.test/cert-1.pdf'},{'url':'https://a.test/cert-2.jpg'}],
+            'certificate_extended_list':[{'url':'https://a.test/cert-3.pdf'}],
+            'file_list':[{'url':'https://a.test/manual.pdf'}],
+        })
+        self.assertEqual(item.document_urls,['https://a.test/cert-1.pdf','https://a.test/cert-2.jpg','https://a.test/cert-3.pdf'])
+        titles=[title for title,_ in item.characteristics]
+        self.assertNotIn('Сертификаты',titles)
+        self.assertNotIn('Расширенные сертификаты',titles)
+        self.assertIn('Файлы Samson',titles)
     def test_upload_image_sends_mime_type(self):
         class FakeHttp:
             def request_json(self,method,url,**kwargs):
