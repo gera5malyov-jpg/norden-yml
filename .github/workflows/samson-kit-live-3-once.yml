@@ -1,5 +1,6 @@
 name: Samson KIT live diagnostic 1 once
 
+# TDD RED: incompatible characteristic reuse test must fail before the fix
 on:
   push:
     branches: [main]
