@@ -1,0 +1,51 @@
+name: Samson to Yandex KIT
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run: do not write to KIT'
+        required: true
+        default: true
+        type: boolean
+      max_items:
+        description: 'SKU limit for safe validation; 0 means full catalog'
+        required: true
+        default: '20'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: samson-kit-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+      - name: Run Samson sync
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--report samson-kit/state/last_sync.json)
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
+          if [[ "${{ inputs.max_items }}" != "0" ]]; then args+=(--max-items "${{ inputs.max_items }}"); fi
+          PYTHONPATH=samson-kit python -m samson_kit.cli "${args[@]}"
+      - name: Print compact report
+        if: always()
+        run: cat samson-kit/state/last_sync.json || true
