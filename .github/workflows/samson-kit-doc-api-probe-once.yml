@@ -12,7 +12,7 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -30,7 +30,7 @@ jobs:
           import json, os
           from samson_kit.http import SafeSession
           from samson_kit.samson_client import SamsonClient
-          from samson_kit.kit_client import KitClient
+          from samson_kit.kit_client import KitClient, extract_items
           from samson_kit.mapper import normalize_sku
 
           http=SafeSession()
@@ -48,17 +48,23 @@ jobs:
           print('SAMSON_CERT_LIST='+json.dumps(source.get('certificate_list'),ensure_ascii=False)[:12000])
           print('SAMSON_CERT_EXT_LIST='+json.dumps(source.get('certificate_extended_list'),ensure_ascii=False)[:12000])
 
-          variants=[v for v in kit.iter_variants() if str(v.get('sku','')).strip()=='SAMS-100327']
-          if len(variants)!=1: raise RuntimeError(f'Expected one SAMS-100327, found {len(variants)}')
+          vp=kit._get('/v1/variants',{'page':1,'per_page':100})
+          variants=[v for v in extract_items(vp) if str(v.get('sku','')).strip()=='SAMS-100327']
+          if len(variants)!=1: raise RuntimeError(f'Expected one SAMS-100327 on first KIT page, found {len(variants)}')
           variant=variants[0]; vid=str(variant.get('id'))
           detail=kit._get('/v1/variants/'+vid)
-          chars=kit.list_characteristics()
-          char_titles={str(c.get('id')):str(c.get('title')) for c in chars}
+
+          wanted_chars=[]
+          for text in ('Сертификаты','Расширенные сертификаты'):
+              cp=kit._get('/v1/characteristics',{'page':1,'per_page':100,'search_text':text})
+              wanted_chars.extend(extract_items(cp))
+          char_titles={str(c.get('id')):str(c.get('title')) for c in wanted_chars}
           mapped=[]
           for row in detail.get('characteristics') or []:
               cid=str(row.get('characteristic_id') or row.get('id') or '')
-              mapped.append({'characteristic_id':cid,'title':char_titles.get(cid),'row':row})
-          print('KIT_CHARACTERISTICS='+json.dumps(mapped,ensure_ascii=False)[:30000])
+              if cid in char_titles:
+                  mapped.append({'characteristic_id':cid,'title':char_titles.get(cid),'row':row})
+          print('KIT_LEGACY_CERT_CHARACTERISTICS='+json.dumps(mapped,ensure_ascii=False)[:12000])
           attachments=kit.list_variant_attachments(vid)
           print('KIT_ATTACHMENTS='+json.dumps(attachments,ensure_ascii=False))
           for a in attachments:
