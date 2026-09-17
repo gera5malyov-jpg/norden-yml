@@ -127,13 +127,13 @@ def extract_active(row,withdrawn=False):
     return True
 
 def extract_characteristics(row):
-    result=[]; seen=set()
+    result=[]; seen_names=set()
     def add(name,values):
         name=str(name).strip(); vals=_flatten_strings(values)
         if not name or not vals: return
-        key=(name,tuple(vals))
-        if key in seen: return
-        seen.add(key); result.append((name,vals))
+        name_key=name.casefold()
+        if name_key in seen_names: return
+        seen_names.add(name_key); result.append((name,vals))
     for key in ('characteristics','properties','attributes','facets','params','parameters'):
         block=row.get(key)
         if isinstance(block,dict):
