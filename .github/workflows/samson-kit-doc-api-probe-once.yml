@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: Inspect KIT product-card and file document shapes
+      - name: Read current KIT attachments
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         shell: bash
@@ -28,28 +28,24 @@ jobs:
           import json, os, requests
           base='https://api.kit.yandex.net'
           h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
-
           r=requests.get(base+'/v1/variants',headers=h,params={'page':1,'per_page':100},timeout=60)
           r.raise_for_status(); p=r.json(); rows=p.get('variants',[]) if isinstance(p,dict) else p
           found=[x for x in rows if str(x.get('sku','')).strip()=='SAMS-100327']
           if len(found)!=1: raise RuntimeError(f'Expected one SAMS-100327, found {len(found)}')
-          card_id=str(found[0].get('product_card_id') or '').strip()
-          print('PRODUCT_CARD_ID='+card_id)
-
-          candidates=[
-              '/v1/product_cards/'+card_id,
-              '/v1/product-cards/'+card_id,
-              '/v1/product_cards',
-              '/v1/product-cards',
-          ]
-          for path in candidates:
-              params={'id':card_id} if path.endswith(('product_cards','product-cards')) else None
-              rr=requests.get(base+path,headers=h,params=params,timeout=60)
-              print('GET '+path+' STATUS='+str(rr.status_code))
-              print('BODY='+rr.text[:12000])
-
-          for typ in ('DOCUMENT','FILE','CERTIFICATE','OTHER'):
-              fr=requests.get(base+'/v1/files',headers=h,params={'page':1,'per_page':10,'type':typ},timeout=60)
-              print('FILES_TYPE_'+typ+'_STATUS='+str(fr.status_code))
-              print('FILES_TYPE_'+typ+'_BODY='+fr.text[:6000])
+          vid=str(found[0].get('id'))
+          rr=requests.get(base+f'/v1/variants/{vid}/attachments',headers=h,timeout=60)
+          print('ATTACHMENTS_STATUS='+str(rr.status_code))
+          print('ATTACHMENTS_BODY='+rr.text[:12000])
+          rr.raise_for_status()
           PY
+      - name: Read exact attachment OpenAPI schemas offline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ztemerbekov/a1-yandex-kit-skills.git /tmp/a1-kit
+          cd /tmp/a1-kit
+          node skills/a1-yandex-kit-catalog/scripts/search_docs.mjs --operation GetVariantAttachments
+          node skills/a1-yandex-kit-catalog/scripts/search_docs.mjs --operation CreateVariantAttachment
+          node skills/a1-yandex-kit-catalog/scripts/search_docs.mjs --operation UpdateVariantAttachment
+          node skills/a1-yandex-kit-catalog/scripts/search_docs.mjs --operation DeleteVariantAttachment
+          node skills/a1-yandex-kit-catalog/scripts/search_docs.mjs --operation UploadFile
