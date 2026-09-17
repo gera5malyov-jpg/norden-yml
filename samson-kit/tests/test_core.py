@@ -1,9 +1,9 @@
-import os, sys, unittest
+import os, sys, unittest, tempfile
 from decimal import Decimal
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from samson_kit.rules import calculate_prices, calculate_stock, to_kit_sku
 from samson_kit.samson_client import parse_page
-from samson_kit.kit_client import resolve_exact_warehouse, index_samson_variants, extract_items
+from samson_kit.kit_client import resolve_exact_warehouse, index_samson_variants, extract_items, KitClient
 from samson_kit.mapper import normalize_sku, category_chain
 from samson_kit.sync import build_price_update, build_stock_update, absent_zero_updates, SyncRunner
 
@@ -71,6 +71,23 @@ class CoreTests(unittest.TestCase):
         out=runner._ensure_characteristics(item)
         self.assertEqual(out[0]['characteristic_id'],'new-multi')
         self.assertEqual(kit.created[0][1],'MULTIPLE_STRING')
+    def test_service_link_lists_are_single_text_values(self):
+        item=normalize_sku({'sku':'1','name':'x','category_id':'1','certificate_list':[{'url':'https://a.test/a.jpg'},{'url':'https://a.test/b.jpg'}]})
+        self.assertIn(('Сертификаты',['https://a.test/a.jpg; https://a.test/b.jpg']),item.characteristics)
+    def test_upload_image_sends_mime_type(self):
+        class FakeHttp:
+            def request_json(self,method,url,**kwargs):
+                self.files=kwargs.get('files'); return {'id':'file1'}
+        fake=FakeHttp(); kit=KitClient('token',fake)
+        with tempfile.NamedTemporaryFile(suffix='.jpg',delete=False) as fh:
+            fh.write(b'jpegdata'); path=fh.name
+        try:
+            kit.upload_image(path)
+            part=fake.files['file']
+            self.assertEqual(len(part),3)
+            self.assertEqual(part[2],'image/jpeg')
+        finally:
+            os.unlink(path)
     def test_category_chain(self):
         cats={'1':{'id':'1','name':'R','parent_id':None},'2':{'id':'2','name':'C','parent_id':'1'}}; self.assertEqual([x['name'] for x in category_chain('2',cats)],['R','C'])
     def test_price_payload_kit_semantics(self):
