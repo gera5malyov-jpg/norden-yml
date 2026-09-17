@@ -1,0 +1,136 @@
+name: Samson KIT migrate certificates 100327 once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/samson-kit-cert-migrate-100327-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Run regression tests
+        run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+      - name: Migrate SAMS-100327 certificates safely
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python - <<'PY'
+          import json, os
+          from samson_kit.http import SafeSession
+          from samson_kit.samson_client import SamsonClient
+          from samson_kit.kit_client import KitClient, extract_items
+          from samson_kit.mapper import normalize_sku
+          from samson_kit.sync import SyncRunner
+
+          TARGET_SKU='SAMS-100327'
+          SOURCE_SKU='100327'
+          LEGACY_ID='01a0b0be-c04d-7891-b67d-919fd689253d'
+          EXPECTED_TITLES={'156_0000','156_0001','17361_0000','17361_0001','17361_0002','17361_0003'}
+
+          http=SafeSession()
+          samson=SamsonClient(os.environ['SAMSON_API_KEY'],http)
+          kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
+
+          source=None
+          for i,row in enumerate(samson.iter_skus(),1):
+              if str(row.get('sku','')).strip()==SOURCE_SKU:
+                  source=row; break
+              if i>=1000: break
+          if source is None: raise RuntimeError('Samson SKU 100327 not found')
+          item=normalize_sku(source)
+          if len(item.document_urls)!=6:
+              raise RuntimeError(f'Expected exactly 6 Samson certificate pages, got {len(item.document_urls)}')
+
+          vp=kit._get('/v1/variants',{'page':1,'per_page':100})
+          variants=[v for v in extract_items(vp) if str(v.get('sku','')).strip()==TARGET_SKU]
+          if len(variants)!=1: raise RuntimeError(f'Expected one {TARGET_SKU}, found {len(variants)}')
+          vid=str(variants[0].get('id'))
+          before=kit._get('/v1/variants/'+vid)
+          before_chars=before.get('characteristics') or []
+          before_legacy=[x for x in before_chars if str(x.get('characteristic_id',''))==LEGACY_ID]
+          if len(before_legacy)!=1:
+              raise RuntimeError(f'Expected exactly one legacy certificate characteristic, found {len(before_legacy)}')
+
+          invariant={
+              'sku':before.get('sku'),
+              'name':before.get('name'),
+              'status':before.get('status'),
+              'pricing':before.get('pricing'),
+              'stocks':before.get('stocks'),
+              'media':before.get('media'),
+              'product_id':before.get('product_id'),
+          }
+          attachments_before=kit.list_variant_attachments(vid)
+          print('BEFORE_ATTACHMENTS='+json.dumps(attachments_before,ensure_ascii=False))
+          print('BEFORE_CHARACTERISTICS='+str(len(before_chars)))
+
+          runner=SyncRunner(None,kit,http,dry_run=False)
+          runner._attach_documents(item,vid)
+          if runner.report['warning_count']:
+              raise RuntimeError('Document attachment warnings: '+json.dumps(runner.report['warnings'],ensure_ascii=False))
+
+          attachments_mid=kit.list_variant_attachments(vid)
+          titles={str(x.get('title','')).strip() for x in attachments_mid}
+          if not EXPECTED_TITLES.issubset(titles):
+              missing=sorted(EXPECTED_TITLES-titles)
+              raise RuntimeError(f'Not all certificate pages attached; missing titles: {missing}')
+          if len(attachments_mid)>10:
+              raise RuntimeError(f'KIT attachment limit exceeded: {len(attachments_mid)}')
+          print('ATTACHED_DOCUMENTS='+json.dumps(attachments_mid,ensure_ascii=False))
+          print('DOCUMENT_REPORT='+json.dumps({k:runner.report[k] for k in ('documents_attached','documents_skipped','warning_count')},ensure_ascii=False))
+
+          remaining=[]
+          for row in before_chars:
+              if str(row.get('characteristic_id',''))==LEGACY_ID: continue
+              cid=str(row.get('characteristic_id','')).strip()
+              value=row.get('value')
+              values=row.get('values')
+              if not cid or not isinstance(value,str) or not isinstance(values,list):
+                  raise RuntimeError('Unexpected existing KIT characteristic shape; refusing destructive replacement')
+              remaining.append({'characteristic_id':cid,'value':value,'values':values})
+          if len(remaining)!=len(before_chars)-1:
+              raise RuntimeError('Characteristic removal count mismatch')
+
+          kit.update_variant(vid,{'characteristics':remaining})
+
+          after=kit._get('/v1/variants/'+vid)
+          after_chars=after.get('characteristics') or []
+          if any(str(x.get('characteristic_id',''))==LEGACY_ID for x in after_chars):
+              raise RuntimeError('Legacy certificate characteristic still present after PATCH')
+          if len(after_chars)!=len(before_chars)-1:
+              raise RuntimeError(f'Characteristic count mismatch: before={len(before_chars)} after={len(after_chars)}')
+          attachments_after=kit.list_variant_attachments(vid)
+          after_titles={str(x.get('title','')).strip() for x in attachments_after}
+          if not EXPECTED_TITLES.issubset(after_titles):
+              raise RuntimeError('Certificate attachments disappeared after characteristic PATCH')
+
+          for key,expected in invariant.items():
+              if after.get(key)!=expected:
+                  raise RuntimeError(f'Invariant changed unexpectedly: {key}')
+
+          print('MIGRATION_OK='+json.dumps({
+              'sku':after.get('sku'),
+              'status':after.get('status'),
+              'documents':len(attachments_after),
+              'certificate_pages':sorted(EXPECTED_TITLES),
+              'characteristics_before':len(before_chars),
+              'characteristics_after':len(after_chars),
+              'pricing':after.get('pricing'),
+              'stocks':after.get('stocks'),
+              'media_count':len(after.get('media') or []),
+          },ensure_ascii=False))
+          PY
