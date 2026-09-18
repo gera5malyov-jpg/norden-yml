@@ -1,0 +1,31 @@
+name: Find KIT Samson quantity guard templates once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/find-kit-samson-quantity-guard-templates-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  find:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: git clone --depth 1 https://github.com/yandex/kit-skills.git /tmp/kit-skills
+      - name: List matching custom templates
+        env:
+          KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          K=/tmp/kit-skills/skills/kit-storefront-constructor/scripts/kit.py
+          PROMPT='Проверить созданный шаблон Samson quantity guard после ответа KIT.'
+          SID='c3b223d7-6041-49cb-9b86-caf0ed67e8ba'
+          python "$K" --bff-url https://megapolis-meb.ru --skill-prompt "$PROMPT" --skill-session-id "$SID" templates list
