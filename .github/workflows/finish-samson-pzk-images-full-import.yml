@@ -1,0 +1,113 @@
+name: Finish Samson PZK images and full import
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/finish-samson-pzk-images-full-import.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repair-existing-samson-images-once
+  cancel-in-progress: true
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+
+      - name: Regression tests
+        run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+
+      - name: 1. Migrate PZK minimum and intermediate package step
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python samson-kit/scripts/migrate_order_constraints.py
+
+      - name: 2. Repair incomplete image sets on existing SAMS variants
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python - <<'PY'
+          import os, json
+          from samson_kit.http import SafeSession
+          from samson_kit.samson_client import SamsonClient
+          from samson_kit.kit_client import KitClient
+          from samson_kit.mapper import normalize_sku
+          from samson_kit.sync import SyncRunner
+
+          http=SafeSession()
+          samson=SamsonClient(os.environ['SAMSON_API_KEY'],http)
+          kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
+          index,duplicates=kit.index_samson_variants()
+          print('EXISTING_SAMS_COUNT='+str(len(index)),flush=True)
+          if duplicates:
+              raise RuntimeError('duplicate SAMS variants found: '+str(len(duplicates)))
+
+          runner=SyncRunner(samson,kit,http,dry_run=False)
+          checked=0; repaired=0; skipped=0; errors=[]
+          for row in samson.iter_skus():
+              try:
+                  item=normalize_sku(row)
+              except Exception:
+                  continue
+              variant=index.get(item.kit_sku)
+              if not variant:
+                  continue
+              checked += 1
+              if not item.image_urls:
+                  skipped += 1
+                  continue
+              try:
+                  if runner._repair_images_if_incomplete(item,variant):
+                      repaired += 1
+                      print('REPAIRED='+item.kit_sku+' source_images='+str(len(item.image_urls)),flush=True)
+              except Exception as exc:
+                  errors.append({'sku':item.kit_sku,'error':str(exc)[:300]})
+                  print('REPAIR_ERROR='+item.kit_sku+' '+str(exc)[:300],flush=True)
+              if checked % 250 == 0:
+                  print('PROGRESS checked='+str(checked)+' repaired='+str(repaired)+' errors='+str(len(errors)),flush=True)
+
+          summary={
+              'existing_sams':len(index),
+              'checked':checked,
+              'repaired':repaired,
+              'no_source_images':skipped,
+              'errors':len(errors),
+              'warnings':runner.report['warning_count'],
+              'error_examples':errors[:50],
+          }
+          print('REPAIR_SUMMARY='+json.dumps(summary,ensure_ascii=False),flush=True)
+          if errors:
+              raise RuntimeError(f'image repair finished with {len(errors)} errors')
+          print('REPAIR_ALL_OK=1',flush=True)
+          PY
+
+      - name: 3. Full live Samson import
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python -m samson_kit.cli --report /tmp/samson-full-live.json
+          echo 'FULL_LIVE_REPORT_BEGIN'
+          cat /tmp/samson-full-live.json
+          echo 'FULL_LIVE_REPORT_END'
