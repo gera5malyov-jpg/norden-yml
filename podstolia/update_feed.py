@@ -13,10 +13,10 @@ PRICE_FILE = BASE_DIR / "prices.json"
 OUTPUT_XML = BASE_DIR / "podstolia.xml"
 OUTPUT_YML = BASE_DIR / "podstolia.yml"
 
-OFFER_RE = re.compile(br"<offer\\b[^>]*>[\\s\\S]*?</offer>", re.I)
-VENDOR_RE = re.compile(br"<vendorCode>\\s*#?([^<\\s]+)\\s*</vendorCode>", re.I)
-PRICE_LINE_RE = re.compile(br"(?m)^([ \\t]*)<price>([^<]*)</price>(\\r?\\n)")
-PURCHASE_RE = re.compile(br"(?m)^([ \\t]*)<purchase_price>[^<]*</purchase_price>(\\r?\\n)", re.I)
+OFFER_RE = re.compile(br"<offer\b[^>]*>[\s\S]*?</offer>", re.I)
+VENDOR_RE = re.compile(br"<vendorCode>\s*#?([^<\s]+)\s*</vendorCode>", re.I)
+PRICE_LINE_RE = re.compile(br"(?m)^([ \t]*)<price>([^<]*)</price>(\r?\n)")
+PURCHASE_RE = re.compile(br"(?m)^([ \t]*)<purchase_price>[^<]*</purchase_price>(\r?\n)", re.I)
 
 def fetch_source() -> bytes:
     req = urllib.request.Request(
@@ -55,8 +55,6 @@ def main() -> None:
             stats["waiting"].append(code)
             return block
 
-        # Supplier feed is the source of truth. Do not parse/reformat it.
-        # Remove only our own tag if it ever appears, then insert one line after <price>.
         block = PURCHASE_RE.sub(b"", block)
 
         pm = PRICE_LINE_RE.search(block)
@@ -77,8 +75,6 @@ def main() -> None:
     if len(re.findall(br"<purchase_price>", output, re.I)) != stats["inserted"]:
         raise RuntimeError("purchase_price count validation failed")
 
-    # Syntax validation only. Bytes, encoding declaration, tag case,
-    # whitespace, IDs, attributes, parameters and supplier content stay untouched.
     ET.fromstring(output)
 
     OUTPUT_XML.write_bytes(output)
