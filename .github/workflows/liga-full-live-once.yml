@@ -1,0 +1,40 @@
+name: Liga full live import once
+
+on:
+  push:
+    branches:
+      - feat/liga-kit-sync
+    paths:
+      - '.github/workflows/liga-full-live-once.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: liga-full-live-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Run all regression tests
+        run: |
+          PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+          PYTHONPATH=liga-kit python -m unittest discover -s liga-kit/tests -v
+      - name: Full live Liga import
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=liga-kit python -m liga_kit.cli --report /tmp/liga-full-live.json
+          echo 'LIGA_FULL_LIVE_REPORT_BEGIN'
+          cat /tmp/liga-full-live.json
+          echo 'LIGA_FULL_LIVE_REPORT_END'
