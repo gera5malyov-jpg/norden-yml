@@ -14,6 +14,8 @@ class OrderQuantityTests(unittest.TestCase):
         })
         self.assertEqual(item.min_order_quantity,60)
         self.assertEqual(item.order_step,20)
+        self.assertIn(('Минимальный заказ',['60']),item.characteristics)
+        self.assertIn(('Шаг заказа',['20']),item.characteristics)
 
     def test_pzk_without_intermediate_uses_step_one(self):
         item=normalize_sku({
