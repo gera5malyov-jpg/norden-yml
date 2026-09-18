@@ -226,7 +226,6 @@ class SyncRunner:
             'new_products_created': 0,
             'new_limit_skipped': 0,
             'ambiguous_existing_skipped': 0,
-            'sku_migrations': 0,
             'price_changes': 0,
             'spb_stock_changes': 0,
             'msk_stock_changes': 0,
@@ -541,7 +540,7 @@ class SyncRunner:
             if unmarked_existing:
                 self.report['ambiguous_existing_skipped'] += 1
                 self._warn(
-                    f'existing Riva article without technical offer id could not '
+                    f'existing Riva SKU without technical offer id could not '
                     f'be safely matched; skipped: {offer.kit_sku} / '
                     f'offer {offer.source_id}'
                 )
