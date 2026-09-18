@@ -32,14 +32,16 @@ class ImageSafetyTests(unittest.TestCase):
             def __init__(self):
                 self.uploaded=[]
                 self.updated=[]
+                self.media=[{'type':'IMAGE','image_id':'old1'}]
             def upload_image(self,path):
                 file_id='file'+str(len(self.uploaded)+1)
                 self.uploaded.append(file_id)
                 return {'id':file_id}
             def get_variant(self,variant_id):
-                return {'id':variant_id,'sku':'SAMS-1','media':[{'type':'IMAGE','image_id':'old1'}]}
+                return {'id':variant_id,'sku':'SAMS-1','media':self.media}
             def update_variant(self,variant_id,payload):
                 self.updated.append((variant_id,payload))
+                self.media=list(payload.get('media') or self.media)
                 return {'id':variant_id,**payload}
         item=normalize_sku({
             'sku':'1','name':'x','category_id':'1',
