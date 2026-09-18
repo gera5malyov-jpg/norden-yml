@@ -4,9 +4,9 @@ Isolated synchronization for the Riva dealer YML feed.
 
 - Source URL is stored only in repository secret `RIVA_FEED_URL`.
 - Yandex KIT token uses existing repository secret `YANDEX_KIT_TOKEN`.
-- KIT SKU/article is the exact Riva `Артикул` value. No `offer id` is substituted into the article.
-- Riva legitimately repeats one article across different color/configuration offers. These variants keep the same article; synchronization distinguishes them technically by Riva `offer id`, barcode, and exact offer name.
-- Technical Riva `offer id` is stored as characteristic `ID предложения Riva` and is not used as the visible article.
+- KIT SKU/article is `riva-<offer id>` from the Riva feed, for example `riva-1290597`.
+- Riva repeats the same supplier article across colors/configurations, so `offer id` is used to keep every variant unique.
+- Original supplier `Артикул` is preserved as a separate product characteristic; technical `offer id` is also stored as `ID предложения Riva`.
 - New products: full initial content, including all source images and useful characteristics.
 - Existing Riva products: price + СПБ/МСК stock only.
 - The top-level Riva YML `<price>` is the purchase price.
