@@ -1,0 +1,119 @@
+name: Inspect Riva feed safely
+
+on:
+  push:
+    branches:
+      - feat/riva-kit-sync
+    paths:
+      - '.github/workflows/riva-feed-inspect.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RIVA_FEED_URL: ${{ secrets.RIVA_FEED_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate secret
+        shell: bash
+        run: |
+          if [[ -z "${RIVA_FEED_URL:-}" ]]; then
+            echo "RIVA_FEED_URL secret is empty or unavailable"
+            exit 1
+          fi
+          echo "RIVA_FEED_URL is configured"
+      - name: Inspect Riva XML
+        shell: bash
+        run: |
+          python - <<'PY'
+          import collections
+          import os
+          import tempfile
+          import xml.etree.ElementTree as ET
+          import urllib.request
+          from urllib.parse import urlsplit
+
+          url = os.environ['RIVA_FEED_URL']
+          path = os.path.join(tempfile.gettempdir(), 'riva.xml')
+          req = urllib.request.Request(url, headers={'User-Agent':'Mozilla/5.0'})
+          with urllib.request.urlopen(req, timeout=180) as r, open(path,'wb') as f:
+              while True:
+                  chunk = r.read(1024*1024)
+                  if not chunk:
+                      break
+                  f.write(chunk)
+
+          print('SIZE_BYTES', os.path.getsize(path))
+          print('SOURCE_HOST', urlsplit(url).netloc)
+
+          counts = collections.Counter()
+          samples = collections.defaultdict(list)
+          offer_like = []
+          category_like = []
+          stack = []
+
+          for event, elem in ET.iterparse(path, events=('start','end')):
+              tag = elem.tag.split('}')[-1]
+              if event == 'start':
+                  stack.append(tag)
+                  continue
+
+              counts[tag] += 1
+              if len(samples[tag]) < 2:
+                  text = (elem.text or '').strip()
+                  if text or elem.attrib:
+                      samples[tag].append({'attrib': dict(elem.attrib), 'text': text[:180]})
+
+              low = tag.casefold()
+              if low in {'offer','product','item','position','good','tovar','товар'} and len(offer_like) < 5:
+                  record = {
+                      'tag': tag,
+                      'attrib': dict(elem.attrib),
+                      'children': []
+                  }
+                  for child in list(elem):
+                      ctag = child.tag.split('}')[-1]
+                      ctext = (child.text or '').strip()
+                      record['children'].append({
+                          'tag': ctag,
+                          'attrib': dict(child.attrib),
+                          'text': ctext[:300],
+                      })
+                  offer_like.append(record)
+
+              if low in {'category','group','section','cataloggroup','categoryitem'} and len(category_like) < 5:
+                  category_like.append({
+                      'tag':tag,
+                      'attrib':dict(elem.attrib),
+                      'text':(elem.text or '').strip()[:180],
+                  })
+
+              if stack:
+                  stack.pop()
+              if len(elem) > 200:
+                  elem.clear()
+
+          print('TOP_TAG_COUNTS')
+          for tag, count in counts.most_common(120):
+              print(f'{tag}\t{count}')
+
+          print('OFFER_LIKE_SAMPLES')
+          for i, row in enumerate(offer_like, 1):
+              print('OFFER_SAMPLE', i, repr(row))
+
+          print('CATEGORY_LIKE_SAMPLES')
+          for i, row in enumerate(category_like, 1):
+              print('CATEGORY_SAMPLE', i, repr(row))
+
+          print('GENERIC_SAMPLES')
+          for tag in sorted(samples):
+              if counts[tag] >= 2:
+                  print('TAG', tag, repr(samples[tag]))
+          PY
