@@ -1,6 +1,7 @@
 import mimetypes
 import os
 import time
+import time
 
 
 def extract_items(payload):
