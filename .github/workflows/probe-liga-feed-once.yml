@@ -1,0 +1,67 @@
+name: Probe Liga Divanov feed once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-liga-feed-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Inspect Liga feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import urllib.request, xml.etree.ElementTree as ET, json, collections, tempfile, os
+
+          url='https://ligadivanov.ru/acrit.export/ym_vendormodel_2023.xml'
+          req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 MegapolisLigaImporter/1.0'})
+          with urllib.request.urlopen(req,timeout=120) as r:
+              data=r.read()
+          print('FEED_BYTES='+str(len(data)))
+          root=ET.fromstring(data)
+          offers=root.findall('.//offer')
+          cats=root.findall('.//category')
+          print('OFFER_COUNT='+str(len(offers)))
+          print('CATEGORY_COUNT='+str(len(cats)))
+
+          tag_counts=collections.Counter()
+          attr_counts=collections.Counter()
+          sample=[]
+          for offer in offers[:20]:
+              attr_counts.update(offer.attrib.keys())
+              tag_counts.update([child.tag for child in offer])
+              d={'attrs':offer.attrib.copy()}
+              for child in offer:
+                  if child.tag=='param':
+                      d.setdefault('params',[]).append({'name':child.attrib.get('name'),'unit':child.attrib.get('unit'),'value':(child.text or '').strip()})
+                  elif child.tag=='picture':
+                      d.setdefault('pictures',[]).append((child.text or '').strip())
+                  else:
+                      if child.tag in d:
+                          if not isinstance(d[child.tag],list): d[child.tag]=[d[child.tag]]
+                          d[child.tag].append((child.text or '').strip())
+                      else:
+                          d[child.tag]=(child.text or '').strip()
+              sample.append(d)
+
+          print('OFFER_ATTRS='+json.dumps(attr_counts.most_common(),ensure_ascii=False))
+          print('OFFER_TAGS='+json.dumps(tag_counts.most_common(),ensure_ascii=False))
+          print('SAMPLE_OFFERS='+json.dumps(sample[:5],ensure_ascii=False)[:30000])
+
+          cat_sample=[]
+          for c in cats[:20]:
+              cat_sample.append({'id':c.attrib.get('id'),'parentId':c.attrib.get('parentId'),'name':(c.text or '').strip()})
+          print('SAMPLE_CATEGORIES='+json.dumps(cat_sample,ensure_ascii=False))
+          PY
