@@ -33,6 +33,14 @@ jobs:
           rm -rf /tmp/quantity-guard
           python "$S" freeform             --html samson-kit/storefront/quantity-guard/template.hbs             --css samson-kit/storefront/quantity-guard/styles.css             --schema samson-kit/storefront/quantity-guard/schema.json             --settings samson-kit/storefront/quantity-guard/settings.product.json             --title "Samson quantity guard"             --out /tmp/quantity-guard             --confirm
           python "$S" lint /tmp/quantity-guard --json
+          python - <<'PY'
+          import json
+          p='/tmp/quantity-guard/create.json'
+          x=json.load(open(p))
+          x.pop('script',None)
+          with open(p,'w') as fh:
+              json.dump(x,fh,ensure_ascii=False)
+          PY
           echo '--- TEMPLATE DRY RUN ---'
           python "$K" "${COMMON[@]}" templates create --file /tmp/quantity-guard/create.json --dry-run
           echo '--- TEMPLATE CREATE ---'
