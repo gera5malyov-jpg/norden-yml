@@ -1,0 +1,40 @@
+name: Liga full dry run once
+
+on:
+  push:
+    branches:
+      - feat/liga-kit-sync
+    paths:
+      - '.github/workflows/liga-full-dry-run-once.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: liga-full-dry-run-once
+  cancel-in-progress: true
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Run all regression tests
+        run: |
+          PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+          PYTHONPATH=liga-kit python -m unittest discover -s liga-kit/tests -v
+      - name: Full Liga dry run
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=liga-kit python -m liga_kit.cli --dry-run --report /tmp/liga-dry.json
+          echo 'LIGA_DRY_REPORT_BEGIN'
+          cat /tmp/liga-dry.json
+          echo 'LIGA_DRY_REPORT_END'
