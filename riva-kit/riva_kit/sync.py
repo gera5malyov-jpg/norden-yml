@@ -221,6 +221,7 @@ class SyncRunner:
             'in_stock_offers': 0,
             'zero_stock_offers': 0,
             'existing_variants_seen': 0,
+            'sku_changes': 0,
             'new_products_planned': 0,
             'new_products_created': 0,
             'new_limit_skipped': 0,
@@ -241,7 +242,7 @@ class SyncRunner:
             'skip_items': self.skip_items,
             'stock_rule': 'count>0 => count; count=0 => 100 on each managed warehouse',
             'price_rule': 'old=cost*1.80; sale=cost*1.26; desired minimum=cost*1.20',
-            'minimum_price_api_supported': None,
+            'minimum_price_api_supported': False,
         }
 
     def _warn(self, message):
@@ -467,6 +468,42 @@ class SyncRunner:
             )
             if variant is not None:
                 self.report['existing_variants_seen'] += 1
+
+                source_ids = _char_values(
+                    variant,
+                    self.characteristic_titles,
+                    'ID предложения Riva',
+                )
+                current_sku = str(variant.get('sku', '')).strip()
+                if (
+                    offer.source_id in source_ids
+                    and current_sku != offer.kit_sku
+                ):
+                    variant_id = str(variant.get('id', '')).strip()
+                    if not variant_id:
+                        self._record_error(
+                            offer.kit_sku,
+                            'existing Riva variant has no KIT id for SKU migration',
+                        )
+                        continue
+                    if not self.dry_run:
+                        updated = self.kit.update_variant(
+                            variant_id,
+                            {'sku': offer.kit_sku},
+                        )
+                        if isinstance(updated, dict):
+                            variant.update(updated)
+                    variant['sku'] = offer.kit_sku
+                    self.report['sku_changes'] += 1
+                    if current_sku in by_sku:
+                        by_sku[current_sku] = [
+                            row for row in by_sku[current_sku]
+                            if str(row.get('id', '')) != variant_id
+                        ]
+                        if not by_sku[current_sku]:
+                            by_sku.pop(current_sku, None)
+                    by_sku.setdefault(offer.kit_sku, []).append(variant)
+
                 price_update = build_price_update(offer, variant)
                 if offer.price is None:
                     self.report['invalid_price_count'] += 1
