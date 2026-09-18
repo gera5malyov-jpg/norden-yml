@@ -1,5 +1,6 @@
 import mimetypes
 import os
+import time
 
 
 def extract_items(payload):
@@ -72,28 +73,44 @@ def index_liga_variants(rows):
 
 
 class KitClient:
-    def __init__(self, token, http, base_url='https://api.kit.yandex.net'):
+    def __init__(self, token, http, base_url='https://api.kit.yandex.net', *, min_request_interval=0.37, monotonic_fn=None, sleep_fn=None):
         self.token = str(token).strip()
         self.http = http
         self.base_url = base_url.rstrip('/')
+        self.min_request_interval = max(0.0, float(min_request_interval))
+        self._monotonic = monotonic_fn or time.monotonic
+        self._sleep = sleep_fn or time.sleep
+        self._last_request_at = None
         if not self.token:
             raise ValueError('empty KIT token')
+
+    def _pace(self):
+        now = self._monotonic()
+        if self._last_request_at is not None:
+            delay = self.min_request_interval - (now - self._last_request_at)
+            if delay > 0:
+                self._sleep(delay)
+                now = self._monotonic()
+        self._last_request_at = now
 
     @property
     def headers(self):
         return {'Authorization': f'Bearer {self.token}', 'Accept': 'application/json'}
 
     def _get(self, path, params=None):
+        self._pace()
         return self.http.request_json(
             'GET', self.base_url + path, params=params, headers=self.headers
         )
 
     def _post(self, path, body=None, files=None):
+        self._pace()
         return self.http.request_json(
             'POST', self.base_url + path, headers=self.headers, json_body=body, files=files
         )
 
     def _patch(self, path, body=None):
+        self._pace()
         headers = dict(self.headers)
         headers['Content-Type'] = 'application/merge-patch+json'
         return self.http.request_json(
