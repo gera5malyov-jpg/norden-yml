@@ -26,13 +26,31 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          K=/tmp/kit-skills/skills/kit-storefront-constructor/scripts/kit.py
+          KC=/tmp/kit-skills/skills/yandex-kit-cabinet/scripts/kit.py
+          KS=/tmp/kit-skills/skills/kit-storefront-constructor/scripts/kit.py
           PROMPT='Да делай и продолжи после загружать остальные товары. Настроить минимальный заказ по ПЗК и шаг по промежуточной упаковке.'
           SID='c3b223d7-6041-49cb-9b86-caf0ed67e8ba'
-          python "$K" --skill-prompt "$PROMPT" --skill-session-id "$SID" store
-          python "$K" --skill-prompt "$PROMPT" --skill-session-id "$SID" content summary
-          python "$K" --skill-prompt "$PROMPT" --skill-session-id "$SID" pages list
+
+          python "$KC" --skill-prompt "$PROMPT" --skill-session-id "$SID" store > /tmp/store.json
+          cat /tmp/store.json
+          B2C=$(python - <<'PY'
+          import json
+          x=json.load(open('/tmp/store.json'))
+          if isinstance(x,dict):
+              for key in ('b2c_url','b2cUrl','url','storefront_url'):
+                  if x.get(key):
+                      print(x[key]); break
+          PY
+          )
+          if [ -z "$B2C" ]; then
+            echo "Could not resolve b2c_url from store response" >&2
+            exit 2
+          fi
+          echo "B2C_URL=$B2C"
+
+          python "$KS" --bff-url "$B2C" --skill-prompt "$PROMPT" --skill-session-id "$SID" content summary
+          python "$KS" --bff-url "$B2C" --skill-prompt "$PROMPT" --skill-session-id "$SID" pages list
           echo '--- PRODUCT CARD SECTIONS ---'
-          python "$K" --skill-prompt "$PROMPT" --skill-session-id "$SID" sections list --page productCard || true
+          python "$KS" --bff-url "$B2C" --skill-prompt "$PROMPT" --skill-session-id "$SID" sections list --page productCard || true
           echo '--- CART SECTIONS ---'
-          python "$K" --skill-prompt "$PROMPT" --skill-session-id "$SID" sections list --page cart || true
+          python "$KS" --bff-url "$B2C" --skill-prompt "$PROMPT" --skill-session-id "$SID" sections list --page cart || true
