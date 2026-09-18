@@ -46,8 +46,11 @@ def main(argv=None):
         if not feed_url:
             raise RuntimeError('RIVA_FEED_URL is not configured')
 
-        http = SafeSession(timeout=(15, 120))
-        kit = KitClient(kit_token, http)
+        # KIT can temporarily throttle large variant-index reads.  Riva has a
+        # large catalog, so use a slower client and a longer retry window here
+        # without changing the request pace of the other supplier integrations.
+        http = SafeSession(max_attempts=10, timeout=(15, 120))
+        kit = KitClient(kit_token, http, min_request_interval=0.75)
         with tempfile.TemporaryDirectory(prefix='riva-feed-') as td:
             feed_path = os.path.join(td, 'feed.xml')
             http.download_to_file(feed_url, feed_path)
