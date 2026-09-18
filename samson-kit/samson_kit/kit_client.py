@@ -86,6 +86,7 @@ class KitClient:
         return self._post('/v1/characteristics',body)
     def create_product(self,category_id): return self._post('/v1/products',{'category_ids':[str(category_id)]})
     def create_variant(self,payload): return self._post('/v1/variants',payload)
+    def get_variant(self,variant_id): return self._get(f'/v1/variants/{str(variant_id).strip()}')
     def update_variant(self,variant_id,payload): return self._patch(f'/v1/variants/{str(variant_id).strip()}',payload)
     def upload_file(self,path):
         if not os.path.isfile(path): raise FileNotFoundError(path)
