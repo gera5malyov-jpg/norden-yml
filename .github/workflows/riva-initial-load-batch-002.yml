@@ -1,0 +1,44 @@
+name: Riva initial catalog load batch 002
+
+on:
+  push:
+    branches:
+      - feat/riva-kit-sync
+    paths:
+      - '.github/workflows/riva-initial-load-batch-002.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: riva-initial-load
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      RIVA_FEED_URL: ${{ secrets.RIVA_FEED_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Riva tests
+        run: PYTHONPATH=liga-kit:riva-kit python -m unittest discover -s riva-kit/tests -v
+      - name: Import Riva offers 501 through 1500
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=liga-kit:riva-kit python -m riva_kit.cli \
+            --skip-items 500 \
+            --max-items 1000 \
+            --report riva-kit/state/initial-batch-002.json
+      - name: Print report
+        if: always()
+        run: cat riva-kit/state/initial-batch-002.json || true
