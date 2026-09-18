@@ -1,0 +1,117 @@
+name: Samson KIT live smoke 3 new products once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/samson-kit-smoke-3-new-once.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: samson-kit-smoke-3-new-once
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Run regression tests
+        run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+      - name: Create and verify exactly 3 new Samson products
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python - <<'PY'
+          import json, os
+          from decimal import Decimal, ROUND_CEILING
+          from samson_kit.http import SafeSession
+          from samson_kit.samson_client import SamsonClient
+          from samson_kit.kit_client import KitClient
+          from samson_kit.mapper import normalize_sku
+          from samson_kit.sync import SyncRunner, calculate_stock, calculate_prices
+
+          LIMIT=3
+          http=SafeSession()
+          samson=SamsonClient(os.environ['SAMSON_API_KEY'],http)
+          kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
+          warehouse_id=kit.resolve_warehouse_exact('СПБ')
+          source_categories={str(x.get('id')):x for x in samson.iter_categories() if isinstance(x,dict) and x.get('id') not in (None,'')}
+          kit_index,duplicates=kit.index_samson_variants()
+          runner=SyncRunner(samson,kit,http,warehouse_name='СПБ',dry_run=False)
+          runner.kit_categories=kit.list_categories()
+          runner.kit_characteristics=kit.list_characteristics()
+          price_override=runner._load_override('iter_prices','price')
+          stock_override=runner._load_override('iter_stock','stock')
+
+          created=[]
+          for raw in samson.iter_skus():
+              item0=normalize_sku(raw)
+              item=normalize_sku(raw,price_override=price_override.get(item0.source_code),stock_override=stock_override.get(item0.source_code))
+              if item.kit_sku in duplicates or item.kit_sku in kit_index:
+                  continue
+              category_id=runner._ensure_category_chain(item,source_categories)
+              chars=runner._ensure_characteristics(item)
+              media=runner._prepare_media(item)
+              product=kit.create_product(category_id)
+              product_id=str(product.get('id','')).strip()
+              if not product_id:
+                  raise RuntimeError(f'KIT did not return product id for {item.kit_sku}')
+              payload=runner._new_payload(item,product_id,warehouse_id,chars,media)
+              variant=kit.create_variant(payload)
+              variant_id=str(variant.get('id','')).strip()
+              if not variant_id:
+                  raise RuntimeError(f'KIT did not return variant id for {item.kit_sku}')
+              runner._attach_documents(item,variant_id)
+
+              detail=kit._get('/v1/variants/'+variant_id)
+              if str(detail.get('sku','')).strip()!=item.kit_sku:
+                  raise RuntimeError(f'SKU mismatch after create: {item.kit_sku}')
+              desired_stock=calculate_stock(item.stock_parts,active=item.active,withdrawn=item.withdrawn)
+              actual_spb=None
+              for s in detail.get('stocks') or []:
+                  if str(s.get('warehouse_id',''))==warehouse_id:
+                      actual_spb=int(s.get('quantity',0)); break
+              if desired_stock is not None and actual_spb!=desired_stock:
+                  raise RuntimeError(f'Stock mismatch for {item.kit_sku}: desired={desired_stock} actual={actual_spb}')
+              prices=calculate_prices(item.purchase_price)
+              if prices:
+                  pricing=detail.get('pricing') or {}
+                  def rub(v):
+                      return Decimal(str(v)).quantize(Decimal('1'),rounding=ROUND_CEILING)
+                  if rub(pricing.get('price'))!=rub(prices.old) or rub(pricing.get('manual_discount_price'))!=rub(prices.sale):
+                      raise RuntimeError(f'Price mismatch for {item.kit_sku}')
+              attachments=kit.list_variant_attachments(variant_id)
+              if item.document_urls and len(attachments)==0:
+                  raise RuntimeError(f'Certificates missing for {item.kit_sku}')
+              created.append({
+                  'sku':item.kit_sku,
+                  'variant_id':variant_id,
+                  'name':detail.get('name'),
+                  'spb_stock':actual_spb,
+                  'images':len(detail.get('media') or []),
+                  'characteristics':len(detail.get('characteristics') or []),
+                  'source_documents':len(item.document_urls),
+                  'attachments':len(attachments),
+                  'pricing':detail.get('pricing'),
+              })
+              if len(created)>=LIMIT:
+                  break
+
+          if len(created)!=LIMIT:
+              raise RuntimeError(f'Expected {LIMIT} new products, created {len(created)}')
+          if runner.report['warning_count']:
+              print('WARNINGS='+json.dumps(runner.report['warnings'],ensure_ascii=False))
+          print('SMOKE_CREATED='+json.dumps(created,ensure_ascii=False))
+          print('SMOKE_OK=3')
+          PY
