@@ -4,6 +4,26 @@ import requests
 
 RETRY_STATUSES = {429, 500, 502, 503, 504}
 
+
+def _capture_file_positions(files):
+    positions = []
+    if not isinstance(files, dict):
+        return positions
+    for part in files.values():
+        stream = part[1] if isinstance(part, (tuple, list)) and len(part) >= 2 else part
+        if not hasattr(stream, 'tell') or not hasattr(stream, 'seek'):
+            continue
+        try:
+            positions.append((stream, stream.tell()))
+        except Exception:
+            continue
+    return positions
+
+
+def _rewind_files(positions):
+    for stream, position in positions:
+        stream.seek(position)
+
 def _safe_error_detail(response, headers=None, params=None):
     try:
         text = (response.text or '').strip().replace('\r', ' ').replace('\n', ' ')
@@ -30,7 +50,9 @@ class SafeSession:
 
     def request_json(self, method, url, *, params=None, headers=None, json_body=None, files=None):
         last_exc = None
+        file_positions = _capture_file_positions(files)
         for attempt in range(self.max_attempts):
+            _rewind_files(file_positions)
             try:
                 response = self.session.request(method=method,url=url,params=params,headers=headers,json=json_body,files=files,timeout=self.timeout)
                 if response.status_code in RETRY_STATUSES and attempt + 1 < self.max_attempts:
