@@ -1,0 +1,67 @@
+name: Direct migrate first Riva SKU once
+
+on:
+  push:
+    branches:
+      - feat/riva-kit-sync
+    paths:
+      - '.github/workflows/direct-migrate-first-riva-sku-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Patch and verify first Riva SKU
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.parse, urllib.request
+          token=os.environ['YANDEX_KIT_TOKEN'].strip()
+          headers={'Authorization':f'Bearer {token}','Accept':'application/json'}
+
+          q=urllib.parse.urlencode({'name':'Л.МП-1','page':1,'per_page':100})
+          req=urllib.request.Request('https://api.kit.yandex.net/v1/variants?'+q,headers=headers)
+          with urllib.request.urlopen(req,timeout=60) as r:
+              payload=json.load(r)
+          rows=payload.get('variants',[]) if isinstance(payload,dict) else []
+          matches=[]
+          for row in rows:
+              chars=row.get('characteristics') or []
+              vals=[]
+              for ch in chars:
+                  vals.extend(ch.get('values') or [])
+                  if ch.get('value'):
+                      vals.append(ch.get('value'))
+              if '1290597' in [str(v) for v in vals]:
+                  matches.append(row)
+          if len(matches)!=1:
+              raise SystemExit(f'expected 1 variant for Riva offer 1290597, found {len(matches)}')
+          row=matches[0]
+          vid=row['id']
+          body=json.dumps({'sku':'riva-1290597'}).encode()
+          h=dict(headers); h['Content-Type']='application/merge-patch+json'
+          req=urllib.request.Request(
+              f'https://api.kit.yandex.net/v1/variants/{vid}',
+              data=body,method='PATCH',headers=h
+          )
+          with urllib.request.urlopen(req,timeout=60) as r:
+              updated=json.load(r)
+          print(json.dumps({
+              'id':updated.get('id'),
+              'sku':updated.get('sku'),
+              'name':updated.get('name'),
+              'pricing':updated.get('pricing'),
+              'stocks':updated.get('stocks'),
+          },ensure_ascii=False))
+          if updated.get('sku')!='riva-1290597':
+              raise SystemExit('SKU patch verification failed')
+          PY
