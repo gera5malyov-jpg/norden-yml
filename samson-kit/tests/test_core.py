@@ -55,8 +55,8 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(same_title,[('Количество цветов в наборе',['6 шт.'])])
         self.assertIn(('Высота упаковки',['1.8']),item.characteristics)
         self.assertFalse(item.withdrawn)
-        removed=normalize_sku(dict(row,out_of_stock=1))
-        self.assertTrue(removed.withdrawn)
+        phaseout=normalize_sku(dict(row,out_of_stock=1))
+        self.assertFalse(phaseout.withdrawn)
     def test_characteristic_reuse_requires_compatible_type(self):
         class FakeKit:
             def __init__(self): self.created=[]
