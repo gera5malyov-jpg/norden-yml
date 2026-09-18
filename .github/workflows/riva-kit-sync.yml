@@ -1,0 +1,88 @@
+name: Riva to Yandex KIT
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run: do not write to KIT'
+        required: true
+        default: true
+        type: boolean
+      max_items:
+        description: 'Feed offer limit; 0 means full feed'
+        required: true
+        default: '1000'
+        type: string
+      max_new:
+        description: 'Maximum new Riva products this run; 0 means unlimited'
+        required: true
+        default: '20'
+        type: string
+      include_zero_stock:
+        description: 'Also create brand-new offers with count=0'
+        required: true
+        default: false
+        type: boolean
+      stock_mode:
+        description: 'Stock mapping'
+        required: true
+        default: binary100
+        type: choice
+        options:
+          - binary100
+          - actual
+  schedule:
+    - cron: '0 7 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: riva-kit-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      RIVA_FEED_URL: ${{ secrets.RIVA_FEED_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Riva tests
+        run: PYTHONPATH=liga-kit:riva-kit python -m unittest discover -s riva-kit/tests -v
+      - name: Run Riva sync
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--report riva-kit/state/last_sync.json)
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+              args+=(--dry-run)
+            fi
+            if [[ "${{ inputs.max_items }}" != "0" ]]; then
+              args+=(--max-items "${{ inputs.max_items }}")
+            fi
+            if [[ "${{ inputs.max_new }}" != "0" ]]; then
+              args+=(--max-new "${{ inputs.max_new }}")
+            fi
+            if [[ "${{ inputs.include_zero_stock }}" == "true" ]]; then
+              args+=(--include-zero-stock)
+            fi
+            args+=(--stock-mode "${{ inputs.stock_mode }}")
+          else
+            args+=(--stock-mode binary100)
+          fi
+
+          PYTHONPATH=liga-kit:riva-kit python -m riva_kit.cli "${args[@]}"
+      - name: Print compact report
+        if: always()
+        run: cat riva-kit/state/last_sync.json || true
