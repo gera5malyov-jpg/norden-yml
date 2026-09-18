@@ -136,7 +136,6 @@ def build_price_update(offer, variant):
     if (
         _kit_money(pricing.get('price')) == _kit_money(prices['old'])
         and _kit_money(pricing.get('manual_discount_price')) == _kit_money(prices['sale'])
-        and _kit_money(pricing.get('minimum_price')) == _kit_money(prices['minimum'])
     ):
         return None
     variant_id = str(variant.get('id', '')).strip()
@@ -146,7 +145,6 @@ def build_price_update(offer, variant):
         'variant_id': variant_id,
         'price': f"{prices['old']:.2f}",
         'manual_discount_price': f"{prices['sale']:.2f}",
-        'minimum_price': f"{prices['minimum']:.2f}",
     }
 
 
@@ -258,7 +256,8 @@ class SyncRunner:
             'errors': [],
             'skip_items': self.skip_items,
             'stock_rule': 'count>0 => count; count=0 => 100 on each managed warehouse',
-            'price_rule': 'old=cost*1.80; sale=cost*1.26; minimum=cost*1.20',
+            'price_rule': 'old=cost*1.80; sale=cost*1.26; desired minimum=cost*1.20',
+            'minimum_price_api_supported': False,
         }
 
     def _warn(self, message):
@@ -401,7 +400,6 @@ class SyncRunner:
             'pricing': {
                 'price': f"{prices['old']:.2f}",
                 'manual_discount_price': f"{prices['sale']:.2f}",
-                'minimum_price': f"{prices['minimum']:.2f}",
             },
             'stocks': [
                 {
