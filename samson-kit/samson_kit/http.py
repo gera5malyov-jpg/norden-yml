@@ -22,6 +22,21 @@ def _safe_error_detail(response, headers=None, params=None):
             text = text.replace(secret, '***')
     return text[:1500]
 
+def _rewind_files(files):
+    if not files:
+        return
+    values = files.values() if isinstance(files, dict) else files
+    for spec in values:
+        stream = spec
+        if isinstance(spec, (tuple, list)):
+            stream = next((part for part in spec if hasattr(part, 'read') and hasattr(part, 'seek')), None)
+        if stream is None or not hasattr(stream, 'seek'):
+            continue
+        try:
+            stream.seek(0)
+        except (OSError, ValueError) as exc:
+            raise RuntimeError('Cannot rewind upload stream for HTTP retry') from exc
+
 class SafeSession:
     def __init__(self, session=None, max_attempts=4, timeout=(10,60)):
         self.session = session or requests.Session()
@@ -32,6 +47,7 @@ class SafeSession:
         last_exc = None
         for attempt in range(self.max_attempts):
             try:
+                _rewind_files(files)
                 response = self.session.request(method=method,url=url,params=params,headers=headers,json=json_body,files=files,timeout=self.timeout)
                 if response.status_code in RETRY_STATUSES and attempt + 1 < self.max_attempts:
                     retry_after = response.headers.get('Retry-After')
