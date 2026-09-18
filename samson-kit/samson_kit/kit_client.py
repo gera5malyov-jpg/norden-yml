@@ -42,10 +42,17 @@ def resolve_exact_warehouse(rows, title):
 
 def index_samson_variants(rows):
     buckets={}
+    seen_variant_ids=set()
     for row in rows:
         if not isinstance(row,dict): continue
         sku=str(row.get('sku','')).strip()
         if not sku.startswith('SAMS-'): continue
+        variant_id=str(row.get('id','')).strip()
+        if variant_id:
+            identity=(sku,variant_id)
+            if identity in seen_variant_ids:
+                continue
+            seen_variant_ids.add(identity)
         buckets.setdefault(sku,[]).append(row)
     return ({sku:values[0] for sku,values in buckets.items() if len(values)==1},{sku:values for sku,values in buckets.items() if len(values)>1})
 
