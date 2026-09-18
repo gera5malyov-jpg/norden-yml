@@ -4,7 +4,7 @@ import unittest
 
 from riva_kit.feed import iter_offers, parse_categories
 from riva_kit.mapper import characteristics_from_offer
-from riva_kit.rules import desired_stock, to_kit_sku
+from riva_kit.rules import calculate_prices, desired_stock, to_kit_sku
 from riva_kit.sync import index_riva_variants, resolve_variant
 
 
@@ -85,10 +85,15 @@ class RivaFeedTests(unittest.TestCase):
         self.assertNotIn('Количество на складе «Склад СПБ»', chars)
         self.assertNotIn('РРЦ: Цена', chars)
 
-    def test_stock_modes(self):
-        self.assertEqual(desired_stock(0, 'binary100'), 0)
-        self.assertEqual(desired_stock(7, 'binary100'), 100)
-        self.assertEqual(desired_stock(7, 'actual'), 7)
+    def test_riva_stock_rule(self):
+        self.assertEqual(desired_stock(0), 100)
+        self.assertEqual(desired_stock(7), 7)
+
+    def test_riva_price_rule(self):
+        prices = calculate_prices('1000')
+        self.assertEqual(str(prices['old']), '1800.00')
+        self.assertEqual(str(prices['sale']), '1260.00')
+        self.assertEqual(str(prices['minimum']), '1200.00')
 
     def test_exact_article_is_sku(self):
         self.assertEqual(to_kit_sku('Л.МП-1'), 'Л.МП-1')
