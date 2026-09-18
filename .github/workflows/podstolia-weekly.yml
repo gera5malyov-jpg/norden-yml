@@ -1,6 +1,11 @@
-name: Update PODSTOLIA feed
+name: Update PODSTOLIA exact feed
 
 on:
+  push:
+    paths:
+      - "podstolia/update_feed.py"
+      - "podstolia/prices.json"
+      - ".github/workflows/podstolia-weekly.yml"
   schedule:
     # Monday 10:00 Moscow time (UTC+3)
     - cron: "0 7 * * 1"
@@ -10,34 +15,37 @@ permissions:
   contents: write
 
 concurrency:
-  group: podstolia-weekly
+  group: podstolia-exact-feed
   cancel-in-progress: false
 
 jobs:
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Update supplier feed
+      - name: Build exact supplier feed plus purchase price
         run: python podstolia/update_feed.py
 
-      - name: Commit only when feed changed
+      - name: Commit generated feed if changed
         shell: bash
         run: |
           if git diff --quiet -- podstolia/podstolia.xml podstolia/podstolia.yml; then
-            echo "PODSTOLIA feed has no changes"
+            echo "No feed changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add podstolia/podstolia.xml podstolia/podstolia.yml
-          git commit -m "Update PODSTOLIA feed"
+          git commit -m "Update exact PODSTOLIA feed"
           git push
