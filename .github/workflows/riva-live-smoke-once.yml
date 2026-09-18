@@ -32,3 +32,5 @@ jobs:
       - name: Show report
         if: always()
         run: cat riva-kit/state/smoke.json || true
+
+# rerun-after-sku-rule
