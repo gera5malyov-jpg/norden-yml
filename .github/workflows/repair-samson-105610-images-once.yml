@@ -9,10 +9,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: repair-samson-105610-images-once
+  cancel-in-progress: true
+
 jobs:
   repair:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           PYTHONPATH=samson-kit python - <<'PY'
-          import os, json
+          import os
           from samson_kit.http import SafeSession
           from samson_kit.samson_client import SamsonClient
           from samson_kit.kit_client import KitClient
@@ -37,12 +41,20 @@ jobs:
           http=SafeSession()
           samson=SamsonClient(os.environ['SAMSON_API_KEY'],http)
           kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
+
+          payload=http.request_json(
+              'GET',
+              samson.base_url+'/sku/',
+              params={'api_key':samson.api_key,'response_format':'json','sku':'105610'},
+              headers={'Accept':'application/json'}
+          )
+          env=payload[0] if isinstance(payload,list) and len(payload)==1 else payload
+          rows=env.get('data') if isinstance(env,dict) else []
           source=None
-          for row in samson.iter_skus():
-              try:
-                  item=normalize_sku(row)
-              except Exception:
+          for row in rows or []:
+              if not isinstance(row,dict):
                   continue
+              item=normalize_sku(row)
               if item.source_code=='105610':
                   source=item
                   break
