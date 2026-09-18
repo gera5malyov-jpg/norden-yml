@@ -49,5 +49,39 @@ class LigaKitClientTests(unittest.TestCase):
         self.assertEqual(fake.files['file'][2], 'image/jpeg')
 
 
+    def test_client_rate_limits_sequential_api_calls(self):
+        class FakeClock:
+            def __init__(self):
+                self.now = 100.0
+                self.sleeps = []
+            def monotonic(self):
+                return self.now
+            def sleep(self, seconds):
+                self.sleeps.append(seconds)
+                self.now += seconds
+
+        class FakeHttp:
+            def __init__(self):
+                self.calls = 0
+            def request_json(self, method, url, **kwargs):
+                self.calls += 1
+                return {'items': []}
+
+        clock = FakeClock()
+        fake = FakeHttp()
+        kit = KitClient(
+            'token',
+            fake,
+            min_request_interval=0.4,
+            monotonic_fn=clock.monotonic,
+            sleep_fn=clock.sleep,
+        )
+        kit._get('/v1/warehouses')
+        kit._get('/v1/categories')
+        self.assertEqual(fake.calls, 2)
+        self.assertEqual(len(clock.sleeps), 1)
+        self.assertAlmostEqual(clock.sleeps[0], 0.4, places=6)
+
+
 if __name__ == '__main__':
     unittest.main()
