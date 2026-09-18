@@ -1,0 +1,72 @@
+name: Direct Samson stock probe 106225 106203 once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/direct-samson-stock-probe-106225-106203-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Direct Samson probe
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python - <<'PY'
+          import os, json
+          from samson_kit.http import SafeSession
+          from samson_kit.mapper import normalize_sku, extract_stock_parts, extract_withdrawn, extract_active
+          from samson_kit.rules import calculate_stock
+
+          http=SafeSession()
+          base='https://api.samsonopt.ru/v1'
+          key=os.environ['SAMSON_API_KEY']
+
+          def unwrap(payload):
+              env=payload[0] if isinstance(payload,list) and len(payload)==1 else payload
+              data=env.get('data') if isinstance(env,dict) else None
+              if isinstance(data,list):
+                  return data[0] if data else None
+              if isinstance(data,dict):
+                  return data
+              return env if isinstance(env,dict) else None
+
+          for code in ('106225','106203'):
+              row=unwrap(http.request_json(
+                  'GET',f'{base}/sku/{code}',
+                  params={'api_key':key,'response_format':'json'},
+                  headers={'Accept':'application/json','User-Agent':'MegapolisSamsonKit/1.0'}))
+              srow=unwrap(http.request_json(
+                  'GET',f'{base}/sku/{code}/stock',
+                  params={'api_key':key,'response_format':'json'},
+                  headers={'Accept':'application/json','User-Agent':'MegapolisSamsonKit/1.0'}))
+              wd=extract_withdrawn(row or {})
+              ac=extract_active(row or {},wd)
+              direct=extract_stock_parts(row or {})
+              over=extract_stock_parts(srow or {})
+              chosen=over if over is not None else direct
+              print('DIRECT='+json.dumps({
+                  'code':code,
+                  'row_stock_list':(row or {}).get('stock_list'),
+                  'stock_endpoint':srow,
+                  'direct_parts':direct,
+                  'override_parts':over,
+                  'out_of_stock':(row or {}).get('out_of_stock'),
+                  'withdrawn':wd,
+                  'active':ac,
+                  'desired':calculate_stock(chosen,active=ac,withdrawn=wd)
+              },ensure_ascii=False))
+          PY
