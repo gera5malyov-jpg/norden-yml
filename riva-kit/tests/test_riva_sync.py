@@ -25,6 +25,7 @@ SAMPLE = '''<?xml version="1.0" encoding="UTF-8"?>
         <name>Стол Л.МП-1 Белый</name>
         <barcode>2000000007748</barcode>
         <param name="Артикул">Л.МП-1</param>
+        <param name="Код для сайта">SITE-1290597</param>
         <param name="Цвет изделия">Белый</param>
         <param name="Количество на складе «Склад СПБ»">0</param>
         <param name="РРЦ: Цена">11657</param>
@@ -38,6 +39,7 @@ SAMPLE = '''<?xml version="1.0" encoding="UTF-8"?>
         <name>Стол Л.МП-1 Венге</name>
         <barcode>2000000009674</barcode>
         <param name="Артикул">Л.МП-1</param>
+        <param name="Код для сайта">SITE-1290613</param>
         <param name="Цвет изделия">Венге</param>
         <count>7</count>
       </offer>
@@ -63,24 +65,25 @@ class RivaFeedTests(unittest.TestCase):
         self.assertEqual(categories['2'].parent_id, '1')
         offers = list(iter_offers(self.tmp.name))
         self.assertEqual(len(offers), 2)
-        self.assertEqual(offers[0].kit_sku, 'riva-1290597')
-        self.assertEqual(offers[1].kit_sku, 'riva-1290613')
+        self.assertEqual(offers[0].kit_sku, 'SITE-1290597')
+        self.assertEqual(offers[1].kit_sku, 'SITE-1290613')
         self.assertEqual(offers[0].article, 'Л.МП-1')
         self.assertFalse(offers[0].in_stock)
         self.assertTrue(offers[1].in_stock)
         self.assertEqual(offers[1].count, 7)
 
-    def test_duplicate_article_uses_unique_offer_id_sku(self):
+    def test_duplicate_article_uses_site_code_sku(self):
         offers = list(iter_offers(self.tmp.name))
         self.assertEqual(offers[0].article, offers[1].article)
         self.assertNotEqual(offers[0].kit_sku, offers[1].kit_sku)
-        self.assertEqual(offers[0].kit_sku, 'riva-1290597')
-        self.assertEqual(offers[1].kit_sku, 'riva-1290613')
+        self.assertEqual(offers[0].kit_sku, 'SITE-1290597')
+        self.assertEqual(offers[1].kit_sku, 'SITE-1290613')
 
     def test_mapper_keeps_useful_and_skips_internal(self):
         offer = list(iter_offers(self.tmp.name))[0]
         chars = dict(characteristics_from_offer(offer))
         self.assertIn('Артикул', chars)
+        self.assertIn('Код для сайта', chars)
         self.assertIn('Цвет изделия', chars)
         self.assertIn('Штрихкод', chars)
         self.assertIn('ID предложения Riva', chars)
@@ -105,17 +108,18 @@ class RivaFeedTests(unittest.TestCase):
         self.assertEqual(update['manual_discount_price'], '10129.14')
         self.assertNotIn('minimum_price', update)
 
-    def test_offer_id_is_prefixed_sku(self):
-        self.assertEqual(to_kit_sku('1290597'), 'riva-1290597')
+    def test_site_code_is_sku_without_prefix(self):
+        self.assertEqual(to_kit_sku('SITE-1290597'), 'SITE-1290597')
+        self.assertEqual(to_kit_sku('  000123  '), '000123')
         with self.assertRaises(ValueError):
             to_kit_sku('')
 
-    def test_duplicate_sku_variants_resolve_by_source_id(self):
+    def test_existing_old_sku_resolves_by_source_id_for_migration(self):
         titles = {'source-char': 'ID предложения Riva'}
         rows = [
             {
                 'id': 'v1',
-                'sku': 'Л.МП-1',
+                'sku': 'riva-1290597',
                 'name': 'Стол Л.МП-1 Белый',
                 'brand': 'RIVA',
                 'characteristics': [
@@ -128,7 +132,7 @@ class RivaFeedTests(unittest.TestCase):
             },
             {
                 'id': 'v2',
-                'sku': 'Л.МП-1',
+                'sku': 'riva-1290613',
                 'name': 'Стол Л.МП-1 Венге',
                 'brand': 'RIVA',
                 'characteristics': [
@@ -142,10 +146,10 @@ class RivaFeedTests(unittest.TestCase):
         ]
         by_source, by_sku, owned = index_riva_variants(rows, titles)
         self.assertEqual(owned, 2)
-        self.assertEqual(len(by_sku['Л.МП-1']), 2)
         offer = list(iter_offers(self.tmp.name))[1]
         variant = resolve_variant(offer, by_source, by_sku, titles)
         self.assertEqual(variant['id'], 'v2')
+        self.assertEqual(offer.kit_sku, 'SITE-1290613')
 
 
 if __name__ == '__main__':

@@ -30,6 +30,18 @@ def _params(offer):
     return grouped
 
 
+def _param_first(params, wanted_title):
+    wanted = str(wanted_title or '').strip().casefold()
+    for title, values in params.items():
+        if str(title or '').strip().casefold() != wanted:
+            continue
+        for value in values:
+            text = str(value or '').strip()
+            if text:
+                return text
+    return ''
+
+
 def _images(offer):
     out = []
     seen = set()
@@ -71,20 +83,20 @@ def offer_from_element(node):
         raise ValueError('Riva offer id is missing')
 
     params = _params(node)
-    article_values = []
-    for title, values in params.items():
-        if title.strip().casefold() == 'артикул':
-            article_values.extend(values)
-    article = next((str(v).strip() for v in article_values if str(v).strip()), '')
+    article = _param_first(params, 'Артикул')
     if not article:
         raise ValueError(f'Riva article is missing for offer {source_id}')
+
+    site_code = _param_first(params, 'Код для сайта')
+    if not site_code:
+        raise ValueError(f'Riva Код для сайта is missing for offer {source_id}')
 
     count = parse_count(_text(node, 'count', '0'))
     return RivaOffer(
         source_id=source_id,
         group_id=str(node.attrib.get('group_id') or '').strip(),
         article=article,
-        kit_sku=to_kit_sku(source_id),
+        kit_sku=to_kit_sku(site_code),
         count=count,
         in_stock=count > 0,
         category_id=_text(node, 'categoryId') or None,

@@ -6,11 +6,11 @@ OLD_MULTIPLIER = Decimal('1.80')
 MINIMUM_MULTIPLIER = Decimal('1.20')
 
 
-def to_kit_sku(source_id):
-    value = str(source_id or '').strip()
+def to_kit_sku(site_code):
+    value = str(site_code or '').strip()
     if not value:
-        raise ValueError('Riva offer id is missing')
-    return 'riva-' + value
+        raise ValueError('Riva Код для сайта is missing')
+    return value
 
 
 def normalize_price(value):
