@@ -1,0 +1,13 @@
+{
+  "title": "Samson quantity guard",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "title": "Режим",
+      "enum": ["product", "cart"],
+      "default": "product"
+    }
+  },
+  "required": ["mode"]
+}
