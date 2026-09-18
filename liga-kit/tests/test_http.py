@@ -40,5 +40,39 @@ class LigaHttpTests(unittest.TestCase):
         self.assertNotIn('SECRET_TOKEN', str(ctx.exception))
 
 
+class RetryUploadSession:
+    def __init__(self):
+        self.calls = 0
+        self.payloads = []
+
+    def request(self, **kwargs):
+        self.calls += 1
+        file_tuple = kwargs['files']['file']
+        fh = file_tuple[1]
+        self.payloads.append(fh.read())
+        if self.calls == 1:
+            response = FakeResponse(429, 'retry')
+            response.headers = {'Retry-After':'0'}
+            return response
+        response = FakeResponse(200, '')
+        response.json = lambda: {'id':'file-ok'}
+        return response
+
+
+class UploadRetryTests(unittest.TestCase):
+    def test_file_body_is_rewound_before_retry(self):
+        session = RetryUploadSession()
+        http = SafeSession(session=session, max_attempts=2)
+        import io
+        body = io.BytesIO(b'non-empty-image')
+        result = http.request_json(
+            'POST',
+            'https://example.test/v1/files',
+            files={'file':('image.jpg', body, 'image/jpeg')},
+        )
+        self.assertEqual(result, {'id':'file-ok'})
+        self.assertEqual(session.payloads, [b'non-empty-image', b'non-empty-image'])
+
+
 if __name__ == '__main__':
     unittest.main()
