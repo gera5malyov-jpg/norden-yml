@@ -5,7 +5,7 @@ import unittest
 from riva_kit.feed import iter_offers, parse_categories
 from riva_kit.mapper import characteristics_from_offer
 from riva_kit.rules import calculate_prices, desired_stock, to_kit_sku
-from riva_kit.sync import index_riva_variants, resolve_variant
+from riva_kit.sync import build_price_update, index_riva_variants, resolve_variant
 
 
 SAMPLE = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -94,6 +94,14 @@ class RivaFeedTests(unittest.TestCase):
         self.assertEqual(str(prices['old']), '1800.00')
         self.assertEqual(str(prices['sale']), '1260.00')
         self.assertEqual(str(prices['minimum']), '1200.00')
+
+    def test_api_price_payload_uses_supported_fields_only(self):
+        offer = list(iter_offers(self.tmp.name))[0]
+        variant = {'id': 'v1', 'pricing': {}}
+        update = build_price_update(offer, variant)
+        self.assertEqual(update['price'], '14470.20')
+        self.assertEqual(update['manual_discount_price'], '10129.14')
+        self.assertNotIn('minimum_price', update)
 
     def test_exact_article_is_sku(self):
         self.assertEqual(to_kit_sku('Л.МП-1'), 'Л.МП-1')
