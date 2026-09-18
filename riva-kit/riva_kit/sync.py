@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 from .feed import iter_offers
 from .mapper import characteristics_from_offer
-from .rules import desired_stock
+from .rules import calculate_prices, desired_stock
 
 
 def _lower(value):
@@ -129,30 +129,32 @@ def resolve_variant(offer, by_source, by_sku, characteristic_titles=None):
 
 
 def build_price_update(offer, variant):
-    if offer.price is None:
+    prices = calculate_prices(offer.price)
+    if prices is None:
         return None
     pricing = variant.get('pricing') or {}
     if (
-        _kit_money(pricing.get('price')) == _kit_money(offer.price)
-        and _kit_money(pricing.get('manual_discount_price')) == _kit_money(offer.price)
+        _kit_money(pricing.get('price')) == _kit_money(prices['old'])
+        and _kit_money(pricing.get('manual_discount_price')) == _kit_money(prices['sale'])
+        and _kit_money(pricing.get('minimum_price')) == _kit_money(prices['minimum'])
     ):
         return None
     variant_id = str(variant.get('id', '')).strip()
     if not variant_id:
         return None
-    desired = f'{offer.price:.2f}'
     return {
         'variant_id': variant_id,
-        'price': desired,
-        'manual_discount_price': desired,
+        'price': f"{prices['old']:.2f}",
+        'manual_discount_price': f"{prices['sale']:.2f}",
+        'minimum_price': f"{prices['minimum']:.2f}",
     }
 
 
-def build_stock_updates(offer, variant, warehouse_ids, stock_mode):
+def build_stock_updates(offer, variant, warehouse_ids):
     variant_id = str(variant.get('id', '')).strip()
     if not variant_id:
         return []
-    quantity = desired_stock(offer.count, stock_mode)
+    quantity = desired_stock(offer.count)
     out = []
     for title in ('СПБ', 'МСК'):
         warehouse_id = str(warehouse_ids[title])
@@ -214,20 +216,18 @@ class SyncRunner:
         http,
         *,
         dry_run=False,
+        skip_items=0,
         max_items=None,
         max_new=None,
-        include_zero_stock=False,
-        stock_mode='binary100',
     ):
         self.feed_path = feed_path
         self.categories = categories
         self.kit = kit
         self.http = http
         self.dry_run = bool(dry_run)
+        self.skip_items = max(0, int(skip_items or 0))
         self.max_items = int(max_items) if max_items not in (None, '', 0, '0') else None
         self.max_new = int(max_new) if max_new not in (None, '', 0, '0') else None
-        self.include_zero_stock = bool(include_zero_stock)
-        self.stock_mode = str(stock_mode or 'binary100')
         self.kit_categories = []
         self.kit_characteristics = []
         self.characteristic_titles = {}
@@ -241,7 +241,6 @@ class SyncRunner:
             'existing_variants_seen': 0,
             'new_products_planned': 0,
             'new_products_created': 0,
-            'zero_stock_new_skipped': 0,
             'new_limit_skipped': 0,
             'ambiguous_existing_skipped': 0,
             'price_changes': 0,
@@ -257,8 +256,9 @@ class SyncRunner:
             'warnings': [],
             'error_count': 0,
             'errors': [],
-            'stock_mode': self.stock_mode,
-            'include_zero_stock': self.include_zero_stock,
+            'skip_items': self.skip_items,
+            'stock_rule': 'count>0 => count; count=0 => 100 on each managed warehouse',
+            'price_rule': 'old=cost*1.80; sale=cost*1.26; minimum=cost*1.20',
         }
 
     def _warn(self, message):
@@ -387,8 +387,10 @@ class SyncRunner:
     def _new_payload(self, offer, product_id, warehouse_ids, characteristics, media):
         if offer.price is None:
             raise RuntimeError(f'invalid price for {offer.kit_sku}')
-        desired_price = f'{offer.price:.2f}'
-        quantity = desired_stock(offer.count, self.stock_mode)
+        prices = calculate_prices(offer.price)
+        if prices is None:
+            raise RuntimeError(f'invalid price for {offer.kit_sku}')
+        quantity = desired_stock(offer.count)
         payload = {
             'sku': offer.kit_sku,
             'name': offer.name,
@@ -397,8 +399,9 @@ class SyncRunner:
             'product_id': str(product_id),
             'brand': 'RIVA',
             'pricing': {
-                'price': desired_price,
-                'manual_discount_price': desired_price,
+                'price': f"{prices['old']:.2f}",
+                'manual_discount_price': f"{prices['sale']:.2f}",
+                'minimum_price': f"{prices['minimum']:.2f}",
             },
             'stocks': [
                 {
@@ -457,10 +460,15 @@ class SyncRunner:
         stopped_early = False
         created_or_planned = 0
 
+        feed_index = 0
         for offer in iter_offers(self.feed_path):
+            if feed_index < self.skip_items:
+                feed_index += 1
+                continue
             if self.max_items is not None and self.report['offers_seen'] >= self.max_items:
                 stopped_early = True
                 break
+            feed_index += 1
 
             seen_source_ids.add(offer.source_id)
             self.report['offers_seen'] += 1
@@ -486,10 +494,8 @@ class SyncRunner:
                     self.report['price_changes'] += 1
 
                 stock_updates = build_stock_updates(
-                    offer, variant, warehouse_ids, self.stock_mode
+                    offer, variant, warehouse_ids
                 )
-                if stock_updates and not offer.in_stock:
-                    self.report['zeroed_by_feed_count'] += 1
                 for update in stock_updates:
                     if update['warehouse_id'] == warehouse_ids['СПБ']:
                         self.report['spb_stock_changes'] += 1
@@ -519,10 +525,6 @@ class SyncRunner:
                     f'be safely matched; skipped: {offer.kit_sku} / '
                     f'offer {offer.source_id}'
                 )
-                continue
-
-            if not offer.in_stock and not self.include_zero_stock:
-                self.report['zero_stock_new_skipped'] += 1
                 continue
 
             if self.max_new is not None and created_or_planned >= self.max_new:
@@ -569,7 +571,7 @@ class SyncRunner:
         self._flush_prices(price_batch)
         self._flush_stocks(stock_batch)
 
-        complete = not stopped_early
+        complete = (not stopped_early and self.skip_items == 0)
         self.report['catalog_complete'] = complete
         absent = absent_zero_updates(
             by_source, seen_source_ids, warehouse_ids, complete=complete
