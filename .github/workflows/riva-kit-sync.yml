@@ -8,8 +8,13 @@ on:
         required: true
         default: true
         type: boolean
+      skip_items:
+        description: 'Skip this many Riva offer rows before processing'
+        required: true
+        default: '0'
+        type: string
       max_items:
-        description: 'Feed offer limit; 0 means full feed'
+        description: 'Process this many offer rows; 0 means no limit'
         required: true
         default: '1000'
         type: string
@@ -18,19 +23,6 @@ on:
         required: true
         default: '20'
         type: string
-      include_zero_stock:
-        description: 'Also create brand-new offers with count=0'
-        required: true
-        default: false
-        type: boolean
-      stock_mode:
-        description: 'Stock mapping'
-        required: true
-        default: binary100
-        type: choice
-        options:
-          - binary100
-          - actual
   schedule:
     - cron: '0 7 * * 1'
 
@@ -68,18 +60,15 @@ jobs:
             if [[ "${{ inputs.dry_run }}" == "true" ]]; then
               args+=(--dry-run)
             fi
+            if [[ "${{ inputs.skip_items }}" != "0" ]]; then
+              args+=(--skip-items "${{ inputs.skip_items }}")
+            fi
             if [[ "${{ inputs.max_items }}" != "0" ]]; then
               args+=(--max-items "${{ inputs.max_items }}")
             fi
             if [[ "${{ inputs.max_new }}" != "0" ]]; then
               args+=(--max-new "${{ inputs.max_new }}")
             fi
-            if [[ "${{ inputs.include_zero_stock }}" == "true" ]]; then
-              args+=(--include-zero-stock)
-            fi
-            args+=(--stock-mode "${{ inputs.stock_mode }}")
-          else
-            args+=(--stock-mode binary100)
           fi
 
           PYTHONPATH=liga-kit:riva-kit python -m riva_kit.cli "${args[@]}"
