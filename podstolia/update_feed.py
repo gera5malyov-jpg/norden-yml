@@ -11,12 +11,12 @@ BASE_DIR = Path(__file__).resolve().parent
 PRICE_FILE = BASE_DIR / "prices.json"
 OUTPUT_FILE = BASE_DIR / "podstolia.yml"
 
-OFFER_RE = re.compile(r"<offer\\b[^>]*>[\\s\\S]*?</offer>", re.I)
-VENDOR_RE = re.compile(r"<vendorcode>\\s*#?([^<\\s]+)\\s*</vendorcode>", re.I)
+OFFER_RE = re.compile(r"<offer\b[^>]*>[\s\S]*?</offer>", re.I)
+VENDOR_RE = re.compile(r"<vendorcode>\s*#?([^<\s]+)\s*</vendorcode>", re.I)
 PRICE_RE = re.compile(r"(<price>[^<]*</price>)", re.I)
 PURCHASE_RE = re.compile(r"<purchase_price>[^<]*</purchase_price>", re.I)
 ENCODING_RE = re.compile(
-    r'(<\\?xml\\s+version=["\\']1\\.0["\\']\\s+encoding=["\\'])[^"\\']+(["\\'][^?]*\\?>)',
+    r'(<\?xml\s+version=["\']1\.0["\']\s+encoding=["\'])[^"\']+(["\'][^?]*\?>)',
     re.I,
 )
 
@@ -29,7 +29,7 @@ def fetch_source() -> str:
         raw = response.read()
 
     head = raw[:300].decode("ascii", errors="ignore")
-    match = re.search(r'encoding=["\\']([^"\\']+)["\\']', head, re.I)
+    match = re.search(r'encoding=["\']([^"\']+)["\']', head, re.I)
     encoding = match.group(1) if match else "windows-1251"
     return raw.decode(encoding, errors="strict")
 
