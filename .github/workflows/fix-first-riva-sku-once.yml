@@ -1,0 +1,57 @@
+name: Fix first Riva SKU once
+
+on:
+  push:
+    branches:
+      - feat/riva-kit-sync
+    paths:
+      - '.github/workflows/fix-first-riva-sku-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Update and verify SKU
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          token=os.environ['YANDEX_KIT_TOKEN'].strip()
+          variant_id='01a0b475-ecbd-755c-bf64-2f77cfb772f7'
+          url=f'https://api.kit.yandex.net/v1/variants/{variant_id}'
+          body=json.dumps({'sku':'riva-1290597'}).encode()
+          req=urllib.request.Request(
+              url,
+              data=body,
+              method='PATCH',
+              headers={
+                  'Authorization':f'Bearer {token}',
+                  'Accept':'application/json',
+                  'Content-Type':'application/merge-patch+json',
+              },
+          )
+          with urllib.request.urlopen(req, timeout=60) as r:
+              r.read()
+
+          req=urllib.request.Request(
+              url,
+              headers={'Authorization':f'Bearer {token}','Accept':'application/json'},
+          )
+          with urllib.request.urlopen(req, timeout=60) as r:
+              row=json.load(r)
+          print('SKU', row.get('sku'))
+          print('ID', row.get('id'))
+          print('PRICING', row.get('pricing'))
+          print('STOCKS', row.get('stocks'))
+          if str(row.get('sku','')).strip() != 'riva-1290597':
+              raise SystemExit('SKU verification failed')
+          PY
