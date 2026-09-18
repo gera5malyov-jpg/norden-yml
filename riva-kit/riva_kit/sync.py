@@ -305,8 +305,14 @@ class SyncRunner:
                 and str(row.get('type', '')).strip().upper() == desired_type
             ]
             if len(matches) > 1:
-                self._warn(f'ambiguous KIT characteristic skipped: {title}')
-                continue
+                # KIT may contain duplicate characteristics created by older
+                # imports. Reuse one deterministic matching characteristic
+                # instead of dropping the source field or creating yet another
+                # duplicate.
+                matches = sorted(
+                    matches,
+                    key=lambda row: str(row.get('id', '')).strip(),
+                )
             if matches:
                 characteristic_id = str(matches[0].get('id', '')).strip()
             elif self.dry_run:
