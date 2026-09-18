@@ -44,6 +44,8 @@ class SafeSession:
                     detail = _safe_error_detail(response, headers, params)
                     suffix = f' :: {detail}' if detail else ''
                     raise RuntimeError(f'HTTP {response.status_code} {method.upper()} {p.scheme}://{p.netloc}{p.path}{suffix}')
+                if response.status_code == 204 or not (response.text or '').strip():
+                    return {}
                 try:
                     return response.json()
                 except ValueError as exc:
