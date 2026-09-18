@@ -22,6 +22,11 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(extract_items({'categories':[{'id':'c1'}],'total_count':1}),[{'id':'c1'}])
     def test_duplicate_samson_index(self):
         idx,dup=index_samson_variants([{'id':'1','sku':'SAMS-1'},{'id':'2','sku':'SAMS-2'},{'id':'3','sku':'SAMS-2'},{'id':'4','sku':'ABC'}]); self.assertEqual(set(idx),{'SAMS-1'}); self.assertEqual(set(dup),{'SAMS-2'})
+    def test_duplicate_samson_index_ignores_repeat_of_same_variant_id(self):
+        repeated={'id':'same','sku':'SAMS-1','name':'x'}
+        idx,dup=index_samson_variants([repeated,dict(repeated)])
+        self.assertEqual(set(idx),{'SAMS-1'})
+        self.assertEqual(dup,{})
     def test_mapper(self):
         item=normalize_sku({'sku':'531863','name':'Товар','category_id':'3','price':'2500','stocks':[{'quantity':4},{'quantity':6}],'barcodes':['4601'],'characteristics':[{'name':'Цвет','value':'Белый'}]}); self.assertEqual(item.stock_parts,[4,6]); self.assertEqual(item.purchase_price,Decimal('2500')); self.assertIn(('Цвет',['Белый']),item.characteristics)
     def test_actual_samson_field_shapes(self):
