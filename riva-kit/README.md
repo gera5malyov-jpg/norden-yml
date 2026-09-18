@@ -12,7 +12,7 @@ Isolated synchronization for the Riva dealer YML feed.
 - The top-level Riva YML `<price>` is the purchase price.
 - KIT price before discount: purchase × 1.80.
 - KIT price with discount: purchase × 1.26.
-- KIT minimum price: purchase × 1.20. The exact writable KIT API field is verified on a Riva smoke item before full rollout.
+- Desired KIT minimum price: purchase × 1.20. The public KIT API currently exposes only `price` and `manual_discount_price`; minimum price requires a separate supported import/UI route.
 - Availability source is top-level `<count>`; Riva's `available=true` is ignored because it is true for every offer.
 - Stock rule on both managed warehouses:
   - if `count > 0`: write the actual Riva total `count` to both СПБ and МСК;
