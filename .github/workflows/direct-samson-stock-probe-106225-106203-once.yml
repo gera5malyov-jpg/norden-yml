@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: direct-samson-stock-probe-examples
+  cancel-in-progress: true
+
 jobs:
   probe:
     runs-on: ubuntu-latest
@@ -19,7 +23,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Direct Samson probe
+      - name: Direct Samson raw stock probe
         env:
           SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
         shell: bash
@@ -28,45 +32,19 @@ jobs:
           PYTHONPATH=samson-kit python - <<'PY'
           import os, json
           from samson_kit.http import SafeSession
-          from samson_kit.mapper import normalize_sku, extract_stock_parts, extract_withdrawn, extract_active
-          from samson_kit.rules import calculate_stock
 
           http=SafeSession()
           base='https://api.samsonopt.ru/v1'
           key=os.environ['SAMSON_API_KEY']
-
-          def unwrap(payload):
-              env=payload[0] if isinstance(payload,list) and len(payload)==1 else payload
-              data=env.get('data') if isinstance(env,dict) else None
-              if isinstance(data,list):
-                  return data[0] if data else None
-              if isinstance(data,dict):
-                  return data
-              return env if isinstance(env,dict) else None
-
           for code in ('106225','106203'):
-              row=unwrap(http.request_json(
+              product=http.request_json(
                   'GET',f'{base}/sku/{code}',
                   params={'api_key':key,'response_format':'json'},
-                  headers={'Accept':'application/json','User-Agent':'MegapolisSamsonKit/1.0'}))
-              srow=unwrap(http.request_json(
+                  headers={'Accept':'application/json','User-Agent':'MegapolisSamsonKit/1.0'})
+              stock=http.request_json(
                   'GET',f'{base}/sku/{code}/stock',
                   params={'api_key':key,'response_format':'json'},
-                  headers={'Accept':'application/json','User-Agent':'MegapolisSamsonKit/1.0'}))
-              wd=extract_withdrawn(row or {})
-              ac=extract_active(row or {},wd)
-              direct=extract_stock_parts(row or {})
-              over=extract_stock_parts(srow or {})
-              chosen=over if over is not None else direct
-              print('DIRECT='+json.dumps({
-                  'code':code,
-                  'row_stock_list':(row or {}).get('stock_list'),
-                  'stock_endpoint':srow,
-                  'direct_parts':direct,
-                  'override_parts':over,
-                  'out_of_stock':(row or {}).get('out_of_stock'),
-                  'withdrawn':wd,
-                  'active':ac,
-                  'desired':calculate_stock(chosen,active=ac,withdrawn=wd)
-              },ensure_ascii=False))
+                  headers={'Accept':'application/json','User-Agent':'MegapolisSamsonKit/1.0'})
+              print('PRODUCT_RAW_'+code+'='+json.dumps(product,ensure_ascii=False)[:12000])
+              print('STOCK_RAW_'+code+'='+json.dumps(stock,ensure_ascii=False)[:12000])
           PY
