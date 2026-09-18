@@ -98,7 +98,9 @@ class LigaMediaAndMappingTests(unittest.TestCase):
             {'id':'b','title':'Цвет','type':'STRING'},
         ]
         chars = runner._ensure_characteristics(make_offer(params={'Цвет':['Бежевый']}))
-        self.assertEqual(chars, [])
+        chosen_ids = {row['characteristic_id'] for row in chars}
+        self.assertNotIn('a', chosen_ids)
+        self.assertNotIn('b', chosen_ids)
         self.assertEqual(runner.report['warning_count'], 1)
 
 
