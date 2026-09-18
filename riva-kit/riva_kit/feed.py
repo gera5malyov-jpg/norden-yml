@@ -69,22 +69,26 @@ def offer_from_element(node):
     source_id = str(node.attrib.get('id') or '').strip()
     if not source_id:
         raise ValueError('Riva offer id is missing')
+
     params = _params(node)
     article_values = []
     for title, values in params.items():
         if title.strip().casefold() == 'артикул':
             article_values.extend(values)
     article = next((str(v).strip() for v in article_values if str(v).strip()), '')
+    if not article:
+        raise ValueError(f'Riva article is missing for offer {source_id}')
+
     count = parse_count(_text(node, 'count', '0'))
     return RivaOffer(
         source_id=source_id,
         group_id=str(node.attrib.get('group_id') or '').strip(),
         article=article,
-        kit_sku=to_kit_sku(source_id),
+        kit_sku=to_kit_sku(article),
         count=count,
         in_stock=count > 0,
         category_id=_text(node, 'categoryId') or None,
-        name=_text(node, 'name', article or source_id) or article or source_id,
+        name=_text(node, 'name', article) or article,
         description=_text(node, 'description'),
         price=normalize_price(_text(node, 'price')),
         currency=_text(node, 'currencyId', 'RUR') or 'RUR',
