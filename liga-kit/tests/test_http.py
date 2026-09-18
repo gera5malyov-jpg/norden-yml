@@ -54,7 +54,7 @@ class RetryUploadSession:
             response = FakeResponse(429, 'retry')
             response.headers = {'Retry-After':'0'}
             return response
-        response = FakeResponse(200, '')
+        response = FakeResponse(200, 'json')
         response.json = lambda: {'id':'file-ok'}
         return response
 
