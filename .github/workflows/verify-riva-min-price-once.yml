@@ -1,0 +1,65 @@
+name: Verify KIT minimum price on Riva smoke
+
+on:
+  push:
+    branches:
+      - feat/riva-kit-sync
+    paths:
+      - '.github/workflows/verify-riva-min-price-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify minimum price field on existing Riva smoke item
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, time, urllib.error, urllib.request
+          token=os.environ['YANDEX_KIT_TOKEN'].strip()
+          variant_id='01a0b475-ecbd-755c-bf64-2f77cfb772f7'
+          endpoint='https://api.kit.yandex.net/v1/variants/prices/bulk_update'
+          fields=['minimum_price','min_price','manual_minimum_price','minimum_allowed_price']
+          base={
+              'variant_id':variant_id,
+              'price':'14470.20',
+              'manual_discount_price':'10129.14',
+          }
+          for field in fields:
+              body={'items':[dict(base, **{field:'9646.80'})]}
+              req=urllib.request.Request(
+                  endpoint,
+                  data=json.dumps(body).encode(),
+                  method='POST',
+                  headers={
+                      'Authorization':f'Bearer {token}',
+                      'Accept':'application/json',
+                      'Content-Type':'application/json',
+                  },
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      response=r.read().decode('utf-8','replace')[:1500]
+                      print('FIELD',field,'STATUS',r.status,'BODY',response)
+              except urllib.error.HTTPError as e:
+                  response=e.read().decode('utf-8','replace')[:1500]
+                  print('FIELD',field,'STATUS',e.code,'BODY',response)
+              time.sleep(0.5)
+
+          req=urllib.request.Request(
+              f'https://api.kit.yandex.net/v1/variants/{variant_id}',
+              headers={'Authorization':f'Bearer {token}','Accept':'application/json'},
+          )
+          with urllib.request.urlopen(req, timeout=60) as r:
+              row=json.load(r)
+          print('FINAL_PRICING',repr(row.get('pricing')))
+          PY
