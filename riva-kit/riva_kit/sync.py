@@ -226,6 +226,7 @@ class SyncRunner:
             'new_products_created': 0,
             'new_limit_skipped': 0,
             'ambiguous_existing_skipped': 0,
+            'sku_migrations': 0,
             'price_changes': 0,
             'spb_stock_changes': 0,
             'msk_stock_changes': 0,
