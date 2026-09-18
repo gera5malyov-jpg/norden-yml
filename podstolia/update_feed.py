@@ -70,6 +70,12 @@ def main() -> None:
 
     output = OFFER_RE.sub(enrich, source)
 
+    # Hard check: remove only the added purchase_price lines.
+    # The remaining bytes must be exactly identical to the supplier response.
+    restored = PURCHASE_RE.sub(b"", output)
+    if restored != source:
+        raise RuntimeError("Supplier feed changed beyond purchase_price insertion")
+
     if stats["offers"] == 0:
         raise RuntimeError("No offers found in supplier feed")
     if len(re.findall(br"<purchase_price>", output, re.I)) != stats["inserted"]:
@@ -87,6 +93,7 @@ def main() -> None:
         "not_found_in_price_list": sorted(set(stats["missing"])),
         "offers_without_price_tag": sorted(set(stats["no_price"])),
         "source_encoding_header": source.splitlines()[0].decode("ascii", errors="replace"),
+        "supplier_bytes_preserved_exactly": restored == source,
     }, ensure_ascii=False))
 
 if __name__ == "__main__":
