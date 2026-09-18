@@ -84,7 +84,7 @@ def offer_from_element(node):
         source_id=source_id,
         group_id=str(node.attrib.get('group_id') or '').strip(),
         article=article,
-        kit_sku=to_kit_sku(article),
+        kit_sku=to_kit_sku(source_id),
         count=count,
         in_stock=count > 0,
         category_id=_text(node, 'categoryId') or None,
