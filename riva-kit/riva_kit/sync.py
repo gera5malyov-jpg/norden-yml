@@ -1,5 +1,6 @@
 import os
 import tempfile
+from collections import defaultdict
 from decimal import Decimal, ROUND_CEILING
 from urllib.parse import urlparse
 
@@ -31,19 +32,100 @@ def _current_stock(variant, warehouse_id):
     return 0
 
 
-def index_riva_variants(rows):
-    buckets = {}
+def _brand_text(row):
+    brand = row.get('brand')
+    if isinstance(brand, dict):
+        for key in ('title', 'name', 'value'):
+            if brand.get(key):
+                return str(brand.get(key)).strip()
+        return ''
+    return str(brand or '').strip()
+
+
+def _char_values(row, characteristic_titles, wanted_title):
+    out = []
+    wanted = _lower(wanted_title)
+    for char in row.get('characteristics') or []:
+        if not isinstance(char, dict):
+            continue
+        title = str(char.get('title') or '').strip()
+        if not title:
+            cid = str(char.get('characteristic_id') or char.get('id') or '').strip()
+            title = str(characteristic_titles.get(cid) or '').strip()
+        if _lower(title) != wanted:
+            continue
+
+        values = char.get('values')
+        if isinstance(values, list):
+            candidates = values
+        elif values not in (None, ''):
+            candidates = [values]
+        else:
+            candidates = [char.get('value')]
+
+        for value in candidates:
+            text = str(value or '').strip()
+            if text and text not in out:
+                out.append(text)
+    return out
+
+
+def index_riva_variants(rows, characteristic_titles=None):
+    characteristic_titles = characteristic_titles or {}
+    by_source = {}
+    by_sku = defaultdict(list)
+    owned_count = 0
+
     for row in rows:
         if not isinstance(row, dict):
             continue
         sku = str(row.get('sku', '')).strip()
-        if not sku.startswith('riva-'):
+        source_values = _char_values(
+            row, characteristic_titles, 'ID предложения Riva'
+        )
+        source_id = source_values[0] if source_values else ''
+        is_riva = bool(source_id) or _lower(_brand_text(row)) == 'riva'
+        if not is_riva:
             continue
-        buckets.setdefault(sku, []).append(row)
-    return (
-        {sku: values[0] for sku, values in buckets.items() if len(values) == 1},
-        {sku: values for sku, values in buckets.items() if len(values) > 1},
-    )
+
+        owned_count += 1
+        if source_id and source_id not in by_source:
+            by_source[source_id] = row
+        if sku:
+            by_sku[sku].append(row)
+
+    return by_source, dict(by_sku), owned_count
+
+
+def resolve_variant(offer, by_source, by_sku, characteristic_titles=None):
+    characteristic_titles = characteristic_titles or {}
+
+    variant = by_source.get(offer.source_id)
+    if variant is not None:
+        return variant
+
+    bucket = list(by_sku.get(offer.kit_sku) or [])
+    if not bucket:
+        return None
+
+    if offer.barcode:
+        barcode_matches = [
+            row for row in bucket
+            if offer.barcode in _char_values(
+                row, characteristic_titles, 'Штрихкод'
+            )
+        ]
+        if len(barcode_matches) == 1:
+            return barcode_matches[0]
+
+    exact_name = [
+        row for row in bucket
+        if _lower(row.get('name')) == _lower(offer.name)
+    ]
+    if len(exact_name) == 1:
+        return exact_name[0]
+
+    return None
 
 
 def build_price_update(offer, variant):
@@ -84,12 +166,12 @@ def build_stock_updates(offer, variant, warehouse_ids, stock_mode):
     return out
 
 
-def absent_zero_updates(index, seen_skus, warehouse_ids, *, complete):
+def absent_zero_updates(source_index, seen_source_ids, warehouse_ids, *, complete):
     if not complete:
         return []
     out = []
-    for sku, variant in index.items():
-        if sku in seen_skus:
+    for source_id, variant in source_index.items():
+        if source_id in seen_source_ids:
             continue
         variant_id = str(variant.get('id', '')).strip()
         if not variant_id:
@@ -148,6 +230,7 @@ class SyncRunner:
         self.stock_mode = str(stock_mode or 'binary100')
         self.kit_categories = []
         self.kit_characteristics = []
+        self.characteristic_titles = {}
         self.report = {
             'status': 'pending',
             'dry_run': self.dry_run,
@@ -160,12 +243,14 @@ class SyncRunner:
             'new_products_created': 0,
             'zero_stock_new_skipped': 0,
             'new_limit_skipped': 0,
+            'ambiguous_existing_skipped': 0,
             'price_changes': 0,
             'spb_stock_changes': 0,
             'msk_stock_changes': 0,
             'zeroed_by_feed_count': 0,
             'absent_to_zero': 0,
-            'duplicate_kit_skus': 0,
+            'riva_variants_indexed': 0,
+            'duplicate_article_buckets': 0,
             'invalid_price_count': 0,
             'image_failure_count': 0,
             'warning_count': 0,
@@ -242,12 +327,13 @@ class SyncRunner:
                 characteristic_id = str(matches[0].get('id', '')).strip()
             elif self.dry_run:
                 characteristic_id = f'dry-riva-char-{len(self.kit_characteristics) + 1}'
-                self.kit_characteristics.append({
+                created = {
                     'id': characteristic_id,
                     'title': title,
                     'type': desired_type,
                     'select_mode': 'MULTIPLE' if len(values) > 1 else 'SINGLE',
-                })
+                }
+                self.kit_characteristics.append(created)
             else:
                 created = self.kit.create_characteristic(
                     title,
@@ -259,6 +345,8 @@ class SyncRunner:
                     self._warn(f'KIT characteristic creation failed: {title}')
                     continue
                 self.kit_characteristics.append(created)
+
+            self.characteristic_titles[str(characteristic_id)] = title
             out.append({
                 'characteristic_id': characteristic_id,
                 'value': values[0],
@@ -346,12 +434,24 @@ class SyncRunner:
             'СПБ': self.kit.resolve_warehouse_exact('СПБ'),
             'МСК': self.kit.resolve_warehouse_exact('МСК'),
         }
-        kit_index, duplicates = index_riva_variants(list(self.kit.iter_variants()))
-        self.report['duplicate_kit_skus'] = len(duplicates)
         self.kit_categories = self.kit.list_categories()
         self.kit_characteristics = self.kit.list_characteristics()
+        self.characteristic_titles = {
+            str(row.get('id', '')).strip(): str(row.get('title', '')).strip()
+            for row in self.kit_characteristics
+            if str(row.get('id', '')).strip()
+        }
 
-        seen = set()
+        by_source, by_sku, owned_count = index_riva_variants(
+            list(self.kit.iter_variants()),
+            self.characteristic_titles,
+        )
+        self.report['riva_variants_indexed'] = owned_count
+        self.report['duplicate_article_buckets'] = sum(
+            1 for values in by_sku.values() if len(values) > 1
+        )
+
+        seen_source_ids = set()
         price_batch = []
         stock_batch = []
         stopped_early = False
@@ -362,18 +462,19 @@ class SyncRunner:
                 stopped_early = True
                 break
 
-            seen.add(offer.kit_sku)
+            seen_source_ids.add(offer.source_id)
             self.report['offers_seen'] += 1
             if offer.in_stock:
                 self.report['in_stock_offers'] += 1
             else:
                 self.report['zero_stock_offers'] += 1
 
-            if offer.kit_sku in duplicates:
-                self._warn(f'duplicate KIT Riva SKU skipped: {offer.kit_sku}')
-                continue
-
-            variant = kit_index.get(offer.kit_sku)
+            variant = resolve_variant(
+                offer,
+                by_source,
+                by_sku,
+                self.characteristic_titles,
+            )
             if variant is not None:
                 self.report['existing_variants_seen'] += 1
                 price_update = build_price_update(offer, variant)
@@ -400,6 +501,14 @@ class SyncRunner:
                     self._flush_prices(price_batch)
                 if len(stock_batch) >= 500:
                     self._flush_stocks(stock_batch)
+                continue
+
+            if by_sku.get(offer.kit_sku):
+                self.report['ambiguous_existing_skipped'] += 1
+                self._warn(
+                    f'existing Riva article could not be safely matched; skipped: '
+                    f'{offer.kit_sku} / offer {offer.source_id}'
+                )
                 continue
 
             if not offer.in_stock and not self.include_zero_stock:
@@ -437,6 +546,10 @@ class SyncRunner:
                     variant_id = str(created.get('id', '')).strip()
                     if not variant_id:
                         raise RuntimeError('KIT did not return variant id')
+                    normalized = dict(payload)
+                    normalized.update(created)
+                    by_source[offer.source_id] = normalized
+                    by_sku.setdefault(offer.kit_sku, []).append(normalized)
                     self.report['new_products_created'] += 1
             except Exception as exc:
                 if 'image set' in str(exc):
@@ -449,7 +562,7 @@ class SyncRunner:
         complete = not stopped_early
         self.report['catalog_complete'] = complete
         absent = absent_zero_updates(
-            kit_index, seen, warehouse_ids, complete=complete
+            by_source, seen_source_ids, warehouse_ids, complete=complete
         )
         absent_variants = {update['variant_id'] for update in absent}
         self.report['absent_to_zero'] = len(absent_variants)
