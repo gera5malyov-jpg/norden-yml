@@ -1,0 +1,38 @@
+name: Samson KIT full live import
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/samson-kit-full-live-once.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: samson-kit-full-live-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Run regression tests
+        run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+      - name: Full live Samson import
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python -m samson_kit.cli --report /tmp/samson-full-live.json
+          echo 'FULL_LIVE_REPORT_BEGIN'
+          cat /tmp/samson-full-live.json
+          echo 'FULL_LIVE_REPORT_END'
