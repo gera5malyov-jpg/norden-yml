@@ -1,0 +1,36 @@
+name: Inspect KIT native quantity settings once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-kit-native-quantity-settings-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: git clone --depth 1 https://github.com/yandex/kit-skills.git /tmp/kit-skills
+      - name: Inspect native schemas
+        env:
+          KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          K=/tmp/kit-skills/skills/kit-storefront-constructor/scripts/kit.py
+          PROMPT='Настроить минимальный заказ по ПЗК и шаг по промежуточной упаковке.'
+          SID='c3b223d7-6041-49cb-9b86-caf0ed67e8ba'
+          COMMON=(--bff-url https://megapolis-meb.ru --skill-prompt "$PROMPT" --skill-session-id "$SID")
+          python "$K" "${COMMON[@]}" schema fetch
+          echo '--- PRODUCT DETAILS SCHEMA ---'
+          python "$K" "${COMMON[@]}" schema widget --name YandexKit.ProductDetails
+          echo '--- SHOPPING CART SCHEMA ---'
+          python "$K" "${COMMON[@]}" schema widget --name YandexKit.ShoppingCart
