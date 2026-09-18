@@ -1,6 +1,9 @@
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 MONEY = Decimal('0.01')
+SALE_MULTIPLIER = Decimal('1.26')
+OLD_MULTIPLIER = Decimal('1.80')
+MINIMUM_MULTIPLIER = Decimal('1.20')
 
 
 def to_kit_sku(article):
@@ -28,10 +31,18 @@ def parse_count(value):
     return max(0, count)
 
 
-def desired_stock(count, mode='binary100'):
+def calculate_prices(purchase_price):
+    purchase = normalize_price(purchase_price)
+    if purchase is None:
+        return None
+    return {
+        'purchase': purchase,
+        'sale': (purchase * SALE_MULTIPLIER).quantize(MONEY, rounding=ROUND_HALF_UP),
+        'old': (purchase * OLD_MULTIPLIER).quantize(MONEY, rounding=ROUND_HALF_UP),
+        'minimum': (purchase * MINIMUM_MULTIPLIER).quantize(MONEY, rounding=ROUND_HALF_UP),
+    }
+
+
+def desired_stock(count):
     count = max(0, int(count or 0))
-    if mode == 'actual':
-        return count
-    if mode != 'binary100':
-        raise ValueError(f'Unsupported stock mode: {mode}')
-    return 100 if count > 0 else 0
+    return count if count > 0 else 100
