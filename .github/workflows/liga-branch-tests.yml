@@ -1,0 +1,37 @@
+name: Liga branch tests
+
+on:
+  push:
+    branches:
+      - feat/liga-kit-sync
+    paths:
+      - 'liga-kit/**'
+      - '.github/workflows/liga-branch-tests.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: liga-branch-tests
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Samson regression suite
+        run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+      - name: Liga test suite
+        shell: bash
+        run: |
+          if [[ -d liga-kit/tests ]]; then
+            PYTHONPATH=liga-kit python -m unittest discover -s liga-kit/tests -v
+          else
+            echo "Liga tests not created yet"
+          fi
