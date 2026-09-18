@@ -6,6 +6,7 @@ on:
       - feat/liga-kit-sync
     paths:
       - 'liga-kit/**'
+      - 'samson-kit/**'
       - '.github/workflows/liga-kit-sync.yml'
       - '.github/workflows/liga-branch-tests.yml'
 
