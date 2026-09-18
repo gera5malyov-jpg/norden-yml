@@ -1,0 +1,89 @@
+<div class="samson-quantity-guard">
+{{#if (eql settings.mode "product")}}
+    <ya-kit-product-detail-controller as="pd">
+        {{#if pd.model}}
+            {{#if (startsWith pd.model.variant.sku "SAMS-")}}
+                <ya-kit-value-controller initial-value="{{0}}" as="previous">
+                    {{#each pd.model.variant.characteristics as |minChar|}}
+                        {{#if (eql minChar.title "Минимальный заказ")}}
+                            {{#each pd.model.variant.characteristics as |stepChar|}}
+                                {{#if (eql stepChar.title "Шаг заказа")}}
+                                    {{#if (notEql pd.model.quantity previous.value)}}
+                                        {{#if (eql pd.model.quantity 0)}}
+                                            {{call previous.onChange 0}}
+                                        {{else}}
+                                            {{#if (lt pd.model.variant.totalQuantity (multiply minChar.value 1))}}
+                                                {{call pd.onRemoveVariantFromCart}}
+                                                {{call previous.onChange 0}}
+                                            {{else}}
+                                                {{#if (lt pd.model.quantity (multiply minChar.value 1))}}
+                                                    {{call pd.onUpdateVariantQuantity (multiply minChar.value 1)}}
+                                                    {{call previous.onChange (multiply minChar.value 1)}}
+                                                {{else}}
+                                                    {{#if (gt pd.model.quantity previous.value)}}
+                                                        {{call pd.onUpdateVariantQuantity (min (add (multiply minChar.value 1) (multiply (ceil (divide (subtract pd.model.quantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))) (add (multiply minChar.value 1) (multiply (floor (divide (subtract pd.model.variant.totalQuantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))))}}
+                                                        {{call previous.onChange (min (add (multiply minChar.value 1) (multiply (ceil (divide (subtract pd.model.quantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))) (add (multiply minChar.value 1) (multiply (floor (divide (subtract pd.model.variant.totalQuantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))))}}
+                                                    {{else}}
+                                                        {{call pd.onUpdateVariantQuantity (max (multiply minChar.value 1) (add (multiply minChar.value 1) (multiply (floor (divide (subtract pd.model.quantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))))}}
+                                                        {{call previous.onChange (max (multiply minChar.value 1) (add (multiply minChar.value 1) (multiply (floor (divide (subtract pd.model.quantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))))}}
+                                                    {{/if}}
+                                                {{/if}}
+                                            {{/if}}
+                                        {{/if}}
+                                    {{/if}}
+                                {{/if}}
+                            {{/each}}
+                        {{/if}}
+                    {{/each}}
+                </ya-kit-value-controller>
+            {{/if}}
+        {{/if}}
+    </ya-kit-product-detail-controller>
+{{/if}}
+
+{{#if (eql settings.mode "cart")}}
+    <ya-kit-shopping-cart-controller as="cart">
+        {{#if cart.model}}
+            {{#each cart.model.items as |item|}}
+                {{#if (startsWith item.variant.sku "SAMS-")}}
+                    <ya-kit-product-snippet-controller product={{item.variant}} as="line">
+                        <ya-kit-value-controller initial-value="{{0}}" as="previous">
+                            {{#each item.variant.characteristics as |minChar|}}
+                                {{#if (eql minChar.title "Минимальный заказ")}}
+                                    {{#each item.variant.characteristics as |stepChar|}}
+                                        {{#if (eql stepChar.title "Шаг заказа")}}
+                                            {{#if (notEql line.quantity previous.value)}}
+                                                {{#if (eql line.quantity 0)}}
+                                                    {{call previous.onChange 0}}
+                                                {{else}}
+                                                    {{#if (lt item.variant.totalQuantity (multiply minChar.value 1))}}
+                                                        {{call line.onRemoveFromCart}}
+                                                        {{call previous.onChange 0}}
+                                                    {{else}}
+                                                        {{#if (lt line.quantity (multiply minChar.value 1))}}
+                                                            {{call line.onUpdateQuantity (multiply minChar.value 1)}}
+                                                            {{call previous.onChange (multiply minChar.value 1)}}
+                                                        {{else}}
+                                                            {{#if (gt line.quantity previous.value)}}
+                                                                {{call line.onUpdateQuantity (min (add (multiply minChar.value 1) (multiply (ceil (divide (subtract line.quantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))) (add (multiply minChar.value 1) (multiply (floor (divide (subtract item.variant.totalQuantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))))}}
+                                                                {{call previous.onChange (min (add (multiply minChar.value 1) (multiply (ceil (divide (subtract line.quantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))) (add (multiply minChar.value 1) (multiply (floor (divide (subtract item.variant.totalQuantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))))}}
+                                                            {{else}}
+                                                                {{call line.onUpdateQuantity (max (multiply minChar.value 1) (add (multiply minChar.value 1) (multiply (floor (divide (subtract line.quantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))))}}
+                                                                {{call previous.onChange (max (multiply minChar.value 1) (add (multiply minChar.value 1) (multiply (floor (divide (subtract line.quantity (multiply minChar.value 1)) (multiply stepChar.value 1))) (multiply stepChar.value 1))))}}
+                                                            {{/if}}
+                                                        {{/if}}
+                                                    {{/if}}
+                                                {{/if}}
+                                            {{/if}}
+                                        {{/if}}
+                                    {{/each}}
+                                {{/if}}
+                            {{/each}}
+                        </ya-kit-value-controller>
+                    </ya-kit-product-snippet-controller>
+                {{/if}}
+            {{/each}}
+        {{/if}}
+    </ya-kit-shopping-cart-controller>
+{{/if}}
+</div>
