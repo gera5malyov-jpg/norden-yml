@@ -1,0 +1,69 @@
+name: Analyze Riva site codes
+
+on:
+  push:
+    branches:
+      - feat/riva-kit-sync
+    paths:
+      - '.github/workflows/riva-site-code-analysis.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RIVA_FEED_URL: ${{ secrets.RIVA_FEED_URL }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Count Код для сайта values
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, tempfile, urllib.request, xml.etree.ElementTree as ET
+          from collections import Counter
+
+          url=os.environ['RIVA_FEED_URL'].strip()
+          fd,path=tempfile.mkstemp(suffix='.xml')
+          os.close(fd)
+          urllib.request.urlretrieve(url,path)
+
+          total=0
+          missing=0
+          codes=Counter()
+          examples=[]
+          for event,elem in ET.iterparse(path,events=('end',)):
+              if elem.tag.split('}')[-1] != 'offer':
+                  continue
+              total += 1
+              code=''
+              offer_id=str(elem.attrib.get('id') or '').strip()
+              for child in list(elem):
+                  if child.tag.split('}')[-1]=='param' and str(child.attrib.get('name') or '').strip().casefold()=='код для сайта':
+                      code=str(child.text or '').strip()
+                      if code:
+                          break
+              if code:
+                  codes[code]+=1
+                  if len(examples)<10:
+                      examples.append((offer_id,code))
+              else:
+                  missing += 1
+              elem.clear()
+
+          duplicate_codes=sum(1 for n in codes.values() if n>1)
+          duplicate_rows=sum(n for n in codes.values() if n>1)
+          print('TOTAL_OFFERS', total)
+          print('WITH_SITE_CODE', total-missing)
+          print('MISSING_SITE_CODE', missing)
+          print('UNIQUE_SITE_CODES', len(codes))
+          print('DUPLICATE_SITE_CODE_VALUES', duplicate_codes)
+          print('ROWS_USING_DUPLICATE_CODES', duplicate_rows)
+          print('MAX_CODE_REPETITIONS', max(codes.values()) if codes else 0)
+          print('EXAMPLES', examples)
+          print('TOP_DUPLICATES', codes.most_common(20))
+          PY
