@@ -1,0 +1,66 @@
+name: Probe Samson image failures once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-samson-image-failures-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Probe source image downloads only
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python - <<'PY'
+          import os, tempfile
+          from samson_kit.http import SafeSession
+          from samson_kit.mapper import extract_images
+
+          http=SafeSession(max_attempts=4)
+          base='https://api.samsonopt.ru/v1'
+          targets=['101889','105715','106203','106225']
+          total_failures=0
+
+          for code in targets:
+              payload=http.request_json(
+                  'GET', f'{base}/sku/{code}',
+                  params={'api_key':os.environ['SAMSON_API_KEY'],'response_format':'json'},
+                  headers={'Accept':'application/json','User-Agent':'megapolis-samson-kit/1.0'},
+              )
+              envelope=payload[0] if isinstance(payload,list) and len(payload)==1 else payload
+              rows=(envelope or {}).get('data') if isinstance(envelope,dict) else None
+              row=(rows or [None])[0] if isinstance(rows,list) else None
+              if not isinstance(row,dict):
+                  print(f'SKU={code} FETCH_ROW_ERROR payload_type={type(payload).__name__}', flush=True)
+                  total_failures += 1
+                  continue
+              urls=extract_images(row)
+              print(f'SKU={code} SOURCE_IMAGES={len(urls)}', flush=True)
+              for idx,url in enumerate(urls,1):
+                  try:
+                      suffix=os.path.splitext(url.split('?',1)[0])[1] or '.jpg'
+                      with tempfile.TemporaryDirectory(prefix='samson-probe-') as td:
+                          path=os.path.join(td,'image'+suffix[:10])
+                          http.download_to_file(url,path)
+                          size=os.path.getsize(path)
+                      print(f'IMAGE_OK sku={code} index={idx}/{len(urls)} bytes={size} url={url}', flush=True)
+                  except Exception as exc:
+                      total_failures += 1
+                      print(f'IMAGE_FAIL sku={code} index={idx}/{len(urls)} error={str(exc)[:500]} url={url}', flush=True)
+
+          print(f'PROBE_SOURCE_FAILURES={total_failures}', flush=True)
+          PY
