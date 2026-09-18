@@ -66,29 +66,55 @@ def extract_purchase_price(row):
     value=_typed_value(row.get('price_list'),('contract','purchase','client','personal'))
     return _as_decimal(value)
 
+def _stock_entries(value):
+    out=[]
+    if isinstance(value,dict):
+        if 'type' in value:
+            out.append(value)
+        elif 'stock_list' in value:
+            out.extend(_stock_entries(value.get('stock_list')))
+        return out
+    if isinstance(value,(list,tuple)):
+        for item in value:
+            out.extend(_stock_entries(item))
+    return out
+
 def extract_stock_parts(row):
-    samson_stock=row.get('stock_list')
-    if isinstance(samson_stock,list):
-        total=_typed_value(samson_stock,('total',))
-        q=_extract_quantity(total)
-        if q is not None: return [q]
+    if isinstance(row,(list,tuple)):
+        samson_stock=row
+        mapping=None
+    elif isinstance(row,dict):
+        samson_stock=row.get('stock_list')
+        mapping=row
+    else:
+        return None
+
+    entries=_stock_entries(samson_stock)
+    if entries:
+        for item in entries:
+            if str(item.get('type','')).strip().casefold()=='total':
+                q=_extract_quantity(item.get('value'))
+                if q is not None: return [q]
         vals=[]
-        for item in samson_stock:
-            if not isinstance(item,dict): continue
+        for item in entries:
             if str(item.get('type','')).strip().casefold()=='total': continue
             q=_extract_quantity(item.get('value'))
             if q is not None: vals.append(q)
         if vals: return vals
+
+    if mapping is None:
+        return None
+
     for key in ('stocks','warehouse_stocks','rests','warehouses'):
-        value=row.get(key)
+        value=mapping.get(key)
         if isinstance(value,list):
             vals=[_extract_quantity(x) for x in value]; vals=[x for x in vals if x is not None]
             if vals: return vals
         if isinstance(value,dict):
             vals=[_extract_quantity(x) for x in value.values()]; vals=[x for x in vals if x is not None]
             if vals: return vals
-    if 'stock' in row:
-        value=row.get('stock')
+    if 'stock' in mapping:
+        value=mapping.get('stock')
         if isinstance(value,list):
             vals=[_extract_quantity(x) for x in value]; vals=[x for x in vals if x is not None]
             if vals: return vals
@@ -99,8 +125,8 @@ def extract_stock_parts(row):
         if q is not None: return [q]
     direct=[]
     for key in ('stock_idp','stock_rc','stock_way','stock_in_way','stock_in_transit','idp_stock','rc_stock','transit_stock','quantity_idp','quantity_rc','quantity_way'):
-        if key in row:
-            q=_extract_quantity(row[key])
+        if key in mapping:
+            q=_extract_quantity(mapping[key])
             if q is not None: direct.append(q)
     return direct or None
 
@@ -113,7 +139,9 @@ def _boolish(value):
     return None
 
 def extract_withdrawn(row):
-    if 'out_of_stock' in row and _boolish(row.get('out_of_stock')) is True: return True
+    # Samson's out_of_stock means a phase-out flag, but products can remain
+    # orderable with positive stock for a long time. Presence in the current
+    # Samson catalog controls availability; do not zero stock from this flag.
     for key in ('deleted','is_deleted','discontinued','is_discontinued','withdrawn','is_withdrawn','removed','is_removed','archive','archived'):
         if key in row and _boolish(row[key]) is True: return True
     return str(_first(row,('status','state','availability_status'),'')).strip().upper() in {'DELETED','DISCONTINUED','WITHDRAWN','REMOVED','ARCHIVED','CLOSED'}
