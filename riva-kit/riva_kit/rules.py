@@ -3,11 +3,11 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 MONEY = Decimal('0.01')
 
 
-def to_kit_sku(source_id):
-    value = str(source_id or '').strip()
+def to_kit_sku(article):
+    value = str(article or '').strip()
     if not value:
-        raise ValueError('Riva offer id is missing')
-    return 'riva-' + value
+        raise ValueError('Riva article is missing')
+    return value
 
 
 def normalize_price(value):
