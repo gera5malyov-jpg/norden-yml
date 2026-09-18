@@ -1,0 +1,51 @@
+name: Inspect KIT pricing fields once
+
+on:
+  push:
+    branches:
+      - feat/riva-kit-sync
+    paths:
+      - '.github/workflows/inspect-kit-pricing-fields-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Inspect pricing object keys
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          token=os.environ.get('YANDEX_KIT_TOKEN','').strip()
+          if not token:
+              raise SystemExit('YANDEX_KIT_TOKEN missing')
+          req=urllib.request.Request(
+              'https://api.kit.yandex.net/v1/variants?page=1&per_page=5',
+              headers={'Authorization':f'Bearer {token}','Accept':'application/json'}
+          )
+          with urllib.request.urlopen(req, timeout=60) as r:
+              payload=json.load(r)
+          rows=[]
+          if isinstance(payload,list):
+              rows=payload
+          elif isinstance(payload,dict):
+              for key in ('items','results','variants','data'):
+                  value=payload.get(key)
+                  if isinstance(value,list):
+                      rows=value; break
+                  if isinstance(value,dict) and isinstance(value.get('items'),list):
+                      rows=value['items']; break
+          print('VARIANT_COUNT', len(rows))
+          for i,row in enumerate(rows[:5],1):
+              pricing=row.get('pricing') if isinstance(row,dict) else None
+              print('VARIANT',i,'PRICING',repr(pricing))
+          PY
