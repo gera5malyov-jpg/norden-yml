@@ -1,0 +1,75 @@
+name: Inspect duplicate Riva site codes
+
+on:
+  push:
+    branches:
+      - feat/riva-kit-sync
+    paths:
+      - '.github/workflows/riva-site-code-duplicates.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RIVA_FEED_URL: ${{ secrets.RIVA_FEED_URL }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Print duplicate and missing Код для сайта rows
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, tempfile, urllib.request, xml.etree.ElementTree as ET
+          from collections import defaultdict
+
+          url=os.environ['RIVA_FEED_URL'].strip()
+          fd,path=tempfile.mkstemp(suffix='.xml')
+          os.close(fd)
+          urllib.request.urlretrieve(url,path)
+
+          rows=[]
+          missing=[]
+          for event,elem in ET.iterparse(path,events=('end',)):
+              if elem.tag.split('}')[-1] != 'offer':
+                  continue
+              data={
+                  'offer_id':str(elem.attrib.get('id') or '').strip(),
+                  'group_id':str(elem.attrib.get('group_id') or '').strip(),
+                  'name':'','barcode':'','count':'','price':'','site_code':'',
+                  'article':'','color':''
+              }
+              for child in list(elem):
+                  tag=child.tag.split('}')[-1]
+                  text=str(child.text or '').strip()
+                  if tag in ('name','barcode','count','price'):
+                      data[tag]=text
+                  elif tag=='param':
+                      title=str(child.attrib.get('name') or '').strip().casefold()
+                      if title=='код для сайта': data['site_code']=text
+                      elif title=='артикул': data['article']=text
+                      elif title=='цвет изделия': data['color']=text
+              if data['site_code']:
+                  rows.append(data)
+              else:
+                  missing.append(data)
+              elem.clear()
+
+          buckets=defaultdict(list)
+          for row in rows:
+              buckets[row['site_code']].append(row)
+
+          print('MISSING_ROWS')
+          for row in missing:
+              print(row)
+          print('DUPLICATE_ROWS')
+          for code,vals in sorted(buckets.items()):
+              if len(vals)>1:
+                  print('CODE',code)
+                  for row in vals:
+                      print(row)
+          PY
