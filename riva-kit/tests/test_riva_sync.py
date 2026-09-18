@@ -63,17 +63,19 @@ class RivaFeedTests(unittest.TestCase):
         self.assertEqual(categories['2'].parent_id, '1')
         offers = list(iter_offers(self.tmp.name))
         self.assertEqual(len(offers), 2)
-        self.assertEqual(offers[0].kit_sku, 'Л.МП-1')
-        self.assertEqual(offers[1].kit_sku, 'Л.МП-1')
+        self.assertEqual(offers[0].kit_sku, 'riva-1290597')
+        self.assertEqual(offers[1].kit_sku, 'riva-1290613')
         self.assertEqual(offers[0].article, 'Л.МП-1')
         self.assertFalse(offers[0].in_stock)
         self.assertTrue(offers[1].in_stock)
         self.assertEqual(offers[1].count, 7)
 
-    def test_duplicate_article_keeps_exact_same_sku(self):
+    def test_duplicate_article_uses_unique_offer_id_sku(self):
         offers = list(iter_offers(self.tmp.name))
         self.assertEqual(offers[0].article, offers[1].article)
-        self.assertEqual(offers[0].kit_sku, offers[1].kit_sku)
+        self.assertNotEqual(offers[0].kit_sku, offers[1].kit_sku)
+        self.assertEqual(offers[0].kit_sku, 'riva-1290597')
+        self.assertEqual(offers[1].kit_sku, 'riva-1290613')
 
     def test_mapper_keeps_useful_and_skips_internal(self):
         offer = list(iter_offers(self.tmp.name))[0]
@@ -103,8 +105,8 @@ class RivaFeedTests(unittest.TestCase):
         self.assertEqual(update['manual_discount_price'], '10129.14')
         self.assertNotIn('minimum_price', update)
 
-    def test_exact_article_is_sku(self):
-        self.assertEqual(to_kit_sku('Л.МП-1'), 'Л.МП-1')
+    def test_offer_id_is_prefixed_sku(self):
+        self.assertEqual(to_kit_sku('1290597'), 'riva-1290597')
         with self.assertRaises(ValueError):
             to_kit_sku('')
 
