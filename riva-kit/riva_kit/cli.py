@@ -27,14 +27,9 @@ def write_report(path, data):
 def build_parser():
     parser = argparse.ArgumentParser(description='Riva → Yandex KIT synchronizer')
     parser.add_argument('--dry-run', action='store_true')
+    parser.add_argument('--skip-items', type=int, default=0)
     parser.add_argument('--max-items', type=int, default=None)
     parser.add_argument('--max-new', type=int, default=None)
-    parser.add_argument('--include-zero-stock', action='store_true')
-    parser.add_argument(
-        '--stock-mode',
-        choices=('binary100', 'actual'),
-        default='binary100',
-    )
     parser.add_argument('--report', default='riva-kit/state/last_sync.json')
     return parser
 
@@ -65,10 +60,9 @@ def main(argv=None):
                 kit,
                 http,
                 dry_run=args.dry_run,
+                skip_items=args.skip_items,
                 max_items=args.max_items,
                 max_new=args.max_new,
-                include_zero_stock=args.include_zero_stock,
-                stock_mode=args.stock_mode,
             )
             result = runner.run()
     except Exception as exc:
@@ -90,6 +84,7 @@ def main(argv=None):
     keys = (
         'status',
         'dry_run',
+        'skip_items',
         'catalog_complete',
         'offers_seen',
         'in_stock_offers',
@@ -97,12 +92,10 @@ def main(argv=None):
         'existing_variants_seen',
         'new_products_planned',
         'new_products_created',
-        'zero_stock_new_skipped',
         'new_limit_skipped',
         'price_changes',
         'spb_stock_changes',
         'msk_stock_changes',
-        'zeroed_by_feed_count',
         'absent_to_zero',
         'error_count',
         'warning_count',
@@ -115,7 +108,7 @@ def main(argv=None):
 
     if result.get('status') == 'failed':
         return 1
-    if args.max_items is None and not result.get('catalog_complete'):
+    if args.max_items is None and args.skip_items == 0 and not result.get('catalog_complete'):
         return 2
     return 0
 
