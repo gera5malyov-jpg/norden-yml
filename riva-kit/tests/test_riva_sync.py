@@ -51,9 +51,7 @@ SAMPLE = '''<?xml version="1.0" encoding="UTF-8"?>
 
 class RivaFeedTests(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.NamedTemporaryFile(
-            'w', suffix='.xml', delete=False, encoding='utf-8'
-        )
+        self.tmp = tempfile.NamedTemporaryFile('w', suffix='.xml', delete=False, encoding='utf-8')
         self.tmp.write(SAMPLE)
         self.tmp.close()
 
@@ -76,8 +74,6 @@ class RivaFeedTests(unittest.TestCase):
         offers = list(iter_offers(self.tmp.name))
         self.assertEqual(offers[0].article, offers[1].article)
         self.assertNotEqual(offers[0].kit_sku, offers[1].kit_sku)
-        self.assertEqual(offers[0].kit_sku, 'SITE-1290597')
-        self.assertEqual(offers[1].kit_sku, 'SITE-1290613')
 
     def test_mapper_keeps_useful_and_skips_internal(self):
         offer = list(iter_offers(self.tmp.name))[0]
@@ -116,40 +112,55 @@ class RivaFeedTests(unittest.TestCase):
 
     def test_existing_old_sku_resolves_by_source_id_for_migration(self):
         titles = {'source-char': 'ID предложения Riva'}
-        rows = [
-            {
-                'id': 'v1',
-                'sku': 'riva-1290597',
-                'name': 'Стол Л.МП-1 Белый',
-                'brand': 'RIVA',
-                'characteristics': [
-                    {
-                        'characteristic_id': 'source-char',
-                        'value': '1290597',
-                        'values': ['1290597'],
-                    }
-                ],
-            },
-            {
-                'id': 'v2',
-                'sku': 'riva-1290613',
-                'name': 'Стол Л.МП-1 Венге',
-                'brand': 'RIVA',
-                'characteristics': [
-                    {
-                        'characteristic_id': 'source-char',
-                        'value': '1290613',
-                        'values': ['1290613'],
-                    }
-                ],
-            },
-        ]
+        rows = [{
+            'id': 'v1', 'sku': 'riva-1290613', 'name': 'Стол Л.МП-1 Венге', 'brand': 'RIVA',
+            'characteristics': [{
+                'characteristic_id': 'source-char', 'value': '1290613', 'values': ['1290613']
+            }],
+        }]
         by_source, by_sku, owned = index_riva_variants(rows, titles)
-        self.assertEqual(owned, 2)
+        self.assertEqual(owned, 1)
         offer = list(iter_offers(self.tmp.name))[1]
         variant = resolve_variant(offer, by_source, by_sku, titles)
-        self.assertEqual(variant['id'], 'v2')
+        self.assertEqual(variant['id'], 'v1')
         self.assertEqual(offer.kit_sku, 'SITE-1290613')
+
+    def test_duplicate_site_code_resolves_to_single_riva_variant(self):
+        titles = {'source-char': 'ID предложения Riva'}
+        row = {
+            'id': 'v1', 'sku': 'DUP-1', 'name': 'Old name', 'brand': 'RIVA',
+            'characteristics': [{
+                'characteristic_id': 'source-char', 'value': '100', 'values': ['100']
+            }],
+        }
+        by_source, by_sku, _ = index_riva_variants([row], titles)
+        offer = list(iter_offers(self.tmp.name))[0]
+        duplicate_offer = type(offer)(
+            source_id='200', group_id=offer.group_id, article=offer.article,
+            kit_sku='DUP-1', count=0, in_stock=False, category_id=offer.category_id,
+            name='Different spelling', description=offer.description, price=offer.price,
+            currency=offer.currency, barcode='', weight=offer.weight,
+            source_url=offer.source_url, images=offer.images, params=offer.params,
+        )
+        self.assertEqual(resolve_variant(duplicate_offer, by_source, by_sku, titles)['id'], 'v1')
+
+    def test_missing_site_code_is_skipped_without_stopping_feed(self):
+        xml = SAMPLE.replace(
+            '<param name="Код для сайта">SITE-1290597</param>',
+            ''
+        )
+        tmp = tempfile.NamedTemporaryFile('w', suffix='.xml', delete=False, encoding='utf-8')
+        try:
+            tmp.write(xml)
+            tmp.close()
+            skipped = []
+            offers = list(iter_offers(tmp.name, on_skip=skipped.append))
+            self.assertEqual(len(offers), 1)
+            self.assertEqual(offers[0].kit_sku, 'SITE-1290613')
+            self.assertEqual(len(skipped), 1)
+            self.assertIn('Код для сайта is missing', skipped[0])
+        finally:
+            os.unlink(tmp.name)
 
 
 if __name__ == '__main__':

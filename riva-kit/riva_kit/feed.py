@@ -112,11 +112,20 @@ def offer_from_element(node):
     )
 
 
-def iter_offers(path):
+def iter_offers(path, on_skip=None):
     for event, elem in ET.iterparse(path, events=('end',)):
         if _tag(elem) != 'offer':
             continue
         try:
-            yield offer_from_element(elem)
+            try:
+                offer = offer_from_element(elem)
+            except ValueError as exc:
+                message = str(exc)
+                if 'Код для сайта is missing' in message:
+                    if on_skip is not None:
+                        on_skip(message)
+                    continue
+                raise
+            yield offer
         finally:
             elem.clear()
