@@ -1,0 +1,89 @@
+name: Probe Riva feed structure
+
+on:
+  push:
+    branches:
+      - feat/riva-kit-sync
+    paths:
+      - '.github/workflows/riva-feed-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      RIVA_FEED_URL: ${{ secrets.RIVA_FEED_URL }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Stream first Riva records
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import urllib.request
+          import xml.etree.ElementTree as ET
+          from collections import Counter
+
+          url = os.environ.get('RIVA_FEED_URL','').strip()
+          if not url:
+              raise SystemExit('RIVA_FEED_URL secret is empty')
+
+          parser = ET.XMLPullParser(events=('start','end'))
+          counts = Counter()
+          stack = []
+          samples = []
+          candidates = {'offer','product','item','position','good','tovar','товар','row'}
+          req = urllib.request.Request(url, headers={'User-Agent':'Mozilla/5.0'})
+
+          with urllib.request.urlopen(req, timeout=120) as r:
+              total = 0
+              done = False
+              while not done:
+                  chunk = r.read(256 * 1024)
+                  if not chunk:
+                      break
+                  total += len(chunk)
+                  parser.feed(chunk)
+                  for event, elem in parser.read_events():
+                      tag = elem.tag.split('}')[-1]
+                      low = tag.casefold()
+                      if event == 'start':
+                          stack.append(tag)
+                          continue
+                      counts[tag] += 1
+                      if low in candidates and len(samples) < 5:
+                          children = []
+                          for child in list(elem):
+                              ctag = child.tag.split('}')[-1]
+                              children.append({
+                                  'tag': ctag,
+                                  'attrib': dict(child.attrib),
+                                  'text': (child.text or '').strip()[:500],
+                              })
+                          samples.append({
+                              'tag': tag,
+                              'attrib': dict(elem.attrib),
+                              'children': children,
+                          })
+                          if len(samples) >= 5:
+                              done = True
+                      if stack:
+                          stack.pop()
+                      if done:
+                          break
+                  if total >= 32 * 1024 * 1024:
+                      break
+
+          print('BYTES_READ', total)
+          print('TAG_COUNTS', counts.most_common(80))
+          print('RECORD_SAMPLES')
+          for i, row in enumerate(samples,1):
+              print('SAMPLE', i, repr(row))
+          if not samples:
+              print('NO_COMMON_RECORD_TAG_FOUND')
+          PY
