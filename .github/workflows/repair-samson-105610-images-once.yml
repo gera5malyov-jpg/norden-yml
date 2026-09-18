@@ -1,0 +1,73 @@
+name: Repair Samson 105610 images once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-samson-105610-images-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Repair and verify SAMS-105610 images
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python - <<'PY'
+          import os, json
+          from samson_kit.http import SafeSession
+          from samson_kit.samson_client import SamsonClient
+          from samson_kit.kit_client import KitClient
+          from samson_kit.mapper import normalize_sku
+          from samson_kit.sync import SyncRunner
+
+          http=SafeSession()
+          samson=SamsonClient(os.environ['SAMSON_API_KEY'],http)
+          kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
+          source=None
+          for row in samson.iter_skus():
+              try:
+                  item=normalize_sku(row)
+              except Exception:
+                  continue
+              if item.source_code=='105610':
+                  source=item
+                  break
+          if source is None:
+              raise RuntimeError('Samson 105610 not found')
+
+          variant=None
+          for v in kit.iter_variants():
+              if str(v.get('sku','')).strip()=='SAMS-105610':
+                  variant=v
+                  break
+          if variant is None:
+              raise RuntimeError('KIT SAMS-105610 not found')
+
+          runner=SyncRunner(samson,kit,http,dry_run=False)
+          before=kit.get_variant(variant['id'])
+          before_count=len([m for m in (before.get('media') or []) if isinstance(m,dict) and str(m.get('type','')).upper()=='IMAGE'])
+          changed=runner._repair_images_if_incomplete(source,variant)
+          after=kit.get_variant(variant['id'])
+          after_count=len([m for m in (after.get('media') or []) if isinstance(m,dict) and str(m.get('type','')).upper()=='IMAGE'])
+          print('SOURCE_IMAGE_COUNT='+str(len(source.image_urls)))
+          print('BEFORE_IMAGE_COUNT='+str(before_count))
+          print('AFTER_IMAGE_COUNT='+str(after_count))
+          print('CHANGED='+str(changed))
+          if after_count!=len(source.image_urls):
+              raise RuntimeError(f'Expected {len(source.image_urls)} images after repair, got {after_count}')
+          print('REPAIR_OK=1')
+          PY
