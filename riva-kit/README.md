@@ -9,11 +9,17 @@ Isolated synchronization for the Riva dealer YML feed.
 - Technical Riva `offer id` is stored as characteristic `ID предложения Riva` and is not used as the visible article.
 - New products: full initial content, including all source images and useful characteristics.
 - Existing Riva products: price + СПБ/МСК stock only.
-- Price: top-level Riva YML `<price>`, copied without markup, matching the Liga Divanov integration.
-- Availability source: top-level `<count>`; Riva's `available=true` is ignored because it is true for every offer.
-- Default stock mode: 100 on СПБ and 100 on МСК when `count > 0`, otherwise 0, matching Liga Divanov.
-- Optional `actual` stock mode can copy Riva's actual `count` to both managed warehouses.
+- The top-level Riva YML `<price>` is the purchase price.
+- KIT price before discount: purchase × 1.80.
+- KIT price with discount: purchase × 1.26.
+- KIT minimum price: purchase × 1.20.
+- Availability source is top-level `<count>`; Riva's `available=true` is ignored because it is true for every offer.
+- Stock rule on both managed warehouses:
+  - if `count > 0`: write the actual Riva total `count` to both СПБ and МСК;
+  - if `count = 0`: write 100 to СПБ and 100 to МСК.
+- Zero-stock offers are therefore created too; initial import covers the whole feed.
 - Missing previously imported offers from a complete feed are reconciled to 0 on СПБ and МСК by technical offer id.
+- Batch import is supported with `--skip-items` and `--max-items` so the large source feed can be loaded safely in parts.
 - Weekly schedule: Monday 10:00 Moscow / 07:00 UTC after rollout.
 
 Feed audit on 2026-09-18:
