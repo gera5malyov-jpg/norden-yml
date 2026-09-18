@@ -6,6 +6,7 @@ on:
       - feat/liga-kit-sync
     paths:
       - 'liga-kit/**'
+      - '.github/workflows/liga-kit-sync.yml'
       - '.github/workflows/liga-branch-tests.yml'
 
 permissions:
@@ -35,3 +36,16 @@ jobs:
           else
             echo "Liga tests not created yet"
           fi
+      - name: Validate permanent Liga workflow
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('.github/workflows/liga-kit-sync.yml').read_text(encoding='utf-8')
+          assert "cron: '0 7 * * 1'" in text
+          assert 'liga-kit' in text
+          assert 'YANDEX_KIT_TOKEN' in text
+          assert 'SAMSON_API_KEY' not in text
+          assert "default: true" in text
+          assert "default: '20'" in text
+          print('OK')
+          PY
