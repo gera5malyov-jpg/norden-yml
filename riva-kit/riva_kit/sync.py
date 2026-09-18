@@ -167,25 +167,9 @@ def build_stock_updates(offer, variant, warehouse_ids):
 
 
 def absent_zero_updates(source_index, seen_source_ids, warehouse_ids, *, complete):
-    if not complete:
-        return []
-    out = []
-    for source_id, variant in source_index.items():
-        if source_id in seen_source_ids:
-            continue
-        variant_id = str(variant.get('id', '')).strip()
-        if not variant_id:
-            continue
-        for title in ('СПБ', 'МСК'):
-            warehouse_id = str(warehouse_ids[title])
-            if _current_stock(variant, warehouse_id) == 0:
-                continue
-            out.append({
-                'variant_id': variant_id,
-                'warehouse_id': warehouse_id,
-                'quantity': 0,
-            })
-    return out
+    # Riva rule: do not force a stock value when an offer disappears from the
+    # source feed. Offers explicitly present with count=0 are handled as 100.
+    return []
 
 
 def _category_chain(category_id, categories):
@@ -257,7 +241,7 @@ class SyncRunner:
             'skip_items': self.skip_items,
             'stock_rule': 'count>0 => count; count=0 => 100 on each managed warehouse',
             'price_rule': 'old=cost*1.80; sale=cost*1.26; desired minimum=cost*1.20',
-            'minimum_price_api_supported': False,
+            'minimum_price_api_supported': None,
         }
 
     def _warn(self, message):
