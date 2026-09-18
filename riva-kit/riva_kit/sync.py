@@ -503,11 +503,21 @@ class SyncRunner:
                     self._flush_stocks(stock_batch)
                 continue
 
-            if by_sku.get(offer.kit_sku):
+            bucket = list(by_sku.get(offer.kit_sku) or [])
+            unmarked_existing = [
+                row for row in bucket
+                if not _char_values(
+                    row,
+                    self.characteristic_titles,
+                    'ID предложения Riva',
+                )
+            ]
+            if unmarked_existing:
                 self.report['ambiguous_existing_skipped'] += 1
                 self._warn(
-                    f'existing Riva article could not be safely matched; skipped: '
-                    f'{offer.kit_sku} / offer {offer.source_id}'
+                    f'existing Riva article without technical offer id could not '
+                    f'be safely matched; skipped: {offer.kit_sku} / '
+                    f'offer {offer.source_id}'
                 )
                 continue
 
