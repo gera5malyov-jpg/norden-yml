@@ -184,6 +184,22 @@ def absent_zero_updates(source_index, seen_source_ids, warehouse_ids, *, complet
     return []
 
 
+def build_feed_canonical_state(feed_path):
+    stock_by_sku = {}
+    latest_by_sku = {}
+    for offer in iter_offers(feed_path):
+        if offer.count > 0:
+            stock_by_sku[offer.kit_sku] = max(
+                stock_by_sku.get(offer.kit_sku, 0),
+                offer.count,
+            )
+        key = _source_sort_key(offer.source_id)
+        current = latest_by_sku.get(offer.kit_sku)
+        if current is None or key >= current[0]:
+            latest_by_sku[offer.kit_sku] = (key, offer.price)
+    return stock_by_sku, latest_by_sku
+
+
 def _category_chain(category_id, categories):
     if not category_id:
         return []
@@ -411,8 +427,7 @@ class SyncRunner:
 
         seen_source_ids = set()
         seen_site_codes = set()
-        sku_positive_max = {}
-        sku_newest_source = {}
+        global_positive_max, global_latest = build_feed_canonical_state(self.feed_path)
         price_batch = []
         stock_batch = []
         stopped_early = False
@@ -444,20 +459,19 @@ class SyncRunner:
             else:
                 seen_site_codes.add(offer.kit_sku)
 
-            previous_positive = sku_positive_max.get(offer.kit_sku, 0)
-            effective_positive = max(previous_positive, offer.count if offer.count > 0 else 0)
-            sku_positive_max[offer.kit_sku] = effective_positive
-            stock_offer = replace(
+            effective_positive = global_positive_max.get(offer.kit_sku, 0)
+            latest_key, latest_price = global_latest.get(
+                offer.kit_sku,
+                (_source_sort_key(offer.source_id), offer.price),
+            )
+            canonical_offer = replace(
                 offer,
                 count=effective_positive if effective_positive > 0 else 0,
                 in_stock=effective_positive > 0,
+                price=latest_price,
             )
-
-            current_source_key = _source_sort_key(offer.source_id)
-            previous_source_key = sku_newest_source.get(offer.kit_sku)
-            use_price = previous_source_key is None or current_source_key >= previous_source_key
-            if use_price:
-                sku_newest_source[offer.kit_sku] = current_source_key
+            stock_offer = canonical_offer
+            use_price = True
 
             variant = resolve_variant(offer, by_source, by_sku, self.characteristic_titles)
             if variant is not None:
@@ -485,11 +499,11 @@ class SyncRunner:
                             by_sku.pop(current_sku, None)
                     by_sku.setdefault(offer.kit_sku, []).append(variant)
 
-                if offer.price is None:
+                if canonical_offer.price is None:
                     self.report['invalid_price_count'] += 1
                     self._warn(f'invalid feed price; KIT price unchanged: {offer.kit_sku}')
                 elif use_price:
-                    price_update = build_price_update(offer, variant)
+                    price_update = build_price_update(canonical_offer, variant)
                     if price_update:
                         price_batch.append(price_update)
                         self.report['price_changes'] += 1
@@ -525,7 +539,7 @@ class SyncRunner:
                 self.report['new_limit_skipped'] += 1
                 continue
 
-            if offer.price is None:
+            if canonical_offer.price is None:
                 self.report['invalid_price_count'] += 1
                 self._record_error(offer.kit_sku, 'new product has invalid feed price')
                 continue
