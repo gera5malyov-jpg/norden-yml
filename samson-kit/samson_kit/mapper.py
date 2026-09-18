@@ -282,6 +282,8 @@ def normalize_sku(row,price_override=None,stock_override=None):
     if barcodes: chars.append(('Штрихкод',barcodes))
     chars.append(('Samson ID/артикул',[code]))
     min_order_quantity,order_step=extract_order_constraints(row)
+    chars.append(('Минимальный заказ',[str(min_order_quantity)]))
+    chars.append(('Шаг заказа',[str(order_step)]))
     return NormalizedSku(
         source_code=code,
         kit_sku=to_kit_sku(code),
