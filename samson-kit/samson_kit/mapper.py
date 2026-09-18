@@ -221,6 +221,24 @@ def extract_documents(row):
             if value.startswith(('http://','https://')) and value not in out: out.append(value)
     return out
 
+def extract_order_constraints(row):
+    pzk=None
+    intermediate=None
+    for item in row.get('package_list') or []:
+        if not isinstance(item,dict):
+            continue
+        typ=str(item.get('type','')).strip().casefold()
+        q=_extract_quantity(item.get('value'))
+        if q is None or q <= 0:
+            continue
+        if typ=='pzk':
+            pzk=q
+        elif typ=='intermediate':
+            intermediate=q
+    if not pzk:
+        return 1,1
+    return int(pzk), int(intermediate or 1)
+
 def extract_barcodes(row):
     out=[]
     for key in ('barcodes','barcode','ean','ean13','gtin','upc'):
@@ -230,7 +248,23 @@ def extract_barcodes(row):
 
 @dataclass
 class NormalizedSku:
-    source_code:str; kit_sku:str; name:str; category_id:Optional[str]; description:str; brand:str; purchase_price:Optional[Decimal]; stock_parts:Optional[list]; active:bool; withdrawn:bool; barcodes:list=field(default_factory=list); image_urls:list=field(default_factory=list); document_urls:list=field(default_factory=list); characteristics:list=field(default_factory=list); raw_keys:list=field(default_factory=list)
+    source_code:str
+    kit_sku:str
+    name:str
+    category_id:Optional[str]
+    description:str
+    brand:str
+    purchase_price:Optional[Decimal]
+    stock_parts:Optional[list]
+    active:bool
+    withdrawn:bool
+    min_order_quantity:int=1
+    order_step:int=1
+    barcodes:list=field(default_factory=list)
+    image_urls:list=field(default_factory=list)
+    document_urls:list=field(default_factory=list)
+    characteristics:list=field(default_factory=list)
+    raw_keys:list=field(default_factory=list)
 
 def normalize_sku(row,price_override=None,stock_override=None):
     code=_first(row,('sku','code','article','articul','vendor_code','id'))
@@ -247,7 +281,26 @@ def normalize_sku(row,price_override=None,stock_override=None):
     chars=extract_characteristics(row); barcodes=extract_barcodes(row)
     if barcodes: chars.append(('Штрихкод',barcodes))
     chars.append(('Samson ID/артикул',[code]))
-    return NormalizedSku(code,to_kit_sku(code),name,category_id,description,brand,purchase,stock_parts,active,withdrawn,barcodes,extract_images(row),extract_documents(row),chars,sorted(map(str,row.keys())))
+    min_order_quantity,order_step=extract_order_constraints(row)
+    return NormalizedSku(
+        source_code=code,
+        kit_sku=to_kit_sku(code),
+        name=name,
+        category_id=category_id,
+        description=description,
+        brand=brand,
+        purchase_price=purchase,
+        stock_parts=stock_parts,
+        active=active,
+        withdrawn=withdrawn,
+        min_order_quantity=min_order_quantity,
+        order_step=order_step,
+        barcodes=barcodes,
+        image_urls=extract_images(row),
+        document_urls=extract_documents(row),
+        characteristics=chars,
+        raw_keys=sorted(map(str,row.keys())),
+    )
 
 def category_chain(category_id,categories_by_id):
     if category_id in (None,''): return []
