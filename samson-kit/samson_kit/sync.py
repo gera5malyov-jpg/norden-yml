@@ -113,15 +113,47 @@ class SyncRunner:
         return out
     def _prepare_media(self,item):
         if self.dry_run: return []
-        media=[]
+        media=[]; failures=[]
         for url in item.image_urls:
             try:
                 suffix=os.path.splitext(urlparse(url).path)[1] or '.jpg'
                 with tempfile.TemporaryDirectory(prefix='samson-img-') as td:
-                    path=os.path.join(td,'image'+suffix[:10]); self.http.download_to_file(url,path); uploaded=self.kit.upload_image(path); file_id=str(uploaded.get('id','')).strip()
-                    if file_id: media.append({'type':'IMAGE','display_sequence':len(media),'image_id':file_id})
-            except Exception as exc: self._warn(f'image skipped for {item.kit_sku}: {exc}')
+                    path=os.path.join(td,'image'+suffix[:10])
+                    self.http.download_to_file(url,path)
+                    uploaded=self.kit.upload_image(path)
+                    file_id=str(uploaded.get('id','')).strip()
+                    if not file_id:
+                        raise RuntimeError('KIT did not return image file id')
+                    media.append({'type':'IMAGE','display_sequence':len(media),'image_id':file_id})
+            except Exception as exc:
+                failures.append(str(exc))
+                self._warn(f'image failed for {item.kit_sku}: {exc}')
+        if len(media)!=len(item.image_urls):
+            raise RuntimeError(f'incomplete image set for {item.kit_sku}: prepared {len(media)} of {len(item.image_urls)}')
         return media
+
+    def _repair_images_if_incomplete(self,item,variant):
+        if self.dry_run or not item.image_urls:
+            return False
+        variant_id=str((variant or {}).get('id','')).strip()
+        if not variant_id:
+            raise RuntimeError(f'KIT variant id missing for image repair {item.kit_sku}')
+        detail=self.kit.get_variant(variant_id)
+        current_media=detail.get('media') or []
+        current_images=[m for m in current_media if isinstance(m,dict) and str(m.get('type','')).strip().upper()=='IMAGE']
+        non_images=[m for m in current_media if isinstance(m,dict) and str(m.get('type','')).strip().upper()!='IMAGE']
+        if len(current_images)>=len(item.image_urls):
+            return False
+        if non_images:
+            self._warn(f'image repair skipped for {item.kit_sku}: non-image media present')
+            return False
+        media=self._prepare_media(item)
+        self.kit.update_variant(variant_id,{'media':media})
+        verify=self.kit.get_variant(variant_id)
+        verified=[m for m in (verify.get('media') or []) if isinstance(m,dict) and str(m.get('type','')).strip().upper()=='IMAGE']
+        if len(verified)!=len(item.image_urls):
+            raise RuntimeError(f'image repair verification failed for {item.kit_sku}: KIT has {len(verified)} of {len(item.image_urls)}')
+        return True
     def _attach_documents(self,item,variant_id):
         if self.dry_run or not item.document_urls: return
         try:
