@@ -1,0 +1,103 @@
+name: Fast probe Samson stock examples once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fast-probe-samson-stock-examples-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Fast probe stock
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python - <<'PY'
+          import os, json
+          from samson_kit.http import SafeSession
+          from samson_kit.samson_client import SamsonClient
+          from samson_kit.kit_client import KitClient
+          from samson_kit.mapper import normalize_sku, extract_stock_parts, extract_withdrawn, extract_active
+          from samson_kit.rules import calculate_stock
+
+          http=SafeSession()
+          samson=SamsonClient(os.environ['SAMSON_API_KEY'],http)
+          kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http)
+          wid=kit.resolve_warehouse_exact('СПБ')
+          for code in ('106225','106203'):
+              sku_payload=http.request_json(
+                  'GET',samson.base_url+'/sku/',
+                  params={'api_key':samson.api_key,'response_format':'json','sku':code},
+                  headers={'Accept':'application/json'})
+              env=sku_payload[0] if isinstance(sku_payload,list) and len(sku_payload)==1 else sku_payload
+              sku_rows=(env.get('data') if isinstance(env,dict) else []) or []
+              row=None
+              for x in sku_rows:
+                  if isinstance(x,dict):
+                      try: item0=normalize_sku(x)
+                      except Exception: continue
+                      if item0.source_code==code:
+                          row=x; break
+              if row is None:
+                  print('NO_SKU_ROW '+code); continue
+
+              stock_payload=http.request_json(
+                  'GET',samson.base_url+'/sku/stock/',
+                  params={'api_key':samson.api_key,'response_format':'json','sku':code},
+                  headers={'Accept':'application/json'})
+              senv=stock_payload[0] if isinstance(stock_payload,list) and len(stock_payload)==1 else stock_payload
+              srows=(senv.get('data') if isinstance(senv,dict) else []) or []
+              srow=None
+              for x in srows:
+                  if isinstance(x,dict):
+                      try: ix=normalize_sku(x)
+                      except Exception: continue
+                      if ix.source_code==code:
+                          srow=x; break
+
+              variant_rows=list(kit.iter_variants({'sku':'SAMS-'+code}))
+              exact=[v for v in variant_rows if str(v.get('sku','')).strip()=='SAMS-'+code]
+              detail=kit.get_variant(exact[0]['id']) if len(exact)==1 else None
+              spb=None
+              if detail:
+                  for st in detail.get('stocks') or []:
+                      if str(st.get('warehouse_id',''))==wid:
+                          spb=st.get('quantity'); break
+
+              withdrawn=extract_withdrawn(row)
+              active=extract_active(row,withdrawn)
+              direct=extract_stock_parts(row)
+              override=extract_stock_parts(srow) if srow else None
+              chosen=override if override is not None else direct
+              desired=calculate_stock(chosen,active=active,withdrawn=withdrawn)
+              print('FAST_RESULT='+json.dumps({
+                  'code':code,
+                  'sku_stock_list':row.get('stock_list'),
+                  'out_of_stock':row.get('out_of_stock'),
+                  'status':row.get('status'),
+                  'remove_date':row.get('remove_date'),
+                  'stock_endpoint_row':srow,
+                  'direct_parts':direct,
+                  'override_parts':override,
+                  'active':active,
+                  'withdrawn':withdrawn,
+                  'desired_stock':desired,
+                  'kit_query_count':len(variant_rows),
+                  'kit_exact_count':len(exact),
+                  'kit_spb':spb
+              },ensure_ascii=False))
+          PY
