@@ -1,0 +1,63 @@
+name: Ozon TN VED sync
+
+on:
+  schedule:
+    - cron: '37 3 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only inspect and report, do not write to Ozon'
+        required: true
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ozon-tnved-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+      MAX_UPDATES_PER_RUN: '500'
+      UPDATE_BATCH_SIZE: '50'
+      TNVED_OVERRIDES: ozon/tnved_overrides.json
+      TNVED_SUMMARY: ozon/tnved_summary.md
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check Ozon credentials
+        shell: bash
+        run: |
+          if [ -z "$OZON_CLIENT_ID" ] || [ -z "$OZON_API_KEY" ]; then
+            echo "::error::Add OZON_CLIENT_ID and OZON_API_KEY in Settings > Secrets and variables > Actions > Repository secrets."
+            exit 2
+          fi
+
+      - name: Sync missing TN VED
+        run: python ozon/tnved_sync.py
+
+      - name: Add report to job summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f ozon/tnved_summary.md ]; then
+            cat ozon/tnved_summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
