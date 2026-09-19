@@ -1,0 +1,118 @@
+name: Samson efficient initial bootstrap
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/samson-efficient-bootstrap.yml'
+  workflow_dispatch:
+    inputs:
+      skip_items:
+        description: 'Source rows already covered'
+        required: true
+        default: '0'
+        type: string
+      batch_size:
+        description: 'Rows to process this run'
+        required: true
+        default: '2500'
+        type: string
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: kit-api-write
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Resolve batch
+        id: batch
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "skip=${{ inputs.skip_items }}" >> "$GITHUB_OUTPUT"
+            echo "size=${{ inputs.batch_size }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=0" >> "$GITHUB_OUTPUT"
+            echo "size=2500" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Regression tests on first run only
+        if: github.event_name == 'push'
+        run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
+      - name: Import one Samson batch
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python -m samson_kit.cli \
+            --skip-items "${{ steps.batch.outputs.skip }}" \
+            --max-items "${{ steps.batch.outputs.size }}" \
+            --report /tmp/samson-bootstrap.json
+      - name: Decide whether to continue
+        id: next
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          path='/tmp/samson-bootstrap.json'
+          if not os.path.exists(path):
+              print('continue=false')
+              raise SystemExit
+          r=json.load(open(path,encoding='utf-8'))
+          seen=int(r.get('samson_products_seen') or 0)
+          errors=int(r.get('error_count') or 0)
+          skip=int('${{ steps.batch.outputs.skip }}')
+          size=int('${{ steps.batch.outputs.size }}')
+          ok=(r.get('status')=='ok' and errors==0)
+          print('continue=' + ('true' if ok and seen==size else 'false'))
+          print('next_skip=' + str(skip+seen))
+          print('seen=' + str(seen))
+          print('errors=' + str(errors))
+          PY
+      - name: Queue next Samson batch
+        if: steps.next.outputs.continue == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEXT_SKIP: ${{ steps.next.outputs.next_skip }}
+          BATCH_SIZE: ${{ steps.batch.outputs.size }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          repo=os.environ['GITHUB_REPOSITORY']
+          url=f"https://api.github.com/repos/{repo}/actions/workflows/samson-efficient-bootstrap.yml/dispatches"
+          body=json.dumps({
+              'ref':'main',
+              'inputs':{
+                  'skip_items':os.environ['NEXT_SKIP'],
+                  'batch_size':os.environ['BATCH_SIZE'],
+              }
+          }).encode()
+          req=urllib.request.Request(
+              url,data=body,method='POST',
+              headers={
+                  'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+                  'Accept':'application/vnd.github+json',
+                  'X-GitHub-Api-Version':'2022-11-28',
+                  'Content-Type':'application/json',
+              }
+          )
+          with urllib.request.urlopen(req,timeout=30) as resp:
+              if resp.status not in (204,):
+                  raise RuntimeError(f'dispatch status {resp.status}')
+          PY

@@ -57,9 +57,9 @@ def _document_parts(url,index):
     return title,ext
 
 class SyncRunner:
-    def __init__(self,samson,kit,http,*,warehouse_name='СПБ',dry_run=False,max_items=None):
-        self.samson=samson; self.kit=kit; self.http=http; self.warehouse_name=warehouse_name; self.dry_run=bool(dry_run); self.max_items=int(max_items) if max_items not in (None,'',0,'0') else None; self.kit_categories=[]; self.kit_characteristics=[]
-        self.report={'dry_run':self.dry_run,'catalog_complete':False,'samson_products_seen':0,'new_products_created':0,'price_changes':0,'stock_changes':0,'active_zero_to_100':0,'withdrawn_to_zero':0,'absent_to_zero':0,'documents_attached':0,'documents_skipped':0,'duplicate_kit_skus':0,'error_count':0,'errors':[],'warning_count':0,'warnings':[],'unmapped_source_keys':{},'minimum_price_mapping_unsupported_count':0,'minimum_price_examples':{}}
+    def __init__(self,samson,kit,http,*,warehouse_name='СПБ',dry_run=False,skip_items=0,max_items=None):
+        self.samson=samson; self.kit=kit; self.http=http; self.warehouse_name=warehouse_name; self.dry_run=bool(dry_run); self.skip_items=max(0,int(skip_items or 0)); self.max_items=int(max_items) if max_items not in (None,'',0,'0') else None; self.kit_categories=[]; self.kit_characteristics=[]
+        self.report={'dry_run':self.dry_run,'catalog_complete':False,'samson_products_seen':0,'new_products_created':0,'price_changes':0,'stock_changes':0,'active_zero_to_100':0,'withdrawn_to_zero':0,'absent_to_zero':0,'documents_attached':0,'documents_skipped':0,'duplicate_kit_skus':0,'error_count':0,'errors':[],'warning_count':0,'warnings':[],'unmapped_source_keys':{},'minimum_price_mapping_unsupported_count':0,'minimum_price_examples':{},'skip_items':self.skip_items}
     def _record_error(self,sku,exc):
         self.report['error_count']+=1
         if len(self.report['errors'])<200: self.report['errors'].append({'sku':sku,'message':str(exc)[:500]})
@@ -205,8 +205,13 @@ class SyncRunner:
         return payload
     def run(self):
         warehouse_id=self.kit.resolve_warehouse_exact(self.warehouse_name); source_categories={str(x.get('id')):x for x in self.samson.iter_categories() if isinstance(x,dict) and x.get('id') not in (None,'')}; kit_index,duplicates=self.kit.index_samson_variants(); self.report['duplicate_kit_skus']=len(duplicates); self.kit_categories=self.kit.list_categories(); self.kit_characteristics=self.kit.list_characteristics(); price_override=self._load_override('iter_prices','price'); stock_override=self._load_override('iter_stock','stock'); seen=set(); price_batch=[]; stock_batch=[]; complete=False
+        source_index=0
         try:
             for raw in self.samson.iter_skus():
+                if source_index < self.skip_items:
+                    source_index+=1
+                    continue
+                source_index+=1
                 item0=normalize_sku(raw); item=normalize_sku(raw,price_override=price_override.get(item0.source_code),stock_override=stock_override.get(item0.source_code)); seen.add(item.kit_sku); self.report['samson_products_seen']+=1
                 for key in item.raw_keys: self.report['unmapped_source_keys'][key]=self.report['unmapped_source_keys'].get(key,0)+1
                 if item.kit_sku in duplicates: continue
@@ -238,7 +243,7 @@ class SyncRunner:
         except Exception as exc: self._record_error('CATALOG',exc); complete=False
         if price_batch and not self.dry_run: self.kit.bulk_update_prices(price_batch)
         if stock_batch and not self.dry_run: self.kit.bulk_update_stocks(stock_batch)
-        self.report['catalog_complete']=bool(complete and self.max_items is None); absent=absent_zero_updates(kit_index,seen,warehouse_id,complete=self.report['catalog_complete']); self.report['absent_to_zero']=len(absent)
+        self.report['catalog_complete']=bool(complete and self.max_items is None and self.skip_items==0); absent=absent_zero_updates(kit_index,seen,warehouse_id,complete=self.report['catalog_complete']); self.report['absent_to_zero']=len(absent)
         if absent and not self.dry_run: self.kit.bulk_update_stocks(absent)
         self.report['status']='ok' if not self.report['errors'] else ('degraded' if self.report['samson_products_seen'] else 'failed')
         return self.report
