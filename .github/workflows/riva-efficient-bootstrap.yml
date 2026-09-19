@@ -1,0 +1,119 @@
+name: Riva efficient initial bootstrap
+
+on:
+  push:
+    branches:
+      - feat/riva-kit-sync
+    paths:
+      - '.github/workflows/riva-efficient-bootstrap.yml'
+  workflow_dispatch:
+    inputs:
+      skip_items:
+        description: 'Valid Riva offers already covered'
+        required: true
+        default: '3500'
+        type: string
+      batch_size:
+        description: 'Offers to process this run'
+        required: true
+        default: '4500'
+        type: string
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: kit-api-write
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      RIVA_FEED_URL: ${{ secrets.RIVA_FEED_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Resolve batch
+        id: batch
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "skip=${{ inputs.skip_items }}" >> "$GITHUB_OUTPUT"
+            echo "size=${{ inputs.batch_size }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=3500" >> "$GITHUB_OUTPUT"
+            echo "size=4500" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Riva regression tests on first run only
+        if: github.event_name == 'push'
+        run: PYTHONPATH=liga-kit:riva-kit python -m unittest discover -s riva-kit/tests -v
+      - name: Import one Riva batch
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=liga-kit:riva-kit python -m riva_kit.cli \
+            --skip-items "${{ steps.batch.outputs.skip }}" \
+            --max-items "${{ steps.batch.outputs.size }}" \
+            --report /tmp/riva-bootstrap.json
+      - name: Decide whether to continue
+        id: next
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          path='/tmp/riva-bootstrap.json'
+          if not os.path.exists(path):
+              print('continue=false')
+              raise SystemExit
+          r=json.load(open(path,encoding='utf-8'))
+          seen=int(r.get('offers_seen') or 0)
+          errors=int(r.get('error_count') or 0)
+          skip=int('${{ steps.batch.outputs.skip }}')
+          size=int('${{ steps.batch.outputs.size }}')
+          ok=(r.get('status')=='ok' and errors==0)
+          print('continue=' + ('true' if ok and seen==size else 'false'))
+          print('next_skip=' + str(skip+seen))
+          print('seen=' + str(seen))
+          print('errors=' + str(errors))
+          PY
+      - name: Queue next Riva batch
+        if: steps.next.outputs.continue == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEXT_SKIP: ${{ steps.next.outputs.next_skip }}
+          BATCH_SIZE: ${{ steps.batch.outputs.size }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          repo=os.environ['GITHUB_REPOSITORY']
+          url=f"https://api.github.com/repos/{repo}/actions/workflows/riva-efficient-bootstrap.yml/dispatches"
+          body=json.dumps({
+              'ref':'feat/riva-kit-sync',
+              'inputs':{
+                  'skip_items':os.environ['NEXT_SKIP'],
+                  'batch_size':os.environ['BATCH_SIZE'],
+              }
+          }).encode()
+          req=urllib.request.Request(
+              url,data=body,method='POST',
+              headers={
+                  'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+                  'Accept':'application/vnd.github+json',
+                  'X-GitHub-Api-Version':'2022-11-28',
+                  'Content-Type':'application/json',
+              }
+          )
+          with urllib.request.urlopen(req,timeout=30) as resp:
+              if resp.status not in (204,):
+                  raise RuntimeError(f'dispatch status {resp.status}')
+          PY
