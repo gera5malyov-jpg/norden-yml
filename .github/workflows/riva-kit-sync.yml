@@ -30,7 +30,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: kit-api-write
+  group: riva-kit-write
   cancel-in-progress: false
 
 jobs:

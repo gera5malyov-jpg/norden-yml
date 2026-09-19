@@ -24,7 +24,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: kit-api-write
+  group: riva-kit-write
   cancel-in-progress: false
 
 jobs:
