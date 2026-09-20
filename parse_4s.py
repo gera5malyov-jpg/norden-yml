@@ -70,7 +70,13 @@ def catalog_products():
     print('catalog products',len(products)); return products
 
 def discover():
-    urls=sitemap_products(); urls.update(catalog_products()); return sorted(urls)
+    urls=sitemap_products()
+    if len(urls)<MIN:
+        print('sitemap insufficient; using catalog fallback')
+        urls.update(catalog_products())
+    else:
+        print('sitemap sufficient; catalog fallback skipped')
+    return sorted(urls)
 
 def walk(v):
     if isinstance(v,dict):
