@@ -1,0 +1,219 @@
+name: Norden surgical first card
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/norden-surgical-first-card-once.yml']
+permissions:
+  contents: write
+
+jobs:
+  create-one:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find one missing Norden chair
+        timeout-minutes: 2
+        run: |
+          python - <<'PY'
+          import json,re,unicodedata,urllib.request,xml.etree.ElementTree as ET
+          U='https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.xml'
+          P='https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.group+-K8%25.xml'
+          def get(u):
+              return urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'}),timeout=60).read()
+          conf=str.maketrans({'а':'a','в':'b','с':'c','е':'e','н':'h','к':'k','м':'m','о':'o','р':'p','т':'t','х':'x','у':'y',
+                              'А':'a','В':'b','С':'c','Е':'e','Н':'h','К':'k','М':'m','О':'o','Р':'p','Т':'t','Х':'x','У':'y'})
+          def norm(v):
+              x=unicodedata.normalize('NFKC',str(v or '').strip()).translate(conf).casefold()
+              return re.sub(r'[^0-9a-z]+','',x)
+          seeds={norm(x.strip()) for x in open('norden-kit/existing_norden_codes_seed.txt',encoding='utf-8') if x.strip()}
+          price={}
+          pr=ET.fromstring(get(P))
+          for n in pr.iter('Номенклатура'):
+              a=(n.findtext('Артикул') or '').strip()
+              if not a: continue
+              opt=None; stock=None
+              for x in n.findall('Цена'):
+                  if (x.attrib.get('ВидЦен') or '').strip().casefold()=='опт':
+                      opt=(x.text or '').strip(); break
+              for x in n.findall('СвободныйОстаток'):
+                  if (x.attrib.get('Склад') or '').strip()=='Основной склад':
+                      stock=(x.text or '').strip(); break
+              price[a]={'purchase':opt,'stock':stock}
+          root=ET.fromstring(get(U))
+          cand=None
+          for n in root.iter('Номенклатура'):
+              a=(n.findtext('Артикул') or '').strip()
+              g=(n.findtext('Группа') or '').strip()
+              if not a or norm(a) in seeds or 'кресл' not in g.casefold():
+                  continue
+              cand={
+                'article':a,
+                'name':(n.findtext('НаименованиеПолное') or n.findtext('Наименование') or a).strip(),
+                'description':(n.findtext('Особенностимодели') or '').strip(),
+                'group':g,
+                'purchase':price.get(a,{}).get('purchase'),
+                'stock':price.get(a,{}).get('stock'),
+              }
+              break
+          if not cand: raise SystemExit('No missing chair candidate found')
+          open('/tmp/candidate.json','w',encoding='utf-8').write(json.dumps(cand,ensure_ascii=False))
+          print(json.dumps(cand,ensure_ascii=False),flush=True)
+          PY
+
+      - name: Resolve reference category and warehouses
+        timeout-minutes: 2
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,urllib.parse,urllib.request
+          H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          def get(path,params=None):
+              u='https://api.kit.yandex.net'+path
+              if params: u+='?'+urllib.parse.urlencode(params)
+              with urllib.request.urlopen(urllib.request.Request(u,headers=H),timeout=40) as r:
+                  return json.loads(r.read().decode())
+          p=get('/v1/variants',{'name':'AF-31646769','page':1,'per_page':100})
+          rows=p.get('variants') or p.get('items') or p.get('results') or p.get('data') or []
+          if isinstance(rows,dict): rows=rows.get('items') or []
+          ref=next(x for x in rows if x.get('sku')=='AF-31646769')
+          prod=get('/v1/products/'+ref['product_id'])
+          cats=prod.get('category_ids') or prod.get('categories') or []
+          if cats and isinstance(cats[0],dict): cats=[x.get('id') for x in cats]
+          if not cats: raise SystemExit('Reference product has no category ids')
+          wh=get('/v1/warehouses',{'page':1,'per_page':100})
+          wr=wh.get('warehouses') or wh.get('items') or wh.get('data') or []
+          if isinstance(wr,dict): wr=wr.get('items') or []
+          wanted={}
+          for title in ('МСК','СПБ привозной'):
+              m=[x for x in wr if (x.get('title') or '')==title]
+              if len(m)!=1: raise SystemExit('Warehouse not unique: '+title)
+              wanted[title]=m[0]['id']
+          ctx={'category_id':cats[0],'warehouses':wanted}
+          open('/tmp/context.json','w').write(json.dumps(ctx))
+          print(json.dumps(ctx,ensure_ascii=False),flush=True)
+          PY
+
+      - name: Create KIT product shell
+        timeout-minutes: 2
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,urllib.request
+          H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json','Content-Type':'application/json'}
+          ctx=json.load(open('/tmp/context.json'))
+          req=urllib.request.Request('https://api.kit.yandex.net/v1/products',
+                                     data=json.dumps({'category_ids':[ctx['category_id']]}).encode(),
+                                     headers=H,method='POST')
+          with urllib.request.urlopen(req,timeout=40) as r: out=json.loads(r.read().decode())
+          if not out.get('id'): raise SystemExit('No product id')
+          open('/tmp/new_product.json','w').write(json.dumps(out))
+          print(json.dumps(out,ensure_ascii=False),flush=True)
+          PY
+
+      - name: Create KIT variant
+        timeout-minutes: 2
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,re,urllib.request
+          H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json','Content-Type':'application/json'}
+          cand=json.load(open('/tmp/candidate.json')); prod=json.load(open('/tmp/new_product.json'))
+          safe=re.sub(r'[^0-9A-Za-z]+','-',cand['article'])[:45].strip('-') or 'ITEM'
+          temp='NORDEN-TMP-'+safe+'-'+hashlib.sha1(cand['article'].encode()).hexdigest()[:10]
+          body={
+            'sku':temp,'name':cand['name'],'description':cand['description'],'status':'PUBLISHED',
+            'product_id':prod['id'],'brand':'Norden',
+            'characteristics':[{
+              'characteristic_id':'01a0b475-d329-7d14-b258-0171d79daa79',
+              'value':cand['article'],'values':[cand['article']]
+            }]
+          }
+          req=urllib.request.Request('https://api.kit.yandex.net/v1/variants',
+                                     data=json.dumps(body,ensure_ascii=False).encode(),
+                                     headers=H,method='POST')
+          with urllib.request.urlopen(req,timeout=40) as r: out=json.loads(r.read().decode())
+          if not out.get('id'): raise SystemExit('No variant id')
+          open('/tmp/new_variant.json','w').write(json.dumps(out))
+          print(json.dumps(out,ensure_ascii=False),flush=True)
+          PY
+
+      - name: Set final article 100-KITID
+        timeout-minutes: 2
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,urllib.request
+          token=os.environ['YANDEX_KIT_TOKEN']
+          cand=json.load(open('/tmp/candidate.json')); v=json.load(open('/tmp/new_variant.json'))
+          kid=v.get('kit_id')
+          if not kid:
+              req=urllib.request.Request('https://api.kit.yandex.net/v1/variants/'+v['id'],headers={'Authorization':'Bearer '+token,'Accept':'application/json'})
+              with urllib.request.urlopen(req,timeout=40) as r: v=json.loads(r.read().decode())
+              kid=v.get('kit_id')
+          if not kid: raise SystemExit('No kit_id')
+          art='100-'+str(kid)
+          body={'sku':art,'characteristics':[
+            {'characteristic_id':'01a0b475-d329-7d14-b258-0171d79daa79','value':cand['article'],'values':[cand['article']]},
+            {'characteristic_id':'01a0b41e-7a1c-72a1-b7e0-1e71f55d3d8e','value':art,'values':[art]}
+          ]}
+          H={'Authorization':'Bearer '+token,'Accept':'application/json','Content-Type':'application/merge-patch+json'}
+          req=urllib.request.Request('https://api.kit.yandex.net/v1/variants/'+v['id'],
+                                     data=json.dumps(body,ensure_ascii=False).encode(),headers=H,method='PATCH')
+          with urllib.request.urlopen(req,timeout=40) as r: r.read()
+          result={'article':cand['article'],'variant_id':v['id'],'kit_id':kid,'sku':art}
+          open('/tmp/result.json','w').write(json.dumps(result,ensure_ascii=False))
+          print(json.dumps(result,ensure_ascii=False),flush=True)
+          PY
+
+      - name: Apply price and stock
+        timeout-minutes: 2
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,math,os,urllib.request
+          cand=json.load(open('/tmp/candidate.json')); ctx=json.load(open('/tmp/context.json')); res=json.load(open('/tmp/result.json'))
+          H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json','Content-Type':'application/json'}
+          def post(path,body):
+              req=urllib.request.Request('https://api.kit.yandex.net'+path,data=json.dumps(body).encode(),headers=H,method='POST')
+              with urllib.request.urlopen(req,timeout=40) as r: return r.read()
+          if cand.get('purchase'):
+              p=float(str(cand['purchase']).replace(',','.'))
+              post('/v1/variants/prices/bulk_update',{'items':[{
+                'variant_id':res['variant_id'],'price':str(math.ceil(p*1.80)),
+                'manual_discount_price':str(math.ceil(p*1.26))
+              }]})
+          raw=str(cand.get('stock') or '').strip()
+          qty=100 if raw.startswith('>') else int(float(raw.replace(',','.'))) if raw else 0
+          post('/v1/variants/stocks/bulk_update',{'items':[
+              {'variant_id':res['variant_id'],'warehouse_id':wid,'quantity':qty}
+              for wid in ctx['warehouses'].values()
+          ]})
+          print(json.dumps({'purchase':cand.get('purchase'),'stock':qty},ensure_ascii=False),flush=True)
+          PY
+
+      - name: Save proof
+        if: always()
+        run: |
+          python - <<'PY'
+          import json,os
+          out={}
+          for name,path in [('candidate','/tmp/candidate.json'),('context','/tmp/context.json'),('product','/tmp/new_product.json'),('variant','/tmp/new_variant.json'),('result','/tmp/result.json')]:
+              if os.path.exists(path):
+                  try: out[name]=json.load(open(path))
+                  except: pass
+          os.makedirs('norden-kit',exist_ok=True)
+          open('norden-kit/surgical_first_card_result.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/surgical_first_card_result.json
+          git commit -m "Record Norden surgical first card result" || exit 0
+          git pull --rebase
+          git push
