@@ -1,4 +1,5 @@
 name: Repair one Norden image once
+# content probe
 on:
   push:
     branches: [main]
@@ -58,7 +59,7 @@ jobs:
                       out['api']['rows']=len(rows)
                       if rows:
                           raw=rows[0]
-                          out['api']['image_type']=type(raw.get('images')).__name__
+                          out['api']['keys']=sorted(raw.keys()); out['api']['description']=raw.get('description'); out['api']['features']=raw.get('features'); out['api']['image_type']=type(raw.get('images')).__name__
                           out['api']['image_preview']=raw.get('images')
                           urls=extract_urls(raw.get('images'))
                           out['api']['urls']=urls[:20]
@@ -108,8 +109,20 @@ jobs:
           m=re.search(r'\.(jpg|jpeg|png|webp)(?:\?|$)',chosen,re.I)
           if m: ext='.'+m.group(1).lower().replace('jpeg','jpg')
 
-          # Upload file to KIT exactly like working Samson integration.
+          # Inspect current KIT card first; if image is already present, skip media mutation.
           H={'Authorization':'Bearer '+token,'Accept':'application/json'}
+          current=requests.get('https://api.kit.yandex.net/v1/variants/'+VARIANT_ID,headers=H,timeout=60)
+          current.raise_for_status()
+          current_payload=current.json()
+          if current_payload.get('media'):
+              out['upload']['skipped_existing_media']=True
+              out['verify']={'media_count':len(current_payload.get('media') or []),'media':current_payload.get('media') or []}
+              os.makedirs('norden-kit',exist_ok=True)
+              open('norden-kit/one_image_repair_result.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+              print(json.dumps(out,ensure_ascii=False,indent=2))
+              raise SystemExit(0)
+
+          # Upload file to KIT exactly like working Samson integration.
           for attempt in range(12):
               up=requests.post('https://api.kit.yandex.net/v1/files',headers=H,
                                files={'file':('norden'+ext,img.content,mime)},timeout=60)
