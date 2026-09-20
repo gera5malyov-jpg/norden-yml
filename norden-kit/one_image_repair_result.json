@@ -4,6 +4,45 @@
   "api": {
     "status": 200,
     "rows": 1,
+    "keys": [
+      "Kod",
+      "category",
+      "description",
+      "features",
+      "images",
+      "name",
+      "price",
+      "price_rrc",
+      "product_code",
+      "qty"
+    ],
+    "description": null,
+    "features": [
+      {
+        "name": "Вид номенклатуры",
+        "value": "Корпусная мебель Наборы"
+      },
+      {
+        "name": "Серия",
+        "value": "Sigma"
+      },
+      {
+        "name": "Акция",
+        "value": "Да"
+      },
+      {
+        "name": "Вес, кг",
+        "value": "18"
+      },
+      {
+        "name": "Объем,м3",
+        "value": "0.06"
+      },
+      {
+        "name": "Количество мест",
+        "value": "3"
+      }
+    ],
     "image_type": "list",
     "image_preview": [
       "https://norden.group/images/detailed/433/00-00015187___SG.110.SH.44.AN_aa851400-ffd8-11ef-bb05-50eb71d73a80.jpg"
@@ -17,11 +56,7 @@
     "chosen_url": "https://norden.group/images/detailed/433/00-00015187___SG.110.SH.44.AN_aa851400-ffd8-11ef-bb05-50eb71d73a80.jpg",
     "download_status": 200,
     "download_bytes": 61249,
-    "kit_file_status": 201,
-    "kit_file_body": "{\"id\":\"01a0bff7-96ff-7abf-91a9-41ec1ef015d3\",\"type\":\"IMAGE\",\"url\":\"https://avatars.mds.yandex.net/get-yastore/21553739/xmsxtfbtd92vvkwplszh29fzt5wkbxs5/orig\"}",
-    "file_id": "01a0bff7-96ff-7abf-91a9-41ec1ef015d3",
-    "patch_status": 200,
-    "patch_body": "{\"barcode\":\"\",\"brand\":\"Norden\",\"cargo_boxes\":[],\"characteristics\":[{\"characteristic_id\":\"01a0b41e-7a1c-72a1-b7e0-1e71f55d3d8e\",\"value\":\"100-1536982\",\"values\":[\"100-1536982\"]},{\"characteristic_id\":\"01a0b475-d329-7d14-b258-0171d79daa79\",\"value\":\"SG.110.SH.44.AN\",\"values\":[\"SG.110.SH.44.AN\"]}],\"created_at\":\"2026-09-20T20:23:40.703796+03:00\",\"description\":\"\",\"id\":\"01a0bfd8-53c3-7398-b8f0-1a9f97539d72\",\"kit_id\":1536982,\"media\":[{\"display_sequence\":0,\"image_id\":\"01a0bff7-96ff-7abf-91a9-41ec1ef015d3\",\"type\":\"IMAGE\"}],\"name\":\"Брифинг-приставка 800х600х750\",\"pricing\":{\"final_price\":\"8127\",\"manual_discount_price\":\"8127\",\"price\":\"11610\",\"promotion_price\":\"11610\"},\"product_card_id\":\"01a0bfd8-53f2-72bf-a367-67ab69e1dedc\",\"product_id\":\"01a0bfd8-3de8-7681-821a-52e3f22e3f7b\",\"relative_link_url\":\"/products/brifing-pristavka-800h600h750-17-3848137?variant=1536982\",\"requires_marking\":false,\"seo_description\":\"\",\"seo_h1\":\"\",\"seo_title\":\"\",\"sku\":\"100-1536982\",\"slug\":\"brifing-pristavka-800h600h750-9\",\"sort_w"
+    "skipped_existing_media": true
   },
   "verify": {
     "media_count": 1,
