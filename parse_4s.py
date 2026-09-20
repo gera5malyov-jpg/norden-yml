@@ -14,7 +14,7 @@ from urllib3.util.retry import Retry
 
 BASE='https://4s-mebel.ru'
 OUT=Path('4s-mebel.yml')
-MIN=int(os.getenv('FOURS_MIN_OFFERS','150'))
+MIN=int(os.getenv('FOURS_MIN_OFFERS','20'))
 DELAY=float(os.getenv('FOURS_REQUEST_DELAY','0.12'))
 TIMEOUT=45
 
@@ -101,6 +101,34 @@ def first(*a):
         if txt(x): return txt(x)
     return ''
 
+def norm_brand(v):
+    return re.sub(r'[^0-9a-zа-яё]+','',txt(v).casefold())
+
+def product_brand(p, ps):
+    raw=p.get('brand') if isinstance(p,dict) else None
+    if isinstance(raw,str):
+        brand=txt(raw)
+    elif isinstance(raw,dict):
+        brand=first(raw.get('name'),raw.get('brand'),raw.get('title'))
+    elif isinstance(raw,list):
+        brand=''
+        for x in raw:
+            if isinstance(x,str) and txt(x):
+                brand=txt(x); break
+            if isinstance(x,dict):
+                brand=first(x.get('name'),x.get('brand'),x.get('title'))
+                if brand: break
+    else:
+        brand=''
+    if brand:
+        return brand
+    for k,v in ps.items():
+        nk=txt(k).casefold()
+        if nk in {'бренд','марка','производитель'} or 'бренд' in nk:
+            if txt(v):
+                return txt(v)
+    return ''
+
 def params(soup):
     d={}
     for tr in soup.find_all('tr'):
@@ -146,6 +174,7 @@ def crumbs(soup):
 
 def parse(u):
     soup=BeautifulSoup(get(u).text,'lxml'); p=product_ld(soup); o=offer_ld(p); body=txt(soup.get_text('\n',strip=True)); ps=params(soup)
+    brand=product_brand(p,ps)
     h=soup.find('h1'); name=first(p.get('name'),h.get_text(' ',strip=True) if h else '')
     sku=first(p.get('sku'),p.get('mpn'),p.get('productID'),ps.get('Артикул'),ps.get('артикул'))
     if not sku:
@@ -168,7 +197,7 @@ def parse(u):
     for sel in ["[class*='old-price']","[class*='old_price']","[class*='price-old']"]:
         t=soup.select_one(sel)
         if t and price(t.get_text(' ',strip=True)): old=price(t.get_text(' ',strip=True)); break
-    return {'url':u,'name':name,'sku':sku,'price':pr,'old':old,'available':available,'status':status,'description':desc,'images':images(soup,p,u),'params':ps,'cats':crumbs(soup)}
+    return {'url':u,'name':name,'sku':sku,'price':pr,'old':old,'available':available,'status':status,'description':desc,'images':images(soup,p,u),'params':ps,'cats':crumbs(soup),'brand':brand}
 
 def cid(path): return str(int(hashlib.sha1(' / '.join(path).encode()).hexdigest()[:12],16))
 def add(parent,tag,value,**attrs):
@@ -209,7 +238,7 @@ def make(items):
 def main():
     urls=discover()
     if len(urls)<MIN: raise RuntimeError(f'only {len(urls)} product URLs discovered; minimum {MIN}')
-    items=[]; fails=[]; done=0
+    items=[]; fails=[]; skipped_brand=0; done=0
     with ThreadPoolExecutor(max_workers=4) as pool:
         futures={pool.submit(parse,u):u for u in urls}
         for future in as_completed(futures):
@@ -217,12 +246,16 @@ def main():
             try:
                 it=future.result()
                 if not it['name'] or not it['price']: raise ValueError('missing name or price')
+                if norm_brand(it.get('brand')) not in {'4сезона','4sezona'}:
+                    skipped_brand+=1
+                    continue
+                it['brand']='4 Сезона'
                 items.append(it)
             except Exception as e:
                 fails.append((u,str(e))); print('FAILED',u,e)
-            if done%25==0 or done==len(urls): print(f'parsed {done}/{len(urls)} valid={len(items)} failed={len(fails)}')
+            if done%25==0 or done==len(urls): print(f'parsed {done}/{len(urls)} brand_4seasons={len(items)} skipped_other_brand={skipped_brand} failed={len(fails)}')
     items.sort(key=lambda x:x['url'])
-    make(items); print(f'generated {OUT}: {len(items)} offers, {OUT.stat().st_size} bytes')
+    make(items); print(f'generated {OUT}: {len(items)} offers, skipped_other_brand={skipped_brand}, {OUT.stat().st_size} bytes')
     if fails:
         print('non-fatal failures',len(fails))
         for u,e in fails[:20]: print('-',u,e)
