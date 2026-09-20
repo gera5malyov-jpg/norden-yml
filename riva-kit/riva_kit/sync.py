@@ -218,7 +218,7 @@ def _category_chain(category_id, categories):
 
 
 class SyncRunner:
-    def __init__(self, feed_path, categories, kit, http, *, dry_run=False, skip_items=0, max_items=None, max_new=None):
+    def __init__(self, feed_path, categories, kit, http, *, dry_run=False, skip_items=0, max_items=None, max_new=None, new_only=False):
         self.feed_path = feed_path
         self.categories = categories
         self.kit = kit
@@ -227,6 +227,7 @@ class SyncRunner:
         self.skip_items = max(0, int(skip_items or 0))
         self.max_items = int(max_items) if max_items not in (None, '', 0, '0') else None
         self.max_new = int(max_new) if max_new not in (None, '', 0, '0') else None
+        self.new_only = bool(new_only)
         self.kit_categories = []
         self.kit_characteristics = []
         self.characteristic_titles = {}
@@ -259,6 +260,8 @@ class SyncRunner:
             'error_count': 0,
             'errors': [],
             'skip_items': self.skip_items,
+            'max_new': self.max_new,
+            'new_only': self.new_only,
             'stock_rule': 'per Код для сайта: max positive count across duplicates; if none positive => 100 on each managed warehouse',
             'price_rule': 'newest technical offer id wins; old=cost*1.80; sale=cost*1.26; desired minimum=cost*1.20',
             'minimum_price_api_supported': False,
@@ -476,6 +479,8 @@ class SyncRunner:
             variant = resolve_variant(offer, by_source, by_sku, self.characteristic_titles)
             if variant is not None:
                 self.report['existing_variants_seen'] += 1
+                if self.new_only:
+                    continue
 
                 source_ids = _char_values(variant, self.characteristic_titles, 'ID предложения Riva')
                 current_sku = str(variant.get('sku', '')).strip()
@@ -536,8 +541,8 @@ class SyncRunner:
                 continue
 
             if self.max_new is not None and created_or_planned >= self.max_new:
-                self.report['new_limit_skipped'] += 1
-                continue
+                stopped_early = True
+                break
 
             if canonical_offer.price is None:
                 self.report['invalid_price_count'] += 1

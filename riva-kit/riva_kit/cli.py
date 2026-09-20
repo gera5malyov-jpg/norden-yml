@@ -30,6 +30,7 @@ def build_parser():
     parser.add_argument('--skip-items', type=int, default=0)
     parser.add_argument('--max-items', type=int, default=None)
     parser.add_argument('--max-new', type=int, default=None)
+    parser.add_argument('--new-only', action='store_true')
     parser.add_argument('--report', default='riva-kit/state/last_sync.json')
     return parser
 
@@ -66,6 +67,7 @@ def main(argv=None):
                 skip_items=args.skip_items,
                 max_items=args.max_items,
                 max_new=args.max_new,
+                new_only=args.new_only,
             )
             result = runner.run()
     except Exception as exc:
@@ -88,6 +90,8 @@ def main(argv=None):
         'status',
         'dry_run',
         'skip_items',
+        'max_new',
+        'new_only',
         'catalog_complete',
         'offers_seen',
         'in_stock_offers',
@@ -111,7 +115,7 @@ def main(argv=None):
 
     if result.get('status') == 'failed':
         return 1
-    if args.max_items is None and args.skip_items == 0 and not result.get('catalog_complete'):
+    if args.max_items is None and args.max_new is None and args.skip_items == 0 and not result.get('catalog_complete'):
         return 2
     return 0
 
