@@ -1,0 +1,73 @@
+name: KIT Norden mapping probe once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-norden-mapping-probe-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe characteristic mapping and Norden sample
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.parse, urllib.request, urllib.error, time
+          def get(url,headers):
+              for attempt in range(12):
+                  req=urllib.request.Request(url,headers=headers)
+                  try:
+                      with urllib.request.urlopen(req,timeout=120) as r:
+                          return json.loads(r.read().decode('utf-8'))
+                  except urllib.error.HTTPError as e:
+                      if e.code==429:
+                          time.sleep(int(e.headers.get('Retry-After') or 3)); continue
+                      raise
+              raise RuntimeError('request retries exhausted')
+          kh={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          nh={'secret':os.environ['NORDEN_SECRET']}
+          chars=[]
+          page=1
+          while True:
+              data=get('https://api.kit.yandex.net/v1/characteristics?'+urllib.parse.urlencode({'page':page,'per_page':100}),kh)
+              batch=data.get('characteristics') or data.get('items') or data.get('results') or data.get('data') or []
+              if isinstance(batch,dict): batch=batch.get('items') or []
+              chars.extend([x for x in batch if isinstance(x,dict)])
+              if not batch or len(batch)<100: break
+              page+=1
+          wanted=[x for x in chars if str(x.get('title','')).strip().casefold() in {'код для сайта','код продавца'}]
+          sample=None; page=1
+          while page<=20 and sample is None:
+              data=get('https://norden.group/api-products/?'+urllib.parse.urlencode({'page':page}),nh)
+              batch=data.get('products',[])
+              for p in batch:
+                  if str(p.get('product_code','')).strip()=='RT-2031':
+                      sample=p; break
+              if len(batch)<500: break
+              page+=1
+          cats=get('https://norden.group/api-categories/',nh)
+          os.makedirs('norden-kit',exist_ok=True)
+          out={'kit_characteristics':wanted,'norden_sample':sample,'norden_categories_count':len(cats) if isinstance(cats,list) else None}
+          with open('norden-kit/mapping_probe.json','w',encoding='utf-8') as f:
+              json.dump(out,f,ensure_ascii=False,indent=2,sort_keys=True)
+          PY
+      - name: Commit probe result
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/mapping_probe.json
+          git commit -m "Probe Norden to KIT field mapping" || exit 0
+          git pull --rebase
+          git push
