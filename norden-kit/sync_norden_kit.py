@@ -789,7 +789,11 @@ def merge_recent_norden_mapping(kit, source, code_site_id, mapping, report, page
                 })
                 known_ids.add(vid)
                 merged += 1
-            if vid and (not (row.get("media") or []) or len(row.get("characteristics") or []) <= 2):
+            if vid:
+                # Revisit recent Norden cards safely. The repair function only:
+                # - adds description when blank,
+                # - adds completely absent characteristics,
+                # - adds images only when media is empty.
                 repair.append((article, vid))
         time.sleep(1.2)
     report["recent_norden_mapping_merged"] = merged
@@ -928,18 +932,20 @@ def fill_existing_content(kit, item, variant_id, all_chars, chars_by_title, code
         patch["description"] = s(item["description"])
 
     existing = list(current.get("characteristics") or [])
-    existing_values = {}
-    for c in existing:
-        cid = s(c.get("characteristic_id"))
-        vals = c.get("values") or []
-        existing_values[cid] = s(c.get("value") or (vals[0] if vals else ""))
+    existing_ids = {
+        s(c.get("characteristic_id"))
+        for c in existing
+        if s(c.get("characteristic_id"))
+    }
 
     additions = []
     try:
         desired = build_source_characteristics(item, kit, all_chars, chars_by_title, code_site_id)
         for d in desired:
             cid = d["characteristic_id"]
-            if not existing_values.get(cid):
+            # Strict rule: never overwrite or refill an existing characteristic.
+            # Add only characteristic IDs that are completely absent from the card.
+            if cid not in existing_ids:
                 additions.append(d)
     except Exception as exc:
         report["errors"].append({
