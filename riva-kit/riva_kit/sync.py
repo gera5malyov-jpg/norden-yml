@@ -420,7 +420,7 @@ class SyncRunner:
         }
 
         by_source, by_sku, owned_count = index_riva_variants(
-            list(self.kit.iter_variants()), self.characteristic_titles
+            list(self.kit.iter_variants({'name': 'ЦБ-'})), self.characteristic_titles
         )
         self.report['riva_variants_indexed'] = owned_count
         self.report['duplicate_article_buckets'] = sum(1 for values in by_sku.values() if len(values) > 1)
