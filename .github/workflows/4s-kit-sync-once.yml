@@ -2,7 +2,7 @@ name: Sync 4 Сезона to Yandex KIT
 
 on:
   workflow_run:
-    workflows: ["Update 4s-mebel YML", "Fast refresh 4s brand-only feed once"]
+    workflows: ["Update 4s-mebel YML"]
     types: [completed]
   workflow_dispatch:
 
