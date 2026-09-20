@@ -29,6 +29,7 @@ ROOT = Path(__file__).resolve().parent
 MAPPING_PATH = ROOT / "kit_mapping.json"
 REPORT_PATH = ROOT / "last_sync_report.json"
 EXISTING_SKUS_PATH = ROOT / "existing_norden_skus.txt"
+EXISTING_CODES_SEED_PATH = ROOT / "existing_norden_codes_seed.txt"
 
 CODE_SITE_TITLE = "Код для сайта"
 ARTICLE_TITLE = "Артикул"
@@ -614,6 +615,35 @@ def match_source_article(code, source_articles):
     return None
 
 
+def seed_mapping_from_existing_codes(source, report):
+    if not EXISTING_CODES_SEED_PATH.exists():
+        return None
+    seeds = [s(x) for x in EXISTING_CODES_SEED_PATH.read_text(encoding="utf-8").splitlines() if s(x)]
+    if len(seeds) < 500:
+        return None
+    articles = list(source)
+    mapping = {"version": 1, "updated_at": None, "initial_complete": False, "variants": {}}
+    unresolved = []
+    for code in seeds:
+        article = match_source_article(code, articles)
+        if not article:
+            unresolved.append(code)
+            continue
+        mapping["variants"].setdefault(article, [])
+    report["kit_mapping_method"] = "seed_existing_site_codes"
+    report["kit_seed_codes"] = len(seeds)
+    report["mapped_existing_articles"] = len(mapping["variants"])
+    report["unresolved_existing_count"] = len(unresolved)
+    report["unresolved_existing_sample"] = unresolved[:200]
+    if len(mapping["variants"]) < 500:
+        report["warnings"].append(
+            f"Existing Norden seed mapped only {len(mapping['variants'])} of {len(seeds)} codes."
+        )
+        return None
+    save_mapping(mapping)
+    return mapping
+
+
 def rebuild_mapping_from_sku_list(kit, source, code_site_id, report):
     articles = list(source)
     mapping = {"version": 1, "updated_at": None, "initial_complete": False, "variants": {}}
@@ -999,11 +1029,15 @@ def main():
         if short:
             # Need the full article list for safe mapping.
             full_source, _, _, _ = load_source(secret, short=False)
-            mapping = rebuild_mapping_from_sku_list(kit, full_source, code_site_id, report)
+            mapping = seed_mapping_from_existing_codes(full_source, report) if args.mode == "preflight" else None
+            if mapping is None:
+                mapping = rebuild_mapping_from_sku_list(kit, full_source, code_site_id, report)
             if mapping is None:
                 mapping = rebuild_mapping(kit, full_source, code_site_id, report)
         else:
-            mapping = rebuild_mapping_from_sku_list(kit, source, code_site_id, report)
+            mapping = seed_mapping_from_existing_codes(source, report) if args.mode == "preflight" else None
+            if mapping is None:
+                mapping = rebuild_mapping_from_sku_list(kit, source, code_site_id, report)
             if mapping is None:
                 mapping = rebuild_mapping(kit, source, code_site_id, report)
     else:
