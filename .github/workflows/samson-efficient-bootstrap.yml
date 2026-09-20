@@ -15,7 +15,7 @@ on:
       batch_size:
         description: 'Rows to process this run'
         required: true
-        default: '2500'
+        default: '1200'
         type: string
 
 permissions:
@@ -45,8 +45,8 @@ jobs:
             echo "skip=${{ inputs.skip_items }}" >> "$GITHUB_OUTPUT"
             echo "size=${{ inputs.batch_size }}" >> "$GITHUB_OUTPUT"
           else
-            echo "skip=0" >> "$GITHUB_OUTPUT"
-            echo "size=2500" >> "$GITHUB_OUTPUT"
+            echo "skip=2500" >> "$GITHUB_OUTPUT"
+            echo "size=1200" >> "$GITHUB_OUTPUT"
           fi
       - name: Regression tests on first run only
         if: github.event_name == 'push'
