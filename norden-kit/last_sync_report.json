@@ -1,237 +1,141 @@
 {
-  "started_at": "2026-09-20T20:38:51.791477+00:00",
-  "mode": "full",
+  "started_at": "2026-09-20T21:30:43.608433+00:00",
+  "mode": "scheduled",
   "source": "api",
   "catalog_source": "API Norden; fallback Norden.xml",
   "price_stock_source": "API Norden; fallback Norden.group -K8%.xml",
   "api_error": null,
   "source_products": 8485,
   "source_duplicate_articles": 15,
-  "mapped_existing_articles": 390,
-  "planned_new_products": 8091,
-  "new_products_created": 100,
-  "existing_products_patched": 100,
-  "empty_characteristics_filled": 901,
-  "existing_products_images_filled": 92,
-  "image_errors": 5,
-  "price_updates": 104,
-  "stock_updates": 208,
+  "mapped_existing_articles": 547,
+  "planned_new_products": 7928,
+  "new_products_created": 250,
+  "existing_products_patched": 250,
+  "empty_characteristics_filled": 1346,
+  "existing_products_images_filled": 221,
+  "image_errors": 9,
+  "price_updates": 507,
+  "stock_updates": 1014,
   "minimum_price_field": "minimum_price",
   "minimum_price_supported": true,
   "warnings": [
-    "SG.821.SH.OL: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
-    "AG.240.WH.WH.AR: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
-    "C1918 CF brown leather: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
-    "YS-0816H(D+TW) black- black LB: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
-    "6227A-HS: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    "SG.826.OD.OD.R: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "SG.826.OD.WH.R: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "SG.821.SH.OD: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "SG.824.OD.OD: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "SG.824.SH.OD: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "SG.822.WH.OL: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "CH-336B: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "CH-336B: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "CH-336B: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
   ],
   "errors": [
     {
       "article": "PR.110.WH.P59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5b168d41421090d19526487cd3682f96\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"bb902646b5a5cea52d030a60f60a09b5\"}"
     },
     {
       "article": "PR.110.WH.P59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"80c6a591596b75264996a5748ce07066\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"87b57a2cf1a8db7cf40cfebf4cac2a30\"}"
     },
     {
       "article": "PR.110.WH.O59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c93ebbec7365abae7c698fd62c1443ee\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e19a13a8e9db9ebbf4154685154c9b33\"}"
     },
     {
       "article": "PR.110.WH.O59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"35911a5e319d31002a5dd0d61da91529\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1172ee24fdb5143983cbd4c3079807aa\"}"
     },
     {
       "article": "PR.110.DM.P59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"daf21946e12238c0a7a495d331d69052\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2f564056a8c01517a9e76e234c61b0cc\"}"
     },
     {
       "article": "PR.110.DM.P59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"943147d13f7278b0172a5d5e135ec991\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cd06f674c897b8b5e96db0b5e641bbe6\"}"
     },
     {
       "article": "PR.110.DM.O59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9950386087878692ebce542e19ebdbc3\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"fbfff55dc48e761e76a449f8d17b8466\"}"
     },
     {
       "article": "PR.110.DM.O59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d8905e7e2afcc9bc390ccbc49ca9194d\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7647d1adf9a6d59e8384dbdf17a45924\"}"
     },
     {
       "article": "PR.110.OD.P59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"067fc8e0d653ed8549954bc6fc4d4007\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"043aa109a540d024cbe9942e7358018a\"}"
     },
     {
       "article": "PR.110.OD.P59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b67a3e999d45840e8b733248f6d6e4ea\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"f6e782e7714f650dfaa6c449b63445ac\"}"
     },
     {
       "article": "PR.110.OD.O59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"aebb1e554b710e0f261a0bcd9c61eaed\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7ec83fe1c11d0922a25a1e6c0e736f10\"}"
     },
     {
       "article": "PR.110.OD.O59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0e6e518245490136383c94c54d6ecf6b\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"f40752703bdbd23d90e16befca45cd36\"}"
     },
     {
       "article": "PR.110.SH.P59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7afc44090b7a08393ddf6bbbd83b21f1\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c9cf6f069edd827e98ffdabbc0cb3a3b\"}"
     },
     {
       "article": "PR.110.SH.P59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4dc3f4360f4b6ca7d407b604f01015cf\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0c83f352b7b1d2f32a6881f63bf19575\"}"
     },
     {
       "article": "PR.110.SH.O59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9cf2f80db139f08269fd32f32ce7df45\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"dc3d3b451201cfb8b73be7a1833ac2ee\"}"
     },
     {
       "article": "PR.110.SH.O59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4ff917e5c6c6e5c761b31c61daab61c2\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1bee290d412fa4bdc444ed59c9edd48b\"}"
     },
     {
       "article": "6227B-HS",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3dacd8f26554968060d5497be612534f\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"868fe4e6b3d7e26b440df441a174b93f\"}"
     },
     {
       "article": "6227B",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d06a4c133a592158c50b89ca83a31733\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"fba9fec42460b83ea9656f97f40ac6a5\"}"
+    },
+    {
+      "article": "CB273B",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b58fb796090053d68125c3c5a8a1dfb5\"}"
+    },
+    {
+      "article": "OL-060-20-18.GN",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5e2a5fbbff040dc83eff59cd5af8dc87\"}"
     }
   ],
   "initial_complete": false,
-  "kit_mapping_method": "seed_existing_site_codes",
-  "kit_seed_codes": 528,
-  "unresolved_existing_count": 105,
-  "unresolved_existing_sample": [
-    "RF-8106B PU",
-    "216B-Сhrome-B-BB",
-    "HD-2216L grey",
-    "HD-2216H grey",
-    "HD-2216H-1 Fabric",
-    "HD-2216L",
-    "HD-2216H",
-    "C1918 CF brown leath",
-    "2311 ivory",
-    "FG-8631A",
-    "FG-1813A",
-    "U-059B-BS",
-    "CH-330B-BS-W-GG",
-    "U-059B-HS",
-    "FG-1822A-2",
-    "FG-1822A-1",
-    "HY-839C W",
-    "H-100F-35",
-    "K-1190-10-1 white",
-    "RF-8107A",
-    "AM 6007A",
-    "F181-F black leather",
-    "AM 13-09A",
-    "2311 CF ivory",
-    "2311 black",
-    "TS2301-10-2",
-    "2311 CF black",
-    "919A",
-    "P3124-02",
-    "824 grey",
-    "RF-8106A PU",
-    "L347HCA-grey fabric",
-    "829 grey",
-    "831 yellow",
-    "823/824 grey",
-    "AM 1716A",
-    "AM 128B PU",
-    "AM 1716B",
-    "CH-193B-К304D-1*N207",
-    "CH-240C-OA2000*OS800",
-    "WH001-blackleather",
-    "CH-226B-OA2000*OS800",
-    "NG-28PL",
-    "CX0398H01 grey+silve",
-    "CH-329A",
-    "CX1168M01 gray - bla",
-    "CX0398H01 black",
-    "U-020C-OA2000*OS-01",
-    "H-1182-70-5",
-    "JZR1008 -BL005-DWB10",
-    "909R-1-1",
-    "H-103-35",
-    "CH-180B-OA2016*АК30-",
-    "8005A blue",
-    "8005A-2 gray",
-    "8005A-2 cian",
-    "H-1113-35",
-    "CH-203A-B-BB",
-    "P039A-M02-05",
-    "CH-203B-B-BB",
-    "216A-2D-B-BB",
-    "P039B-M02-05",
-    "YS-0816H(D+TW) black",
-    "CH-359A black",
-    "CH-359A grey",
-    "A13-B-BB",
-    "H-1133-70-8",
-    "P2346-L09 leather",
-    "AM 188A-3",
-    "AM3-H(white)",
-    "8001A-2 grey",
-    "H-2021-86 leather",
-    "H-2029",
-    "H-2021-70-8",
-    "H-2021-86",
-    "P2338-L09 leather",
-    "H-2021-70-30",
-    "ZR8637H black leathe",
-    "HA-900-70",
-    "H-1178-70",
-    "CH-312A-W-RR",
-    "EIT-001A",
-    "EVA-004B",
-    "CH-366A-wb",
-    "YS1505A-black",
-    "YS1505A-brown",
-    "9132 white leather",
-    "P2338-L02 leather",
-    "H-103-322",
-    "8005A black",
-    "AM3-H(black)",
-    "A3-M(black)",
-    "A13-B-GB",
-    "216B-Сhrome-B-GG",
-    "CH-193B-К304D-1*N204",
-    "216B",
-    "CH-178A",
-    "CX0898H-1-171",
-    "CX0398H01 grey+black",
-    "CX0398H01 white+blac",
-    "HB-102-05",
-    "HB-101-322",
-    "CH-219B-HS-К304D-14*",
-    "CH-193A-1-К304D-14*N",
-    "336G-LB"
-  ],
-  "recent_norden_mapping_merged": 4,
-  "recent_norden_repair_candidates": 4,
-  "mapped_source_articles_for_updates": 394,
-  "bare_cards_repaired": 4,
-  "remaining_new_products": 7991,
-  "finished_at": "2026-09-20T21:30:29.562991+00:00"
+  "recent_norden_mapping_merged": 100,
+  "recent_norden_repair_candidates": 100,
+  "mapped_source_articles_for_updates": 557,
+  "bare_cards_repaired": 100,
+  "remaining_new_products": 7678,
+  "finished_at": "2026-09-20T23:58:41.361805+00:00"
 }
