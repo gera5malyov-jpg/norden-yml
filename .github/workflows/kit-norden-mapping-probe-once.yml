@@ -34,14 +34,15 @@ jobs:
                   except urllib.error.HTTPError as e:
                       if e.code==429:
                           time.sleep(int(e.headers.get('Retry-After') or 3)); continue
-                      raise
+                      body=e.read().decode('utf-8','replace')
+                      raise RuntimeError(f'HTTP {e.code} {url}: {body[:500]}')
               raise RuntimeError('request retries exhausted')
           kh={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
           nh={'secret':os.environ['NORDEN_SECRET']}
-          chars=[]
-          page=1
+          chars=[]; page=1
           while True:
-              data=get('https://api.kit.yandex.net/v1/characteristics?'+urllib.parse.urlencode({'page':page,'per_page':100}),kh)
+              qs=urllib.parse.urlencode([('status','ACTIVE'),('page',page),('per_page',100)])
+              data=get('https://api.kit.yandex.net/v1/characteristics?'+qs,kh)
               batch=data.get('characteristics') or data.get('items') or data.get('results') or data.get('data') or []
               if isinstance(batch,dict): batch=batch.get('items') or []
               chars.extend([x for x in batch if isinstance(x,dict)])
