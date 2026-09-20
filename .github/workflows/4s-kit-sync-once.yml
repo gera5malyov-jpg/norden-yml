@@ -1,6 +1,11 @@
 name: Sync 4 Сезона to Yandex KIT
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/4s-kit-sync-once.yml'
+      - '4s-kit/sync_4s_kit.py'
   workflow_run:
     workflows: ["Update 4s-mebel YML", "Fast refresh 4s brand-only feed once"]
     types: [completed]
