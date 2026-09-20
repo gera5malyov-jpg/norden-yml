@@ -1,0 +1,68 @@
+name: KIT variant probe once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-variant-probe-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe exact Norden variant
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.parse, urllib.request, time
+          token=os.environ['YANDEX_KIT_TOKEN']
+          headers={'Authorization':'Bearer '+token,'Accept':'application/json'}
+          def get(url):
+              while True:
+                  req=urllib.request.Request(url,headers=headers)
+                  try:
+                      with urllib.request.urlopen(req,timeout=120) as r:
+                          return json.loads(r.read().decode('utf-8'))
+                  except urllib.error.HTTPError as e:
+                      if e.code==429:
+                          time.sleep(int(e.headers.get('Retry-After') or 3)); continue
+                      raise
+          data=get('https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode({'page':1,'per_page':100,'name':'RT-2031'}))
+          rows=data.get('variants') or data.get('items') or data.get('results') or data.get('data') or []
+          if isinstance(rows,dict): rows=rows.get('items') or []
+          exact=[r for r in rows if str(r.get('sku','')).strip()=='RT-2031']
+          if not exact:
+              # Fallback: scan pages until exact sku is found.
+              exact=[]
+              page=1
+              while page<=100 and not exact:
+                  d=get('https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode({'page':page,'per_page':100}))
+                  rr=d.get('variants') or d.get('items') or d.get('results') or d.get('data') or []
+                  if isinstance(rr,dict): rr=rr.get('items') or []
+                  exact=[r for r in rr if str(r.get('sku','')).strip()=='RT-2031']
+                  if not rr or len(rr)<100: break
+                  page+=1
+          if not exact:
+              raise SystemExit('RT-2031 not found')
+          vid=str(exact[0].get('id','')).strip()
+          detail=get('https://api.kit.yandex.net/v1/variants/'+vid)
+          os.makedirs('norden-kit',exist_ok=True)
+          with open('norden-kit/variant_probe.json','w',encoding='utf-8') as f:
+              json.dump(detail,f,ensure_ascii=False,indent=2,sort_keys=True)
+          PY
+      - name: Commit probe result
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/variant_probe.json
+          git commit -m "Probe KIT Norden variant fields" || exit 0
+          git push
