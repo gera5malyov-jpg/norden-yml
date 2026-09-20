@@ -1,0 +1,50 @@
+name: Probe KIT Norden brand filter once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/kit-norden-brand-filter-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe brand filter
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,urllib.parse,urllib.request
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          tests=[
+            {'brand':'Norden','page':1,'per_page':100},
+            {'brands':'Norden','page':1,'per_page':100},
+            {'brand[]':'Norden','page':1,'per_page':100},
+          ]
+          out=[]
+          for q in tests:
+              u='https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode(q,doseq=True)
+              try:
+                  req=urllib.request.Request(u,headers=h)
+                  with urllib.request.urlopen(req,timeout=120) as r:
+                      p=json.loads(r.read().decode())
+                  rows=p.get('variants') or p.get('items') or p.get('results') or p.get('data') or []
+                  if isinstance(rows,dict): rows=rows.get('items') or []
+                  out.append({'query':q,'ok':True,'returned':len(rows),'total_count':p.get('total_count') or p.get('total'),'brands':sorted(set(str(x.get('brand','')) for x in rows if isinstance(x,dict)))[:20]})
+              except Exception as e:
+                  out.append({'query':q,'ok':False,'error':repr(e)})
+          os.makedirs('norden-kit',exist_ok=True)
+          with open('norden-kit/brand_filter_probe.json','w',encoding='utf-8') as f:
+              json.dump(out,f,ensure_ascii=False,indent=2)
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit result
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/brand_filter_probe.json
+          git commit -m "Probe KIT Norden brand filter" || exit 0
+          git pull --rebase
+          git push
