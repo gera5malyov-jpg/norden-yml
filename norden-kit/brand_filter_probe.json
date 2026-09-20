@@ -1,0 +1,47 @@
+[
+  {
+    "query": {
+      "brand": "Norden",
+      "page": 1,
+      "per_page": 100
+    },
+    "ok": true,
+    "returned": 100,
+    "total_count": 41031,
+    "brands": [
+      "BRAUBERG",
+      "RIVA",
+      "КУРТ"
+    ]
+  },
+  {
+    "query": {
+      "brands": "Norden",
+      "page": 1,
+      "per_page": 100
+    },
+    "ok": true,
+    "returned": 100,
+    "total_count": 41031,
+    "brands": [
+      "BRAUBERG",
+      "RIVA",
+      "КУРТ"
+    ]
+  },
+  {
+    "query": {
+      "brand[]": "Norden",
+      "page": 1,
+      "per_page": 100
+    },
+    "ok": true,
+    "returned": 100,
+    "total_count": 41031,
+    "brands": [
+      "BRAUBERG",
+      "RIVA",
+      "КУРТ"
+    ]
+  }
+]
