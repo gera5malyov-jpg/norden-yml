@@ -7,15 +7,10 @@ on:
       - '.github/workflows/samson-efficient-bootstrap.yml'
   workflow_dispatch:
     inputs:
-      skip_items:
-        description: 'Source rows already covered'
-        required: true
-        default: '0'
-        type: string
       batch_size:
-        description: 'Rows to process this run'
+        description: 'Missing Samson products to create this run'
         required: true
-        default: '1200'
+        default: '600'
         type: string
 
 permissions:
@@ -23,7 +18,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: kit-api-write
+  group: samson-kit-write
   cancel-in-progress: true
 
 jobs:
@@ -37,21 +32,19 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Resolve batch
+      - name: Resolve batch size
         id: batch
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "skip=${{ inputs.skip_items }}" >> "$GITHUB_OUTPUT"
             echo "size=${{ inputs.batch_size }}" >> "$GITHUB_OUTPUT"
           else
-            echo "skip=2500" >> "$GITHUB_OUTPUT"
-            echo "size=1200" >> "$GITHUB_OUTPUT"
+            echo "size=600" >> "$GITHUB_OUTPUT"
           fi
       - name: Regression tests on first run only
         if: github.event_name == 'push'
         run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
-      - name: Import one Samson batch
+      - name: Create next missing Samson products
         env:
           SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
@@ -59,8 +52,8 @@ jobs:
         run: |
           set -euo pipefail
           PYTHONPATH=samson-kit python -m samson_kit.cli \
-            --skip-items "${{ steps.batch.outputs.skip }}" \
-            --max-items "${{ steps.batch.outputs.size }}" \
+            --new-only \
+            --max-new "${{ steps.batch.outputs.size }}" \
             --report /tmp/samson-bootstrap.json
       - name: Decide whether to continue
         id: next
@@ -74,21 +67,18 @@ jobs:
               print('continue=false')
               raise SystemExit
           r=json.load(open(path,encoding='utf-8'))
-          seen=int(r.get('samson_products_seen') or 0)
+          created=int(r.get('new_products_created') or 0)
           errors=int(r.get('error_count') or 0)
-          skip=int('${{ steps.batch.outputs.skip }}')
           size=int('${{ steps.batch.outputs.size }}')
           ok=(r.get('status')=='ok' and errors==0)
-          print('continue=' + ('true' if ok and seen==size else 'false'))
-          print('next_skip=' + str(skip+seen))
-          print('seen=' + str(seen))
+          print('continue=' + ('true' if ok and created>=size else 'false'))
+          print('created=' + str(created))
           print('errors=' + str(errors))
           PY
-      - name: Queue next Samson batch
+      - name: Queue next Samson missing-only batch
         if: steps.next.outputs.continue == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          NEXT_SKIP: ${{ steps.next.outputs.next_skip }}
           BATCH_SIZE: ${{ steps.batch.outputs.size }}
         shell: bash
         run: |
@@ -96,23 +86,14 @@ jobs:
           import json, os, urllib.request
           repo=os.environ['GITHUB_REPOSITORY']
           url=f"https://api.github.com/repos/{repo}/actions/workflows/samson-efficient-bootstrap.yml/dispatches"
-          body=json.dumps({
-              'ref':'main',
-              'inputs':{
-                  'skip_items':os.environ['NEXT_SKIP'],
-                  'batch_size':os.environ['BATCH_SIZE'],
-              }
-          }).encode()
-          req=urllib.request.Request(
-              url,data=body,method='POST',
-              headers={
-                  'Authorization':'Bearer '+os.environ['GH_TOKEN'],
-                  'Accept':'application/vnd.github+json',
-                  'X-GitHub-Api-Version':'2022-11-28',
-                  'Content-Type':'application/json',
-              }
-          )
+          body=json.dumps({'ref':'main','inputs':{'batch_size':os.environ['BATCH_SIZE']}}).encode()
+          req=urllib.request.Request(url,data=body,method='POST',headers={
+              'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+              'Accept':'application/vnd.github+json',
+              'X-GitHub-Api-Version':'2022-11-28',
+              'Content-Type':'application/json',
+          })
           with urllib.request.urlopen(req,timeout=30) as resp:
-              if resp.status not in (204,):
+              if resp.status != 204:
                   raise RuntimeError(f'dispatch status {resp.status}')
           PY

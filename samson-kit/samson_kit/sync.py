@@ -57,9 +57,9 @@ def _document_parts(url,index):
     return title,ext
 
 class SyncRunner:
-    def __init__(self,samson,kit,http,*,warehouse_name='СПБ',dry_run=False,skip_items=0,max_items=None):
-        self.samson=samson; self.kit=kit; self.http=http; self.warehouse_name=warehouse_name; self.dry_run=bool(dry_run); self.skip_items=max(0,int(skip_items or 0)); self.max_items=int(max_items) if max_items not in (None,'',0,'0') else None; self.kit_categories=[]; self.kit_characteristics=[]
-        self.report={'dry_run':self.dry_run,'catalog_complete':False,'samson_products_seen':0,'new_products_created':0,'price_changes':0,'stock_changes':0,'active_zero_to_100':0,'withdrawn_to_zero':0,'absent_to_zero':0,'documents_attached':0,'documents_skipped':0,'duplicate_kit_skus':0,'error_count':0,'errors':[],'warning_count':0,'warnings':[],'unmapped_source_keys':{},'minimum_price_mapping_unsupported_count':0,'minimum_price_examples':{},'skip_items':self.skip_items}
+    def __init__(self,samson,kit,http,*,warehouse_name='СПБ',dry_run=False,skip_items=0,max_items=None,max_new=None,new_only=False):
+        self.samson=samson; self.kit=kit; self.http=http; self.warehouse_name=warehouse_name; self.dry_run=bool(dry_run); self.skip_items=max(0,int(skip_items or 0)); self.max_items=int(max_items) if max_items not in (None,'',0,'0') else None; self.max_new=int(max_new) if max_new not in (None,'',0,'0') else None; self.new_only=bool(new_only); self.kit_categories=[]; self.kit_characteristics=[]
+        self.report={'dry_run':self.dry_run,'catalog_complete':False,'samson_products_seen':0,'new_products_created':0,'price_changes':0,'stock_changes':0,'active_zero_to_100':0,'withdrawn_to_zero':0,'absent_to_zero':0,'documents_attached':0,'documents_skipped':0,'duplicate_kit_skus':0,'error_count':0,'errors':[],'warning_count':0,'warnings':[],'unmapped_source_keys':{},'minimum_price_mapping_unsupported_count':0,'minimum_price_examples':{},'skip_items':self.skip_items,'max_new':self.max_new,'new_only':self.new_only}
     def _record_error(self,sku,exc):
         self.report['error_count']+=1
         if len(self.report['errors'])<200: self.report['errors'].append({'sku':sku,'message':str(exc)[:500]})
@@ -217,6 +217,7 @@ class SyncRunner:
                 if item.kit_sku in duplicates: continue
                 variant=kit_index.get(item.kit_sku)
                 if variant:
+                    if self.new_only: continue
                     pu=build_price_update(item,variant); su=build_stock_update(item,variant,warehouse_id)
                     if pu: price_batch.append(pu); self.report['price_changes']+=1
                     if su:
@@ -226,16 +227,20 @@ class SyncRunner:
                     if len(price_batch)>=500 and not self.dry_run: self.kit.bulk_update_prices(price_batch); price_batch=[]
                     if len(stock_batch)>=500 and not self.dry_run: self.kit.bulk_update_stocks(stock_batch); stock_batch=[]
                 else:
+                    if self.max_new is not None and self.report['new_products_created']>=self.max_new:
+                        break
                     try:
                         category_id=self._ensure_category_chain(item,source_categories); chars=self._ensure_characteristics(item); media=self._prepare_media(item)
                         if self.dry_run: self._new_payload(item,'dry-product',warehouse_id,chars,media); self.report['new_products_created']+=1
                         else:
                             product=self.kit.create_product(category_id); product_id=str(product.get('id','')).strip()
                             if not product_id: raise RuntimeError('KIT did not return product id')
-                            created=self.kit.create_variant(self._new_payload(item,product_id,warehouse_id,chars,media))
+                            payload=self._new_payload(item,product_id,warehouse_id,chars,media)
+                            created=self.kit.create_variant(payload)
                             variant_id=str(created.get('id','')).strip()
                             if not variant_id: raise RuntimeError('KIT did not return variant id')
                             self.report['new_products_created']+=1
+                            normalized=dict(payload); normalized.update(created); kit_index[item.kit_sku]=normalized
                             self._attach_documents(item,variant_id)
                     except Exception as exc: self._record_error(item.kit_sku,exc)
                 if self.max_items and self.report['samson_products_seen']>=self.max_items: break
@@ -243,7 +248,7 @@ class SyncRunner:
         except Exception as exc: self._record_error('CATALOG',exc); complete=False
         if price_batch and not self.dry_run: self.kit.bulk_update_prices(price_batch)
         if stock_batch and not self.dry_run: self.kit.bulk_update_stocks(stock_batch)
-        self.report['catalog_complete']=bool(complete and self.max_items is None and self.skip_items==0); absent=absent_zero_updates(kit_index,seen,warehouse_id,complete=self.report['catalog_complete']); self.report['absent_to_zero']=len(absent)
+        self.report['catalog_complete']=bool(complete and self.max_items is None and self.skip_items==0); absent=absent_zero_updates(kit_index,seen,warehouse_id,complete=(self.report['catalog_complete'] and not self.new_only)); self.report['absent_to_zero']=len(absent)
         if absent and not self.dry_run: self.kit.bulk_update_stocks(absent)
         self.report['status']='ok' if not self.report['errors'] else ('degraded' if self.report['samson_products_seen'] else 'failed')
         return self.report
