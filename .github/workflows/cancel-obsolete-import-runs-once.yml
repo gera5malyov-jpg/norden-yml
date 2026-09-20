@@ -1,0 +1,40 @@
+name: Cancel obsolete import runs once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-obsolete-import-runs-once.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel obsolete runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, urllib.request, urllib.error
+          repo=os.environ['GITHUB_REPOSITORY']
+          for run_id in (35498578511, 35498692277, 35498418197):
+              url=f'https://api.github.com/repos/{repo}/actions/runs/{run_id}/cancel'
+              req=urllib.request.Request(url,data=b'',method='POST',headers={
+                  'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+                  'Accept':'application/vnd.github+json',
+                  'X-GitHub-Api-Version':'2022-11-28',
+              })
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as resp:
+                      print(run_id, resp.status)
+              except urllib.error.HTTPError as exc:
+                  if exc.code in (409,422):
+                      print(run_id, 'already finished/not cancellable', exc.code)
+                  else:
+                      raise
+          PY
