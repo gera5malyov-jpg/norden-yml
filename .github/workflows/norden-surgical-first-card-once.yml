@@ -1,5 +1,5 @@
 name: Norden surgical first card
-# retry with 429 backoff
+# direct Norden category + 429 backoff
 on:
   push:
     branches: [main]
@@ -63,47 +63,70 @@ jobs:
           print(json.dumps(cand,ensure_ascii=False),flush=True)
           PY
 
-      - name: Resolve reference category and warehouses
-        timeout-minutes: 2
+      - name: Resolve Norden category and warehouses
+        timeout-minutes: 3
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         run: |
           python - <<'PY'
           import json,os,time,urllib.parse,urllib.request,urllib.error
-          H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
-          def get(path,params=None):
+          token=os.environ['YANDEX_KIT_TOKEN']
+          H={'Authorization':'Bearer '+token,'Accept':'application/json','Content-Type':'application/json'}
+          def call(method,path,params=None,body=None):
               u='https://api.kit.yandex.net'+path
-              if params: u+='?'+urllib.parse.urlencode(params)
-              for attempt in range(8):
+              if params: u+='?'+urllib.parse.urlencode(params,doseq=True)
+              data=None if body is None else json.dumps(body,ensure_ascii=False).encode()
+              for attempt in range(12):
                   try:
-                      with urllib.request.urlopen(urllib.request.Request(u,headers=H),timeout=40) as r:
-                          return json.loads(r.read().decode())
+                      req=urllib.request.Request(u,data=data,headers=H,method=method)
+                      with urllib.request.urlopen(req,timeout=40) as r:
+                          raw=r.read()
+                          return json.loads(raw.decode()) if raw else {}
                   except urllib.error.HTTPError as e:
                       if e.code==429:
-                          wait=int(e.headers.get('Retry-After') or min(30,3*(attempt+1)))
-                          print('KIT 429, wait',wait,'sec',flush=True)
-                          time.sleep(wait)
-                          continue
-                      raise
-              raise SystemExit('KIT GET retries exhausted: '+u)
-          p=get('/v1/variants',{'name':'AF-31646769','page':1,'per_page':100})
-          rows=p.get('variants') or p.get('items') or p.get('results') or p.get('data') or []
-          if isinstance(rows,dict): rows=rows.get('items') or []
-          ref=next(x for x in rows if x.get('sku')=='AF-31646769')
-          prod=get('/v1/products/'+ref['product_id'])
-          cats=prod.get('category_ids') or prod.get('categories') or []
-          if cats and isinstance(cats[0],dict): cats=[x.get('id') for x in cats]
-          if not cats: raise SystemExit('Reference product has no category ids')
-          wh=get('/v1/warehouses',{'page':1,'per_page':100})
-          wr=wh.get('warehouses') or wh.get('items') or wh.get('data') or []
+                          wait=int(e.headers.get('Retry-After') or min(45,5*(attempt+1)))
+                          print('KIT 429',method,path,'wait',wait,flush=True)
+                          time.sleep(wait); continue
+                      bodytxt=e.read().decode('utf-8','replace')
+                      raise SystemExit(f'{method} {path} -> {e.code}: {bodytxt[:500]}')
+              raise SystemExit('KIT retries exhausted: '+path)
+
+          cats=[]; page=1
+          while True:
+              p=call('GET','/v1/categories',{'status':'ACTIVE','page':page,'per_page':100})
+              rows=p.get('categories') or p.get('items') or p.get('data') or []
+              if isinstance(rows,dict): rows=rows.get('items') or []
+              cats.extend(rows)
+              total=p.get('total_count')
+              if not rows or (isinstance(total,int) and len(cats)>=total) or len(rows)<100: break
+              page+=1
+              time.sleep(1.2)
+
+          roots=[x for x in cats if (x.get('title') or '').strip().casefold()=='norden' and not (x.get('parent_id') or '')]
+          if roots:
+              root=roots[0]
+          else:
+              root=call('POST','/v1/categories',body={'title':'Norden'})
+              cats.append(root)
+              time.sleep(2)
+
+          children=[x for x in cats if (x.get('title') or '').strip().casefold()=='кресло офисное' and (x.get('parent_id') or '')==root.get('id')]
+          if children:
+              child=children[0]
+          else:
+              child=call('POST','/v1/categories',body={'title':'Кресло офисное','parent_id':root['id']})
+              time.sleep(2)
+
+          p=call('GET','/v1/warehouses',{'page':1,'per_page':100})
+          wr=p.get('warehouses') or p.get('items') or p.get('data') or []
           if isinstance(wr,dict): wr=wr.get('items') or []
           wanted={}
           for title in ('МСК','СПБ привозной'):
               m=[x for x in wr if (x.get('title') or '')==title]
               if len(m)!=1: raise SystemExit('Warehouse not unique: '+title)
               wanted[title]=m[0]['id']
-          ctx={'category_id':cats[0],'warehouses':wanted}
-          open('/tmp/context.json','w').write(json.dumps(ctx))
+          ctx={'category_id':child['id'],'category_title':child.get('title'),'warehouses':wanted}
+          open('/tmp/context.json','w').write(json.dumps(ctx,ensure_ascii=False))
           print(json.dumps(ctx,ensure_ascii=False),flush=True)
           PY
 
