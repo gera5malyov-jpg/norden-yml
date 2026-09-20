@@ -754,6 +754,46 @@ def rebuild_mapping(kit, source, code_site_id, report):
     return mapping
 
 
+def merge_recent_norden_mapping(kit, source, code_site_id, mapping, report, pages=10):
+    """Merge recently created Norden cards into mapping so interrupted runs never duplicate them."""
+    merged = 0
+    repair = []
+    known_ids = {
+        s(v.get("variant_id"))
+        for vs in mapping.get("variants", {}).values()
+        for v in (vs or [])
+        if s(v.get("variant_id"))
+    }
+    for page in range(1, pages + 1):
+        payload = kit.request("GET", "/v1/variants", params={"page": page, "per_page": 100})
+        rows = kit.items(payload)
+        if not rows:
+            break
+        for row in rows:
+            if s(row.get("brand")).casefold() != BRAND.casefold():
+                continue
+            code = current_char_value(row, code_site_id)
+            article = match_source_article(code, list(source))
+            if not article:
+                continue
+            vid = s(row.get("id"))
+            if vid and vid not in known_ids:
+                mapping["variants"].setdefault(article, []).append({
+                    "variant_id": vid,
+                    "kit_id": row.get("kit_id"),
+                    "sku": s(row.get("sku")),
+                })
+                known_ids.add(vid)
+                merged += 1
+            if vid and (not (row.get("media") or []) or len(row.get("characteristics") or []) <= 2):
+                repair.append((article, vid))
+        time.sleep(1.2)
+    report["recent_norden_mapping_merged"] = merged
+    report["recent_norden_repair_candidates"] = len(repair)
+    save_mapping(mapping)
+    return repair
+
+
 def resolve_warehouses(kit):
     rows = kit.warehouses()
     result = {}
@@ -1046,6 +1086,14 @@ def main():
     else:
         report["mapped_existing_articles"] = len(mapping.get("variants", {}))
 
+    # Recover cards created by interrupted/older runs before deciding what is missing.
+    # This prevents duplicates and gives us a list of bare cards to repair.
+    repair_recent = []
+    if args.mode in ("full", "scheduled") and not short:
+        repair_recent = merge_recent_norden_mapping(
+            kit, source, code_site_id, mapping, report, pages=10
+        )
+
     price_rows, stock_rows, mapped_articles = planned_updates(mapping, source, warehouses)
     report["mapped_source_articles_for_updates"] = mapped_articles
 
@@ -1067,6 +1115,32 @@ def main():
         save_mapping(mapping)
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return
+
+    # Repair cards left bare by earlier interrupted runs before creating more.
+    if args.mode in ("full", "scheduled") and repair_recent:
+        repaired_seen = set()
+        for article, vid in repair_recent:
+            key = (article, vid)
+            if key in repaired_seen:
+                continue
+            repaired_seen.add(key)
+            item = source.get(article)
+            if not item:
+                continue
+            try:
+                fill_existing_content(
+                    kit, item, vid,
+                    all_chars, chars_by_title, code_site_id, report
+                )
+                report.setdefault("bare_cards_repaired", 0)
+                report["bare_cards_repaired"] += 1
+                time.sleep(1.5)
+            except Exception as exc:
+                report["errors"].append({
+                    "article": article,
+                    "stage": "repair_bare",
+                    "message": str(exc)[:800],
+                })
 
     # Preflight performs no writes other than local report/mapping files.
     missing = [a for a in source if a not in mapping.get("variants", {})]
