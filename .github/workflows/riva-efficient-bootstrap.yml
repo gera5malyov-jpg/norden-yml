@@ -16,7 +16,7 @@ on:
       batch_size:
         description: 'Offers to process this run'
         required: true
-        default: '4500'
+        default: '2000'
         type: string
 
 permissions:
@@ -50,7 +50,7 @@ jobs:
             echo "size=${{ inputs.batch_size }}" >> "$GITHUB_OUTPUT"
           else
             echo "skip=3500" >> "$GITHUB_OUTPUT"
-            echo "size=4500" >> "$GITHUB_OUTPUT"
+            echo "size=2000" >> "$GITHUB_OUTPUT"
           fi
       - name: Riva regression tests on first run only
         if: github.event_name == 'push'
