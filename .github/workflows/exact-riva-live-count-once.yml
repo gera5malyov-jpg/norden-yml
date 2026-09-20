@@ -1,0 +1,72 @@
+name: Exact Riva live count once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/exact-riva-live-count-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Count exact Riva variants
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, json, time, urllib.parse, urllib.request, urllib.error
+          token=os.environ['YANDEX_KIT_TOKEN']
+          headers={'Authorization':'Bearer '+token,'Accept':'application/json'}
+          page=1
+          count=0
+          total_seen=0
+          last=[]
+          while True:
+              url='https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode({
+                  'page':page,'per_page':100,'name':'ЦБ-'
+              })
+              req=urllib.request.Request(url,headers=headers)
+              try:
+                  with urllib.request.urlopen(req,timeout=120) as resp:
+                      data=json.loads(resp.read().decode('utf-8'))
+              except urllib.error.HTTPError as exc:
+                  if exc.code==429:
+                      time.sleep(int(exc.headers.get('Retry-After') or 2))
+                      continue
+                  raise
+              rows=data.get('variants') or data.get('items') or data.get('results') or []
+              if not rows:
+                  break
+              total_seen += len(rows)
+              for row in rows:
+                  brand=row.get('brand')
+                  if isinstance(brand,dict):
+                      brand=str(brand.get('title') or brand.get('name') or brand.get('value') or '')
+                  else:
+                      brand=str(brand or '')
+                  if brand.strip().casefold()=='riva':
+                      count += 1
+                      last.append((str(row.get('sku') or ''),str(row.get('name') or '')))
+                      if len(last)>20: last=last[-20:]
+              total=(data.get('total') or data.get('total_count') or
+                     (data.get('meta') or {}).get('total') or
+                     (data.get('meta') or {}).get('total_count'))
+              if total is not None and total_seen>=int(total):
+                  break
+              if len(rows)<100:
+                  break
+              page+=1
+              time.sleep(0.05)
+          print('CB_TOTAL='+str(total_seen))
+          print('RIVA_EXACT_COUNT='+str(count))
+          print('RIVA_LAST='+json.dumps(last,ensure_ascii=False))
+          PY
