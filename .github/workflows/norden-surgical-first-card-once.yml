@@ -1,4 +1,5 @@
 name: Norden surgical first card
+# retry with 429 backoff
 on:
   push:
     branches: [main]
@@ -68,13 +69,23 @@ jobs:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         run: |
           python - <<'PY'
-          import json,os,urllib.parse,urllib.request
+          import json,os,time,urllib.parse,urllib.request,urllib.error
           H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
           def get(path,params=None):
               u='https://api.kit.yandex.net'+path
               if params: u+='?'+urllib.parse.urlencode(params)
-              with urllib.request.urlopen(urllib.request.Request(u,headers=H),timeout=40) as r:
-                  return json.loads(r.read().decode())
+              for attempt in range(8):
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(u,headers=H),timeout=40) as r:
+                          return json.loads(r.read().decode())
+                  except urllib.error.HTTPError as e:
+                      if e.code==429:
+                          wait=int(e.headers.get('Retry-After') or min(30,3*(attempt+1)))
+                          print('KIT 429, wait',wait,'sec',flush=True)
+                          time.sleep(wait)
+                          continue
+                      raise
+              raise SystemExit('KIT GET retries exhausted: '+u)
           p=get('/v1/variants',{'name':'AF-31646769','page':1,'per_page':100})
           rows=p.get('variants') or p.get('items') or p.get('results') or p.get('data') or []
           if isinstance(rows,dict): rows=rows.get('items') or []
