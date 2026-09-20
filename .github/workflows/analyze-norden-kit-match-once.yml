@@ -1,0 +1,93 @@
+name: Analyze Norden KIT match once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/analyze-norden-kit-match-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install requests
+        run: pip install requests
+      - name: Analyze exact Code for site matches
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, time, xml.etree.ElementTree as ET
+          from collections import defaultdict
+          import requests
+
+          SOURCE='https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/b3d07c22c6093ed2ffd71953e75e7e3ce4937039/norden.yml'
+          CODE_SITE='01a0b475-d329-7d14-b258-0171d79daa79'
+          token=os.environ['YANDEX_KIT_TOKEN']
+          h={'Authorization':'Bearer '+token,'Accept':'application/json'}
+
+          def req(url,params=None):
+              for i in range(12):
+                  r=requests.get(url,headers=h,params=params,timeout=120)
+                  if r.status_code==429:
+                      time.sleep(float(r.headers.get('Retry-After') or min(20,2**i))); continue
+                  if r.status_code>=500:
+                      time.sleep(min(20,2**i)); continue
+                  r.raise_for_status(); return r.json()
+              raise RuntimeError('request retries exhausted')
+
+          src=requests.get(SOURCE,timeout=120); src.raise_for_status()
+          root=ET.fromstring(src.content)
+          offers=[]
+          for o in root.findall('.//offer'):
+              code=(o.findtext('vendorCode') or o.attrib.get('id') or '').strip()
+              if code: offers.append(code)
+          source=set(offers)
+
+          buckets=defaultdict(list); brand_norden=0; brand_norden_codes=[]
+          page=1; seen=0
+          while True:
+              p=req('https://api.kit.yandex.net/v1/variants',{'page':page,'per_page':100})
+              rows=p.get('variants') or p.get('items') or p.get('results') or p.get('data') or []
+              if isinstance(rows,dict): rows=rows.get('items') or []
+              if not rows: break
+              for row in rows:
+                  seen+=1
+                  code=''
+                  for c in row.get('characteristics') or []:
+                      if str(c.get('characteristic_id',''))==CODE_SITE:
+                          vals=c.get('values') or []
+                          code=str(c.get('value') or (vals[0] if vals else '') or '').strip()
+                          break
+                  if code: buckets[code].append({'id':row.get('id'),'kit_id':row.get('kit_id'),'sku':row.get('sku'),'brand':row.get('brand'),'name':row.get('name')})
+                  if str(row.get('brand','')).strip().casefold()=='norden':
+                      brand_norden+=1
+                      if len(brand_norden_codes)<50: brand_norden_codes.append({'code_for_site':code,'sku':row.get('sku'),'kit_id':row.get('kit_id'),'name':row.get('name')})
+              total=p.get('total_count') or p.get('total') or (p.get('meta') or {}).get('total_count') or (p.get('meta') or {}).get('total')
+              if total is not None and seen>=int(total): break
+              if len(rows)<100: break
+              page+=1
+          matched={c:buckets[c] for c in source if c in buckets}
+          duplicates={c:v for c,v in matched.items() if len(v)>1}
+          unmatched=sorted(source-set(matched))
+          report={'source_offer_rows':len(offers),'source_unique_codes':len(source),'kit_variants_scanned':seen,'matched_unique_codes':len(matched),'duplicate_matching_codes':len(duplicates),'unmatched_count':len(unmatched),'unmatched_sample':unmatched[:100],'brand_norden_variant_count':brand_norden,'brand_norden_sample':brand_norden_codes}
+          os.makedirs('norden-kit',exist_ok=True)
+          with open('norden-kit/match_analysis.json','w',encoding='utf-8') as f: json.dump(report,f,ensure_ascii=False,indent=2)
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit analysis
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/match_analysis.json
+          git commit -m "Analyze Norden KIT Code for site matching" || exit 0
+          git pull --rebase
+          git push
