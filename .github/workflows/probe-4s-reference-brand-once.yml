@@ -1,0 +1,32 @@
+name: Probe 4s reference brand
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-4s-reference-brand-once.yml'
+      - '4s-kit/probe_reference_brand.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - run: python 4s-kit/probe_reference_brand.py
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 4s-kit/reference_brand_probe.json
+          git commit -m "Probe 4s reference brand" || exit 0
+          git pull --rebase origin main
+          git push
