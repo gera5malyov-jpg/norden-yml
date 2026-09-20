@@ -129,7 +129,9 @@ def ceil_rub(value):
 
 def price_set(purchase):
     p = dec(purchase)
-    if p is None:
+    # KIT rejects zero/negative "price before discount".
+    # Create/update the product without pricing until Norden provides a positive purchase price.
+    if p is None or p <= 0:
         return None
     return {
         "sale": ceil_rub(p * Decimal("1.26")),
