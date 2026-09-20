@@ -1,5 +1,5 @@
 name: Verify repaired Norden card once
-# verify pass 2
+# verify pass 4
 on:
   push:
     branches: [main]
@@ -33,7 +33,7 @@ jobs:
           x=next((v for v in rows if v.get('sku')=='100-1536982'), None)
           out={'found':bool(x)}
           if x:
-              out.update({'kit_id':x.get('kit_id'),'sku':x.get('sku'),'name':x.get('name'),'media_count':len(x.get('media') or []),'char_count':len(x.get('characteristics') or []),'characteristics':x.get('characteristics') or []})
+              out.update({'kit_id':x.get('kit_id'),'sku':x.get('sku'),'name':x.get('name'),'description':x.get('description'),'description_len':len((x.get('description') or '').strip()),'media_count':len(x.get('media') or []),'char_count':len(x.get('characteristics') or []),'characteristics':x.get('characteristics') or []})
           os.makedirs('norden-kit',exist_ok=True)
           open('norden-kit/repaired_card_check.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
           print(json.dumps(out,ensure_ascii=False,indent=2))
