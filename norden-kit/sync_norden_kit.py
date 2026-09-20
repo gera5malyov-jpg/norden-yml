@@ -187,7 +187,7 @@ class KitClient:
             r = self.session.request(method, url, params=params, json=body if files is None else None,
                                      files=files, headers=headers, timeout=timeout)
             if r.status_code == 429:
-                time.sleep(float(r.headers.get("Retry-After") or min(20, 2 ** attempt)))
+                time.sleep(float(r.headers.get("Retry-After") or min(45, 5 * (attempt + 1))))
                 continue
             if r.status_code >= 500:
                 time.sleep(min(20, 2 ** attempt))
@@ -318,7 +318,7 @@ class KitClient:
             headers["Content-Type"] = "application/merge-patch+json"
             r = self.session.patch(full, json=body, headers=headers, timeout=120)
             if r.status_code == 429:
-                time.sleep(float(r.headers.get("Retry-After") or min(20, 2 ** attempt)))
+                time.sleep(float(r.headers.get("Retry-After") or min(45, 5 * (attempt + 1))))
                 continue
             if r.status_code >= 500:
                 time.sleep(min(20, 2 ** attempt))
@@ -893,21 +893,14 @@ def create_new_product(kit, item, categories, all_chars, chars_by_title, code_si
     suffix = hashlib.sha1(item["article"].encode("utf-8")).hexdigest()[:10]
     temp_sku = f"NORDEN-TMP-{safe_part}-{suffix}"
 
-    # Create the card immediately with only the stable Norden site code.
-    # Full characteristics are added after the variant exists.
-    chars = [{
-        "characteristic_id": code_site_id,
-        "value": item["article"],
-        "values": [item["article"]],
-    }]
+    # Create with the minimal payload proven to work in KIT.
+    # Stable site code and final Article are patched only after KIT returns kit_id.
     body = {
         "sku": temp_sku,
         "name": item["name"],
-        "description": s(item.get("description")),
         "status": "PUBLISHED",
         "product_id": product_id,
         "brand": BRAND,
-        "characteristics": chars,
     }
     stock = item.get("stock")
     if stock is not None:
