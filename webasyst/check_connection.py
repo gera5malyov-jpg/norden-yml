@@ -79,7 +79,17 @@ def main():
     bearer_result = summarize_response("bearer", bearer)
     print(json.dumps(bearer_result, ensure_ascii=False))
 
-    # 2) Official query-parameter fallback. Useful for diagnosing redirects/header stripping.
+    # 2) Official POST-field transfer. Preferred fallback because the token is not in the URL.
+    post_form = session.post(
+        endpoint,
+        data={"access_token": token, "format": "json"},
+        timeout=60,
+        allow_redirects=True,
+    )
+    post_form_result = summarize_response("post_form", post_form)
+    print(json.dumps(post_form_result, ensure_ascii=False))
+
+    # 3) Query-parameter fallback, used only for diagnostics.
     query = session.get(
         endpoint,
         params={"access_token": token, "format": "json"},
@@ -89,7 +99,7 @@ def main():
     query_result = summarize_response("query_parameter", query)
     print(json.dumps(query_result, ensure_ascii=False))
 
-    if bearer_result["ok"] or query_result["ok"]:
+    if bearer_result["ok"] or post_form_result["ok"] or query_result["ok"]:
         print("Webasyst API connection is working.")
         return 0
 
