@@ -556,12 +556,19 @@ def source_from_xml(*, short=False):
 
 
 def load_source(secret, *, short=False):
-    # Authoritative Norden sources:
-    # - full product catalog/content/images/features: Norden.xml
-    # - purchase prices and stock: Norden.group -K8%.xml
-    # Norden API is intentionally not used for KIT synchronization.
+    # Primary source: Norden API.
+    # Fallback if API is unavailable/unauthorized:
+    # - catalog/content/images/features from Norden.xml
+    # - purchase price and stock from Norden.group -K8%.xml
+    api_error = None
+    try:
+        products, duplicates = source_from_api(secret, short=short)
+        if products:
+            return products, duplicates, "api-short" if short else "api", None
+    except Exception as exc:
+        api_error = str(exc)
     products, duplicates = source_from_xml(short=short)
-    return products, duplicates, "xml-price" if short else "xml-full+price", None
+    return products, duplicates, "xml-price" if short else "xml-full+price", api_error
 
 
 def load_mapping():
@@ -1028,8 +1035,8 @@ def main():
         "started_at": now_iso(),
         "mode": args.mode,
         "source": None,
-        "catalog_source": "Norden.xml",
-        "price_stock_source": "Norden.group -K8%.xml",
+        "catalog_source": "API Norden; fallback Norden.xml",
+        "price_stock_source": "API Norden; fallback Norden.group -K8%.xml",
         "api_error": None,
         "source_products": 0,
         "source_duplicate_articles": 0,
