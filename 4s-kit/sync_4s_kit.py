@@ -303,7 +303,7 @@ def main():
                 if not pid: raise RuntimeError('KIT did not return product id')
                 p=o['price']; old=(p*Decimal('1.40')).quantize(MONEY,rounding=ROUND_HALF_UP)
                 payload={
-                    'sku':o['sku'],
+                    'sku':kit_sku(o['sku']),
                     'name':o['name'],
                     'description':o['description'],
                     'brand':BRAND,
