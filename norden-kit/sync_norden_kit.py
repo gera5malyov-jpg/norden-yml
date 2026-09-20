@@ -1123,24 +1123,19 @@ def main():
                 report["price_updates"] += 1
             if item.get("stock") is not None:
                 report["stock_updates"] += len(warehouses)
+
+            # Enrich this card immediately: description, characteristics and images.
+            # Do not wait until the whole batch is created.
+            fill_existing_content(
+                kit, item, new["variant_id"],
+                all_chars, chars_by_title, code_site_id, report
+            )
+            time.sleep(1.5)
         except Exception as exc:
             report["errors"].append({"article": article, "stage": "create", "message": str(exc)[:800]})
             if len(report["errors"]) >= 200:
                 report["warnings"].append("Error limit reached; stopping product creation.")
                 break
-
-    # Enrich only cards created in this run. Existing Norden cards are handled separately
-    # after their UUID mapping is confirmed; this keeps batch imports fast and rate-limit safe.
-    if args.mode in ("full", "scheduled"):
-        for article in created_articles:
-            item = source.get(article)
-            variants = mapping.get("variants", {}).get(article, [])
-            if not item:
-                continue
-            for v in variants:
-                vid = s(v.get("variant_id"))
-                if vid:
-                    fill_existing_content(kit, item, vid, all_chars, chars_by_title, code_site_id, report)
 
     remaining = [a for a in source if a not in mapping.get("variants", {})]
     mapping["initial_complete"] = len(remaining) == 0
