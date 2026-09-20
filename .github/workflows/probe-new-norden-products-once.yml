@@ -1,0 +1,45 @@
+name: Probe new Norden products once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe-new-norden-products-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe current KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.parse, urllib.request
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          out={}
+          for term in ['NORDEN-TMP-','100-','Norden']:
+              q=urllib.parse.urlencode({'name':term,'page':1,'per_page':100})
+              u='https://api.kit.yandex.net/v1/variants?'+q
+              with urllib.request.urlopen(urllib.request.Request(u,headers=h),timeout=60) as r:
+                  p=json.loads(r.read().decode())
+              rows=p.get('variants') or p.get('items') or p.get('results') or p.get('data') or []
+              if isinstance(rows,dict): rows=rows.get('items') or []
+              out[term]={
+                'total':p.get('total_count') or p.get('total'),
+                'returned':len(rows),
+                'samples':[{'kit_id':x.get('kit_id'),'sku':x.get('sku'),'brand':x.get('brand'),'name':x.get('name')} for x in rows[:20]]
+              }
+          os.makedirs('norden-kit',exist_ok=True)
+          open('norden-kit/new_products_probe.json','w').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/new_products_probe.json
+          git commit -m "Probe new Norden products" || exit 0
+          git pull --rebase
+          git push
