@@ -865,7 +865,13 @@ def build_source_characteristics(item, kit, all_rows, by_title, code_site_id, ar
             continue
         if norm_title(title) in (norm_title(CODE_SITE_TITLE), norm_title(ARTICLE_TITLE)):
             continue
-        cid = characteristic_id(kit, all_rows, by_title, title)
+        try:
+            cid = characteristic_id(kit, all_rows, by_title, title)
+        except RuntimeError as exc:
+            # One ambiguous/invalid characteristic must not block all other fields.
+            # Skip only this characteristic; keep filling the rest.
+            print(f"Skip Norden characteristic {title!r}: {exc}", flush=True)
+            continue
         out.append({"characteristic_id": cid, "value": s(value), "values": [s(value)]})
     if article_id and new_article:
         out.append({"characteristic_id": article_id, "value": new_article, "values": [new_article]})
