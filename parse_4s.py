@@ -71,11 +71,7 @@ def catalog_products():
 
 def discover():
     urls=sitemap_products()
-    if len(urls)<MIN:
-        print('sitemap insufficient; using catalog fallback')
-        urls.update(catalog_products())
-    else:
-        print('sitemap sufficient; catalog fallback skipped')
+    print('catalog fallback disabled for normal runs')
     return sorted(urls)
 
 def walk(v):
