@@ -8,6 +8,7 @@ import re
 import sys
 import time
 import unicodedata
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -248,6 +249,34 @@ class KitClient:
 
     def variants(self):
         return self.iter_collection("/v1/variants")
+
+    def variants_parallel(self, workers=6):
+        first = self.request("GET", "/v1/variants", params={"page": 1, "per_page": 100})
+        first_rows = self.items(first)
+        total = self.total(first)
+        if total is None or total <= len(first_rows):
+            for row in first_rows:
+                if isinstance(row, dict):
+                    yield row
+            return
+        pages = max(1, math.ceil(total / 100))
+        for row in first_rows:
+            if isinstance(row, dict):
+                yield row
+        def fetch_page(page):
+            payload = self.request("GET", "/v1/variants", params={"page": page, "per_page": 100})
+            return page, self.items(payload)
+        with ThreadPoolExecutor(max_workers=max(1, int(workers))) as pool:
+            futures = [pool.submit(fetch_page, page) for page in range(2, pages + 1)]
+            done = 1
+            for fut in as_completed(futures):
+                page, rows = fut.result()
+                done += 1
+                if done % 25 == 0 or done == pages:
+                    print(f"KIT mapping scan: {done}/{pages} pages", flush=True)
+                for row in rows:
+                    if isinstance(row, dict):
+                        yield row
 
     def get_variant(self, variant_id):
         return self.request("GET", f"/v1/variants/{variant_id}")
@@ -590,7 +619,7 @@ def rebuild_mapping(kit, source, code_site_id, report):
     scanned = 0
     norden_rows = 0
     unresolved = []
-    for row in kit.variants():
+    for row in kit.variants_parallel(workers=6):
         scanned += 1
         if s(row.get("brand")).casefold() != BRAND.casefold():
             continue
