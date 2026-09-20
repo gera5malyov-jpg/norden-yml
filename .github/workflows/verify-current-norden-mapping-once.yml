@@ -1,0 +1,107 @@
+name: Verify current Norden KIT mapping once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/verify-current-norden-mapping-once.yml']
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact live KIT item
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, time, requests, xml.etree.ElementTree as ET
+          CODE_SITE='01a0b475-d329-7d14-b258-0171d79daa79'
+          ARTIKUL='01a0b41e-7a1c-72a1-b7e0-1e71f55d3d8e'
+          TARGET_SKU='AF-31646769'
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          def get(params):
+              for i in range(12):
+                  r=requests.get('https://api.kit.yandex.net/v1/variants',headers=h,params=params,timeout=120)
+                  if r.status_code==429:
+                      time.sleep(float(r.headers.get('Retry-After') or min(20,2**i))); continue
+                  r.raise_for_status(); return r.json()
+              raise RuntimeError('retries exhausted')
+          # First try direct server-side filtering.
+          found=[]
+          for params in (
+              {'sku':TARGET_SKU,'page':1,'per_page':100},
+              {'search':TARGET_SKU,'page':1,'per_page':100},
+              {'query':TARGET_SKU,'page':1,'per_page':100},
+          ):
+              p=get(params)
+              rows=p.get('variants') or p.get('items') or p.get('results') or p.get('data') or []
+              if isinstance(rows,dict): rows=rows.get('items') or []
+              exact=[x for x in rows if str(x.get('sku','')).strip()==TARGET_SKU]
+              if exact:
+                  found=exact; break
+          # Fallback scan only until exact sku is found.
+          if not found:
+              page=1
+              while page<=500 and not found:
+                  p=get({'page':page,'per_page':100})
+                  rows=p.get('variants') or p.get('items') or p.get('results') or p.get('data') or []
+                  if isinstance(rows,dict): rows=rows.get('items') or []
+                  found=[x for x in rows if str(x.get('sku','')).strip()==TARGET_SKU]
+                  if not rows or len(rows)<100: break
+                  page+=1
+          if not found:
+              raise RuntimeError('target SKU not found')
+          row=found[0]
+          chars={}
+          for c in row.get('characteristics') or []:
+              cid=str(c.get('characteristic_id',''))
+              val=str(c.get('value') or ((c.get('values') or [''])[0]) or '').strip()
+              if cid in (CODE_SITE,ARTIKUL):
+                  chars[cid]=val
+          # Verify against saved Norden source from last successful API-generated YML.
+          src=requests.get('https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/b3d07c22c6093ed2ffd71953e75e7e3ce4937039/norden.yml',timeout=120)
+          src.raise_for_status()
+          root=ET.fromstring(src.content)
+          norden=None
+          for o in root.findall('.//offer'):
+              code=(o.findtext('vendorCode') or o.attrib.get('id') or '').strip()
+              if code=='RT-2031':
+                  norden={
+                    'offer_id':o.attrib.get('id'),
+                    'name':(o.findtext('name') or '').strip(),
+                    'vendorCode':code,
+                    'vendor':(o.findtext('vendor') or '').strip(),
+                    'price':(o.findtext('price') or '').strip(),
+                    'oldprice':(o.findtext('oldprice') or '').strip(),
+                }
+                  break
+          out={
+            'kit':{
+              'id':row.get('id'),
+              'kit_id':row.get('kit_id'),
+              'sku':row.get('sku'),
+              'name':row.get('name'),
+              'brand':row.get('brand'),
+              'code_for_site':chars.get(CODE_SITE,''),
+              'article_characteristic':chars.get(ARTIKUL,''),
+            },
+            'norden':norden
+          }
+          os.makedirs('norden-kit',exist_ok=True)
+          with open('norden-kit/current_mapping_check.json','w',encoding='utf-8') as f:
+              json.dump(out,f,ensure_ascii=False,indent=2)
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit verification
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/current_mapping_check.json
+          git commit -m "Verify current Norden KIT mapping" || exit 0
+          git pull --rebase
+          git push
