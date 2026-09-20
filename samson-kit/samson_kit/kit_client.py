@@ -89,7 +89,7 @@ class KitClient:
     def list_active_warehouses(self): return list(self._iter_collection('/v1/warehouses',{'status':'ACTIVE'}))
     def resolve_warehouse_exact(self,title): return resolve_exact_warehouse(self.list_active_warehouses(),title)
     def iter_variants(self,filters=None): yield from self._iter_collection('/v1/variants',filters)
-    def index_samson_variants(self): return index_samson_variants(list(self.iter_variants()))
+    def index_samson_variants(self): return index_samson_variants(list(self.iter_variants({'name':'SAMS-'})))
     def list_categories(self): return list(self._iter_collection('/v1/categories',{'status':['ACTIVE']}))
     def create_category(self,title,parent_id=None):
         body={'title':str(title).strip()}
