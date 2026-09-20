@@ -1,0 +1,160 @@
+name: Repair one Norden image once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/repair-one-norden-image-once.yml']
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: pip install requests
+      - name: Probe source image and attach one
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: |
+          python - <<'PY'
+          import json, os, re, time, requests, xml.etree.ElementTree as ET
+          ARTICLE='SG.110.SH.44.AN'
+          VARIANT_ID='01a0bfd8-53c3-7398-b8f0-1a9f97539d72'
+          token=os.environ['YANDEX_KIT_TOKEN']; secret=os.environ.get('NORDEN_SECRET','').strip()
+          out={'article':ARTICLE,'variant_id':VARIANT_ID,'api':{},'fallback':{},'upload':{}}
+
+          def extract_urls(obj):
+              urls=[]
+              def walk(x):
+                  if isinstance(x,str):
+                      s=x.strip()
+                      if s.startswith('http://') or s.startswith('https://'):
+                          urls.append(s)
+                  elif isinstance(x,list):
+                      for v in x: walk(v)
+                  elif isinstance(x,dict):
+                      # Prefer likely URL-bearing values, but recursively inspect all.
+                      for k in ('url','src','image','image_url','href','link','original','big','large'):
+                          if k in x: walk(x[k])
+                      for k,v in x.items():
+                          if k not in ('url','src','image','image_url','href','link','original','big','large'):
+                              walk(v)
+              walk(obj)
+              return list(dict.fromkeys(urls))
+
+          # Primary: Norden API.
+          urls=[]
+          if secret:
+              try:
+                  r=requests.get('https://norden.group/api-products/',headers={'secret':secret},params={'sku':ARTICLE,'page':1},timeout=60)
+                  out['api']['status']=r.status_code
+                  if r.ok:
+                      p=r.json(); rows=p.get('products') or []
+                      out['api']['rows']=len(rows)
+                      if rows:
+                          raw=rows[0]
+                          out['api']['image_type']=type(raw.get('images')).__name__
+                          out['api']['image_preview']=raw.get('images')
+                          urls=extract_urls(raw.get('images'))
+                          out['api']['urls']=urls[:20]
+                  else:
+                      out['api']['body']=r.text[:500]
+              except Exception as e:
+                  out['api']['error']=repr(e)
+
+          # Fallback: full XML.
+          if not urls:
+              try:
+                  u='https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.xml'
+                  x=requests.get(u,timeout=120,headers={'User-Agent':'Mozilla/5.0'})
+                  x.raise_for_status()
+                  root=ET.fromstring(x.content)
+                  for n in root.iter('Номенклатура'):
+                      if (n.findtext('Артикул') or '').strip()!=ARTICLE: continue
+                      vals=[]
+                      for c in list(n):
+                          if str(c.tag).startswith('Ссылканафото') and (c.text or '').strip():
+                              vals.append((c.text or '').strip())
+                      urls=list(dict.fromkeys(vals))
+                      out['fallback']['urls']=urls[:20]
+                      break
+              except Exception as e:
+                  out['fallback']['error']=repr(e)
+
+          if not urls:
+              raise SystemExit('No image URLs found for '+ARTICLE)
+
+          # Download first usable source image.
+          img=None; chosen=None
+          for u in urls:
+              try:
+                  rr=requests.get(u,timeout=60,headers={'User-Agent':'Mozilla/5.0'})
+                  if rr.ok and len(rr.content)>1000:
+                      img=rr; chosen=u; break
+              except Exception:
+                  pass
+          if img is None:
+              raise SystemExit('All source image URLs failed')
+          out['upload']['chosen_url']=chosen
+          out['upload']['download_status']=img.status_code
+          out['upload']['download_bytes']=len(img.content)
+          mime=img.headers.get('Content-Type') or 'image/jpeg'
+          ext='.jpg'
+          m=re.search(r'\.(jpg|jpeg|png|webp)(?:\?|$)',chosen,re.I)
+          if m: ext='.'+m.group(1).lower().replace('jpeg','jpg')
+
+          # Upload file to KIT exactly like working Samson integration.
+          H={'Authorization':'Bearer '+token,'Accept':'application/json'}
+          for attempt in range(12):
+              up=requests.post('https://api.kit.yandex.net/v1/files',headers=H,
+                               files={'file':('norden'+ext,img.content,mime)},timeout=60)
+              if up.status_code==429:
+                  time.sleep(float(up.headers.get('Retry-After') or 5)); continue
+              out['upload']['kit_file_status']=up.status_code
+              out['upload']['kit_file_body']=up.text[:1000]
+              up.raise_for_status()
+              payload=up.json()
+              file_id=str(payload.get('id') or '').strip()
+              if not file_id: raise SystemExit('KIT did not return file id')
+              out['upload']['file_id']=file_id
+              break
+          else:
+              raise SystemExit('KIT file upload retries exhausted')
+
+          # Preserve any current media and attach image.
+          detail=requests.get('https://api.kit.yandex.net/v1/variants/'+VARIANT_ID,headers=H,timeout=60)
+          detail.raise_for_status(); cur=detail.json()
+          media=list(cur.get('media') or [])
+          media.append({'type':'IMAGE','display_sequence':len(media),'image_id':file_id})
+          Hp=dict(H); Hp['Content-Type']='application/merge-patch+json'
+          for attempt in range(12):
+              pr=requests.patch('https://api.kit.yandex.net/v1/variants/'+VARIANT_ID,headers=Hp,
+                                json={'media':media},timeout=60)
+              if pr.status_code==429:
+                  time.sleep(float(pr.headers.get('Retry-After') or 5)); continue
+              out['upload']['patch_status']=pr.status_code
+              out['upload']['patch_body']=pr.text[:1000]
+              pr.raise_for_status(); break
+
+          verify=requests.get('https://api.kit.yandex.net/v1/variants/'+VARIANT_ID,headers=H,timeout=60)
+          verify.raise_for_status(); vv=verify.json()
+          out['verify']={'media_count':len(vv.get('media') or []),'media':vv.get('media') or []}
+          os.makedirs('norden-kit',exist_ok=True)
+          open('norden-kit/one_image_repair_result.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit result
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/one_image_repair_result.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "Probe and repair one Norden image"
+          git pull --rebase origin main || true
+          git push origin main || true
