@@ -882,7 +882,13 @@ def create_new_product(kit, item, categories, all_chars, chars_by_title, code_si
     suffix = hashlib.sha1(item["article"].encode("utf-8")).hexdigest()[:10]
     temp_sku = f"NORDEN-TMP-{safe_part}-{suffix}"
 
-    chars = build_source_characteristics(item, kit, all_chars, chars_by_title, code_site_id)
+    # Create the card immediately with only the stable Norden site code.
+    # Full characteristics are added after the variant exists.
+    chars = [{
+        "characteristic_id": code_site_id,
+        "value": item["article"],
+        "values": [item["article"]],
+    }]
     body = {
         "sku": temp_sku,
         "name": item["name"],
@@ -917,9 +923,18 @@ def create_new_product(kit, item, categories, all_chars, chars_by_title, code_si
         raise RuntimeError("KIT did not return kit_id for new variant")
     final_article = f"100-{kit_id}"
 
-    final_chars = build_source_characteristics(
-        item, kit, all_chars, chars_by_title, code_site_id, article_id=article_id, new_article=final_article
-    )
+    final_chars = [
+        {
+            "characteristic_id": code_site_id,
+            "value": item["article"],
+            "values": [item["article"]],
+        },
+        {
+            "characteristic_id": article_id,
+            "value": final_article,
+            "values": [final_article],
+        },
+    ]
     try:
         kit.patch_variant(variant_id, {"sku": final_article, "characteristics": final_chars})
     except Exception as exc:
