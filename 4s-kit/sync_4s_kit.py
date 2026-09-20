@@ -99,6 +99,7 @@ class Kit:
         return out
     def warehouses(self): return self.all('/v1/warehouses',{'status':'ACTIVE'})
     def categories(self): return self.all('/v1/categories',{'status':['ACTIVE']})
+    def characteristics(self): return self.all('/v1/characteristics',{'status':['ACTIVE']})
     def variants(self):
         first=self.request('GET','/v1/variants',params={'page':1,'per_page':100})
         rows=[x for x in self.items(first) if isinstance(x,dict)]
@@ -234,6 +235,16 @@ def main():
     print(f'4s brand feed offers: {len(offers)}',flush=True)
 
     variants=kit.variants()
+    kit_chars=kit.characteristics()
+    code_char_ids={
+        s(x.get('id')) for x in kit_chars
+        if norm(x.get('title')) in {norm('Код для сайта'),norm('Артикул'),norm('Код продавца')}
+        and s(x.get('id'))
+    }
+    site_code_char_id=next((
+        s(x.get('id')) for x in kit_chars
+        if norm(x.get('title'))==norm('Код для сайта') and s(x.get('id'))
+    ),'')
     by_sku=defaultdict(list)
     brand_variants={}
     for v in variants:
@@ -241,9 +252,18 @@ def main():
             continue
         vid=s(v.get('id'))
         brand_variants[vid]=v
+        keys=[]
         sku=s(v.get('sku'))
-        if sku:
-            by_sku[sku].append(v)
+        if sku: keys.append(sku)
+        for ch in v.get('characteristics') or []:
+            if s(ch.get('characteristic_id')) not in code_char_ids:
+                continue
+            vals=ch.get('values') if isinstance(ch.get('values'),list) else []
+            vals=list(vals)
+            if s(ch.get('value')): vals.append(s(ch.get('value')))
+            keys.extend(s(x) for x in vals if s(x))
+        for key in dict.fromkeys(keys):
+            by_sku[key].append(v)
 
     print(f'KIT variants scanned: {len(variants)}; brand 4 Сезона: {len(brand_variants)}',flush=True)
     kitcats=kit.categories()
@@ -258,7 +278,13 @@ def main():
     seen_ids=set(); price_updates=[]; stock_updates=[]
 
     for n,o in enumerate(offers,1):
-        rows=by_sku.get(o['sku'],[])
+        rows=[]
+        for key in dict.fromkeys([o['sku'],o['id']]):
+            rows.extend(by_sku.get(key,[]))
+        dedup={}
+        for row in rows:
+            if s(row.get('id')): dedup[s(row.get('id'))]=row
+        rows=list(dedup.values())
         chosen=None
         if len(rows)==1:
             chosen=rows[0]
@@ -289,6 +315,12 @@ def main():
                         {'warehouse_id':wh['МСК'],'quantity':100,'reserved':0},
                     ],
                 }
+                if site_code_char_id:
+                    payload['characteristics']=[{
+                        'characteristic_id':site_code_char_id,
+                        'value':o['sku'],
+                        'values':[o['sku']],
+                    }]
                 chosen=kit.create_variant(payload)
                 if not s(chosen.get('id')): raise RuntimeError('KIT did not return new variant id')
                 by_sku[o['sku']]=[chosen]; brand_variants[s(chosen.get('id'))]=chosen
