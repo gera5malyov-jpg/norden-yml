@@ -430,11 +430,16 @@ class SyncRunner:
 
         seen_source_ids = set()
         seen_site_codes = set()
-        global_positive_max, global_latest = build_feed_canonical_state(self.feed_path)
+        if self.new_only:
+            global_positive_max, global_latest = {}, {}
+        else:
+            global_positive_max, global_latest = build_feed_canonical_state(self.feed_path)
         price_batch = []
         stock_batch = []
         stopped_early = False
+        creation_limit_hit = False
         created_or_planned = 0
+        created_this_run = set()
 
         def on_feed_skip(message):
             self.report['missing_site_code_count'] += 1
@@ -462,11 +467,19 @@ class SyncRunner:
             else:
                 seen_site_codes.add(offer.kit_sku)
 
-            effective_positive = global_positive_max.get(offer.kit_sku, 0)
-            latest_key, latest_price = global_latest.get(
-                offer.kit_sku,
-                (_source_sort_key(offer.source_id), offer.price),
+            previous_positive = global_positive_max.get(offer.kit_sku, 0)
+            effective_positive = max(
+                previous_positive,
+                offer.count if offer.count > 0 else 0,
             )
+            global_positive_max[offer.kit_sku] = effective_positive
+
+            current_key = _source_sort_key(offer.source_id)
+            previous_latest = global_latest.get(offer.kit_sku)
+            if previous_latest is None or current_key >= previous_latest[0]:
+                global_latest[offer.kit_sku] = (current_key, offer.price)
+            latest_key, latest_price = global_latest[offer.kit_sku]
+
             canonical_offer = replace(
                 offer,
                 count=effective_positive if effective_positive > 0 else 0,
@@ -479,7 +492,7 @@ class SyncRunner:
             variant = resolve_variant(offer, by_source, by_sku, self.characteristic_titles)
             if variant is not None:
                 self.report['existing_variants_seen'] += 1
-                if self.new_only:
+                if self.new_only and offer.kit_sku not in created_this_run:
                     continue
 
                 source_ids = _char_values(variant, self.characteristic_titles, 'ID предложения Riva')
@@ -541,6 +554,10 @@ class SyncRunner:
                 continue
 
             if self.max_new is not None and created_or_planned >= self.max_new:
+                if self.new_only:
+                    creation_limit_hit = True
+                    self.report['new_limit_skipped'] += 1
+                    continue
                 stopped_early = True
                 break
 
@@ -571,6 +588,7 @@ class SyncRunner:
                     normalized.update(created)
                     by_source[offer.source_id] = normalized
                     by_sku.setdefault(offer.kit_sku, []).append(normalized)
+                    created_this_run.add(offer.kit_sku)
                     self.report['new_products_created'] += 1
             except Exception as exc:
                 if 'image set' in str(exc):
@@ -580,7 +598,14 @@ class SyncRunner:
         self._flush_prices(price_batch)
         self._flush_stocks(stock_batch)
 
-        complete = (not stopped_early and self.skip_items == 0)
+        if self.new_only:
+            complete = (
+                self.skip_items == 0
+                and self.max_items is None
+                and not creation_limit_hit
+            )
+        else:
+            complete = (not stopped_early and self.skip_items == 0)
         self.report['catalog_complete'] = complete
         absent = absent_zero_updates(by_source, seen_source_ids, warehouse_ids, complete=complete)
         absent_variants = {update['variant_id'] for update in absent}
