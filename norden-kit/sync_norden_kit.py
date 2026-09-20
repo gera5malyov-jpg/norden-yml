@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -749,9 +750,9 @@ def create_new_product(kit, item, categories, all_chars, chars_by_title, code_si
     if not product_id:
         raise RuntimeError("KIT did not return product id")
 
-    temp_sku = "NORDEN-TMP-" + re.sub(r"[^0-9A-Za-z]+", "-", item["article"])[:60].strip("-")
-    if not temp_sku:
-        temp_sku = "NORDEN-TMP-" + str(int(time.time() * 1000))
+    safe_part = re.sub(r"[^0-9A-Za-z]+", "-", item["article"])[:45].strip("-") or "ITEM"
+    suffix = hashlib.sha1(item["article"].encode("utf-8")).hexdigest()[:10]
+    temp_sku = f"NORDEN-TMP-{safe_part}-{suffix}"
 
     chars = build_source_characteristics(item, kit, all_chars, chars_by_title, code_site_id)
     media = []
@@ -982,6 +983,7 @@ def main():
                 kit, item, categories, all_chars, chars_by_title, code_site_id, article_id, warehouses, report
             )
             mapping["variants"][article] = [new]
+            save_mapping(mapping)
             report["new_products_created"] += 1
 
             ps = price_set(item.get("purchase"))
