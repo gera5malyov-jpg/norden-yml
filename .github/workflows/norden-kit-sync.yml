@@ -50,17 +50,6 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Preflight and build exact current mapping
-        if: github.event_name == 'push'
-        env:
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
-        run: |
-          python norden-kit/sync_norden_kit.py \
-            --mode preflight \
-            --rebuild-map \
-            --time-budget-seconds 1200
-
       - name: Run initial full Norden import
         if: github.event_name == 'push'
         env:
@@ -69,6 +58,7 @@ jobs:
         run: |
           python norden-kit/sync_norden_kit.py \
             --mode full \
+            --rebuild-map \
             --time-budget-seconds 17000
 
       - name: Run scheduled three-hour sync
