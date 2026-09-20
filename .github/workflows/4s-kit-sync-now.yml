@@ -1,4 +1,5 @@
 name: Immediate sync 4 Сезона to Yandex KIT
+# corrected SKU rule: 333-<kit_id>
 
 on:
   push:
@@ -12,7 +13,7 @@ permissions:
 
 concurrency:
   group: kit-api-write
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   sync:
