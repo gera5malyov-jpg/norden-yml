@@ -1029,13 +1029,13 @@ def main():
         if short:
             # Need the full article list for safe mapping.
             full_source, _, _, _ = load_source(secret, short=False)
-            mapping = seed_mapping_from_existing_codes(full_source, report) if args.mode == "preflight" else None
+            mapping = seed_mapping_from_existing_codes(full_source, report) if args.mode in ("preflight", "full") else None
             if mapping is None:
                 mapping = rebuild_mapping_from_sku_list(kit, full_source, code_site_id, report)
             if mapping is None:
                 mapping = rebuild_mapping(kit, full_source, code_site_id, report)
         else:
-            mapping = seed_mapping_from_existing_codes(source, report) if args.mode == "preflight" else None
+            mapping = seed_mapping_from_existing_codes(source, report) if args.mode in ("preflight", "full") else None
             if mapping is None:
                 mapping = rebuild_mapping_from_sku_list(kit, source, code_site_id, report)
             if mapping is None:
