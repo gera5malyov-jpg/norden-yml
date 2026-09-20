@@ -635,7 +635,7 @@ def seed_mapping_from_existing_codes(source, report):
     report["mapped_existing_articles"] = len(mapping["variants"])
     report["unresolved_existing_count"] = len(unresolved)
     report["unresolved_existing_sample"] = unresolved[:200]
-    if len(mapping["variants"]) < 500:
+    if len(mapping["variants"]) < 350:
         report["warnings"].append(
             f"Existing Norden seed mapped only {len(mapping['variants'])} of {len(seeds)} codes."
         )
