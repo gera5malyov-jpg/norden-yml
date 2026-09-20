@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+import hashlib
 import json
 import math
 import os
 import re
-import time
 import threading
+import time
 import unicodedata
 import xml.etree.ElementTree as ET
 from collections import defaultdict
@@ -20,11 +21,13 @@ FEED=Path('4s-mebel.yml')
 REPORT=Path('4s-kit/last_sync_report.json')
 BRAND='4 Сезона'
 WAREHOUSE_TITLES=('СПБ','МСК')
+CODE_SITE_TITLE='Код для сайта'
+ARTICLE_TITLE='Артикул'
 MONEY=Decimal('0.01')
 
 def s(v): return str(v or '').strip()
 def norm(v): return re.sub(r'[^0-9a-zа-яё]+','',unicodedata.normalize('NFKC',s(v)).casefold())
-def is_brand(v): return norm(v) == norm(BRAND)
+def is_brand(v): return norm(v) in {'4сезона','4sezona'}
 def money(v):
     try:
         d=Decimal(str(v).replace(' ','').replace(',','.'))
@@ -43,9 +46,9 @@ class Kit:
         token=s(token)
         if not token: raise RuntimeError('YANDEX_KIT_TOKEN is not configured')
         self.h={'Authorization':f'Bearer {token}','Accept':'application/json'}
-        self.session=requests.Session(); self.last=0.0; self._pace_lock=threading.Lock()
+        self.session=requests.Session(); self.last=0.0; self._lock=threading.Lock()
     def _pace(self):
-        with self._pace_lock:
+        with self._lock:
             delay=.42-(time.monotonic()-self.last)
             if delay>0: time.sleep(delay)
             self.last=time.monotonic()
@@ -92,8 +95,6 @@ class Kit:
             p=self.request('GET',path,params=q); rows=self.items(p)
             out.extend(x for x in rows if isinstance(x,dict))
             total=self.total(p)
-            if page%25==0:
-                print(f'KIT scan {path}: page={page}, rows={len(out)}, total={total}',flush=True)
             if not rows or (total is not None and len(out)>=total) or (total is None and len(rows)<100): break
             page+=1
         return out
@@ -102,12 +103,10 @@ class Kit:
     def characteristics(self): return self.all('/v1/characteristics',{'status':['ACTIVE']})
     def variants(self):
         first=self.request('GET','/v1/variants',params={'page':1,'per_page':100})
-        rows=[x for x in self.items(first) if isinstance(x,dict)]
+        out=[x for x in self.items(first) if isinstance(x,dict)]
         total=self.total(first)
-        if total is None or total<=len(rows):
-            return rows
+        if total is None or total<=len(out): return out
         pages=max(1,math.ceil(total/100))
-        out=list(rows)
         def fetch(page):
             p=self.request('GET','/v1/variants',params={'page':page,'per_page':100})
             return page,[x for x in self.items(p) if isinstance(x,dict)]
@@ -119,20 +118,18 @@ class Kit:
                 if done%25==0 or done==pages:
                     print(f'KIT variants scan: {done}/{pages} pages, rows={len(out)}',flush=True)
         return out
+    def get_variant(self,variant_id): return self.request('GET',f'/v1/variants/{variant_id}')
     def create_category(self,title,parent_id=None):
         b={'title':title}
         if parent_id: b['parent_id']=parent_id
         return self.request('POST','/v1/categories',body=b)
-    def create_product(self,category_id):
-        return self.request('POST','/v1/products',body={'category_ids':[str(category_id)]})
-    def create_variant(self,body):
-        return self.request('POST','/v1/variants',body=body)
+    def create_product(self,category_id): return self.request('POST','/v1/products',body={'category_ids':[str(category_id)]})
+    def create_variant(self,body): return self.request('POST','/v1/variants',body=body)
     def patch_variant(self,variant_id,body):
-        url=f'/v1/variants/{variant_id}'
-        full=BASE+url
+        full=BASE+f'/v1/variants/{variant_id}'
         for attempt in range(12):
-            self._pace(); headers=dict(self.h); headers['Content-Type']='application/merge-patch+json'
-            r=self.session.patch(full,headers=headers,json=body,timeout=120)
+            self._pace(); h=dict(self.h); h['Content-Type']='application/merge-patch+json'
+            r=self.session.patch(full,headers=h,json=body,timeout=120)
             if r.status_code==429:
                 time.sleep(float(r.headers.get('Retry-After') or min(45,5*(attempt+1)))); continue
             if r.status_code>=500:
@@ -148,9 +145,7 @@ class Kit:
             self.request('POST','/v1/variants/stocks/bulk_update',body={'items':items[i:i+5000]})
 
 def parse_feed():
-    categories={}
-    offers=[]
-    stack=[]
+    categories={}; offers=[]; stack=[]
     for event,e in ET.iterparse(FEED,events=('start','end')):
         if event=='start':
             stack.append(e.tag); continue
@@ -159,7 +154,6 @@ def parse_feed():
             if cid and title: categories[cid]={'id':cid,'title':title,'parent_id':parent or None}
             e.clear()
         elif e.tag=='offer':
-            brand=s(e.findtext('vendor'))
             code=s(e.findtext('vendorCode')) or s(e.attrib.get('id'))
             if not code.casefold().startswith('4s-'):
                 e.clear()
@@ -168,17 +162,15 @@ def parse_feed():
             pr=money(e.findtext('price'))
             if code and pr:
                 offers.append({
-                    'id':s(e.attrib.get('id')),
-                    'sku':code,
+                    'id':s(e.attrib.get('id')),'source_code':code,
                     'name':s(e.findtext('name')) or code,
                     'description':s(e.findtext('description')),
                     'category_id':s(e.findtext('categoryId')),
                     'price':pr,
-                    'brand':BRAND,
                 })
             e.clear()
         if stack: stack.pop()
-    if not offers: raise RuntimeError('Brand-only 4s feed is empty')
+    if not offers: raise RuntimeError('4 Сезона feed is empty')
     return categories,offers
 
 def warehouse_map(rows):
@@ -187,6 +179,33 @@ def warehouse_map(rows):
         ids=[s(x.get('id')) for x in rows if s(x.get('title'))==title and s(x.get('id'))]
         if len(ids)!=1: raise RuntimeError(f'Expected exactly one KIT warehouse {title!r}; found {len(ids)}')
         out[title]=ids[0]
+    return out
+
+def resolve_special_characteristics(rows):
+    by_title=defaultdict(list)
+    for row in rows:
+        by_title[norm(row.get('title'))].append(row)
+    def one(title):
+        matches=by_title[norm(title)]
+        if len(matches)!=1: raise RuntimeError(f'Expected exactly one characteristic {title!r}; found {len(matches)}')
+        cid=s(matches[0].get('id'))
+        if not cid: raise RuntimeError(f'Characteristic {title!r} has no id')
+        return cid
+    return one(CODE_SITE_TITLE),one(ARTICLE_TITLE)
+
+def char_value(v,cid):
+    for x in v.get('characteristics') or []:
+        if s(x.get('characteristic_id'))==s(cid):
+            return s(x.get('value')) or (s((x.get('values') or [''])[0]) if x.get('values') else '')
+    return ''
+
+def merged_special_chars(v,code_site_id,article_id,source_code,final_article):
+    replace={str(code_site_id),str(article_id)}
+    out=[x for x in (v.get('characteristics') or []) if s(x.get('characteristic_id')) not in replace]
+    out.extend([
+        {'characteristic_id':code_site_id,'value':source_code,'values':[source_code]},
+        {'characteristic_id':article_id,'value':final_article,'values':[final_article]},
+    ])
     return out
 
 def current_stock(v,wid):
@@ -204,8 +223,7 @@ def cat_chain(cid,cats):
 
 def ensure_category(kit,offer,cats,kitcats):
     chain=cat_chain(offer['category_id'],cats)
-    if not chain:
-        chain=[{'id':'4s-root','title':'4 Сезона','parent_id':None}]
+    if not chain: chain=[{'id':'4s-root','title':'4 Сезона','parent_id':None}]
     parent=''
     for src in chain:
         title=s(src.get('title'))
@@ -220,138 +238,155 @@ def ensure_category(kit,offer,cats,kitcats):
         parent=cid
     return parent
 
-def price_row(variant_id,p):
+def desired_price_row(variant_id,p):
     old=(p*Decimal('1.40')).quantize(MONEY,rounding=ROUND_HALF_UP)
     return {'variant_id':variant_id,'price':f'{old:.2f}','manual_discount_price':f'{p:.2f}'}
 
-def desired_pricing_equal(v,p):
+def pricing_equal(v,p):
     pricing=v.get('pricing') or {}
-    return money(pricing.get('price'))==(p*Decimal('1.40')).quantize(MONEY,rounding=ROUND_HALF_UP) and money(pricing.get('manual_discount_price'))==p
+    old=(p*Decimal('1.40')).quantize(MONEY,rounding=ROUND_HALF_UP)
+    return money(pricing.get('price'))==old and money(pricing.get('manual_discount_price'))==p
+
+def final_sku_from_kit_id(kit_id):
+    if kit_id in (None,''): raise RuntimeError('KIT did not return kit_id')
+    return f'333-{kit_id}'
+
+def is_managed_4s_variant(v,code_site_id):
+    code=char_value(v,code_site_id)
+    sku=s(v.get('sku'))
+    if code.casefold().startswith('4s-'): return True
+    if sku.casefold().startswith('4s-'): return True
+    if sku.casefold().startswith('333-4s-'): return True
+    if is_brand(v.get('brand')) and sku.startswith('333-') and s(v.get('kit_id')) and sku==f"333-{v.get('kit_id')}":
+        return True
+    return False
 
 def main():
     cats,offers=parse_feed()
     kit=Kit(os.getenv('YANDEX_KIT_TOKEN',''))
     wh=warehouse_map(kit.warehouses())
-    print(f'4s brand feed offers: {len(offers)}',flush=True)
+    code_site_id,article_id=resolve_special_characteristics(kit.characteristics())
+    print(f'4 Сезона feed offers: {len(offers)}',flush=True)
 
     variants=kit.variants()
-    kit_chars=kit.characteristics()
-    code_char_ids={
-        s(x.get('id')) for x in kit_chars
-        if norm(x.get('title')) in {norm('Код для сайта'),norm('Артикул'),norm('Код продавца')}
-        and s(x.get('id'))
-    }
-    site_code_char_id=next((
-        s(x.get('id')) for x in kit_chars
-        if norm(x.get('title'))==norm('Код для сайта') and s(x.get('id'))
-    ),'')
-    by_sku=defaultdict(list)
-    brand_variants={}
+    by_source=defaultdict(list)
+    managed={}
     for v in variants:
-        if not (is_brand(v.get('brand')) and s(v.get('id'))):
-            continue
         vid=s(v.get('id'))
-        brand_variants[vid]=v
-        keys=[]
+        if not vid: continue
+        source=char_value(v,code_site_id)
         sku=s(v.get('sku'))
-        if sku:
-            keys.append(sku)
-        for ch in v.get('characteristics') or []:
-            if s(ch.get('characteristic_id')) not in code_char_ids:
-                continue
-            vals=ch.get('values') if isinstance(ch.get('values'),list) else []
-            vals=list(vals)
-            if s(ch.get('value')): vals.append(s(ch.get('value')))
-            keys.extend(s(x) for x in vals if s(x))
-        for key in dict.fromkeys(keys):
-            by_sku[key].append(v)
+        if source.casefold().startswith('4s-'):
+            by_source[source].append(v)
+        if sku.casefold().startswith('4s-'):
+            by_source[sku].append(v)
+        if sku.casefold().startswith('333-4s-'):
+            by_source[sku[4:]].append(v)
+        if is_managed_4s_variant(v,code_site_id):
+            managed[vid]=v
 
-    print(f'KIT variants scanned: {len(variants)}; brand 4 Сезона: {len(brand_variants)}',flush=True)
+    print(f'KIT variants scanned: {len(variants)}; managed 4 Сезона: {len(managed)}',flush=True)
     kitcats=kit.categories()
 
     report={
         'started_at':datetime.now(timezone.utc).isoformat(),
         'feed_offers':len(offers),'kit_variants_scanned':len(variants),
-        'existing_brand_variants':len(brand_variants),
+        'existing_managed_variants':len(managed),
         'matched':0,'created':0,'price_changes':0,'stock_changes':0,
-        'brand_patched':0,'absent_to_zero':0,'collisions':0,'errors':[],
-        'new_sku_rule':'333-<KIT kit_id>',
+        'brand_patched':0,'sku_fixed_to_333_kit_id':0,'code_site_filled':0,
+        'absent_to_zero':0,'collisions':0,'errors':[],
     }
     seen_ids=set(); price_updates=[]; stock_updates=[]
 
     for n,o in enumerate(offers,1):
-        rows=[]
-        for key in dict.fromkeys([o['sku'],o['id']]):
-            rows.extend(by_sku.get(key,[]))
-        dedup={}
-        for row in rows:
-            if s(row.get('id')): dedup[s(row.get('id'))]=row
-        rows=list(dedup.values())
+        source=o['source_code']
+        unique={}
+        for row in by_source.get(source,[]):
+            if s(row.get('id')): unique[s(row.get('id'))]=row
+        rows=list(unique.values())
         chosen=None
         if len(rows)==1:
             chosen=rows[0]
         elif len(rows)>1:
-            b=[x for x in rows if is_brand(x.get('brand'))]
-            if len(b)==1: chosen=b[0]
-            else:
-                report['collisions']+=1
-                report['errors'].append({'sku':o['sku'],'message':f'ambiguous SKU: {len(rows)} variants'})
-                continue
+            report['collisions']+=1
+            report['errors'].append({'source_code':source,'message':f'ambiguous source mapping: {len(rows)} variants'})
+            continue
 
         if chosen is None:
             try:
                 cid=ensure_category(kit,o,cats,kitcats)
                 product=kit.create_product(cid); pid=s(product.get('id'))
                 if not pid: raise RuntimeError('KIT did not return product id')
+                temp='4S-TMP-'+hashlib.sha1(source.encode('utf-8')).hexdigest()[:16]
                 p=o['price']; old=(p*Decimal('1.40')).quantize(MONEY,rounding=ROUND_HALF_UP)
                 payload={
-                    'sku':'tmp-4s-'+norm(o['sku'])[:180],
-                    'name':o['name'],
-                    'description':o['description'],
-                    'brand':BRAND,
-                    'status':'PUBLISHED',
-                    'product_id':pid,
+                    'sku':temp,'name':o['name'],'description':o['description'],
+                    'brand':BRAND,'status':'PUBLISHED','product_id':pid,
                     'pricing':{'price':f'{old:.2f}','manual_discount_price':f'{p:.2f}'},
                     'stocks':[
                         {'warehouse_id':wh['СПБ'],'quantity':100,'reserved':0},
                         {'warehouse_id':wh['МСК'],'quantity':100,'reserved':0},
                     ],
                 }
-                if site_code_char_id:
-                    payload['characteristics']=[{
-                        'characteristic_id':site_code_char_id,
-                        'value':o['sku'],
-                        'values':[o['sku']],
-                    }]
-                chosen=kit.create_variant(payload)
-                if not s(chosen.get('id')): raise RuntimeError('KIT did not return new variant id')
-                kit_id=s(chosen.get('kit_id'))
-                if not kit_id:
-                    raise RuntimeError('KIT did not return generated kit_id')
-                final_sku='333-'+kit_id
-                patched=kit.patch_variant(s(chosen.get('id')),{'sku':final_sku})
-                chosen=dict(chosen)
-                chosen['sku']=final_sku
-                if isinstance(patched,dict):
-                    chosen.update(patched)
-                    chosen['sku']=final_sku
-                by_sku[o['sku']]=[chosen]
-                brand_variants[s(chosen.get('id'))]=chosen
+                created=kit.create_variant(payload)
+                vid=s(created.get('id'))
+                if not vid: raise RuntimeError('KIT did not return new variant id')
+                kit_id=created.get('kit_id')
+                if kit_id in (None,''):
+                    created=kit.get_variant(vid); kit_id=created.get('kit_id')
+                final_sku=final_sku_from_kit_id(kit_id)
+                chars=[
+                    {'characteristic_id':code_site_id,'value':source,'values':[source]},
+                    {'characteristic_id':article_id,'value':final_sku,'values':[final_sku]},
+                ]
+                kit.patch_variant(vid,{'sku':final_sku,'brand':BRAND,'characteristics':chars})
+                chosen=kit.get_variant(vid)
+                by_source[source]=[chosen]; managed[vid]=chosen
                 report['created']+=1
+                report['sku_fixed_to_333_kit_id']+=1
+                report['code_site_filled']+=1
             except Exception as exc:
-                report['errors'].append({'sku':o['sku'],'message':str(exc)[:500]})
+                report['errors'].append({'source_code':source,'message':str(exc)[:500]})
                 continue
         else:
             report['matched']+=1
+            vid=s(chosen.get('id'))
+            kit_id=chosen.get('kit_id')
+            if kit_id in (None,''):
+                try:
+                    chosen=kit.get_variant(vid); kit_id=chosen.get('kit_id')
+                except Exception as exc:
+                    report['errors'].append({'source_code':source,'message':f'get kit_id: {str(exc)[:400]}'})
+                    continue
+            final_sku=final_sku_from_kit_id(kit_id)
+            patch={}
+            if s(chosen.get('sku'))!=final_sku:
+                patch['sku']=final_sku
+            if not is_brand(chosen.get('brand')):
+                patch['brand']=BRAND
+            current_code=char_value(chosen,code_site_id)
+            current_article=char_value(chosen,article_id)
+            if current_code!=source or current_article!=final_sku:
+                patch['characteristics']=merged_special_chars(chosen,code_site_id,article_id,source,final_sku)
+            if patch:
+                try:
+                    kit.patch_variant(vid,patch)
+                    if 'sku' in patch: report['sku_fixed_to_333_kit_id']+=1
+                    if 'brand' in patch: report['brand_patched']+=1
+                    if 'characteristics' in patch and current_code!=source: report['code_site_filled']+=1
+                    chosen=kit.get_variant(vid)
+                except Exception as exc:
+                    report['errors'].append({'source_code':source,'message':f'patch existing: {str(exc)[:400]}'})
+                    continue
+            managed[vid]=chosen
 
         vid=s(chosen.get('id')); seen_ids.add(vid)
-        if not desired_pricing_equal(chosen,o['price']):
-            price_updates.append(price_row(vid,o['price'])); report['price_changes']+=1
+        if not pricing_equal(chosen,o['price']):
+            price_updates.append(desired_price_row(vid,o['price'])); report['price_changes']+=1
         for title in WAREHOUSE_TITLES:
             wid=wh[title]
             if current_stock(chosen,wid)!=100:
                 stock_updates.append({'variant_id':vid,'warehouse_id':wid,'quantity':100}); report['stock_changes']+=1
-
         if len(price_updates)>=500:
             kit.bulk_prices(price_updates); price_updates.clear()
         if len(stock_updates)>=500:
@@ -362,10 +397,14 @@ def main():
     if price_updates: kit.bulk_prices(price_updates)
     if stock_updates: kit.bulk_stocks(stock_updates)
 
-    zero=[]
-    absent_ids=[]
-    for vid,v in brand_variants.items():
+    zero=[]; absent_ids=[]
+    for vid,v in managed.items():
         if vid in seen_ids: continue
+        source=char_value(v,code_site_id)
+        sku=s(v.get('sku'))
+        # Zero only variants clearly managed by this 4s integration.
+        if not (source.casefold().startswith('4s-') or sku.casefold().startswith('4s-') or sku.casefold().startswith('333-4s-')):
+            continue
         absent_ids.append(vid)
         for title in WAREHOUSE_TITLES:
             wid=wh[title]
