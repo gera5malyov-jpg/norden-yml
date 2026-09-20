@@ -28,6 +28,7 @@ PRICE_XML_URL = "https://norden.group/index.php?dispatch=sw_user_prices.get_file
 ROOT = Path(__file__).resolve().parent
 MAPPING_PATH = ROOT / "kit_mapping.json"
 REPORT_PATH = ROOT / "last_sync_report.json"
+EXISTING_SKUS_PATH = ROOT / "existing_norden_skus.txt"
 
 CODE_SITE_TITLE = "Код для сайта"
 ARTICLE_TITLE = "Артикул"
@@ -613,6 +614,74 @@ def match_source_article(code, source_articles):
     return None
 
 
+def rebuild_mapping_from_sku_list(kit, source, code_site_id, report):
+    articles = list(source)
+    mapping = {"version": 1, "updated_at": None, "initial_complete": False, "variants": {}}
+    skus = []
+    if EXISTING_SKUS_PATH.exists():
+        skus = [s(x) for x in EXISTING_SKUS_PATH.read_text(encoding="utf-8").splitlines() if s(x)]
+    if len(skus) < 100:
+        return None
+
+    unresolved = []
+    found_rows = []
+    def fetch_one(sku):
+        payload = kit.request("GET", "/v1/variants", params={"name": sku, "page": 1, "per_page": 100})
+        rows = kit.items(payload)
+        exact = [x for x in rows if s(x.get("sku")) == sku and s(x.get("brand")).casefold() == BRAND.casefold()]
+        if len(exact) == 1:
+            return sku, exact[0], None
+        if len(exact) > 1:
+            return sku, None, f"duplicate exact SKU matches: {len(exact)}"
+        return sku, None, "not found"
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futures = [pool.submit(fetch_one, sku) for sku in skus]
+        done = 0
+        for fut in as_completed(futures):
+            sku, row, error = fut.result()
+            done += 1
+            if done % 50 == 0 or done == len(futures):
+                print(f"KIT targeted Norden mapping: {done}/{len(futures)}", flush=True)
+            if row is None:
+                if len(unresolved) < 200:
+                    unresolved.append({"sku": sku, "reason": error})
+                continue
+            found_rows.append(row)
+
+    for row in found_rows:
+        code = current_char_value(row, code_site_id)
+        article = match_source_article(code, articles)
+        if not article:
+            if len(unresolved) < 200:
+                unresolved.append({
+                    "sku": row.get("sku"), "kit_id": row.get("kit_id"),
+                    "code_for_site": code, "name": row.get("name"),
+                    "reason": "Code for site not found in Norden source",
+                })
+            continue
+        mapping["variants"].setdefault(article, []).append({
+            "variant_id": s(row.get("id")),
+            "kit_id": row.get("kit_id"),
+            "sku": s(row.get("sku")),
+        })
+
+    report["kit_mapping_method"] = "targeted_current_norden_skus"
+    report["kit_target_skus"] = len(skus)
+    report["kit_brand_norden_seen"] = len(found_rows)
+    report["mapped_existing_articles"] = len(mapping["variants"])
+    report["unresolved_existing_count"] = len(unresolved)
+    report["unresolved_existing_sample"] = unresolved
+    # Safety: the current export should resolve almost all existing Norden cards.
+    if len(found_rows) < 500:
+        report["warnings"].append(
+            f"Targeted Norden lookup found only {len(found_rows)} of {len(skus)} cards; falling back to full scan."
+        )
+        return None
+    save_mapping(mapping)
+    return mapping
+
+
 def rebuild_mapping(kit, source, code_site_id, report):
     articles = list(source)
     mapping = {"version": 1, "updated_at": None, "initial_complete": False, "variants": {}}
@@ -930,9 +999,13 @@ def main():
         if short:
             # Need the full article list for safe mapping.
             full_source, _, _, _ = load_source(secret, short=False)
-            mapping = rebuild_mapping(kit, full_source, code_site_id, report)
+            mapping = rebuild_mapping_from_sku_list(kit, full_source, code_site_id, report)
+            if mapping is None:
+                mapping = rebuild_mapping(kit, full_source, code_site_id, report)
         else:
-            mapping = rebuild_mapping(kit, source, code_site_id, report)
+            mapping = rebuild_mapping_from_sku_list(kit, source, code_site_id, report)
+            if mapping is None:
+                mapping = rebuild_mapping(kit, source, code_site_id, report)
     else:
         report["mapped_existing_articles"] = len(mapping.get("variants", {}))
 
