@@ -1,0 +1,49 @@
+name: Probe KIT pricing schema once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe-kit-pricing-schema-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe schema endpoints
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request, urllib.error
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          paths=['/openapi.json','/swagger.json','/docs/openapi.json','/api/openapi.json','/v1/openapi.json']
+          out={}
+          for p in paths:
+              u='https://api.kit.yandex.net'+p
+              try:
+                  req=urllib.request.Request(u,headers=h)
+                  with urllib.request.urlopen(req,timeout=30) as r:
+                      data=r.read(2000000)
+                      txt=data.decode('utf-8','replace')
+                      keys=[]
+                      for needle in ['minimum_price','min_price','manual_discount_price','promotion_price','bulk_update']:
+                          if needle in txt: keys.append(needle)
+                      out[p]={'status':r.status,'content_type':r.headers.get('Content-Type'),'length':len(data),'found':keys}
+              except urllib.error.HTTPError as e:
+                  out[p]={'status':e.code}
+              except Exception as e:
+                  out[p]={'error':repr(e)}
+          os.makedirs('norden-kit',exist_ok=True)
+          open('norden-kit/kit_pricing_schema_probe.json','w').write(json.dumps(out,indent=2))
+          print(json.dumps(out,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/kit_pricing_schema_probe.json
+          git commit -m "Probe KIT pricing schema" || exit 0
+          git pull --rebase
+          git push
