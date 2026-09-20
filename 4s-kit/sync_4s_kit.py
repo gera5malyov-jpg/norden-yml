@@ -21,10 +21,14 @@ REPORT=Path('4s-kit/last_sync_report.json')
 BRAND='4 Сезона'
 WAREHOUSE_TITLES=('СПБ','МСК')
 MONEY=Decimal('0.01')
+SKU_PREFIX='333-'
 
 def s(v): return str(v or '').strip()
 def norm(v): return re.sub(r'[^0-9a-zа-яё]+','',unicodedata.normalize('NFKC',s(v)).casefold())
 def is_brand(v): return norm(v) == norm(BRAND)
+def kit_sku(code):
+    code=s(code)
+    return code if code.startswith(SKU_PREFIX) else SKU_PREFIX+code
 def money(v):
     try:
         d=Decimal(str(v).replace(' ','').replace(',','.'))
@@ -254,7 +258,10 @@ def main():
         brand_variants[vid]=v
         keys=[]
         sku=s(v.get('sku'))
-        if sku: keys.append(sku)
+        if sku:
+            keys.append(sku)
+            if sku.startswith(SKU_PREFIX):
+                keys.append(sku[len(SKU_PREFIX):])
         for ch in v.get('characteristics') or []:
             if s(ch.get('characteristic_id')) not in code_char_ids:
                 continue
@@ -323,7 +330,9 @@ def main():
                     }]
                 chosen=kit.create_variant(payload)
                 if not s(chosen.get('id')): raise RuntimeError('KIT did not return new variant id')
-                by_sku[o['sku']]=[chosen]; brand_variants[s(chosen.get('id'))]=chosen
+                by_sku[o['sku']]=[chosen]
+                by_sku[kit_sku(o['sku'])]=[chosen]
+                brand_variants[s(chosen.get('id'))]=chosen
                 report['created']+=1
             except Exception as exc:
                 report['errors'].append({'sku':o['sku'],'message':str(exc)[:500]})
