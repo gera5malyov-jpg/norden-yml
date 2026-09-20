@@ -6,6 +6,8 @@ import sys
 
 import requests
 
+from client import WebasystAPIError, WebasystClient
+
 
 BASE_URL = os.getenv("WEBASYST_BASE_URL", "https://profikompany.ru").rstrip("/")
 TOKEN = os.getenv("WEBASYST_API_TOKEN", "")
@@ -99,12 +101,52 @@ def main():
     query_result = summarize_response("query_parameter", query)
     print(json.dumps(query_result, ensure_ascii=False))
 
-    if bearer_result["ok"] or post_form_result["ok"] or query_result["ok"]:
-        print("Webasyst API connection is working.")
-        return 0
+    if not (bearer_result["ok"] or post_form_result["ok"] or query_result["ok"]):
+        print("ERROR: token was rejected by Webasyst with all tested transports.", file=sys.stderr)
+        return 1
 
-    print("ERROR: token was rejected by Webasyst with both supported transports.", file=sys.stderr)
-    return 1
+    print("Webasyst API connection is working.")
+
+    # Confirm the reusable client and key read permissions without printing business data.
+    client = WebasystClient(base_url=BASE_URL, token=token)
+    probes = [
+        ("product_types", "shop.type.getList", {}),
+        ("stocks", "shop.stock.getList", {}),
+        ("categories", "shop.category.getTree", {"max_level": 1}),
+        ("products", "shop.product.search", {"limit": 1, "fields": "id"}),
+        ("orders", "shop.order.search", {"limit": 1, "fields": "id"}),
+    ]
+
+    capability_results = []
+    for label, method, params in probes:
+        try:
+            payload = client.call(method, params=params)
+            entry = {"capability": label, "method": method, "ok": True}
+            if isinstance(payload, list):
+                entry["returned_items"] = len(payload)
+            elif isinstance(payload, dict):
+                if "count" in payload:
+                    entry["count"] = payload.get("count")
+                elif "products" in payload and isinstance(payload.get("products"), list):
+                    entry["returned_items"] = len(payload["products"])
+                elif "orders" in payload and isinstance(payload.get("orders"), list):
+                    entry["returned_items"] = len(payload["orders"])
+            capability_results.append(entry)
+        except WebasystAPIError as exc:
+            capability_results.append({
+                "capability": label,
+                "method": method,
+                "ok": False,
+                "error": str(exc),
+            })
+
+    print(json.dumps({"capabilities": capability_results}, ensure_ascii=False))
+    if not all(x["ok"] for x in capability_results):
+        print("ERROR: API token works, but one or more requested Shop-Script read permissions are unavailable.", file=sys.stderr)
+        return 2
+
+    print("Reusable Webasyst client and Shop-Script read permissions are verified.")
+    return 0
 
 
 if __name__ == "__main__":
