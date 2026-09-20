@@ -4,9 +4,11 @@ import math
 import os
 import re
 import time
+import threading
 import unicodedata
 import xml.etree.ElementTree as ET
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
@@ -41,11 +43,12 @@ class Kit:
         token=s(token)
         if not token: raise RuntimeError('YANDEX_KIT_TOKEN is not configured')
         self.h={'Authorization':f'Bearer {token}','Accept':'application/json'}
-        self.session=requests.Session(); self.last=0.0
+        self.session=requests.Session(); self.last=0.0; self._pace_lock=threading.Lock()
     def _pace(self):
-        delay=.42-(time.monotonic()-self.last)
-        if delay>0: time.sleep(delay)
-        self.last=time.monotonic()
+        with self._pace_lock:
+            delay=.42-(time.monotonic()-self.last)
+            if delay>0: time.sleep(delay)
+            self.last=time.monotonic()
     def request(self,method,path,params=None,body=None):
         url=BASE+path
         for attempt in range(12):
@@ -96,7 +99,25 @@ class Kit:
         return out
     def warehouses(self): return self.all('/v1/warehouses',{'status':'ACTIVE'})
     def categories(self): return self.all('/v1/categories',{'status':['ACTIVE']})
-    def variants(self): return self.all('/v1/variants')
+    def variants(self):
+        first=self.request('GET','/v1/variants',params={'page':1,'per_page':100})
+        rows=[x for x in self.items(first) if isinstance(x,dict)]
+        total=self.total(first)
+        if total is None or total<=len(rows):
+            return rows
+        pages=max(1,math.ceil(total/100))
+        out=list(rows)
+        def fetch(page):
+            p=self.request('GET','/v1/variants',params={'page':page,'per_page':100})
+            return page,[x for x in self.items(p) if isinstance(x,dict)]
+        with ThreadPoolExecutor(max_workers=6) as pool:
+            futs=[pool.submit(fetch,p) for p in range(2,pages+1)]
+            done=1
+            for fut in as_completed(futs):
+                page,batch=fut.result(); out.extend(batch); done+=1
+                if done%25==0 or done==pages:
+                    print(f'KIT variants scan: {done}/{pages} pages, rows={len(out)}',flush=True)
+        return out
     def create_category(self,title,parent_id=None):
         b={'title':title}
         if parent_id: b['parent_id']=parent_id
