@@ -1,0 +1,121 @@
+name: Repair one Norden content once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/repair-one-norden-content-once.yml']
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: pip install requests
+      - name: Add only missing characteristics and blank description
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: |
+          python - <<'PY'
+          import json, os, time, requests
+          ARTICLE='SG.110.SH.44.AN'
+          VARIANT_ID='01a0bfd8-53c3-7398-b8f0-1a9f97539d72'
+          token=os.environ['YANDEX_KIT_TOKEN']; secret=os.environ['NORDEN_SECRET']
+          H={'Authorization':'Bearer '+token,'Accept':'application/json'}
+          out={'article':ARTICLE,'variant_id':VARIANT_ID}
+
+          def req(method,url,**kw):
+              for a in range(12):
+                  r=requests.request(method,url,timeout=60,**kw)
+                  if r.status_code==429:
+                      time.sleep(float(r.headers.get('Retry-After') or 5)); continue
+                  r.raise_for_status(); return r
+              raise RuntimeError('retries exhausted '+url)
+
+          src=req('GET','https://norden.group/api-products/',headers={'secret':secret},
+                  params={'sku':ARTICLE,'page':1}).json()
+          rows=src.get('products') or []
+          if not rows: raise SystemExit('Norden API returned no product')
+          raw=rows[0]
+          features=[x for x in (raw.get('features') or []) if isinstance(x,dict) and str(x.get('name') or '').strip() and str(x.get('value') or '').strip()]
+          out['source_description']=raw.get('description')
+          out['source_features']=features
+
+          chars=[]; page=1
+          while True:
+              p=req('GET','https://api.kit.yandex.net/v1/characteristics',headers=H,
+                    params={'status':'ACTIVE','page':page,'per_page':100}).json()
+              batch=p.get('characteristics') or p.get('items') or p.get('data') or []
+              if isinstance(batch,dict): batch=batch.get('items') or []
+              chars.extend(batch)
+              total=p.get('total_count') or p.get('total')
+              if not batch or (isinstance(total,int) and len(chars)>=total) or len(batch)<100: break
+              page+=1; time.sleep(0.8)
+
+          def norm(s): return ' '.join(str(s or '').strip().casefold().split())
+          by={}
+          for x in chars: by.setdefault(norm(x.get('title')),[]).append(x)
+
+          detail=req('GET','https://api.kit.yandex.net/v1/variants/'+VARIANT_ID,headers=H).json()
+          existing=list(detail.get('characteristics') or [])
+          existing_ids={str(x.get('characteristic_id') or '').strip() for x in existing}
+          additions=[]
+          created=[]
+          for f in features:
+              title=str(f['name']).strip(); value=str(f['value']).strip()
+              matches=by.get(norm(title),[])
+              if len(matches)>1:
+                  sm=[x for x in matches if str(x.get('type') or '').upper()=='STRING']
+                  if len(sm)==1: matches=sm
+              if len(matches)==1:
+                  cid=str(matches[0].get('id') or '').strip()
+              elif len(matches)==0:
+                  hh=dict(H); hh['Content-Type']='application/json'
+                  n=req('POST','https://api.kit.yandex.net/v1/characteristics',headers=hh,
+                        json={'title':title,'type':'STRING','select_mode':'SINGLE'}).json()
+                  cid=str(n.get('id') or '').strip()
+                  if not cid: raise RuntimeError('No characteristic id for '+title)
+                  by.setdefault(norm(title),[]).append(n); created.append(title)
+              else:
+                  out.setdefault('ambiguous',[]).append(title); continue
+              if cid not in existing_ids:
+                  additions.append({'characteristic_id':cid,'value':value,'values':[value]})
+                  existing_ids.add(cid)
+
+          patch={}
+          if additions: patch['characteristics']=existing+additions
+          src_desc=str(raw.get('description') or '').strip()
+          if not str(detail.get('description') or '').strip() and src_desc:
+              patch['description']=src_desc
+          if patch:
+              hh=dict(H); hh['Content-Type']='application/merge-patch+json'
+              req('PATCH','https://api.kit.yandex.net/v1/variants/'+VARIANT_ID,headers=hh,json=patch)
+
+          verify=req('GET','https://api.kit.yandex.net/v1/variants/'+VARIANT_ID,headers=H).json()
+          out.update({
+              'created_characteristic_titles':created,
+              'added_count':len(additions),
+              'description_added':bool(patch.get('description')),
+              'verified_description':verify.get('description'),
+              'verified_char_count':len(verify.get('characteristics') or []),
+              'verified_characteristics':verify.get('characteristics') or []
+          })
+          os.makedirs('norden-kit',exist_ok=True)
+          open('norden-kit/one_content_repair_result.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit result
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/one_content_repair_result.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "Repair one Norden content"
+          git pull --rebase origin main || true
+          git push origin main || true
