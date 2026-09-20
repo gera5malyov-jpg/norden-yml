@@ -164,11 +164,11 @@ def parse_feed():
             e.clear()
         elif e.tag=='offer':
             brand=s(e.findtext('vendor'))
-            if not is_brand(brand):
+            code=s(e.findtext('vendorCode')) or s(e.attrib.get('id'))
+            if not code.casefold().startswith('4s-'):
                 e.clear()
                 if stack: stack.pop()
                 continue
-            code=s(e.findtext('vendorCode')) or s(e.attrib.get('id'))
             pr=money(e.findtext('price'))
             if code and pr:
                 offers.append({
