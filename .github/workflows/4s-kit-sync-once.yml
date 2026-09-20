@@ -1,0 +1,56 @@
+name: Sync 4 Сезона to Yandex KIT once
+
+on:
+  workflow_run:
+    workflows: ["Fast refresh 4s brand-only feed once"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kit-api-write
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Verify feed contains only brand 4 Сезона
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root=ET.parse('4s-mebel.yml').getroot()
+          offers=root.findall('.//offer')
+          vendors={str(x.findtext('vendor') or '').strip() for x in offers}
+          if len(offers) < 20:
+              raise SystemExit(f'Too few offers: {len(offers)}')
+          if vendors != {'4 Сезона'}:
+              raise SystemExit(f'Unsafe feed vendors: {vendors}')
+          print(f'Safe feed: {len(offers)} offers, brand=4 Сезона')
+          PY
+      - name: Sync prices and stocks
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python 4s-kit/sync_4s_kit.py
+      - name: Commit sync report
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 4s-kit/last_sync_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save 4 Сезона KIT sync report"
+            git pull --rebase origin main
+            git push
+          fi
