@@ -167,10 +167,20 @@ class KitClient:
             raise RuntimeError("YANDEX_KIT_TOKEN is not configured")
         self.headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
         self.session = requests.Session()
+        self.min_request_interval = 0.42
+        self._last_request_at = 0.0
+
+    def _pace(self):
+        now = time.monotonic()
+        delay = self.min_request_interval - (now - self._last_request_at)
+        if delay > 0:
+            time.sleep(delay)
+        self._last_request_at = time.monotonic()
 
     def request(self, method, path, *, params=None, body=None, files=None, timeout=120):
         url = KIT_BASE + path
         for attempt in range(12):
+            self._pace()
             headers = dict(self.headers)
             if body is not None and files is None:
                 headers["Content-Type"] = "application/json"
@@ -303,6 +313,7 @@ class KitClient:
         url = f"/v1/variants/{variant_id}"
         full = KIT_BASE + url
         for attempt in range(12):
+            self._pace()
             headers = dict(self.headers)
             headers["Content-Type"] = "application/merge-patch+json"
             r = self.session.patch(full, json=body, headers=headers, timeout=120)
@@ -1090,6 +1101,7 @@ def main():
 
     # Create missing Norden products first so new cards appear in KIT immediately.
     categories = kit.categories()
+    created_articles = []
     start = time.monotonic()
     max_new = args.max_new if args.max_new > 0 else None
     # Scheduled run only creates a conservative number if initial load was incomplete.
@@ -1109,30 +1121,27 @@ def main():
             )
             mapping["variants"][article] = [new]
             save_mapping(mapping)
+            created_articles.append(article)
             report["new_products_created"] += 1
 
+            # Price and stocks are already included in POST /v1/variants.
             ps = price_set(item.get("purchase"))
             if ps:
-                prow = {"variant_id": new["variant_id"], **ps}
-                kit.bulk_prices([prow], minimum_field=min_field)
                 report["price_updates"] += 1
             if item.get("stock") is not None:
-                srows = [
-                    {"variant_id": new["variant_id"], "warehouse_id": wid, "quantity": int(item["stock"])}
-                    for wid in warehouses.values()
-                ]
-                kit.bulk_stocks(srows)
-                report["stock_updates"] += len(srows)
+                report["stock_updates"] += len(warehouses)
         except Exception as exc:
             report["errors"].append({"article": article, "stage": "create", "message": str(exc)[:800]})
             if len(report["errors"]) >= 200:
                 report["warnings"].append("Error limit reached; stopping product creation.")
                 break
 
-    # Only after creating missing products, fill empty content/characteristics on existing cards.
-    if args.mode == "full":
-        for article, variants in list(mapping.get("variants", {}).items()):
+    # Enrich only cards created in this run. Existing Norden cards are handled separately
+    # after their UUID mapping is confirmed; this keeps batch imports fast and rate-limit safe.
+    if args.mode in ("full", "scheduled"):
+        for article in created_articles:
             item = source.get(article)
+            variants = mapping.get("variants", {}).get(article, [])
             if not item:
                 continue
             for v in variants:
