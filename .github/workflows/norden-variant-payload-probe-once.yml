@@ -1,0 +1,92 @@
+name: Norden variant payload probe
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/norden-variant-payload-probe-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create minimal variant
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,time,urllib.request,urllib.error
+          proof=json.load(open('norden-kit/surgical_first_card_result.json',encoding='utf-8'))
+          cand=proof['candidate']; prod=proof['product']
+          token=os.environ['YANDEX_KIT_TOKEN']
+          H={'Authorization':'Bearer '+token,'Accept':'application/json','Content-Type':'application/json'}
+          sku='NORD-'+hashlib.sha1(cand['article'].encode()).hexdigest()[:12]
+          body={'sku':sku,'name':cand['name'],'status':'PUBLISHED','product_id':prod['id'],'brand':'Norden'}
+          for attempt in range(10):
+              try:
+                  req=urllib.request.Request('https://api.kit.yandex.net/v1/variants',
+                      data=json.dumps(body,ensure_ascii=False).encode(),headers=H,method='POST')
+                  with urllib.request.urlopen(req,timeout=40) as r:
+                      out=json.loads(r.read().decode())
+                  break
+              except urllib.error.HTTPError as e:
+                  txt=e.read().decode('utf-8','replace')
+                  if e.code==429:
+                      wait=int(e.headers.get('Retry-After') or min(45,5*(attempt+1)))
+                      print('429 wait',wait,flush=True); time.sleep(wait); continue
+                  print('VARIANT_ERROR',e.code,txt,flush=True)
+                  open('norden-kit/variant_payload_error.txt','w',encoding='utf-8').write(txt)
+                  raise
+          else:
+              raise SystemExit('variant retries exhausted')
+          if not out.get('id'): raise SystemExit('No variant id: '+json.dumps(out))
+          result={'candidate':cand,'created':out}
+          open('norden-kit/variant_payload_result.json','w',encoding='utf-8').write(json.dumps(result,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False),flush=True)
+          PY
+      - name: Patch site code and final article
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,time,urllib.request,urllib.error
+          r=json.load(open('norden-kit/variant_payload_result.json',encoding='utf-8'))
+          cand=r['candidate']; v=r['created']; token=os.environ['YANDEX_KIT_TOKEN']
+          kid=v.get('kit_id')
+          if not kid:
+              req=urllib.request.Request('https://api.kit.yandex.net/v1/variants/'+v['id'],
+                  headers={'Authorization':'Bearer '+token,'Accept':'application/json'})
+              with urllib.request.urlopen(req,timeout=40) as x: v=json.loads(x.read().decode())
+              kid=v.get('kit_id')
+          art='100-'+str(kid)
+          body={'sku':art,'characteristics':[
+            {'characteristic_id':'01a0b475-d329-7d14-b258-0171d79daa79','value':cand['article'],'values':[cand['article']]},
+            {'characteristic_id':'01a0b41e-7a1c-72a1-b7e0-1e71f55d3d8e','value':art,'values':[art]}
+          ]}
+          H={'Authorization':'Bearer '+token,'Accept':'application/json','Content-Type':'application/merge-patch+json'}
+          for attempt in range(10):
+              try:
+                  req=urllib.request.Request('https://api.kit.yandex.net/v1/variants/'+v['id'],
+                    data=json.dumps(body,ensure_ascii=False).encode(),headers=H,method='PATCH')
+                  with urllib.request.urlopen(req,timeout=40) as x: raw=x.read()
+                  break
+              except urllib.error.HTTPError as e:
+                  txt=e.read().decode('utf-8','replace')
+                  if e.code==429:
+                      wait=int(e.headers.get('Retry-After') or min(45,5*(attempt+1))); time.sleep(wait); continue
+                  print('PATCH_ERROR',e.code,txt,flush=True); raise
+          r['final']={'kit_id':kid,'sku':art,'code_for_site':cand['article']}
+          open('norden-kit/variant_payload_result.json','w',encoding='utf-8').write(json.dumps(r,ensure_ascii=False,indent=2))
+          print(json.dumps(r['final'],ensure_ascii=False),flush=True)
+          PY
+      - name: Commit result
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/variant_payload_result.json norden-kit/variant_payload_error.txt 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "Probe Norden KIT variant payload"
+          git pull --rebase
+          git push
