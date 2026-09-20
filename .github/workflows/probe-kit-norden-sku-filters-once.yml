@@ -1,0 +1,53 @@
+name: Probe KIT Norden SKU filters once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe-kit-norden-sku-filters-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe filters
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.parse, urllib.request, urllib.error, time
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          tests=[
+            {'name':'AF-','page':1,'per_page':100},
+            {'name':'100-','page':1,'per_page':100},
+            {'name':'RT-2031','page':1,'per_page':100},
+            {'sku':'AF-31646769','page':1,'per_page':100},
+          ]
+          out=[]
+          for q in tests:
+              u='https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode(q)
+              for i in range(10):
+                  try:
+                      req=urllib.request.Request(u,headers=h)
+                      with urllib.request.urlopen(req,timeout=120) as r: p=json.loads(r.read().decode())
+                      break
+                  except urllib.error.HTTPError as e:
+                      if e.code==429: time.sleep(int(e.headers.get('Retry-After') or 3)); continue
+                      raise
+              rows=p.get('variants') or p.get('items') or p.get('results') or p.get('data') or []
+              if isinstance(rows,dict): rows=rows.get('items') or []
+              out.append({'query':q,'returned':len(rows),'total':p.get('total_count') or p.get('total'),
+                'sample':[{'sku':x.get('sku'),'brand':x.get('brand'),'name':x.get('name'),'kit_id':x.get('kit_id')} for x in rows[:10]]})
+          os.makedirs('norden-kit',exist_ok=True)
+          open('norden-kit/sku_filter_probe.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/sku_filter_probe.json
+          git commit -m "Probe KIT Norden SKU filters" || exit 0
+          git pull --rebase
+          git push
