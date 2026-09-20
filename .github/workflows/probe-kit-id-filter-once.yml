@@ -1,0 +1,50 @@
+name: Probe KIT ID filter once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe-kit-id-filter-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe KIT ID filter
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.parse, urllib.request, urllib.error
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          tests=[
+            {'kit_id':1500515,'page':1,'per_page':100},
+            {'kitId':1500515,'page':1,'per_page':100},
+            {'id':1500515,'page':1,'per_page':100},
+            {'name':'AF-31646769','page':1,'per_page':100},
+          ]
+          out=[]
+          for q in tests:
+              u='https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode(q)
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(u,headers=h),timeout=60) as r:
+                      p=json.loads(r.read().decode())
+                  rows=p.get('variants') or p.get('items') or p.get('results') or p.get('data') or []
+                  if isinstance(rows,dict): rows=rows.get('items') or []
+                  out.append({'q':q,'returned':len(rows),'total':p.get('total_count') or p.get('total'),
+                    'sample':[{'id':x.get('id'),'kit_id':x.get('kit_id'),'sku':x.get('sku'),'brand':x.get('brand'),'name':x.get('name')} for x in rows[:10]]})
+              except Exception as e:
+                  out.append({'q':q,'error':repr(e)})
+          os.makedirs('norden-kit',exist_ok=True)
+          open('norden-kit/kit_id_filter_probe.json','w').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/kit_id_filter_probe.json
+          git commit -m "Probe KIT ID filter" || exit 0
+          git pull --rebase
+          git push
