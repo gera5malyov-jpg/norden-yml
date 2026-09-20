@@ -1,0 +1,110 @@
+name: Norden KIT sync
+
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Sync mode'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - scheduled
+          - price-stock
+          - preflight
+      rebuild_map:
+        description: 'Rebuild KIT mapping by scanning variants'
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches: [main]
+    paths:
+      - 'norden-kit/sync_norden_kit.py'
+      - '.github/workflows/norden-kit-sync.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-kit-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Preflight and build exact current mapping
+        if: github.event_name == 'push'
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: |
+          python norden-kit/sync_norden_kit.py \
+            --mode preflight \
+            --rebuild-map \
+            --time-budget-seconds 1200
+
+      - name: Run initial full Norden import
+        if: github.event_name == 'push'
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: |
+          python norden-kit/sync_norden_kit.py \
+            --mode full \
+            --time-budget-seconds 17000
+
+      - name: Run scheduled three-hour sync
+        if: github.event_name == 'schedule'
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: |
+          python norden-kit/sync_norden_kit.py \
+            --mode scheduled \
+            --time-budget-seconds 9000
+
+      - name: Run manual sync
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: |
+          ARGS="--mode ${{ inputs.mode }} --time-budget-seconds 17000"
+          if [ "${{ inputs.rebuild_map }}" = "true" ]; then
+            ARGS="$ARGS --rebuild-map"
+          fi
+          python norden-kit/sync_norden_kit.py $ARGS
+
+      - name: Commit mapping and sync report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/kit_mapping.json norden-kit/last_sync_report.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Update Norden KIT sync state"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin main && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
