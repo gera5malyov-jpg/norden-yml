@@ -1,4 +1,5 @@
 name: Probe new Norden products once
+# retrigger latest Norden import check
 on:
   push:
     branches: [main]
