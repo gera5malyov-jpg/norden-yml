@@ -1,8 +1,8 @@
-name: Sync 4 Сезона to Yandex KIT once
+name: Sync 4 Сезона to Yandex KIT
 
 on:
   workflow_run:
-    workflows: ["Fast refresh 4s brand-only feed once"]
+    workflows: ["Update 4s-mebel YML", "Fast refresh 4s brand-only feed once"]
     types: [completed]
   workflow_dispatch:
 
@@ -17,7 +17,7 @@ jobs:
   sync:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 330
     steps:
       - uses: actions/checkout@v4
         with:
