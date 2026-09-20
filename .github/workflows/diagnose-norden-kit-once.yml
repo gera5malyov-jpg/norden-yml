@@ -1,0 +1,54 @@
+name: Diagnose Norden KIT once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/diagnose-norden-kit-once.yml']
+permissions:
+  contents: write
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe KIT endpoints
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, time, urllib.request
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          urls={
+            'chars1':'https://api.kit.yandex.net/v1/characteristics?status=ACTIVE&page=1&per_page=100',
+            'chars2':'https://api.kit.yandex.net/v1/characteristics?status=ACTIVE&page=2&per_page=100',
+            'cats1':'https://api.kit.yandex.net/v1/categories?status=ACTIVE&page=1&per_page=100',
+            'variant':'https://api.kit.yandex.net/v1/variants?name=AF-31646769&page=1&per_page=100'
+          }
+          out={}
+          for name,url in urls.items():
+              t=time.time()
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(url,headers=h),timeout=30) as r:
+                      data=r.read()
+                  p=json.loads(data.decode())
+                  rows=[]
+                  if isinstance(p,dict):
+                      for k in ('items','results','variants','categories','characteristics','data'):
+                          v=p.get(k)
+                          if isinstance(v,list): rows=v; break
+                          if isinstance(v,dict) and isinstance(v.get('items'),list): rows=v['items']; break
+                  out[name]={'seconds':round(time.time()-t,2),'rows':len(rows),'total':p.get('total') if isinstance(p,dict) else None,'total_count':p.get('total_count') if isinstance(p,dict) else None,'first_id':rows[0].get('id') if rows else None,'last_id':rows[-1].get('id') if rows else None}
+              except Exception as e:
+                  out[name]={'seconds':round(time.time()-t,2),'error':repr(e)}
+              print(name,out[name],flush=True)
+          os.makedirs('norden-kit',exist_ok=True)
+          open('norden-kit/kit_endpoint_probe.json','w').write(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit probe
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/kit_endpoint_probe.json
+          git commit -m 'Probe KIT endpoints' || exit 0
+          git pull --rebase
+          git push
