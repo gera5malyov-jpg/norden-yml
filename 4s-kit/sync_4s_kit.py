@@ -24,7 +24,7 @@ MONEY=Decimal('0.01')
 
 def s(v): return str(v or '').strip()
 def norm(v): return re.sub(r'[^0-9a-zа-яё]+','',unicodedata.normalize('NFKC',s(v)).casefold())
-def is_brand(v): return norm(v) in {'4сезона','4sezona'}
+def is_brand(v): return norm(v) == norm(BRAND)
 def money(v):
     try:
         d=Decimal(str(v).replace(' ','').replace(',','.'))
@@ -237,10 +237,13 @@ def main():
     by_sku=defaultdict(list)
     brand_variants={}
     for v in variants:
+        if not (is_brand(v.get('brand')) and s(v.get('id'))):
+            continue
+        vid=s(v.get('id'))
+        brand_variants[vid]=v
         sku=s(v.get('sku'))
-        if sku: by_sku[sku].append(v)
-        if is_brand(v.get('brand')) and s(v.get('id')):
-            brand_variants[s(v.get('id'))]=v
+        if sku:
+            by_sku[sku].append(v)
 
     print(f'KIT variants scanned: {len(variants)}; brand 4 Сезона: {len(brand_variants)}',flush=True)
     kitcats=kit.categories()
@@ -258,14 +261,7 @@ def main():
         rows=by_sku.get(o['sku'],[])
         chosen=None
         if len(rows)==1:
-            candidate=rows[0]
-            b=s(candidate.get('brand'))
-            if not b or is_brand(b):
-                chosen=candidate
-            else:
-                report['collisions']+=1
-                report['errors'].append({'sku':o['sku'],'message':f'SKU collision with brand {b}'})
-                continue
+            chosen=rows[0]
         elif len(rows)>1:
             b=[x for x in rows if is_brand(x.get('brand'))]
             if len(b)==1: chosen=b[0]
@@ -302,14 +298,6 @@ def main():
                 continue
         else:
             report['matched']+=1
-            vid=s(chosen.get('id'))
-            if not is_brand(chosen.get('brand')):
-                try:
-                    kit.patch_variant(vid,{'brand':BRAND}); chosen['brand']=BRAND; brand_variants[vid]=chosen
-                    report['brand_patched']+=1
-                except Exception as exc:
-                    report['errors'].append({'sku':o['sku'],'message':f'brand patch: {str(exc)[:400]}'})
-                    continue
 
         vid=s(chosen.get('id')); seen_ids.add(vid)
         if not desired_pricing_equal(chosen,o['price']):
