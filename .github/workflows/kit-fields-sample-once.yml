@@ -1,0 +1,53 @@
+name: KIT fields sample once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-fields-sample-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch small variant sample
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.parse, urllib.request, urllib.error, time
+          token=os.environ['YANDEX_KIT_TOKEN']
+          headers={'Authorization':'Bearer '+token,'Accept':'application/json'}
+          url='https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode({'page':1,'per_page':3})
+          for attempt in range(10):
+              req=urllib.request.Request(url,headers=headers)
+              try:
+                  with urllib.request.urlopen(req,timeout=120) as r:
+                      data=json.loads(r.read().decode('utf-8'))
+                  break
+              except urllib.error.HTTPError as e:
+                  if e.code==429:
+                      time.sleep(int(e.headers.get('Retry-After') or 3)); continue
+                  raise
+          else:
+              raise RuntimeError('request retries exhausted')
+          os.makedirs('norden-kit',exist_ok=True)
+          with open('norden-kit/fields_sample.json','w',encoding='utf-8') as f:
+              json.dump(data,f,ensure_ascii=False,indent=2,sort_keys=True)
+          PY
+      - name: Commit sample
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/fields_sample.json
+          git commit -m "Probe KIT variant field names" || exit 0
+          git pull --rebase
+          git push
