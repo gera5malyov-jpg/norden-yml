@@ -878,6 +878,49 @@ def fill_existing_content(kit, item, variant_id, all_chars, chars_by_title, code
     except Exception as exc:
         report["errors"].append({"article": item["article"], "stage": "get_existing", "message": str(exc)[:500]})
         return
+
+    # 1. IMAGES FIRST. Do not let characteristic creation block media upload.
+    if not (current.get("media") or []) and item.get("images"):
+        media = []
+        for url in item["images"][:20]:
+            try:
+                uploaded = kit.upload_image_url(url)
+                fid = s(uploaded.get("id"))
+                if fid:
+                    media.append({"type": "IMAGE", "display_sequence": len(media), "image_id": fid})
+                time.sleep(0.8)
+            except Exception as exc:
+                report["image_errors"] += 1
+                if len(report["warnings"]) < 200:
+                    report["warnings"].append(f"{item['article']}: image failed: {exc}")
+        if media:
+            try:
+                kit.patch_variant(variant_id, {"media": media})
+                verify = kit.get_variant(variant_id)
+                verified = [
+                    m for m in (verify.get("media") or [])
+                    if isinstance(m, dict) and s(m.get("type")).upper() == "IMAGE"
+                ]
+                if verified:
+                    report["existing_products_images_filled"] += 1
+                else:
+                    report["image_errors"] += 1
+                    if len(report["warnings"]) < 200:
+                        report["warnings"].append(
+                            f"{item['article']}: KIT accepted media patch but verification returned no images"
+                        )
+            except Exception as exc:
+                report["image_errors"] += 1
+                if len(report["warnings"]) < 200:
+                    report["warnings"].append(f"{item['article']}: media patch failed: {exc}")
+
+    # Refresh after image patch so subsequent patch preserves current state.
+    try:
+        current = kit.get_variant(variant_id)
+    except Exception:
+        pass
+
+    # 2. Brand/description/characteristics after media is safely attached.
     patch = {}
     if s(current.get("brand")) != BRAND:
         patch["brand"] = BRAND
@@ -890,40 +933,41 @@ def fill_existing_content(kit, item, variant_id, all_chars, chars_by_title, code
         cid = s(c.get("characteristic_id"))
         vals = c.get("values") or []
         existing_values[cid] = s(c.get("value") or (vals[0] if vals else ""))
+
     additions = []
-    desired = build_source_characteristics(item, kit, all_chars, chars_by_title, code_site_id)
-    for d in desired:
-        cid = d["characteristic_id"]
-        if not existing_values.get(cid):
-            additions.append(d)
+    try:
+        desired = build_source_characteristics(item, kit, all_chars, chars_by_title, code_site_id)
+        for d in desired:
+            cid = d["characteristic_id"]
+            if not existing_values.get(cid):
+                additions.append(d)
+    except Exception as exc:
+        report["errors"].append({
+            "article": item["article"],
+            "stage": "build_characteristics",
+            "message": str(exc)[:500],
+        })
+
     if additions:
-        merged = [x for x in existing if s(x.get("characteristic_id")) not in {a["characteristic_id"] for a in additions}]
+        merged = [
+            x for x in existing
+            if s(x.get("characteristic_id")) not in {a["characteristic_id"] for a in additions}
+        ]
         merged.extend(additions)
         patch["characteristics"] = merged
         report["empty_characteristics_filled"] += len(additions)
-
-    if not (current.get("media") or []) and item.get("images"):
-        media = []
-        for url in item["images"][:20]:
-            try:
-                uploaded = kit.upload_image_url(url)
-                fid = s(uploaded.get("id"))
-                if fid:
-                    media.append({"type": "IMAGE", "display_sequence": len(media), "image_id": fid})
-            except Exception as exc:
-                report["image_errors"] += 1
-                if len(report["warnings"]) < 200:
-                    report["warnings"].append(f"{item['article']}: image failed: {exc}")
-        if media:
-            patch["media"] = media
-            report["existing_products_images_filled"] += 1
 
     if patch:
         try:
             kit.patch_variant(variant_id, patch)
             report["existing_products_patched"] += 1
         except Exception as exc:
-            report["errors"].append({"article": item["article"], "stage": "patch_existing", "message": str(exc)[:500]})
+            report["errors"].append({
+                "article": item["article"],
+                "stage": "patch_existing",
+                "message": str(exc)[:500],
+            })
+
 
 
 def create_new_product(kit, item, categories, all_chars, chars_by_title, code_site_id, article_id, warehouses, report):
