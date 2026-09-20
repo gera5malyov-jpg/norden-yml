@@ -1,0 +1,53 @@
+name: Inspect RT2031 fallback data once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/inspect-rt2031-fallback-once.yml']
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect RT-2031
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request, xml.etree.ElementTree as ET
+          urls={
+            'full':'https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.xml',
+            'price':'https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.group+-K8%25.xml'
+          }
+          def fetch(url):
+              return urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'}),timeout=120).read()
+          def node_to_dict(n):
+              out={'_attrs':dict(n.attrib)}
+              for c in list(n):
+                  key=c.tag
+                  val=(c.text or '').strip()
+                  item={'text':val,'attrs':dict(c.attrib)}
+                  out.setdefault(key,[]).append(item)
+              return out
+          rep={}
+          for kind,url in urls.items():
+              root=ET.fromstring(fetch(url))
+              target=None
+              for n in root.iter('Номенклатура'):
+                  art=n.findtext('Артикул')
+                  if (art or '').strip()=='RT-2031':
+                      target=n; break
+              rep[kind]=None if target is None else node_to_dict(target)
+          os.makedirs('norden-kit',exist_ok=True)
+          with open('norden-kit/rt2031_fallback.json','w',encoding='utf-8') as f:
+              json.dump(rep,f,ensure_ascii=False,indent=2)
+          print(json.dumps(rep,ensure_ascii=False,indent=2)[:30000])
+          PY
+      - name: Commit result
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/rt2031_fallback.json
+          git commit -m "Inspect RT-2031 fallback data" || exit 0
+          git pull --rebase
+          git push
