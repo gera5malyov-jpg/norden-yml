@@ -51,7 +51,7 @@ def main(argv=None):
         # large catalog, so use a slower client and a longer retry window here
         # without changing the request pace of the other supplier integrations.
         http = SafeSession(max_attempts=10, timeout=(15, 120))
-        kit = KitClient(kit_token, http, min_request_interval=1.50)
+        kit = KitClient(kit_token, http, min_request_interval=1.50, read_request_interval=0.25)
         with tempfile.TemporaryDirectory(prefix='riva-feed-') as td:
             feed_path = os.path.join(td, 'feed.xml')
             http.download_to_file(feed_url, feed_path)
