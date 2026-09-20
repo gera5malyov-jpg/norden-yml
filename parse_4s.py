@@ -247,7 +247,8 @@ def main():
             try:
                 it=future.result()
                 if not it['name'] or not it['price']: raise ValueError('missing name or price')
-                if norm_brand(it.get('brand')) not in {'4сезона','4sezona'}:
+                own_brand = norm_brand(it.get('brand')) in {'4сезона','4sezona'} or str(it.get('sku') or '').casefold().startswith('4s-')
+                if not own_brand:
                     skipped_brand+=1
                     continue
                 it['brand']='4 Сезона'
