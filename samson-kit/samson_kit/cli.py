@@ -15,7 +15,7 @@ def main(argv=None):
     except Exception as exc: report={'status':'failed','dry_run':args.dry_run,'catalog_complete':False,'error_count':1,'errors':[{'sku':'BOOTSTRAP','message':str(exc)[:500]}]}
     report['started_at']=started; report['finished_at']=utc_now(); write_report(args.report,report); print(json.dumps({k:report.get(k) for k in ('status','dry_run','skip_items','max_new','new_only','catalog_complete','samson_products_seen','new_products_created','price_changes','stock_changes','active_zero_to_100','withdrawn_to_zero','absent_to_zero','error_count','warning_count')},ensure_ascii=False,indent=2))
     if report.get('status')=='failed': return 1
-    if args.max_items is None and not args.dry_run and not report.get('catalog_complete'): return 2
+    if args.max_items is None and args.max_new is None and not args.dry_run and not report.get('catalog_complete'): return 2
     return 0
 
 if __name__=='__main__': sys.exit(main())
