@@ -2,6 +2,7 @@ from __future__ import annotations
 import gzip, hashlib, json, os, re, time
 import xml.etree.ElementTree as ET
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urljoin, urlparse, urlunparse
@@ -208,14 +209,19 @@ def make(items):
 def main():
     urls=discover()
     if len(urls)<MIN: raise RuntimeError(f'only {len(urls)} product URLs discovered; minimum {MIN}')
-    items=[]; fails=[]
-    for i,u in enumerate(urls,1):
-        try:
-            it=parse(u)
-            if not it['name'] or not it['price']: raise ValueError('missing name or price')
-            items.append(it)
-        except Exception as e: fails.append((u,str(e))); print('FAILED',u,e)
-        if i%25==0 or i==len(urls): print(f'parsed {i}/{len(urls)} valid={len(items)} failed={len(fails)}')
+    items=[]; fails=[]; done=0
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        futures={pool.submit(parse,u):u for u in urls}
+        for future in as_completed(futures):
+            u=futures[future]; done+=1
+            try:
+                it=future.result()
+                if not it['name'] or not it['price']: raise ValueError('missing name or price')
+                items.append(it)
+            except Exception as e:
+                fails.append((u,str(e))); print('FAILED',u,e)
+            if done%25==0 or done==len(urls): print(f'parsed {done}/{len(urls)} valid={len(items)} failed={len(fails)}')
+    items.sort(key=lambda x:x['url'])
     make(items); print(f'generated {OUT}: {len(items)} offers, {OUT.stat().st_size} bytes')
     if fails:
         print('non-fatal failures',len(fails))
