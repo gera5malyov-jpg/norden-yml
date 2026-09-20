@@ -1,0 +1,50 @@
+name: KIT direct variant probe once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-direct-variant-probe-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe known KIT variant
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request, urllib.error, time
+          token=os.environ['YANDEX_KIT_TOKEN']
+          headers={'Authorization':'Bearer '+token,'Accept':'application/json'}
+          url='https://api.kit.yandex.net/v1/variants/1500515'
+          while True:
+              req=urllib.request.Request(url,headers=headers)
+              try:
+                  with urllib.request.urlopen(req,timeout=120) as r:
+                      data=json.loads(r.read().decode('utf-8'))
+                  break
+              except urllib.error.HTTPError as e:
+                  if e.code==429:
+                      time.sleep(int(e.headers.get('Retry-After') or 3)); continue
+                  raise
+          os.makedirs('norden-kit',exist_ok=True)
+          with open('norden-kit/direct_variant_probe.json','w',encoding='utf-8') as f:
+              json.dump(data,f,ensure_ascii=False,indent=2,sort_keys=True)
+          PY
+      - name: Commit probe result
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/direct_variant_probe.json
+          git commit -m "Probe direct KIT Norden variant fields" || exit 0
+          git push
