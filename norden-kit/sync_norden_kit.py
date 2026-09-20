@@ -982,17 +982,7 @@ def main():
         kit.bulk_stocks(stock_rows)
         report["stock_updates"] += len(stock_rows)
 
-    # Full mode fills only empty characteristics/content on existing items.
-    if args.mode == "full":
-        for article, variants in list(mapping.get("variants", {}).items()):
-            item = source.get(article)
-            if not item:
-                continue
-            for v in variants:
-                vid = s(v.get("variant_id"))
-                if vid:
-                    fill_existing_content(kit, item, vid, all_chars, chars_by_title, code_site_id, report)
-
+    # Create missing Norden products first so new cards appear in KIT immediately.
     categories = kit.categories()
     start = time.monotonic()
     max_new = args.max_new if args.max_new > 0 else None
@@ -1032,6 +1022,17 @@ def main():
             if len(report["errors"]) >= 200:
                 report["warnings"].append("Error limit reached; stopping product creation.")
                 break
+
+    # Only after creating missing products, fill empty content/characteristics on existing cards.
+    if args.mode == "full":
+        for article, variants in list(mapping.get("variants", {}).items()):
+            item = source.get(article)
+            if not item:
+                continue
+            for v in variants:
+                vid = s(v.get("variant_id"))
+                if vid:
+                    fill_existing_content(kit, item, vid, all_chars, chars_by_title, code_site_id, report)
 
     remaining = [a for a in source if a not in mapping.get("variants", {})]
     mapping["initial_complete"] = len(remaining) == 0
