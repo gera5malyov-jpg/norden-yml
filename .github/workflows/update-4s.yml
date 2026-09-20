@@ -38,9 +38,12 @@ jobs:
           import xml.etree.ElementTree as ET
           root = ET.parse('4s-mebel.yml').getroot()
           offers = root.findall('.//offer')
-          if len(offers) < 150:
-              raise SystemExit(f'Too few offers: {len(offers)}')
-          print(f'YML valid: {len(offers)} offers')
+          if len(offers) < 20:
+              raise SystemExit(f'Too few brand 4 Сезона offers: {len(offers)}')
+          vendors={str(x.findtext('vendor') or '').strip() for x in offers}
+          if vendors != {'4 Сезона'}:
+              raise SystemExit(f'Unexpected vendors: {vendors}')
+          print(f'YML valid: {len(offers)} brand 4 Сезона offers')
           PY
 
       - name: Commit YML
@@ -48,10 +51,19 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add 4s-mebel.yml
-          if git diff --cached --quiet; then
+          if ! git diff --cached --quiet; then
+            git commit -m "Update 4s-mebel YML"
+            git pull --rebase origin main
+            git push
+          else
             echo "No feed changes"
-            exit 0
           fi
-          git commit -m "Update 4s-mebel YML"
-          git pull --rebase origin main
-          git push
+
+      - name: Sync prices and stocks to Yandex KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python 4s-kit/sync_4s_kit.py
+
+      - name: Print KIT sync report
+        if: always()
+        run: cat 4s-kit/last_sync_report.json || true
