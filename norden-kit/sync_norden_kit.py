@@ -883,20 +883,6 @@ def create_new_product(kit, item, categories, all_chars, chars_by_title, code_si
     temp_sku = f"NORDEN-TMP-{safe_part}-{suffix}"
 
     chars = build_source_characteristics(item, kit, all_chars, chars_by_title, code_site_id)
-    media = []
-    for url in item.get("images") or []:
-        if len(media) >= 20:
-            break
-        try:
-            uploaded = kit.upload_image_url(url)
-            fid = s(uploaded.get("id"))
-            if fid:
-                media.append({"type": "IMAGE", "display_sequence": len(media), "image_id": fid})
-        except Exception as exc:
-            report["image_errors"] += 1
-            if len(report["warnings"]) < 200:
-                report["warnings"].append(f"{item['article']}: image failed: {exc}")
-
     body = {
         "sku": temp_sku,
         "name": item["name"],
@@ -906,8 +892,6 @@ def create_new_product(kit, item, categories, all_chars, chars_by_title, code_si
         "brand": BRAND,
         "characteristics": chars,
     }
-    if media:
-        body["media"] = media
     stock = item.get("stock")
     if stock is not None:
         body["stocks"] = [
