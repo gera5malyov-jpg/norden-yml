@@ -1,0 +1,64 @@
+name: Update 4s-mebel YML
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'parse_4s.py'
+      - 'requirements-4s.txt'
+      - '.github/workflows/update-4s.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: 4s-mebel-feed
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: requirements-4s.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-4s.txt
+
+      - name: Parse 4s-mebel.ru
+        run: python parse_4s.py
+
+      - name: Validate YML
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse('4s-mebel.yml').getroot()
+          offers = root.findall('.//offer')
+          if len(offers) < 150:
+              raise SystemExit(f'Too few offers: {len(offers)}')
+          print(f'YML valid: {len(offers)} offers')
+          PY
+
+      - name: Commit YML
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 4s-mebel.yml
+          if git diff --cached --quiet; then
+            echo "No feed changes"
+            exit 0
+          fi
+          git commit -m "Update 4s-mebel YML"
+          git pull --rebase origin main
+          git push
