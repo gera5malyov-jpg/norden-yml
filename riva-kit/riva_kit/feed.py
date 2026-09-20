@@ -66,7 +66,7 @@ def parse_categories(path):
         if event == 'end' and tag == 'categories':
             inside_categories = False
             elem.clear()
-            continue
+            break
         if event == 'end' and inside_categories and tag == 'category':
             source_id = str(elem.attrib.get('id') or '').strip()
             name = str(elem.text or '').strip()
