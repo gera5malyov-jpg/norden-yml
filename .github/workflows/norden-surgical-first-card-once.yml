@@ -1,5 +1,5 @@
 name: Norden surgical first card
-# direct Norden category + 429 backoff
+# warehouse status fix + 429 backoff
 on:
   push:
     branches: [main]
@@ -117,7 +117,7 @@ jobs:
               child=call('POST','/v1/categories',body={'title':'Кресло офисное','parent_id':root['id']})
               time.sleep(2)
 
-          p=call('GET','/v1/warehouses',{'page':1,'per_page':100})
+          p=call('GET','/v1/warehouses',{'status':'ACTIVE','page':1,'per_page':100})
           wr=p.get('warehouses') or p.get('items') or p.get('data') or []
           if isinstance(wr,dict): wr=wr.get('items') or []
           wanted={}
