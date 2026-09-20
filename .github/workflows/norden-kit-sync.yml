@@ -59,6 +59,7 @@ jobs:
           python norden-kit/sync_norden_kit.py \
             --mode full \
             --rebuild-map \
+            --max-new 100 \
             --time-budget-seconds 17000
 
       - name: Run scheduled three-hour sync
@@ -69,6 +70,7 @@ jobs:
         run: |
           python norden-kit/sync_norden_kit.py \
             --mode scheduled \
+            --max-new 250 \
             --time-budget-seconds 9000
 
       - name: Run manual sync
