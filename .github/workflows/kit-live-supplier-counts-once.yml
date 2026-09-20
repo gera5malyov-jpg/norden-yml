@@ -1,0 +1,70 @@
+name: KIT live supplier counts once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-live-supplier-counts-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Count Samson and Riva variants in KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, time, requests
+          token=os.environ['YANDEX_KIT_TOKEN']
+          h={'Authorization':'Bearer '+token,'Accept':'application/json'}
+          page=1
+          samson=0
+          riva=0
+          total_seen=0
+          while True:
+              resp=requests.get(
+                  'https://api.kit.yandex.net/v1/variants',
+                  headers=h,
+                  params={'page':page,'per_page':100},
+                  timeout=120,
+              )
+              if resp.status_code==429:
+                  time.sleep(int(resp.headers.get('Retry-After') or 3))
+                  continue
+              resp.raise_for_status()
+              data=resp.json()
+              items=data.get('items') or data.get('variants') or data.get('results') or []
+              if not items:
+                  break
+              total_seen += len(items)
+              for row in items:
+                  sku=str(row.get('sku') or '')
+                  brand=row.get('brand')
+                  if isinstance(brand,dict):
+                      brand=str(brand.get('title') or brand.get('name') or brand.get('value') or '')
+                  else:
+                      brand=str(brand or '')
+                  if sku.startswith('SAMS-'):
+                      samson += 1
+                  if brand.strip().casefold()=='riva':
+                      riva += 1
+              total=(data.get('total') or data.get('total_count') or (data.get('meta') or {}).get('total') or (data.get('meta') or {}).get('total_count'))
+              if total and total_seen>=int(total):
+                  break
+              if len(items)<100:
+                  break
+              page += 1
+              time.sleep(0.15)
+          print('KIT_TOTAL_SEEN='+str(total_seen))
+          print('SAMSON_COUNT='+str(samson))
+          print('RIVA_COUNT='+str(riva))
+          PY
