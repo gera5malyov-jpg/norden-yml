@@ -1,0 +1,39 @@
+name: Probe 4s Yandex KIT mapping
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '4s-kit/probe_4s_kit.py'
+      - '.github/workflows/4s-kit-probe-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kit-api-read-4s-probe
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Probe mapping
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python 4s-kit/probe_4s_kit.py
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 4s-kit/probe_report.json
+          git commit -m "Save 4s KIT probe report" || exit 0
+          git pull --rebase origin main
+          git push
