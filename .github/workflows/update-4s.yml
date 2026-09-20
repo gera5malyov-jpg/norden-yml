@@ -2,15 +2,8 @@ name: Update 4s-mebel YML
 
 on:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '17 0 1,15 * *'
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'parse_4s.py'
-      - 'requirements-4s.txt'
-      - '.github/workflows/update-4s.yml'
 
 permissions:
   contents: write
