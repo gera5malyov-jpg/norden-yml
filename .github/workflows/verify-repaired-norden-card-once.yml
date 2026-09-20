@@ -1,0 +1,47 @@
+name: Verify repaired Norden card once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/verify-repaired-norden-card-once.yml']
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check one repaired card
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,time,urllib.parse,urllib.request,urllib.error
+          H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          u='https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode({'name':'100-1536982','page':1,'per_page':100})
+          for a in range(12):
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(u,headers=H),timeout=40) as r: p=json.loads(r.read().decode())
+                  break
+              except urllib.error.HTTPError as e:
+                  if e.code==429:
+                      time.sleep(int(e.headers.get('Retry-After') or 5)); continue
+                  raise
+          rows=p.get('variants') or p.get('items') or p.get('data') or []
+          if isinstance(rows,dict): rows=rows.get('items') or []
+          x=next((v for v in rows if v.get('sku')=='100-1536982'), None)
+          out={'found':bool(x)}
+          if x:
+              out.update({'kit_id':x.get('kit_id'),'sku':x.get('sku'),'name':x.get('name'),'media_count':len(x.get('media') or []),'char_count':len(x.get('characteristics') or []),'characteristics':x.get('characteristics') or []})
+          os.makedirs('norden-kit',exist_ok=True)
+          open('norden-kit/repaired_card_check.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/repaired_card_check.json
+          git commit -m 'Verify repaired Norden card' || exit 0
+          git pull --rebase || true
+          git push || true
