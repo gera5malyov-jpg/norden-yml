@@ -17,6 +17,7 @@ OUT=Path('4s-mebel.yml')
 MIN=int(os.getenv('FOURS_MIN_OFFERS','20'))
 DELAY=float(os.getenv('FOURS_REQUEST_DELAY','0.12'))
 TIMEOUT=45
+WORKERS=int(os.getenv('FOURS_WORKERS','12'))
 
 s=requests.Session()
 s.headers.update({'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/131 Safari/537.36 4s-yml/1.0','Accept-Language':'ru-RU,ru;q=0.9'})
@@ -239,7 +240,7 @@ def main():
     urls=discover()
     if len(urls)<MIN: raise RuntimeError(f'only {len(urls)} product URLs discovered; minimum {MIN}')
     items=[]; fails=[]; skipped_brand=0; done=0
-    with ThreadPoolExecutor(max_workers=4) as pool:
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
         futures={pool.submit(parse,u):u for u in urls}
         for future in as_completed(futures):
             u=futures[future]; done+=1
