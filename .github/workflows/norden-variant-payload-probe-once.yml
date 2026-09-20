@@ -1,4 +1,5 @@
 name: Norden variant payload probe
+# retry with required pricing
 on:
   push:
     branches: [main]
@@ -16,13 +17,20 @@ jobs:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         run: |
           python - <<'PY'
-          import hashlib,json,os,time,urllib.request,urllib.error
+          import hashlib,json,math,os,time,urllib.request,urllib.error
           proof=json.load(open('norden-kit/surgical_first_card_result.json',encoding='utf-8'))
-          cand=proof['candidate']; prod=proof['product']
+          cand=proof['candidate']; prod=proof['product']; ctx=proof['context']
           token=os.environ['YANDEX_KIT_TOKEN']
           H={'Authorization':'Bearer '+token,'Accept':'application/json','Content-Type':'application/json'}
           sku='NORD-'+hashlib.sha1(cand['article'].encode()).hexdigest()[:12]
-          body={'sku':sku,'name':cand['name'],'status':'PUBLISHED','product_id':prod['id'],'brand':'Norden'}
+          p=float(str(cand['purchase']).replace(',','.'))
+          raw=str(cand.get('stock') or '').strip()
+          qty=100 if raw.startswith('>') else int(float(raw.replace(',','.'))) if raw else 0
+          body={
+            'sku':sku,'name':cand['name'],'status':'PUBLISHED','product_id':prod['id'],'brand':'Norden',
+            'pricing':{'price':str(math.ceil(p*1.80)),'manual_discount_price':str(math.ceil(p*1.26))},
+            'stocks':[{'warehouse_id':wid,'quantity':qty,'reserved':0} for wid in ctx['warehouses'].values()]
+          }
           for attempt in range(10):
               try:
                   req=urllib.request.Request('https://api.kit.yandex.net/v1/variants',
