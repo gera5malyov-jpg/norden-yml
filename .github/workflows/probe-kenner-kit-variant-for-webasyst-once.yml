@@ -1,0 +1,44 @@
+name: Probe Kenner KIT variant for Webasyst once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe-kenner-kit-variant-for-webasyst-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Probe exact KIT variant
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,requests,urllib.parse,time
+          H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          sku='334-326506'
+          p=requests.get('https://api.kit.yandex.net/v1/variants',headers=H,params={'name':sku,'page':1,'per_page':100},timeout=60).json()
+          rows=p.get('variants') or p.get('items') or p.get('results') or []
+          if isinstance(rows,dict): rows=rows.get('items') or []
+          x=next((v for v in rows if str(v.get('sku') or '').strip()==sku),None)
+          if not x: raise SystemExit('variant not found')
+          d=requests.get('https://api.kit.yandex.net/v1/variants/'+x['id'],headers=H,timeout=60); d.raise_for_status(); x=d.json()
+          out={'id':x.get('id'),'kit_id':x.get('kit_id'),'sku':x.get('sku'),'name':x.get('name'),'description':x.get('description'),'brand':x.get('brand'),'pricing':x.get('pricing'),'stocks':x.get('stocks'),'media':x.get('media'),'characteristics':x.get('characteristics')}
+          os.makedirs('webasyst',exist_ok=True)
+          open('webasyst/kenner_kit_variant_probe.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add webasyst/kenner_kit_variant_probe.json
+          git commit -m 'Probe Kenner KIT variant for Webasyst' || exit 0
+          git pull --rebase || true
+          git push || true
