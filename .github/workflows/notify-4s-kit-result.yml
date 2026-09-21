@@ -4,6 +4,11 @@ on:
   workflow_run:
     workflows: ["Sync 4 Сезона to Yandex KIT"]
     types: [completed]
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/notify-4s-kit-result.yml'
 
 permissions:
   contents: read
@@ -23,9 +28,10 @@ jobs:
           GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           RECIPIENT: shop@office-mag.com
-          RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
-          RUN_URL: ${{ github.event.workflow_run.html_url }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_CONCLUSION: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion || 'test' }}
+          RUN_URL: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.html_url || '' }}
+          RUN_ID: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.id || github.run_id }}
         run: |
           python - <<'PY'
           import json
@@ -39,6 +45,7 @@ jobs:
           user = (os.getenv("GMAIL_SMTP_USER") or "").strip()
           password = (os.getenv("GMAIL_APP_PASSWORD") or "").strip()
           recipient = (os.getenv("RECIPIENT") or "").strip()
+          event_name = (os.getenv("EVENT_NAME") or "").strip().lower()
           conclusion = (os.getenv("RUN_CONCLUSION") or "unknown").strip().lower()
           run_url = (os.getenv("RUN_URL") or "").strip()
           run_id = (os.getenv("RUN_ID") or "").strip()
@@ -57,8 +64,12 @@ jobs:
               except Exception as exc:
                   report = {"report_read_error": str(exc)}
 
-          status = "УСПЕШНО" if conclusion == "success" else f"ОШИБКА ({conclusion.upper()})"
-          subject = f"[4 Сезона → KIT] {status}"
+          if conclusion == "test":
+              status = "ТЕСТ — НАСТРОЙКА ПОЧТЫ РАБОТАЕТ"
+              subject = "[4 Сезона → KIT] Тест уведомления"
+          else:
+              status = "УСПЕШНО" if conclusion == "success" else f"ОШИБКА ({conclusion.upper()})"
+              subject = f"[4 Сезона → KIT] {status}"
 
           labels = [
               ("Товаров в фиде", "feed_offers"),
