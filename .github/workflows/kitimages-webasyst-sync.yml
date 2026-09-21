@@ -3,7 +3,7 @@ name: KIT images sync to Webasyst
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17,47 * * * *'
+    - cron: '7,37 * * * *'
 
 permissions:
   contents: read
