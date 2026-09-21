@@ -366,20 +366,48 @@ class Parser:
 
     def extract_images(self, soup: BeautifulSoup, page_url: str) -> list[str]:
         images: list[str] = []
+
+        def add(value: str | None) -> None:
+            if not value:
+                return
+            value = str(value).strip()
+            if not value or value.startswith("data:"):
+                return
+            # srcset: берём все реальные URL, затем дедуплицируем.
+            if "," in value and (" " in value or "w," in value):
+                for part in value.split(","):
+                    add(part.strip().split(" ")[0])
+                return
+            absolute = urljoin(page_url, value)
+            low = absolute.lower()
+            if any(x in low for x in ("logo", "favicon", "sprite", "icon-", "/icons/")):
+                return
+            images.append(absolute)
+
         for meta in soup.select("meta[property='og:image'], meta[name='twitter:image']"):
-            u = meta.get("content")
-            if u:
-                images.append(urljoin(page_url, str(u)))
-        # Только изображения, относящиеся к конкретной карточке товара.
-        # Не собираем все картинки из <main>, чтобы не подмешать баннеры/логотипы/соседние товары.
+            add(meta.get("content"))
+
+        # Только медиа внутри карточки/галереи конкретной модификации.
         selectors = "[itemprop='image'], [class*='product'] img, [class*='gallery'] img, [class*='slider'] img, [class*='photo'] img"
         for img in soup.select(selectors):
-            for attr in ("data-src", "data-original", "data-lazy", "src"):
-                u = img.get(attr)
-                if u and not str(u).startswith("data:"):
-                    images.append(urljoin(page_url, str(u)))
-                    break
-        return list(dict.fromkeys(images))[:80]
+            for attr in ("data-large", "data-zoom", "data-image", "data-full", "data-src", "data-original", "data-lazy", "srcset", "src"):
+                add(img.get(attr))
+
+        # В галереях оригинал часто лежит в href у <a>, а превью — в <img>.
+        for a in soup.select("[class*='product'] a[href], [class*='gallery'] a[href], [class*='slider'] a[href], [class*='photo'] a[href]"):
+            href = str(a.get("href") or "")
+            if re.search(r"\.(?:jpe?g|png|webp|gif)(?:\?|$)", href, re.I):
+                add(href)
+
+        # CSS background-image / data-* контейнеров.
+        for node in soup.select("[class*='product'], [class*='gallery'], [class*='slider'], [class*='photo']"):
+            style = str(node.get("style") or "")
+            for m in re.finditer(r"url\((?:['\"])?([^)'\"]+)", style, re.I):
+                add(m.group(1))
+            for attr in ("data-image", "data-src", "data-large", "data-full", "data-zoom"):
+                add(node.get(attr))
+
+        return list(dict.fromkeys(images))[:120]
 
     def extract_product(self, html: str, page_url: str, category_hint: str = "") -> Product | None:
         soup = BeautifulSoup(html, "lxml")
