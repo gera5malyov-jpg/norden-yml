@@ -158,6 +158,7 @@ payload = {
         "min_price_for_auto_actions_enabled": True,
         "net_price": str(int(round(purchase))),
         "currency_code": "RUB",
+        "declared_price": {"amount": str(sale_price), "currency": "RUB"},
         "vat": "0",
         "auto_action_enabled": "UNKNOWN",
         "price_strategy_enabled": "UNKNOWN"
