@@ -30,8 +30,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: norden-kit-sync
-  cancel-in-progress: true
+  group: norden-kit-price-stock-daily-v2
+  cancel-in-progress: false
 
 jobs:
   sync:
