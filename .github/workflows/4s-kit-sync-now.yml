@@ -31,19 +31,19 @@ jobs:
           python - <<'PY'
           import xml.etree.ElementTree as ET
           root=ET.parse('4s-mebel.yml').getroot()
-          offers=[]
-          for x in root.findall('.//offer'):
-              code=str(x.findtext('vendorCode') or x.attrib.get('id') or '').strip()
-              if code.lower().startswith('4s-'):
-                  offers.append(x)
-          if len(offers) < 20:
-              raise SystemExit(f'Too few eligible 4s offers: {len(offers)}')
+          offers=root.findall('.//offer')
+          vendors={str(x.findtext('vendor') or '').strip() for x in offers}
+          if len(offers) < 2500:
+              raise SystemExit(f'Too few 4 Сезона offers: {len(offers)}')
+          if vendors != {'4 Сезона'}:
+              raise SystemExit(f'Unsafe feed vendors: {vendors}')
           print(f'Eligible 4 Сезона offers: {len(offers)}')
           PY
 
       - name: Sync prices and stocks now
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          FOURS_EXISTING_ONLY: '1'
         run: python 4s-kit/sync_4s_kit.py
 
       - name: Commit sync report
