@@ -1,15 +1,10 @@
 name: Notify 4S KIT result by Gmail
-# gmail credential retest v1
 
 on:
   workflow_run:
     workflows: ["Sync 4 Сезона to Yandex KIT"]
     types: [completed]
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/notify-4s-kit-result.yml'
 
 permissions:
   contents: read
@@ -23,7 +18,7 @@ jobs:
         with:
           ref: main
 
-      - name: Send result to shop@office-mag.com
+      - name: Отправить результат на shop@office-mag.com
         if: always()
         env:
           GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
@@ -45,93 +40,115 @@ jobs:
 
           user = (os.getenv("GMAIL_SMTP_USER") or "").strip()
           raw_password = os.getenv("GMAIL_APP_PASSWORD") or ""
-          # Google displays app passwords in groups of 4. Accept either
-          # grouped or ungrouped form and remove all whitespace safely.
           password = "".join(raw_password.split())
           recipient = (os.getenv("RECIPIENT") or "").strip()
-          event_name = (os.getenv("EVENT_NAME") or "").strip().lower()
           conclusion = (os.getenv("RUN_CONCLUSION") or "unknown").strip().lower()
           run_url = (os.getenv("RUN_URL") or "").strip()
           run_id = (os.getenv("RUN_ID") or "").strip()
 
           if not user or not password:
-              raise SystemExit(
-                  "Gmail notification is configured, but GitHub secrets "
-                  "GMAIL_SMTP_USER and/or GMAIL_APP_PASSWORD are missing."
-              )
+              raise SystemExit("Не настроены GMAIL_SMTP_USER и/или GMAIL_APP_PASSWORD.")
 
-          report_path = Path("4s-kit/last_sync_report.json")
-          report = {}
-          if report_path.exists():
+          def read_json(path):
+              p=Path(path)
+              if not p.exists():
+                  return {}
               try:
-                  report = json.loads(report_path.read_text(encoding="utf-8"))
+                  return json.loads(p.read_text(encoding="utf-8"))
               except Exception as exc:
-                  report = {"report_read_error": str(exc)}
+                  return {"ошибка_чтения": str(exc)}
+
+          sync = read_json("4s-kit/last_sync_report.json")
+          archive = read_json("4s-kit/archive_duplicates_report.json")
+          audit = read_json("4s-kit/duplicate_audit.json")
 
           if conclusion == "test":
               status = "ТЕСТ — НАСТРОЙКА ПОЧТЫ РАБОТАЕТ"
               subject = "[4 Сезона → KIT] Тест уведомления"
+          elif conclusion == "success":
+              status = "УСПЕШНО"
+              subject = "[4 Сезона → KIT] Обновление завершено успешно"
+          elif conclusion == "cancelled":
+              status = "ОТМЕНЕНО"
+              subject = "[4 Сезона → KIT] Обновление отменено"
           else:
-              status = "УСПЕШНО" if conclusion == "success" else f"ОШИБКА ({conclusion.upper()})"
-              subject = f"[4 Сезона → KIT] {status}"
+              status = "ОШИБКА"
+              subject = "[4 Сезона → KIT] Обновление завершилось с ошибкой"
+
+          lines = [
+              "Автоматический отчёт: 4 Сезона → Яндекс KIT",
+              "",
+              f"Результат: {status}",
+              f"Номер запуска GitHub: {run_id}",
+          ]
+
+          if archive:
+              lines += [
+                  "",
+                  "Архивация дублей:",
+                  f"  Найдено точных групп дублей: {archive.get('duplicate_groups_found', archive.get('exact_duplicate_groups', '—'))}",
+                  f"  Отправлено новых дублей в архив: {archive.get('archived', '—')}",
+                  f"  Уже было в архиве: {archive.get('already_archived', '—')}",
+                  f"  Ошибок архивации: {archive.get('errors_count', len(archive.get('errors') or []))}",
+              ]
+          elif audit:
+              lines += [
+                  "",
+                  "Проверка дублей:",
+                  f"  Найдено точных групп дублей: {audit.get('exact_duplicate_groups', '—')}",
+                  f"  Лишних карточек: {audit.get('duplicate_extra_variants', '—')}",
+              ]
 
           labels = [
-              ("Товаров в фиде", "feed_offers"),
-              ("Уникальных товаров", "unique_offers"),
-              ("Сопоставлено", "matched"),
-              ("Сопоставлено вариантов", "matched_variants"),
-              ("Создано новых", "created"),
+              ("Товаров в исходном фиде", "feed_offers_raw"),
+              ("Уникальных товаров в фиде", "feed_unique_source_codes"),
+              ("Карточек KIT просмотрено", "kit_variants_scanned"),
+              ("Карточек бренда 4 Сезона", "existing_managed_variants"),
+              ("Товаров сопоставлено", "matched"),
+              ("Карточек сопоставлено", "matched_variants"),
+              ("Сопоставлено по Коду для сайта", "matched_by_code_site"),
+              ("Сопоставлено по артикулу", "matched_by_article"),
+              ("Сопоставлено по названию", "matched_by_name"),
+              ("Создано новых карточек", "created"),
               ("Обновлено цен", "price_changes"),
               ("Обновлено остатков", "stock_changes"),
-              ("Заполнено Код для сайта", "code_site_filled"),
+              ("Заполнено поле Код для сайта", "code_site_filled"),
               ("Исправлено описаний", "description_repairs"),
               ("Исправлено характеристик", "characteristic_repairs"),
               ("Записано характеристик", "characteristics_written"),
               ("Исправлено изображений", "image_repairs"),
               ("Загружено изображений", "images_uploaded"),
               ("Ошибок изображений", "image_failures"),
+              ("Отсутствующих товаров обнулено", "absent_to_zero"),
+              ("Найдено конфликтов", "collisions"),
           ]
 
-          lines = [
-              "Автоматический отчёт синхронизации 4 Сезона → Яндекс KIT",
-              "",
-              f"Результат GitHub Actions: {status}",
-              f"Run ID: {run_id}",
-          ]
+          if sync:
+              lines += ["", "Итог синхронизации каталога:"]
+              for label, key in labels:
+                  if key in sync:
+                      lines.append(f"  {label}: {sync.get(key)}")
 
-          found = False
-          for label, key in labels:
-              if key in report:
-                  lines.append(f"{label}: {report.get(key)}")
-                  found = True
-
-          errors = report.get("errors") if isinstance(report, dict) else None
-          if isinstance(errors, list):
-              lines.append(f"Ошибок в отчёте: {len(errors)}")
-              if errors:
-                  lines.append("")
-                  lines.append("Первые ошибки:")
-                  for item in errors[:10]:
-                      if isinstance(item, dict):
-                          code = item.get("source_code") or ""
-                          msg = item.get("message") or ""
-                          lines.append(f"- {code}: {msg}".strip())
-                      else:
-                          lines.append(f"- {item}")
-
-          if not found:
-              lines.extend([
-                  "",
-                  "Подробный JSON-отчёт в репозитории отсутствует или не содержит итоговых счётчиков."
-              ])
+              errors = sync.get("errors")
+              if isinstance(errors, list):
+                  lines.append(f"  Ошибок в отчёте: {len(errors)}")
+                  if errors:
+                      lines += ["", "Первые ошибки:"]
+                      for item in errors[:10]:
+                          if isinstance(item, dict):
+                              code = item.get("source_code") or ""
+                              msg = item.get("message") or ""
+                              lines.append(f"  - {code}: {msg}".strip())
+                          else:
+                              lines.append(f"  - {item}")
 
           if run_url:
-              lines.extend(["", f"GitHub Actions: {run_url}"])
+              lines += ["", f"Ссылка на запуск GitHub: {run_url}"]
 
-          lines.extend([
+          lines += [
               "",
-              f"Время формирования письма (UTC): {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
-          ])
+              f"Время формирования отчёта по UTC: {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
+          ]
 
           msg = EmailMessage()
           msg["From"] = user
@@ -140,16 +157,9 @@ jobs:
           msg.set_content("\n".join(lines))
 
           context = ssl.create_default_context()
-          print(
-              "Gmail SMTP diagnostics: "
-              f"user_domain={user.rsplit('@', 1)[-1] if '@' in user else '<invalid>'}, "
-              f"app_password_length={len(password)}"
-          )
-
           errors = []
           sent = False
 
-          # Primary: STARTTLS on 587 (Google's standard submission endpoint).
           try:
               with smtplib.SMTP("smtp.gmail.com", 587, timeout=60) as smtp:
                   smtp.ehlo()
@@ -158,23 +168,22 @@ jobs:
                   smtp.login(user, password)
                   smtp.send_message(msg)
               sent = True
-              print("Notification sent through Gmail SMTP STARTTLS/587")
+              print("Письмо отправлено через Gmail SMTP 587/STARTTLS")
           except Exception as exc:
               errors.append(f"587/STARTTLS: {type(exc).__name__}: {exc}")
 
-          # Fallback: implicit TLS on 465.
           if not sent:
               try:
                   with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context, timeout=60) as smtp:
                       smtp.login(user, password)
                       smtp.send_message(msg)
                   sent = True
-                  print("Notification sent through Gmail SMTP SSL/465")
+                  print("Письмо отправлено через Gmail SMTP 465/SSL")
               except Exception as exc:
                   errors.append(f"465/SSL: {type(exc).__name__}: {exc}")
 
           if not sent:
-              raise SystemExit("Gmail send failed. " + " | ".join(errors))
+              raise SystemExit("Не удалось отправить письмо. " + " | ".join(errors))
 
-          print(f"Notification sent to {recipient}: {subject}")
+          print(f"Письмо отправлено на {recipient}: {subject}")
           PY
