@@ -2,8 +2,10 @@
 import hashlib
 import json
 import math
+import mimetypes
 import os
 import re
+import tempfile
 import threading
 import time
 import unicodedata
@@ -13,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 
@@ -143,6 +146,27 @@ class Kit:
     def bulk_stocks(self,items):
         for i in range(0,len(items),5000):
             self.request('POST','/v1/variants/stocks/bulk_update',body={'items':items[i:i+5000]})
+    def upload_image_url(self,url):
+        r=requests.get(url,timeout=120,headers={'User-Agent':'Mozilla/5.0'})
+        r.raise_for_status()
+        name=os.path.basename(urlparse(url).path) or 'image.jpg'
+        mime=(r.headers.get('Content-Type') or mimetypes.guess_type(name)[0] or 'image/jpeg').split(';')[0]
+        for attempt in range(12):
+            self._pace()
+            rr=self.session.post(
+                BASE+'/v1/files',
+                headers=self.h,
+                files={'file':(name,r.content,mime)},
+                timeout=180,
+            )
+            if rr.status_code==429:
+                time.sleep(float(rr.headers.get('Retry-After') or min(45,5*(attempt+1)))); continue
+            if rr.status_code>=500:
+                time.sleep(min(20,2**attempt)); continue
+            if rr.status_code>=400:
+                raise HttpError(rr.status_code,rr.url,rr.text)
+            return rr.json() if rr.content else {}
+        raise RuntimeError('KIT image upload retries exhausted')
 
 def parse_feed():
     categories={}; offers=[]; stack=[]
@@ -168,6 +192,10 @@ def parse_feed():
                     'description':s(e.findtext('description')),
                     'category_id':s(e.findtext('categoryId')),
                     'price':money(e.findtext('price')),
+                    'url':s(e.findtext('url')),
+                    'images':list(dict.fromkeys(
+                        s(x.text) for x in e.findall('picture') if s(x.text)
+                    )),
                 })
             e.clear()
         if stack: stack.pop()
@@ -256,6 +284,38 @@ def final_sku_from_kit_id(kit_id):
 def is_managed_4s_variant(v,code_site_id):
     return is_brand(v.get('brand'))
 
+def generated_333_variant(v):
+    kit_id=s(v.get('kit_id'))
+    return bool(kit_id and s(v.get('sku'))==f'333-{kit_id}')
+
+def prepare_media(kit,offer,report):
+    urls=list(dict.fromkeys(x for x in (offer.get('images') or []) if s(x)))[:10]
+    media=[]
+    if not urls:
+        report['new_without_source_images']+=1
+        return media
+    for url in urls:
+        try:
+            uploaded=kit.upload_image_url(url)
+            image_id=s(uploaded.get('id'))
+            if not image_id:
+                raise RuntimeError('KIT did not return image id')
+            media.append({
+                'type':'IMAGE',
+                'display_sequence':len(media),
+                'image_id':image_id,
+            })
+            report['images_uploaded']+=1
+        except Exception as exc:
+            report['image_failures']+=1
+            if len(report['image_errors'])<200:
+                report['image_errors'].append({
+                    'source_code':offer.get('source_code'),
+                    'url':url,
+                    'message':str(exc)[:500],
+                })
+    return media
+
 def dedupe_feed_offers(offers):
     grouped=defaultdict(list)
     for offer in offers:
@@ -277,6 +337,9 @@ def main():
     existing_only=s(os.getenv('FOURS_EXISTING_ONLY')).casefold() in {'1','true','yes','y'}
     cats,raw_offers=parse_feed()
     offers,feed_duplicates,feed_price_conflicts=dedupe_feed_offers(raw_offers)
+    feed_groups=defaultdict(list)
+    for row in raw_offers:
+        feed_groups[row['source_code']].append(row)
     kit=Kit(os.getenv('YANDEX_KIT_TOKEN',''))
     wh=warehouse_map(kit.warehouses())
     code_site_id,article_id=resolve_special_characteristics(kit.characteristics())
@@ -310,7 +373,10 @@ def main():
         'feed_price_conflicts':len(feed_price_conflicts),
         'kit_variants_scanned':len(variants),
         'existing_managed_variants':len(managed),
-        'matched':0,'created':0,'skipped_new_existing_only':0,'price_changes':0,'stock_changes':0,
+        'matched':0,'matched_variants':0,'created':0,'skipped_new_existing_only':0,
+        'price_changes':0,'stock_changes':0,
+        'images_uploaded':0,'image_repairs':0,'image_failures':0,
+        'new_without_source_images':0,'image_errors':[],
         'brand_patched':0,'sku_fixed_to_333_kit_id':0,'code_site_filled':0,
         'absent_to_zero':0,'collisions':0,'errors':[],
     }
@@ -318,8 +384,9 @@ def main():
     claimed_variants={}
     price_updates={}
     stock_updates={}
-    for source,prices in list(feed_price_conflicts.items())[:200]:
-        report['errors'].append({'source_code':source,'message':f'feed has conflicting prices: {prices}'})
+    report['feed_price_conflict_details']={
+        source:prices for source,prices in list(feed_price_conflicts.items())[:200]
+    }
 
     for n,o in enumerate(offers,1):
         source=o['source_code']
@@ -328,20 +395,21 @@ def main():
             if s(row.get('id')): unique[s(row.get('id'))]=row
         rows=list(unique.values())
         chosen=None
+        extra_rows=[]
         created_now=False
-        if len(rows)==1:
+        if rows:
             chosen=rows[0]
-            chosen_id=s(chosen.get('id'))
-            owner=claimed_variants.get(chosen_id)
-            if owner and owner!=source:
-                report['collisions']+=1
-                report['errors'].append({'source_code':source,'message':f'variant already mapped to source {owner}'})
-                continue
-            claimed_variants[chosen_id]=source
-        elif len(rows)>1:
-            report['collisions']+=1
-            report['errors'].append({'source_code':source,'message':f'ambiguous source mapping: {len(rows)} variants'})
-            continue
+            extra_rows=rows[1:]
+            for candidate in rows:
+                chosen_id=s(candidate.get('id'))
+                owner=claimed_variants.get(chosen_id)
+                if owner and owner!=source:
+                    report['collisions']+=1
+                    report['errors'].append({
+                        'source_code':source,
+                        'message':f'variant {chosen_id} already mapped to source {owner}',
+                    })
+                claimed_variants[chosen_id]=source
 
         if chosen is None:
             if existing_only:
@@ -365,6 +433,9 @@ def main():
                         {'warehouse_id':wh['МСК'],'quantity':100,'reserved':0},
                     ],
                 }
+                media=prepare_media(kit,o,report)
+                if media:
+                    payload['media']=media
                 created=kit.create_variant(payload)
                 vid=s(created.get('id'))
                 if not vid: raise RuntimeError('KIT did not return new variant id')
@@ -389,15 +460,60 @@ def main():
         else:
             report['matched']+=1
 
+        targets=[chosen]+extra_rows if chosen is not None else []
+        report['matched_variants']+=len(targets) if not created_now else 0
 
-        vid=s(chosen.get('id')); seen_ids.add(vid)
-        if not created_now:
-            if o['price'] is not None and not pricing_equal(chosen,o['price']):
-                price_updates[vid]=desired_price_row(vid,o['price'])
-            for title in WAREHOUSE_TITLES:
-                wid=wh[title]
-                if current_stock(chosen,wid)!=100:
-                    stock_updates[(vid,wid)]={'variant_id':vid,'warehouse_id':wid,'quantity':100}
+        for target in targets:
+            vid=s(target.get('id'))
+            if not vid:
+                continue
+            seen_ids.add(vid)
+
+            target_offer=o
+            if source in feed_price_conflicts:
+                name_matches=[
+                    row for row in feed_groups[source]
+                    if norm(row.get('name'))==norm(target.get('name'))
+                ]
+                if len(name_matches)==1:
+                    target_offer=name_matches[0]
+
+            target_price=target_offer.get('price')
+            if (
+                not created_now
+                and target_price is not None
+                and not pricing_equal(target,target_price)
+            ):
+                price_updates[vid]=desired_price_row(vid,target_price)
+
+            if not created_now:
+                for title in WAREHOUSE_TITLES:
+                    wid=wh[title]
+                    if current_stock(target,wid)!=100:
+                        stock_updates[(vid,wid)]={
+                            'variant_id':vid,'warehouse_id':wid,'quantity':100
+                        }
+
+            # Repair images only on cards generated by this integration.
+            if (
+                generated_333_variant(target)
+                and not (target.get('media') or [])
+                and o.get('images')
+            ):
+                media=prepare_media(kit,o,report)
+                if media:
+                    try:
+                        kit.patch_variant(vid,{'media':media})
+                        report['image_repairs']+=1
+                        target['media']=media
+                    except Exception as exc:
+                        report['image_failures']+=1
+                        if len(report['image_errors'])<200:
+                            report['image_errors'].append({
+                                'source_code':source,
+                                'url':'<patch media>',
+                                'message':str(exc)[:500],
+                            })
 
         if len(price_updates)>=500:
             batch=list(price_updates.values())
@@ -411,7 +527,11 @@ def main():
             stock_updates.clear()
 
         if n%50==0:
-            print(f'synced {n}/{len(offers)} matched={report["matched"]} created={report["created"]}',flush=True)
+            print(
+                f'synced {n}/{len(offers)} matched_codes={report["matched"]} '
+                f'matched_variants={report["matched_variants"]} created={report["created"]}',
+                flush=True,
+            )
 
     if price_updates:
         batch=list(price_updates.values())
