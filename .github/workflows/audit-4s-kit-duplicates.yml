@@ -1,0 +1,105 @@
+name: Audit 4S KIT exact duplicates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/audit-4s-kit-duplicates.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Compile current sync script
+        run: python -m py_compile 4s-kit/sync_4s_kit.py
+      - name: Audit exact duplicates without KIT writes
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import importlib.util, json, os, pathlib
+          from collections import defaultdict
+          from datetime import datetime, timezone
+
+          p=pathlib.Path('4s-kit/sync_4s_kit.py')
+          spec=importlib.util.spec_from_file_location('sync4s',p)
+          mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+
+          kit=mod.Kit(os.environ['YANDEX_KIT_TOKEN'])
+          chars=kit.characteristics()
+          code_site_id,article_id=mod.resolve_special_characteristics(chars)
+          variants=kit.variants()
+
+          managed=[]
+          for v in variants:
+              if mod.s(v.get('id')) and mod.is_brand(v.get('brand')):
+                  managed.append(v)
+
+          grouped=defaultdict(list)
+          for v in managed:
+              code=mod.norm(mod.char_value(v,code_site_id))
+              name=mod.norm(v.get('name'))
+              if code and name:
+                  grouped[(code,name)].append(v)
+
+          groups=[]
+          for _, rows in grouped.items():
+              if len(rows)<2:
+                  continue
+              rows=sorted(rows,key=mod.canonical_variant_key)
+              canonical=rows[0]
+              extras=rows[1:]
+              groups.append({
+                  'code_site':mod.char_value(canonical,code_site_id),
+                  'name':mod.s(canonical.get('name')),
+                  'canonical':{
+                      'id':mod.s(canonical.get('id')),
+                      'kit_id':mod.s(canonical.get('kit_id')),
+                      'sku':mod.s(canonical.get('sku')),
+                      'article':mod.char_value(canonical,article_id),
+                  },
+                  'duplicates':[
+                      {
+                          'id':mod.s(x.get('id')),
+                          'kit_id':mod.s(x.get('kit_id')),
+                          'sku':mod.s(x.get('sku')),
+                          'article':mod.char_value(x,article_id),
+                      } for x in extras
+                  ],
+              })
+
+          groups.sort(key=lambda g:(g['code_site'],g['name']))
+          report={
+              'generated_at':datetime.now(timezone.utc).isoformat(),
+              'kit_variants_scanned':len(variants),
+              'managed_4s_variants':len(managed),
+              'exact_duplicate_groups':len(groups),
+              'duplicate_extra_variants':sum(len(g['duplicates']) for g in groups),
+              'groups':groups,
+          }
+          out=pathlib.Path('4s-kit/duplicate_audit.json')
+          out.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({k:v for k,v in report.items() if k!='groups'},ensure_ascii=False,indent=2))
+          for g in groups[:25]:
+              print('DUP',json.dumps(g,ensure_ascii=False))
+          PY
+      - name: Commit duplicate audit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 4s-kit/duplicate_audit.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Save 4 Seasons KIT duplicate audit"
+            git pull --rebase origin main
+            git push
+          fi
