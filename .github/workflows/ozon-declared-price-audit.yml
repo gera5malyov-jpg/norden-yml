@@ -1,0 +1,62 @@
+name: Ozon declared price audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-declared-price-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Install requests
+        run: python -m pip install requests
+      - name: Audit declared price on disabled tools
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json, os, time, requests
+          H={"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"}
+          s=requests.Session();s.headers.update(H)
+          def call(body):
+              for a in range(10):
+                  r=s.post("https://api-seller.ozon.ru/v5/product/info/prices",json=body,timeout=120)
+                  if r.status_code==429: time.sleep(1+a); continue
+                  r.raise_for_status(); return r.json()
+          cur=""; disabled=[]; total=0
+          while True:
+              d=call({"cursor":cur,"filter":{"visibility":"ALL"},"limit":1000})
+              rows=d.get("items") or []; total+=len(rows)
+              for x in rows:
+                  p=x.get("price") or {}
+                  if not p.get("auto_action_enabled") or not p.get("auto_add_to_ozon_actions_list_enabled"):
+                      dp=(p.get("declared_price") or {})
+                      amt=dp.get("amount") if isinstance(dp,dict) else dp
+                      disabled.append({
+                          "offer_id":x.get("offer_id"),"product_id":x.get("product_id"),
+                          "auto_action_enabled":p.get("auto_action_enabled"),
+                          "auto_add":p.get("auto_add_to_ozon_actions_list_enabled"),
+                          "declared_price":amt,
+                          "price":p.get("price"),"old_price":p.get("old_price"),"min_price":p.get("min_price")
+                      })
+              nxt=d.get("cursor") or ""
+              if not rows or not nxt or nxt==cur: break
+              cur=nxt
+          positive=[]; zero=[]
+          for x in disabled:
+              try:
+                  (positive if float(x.get("declared_price") or 0)>0 else zero).append(x)
+              except: zero.append(x)
+          print("DECLARED_AUDIT",json.dumps({
+              "total_products":total,"disabled_count":len(disabled),
+              "positive_declared_count":len(positive),"zero_declared_count":len(zero),
+              "positive_sample":positive[:30],"zero_sample":zero[:30]
+          },ensure_ascii=False,sort_keys=True))
+          PY
