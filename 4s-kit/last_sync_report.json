@@ -1,0 +1,45 @@
+{
+  "started_at": "2026-09-21T08:29:40.158147+00:00",
+  "existing_only": true,
+  "feed_offers_raw": 2922,
+  "feed_unique_source_codes": 2902,
+  "feed_duplicate_source_codes": 19,
+  "feed_price_conflicts": 1,
+  "kit_variants_scanned": 55072,
+  "existing_managed_variants": 2833,
+  "matched": 2800,
+  "created": 0,
+  "skipped_new_existing_only": 98,
+  "price_changes": 2248,
+  "stock_changes": 3996,
+  "brand_patched": 0,
+  "sku_fixed_to_333_kit_id": 0,
+  "code_site_filled": 0,
+  "absent_to_zero": 33,
+  "collisions": 4,
+  "errors": [
+    {
+      "source_code": "4s-konsol-01-9005-dkt",
+      "message": "feed has conflicting prices: ['8790.00', '9890.00']"
+    },
+    {
+      "source_code": "4s-sam-1014-pyv",
+      "message": "ambiguous source mapping: 2 variants"
+    },
+    {
+      "source_code": "4s-va90-vykat_ypdm-1014",
+      "message": "ambiguous source mapping: 2 variants"
+    },
+    {
+      "source_code": "4s-va90-vykat_ypv-8014",
+      "message": "ambiguous source mapping: 2 variants"
+    },
+    {
+      "source_code": "4s-va90-vykat_ypdkt-1014",
+      "message": "ambiguous source mapping: 2 variants"
+    }
+  ],
+  "absent_stock_updates": 66,
+  "finished_at": "2026-09-21T08:30:04.092678+00:00",
+  "status": "degraded"
+}
