@@ -1,0 +1,48 @@
+name: DEEPHOUSE feed inspect
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deephouse-kit/sync_deephouse_kit.py'
+      - '.github/workflows/deephouse-feed-inspect.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kit-api-write
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Inspect DEEPHOUSE feed without writing to KIT
+        run: python deephouse-kit/sync_deephouse_kit.py --dry-run
+      - name: Commit diagnostic report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          cp deephouse-kit/last_sync_report.json /tmp/deephouse-last-sync.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          if [ -f /tmp/deephouse-last-sync.json ]; then
+            mkdir -p deephouse-kit
+            cp /tmp/deephouse-last-sync.json deephouse-kit/last_sync_report.json
+          fi
+          git add deephouse-kit/last_sync_report.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Update DEEPHOUSE feed diagnostic report'
+          git push origin HEAD:main || true
