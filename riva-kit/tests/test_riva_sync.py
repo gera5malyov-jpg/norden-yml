@@ -5,7 +5,7 @@ import unittest
 from riva_kit.feed import iter_offers, parse_categories
 from riva_kit.mapper import characteristics_from_offer
 from riva_kit.rules import calculate_prices, desired_stock, to_kit_sku
-from riva_kit.sync import build_price_update, index_riva_variants, resolve_variant
+from riva_kit.sync import build_price_update, index_riva_variants, load_riva_variant_index, resolve_variant
 
 
 SAMPLE = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -143,6 +143,27 @@ class RivaFeedTests(unittest.TestCase):
             source_url=offer.source_url, images=offer.images, params=offer.params,
         )
         self.assertEqual(resolve_variant(duplicate_offer, by_source, by_sku, titles)['id'], 'v1')
+
+    def test_riva_index_scans_all_sku_prefixes(self):
+        class FakeKit:
+            def __init__(self):
+                self.calls = []
+            def iter_variants(self, filters=None):
+                self.calls.append(filters)
+                return iter([{
+                    'id': 'v-uch',
+                    'sku': 'УЧ-00000156',
+                    'name': 'Кресло Атом',
+                    'brand': 'RIVA',
+                    'characteristics': [],
+                }])
+
+        kit = FakeKit()
+        by_source, by_sku, owned = load_riva_variant_index(kit, {})
+        self.assertEqual(kit.calls, [None])
+        self.assertEqual(owned, 1)
+        self.assertIn('УЧ-00000156', by_sku)
+        self.assertEqual(by_sku['УЧ-00000156'][0]['id'], 'v-uch')
 
     def test_missing_site_code_is_skipped_without_stopping_feed(self):
         xml = SAMPLE.replace(
