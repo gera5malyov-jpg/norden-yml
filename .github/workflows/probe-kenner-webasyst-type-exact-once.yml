@@ -1,0 +1,50 @@
+name: Probe Kenner Webasyst type exact once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe-kenner-webasyst-type-exact-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Probe exact type and main stock
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, sys
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+          wa=WebasystClient(min_request_interval=0.4)
+          types=wa.call('shop.type.getList')
+          stocks=wa.call('shop.stock.getList')
+          def rows(x):
+              if isinstance(x,list): return x
+              if isinstance(x,dict):
+                  if all(isinstance(v,dict) for v in x.values()): return list(x.values())
+                  for k in ('types','stocks','items'):
+                      if isinstance(x.get(k),list): return x[k]
+              return []
+          target=[x for x in rows(types) if str(x.get('name') or '').strip().casefold()=='kennermebel-334']
+          main=[x for x in rows(stocks) if str(x.get('name') or '').strip().casefold()=='основной склад']
+          out={'target_type':target,'main_stock':main}
+          open('webasyst/kenner_target_exact.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add webasyst/kenner_target_exact.json
+          git commit -m 'Probe exact Kenner Webasyst target' || exit 0
+          git pull --rebase || true
+          git push || true
