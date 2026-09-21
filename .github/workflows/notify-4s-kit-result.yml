@@ -1,8 +1,12 @@
-name: Notify 4S KIT result by Gmail
+name: Notify 4S pipeline task by Gmail
 
 on:
   workflow_run:
-    workflows: ["Sync 4 Сезона to Yandex KIT"]
+    workflows:
+      - "Mark all 4S products Webasyst 333"
+      - "Audit 4S KIT exact duplicates"
+      - "Archive 4S KIT duplicates"
+      - "Sync 4 Сезона to Yandex KIT"
     types: [completed]
   workflow_dispatch:
 
@@ -11,6 +15,7 @@ permissions:
 
 jobs:
   notify:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.id != 35618604987 && github.event.workflow_run.id != 35602742176) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -18,13 +23,14 @@ jobs:
         with:
           ref: main
 
-      - name: Отправить результат на shop@office-mag.com
+      - name: Отправить русский отчёт на shop@office-mag.com
         if: always()
         env:
           GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           RECIPIENT: shop@office-mag.com
           EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.name || 'Тест уведомления' }}
           RUN_CONCLUSION: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion || 'test' }}
           RUN_URL: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.html_url || '' }}
           RUN_ID: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.id || github.run_id }}
@@ -34,17 +40,17 @@ jobs:
           import os
           import smtplib
           import ssl
+          from datetime import datetime, timezone
           from email.message import EmailMessage
           from pathlib import Path
-          from datetime import datetime, timezone
 
-          user = (os.getenv("GMAIL_SMTP_USER") or "").strip()
-          raw_password = os.getenv("GMAIL_APP_PASSWORD") or ""
-          password = "".join(raw_password.split())
-          recipient = (os.getenv("RECIPIENT") or "").strip()
-          conclusion = (os.getenv("RUN_CONCLUSION") or "unknown").strip().lower()
-          run_url = (os.getenv("RUN_URL") or "").strip()
-          run_id = (os.getenv("RUN_ID") or "").strip()
+          user=(os.getenv("GMAIL_SMTP_USER") or "").strip()
+          password="".join((os.getenv("GMAIL_APP_PASSWORD") or "").split())
+          recipient=(os.getenv("RECIPIENT") or "").strip()
+          workflow=(os.getenv("WORKFLOW_NAME") or "").strip()
+          conclusion=(os.getenv("RUN_CONCLUSION") or "unknown").strip().lower()
+          run_url=(os.getenv("RUN_URL") or "").strip()
+          run_id=(os.getenv("RUN_ID") or "").strip()
 
           if not user or not password:
               raise SystemExit("Не настроены GMAIL_SMTP_USER и/или GMAIL_APP_PASSWORD.")
@@ -56,134 +62,157 @@ jobs:
               try:
                   return json.loads(p.read_text(encoding="utf-8"))
               except Exception as exc:
-                  return {"ошибка_чтения": str(exc)}
+                  return {"report_read_error":str(exc)}
 
-          sync = read_json("4s-kit/last_sync_report.json")
-          archive = read_json("4s-kit/archive_duplicates_report.json")
-          audit = read_json("4s-kit/duplicate_audit.json")
+          tasks={
+              "Mark all 4S products Webasyst 333":{
+                  "title":"Характеристика Webasyst = 333",
+                  "report":"4s-kit/webasyst_333_full_brand_report.json",
+              },
+              "Audit 4S KIT exact duplicates":{
+                  "title":"Поиск дублей 4 Сезона по наименованию",
+                  "report":"4s-kit/duplicate_audit.json",
+              },
+              "Archive 4S KIT duplicates":{
+                  "title":"Архивация новых дублей 4 Сезона",
+                  "report":"4s-kit/archive_duplicates_report.json",
+              },
+              "Sync 4 Сезона to Yandex KIT":{
+                  "title":"Обновление каталога 4 Сезона",
+                  "report":"4s-kit/last_sync_report.json",
+              },
+          }
 
-          if conclusion == "test":
-              status = "ТЕСТ — НАСТРОЙКА ПОЧТЫ РАБОТАЕТ"
-              subject = "[4 Сезона → KIT] Тест уведомления"
-          elif conclusion == "success":
-              status = "УСПЕШНО"
-              subject = "[4 Сезона → KIT] Обновление завершено успешно"
-          elif conclusion == "cancelled":
-              status = "ОТМЕНЕНО"
-              subject = "[4 Сезона → KIT] Обновление отменено"
+          task=tasks.get(workflow,{
+              "title":workflow or "Тест уведомления",
+              "report":"",
+          })
+          report=read_json(task["report"]) if task["report"] else {}
+
+          if conclusion=="test":
+              status="ТЕСТ"
+          elif conclusion=="success":
+              status="УСПЕШНО"
+          elif conclusion=="cancelled":
+              status="ОТМЕНЕНО"
           else:
-              status = "ОШИБКА"
-              subject = "[4 Сезона → KIT] Обновление завершилось с ошибкой"
+              status=f"ОШИБКА ({conclusion.upper()})"
 
-          lines = [
-              "Автоматический отчёт: 4 Сезона → Яндекс KIT",
+          subject=f"[4 Сезона] {task['title']} — {status}"
+          lines=[
+              "Автоматический отчёт по каталогу «4 Сезона»",
               "",
+              f"Задача: {task['title']}",
               f"Результат: {status}",
               f"Номер запуска GitHub: {run_id}",
           ]
 
-          if archive:
+          if workflow=="Mark all 4S products Webasyst 333":
               lines += [
                   "",
-                  "Архивация дублей:",
-                  f"  Найдено точных групп дублей: {archive.get('duplicate_groups_found', archive.get('exact_duplicate_groups', '—'))}",
-                  f"  Отправлено новых дублей в архив: {archive.get('archived', '—')}",
-                  f"  Уже было в архиве: {archive.get('already_archived', '—')}",
-                  f"  Ошибок архивации: {archive.get('errors_count', len(archive.get('errors') or []))}",
+                  f"Активных карточек бренда 4 Сезона: {report.get('brand_4s_active','—')}",
+                  f"Уже было Webasyst=333: {report.get('already_333','—')}",
+                  f"Проставлено Webasyst=333: {report.get('updated_to_333','—')}",
+                  f"Архивных карточек пропущено: {report.get('brand_4s_archived_skipped','—')}",
+                  f"Ошибок: {report.get('errors_count',len(report.get('errors') or []))}",
               ]
-          elif audit:
+          elif workflow=="Audit 4S KIT exact duplicates":
               lines += [
                   "",
-                  "Проверка дублей:",
-                  f"  Найдено точных групп дублей: {audit.get('exact_duplicate_groups', '—')}",
-                  f"  Лишних карточек: {audit.get('duplicate_extra_variants', '—')}",
+                  f"Активных карточек бренда 4 Сезона: {report.get('managed_4s_variants','—')}",
+                  f"Групп дублей по одинаковому наименованию: {report.get('exact_duplicate_groups','—')}",
+                  f"Лишних более новых карточек: {report.get('duplicate_extra_variants','—')}",
               ]
+              groups=report.get("groups") or []
+              if groups:
+                  lines += ["", "Первые найденные дубли:"]
+                  for g in groups[:10]:
+                      lines.append(
+                          f"- {g.get('name','')} | оставить {((g.get('canonical') or {}).get('sku') or '—')} | "
+                          f"в архив: {', '.join(str(x.get('sku') or x.get('kit_id') or '') for x in (g.get('duplicates') or []))}"
+                      )
+          elif workflow=="Archive 4S KIT duplicates":
+              lines += [
+                  "",
+                  f"Групп дублей: {report.get('duplicate_groups_found','—')}",
+                  f"Лишних карточек: {report.get('duplicate_extra_variants','—')}",
+                  f"Перенесено новых дублей в архив: {report.get('archived','—')}",
+                  f"Уже было в архиве: {report.get('already_archived','—')}",
+                  f"Пропущено по защите: {report.get('skipped_unsafe','—')}",
+                  f"Ошибок: {report.get('errors_count',len(report.get('errors') or []))}",
+              ]
+          elif workflow=="Sync 4 Сезона to Yandex KIT":
+              labels=[
+                  ("Товаров в исходном фиде","feed_offers_raw"),
+                  ("Уникальных товаров","feed_unique_source_codes"),
+                  ("Карточек KIT просмотрено","kit_variants_scanned"),
+                  ("Карточек бренда 4 Сезона","existing_managed_variants"),
+                  ("Сопоставлено товаров","matched"),
+                  ("Создано новых карточек","created"),
+                  ("Обновлено цен","price_changes"),
+                  ("Обновлено остатков","stock_changes"),
+                  ("Проставлено Webasyst=333","webasyst_333_marked"),
+                  ("Заполнено Код для сайта","code_site_filled"),
+                  ("Исправлено изображений","image_repairs"),
+                  ("Обнулено отсутствующих","absent_to_zero"),
+                  ("Конфликтов","collisions"),
+              ]
+              lines += ["", "Результат обновления каталога:"]
+              for label,key in labels:
+                  if key in report:
+                      lines.append(f"{label}: {report.get(key)}")
+              lines.append(f"Ошибок в отчёте: {len(report.get('errors') or [])}")
 
-          labels = [
-              ("Товаров в исходном фиде", "feed_offers_raw"),
-              ("Уникальных товаров в фиде", "feed_unique_source_codes"),
-              ("Карточек KIT просмотрено", "kit_variants_scanned"),
-              ("Карточек бренда 4 Сезона", "existing_managed_variants"),
-              ("Товаров сопоставлено", "matched"),
-              ("Карточек сопоставлено", "matched_variants"),
-              ("Сопоставлено по Коду для сайта", "matched_by_code_site"),
-              ("Сопоставлено по артикулу", "matched_by_article"),
-              ("Сопоставлено по названию", "matched_by_name"),
-              ("Создано новых карточек", "created"),
-              ("Обновлено цен", "price_changes"),
-              ("Обновлено остатков", "stock_changes"),
-              ("Заполнено поле Код для сайта", "code_site_filled"),
-              ("Исправлено описаний", "description_repairs"),
-              ("Исправлено характеристик", "characteristic_repairs"),
-              ("Записано характеристик", "characteristics_written"),
-              ("Исправлено изображений", "image_repairs"),
-              ("Загружено изображений", "images_uploaded"),
-              ("Ошибок изображений", "image_failures"),
-              ("Отсутствующих товаров обнулено", "absent_to_zero"),
-              ("Найдено конфликтов", "collisions"),
-          ]
-
-          if sync:
-              lines += ["", "Итог синхронизации каталога:"]
-              for label, key in labels:
-                  if key in sync:
-                      lines.append(f"  {label}: {sync.get(key)}")
-
-              errors = sync.get("errors")
-              if isinstance(errors, list):
-                  lines.append(f"  Ошибок в отчёте: {len(errors)}")
-                  if errors:
-                      lines += ["", "Первые ошибки:"]
-                      for item in errors[:10]:
-                          if isinstance(item, dict):
-                              code = item.get("source_code") or ""
-                              msg = item.get("message") or ""
-                              lines.append(f"  - {code}: {msg}".strip())
-                          else:
-                              lines.append(f"  - {item}")
+          errors=report.get("errors") if isinstance(report,dict) else None
+          if isinstance(errors,list) and errors:
+              lines += ["", "Первые ошибки:"]
+              for item in errors[:10]:
+                  if isinstance(item,dict):
+                      name=item.get("name") or item.get("source_code") or item.get("sku") or ""
+                      msg=item.get("message") or ""
+                      lines.append(f"- {name}: {msg}".strip())
+                  else:
+                      lines.append(f"- {item}")
 
           if run_url:
-              lines += ["", f"Ссылка на запуск GitHub: {run_url}"]
+              lines += ["", f"GitHub Actions: {run_url}"]
 
           lines += [
               "",
-              f"Время формирования отчёта по UTC: {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
+              f"Время отчёта UTC: {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
           ]
 
-          msg = EmailMessage()
-          msg["From"] = user
-          msg["To"] = recipient
-          msg["Subject"] = subject
+          msg=EmailMessage()
+          msg["From"]=user
+          msg["To"]=recipient
+          msg["Subject"]=subject
           msg.set_content("\n".join(lines))
 
-          context = ssl.create_default_context()
-          errors = []
-          sent = False
-
+          context=ssl.create_default_context()
+          send_errors=[]
+          sent=False
           try:
-              with smtplib.SMTP("smtp.gmail.com", 587, timeout=60) as smtp:
+              with smtplib.SMTP("smtp.gmail.com",587,timeout=60) as smtp:
                   smtp.ehlo()
                   smtp.starttls(context=context)
                   smtp.ehlo()
-                  smtp.login(user, password)
+                  smtp.login(user,password)
                   smtp.send_message(msg)
-              sent = True
-              print("Письмо отправлено через Gmail SMTP 587/STARTTLS")
+              sent=True
           except Exception as exc:
-              errors.append(f"587/STARTTLS: {type(exc).__name__}: {exc}")
+              send_errors.append(f"587/STARTTLS: {type(exc).__name__}: {exc}")
 
           if not sent:
               try:
-                  with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context, timeout=60) as smtp:
-                      smtp.login(user, password)
+                  with smtplib.SMTP_SSL("smtp.gmail.com",465,context=context,timeout=60) as smtp:
+                      smtp.login(user,password)
                       smtp.send_message(msg)
-                  sent = True
-                  print("Письмо отправлено через Gmail SMTP 465/SSL")
+                  sent=True
               except Exception as exc:
-                  errors.append(f"465/SSL: {type(exc).__name__}: {exc}")
+                  send_errors.append(f"465/SSL: {type(exc).__name__}: {exc}")
 
           if not sent:
-              raise SystemExit("Не удалось отправить письмо. " + " | ".join(errors))
+              raise SystemExit("Не удалось отправить письмо. "+" | ".join(send_errors))
 
           print(f"Письмо отправлено на {recipient}: {subject}")
           PY
