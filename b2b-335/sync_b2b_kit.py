@@ -289,7 +289,7 @@ def run():
     supplier_cid = ensure_char("Артикул поставщика")
     article_cid = ensure_char("Артикул")
     site_code_cid = ensure_char("Код для сайта")
-    purchase_char_cid = ensure_char("Закупочная цена")
+    purchase_char_ids = {s(x.get("id")) for x in characteristics if norm(x.get("title")) == norm("Закупочная цена")}
 
     mapping = load_mapping()
     mapping.setdefault("variants", {})
@@ -339,8 +339,6 @@ def run():
             ("Артикул", final_sku, article_cid),
             ("Код для сайта", final_sku, site_code_cid),
         ]
-        if item.get("purchase") not in (None, ""):
-            pairs.append(("Закупочная цена", str(item["purchase"]), purchase_char_cid))
         used = {norm(x[0]) for x in pairs}
         for title, values in item.get("params", {}).items():
             if norm(title) in used:
@@ -373,7 +371,10 @@ def run():
                     patch["sku"] = final_sku
                 if s(variant.get("brand")) != BRAND:
                     patch["brand"] = BRAND
-                existing = list(variant.get("characteristics") or [])
+                existing = [
+                    x for x in (variant.get("characteristics") or [])
+                    if s(x.get("characteristic_id")) not in purchase_char_ids
+                ]
                 by_id = {s(x.get("characteristic_id")): x for x in existing}
                 for x in build_chars(item, final_sku):
                     if s(x["characteristic_id"]) not in by_id:
