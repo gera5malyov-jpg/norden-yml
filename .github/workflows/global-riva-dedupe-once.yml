@@ -1,0 +1,119 @@
+name: Global Riva dedupe once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/global-riva-dedupe-once.yml']
+permissions:
+  contents: write
+jobs:
+  dedupe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find and archive duplicate Riva SKUs
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, time, urllib.parse, urllib.request, urllib.error
+          H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+
+          def call(req):
+              for _ in range(20):
+                  try:
+                      with urllib.request.urlopen(req,timeout=90) as r:
+                          body=r.read().decode('utf-8','replace')
+                          return r.status, body
+                  except urllib.error.HTTPError as e:
+                      if e.code==429:
+                          time.sleep(float(e.headers.get('Retry-After') or 3)); continue
+                      raise
+                  except Exception:
+                      time.sleep(2)
+              raise RuntimeError('request retries exhausted')
+
+          def brand_text(x):
+              b=x.get('brand')
+              if isinstance(b,dict):
+                  b=b.get('title') or b.get('name') or b.get('value') or ''
+              return str(b or '').strip()
+
+          # Full active catalog scan. No SKU-prefix filter.
+          rows=[]; page=1; total=None
+          while True:
+              u='https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode({'page':page,'per_page':100})
+              _,body=call(urllib.request.Request(u,headers=H))
+              p=json.loads(body)
+              batch=p.get('variants') or p.get('items') or p.get('results') or []
+              if isinstance(batch,dict): batch=batch.get('items') or []
+              if not batch: break
+              rows.extend(batch)
+              total=p.get('total_count') or p.get('total') or (p.get('meta') or {}).get('total_count') or (p.get('meta') or {}).get('total')
+              if total is not None and len(rows)>=int(total): break
+              if len(batch)<100: break
+              page+=1
+              time.sleep(0.16)
+
+          groups={}
+          for x in rows:
+              if str(x.get('status') or '').strip().upper()=='ARCHIVED': continue
+              sku=str(x.get('sku') or '').strip()
+              if not sku: continue
+              brand=brand_text(x).casefold()
+              if not (brand=='riva' or brand.startswith('riva ')): continue
+              groups.setdefault(sku,[]).append(x)
+
+          dup={k:v for k,v in groups.items() if len(v)>1}
+          plan=[]
+          for sku,bucket in sorted(dup.items()):
+              # Preserve a legacy/original Riva-branded card when present; otherwise
+              # preserve the oldest KIT card. This protects historical URLs/card IDs.
+              legacy=[x for x in bucket if brand_text(x).casefold()!='riva']
+              pool=legacy or bucket
+              keeper=min(pool,key=lambda x:(int(x.get('kit_id') or 10**18), str(x.get('created_at') or '9999')))
+              extras=[x for x in bucket if str(x.get('id') or '')!=str(keeper.get('id') or '')]
+              plan.append({
+                  'sku':sku,
+                  'keeper':{'id':keeper.get('id'),'kit_id':keeper.get('kit_id'),'name':keeper.get('name'),'brand':brand_text(keeper),'created_at':keeper.get('created_at'),'media_count':len(keeper.get('media') or []),'char_count':len(keeper.get('characteristics') or []),'description_len':len(str(keeper.get('description') or '').strip())},
+                  'extras':[{'id':x.get('id'),'kit_id':x.get('kit_id'),'name':x.get('name'),'brand':brand_text(x),'created_at':x.get('created_at')} for x in extras]
+              })
+
+          archived=[]; failures=[]
+          for g in plan:
+              for x in g['extras']:
+                  vid=str(x.get('id') or '').strip()
+                  if not vid: continue
+                  req=urllib.request.Request(f'https://api.kit.yandex.net/v1/variants/{vid}/archive',data=b'',method='POST',headers=H)
+                  try:
+                      status,_=call(req)
+                      archived.append({'sku':g['sku'],'id':vid,'kit_id':x.get('kit_id'),'status':status})
+                  except Exception as e:
+                      failures.append({'sku':g['sku'],'id':vid,'kit_id':x.get('kit_id'),'error':str(e)[:500]})
+                  time.sleep(0.55)
+
+          out={
+              'variants_scanned':len(rows),
+              'riva_active_variants':sum(len(v) for v in groups.values()),
+              'duplicate_sku_groups':len(plan),
+              'duplicates_planned_for_archive':sum(len(x['extras']) for x in plan),
+              'archived_count':len(archived),
+              'failure_count':len(failures),
+              'failures':failures[:200],
+              'plan':plan[:1000],
+          }
+          os.makedirs('riva-kit',exist_ok=True)
+          open('riva-kit/global_dedupe_report.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps({k:v for k,v in out.items() if k not in ('plan','failures')},ensure_ascii=False,indent=2))
+          if failures: raise SystemExit(2)
+          PY
+      - name: Commit report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add riva-kit/global_dedupe_report.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Archive duplicate Riva SKUs'
+          git pull --rebase || true
+          git push || true
