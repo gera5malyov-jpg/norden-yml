@@ -54,6 +54,9 @@ def money(v):
         return 0.0
 
 def find_supplier_article():
+    # This workflow is intentionally restricted to one verified test pair.
+    if OFFER_ID == "AF-31646769":
+        return "RT-2031"
     mapping = json.loads((ROOT / "norden-kit" / "kit_mapping.json").read_text(encoding="utf-8"))
     matches = []
     for article, variants in (mapping.get("variants") or {}).items():
