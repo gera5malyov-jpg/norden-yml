@@ -144,6 +144,19 @@ class RivaFeedTests(unittest.TestCase):
         )
         self.assertEqual(resolve_variant(duplicate_offer, by_source, by_sku, titles)['id'], 'v1')
 
+    def test_riva_chair_brand_is_owned_by_riva_index(self):
+        rows = [{
+            'id': 'v-old',
+            'sku': 'УЧ-00000156',
+            'name': 'Кресло Atom RCH 9249-4 Бежевый',
+            'brand': 'Riva Chair',
+            'characteristics': [],
+        }]
+        by_source, by_sku, owned = index_riva_variants(rows, {})
+        self.assertEqual(owned, 1)
+        self.assertIn('УЧ-00000156', by_sku)
+        self.assertEqual(by_sku['УЧ-00000156'][0]['id'], 'v-old')
+
     def test_riva_index_scans_all_sku_prefixes(self):
         class FakeKit:
             def __init__(self):
