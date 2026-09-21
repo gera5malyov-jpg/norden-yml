@@ -1,0 +1,139 @@
+name: Ozon mass actions audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-mass-actions-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install requests
+        run: python -m pip install requests
+      - name: Audit all Ozon products and actions
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json, os, time, requests
+          BASE="https://api-seller.ozon.ru"
+          H={"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"}
+          S=requests.Session(); S.headers.update(H)
+
+          def call(method,path,body=None):
+              for a in range(12):
+                  r=S.request(method,BASE+path,json=body,timeout=120)
+                  if r.status_code==429:
+                      time.sleep(float(r.headers.get("Retry-After") or min(20,1+a))); continue
+                  if r.status_code>=500:
+                      time.sleep(min(20,1+a)); continue
+                  if r.status_code>=400:
+                      print("HTTP_ERROR",method,path,r.status_code,r.text[:1500])
+                      return None
+                  return r.json() if r.content else {}
+              return None
+
+          # All product prices.
+          items=[]
+          cursor=""
+          seen=set()
+          while True:
+              body={"cursor":cursor,"filter":{"visibility":"ALL"},"limit":1000}
+              d=call("POST","/v5/product/info/prices",body)
+              if not d: break
+              rows=d.get("items") or []
+              for x in rows:
+                  pid=x.get("product_id")
+                  if pid not in seen:
+                      seen.add(pid); items.append(x)
+              nxt=d.get("cursor") or ""
+              if not rows or not nxt or nxt==cursor: break
+              cursor=nxt
+          by_pid={int(x["product_id"]):x for x in items if x.get("product_id") is not None}
+          disabled_auto=[]
+          disabled_list=[]
+          zero_min=[]
+          for x in items:
+              p=x.get("price") or {}
+              if not p.get("auto_action_enabled"): disabled_auto.append(x.get("offer_id"))
+              if not p.get("auto_add_to_ozon_actions_list_enabled"): disabled_list.append(x.get("offer_id"))
+              try:
+                  if float(p.get("min_price") or 0)<=0: zero_min.append(x.get("offer_id"))
+              except: zero_min.append(x.get("offer_id"))
+
+          # Strategy state.
+          strategies=call("POST","/v1/pricing-strategy/list",{"page":1,"limit":49}) or {}
+          system=[s for s in (strategies.get("strategies") or []) if s.get("type")=="MIN_EXT_PRICE"]
+          chosen=next((s for s in system if s.get("enabled") is True), system[0] if system else None)
+          strategy_id=str(chosen.get("id")) if chosen else None
+          linked=set()
+          pids=list(by_pid)
+          for i in range(0,len(pids),1000):
+              d=call("POST","/v1/pricing-strategy/strategy-ids-by-product-ids",{"product_id":[str(x) for x in pids[i:i+1000]]}) or {}
+              for row in (((d.get("result") or {}).get("products_info")) or []):
+                  if strategy_id and str(row.get("strategy_id"))==strategy_id:
+                      linked.add(int(row.get("product_id")))
+
+          # Actions.
+          actions=(call("GET","/v1/actions") or {}).get("result") or []
+          promo_rows=[]
+          below=[]
+          participating_total=0
+          stock_discount_members=0
+          for a in actions:
+              aid=a.get("id")
+              offset=0
+              total_for_action=0
+              while aid:
+                  d=call("POST","/v1/actions/products",{"action_id":aid,"limit":1000,"offset":offset}) or {}
+                  rows=((d.get("result") or {}).get("products")) or []
+                  if not rows: break
+                  total_for_action += len(rows)
+                  for pr in rows:
+                      pid=int(pr.get("id") or pr.get("product_id") or 0)
+                      info=by_pid.get(pid)
+                      minp=float(((info or {}).get("price") or {}).get("min_price") or 0)
+                      ap=float(pr.get("action_price") or 0)
+                      if minp>0 and ap>0 and ap<minp:
+                          below.append({
+                              "action_id":aid,"action_title":a.get("title"),"action_type":a.get("action_type"),
+                              "product_id":pid,"offer_id":(info or {}).get("offer_id"),"action_price":ap,"min_price":minp,
+                              "stock":pr.get("stock")
+                          })
+                  if len(rows)<1000: break
+                  offset += 1000
+              participating_total += total_for_action
+              if a.get("action_type")=="STOCK_DISCOUNT":
+                  stock_discount_members += total_for_action
+              promo_rows.append({
+                  "id":aid,"title":a.get("title"),"type":a.get("action_type"),
+                  "participants":total_for_action,"auto_add_dates":a.get("auto_add_dates") or []
+              })
+
+          report={
+              "products_total":len(items),
+              "auto_action_disabled_count":len(disabled_auto),
+              "auto_add_list_disabled_count":len(disabled_list),
+              "zero_min_price_count":len(zero_min),
+              "strategy":chosen,
+              "strategy_linked_count":len(linked),
+              "strategy_unlinked_count":len(by_pid)-len(linked),
+              "actions_count":len(actions),
+              "participating_rows_total":participating_total,
+              "stock_discount_participants":stock_discount_members,
+              "below_min_count":len(below),
+              "below_min_sample":below[:100],
+              "actions":promo_rows,
+              "disabled_auto_sample":disabled_auto[:50],
+              "disabled_list_sample":disabled_list[:50],
+          }
+          print("AUDIT_JSON",json.dumps(report,ensure_ascii=False,sort_keys=True))
+          PY
