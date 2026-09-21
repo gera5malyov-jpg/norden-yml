@@ -1,0 +1,83 @@
+name: Probe KIT archive endpoint on confirmed duplicate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-4s-kit-archive-endpoint.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kit-api-write
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Probe archive methods
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, time, requests
+
+          base='https://api.kit.yandex.net'
+          token=os.environ['YANDEX_KIT_TOKEN']
+          h={'Authorization':'Bearer '+token,'Accept':'application/json'}
+          hjson={**h,'Content-Type':'application/json'}
+          vid='01a0c3e1-b1b5-798c-a512-21a9732c136b'
+          sku='333-1551016'
+
+          def getv():
+              for _ in range(8):
+                  r=requests.get(base+'/v1/variants/'+vid,headers=h,timeout=60)
+                  if r.status_code==429:
+                      time.sleep(3); continue
+                  r.raise_for_status()
+                  return r.json()
+              raise RuntimeError('GET retries exhausted')
+
+          before=getv()
+          print('ДО',json.dumps({k:before.get(k) for k in ('id','kit_id','sku','name','status')},ensure_ascii=False))
+          if str(before.get('status') or '').upper()=='ARCHIVED':
+              print('Уже в архиве')
+              raise SystemExit(0)
+
+          probes=[
+              ('POST',f'/v1/variants/{vid}/archive',None),
+              ('POST','/v1/variants/archive',{'variant_ids':[vid]}),
+              ('POST','/v1/variants/archive',{'ids':[vid]}),
+              ('POST','/v1/variants/bulk_archive',{'variant_ids':[vid]}),
+              ('POST','/v1/variants/bulk_archive',{'ids':[vid]}),
+              ('POST','/v1/variants/archive/bulk',{'variant_ids':[vid]}),
+              ('POST','/v1/variants/archive/bulk',{'ids':[vid]}),
+              ('POST','/v1/variants/archive',{'skus':[sku]}),
+          ]
+
+          for method,path,body in probes:
+              r=requests.request(method,base+path,headers=hjson if body is not None else h,json=body,timeout=60)
+              print('ПРОБА',method,path,'body=',body,'->',r.status_code,r.text[:1000])
+              if r.status_code==429:
+                  time.sleep(4)
+                  continue
+              if 200 <= r.status_code < 300:
+                  time.sleep(1)
+                  after=getv()
+                  print('ПОСЛЕ',json.dumps({k:after.get(k) for k in ('id','kit_id','sku','name','status')},ensure_ascii=False))
+                  if str(after.get('status') or '').upper()=='ARCHIVED':
+                      print('АРХИВАЦИЯ_ПОДТВЕРЖДЕНА',method,path,body)
+                      raise SystemExit(0)
+              time.sleep(0.7)
+
+          raise RuntimeError('Подходящий API-метод архивации не найден среди проверенных вариантов')
+          PY
