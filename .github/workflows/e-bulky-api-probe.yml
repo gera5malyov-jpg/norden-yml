@@ -1,9 +1,6 @@
 name: Easy Bulky API probe
 
 on:
-  push:
-    paths:
-      - ".github/workflows/e-bulky-api-probe.yml"
   workflow_dispatch:
 
 permissions:
