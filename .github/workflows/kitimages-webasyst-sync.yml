@@ -1,114 +1,13 @@
-name: KIT images sync to Webasyst
+name: KIT images sync to Webasyst (disabled)
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '7,37 * * * *'
-  push:
-    branches: [main]
-    paths:
-      - '.github/triggers/kitimages-run.txt'
 
 permissions:
   contents: read
 
-concurrency:
-  group: kitimages-webasyst-sync
-  cancel-in-progress: false
-
 jobs:
-  sync:
+  disabled:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-
     steps:
-      - name: Run KIT images plugin sync in bounded steps
-        env:
-          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-          KITIMAGES_SYNC_URL: https://profikompany.ru/kitimages-sync/
-        run: |
-          set -euo pipefail
-
-          if [ -z "${WEBASYST_API_TOKEN:-}" ]; then
-            echo "::error::WEBASYST_API_TOKEN is not configured"
-            exit 1
-          fi
-          if [ -z "${YANDEX_KIT_TOKEN:-}" ]; then
-            echo "::error::YANDEX_KIT_TOKEN is not configured"
-            exit 1
-          fi
-
-          run_key=""
-          reset=1
-
-          for step in $(seq 1 500); do
-            args=(
-              --silent --show-error
-              --connect-timeout 30
-              --max-time 120
-              --output /tmp/kitimages-response.json
-              --write-out '%{http_code}'
-              --request POST
-              --header "Accept: application/json"
-              --data-urlencode "access_token=${WEBASYST_API_TOKEN}"
-              --data-urlencode "kit_token=${YANDEX_KIT_TOKEN}"
-              --data-urlencode "reset=${reset}"
-            )
-            if [ -n "${run_key}" ]; then
-              args+=(--data-urlencode "run_key=${run_key}")
-            fi
-
-            http_code="$(curl "${args[@]}" "${KITIMAGES_SYNC_URL}")"
-            echo "Step ${step}: HTTP ${http_code}"
-
-            if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
-              cat /tmp/kitimages-response.json || true
-              echo
-              exit 1
-            fi
-
-            status="$(jq -r '.status // "error"' /tmp/kitimages-response.json)"
-            complete="$(jq -r '.complete // false' /tmp/kitimages-response.json)"
-            new_run_key="$(jq -r '.run_key // empty' /tmp/kitimages-response.json)"
-            phase="$(jq -r '.progress.phase // "unknown"' /tmp/kitimages-response.json)"
-
-            if [ -n "${new_run_key}" ]; then
-              run_key="${new_run_key}"
-            fi
-
-            jq '{
-              status,
-              complete,
-              run_key,
-              progress,
-              summary: {
-                candidate_products: .report.candidate_products,
-                candidate_skus: .report.candidate_skus,
-                kit_variants_scanned: .report.kit_variants_scanned,
-                matched_products: .report.matched_products,
-                updated_products: .report.updated_products,
-                saved_image_urls: .report.saved_image_urls,
-                products_without_kit_match: .report.products_without_kit_match,
-                products_without_kit_images: .report.products_without_kit_images,
-                kit_duplicate_skus: .report.kit_duplicate_skus,
-                removed_stale_products: .report.removed_stale_products,
-                errors: .report.errors
-              }
-            }' /tmp/kitimages-response.json
-
-            if [ "${status}" = "error" ]; then
-              exit 1
-            fi
-            if [ "${complete}" = "true" ]; then
-              echo "KIT image synchronization completed."
-              exit 0
-            fi
-
-            reset=0
-            echo "Continuing phase: ${phase}"
-            sleep 1
-          done
-
-          echo "::error::KIT image synchronization exceeded 500 steps"
-          exit 1
+      - run: echo "Automatic KIT image sync is disabled because the Webasyst plugin is disabled."
