@@ -306,6 +306,21 @@ def final_sku_from_kit_id(kit_id):
 def is_managed_4s_variant(v,code_site_id):
     return is_brand(v.get('brand'))
 
+def is_likely_legacy_4s_variant(v,code_site_id,article_id,webasyst_id):
+    """Recognize old 4 Seasons cards even when the Brand field was not normalized."""
+    if s(v.get('status')).upper()=='ARCHIVED':
+        return False
+    if is_brand(v.get('brand')) or generated_333_variant(v):
+        return True
+    if s(char_value(v,webasyst_id))==WEBASYST_VALUE:
+        return True
+    code=norm(char_value(v,code_site_id))
+    if code.startswith('4s'):
+        return True
+    sku=s(v.get('sku')).upper()
+    article=s(char_value(v,article_id)).upper()
+    return sku.startswith('AF-') or article.startswith('AF-')
+
 def characteristic_title_index(rows):
     out=defaultdict(list)
     for row in rows:
@@ -505,16 +520,34 @@ def main():
         flush=True,
     )
 
-    variants=kit.variants()
+    # KIT pagination has occasionally repeated rows between pages. A repeated row can
+    # displace another card from a page and make an existing product look "missing".
+    # In create mode scan twice and use the union by immutable variant id.
+    variants_first=kit.variants()
+    scan_passes=1
+    variants_by_id={
+        s(v.get('id')):v for v in variants_first
+        if isinstance(v,dict) and s(v.get('id'))
+    }
+    if not existing_only:
+        variants_second=kit.variants()
+        scan_passes=2
+        for v in variants_second:
+            if isinstance(v,dict) and s(v.get('id')):
+                variants_by_id[s(v.get('id'))]=v
+    variants=list(variants_by_id.values())
+
     by_code_site=defaultdict(list)
     by_article=defaultdict(list)
     by_name=defaultdict(list)
+    all_active_by_name=defaultdict(list)
     managed={}
     for v in variants:
         vid=s(v.get('id'))
-        if not vid or not is_brand(v.get('brand')):
+        if not vid or s(v.get('status')).upper()=='ARCHIVED':
             continue
-        if s(v.get('status')).upper()=='ARCHIVED':
+        add_index(all_active_by_name,s(v.get('name')),v)
+        if not is_brand(v.get('brand')):
             continue
         managed[vid]=v
         add_index(by_code_site,char_value(v,code_site_id),v)
@@ -575,7 +608,11 @@ def main():
         'feed_duplicate_article_name_identities':len(feed_duplicates),
         'feed_price_conflicts':len(feed_price_conflicts),
         'kit_variants_scanned':len(variants),
+        'kit_variant_scan_passes':scan_passes,
+        'kit_variants_first_pass_rows':len(variants_first),
+        'kit_variants_unique_union':len(variants),
         'existing_managed_variants':len(managed),
+        'legacy_exact_name_guards':0,
         'matched':0,'matched_variants':0,'matched_by_code_site':0,
         'matched_by_article':0,'matched_by_name':0,'ambiguous_name_matches':0,
         'created':0,'skipped_new_existing_only':0,
@@ -657,12 +694,18 @@ def main():
                 report['matched_by_name']+=1
 
         if chosen is None:
-            # Last-resort pre-create exact-name safety guard. Never create when an
-            # existing managed card has the same normalized name.
+            # Final pre-create safety guard across ALL active KIT cards, not only
+            # cards whose Brand field is already exactly "4 Сезона". This protects
+            # legacy AF-* cards and cards that already carry Webasyst=333 / 4s code.
+            # Exact normalized name is required, so a newer 333-* copy is never
+            # created beside an older legacy card with the same product name.
+            name_key=norm(o.get('name'))
             same_name_all=[
-                v for v in managed.values()
-                if norm(v.get('name'))==norm(o.get('name'))
-                and s(v.get('id')) not in duplicate_variant_ids
+                v for v in all_active_by_name.get(name_key,[])
+                if s(v.get('id')) not in duplicate_variant_ids
+                and is_likely_legacy_4s_variant(
+                    v,code_site_id,article_id,webasyst_id
+                )
             ]
             if same_name_all:
                 same_name_all=sorted(same_name_all,key=canonical_variant_key)
@@ -670,6 +713,7 @@ def main():
                 rows=[chosen]
                 report['matched']+=1
                 report['matched_by_name']+=1
+                report['legacy_exact_name_guards']+=1
 
         if chosen is None:
             if existing_only:
