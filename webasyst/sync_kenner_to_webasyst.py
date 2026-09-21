@@ -256,6 +256,8 @@ def main():
         "features_created": 0,
         "feature_values_written": 0,
         "file_urls_resolved": 0,
+        "image_source": "Yandex KIT media only",
+        "webasyst_routing": "Webasyst=334",
         "errors": [],
         "sample_new": [],
         "sample_updates": [],
@@ -317,19 +319,50 @@ def main():
     report["kit_duplicate_skus"] = sum(1 for rows in kit_by_sku.values() if len(rows) > 1)
     kit_unique = {sku: rows[0] for sku, rows in kit_by_sku.items() if len(rows) == 1}
 
-    # Existing managed Webasyst cards.
+    # Feature lookup. The supplier routing gate must exist in BOTH systems:
+    # KIT Webasyst=334 <-> Webasyst Webasyst=334.
+    type_features = listify(
+        wa.call("shop.feature.getList", params={"type_id": type_id}),
+        ("features", "items"),
+    )
+    all_features = listify(wa.call("shop.feature.getList"), ("features", "items"))
+    webasyst_feature_matches = [
+        row for row in (type_features + all_features)
+        if norm(row.get("name") or row.get("title")) == norm(WEBASYST_TITLE)
+        and s(row.get("code"))
+    ]
+    # De-duplicate same feature returned in type + global lists.
+    wa_webasyst_by_code = {s(row.get("code")): row for row in webasyst_feature_matches}
+    if len(wa_webasyst_by_code) != 1:
+        raise RuntimeError(
+            f"Expected exactly one Webasyst characteristic in Webasyst; found {len(wa_webasyst_by_code)}"
+        )
+    wa_webasyst_code = next(iter(wa_webasyst_by_code))
+    report["webasyst_routing_feature_code"] = wa_webasyst_code
+
+    # Existing managed Webasyst cards: type 203 is only a safety boundary.
+    # Actual supplier membership is Webasyst=334.
     products = load_wa_products(wa, type_id)
     report["webasyst_products"] = len(products)
     wa_by_sku = defaultdict(list)
+    managed_wa_products = 0
     for product in products:
+        product_id = s(product.get("id"))
+        if not product_id:
+            continue
+        info = wa.call("shop.product.getInfo", params={"id": product_id})
+        features = (info or {}).get("features") or {}
+        if s(features.get(wa_webasyst_code)) != WEBASYST_VALUE:
+            continue
+        managed_wa_products += 1
         for sku_row in product_skus(product):
             sku = s(sku_row.get("sku"))
-            if sku.startswith(SKU_PREFIX):
+            if sku:
                 wa_by_sku[sku].append((product, sku_row))
+    report["webasyst_334_products"] = managed_wa_products
     report["webasyst_duplicate_skus"] = sum(1 for rows in wa_by_sku.values() if len(rows) > 1)
 
     # Feature lookup for new products.
-    type_features = listify(
         wa.call("shop.feature.getList", params={"type_id": type_id}),
         ("features", "items"),
     )
@@ -427,6 +460,7 @@ def main():
 
     for sku, variant in sorted(kit_unique.items()):
         try:
+            # Exact item match only inside the already-routed Webasyst=334 population.
             matches = wa_by_sku.get(sku, [])
             if len(matches) > 1:
                 raise RuntimeError(f"duplicate Webasyst SKU in type {type_id}: {sku}")
