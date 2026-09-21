@@ -1,12 +1,14 @@
-name: DEEPHOUSE feed inspect
+name: DEEPHOUSE to Yandex KIT
 
 on:
+  schedule:
+    - cron: '35 4 * * *'
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'deephouse-kit/sync_deephouse_kit.py'
       - '.github/workflows/deephouse-feed-inspect.yml'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,9 +18,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  inspect:
+  sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 345
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,9 +30,13 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Inspect DEEPHOUSE feed without writing to KIT
-        run: python deephouse-kit/sync_deephouse_kit.py --dry-run
-      - name: Commit diagnostic report
+      - name: Sync DEEPHOUSE catalog to Yandex KIT
+        id: deephouse_sync
+        continue-on-error: true
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python deephouse-kit/sync_deephouse_kit.py
+      - name: Commit sync report
         if: always()
         run: |
           git config user.name github-actions
@@ -44,7 +50,81 @@ jobs:
           fi
           git add deephouse-kit/last_sync_report.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
-          git commit -m 'Update DEEPHOUSE feed diagnostic report'
+          git commit -m 'Update DEEPHOUSE KIT sync report'
           git push origin HEAD:main || true
+      - name: Send Russian email report
+        if: always()
+        env:
+          GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          REPORT_TO: shop@office-mag.com
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, smtplib
+          from email.message import EmailMessage
 
-# diagnostic trigger
+          path = "deephouse-kit/last_sync_report.json"
+          try:
+              with open(path, "r", encoding="utf-8") as f:
+                  r = json.load(f)
+          except Exception as exc:
+              r = {"status": "error", "errors": [{"message": f"Не удалось прочитать отчет: {exc}"}]}
+
+          status = r.get("status", "неизвестно")
+          complete = r.get("complete", False)
+          subject = f"[DEEPHOUSE] {'УСПЕХ' if complete else 'ОШИБКА'} — загрузка в Яндекс KIT"
+          errors = r.get("errors") or []
+          warnings = r.get("warnings") or []
+          body = f"""Автоматический отчет по каталогу DEEPHOUSE
+
+          Результат: {'УСПЕШНО' if complete else 'С ОШИБКАМИ'}
+          Статус: {status}
+
+          Товаров в исходном фиде: {r.get('source_products', 0)}
+          Обработано: {r.get('processed', 0)}
+          Создано новых карточек: {r.get('created', 0)}
+          Обновлено существующих: {r.get('updated_existing', 0)}
+          Архивировано дублей: {r.get('duplicate_variants_archived', 0)}
+          Загружено изображений: {r.get('images_uploaded', 0)}
+          Ошибок изображений: {r.get('image_errors', 0)}
+          Обновлено цен: {r.get('price_updates', 0)}
+          Обновлено остатков: {r.get('stock_updates', 0)}
+
+          Правило артикула: DEEP-<артикул поставщика>
+          Бренд: DEEPHOUSE
+          Характеристика Webasyst: 336
+          Склады: МСК и СПБ привозной
+          Цена для покупателя: из XML
+          Цена до скидки: цена для покупателя + 50%
+          """
+
+          if warnings:
+              body += "\nПредупреждения (первые 20):\n" + "\n".join("- " + str(x) for x in warnings[:20])
+          if errors:
+              body += "\n\nОшибки (первые 20):\n"
+              for x in errors[:20]:
+                  if isinstance(x, dict):
+                      body += f"- {x.get('sku','')}: {x.get('message','')}\n"
+                  else:
+                      body += f"- {x}\n"
+
+          user = os.environ.get("GMAIL_SMTP_USER", "").strip()
+          password = os.environ.get("GMAIL_APP_PASSWORD", "").replace(" ", "").strip()
+          to = os.environ.get("REPORT_TO", "").strip()
+          if not user or not password or not to:
+              raise SystemExit("SMTP secrets/recipient are not configured")
+
+          msg = EmailMessage()
+          msg["From"] = user
+          msg["To"] = to
+          msg["Subject"] = subject
+          msg.set_content(body)
+
+          with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as smtp:
+              smtp.login(user, password)
+              smtp.send_message(msg)
+          PY
+      - name: Fail workflow when sync failed
+        if: steps.deephouse_sync.outcome != 'success'
+        run: exit 1
