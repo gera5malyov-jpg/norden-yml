@@ -157,21 +157,15 @@ def main():
         raise RuntimeError(f"Expected exactly one KIT characteristic {ARTICLE_TITLE!r}; found {len(article_matches)}")
     article_id = s(article_matches[0].get("id"))
 
-    # Scan KIT only to count brand 4 Сезона and inspect the fields needed by sync.
-    variants = kit.all("/v1/variants")
-    managed = [v for v in variants if s(v.get("brand")) == TARGET_BRAND]
-    with_article = [v for v in managed if char_value(v, article_id)]
-
-    sample = managed[0] if managed else {}
-    safe_sample = {
-        "keys": sorted(sample.keys()),
-        "pricing_keys": sorted((sample.get("pricing") or {}).keys()),
-        "stock_keys": sorted((sample.get("stocks") or [{}])[0].keys()) if sample.get("stocks") else [],
-        "media_keys": sorted((sample.get("media") or [{}])[0].keys()) if sample.get("media") else [],
-        "characteristic_entry_keys": sorted((sample.get("characteristics") or [{}])[0].keys()) if sample.get("characteristics") else [],
-        "has_description": bool(s(sample.get("description"))),
-        "media_count": len(sample.get("media") or []),
-    }
+    # Current 4S KIT sync report already contains the full managed-brand count.
+    report_path = os.path.join(os.path.dirname(__file__), "..", "4s-kit", "last_sync_report.json")
+    managed_count = None
+    if os.path.exists(report_path):
+        try:
+            with open(report_path, "r", encoding="utf-8") as fh:
+                managed_count = json.load(fh).get("existing_managed_variants")
+        except Exception:
+            managed_count = None
 
     wa_skus = []
     for p in products:
@@ -185,10 +179,8 @@ def main():
         "webasyst_type": {"id": type_id, "name": row_name(target_type), "product_count": len(products), "sku_count": len(wa_skus)},
         "webasyst_stock": {"id": s(wa_stock.get("id")), "name": row_name(wa_stock)},
         "kit_stock": {"id": s(kit_spb.get("id")), "name": row_name(kit_spb)},
-        "kit_brand_variants": len(managed),
-        "kit_brand_variants_with_article": len(with_article),
+        "kit_brand_variants_from_last_sync": managed_count,
         "kit_article_characteristic_id": article_id,
-        "kit_variant_shape": safe_sample,
     }
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
