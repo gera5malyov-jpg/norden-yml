@@ -1,0 +1,69 @@
+name: STOL-TRANSFORMER — Parse protected catalog
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stol-transformer-parser
+  cancel-in-progress: false
+
+jobs:
+  parse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r stol-transformer/requirements.txt
+
+      - name: Parse protected catalog
+        id: parse
+        env:
+          STOL_TRANSFORMER_LOGIN: ${{ secrets.STOL_TRANSFORMER_LOGIN }}
+          STOL_TRANSFORMER_PASSWORD: ${{ secrets.STOL_TRANSFORMER_PASSWORD }}
+          STOL_TRANSFORMER_MAX_PAGES: "2500"
+          STOL_TRANSFORMER_DELAY: "0.15"
+        run: python stol-transformer/parser.py
+
+      - name: Show report
+        if: always()
+        run: |
+          if [ -f stol-transformer/output/report.json ]; then
+            cat stol-transformer/output/report.json
+          fi
+
+      - name: Upload parser results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stol-transformer-catalog-${{ github.run_number }}
+          path: stol-transformer/output/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Commit parsed catalog
+        if: success()
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add stol-transformer/output/
+          if git diff --cached --quiet; then
+            echo "No catalog changes"
+            exit 0
+          fi
+          git commit -m "Update STOL-TRANSFORMER parsed catalog"
+          git pull --rebase origin main
+          git push origin HEAD:main
