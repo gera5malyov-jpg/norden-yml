@@ -39,7 +39,7 @@ jobs:
                   return d,r
               return {},r
 
-          listed,lr=call("/v1/pricing-strategy/list",{"page":1,"limit":50})
+          listed,lr=call("/v1/pricing-strategy/list",{"page":1,"limit":49})
           print("STRATEGIES",json.dumps(listed,ensure_ascii=False,sort_keys=True))
           current,cr=call("/v1/pricing-strategy/strategy-ids-by-product-ids",{"product_id":[PID]})
           print("CURRENT_STRATEGY",json.dumps(current,ensure_ascii=False,sort_keys=True))
