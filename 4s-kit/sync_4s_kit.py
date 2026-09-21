@@ -353,7 +353,7 @@ def match_offer(offer,by_code_site,by_article,by_name):
     def add(rows,points,reason):
         for row in rows:
             vid=s(row.get('id'))
-            if not vid:
+            if not vid or reason in reasons[vid]:
                 continue
             scores[vid]=scores.get(vid,0)+points
             reasons[vid].add(reason)
