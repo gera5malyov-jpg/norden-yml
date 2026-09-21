@@ -1,0 +1,58 @@
+name: Probe Riva duplicate SKU once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe-riva-generic-duplicate-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe exact SKU
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,time,urllib.parse,urllib.request,urllib.error
+          sku='00-00006098'
+          H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          def call(url):
+              for _ in range(12):
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(url,headers=H),timeout=60) as r:
+                          return json.loads(r.read().decode())
+                  except urllib.error.HTTPError as e:
+                      if e.code==429:
+                          time.sleep(int(e.headers.get('Retry-After') or 3)); continue
+                      raise
+              raise RuntimeError('retry exhausted')
+          p=call('https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode({'name':sku,'page':1,'per_page':100}))
+          rows=p.get('variants') or p.get('items') or p.get('results') or []
+          if isinstance(rows,dict): rows=rows.get('items') or []
+          exact=[]
+          for x in rows:
+              if str(x.get('sku') or '').strip()!=sku: continue
+              b=x.get('brand')
+              if isinstance(b,dict): b=b.get('title') or b.get('name') or b.get('value')
+              exact.append({
+                  'id':x.get('id'),'kit_id':x.get('kit_id'),'sku':x.get('sku'),'name':x.get('name'),
+                  'brand':b,'status':x.get('status'),'created_at':x.get('created_at'),'updated_at':x.get('updated_at'),
+                  'media_count':len(x.get('media') or []),'char_count':len(x.get('characteristics') or []),
+                  'description_len':len(str(x.get('description') or '').strip()),
+              })
+          out={'sku':sku,'exact_count':len(exact),'variants':exact}
+          os.makedirs('riva-kit',exist_ok=True)
+          open('riva-kit/duplicate_generic_probe.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add riva-kit/duplicate_generic_probe.json
+          git commit -m 'Probe generic Riva duplicate' || exit 0
+          git pull --rebase || true
+          git push || true
