@@ -151,33 +151,111 @@ class Parser:
             return response
 
         soup = BeautifulSoup(response.text, "lxml")
-        password_input = soup.find("input", attrs={"type": re.compile("password", re.I)})
-        if not password_input:
+        page_text = clean_text(soup.get_text(" ", strip=True))
+        forms = soup.find_all("form")
+
+        # Сохраняем безопасную диагностику формы без значений и без секретов.
+        debug_forms = []
+        for idx, frm in enumerate(forms):
+            inputs = []
+            for inp in frm.find_all("input"):
+                inputs.append({
+                    "name": str(inp.get("name") or ""),
+                    "type": str(inp.get("type") or "text"),
+                    "id": str(inp.get("id") or ""),
+                })
+            debug_forms.append({
+                "index": idx,
+                "action": str(frm.get("action") or ""),
+                "method": str(frm.get("method") or "post"),
+                "inputs": inputs,
+                "text": clean_text(frm.get_text(" ", strip=True))[:300],
+            })
+        (OUT / "auth_debug.json").write_text(
+            json.dumps({
+                "url": response.url,
+                "status": response.status_code,
+                "page_title": clean_text(soup.title.get_text(" ", strip=True)) if soup.title else "",
+                "page_text_head": page_text[:500],
+                "forms": debug_forms,
+            }, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+        # Ищем форму входа не только по type=password:
+        # некоторые каталоги используют обычный text input и JS.
+        form: Tag | None = None
+        user_field = ""
+        pass_field = ""
+
+        for candidate in forms:
+            named_inputs = []
+            for inp in candidate.find_all("input"):
+                name = str(inp.get("name") or "").strip()
+                if not name:
+                    continue
+                typ = str(inp.get("type") or "text").lower()
+                named_inputs.append((name, typ, inp))
+
+            if not named_inputs:
+                continue
+
+            local_user = ""
+            local_pass = ""
+            for name, typ, inp in named_inputs:
+                hay = " ".join([
+                    name,
+                    str(inp.get("id") or ""),
+                    str(inp.get("placeholder") or ""),
+                    str(inp.get("autocomplete") or ""),
+                ])
+                if typ == "password" or re.search(r"pass|password|pwd|парол", hay, re.I):
+                    local_pass = local_pass or name
+                if re.search(r"login|user|username|email|логин", hay, re.I):
+                    local_user = local_user or name
+
+            visible = [(name, typ) for name, typ, _ in named_inputs if typ not in {"hidden", "submit", "button", "checkbox", "radio"}]
+            if not local_user and visible:
+                local_user = visible[0][0]
+            if not local_pass and len(visible) >= 2:
+                # Для простых каталогов второй видимый input обычно пароль.
+                local_pass = visible[1][0]
+
+            candidate_text = clean_text(candidate.get_text(" ", strip=True))
+            loginish = bool(
+                local_user and local_pass and (
+                    re.search(r"войти|логин|парол|login|sign\s*in", candidate_text, re.I)
+                    or re.search(r"войти|доступ по логину|login", page_text, re.I)
+                )
+            )
+            if loginish:
+                form = candidate
+                user_field = local_user
+                pass_field = local_pass
+                break
+
+        # Если формы действительно нет и страницы входа тоже нет — считаем доступ уже открытым.
+        if form is None:
+            if re.search(r"доступ по логину|войти|парол", page_text, re.I):
+                raise RuntimeError(
+                    "Страница входа найдена, но HTML-форма авторизации не распознана. "
+                    "См. stol-transformer/output/auth_debug.json"
+                )
             self.auth_mode = "none_or_cookie_already"
             return response
 
-        form = password_input.find_parent("form")
-        if not isinstance(form, Tag):
-            raise RuntimeError("На странице есть поле пароля, но форма авторизации не найдена")
-
         payload: dict[str, str] = {}
-        user_field = None
-        pass_field = password_input.get("name")
         for inp in form.find_all("input"):
-            name = inp.get("name")
+            name = str(inp.get("name") or "").strip()
             if not name:
                 continue
-            typ = str(inp.get("type", "text")).lower()
-            val = str(inp.get("value", ""))
+            typ = str(inp.get("type") or "text").lower()
+            val = str(inp.get("value") or "")
             if typ in {"hidden", "submit"}:
                 payload[name] = val
-            if typ in {"text", "email"} and (not user_field or re.search(r"login|user|email|name", name, re.I)):
-                user_field = name
-        if not user_field or not pass_field:
-            raise RuntimeError("Не удалось определить поля логина/пароля в форме")
 
         payload[user_field] = self.login
-        payload[str(pass_field)] = self.password
+        payload[pass_field] = self.password
         action = urljoin(response.url, str(form.get("action") or response.url))
         method = str(form.get("method") or "post").lower()
         if method == "get":
@@ -186,8 +264,13 @@ class Parser:
             login_response = self.session.post(action, data=payload, timeout=self.timeout, allow_redirects=True)
         login_response.raise_for_status()
         self.pages_fetched += 1
-        if BeautifulSoup(login_response.text, "lxml").find("input", attrs={"type": re.compile("password", re.I)}):
-            raise RuntimeError("Авторизация через форму не подтверждена: форма логина осталась на странице")
+
+        after = BeautifulSoup(login_response.text, "lxml")
+        after_text = clean_text(after.get_text(" ", strip=True))
+        if re.search(r"доступ по логину|войти", after_text, re.I) and not re.search(r"артикул|характеристик|каталог\s*·", after_text, re.I):
+            raise RuntimeError(
+                "Авторизация через форму не подтверждена: после отправки логина/пароля осталась страница входа"
+            )
         self.auth_mode = "html_form"
         return login_response
 
