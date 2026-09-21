@@ -363,6 +363,7 @@ def main():
     report["webasyst_duplicate_skus"] = sum(1 for rows in wa_by_sku.values() if len(rows) > 1)
 
     # Feature lookup for new products.
+    type_features = listify(
         wa.call("shop.feature.getList", params={"type_id": type_id}),
         ("features", "items"),
     )
