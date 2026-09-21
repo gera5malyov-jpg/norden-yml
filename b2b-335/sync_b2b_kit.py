@@ -52,15 +52,26 @@ def money(v):
     return None if d is None else d.quantize(MONEY, rounding=ROUND_HALF_UP)
 
 
-def price_set(purchase):
+def price_set(purchase, retail):
     p = money(purchase)
-    if p is None or p <= 0:
-        return None
+    r = money(retail)
+
+    # Для Б2Б Фабрика цена для покупателя считается от розничной цены
+    # поставщика: розничная цена - 5%. Закупочная цена используется только
+    # как закупочная/минимальная и не блокирует загрузку товара.
+    if r is None or r <= 0:
+        # Резервный расчёт нужен только если в фиде временно нет розничной цены.
+        # Он позволяет не потерять товар, если закупочная цена известна.
+        if p is None or p <= 0:
+            return None
+        r = money(p * Decimal("1.30"))
+
     return {
-        "purchase": p,
-        "sale": money(p * Decimal("1.30")),
-        "old": money(p * Decimal("1.80")),
-        "minimum": money(p * Decimal("1.20")),
+        "purchase": p if p is not None and p > 0 else None,
+        "retail": r,
+        "sale": money(r * Decimal("0.95")),
+        "old": r,
+        "minimum": money(p * Decimal("1.20")) if p is not None and p > 0 else None,
     }
 
 
@@ -145,6 +156,7 @@ def parse_feed(prices):
             "pictures": all_text(n, "picture"),
             "params": params,
             "count": parse_count(n),
+            "retail": first_text(n, "price"),
             "purchase": prices.get(key),
         }
         if key in offers:
@@ -211,6 +223,7 @@ def run():
         "images_uploaded": 0,
         "image_errors": 0,
         "missing_purchase_price": [],
+        "missing_retail_price": [],
         "minimum_price_field": None,
         "purchase_price_field": None,
         "warnings": [],
@@ -220,10 +233,11 @@ def run():
         "webasyst_characteristic": WEBASYST_VALUE,
         "warehouses": list(WAREHOUSE_NAMES),
         "price_rules": {
-            "purchase": "Оптовый прайс: Цена Опт динамика",
-            "customer": "purchase * 1.30",
-            "before_discount": "purchase * 1.80",
-            "minimum": "purchase * 1.20",
+            "purchase": "Оптовый прайс: Цена Опт динамика (если есть)",
+            "retail": "YML <price> — розничная цена поставщика",
+            "customer": "retail * 0.95",
+            "before_discount": "retail",
+            "minimum": "purchase * 1.20 (если есть закупочная цена)",
         },
     }
     HERE.mkdir(parents=True, exist_ok=True)
@@ -355,9 +369,11 @@ def run():
     for key, item in offers.items():
         try:
             mapped = mapping["variants"].get(key)
-            ps = price_set(item.get("purchase"))
-            if ps is None:
+            ps = price_set(item.get("purchase"), item.get("retail"))
+            if money(item.get("purchase")) is None or money(item.get("purchase")) <= 0:
                 report["missing_purchase_price"].append(item["supplier_article"])
+            if money(item.get("retail")) is None or money(item.get("retail")) <= 0:
+                report["missing_retail_price"].append(item["supplier_article"])
 
             if mapped:
                 variant_id = s(mapped.get("variant_id"))
@@ -437,13 +453,16 @@ def run():
 
             variant_id = s(mapping["variants"][key]["variant_id"])
             if ps:
-                price_rows.append({
+                price_row = {
                     "variant_id": variant_id,
                     "price": f"{ps['old']:.2f}",
                     "manual_discount_price": f"{ps['sale']:.2f}",
-                    "_minimum": f"{ps['minimum']:.2f}",
-                    "_purchase": f"{ps['purchase']:.2f}",
-                })
+                }
+                if ps["minimum"] is not None:
+                    price_row["_minimum"] = f"{ps['minimum']:.2f}"
+                if ps["purchase"] is not None:
+                    price_row["_purchase"] = f"{ps['purchase']:.2f}"
+                price_rows.append(price_row)
             for name in WAREHOUSE_NAMES:
                 stock_rows.append({"variant_id": variant_id, "warehouse_id": wh[name], "quantity": int(item["count"])})
         except Exception as exc:
@@ -478,22 +497,24 @@ def run():
         return None
 
     if price_rows:
+        minimum_sample = next((row for row in price_rows if row.get("_minimum")), None)
+        purchase_sample = next((row for row in price_rows if row.get("_purchase")), None)
         report["minimum_price_field"] = discover_field(
             ("minimum_price", "min_price", "minimum_sale_price", "manual_minimum_price"),
-            price_rows[0], "_minimum"
+            minimum_sample, "_minimum"
         )
         report["purchase_price_field"] = discover_field(
             ("purchase_price", "cost_price", "procurement_price", "acquisition_price"),
-            price_rows[0], "_purchase"
+            purchase_sample, "_purchase"
         )
 
     for start in range(0, len(price_rows), 500):
         batch = []
         for row in price_rows[start:start+500]:
             x = {k: v for k, v in row.items() if not k.startswith("_")}
-            if report["minimum_price_field"]:
+            if report["minimum_price_field"] and row.get("_minimum") is not None:
                 x[report["minimum_price_field"]] = row["_minimum"]
-            if report["purchase_price_field"]:
+            if report["purchase_price_field"] and row.get("_purchase") is not None:
                 x[report["purchase_price_field"]] = row["_purchase"]
             batch.append(x)
         kit.request("POST", "/v1/variants/prices/bulk_update", body={"items": batch})
@@ -506,10 +527,9 @@ def run():
 
     save_mapping(mapping)
     report["mapped_products"] = len(mapping["variants"])
-    report["status"] = "ok" if not report["errors"] and not report["missing_purchase_price"] else "degraded"
+    report["status"] = "ok" if not report["errors"] else "degraded"
     report["complete"] = (
         not report["errors"]
-        and not report["missing_purchase_price"]
         and len(mapping["variants"]) >= len(offers)
     )
     REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

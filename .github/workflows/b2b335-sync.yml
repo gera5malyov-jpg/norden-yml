@@ -95,22 +95,33 @@ jobs:
 
           kit = load('b2b-335/last_sync_report.json')
           wa = load('webasyst/last_b2b335_webasyst_sync.json')
+
+          def ru_status(value):
+              return {
+                  'success': 'УСПЕШНО',
+                  'failure': 'ЗАВЕРШЕНО С ОШИБКАМИ',
+                  'cancelled': 'ОТМЕНЕНО',
+                  'skipped': 'ПРОПУЩЕНО',
+              }.get((value or '').strip().lower(), (value or 'НЕИЗВЕСТНО').upper())
+
           ok = os.getenv('KIT_OUTCOME') == 'success' and os.getenv('WA_OUTCOME') == 'success'
           subject = ('[Б2Б Фабрика 335] Загрузка завершена' if ok
                      else '[Б2Б Фабрика 335] Ошибка загрузки')
           body = f"""Ежедневная цепочка: фид → KIT → Webasyst
 
           KIT:
-          результат шага: {os.getenv('KIT_OUTCOME')}
+          результат шага: {ru_status(os.getenv('KIT_OUTCOME'))}
           товаров в фиде: {kit.get('source_products', '—')}
           создано: {kit.get('created', '—')}
           обновлено: {kit.get('updated', '—')}
           обнулено отсутствующих: {kit.get('zeroed_missing_from_feed', '—')}
-          без закупочной цены: {len(kit.get('missing_purchase_price') or [])}
+          без закупочной цены (не блокирует загрузку): {len(kit.get('missing_purchase_price') or [])}
+          без розничной цены в фиде: {len(kit.get('missing_retail_price') or [])}
+          правило цены покупателя: розничная цена поставщика минус 5%
           ошибок: {len(kit.get('errors') or [])}
 
           Webasyst:
-          результат шага: {os.getenv('WA_OUTCOME')}
+          результат шага: {ru_status(os.getenv('WA_OUTCOME'))}
           обработано: {wa.get('processed', '—')}
           создано: {wa.get('created', '—')}
           обновлено цена/остаток: {wa.get('updated_prices_stock', '—')}
