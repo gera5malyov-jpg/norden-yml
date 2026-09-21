@@ -1,0 +1,26 @@
+name: Remove B2B purchase characteristic once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/remove-b2b-purchase-characteristic-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check requests
+      - name: Remove purchase price characteristic from B2B only
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python maintenance/remove_b2b_purchase_characteristic.py
