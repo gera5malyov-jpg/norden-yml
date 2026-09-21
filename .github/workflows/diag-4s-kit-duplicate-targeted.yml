@@ -13,56 +13,34 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: Targeted duplicate diagnostics
+      - name: Inspect exact Dakar duplicate cards
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         run: |
           python - <<'PY'
-          import importlib.util, json, os, pathlib
-          path=pathlib.Path('4s-kit/sync_4s_kit.py')
-          spec=importlib.util.spec_from_file_location('sync4s', path)
-          mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
-          kit=mod.Kit(os.environ['YANDEX_KIT_TOKEN'])
-          chars=kit.characteristics()
-          code_site_id,article_id=mod.resolve_special_characteristics(chars)
-
-          tests=[
-              ('sku','333-1551016'),
-              ('sku','333-1508664'),
-              ('kit_id','1551016'),
-              ('kit_id','1508664'),
-              ('search','Двухъярусная кровать-диван Дакар 2'),
-              ('query','Двухъярусная кровать-диван Дакар 2'),
+          import json, os, requests
+          base='https://api.kit.yandex.net'
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          ids=[
+            '01a0a11a-5e79-705e-8103-d0272043fcf3',
+            '01a0c3e1-b1b5-798c-a512-21a9732c136b',
           ]
-          for key,value in tests:
-              try:
-                  payload=kit.request('GET','/v1/variants',params={key:value,'page':1,'per_page':100})
-                  rows=kit.items(payload)
-                  safe=[]
-                  for v in rows:
-                      name=mod.s(v.get('name'))
-                      sku=mod.s(v.get('sku'))
-                      kid=mod.s(v.get('kit_id'))
-                      if ('дакар' in name.casefold()) or sku in {'333-1551016','333-1508664'} or kid in {'1551016','1508664'}:
-                          safe.append({
-                              'id':mod.s(v.get('id')),
-                              'kit_id':kid,
-                              'sku':sku,
-                              'name':name,
-                              'brand':v.get('brand'),
-                              'code_site':mod.char_value(v,code_site_id),
-                              'article':mod.char_value(v,article_id),
-                              'product_id':mod.s(v.get('product_id')),
-                              'category_ids':v.get('category_ids'),
-                          })
-                  print('TEST',key,value,'returned',len(rows),'total',kit.total(payload),'matches',json.dumps(safe,ensure_ascii=False))
-              except Exception as exc:
-                  print('TEST_ERROR',key,value,type(exc).__name__,str(exc)[:1000])
+          for vid in ids:
+              r=requests.get(base+'/v1/variants/'+vid,headers=h,timeout=60)
+              print('HTTP',vid,r.status_code)
+              r.raise_for_status()
+              v=r.json()
+              safe={k:v.get(k) for k in [
+                  'id','kit_id','sku','name','brand','status','created_at','updated_at',
+                  'product_id','category_ids','pricing','stocks','media'
+              ] if k in v}
+              safe['characteristics']=v.get('characteristics')
+              print(json.dumps(safe,ensure_ascii=False,indent=2))
           PY
