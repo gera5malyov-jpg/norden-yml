@@ -23,7 +23,7 @@ jobs:
           import os, urllib.request, urllib.error
           repo=os.environ['GITHUB_REPOSITORY']
           for run_id in (35612440643,):
-              url=f'https://api.github.com/repos/{repo}/actions/runs/{run_id}/cancel'
+              url=f'https://api.github.com/repos/{repo}/actions/runs/{run_id}/force-cancel'
               req=urllib.request.Request(url,data=b'',method='POST',headers={
                   'Authorization':'Bearer '+os.environ['GH_TOKEN'],
                   'Accept':'application/vnd.github+json',
