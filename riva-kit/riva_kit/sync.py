@@ -105,6 +105,14 @@ def index_riva_variants(rows, characteristic_titles=None):
     return by_source, dict(by_sku), owned_count
 
 
+def load_riva_variant_index(kit, characteristic_titles=None):
+    """Index all Riva variants regardless of SKU prefix."""
+    return index_riva_variants(
+        list(kit.iter_variants()),
+        characteristic_titles or {},
+    )
+
+
 def resolve_variant(offer, by_source, by_sku, characteristic_titles=None):
     characteristic_titles = characteristic_titles or {}
 
@@ -427,8 +435,8 @@ class SyncRunner:
         # "Код для сайта" values can use other prefixes (for example "УЧ-").
         # A prefix-filtered index makes every subsequent run treat those
         # existing products as new and creates duplicates.
-        by_source, by_sku, owned_count = index_riva_variants(
-            list(self.kit.iter_variants()), self.characteristic_titles
+        by_source, by_sku, owned_count = load_riva_variant_index(
+            self.kit, self.characteristic_titles
         )
         self.report['riva_variants_indexed'] = owned_count
         self.report['duplicate_article_buckets'] = sum(1 for values in by_sku.values() if len(values) > 1)
