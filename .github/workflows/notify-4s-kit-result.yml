@@ -1,0 +1,133 @@
+name: Notify 4S KIT result by Gmail
+
+on:
+  workflow_run:
+    workflows: ["Sync 4 Сезона to Yandex KIT"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Send result to shop@office-mag.com
+        if: always()
+        env:
+          GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import smtplib
+          import ssl
+          from email.message import EmailMessage
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          user = (os.getenv("GMAIL_SMTP_USER") or "").strip()
+          password = (os.getenv("GMAIL_APP_PASSWORD") or "").strip()
+          recipient = (os.getenv("RECIPIENT") or "").strip()
+          conclusion = (os.getenv("RUN_CONCLUSION") or "unknown").strip().lower()
+          run_url = (os.getenv("RUN_URL") or "").strip()
+          run_id = (os.getenv("RUN_ID") or "").strip()
+
+          if not user or not password:
+              raise SystemExit(
+                  "Gmail notification is configured, but GitHub secrets "
+                  "GMAIL_SMTP_USER and/or GMAIL_APP_PASSWORD are missing."
+              )
+
+          report_path = Path("4s-kit/last_sync_report.json")
+          report = {}
+          if report_path.exists():
+              try:
+                  report = json.loads(report_path.read_text(encoding="utf-8"))
+              except Exception as exc:
+                  report = {"report_read_error": str(exc)}
+
+          status = "УСПЕШНО" if conclusion == "success" else f"ОШИБКА ({conclusion.upper()})"
+          subject = f"[4 Сезона → KIT] {status}"
+
+          labels = [
+              ("Товаров в фиде", "feed_offers"),
+              ("Уникальных товаров", "unique_offers"),
+              ("Сопоставлено", "matched"),
+              ("Сопоставлено вариантов", "matched_variants"),
+              ("Создано новых", "created"),
+              ("Обновлено цен", "price_changes"),
+              ("Обновлено остатков", "stock_changes"),
+              ("Заполнено Код для сайта", "code_site_filled"),
+              ("Исправлено описаний", "description_repairs"),
+              ("Исправлено характеристик", "characteristic_repairs"),
+              ("Записано характеристик", "characteristics_written"),
+              ("Исправлено изображений", "image_repairs"),
+              ("Загружено изображений", "images_uploaded"),
+              ("Ошибок изображений", "image_failures"),
+          ]
+
+          lines = [
+              "Автоматический отчёт синхронизации 4 Сезона → Яндекс KIT",
+              "",
+              f"Результат GitHub Actions: {status}",
+              f"Run ID: {run_id}",
+          ]
+
+          found = False
+          for label, key in labels:
+              if key in report:
+                  lines.append(f"{label}: {report.get(key)}")
+                  found = True
+
+          errors = report.get("errors") if isinstance(report, dict) else None
+          if isinstance(errors, list):
+              lines.append(f"Ошибок в отчёте: {len(errors)}")
+              if errors:
+                  lines.append("")
+                  lines.append("Первые ошибки:")
+                  for item in errors[:10]:
+                      if isinstance(item, dict):
+                          code = item.get("source_code") or ""
+                          msg = item.get("message") or ""
+                          lines.append(f"- {code}: {msg}".strip())
+                      else:
+                          lines.append(f"- {item}")
+
+          if not found:
+              lines.extend([
+                  "",
+                  "Подробный JSON-отчёт в репозитории отсутствует или не содержит итоговых счётчиков."
+              ])
+
+          if run_url:
+              lines.extend(["", f"GitHub Actions: {run_url}"])
+
+          lines.extend([
+              "",
+              f"Время формирования письма (UTC): {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
+          ])
+
+          msg = EmailMessage()
+          msg["From"] = user
+          msg["To"] = recipient
+          msg["Subject"] = subject
+          msg.set_content("\n".join(lines))
+
+          context = ssl.create_default_context()
+          with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context, timeout=60) as smtp:
+              smtp.login(user, password)
+              smtp.send_message(msg)
+
+          print(f"Notification sent to {recipient}: {subject}")
+          PY
