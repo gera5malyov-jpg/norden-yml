@@ -5,13 +5,6 @@ on:
   schedule:
     # GitHub checks weekly; state guard runs the real job only once every ~14 days.
     - cron: "17 3 * * 1"
-  push:
-    branches: [main]
-    paths:
-      - "stol-transformer/parser.py"
-      - "stol-transformer/sync_kit.py"
-      - "stol-transformer/requirements.txt"
-      - ".github/workflows/stol-transformer-parser.yml"
 
 permissions:
   contents: write
