@@ -1,0 +1,55 @@
+name: Test 4s parser control product
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-4s-parser-control.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-4s.txt
+      - name: Compile parser
+        run: python -m py_compile parse_4s.py
+      - name: Parse control product
+        run: |
+          python - <<'PY'
+          import json
+          import parse_4s
+
+          url='https://4s-mebel.ru/product/banketka_aysberg_loft_03_belyy_bezhevyy/'
+          item=parse_4s.parse(url)
+          print(json.dumps(item,ensure_ascii=False,indent=2))
+
+          expected_images=[
+            'https://4s-mebel.ru/upload/resize_cache/iblock/8f5/1200_1200_140cd750bba9870f18aada2478b24840a/8f59fd42eb2db7995c1bdecab122f184.jpg',
+            'https://4s-mebel.ru/upload/resize_cache/iblock/0f7/1200_1200_140cd750bba9870f18aada2478b24840a/0f71c759e23f5f32f3988a2c2f88c426.jpg',
+          ]
+          assert item['images']==expected_images, item['images']
+          assert item['description']=='Банкетка Айсберг Лофт 03 Белый/Бежевый', item['description']
+          assert item['sku']=='4s-bank03-bel-bej', item['sku']
+          expected={
+            'Ширина см.':'110',
+            'Глубина см.':'42',
+            'Высота см.':'55',
+            'Материал каркаса':'Металл белый',
+            'Гарантия':'12 месяцев',
+            'Материал обивки':'Экокожа',
+            'Страна производства':'Россия',
+            'Цвет':'Бежевый',
+            'Артикул':'4s-bank03-bel-bej',
+            'Доставка':'1-2 дня',
+            'Самовывоз':'Завтра',
+          }
+          for k,v in expected.items():
+              assert item['params'].get(k)==v, (k,item['params'].get(k),v)
+          print('CONTROL_PRODUCT_OK')
+          PY
