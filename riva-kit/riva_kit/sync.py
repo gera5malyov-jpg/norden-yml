@@ -422,8 +422,13 @@ class SyncRunner:
             for row in self.kit_characteristics if str(row.get('id', '')).strip()
         }
 
+        # Build the Riva index from the whole KIT catalog.
+        # Do NOT filter by an old SKU prefix such as "ЦБ-": current Riva
+        # "Код для сайта" values can use other prefixes (for example "УЧ-").
+        # A prefix-filtered index makes every subsequent run treat those
+        # existing products as new and creates duplicates.
         by_source, by_sku, owned_count = index_riva_variants(
-            list(self.kit.iter_variants({'name': 'ЦБ-'})), self.characteristic_titles
+            list(self.kit.iter_variants()), self.characteristic_titles
         )
         self.report['riva_variants_indexed'] = owned_count
         self.report['duplicate_article_buckets'] = sum(1 for values in by_sku.values() if len(values) > 1)
