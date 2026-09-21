@@ -22,7 +22,7 @@ HEADERS = {
     "Api-Key": API_KEY,
     "Content-Type": "application/json",
     "Accept": "application/json",
-    "User-Agent": "megapolis-norden-rfbs-price/1.0",
+    "User-Agent": "megapolis-norden-rfbs-price/1.1",
 }
 
 def post(path, payload, attempts=5):
@@ -98,10 +98,12 @@ if commission_pct <= 0:
 
 price_block = before.get("price") or {}
 current_price = money(price_block.get("price"))
+marketing_seller_price = money(price_block.get("marketing_seller_price"))
 acquiring_amount = money(before.get("acquiring"))
-if acquiring_amount > 0 and current_price > 0:
-    acquiring_pct = acquiring_amount / current_price * 100.0
-    acquiring_source = "Ozon acquiring/current seller price"
+acquiring_base = marketing_seller_price if marketing_seller_price > 0 else current_price
+if acquiring_amount > 0 and acquiring_base > 0:
+    acquiring_pct = acquiring_amount / acquiring_base * 100.0
+    acquiring_source = "Ozon acquiring / marketing_seller_price"
 else:
     acquiring_pct = ACQUIRING_FALLBACK_PCT
     acquiring_source = f"fallback {ACQUIRING_FALLBACK_PCT}%"
@@ -116,23 +118,45 @@ min_price = ceil_rub(purchase * (1.0 + MIN_PROFIT_PCT / 100.0) / denom)
 if min_price > sale_price:
     raise RuntimeError("Safety stop: min_price > sale_price")
 
-old_price = money(price_block.get("old_price"))
-old_price_out = str(int(round(old_price))) if old_price > sale_price else "0"
+base_report = {
+    "status": "ПОДГОТОВЛЕНО",
+    "finished_at": datetime.now(timezone.utc).isoformat(),
+    "offer_id": OFFER_ID,
+    "norden_article": article,
+    "scheme": "rFBS",
+    "purchase_price_github_rub": purchase,
+    "purchase_source": "norden.yml",
+    "ozon_sales_percent_rfbs": commission_pct,
+    "ozon_acquiring_current_amount_rub": acquiring_amount,
+    "ozon_acquiring_base_rub": acquiring_base,
+    "ozon_acquiring_effective_percent": round(acquiring_pct, 6),
+    "acquiring_source": acquiring_source,
+    "delivery_included": False,
+    "target_profit_percent_of_purchase": PROFIT_PCT,
+    "minimum_profit_percent_of_purchase": MIN_PROFIT_PCT,
+    "old_ozon_price_rub": current_price,
+    "old_marketing_seller_price_rub": marketing_seller_price,
+    "calculated_sale_price_rub": sale_price,
+    "calculated_min_price_rub": min_price,
+}
+REPORT.write_text(json.dumps(base_report, ensure_ascii=False, indent=2), encoding="utf-8")
+print("PRECALC " + json.dumps(base_report, ensure_ascii=False))
 
 payload = {
     "prices": [{
         "offer_id": OFFER_ID,
         "price": str(sale_price),
-        "old_price": old_price_out,
         "min_price": str(min_price),
-        "currency_code": "RUB",
-        "auto_action_enabled": "UNKNOWN",
-        "min_price_for_auto_actions_enabled": True
+        "currency_code": "RUB"
     }]
 }
 update = post("/v1/product/import/prices", payload)
 rows = update.get("result") or []
-if not rows or not bool(rows[0].get("updated")) or rows[0].get("errors"):
+ok = bool(rows) and bool(rows[0].get("updated")) and not rows[0].get("errors")
+if not ok:
+    base_report["status"] = "ОШИБКА"
+    base_report["update_response"] = update
+    REPORT.write_text(json.dumps(base_report, ensure_ascii=False, indent=2), encoding="utf-8")
     raise RuntimeError("Ozon rejected price update: " + json.dumps(update, ensure_ascii=False))
 
 time.sleep(3)
@@ -142,29 +166,14 @@ after_min = money((after.get("price") or {}).get("min_price"))
 net_sale = sale_price * denom - purchase
 net_min = min_price * denom - purchase
 
-report = {
+report = dict(base_report)
+report.update({
     "status": "УСПЕШНО",
-    "finished_at": datetime.now(timezone.utc).isoformat(),
-    "offer_id": OFFER_ID,
-    "norden_article": article,
-    "scheme": "rFBS",
-    "purchase_price_github_rub": purchase,
-    "purchase_source": "norden.yml",
-    "ozon_sales_percent_rfbs": commission_pct,
-    "ozon_acquiring_current_amount_rub": acquiring_amount,
-    "ozon_acquiring_effective_percent": round(acquiring_pct, 6),
-    "acquiring_source": acquiring_source,
-    "delivery_included": False,
-    "target_profit_percent_of_purchase": PROFIT_PCT,
-    "minimum_profit_percent_of_purchase": MIN_PROFIT_PCT,
-    "old_ozon_price_rub": current_price,
-    "calculated_sale_price_rub": sale_price,
-    "calculated_min_price_rub": min_price,
     "verified_ozon_price_rub": after_price,
     "verified_ozon_min_price_rub": after_min,
     "estimated_profit_after_commission_and_acquiring_rub": round(net_sale, 2),
     "estimated_profit_at_min_price_rub": round(net_min, 2),
     "update_response": update,
-}
+})
 REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 print(json.dumps(report, ensure_ascii=False, indent=2))
