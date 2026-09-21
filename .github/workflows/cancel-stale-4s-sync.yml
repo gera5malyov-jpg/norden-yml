@@ -1,4 +1,4 @@
-name: Cancel stale 4S sync once
+name: Cancel stale 4S runs once
 
 on:
   push:
@@ -14,9 +14,11 @@ jobs:
   cancel:
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel stale 4S KIT sync run
+      - name: Cancel stale 4S runs
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api --method POST repos/${{ github.repository }}/actions/runs/35602742176/cancel
-          echo "Requested cancellation of stale run 35602742176"
+          for RUN_ID in 35602742176 35618604987; do
+            gh api --method POST repos/${{ github.repository }}/actions/runs/${RUN_ID}/cancel || true
+            echo "Requested cancellation of stale run ${RUN_ID}"
+          done
