@@ -1,0 +1,55 @@
+name: WB warehouse delivery type check
+
+on:
+  push:
+    paths:
+      - '.github/workflows/wb-warehouse-type-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check warehouse type for target stock
+        env:
+          WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os,json,urllib.request
+          t=os.environ["WB_API_TOKEN"]
+          h={"Authorization":t,"Content-Type":"application/json"}
+          def call(method,url,body=None):
+              d=None if body is None else json.dumps(body).encode()
+              r=urllib.request.Request(url,data=d,method=method,headers=h)
+              with urllib.request.urlopen(r,timeout=60) as x:
+                  raw=x.read().decode()
+                  return x.status,json.loads(raw) if raw else None
+
+          _,ws=call("GET","https://marketplace-api.wildberries.ru/api/v3/warehouses")
+          _,offs=call("GET","https://marketplace-api.wildberries.ru/api/v3/offices")
+          om={int(x.get("id") or 0):x for x in offs or []}
+          chrt=655834525
+          for w in ws or []:
+              wid=w.get("id")
+              try:
+                  _,s=call("POST",f"https://marketplace-api.wildberries.ru/api/v3/stocks/{wid}",{"chrtIds":[chrt]})
+              except Exception:
+                  continue
+              rows=(s or {}).get("stocks") or []
+              amt=int((rows[0] or {}).get("amount") or 0) if rows else 0
+              if amt>0:
+                  print("WB_WH_NAME="+str(w.get("name","")))
+                  print("WB_WH_STOCK="+str(amt))
+                  print("WB_WH_CARGO_TYPE="+str(w.get("cargoType","")))
+                  print("WB_WH_DELIVERY_TYPE="+str(w.get("deliveryType","")))
+                  oid=int(w.get("officeId") or 0)
+                  print("WB_WH_OFFICE_ID="+str(oid))
+                  o=om.get(oid,{})
+                  print("WB_WH_OFFICE_NAME="+str(o.get("name","")))
+                  print("WB_WH_OFFICE_DELIVERY_TYPE="+str(o.get("deliveryType","")))
+          PY
