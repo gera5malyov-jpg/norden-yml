@@ -1,0 +1,55 @@
+name: Archive confirmed 4S duplicate test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/archive-4s-duplicate-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kit-api-write
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Archive one confirmed newer duplicate
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import importlib.util, json, os, pathlib
+          p=pathlib.Path('4s-kit/sync_4s_kit.py')
+          spec=importlib.util.spec_from_file_location('sync4s',p)
+          mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+          kit=mod.Kit(os.environ['YANDEX_KIT_TOKEN'])
+
+          old_id='01a0a11a-5e79-705e-8103-d0272043fcf3'
+          new_id='01a0c3e1-b1b5-798c-a512-21a9732c136b'
+
+          old=kit.get_variant(old_id)
+          new=kit.get_variant(new_id)
+          print('OLD_BEFORE',json.dumps({k:old.get(k) for k in ('id','kit_id','sku','name','brand','status')},ensure_ascii=False))
+          print('NEW_BEFORE',json.dumps({k:new.get(k) for k in ('id','kit_id','sku','name','brand','status')},ensure_ascii=False))
+
+          if str(old.get('status') or '').upper()=='ARCHIVED':
+              raise RuntimeError('Old canonical card is archived; refusing test')
+          if str(new.get('status') or '').upper()!='ARCHIVED':
+              kit.patch_variant(new_id,{'status':'ARCHIVED'})
+
+          after=kit.get_variant(new_id)
+          print('NEW_AFTER',json.dumps({k:after.get(k) for k in ('id','kit_id','sku','name','brand','status')},ensure_ascii=False))
+          if str(after.get('status') or '').upper()!='ARCHIVED':
+              raise RuntimeError('KIT did not archive confirmed duplicate')
+          PY
