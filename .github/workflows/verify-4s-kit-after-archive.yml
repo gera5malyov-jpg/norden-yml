@@ -1,0 +1,96 @@
+name: Verify 4S KIT duplicates after archive
+
+on:
+  workflow_run:
+    workflows: ["Archive 4S KIT duplicates"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Проверить активный каталог после архивации
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import importlib.util, json, os, pathlib
+          from collections import defaultdict
+          from datetime import datetime, timezone
+
+          p=pathlib.Path('4s-kit/sync_4s_kit.py')
+          spec=importlib.util.spec_from_file_location('sync4s',p)
+          mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+          kit=mod.Kit(os.environ['YANDEX_KIT_TOKEN'])
+          chars=kit.characteristics()
+          code_site_id,_=mod.resolve_special_characteristics(chars)
+          rows=kit.variants()
+
+          active_by_id={}
+          for v in rows:
+              vid=mod.s(v.get('id'))
+              if not vid or not mod.is_brand(v.get('brand')):
+                  continue
+              if mod.s(v.get('status')).upper()=='ARCHIVED':
+                  continue
+              active_by_id[vid]=v
+
+          groups=defaultdict(list)
+          for v in active_by_id.values():
+              code=mod.norm(mod.char_value(v,code_site_id))
+              name=mod.norm(v.get('name'))
+              if code and name:
+                  groups[(code,name)].append(v)
+
+          duplicates=[]
+          for _,vals in groups.items():
+              unique={mod.s(x.get('id')):x for x in vals if mod.s(x.get('id'))}
+              vals=sorted(unique.values(),key=mod.canonical_variant_key)
+              if len(vals)>1:
+                  duplicates.append({
+                      'code_site':mod.char_value(vals[0],code_site_id),
+                      'name':mod.s(vals[0].get('name')),
+                      'kit_ids':[mod.s(x.get('kit_id')) for x in vals],
+                      'skus':[mod.s(x.get('sku')) for x in vals],
+                  })
+
+          report={
+              'checked_at':datetime.now(timezone.utc).isoformat(),
+              'kit_rows_scanned':len(rows),
+              'active_4s_variants':len(active_by_id),
+              'active_exact_duplicate_groups':len(duplicates),
+              'duplicates':duplicates,
+              'status':'ok' if not duplicates else 'failed',
+          }
+          out=pathlib.Path('4s-kit/post_archive_duplicate_check.json')
+          out.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({k:v for k,v in report.items() if k!='duplicates'},ensure_ascii=False,indent=2))
+          if duplicates:
+              for x in duplicates[:20]:
+                  print('ОСТАЛСЯ ДУБЛЬ',json.dumps(x,ensure_ascii=False))
+              raise RuntimeError(f"После архивации осталось точных дублей: {len(duplicates)}")
+          PY
+      - name: Сохранить отчёт проверки
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 4s-kit/post_archive_duplicate_check.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save post-archive 4 Seasons duplicate check"
+            git pull --rebase origin main
+            git push
+          fi
