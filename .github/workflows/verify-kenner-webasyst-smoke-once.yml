@@ -1,4 +1,5 @@
 name: Verify Kenner Webasyst smoke once
+# url-cleanup-check
 on:
   push:
     branches: [main]
@@ -40,9 +41,9 @@ jobs:
           if not target: raise SystemExit('334-326506 not found')
           info=wa.call('shop.product.getInfo',params={'id':target['id']})
           skus=wa.call('shop.product.skus.getList',params={'product_id':target['id']})
-          out={'product_id':target['id'],'type_id':info.get('type_id'),'summary':info.get('summary'),'description_len':len(str(info.get('description') or '')),'features':info.get('features'),'skus':skus}
+          features=info.get('features') or {}; out={'product_id':target['id'],'type_id':info.get('type_id'),'url':info.get('url'),'summary':info.get('summary'),'description_len':len(str(info.get('description') or '')),'features':features,'supplier_link_value':features.get('kenner_d125631c719b'),'skus':skus}
           open('webasyst/kenner_smoke_verify.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
-          print(json.dumps({'product_id':out['product_id'],'type_id':out['type_id'],'summary_prefix':str(out['summary'])[:100],'feature_count':len(out['features'] or {}),'skus':skus},ensure_ascii=False,indent=2))
+          print(json.dumps({'product_id':out['product_id'],'type_id':out['type_id'],'url':out['url'],'summary_prefix':str(out['summary'])[:100],'feature_count':len(out['features'] or {}),'supplier_link_value':out['supplier_link_value'],'skus':skus},ensure_ascii=False,indent=2))
           PY
       - name: Commit
         run: |
