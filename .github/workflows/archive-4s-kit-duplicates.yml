@@ -46,6 +46,14 @@ jobs:
           kit=mod.Kit(os.environ['YANDEX_KIT_TOKEN'])
           chars=kit.characteristics()
           code_site_id,article_id=mod.resolve_special_characteristics(chars)
+          web_rows=[
+              x for x in chars
+              if mod.norm(x.get('title'))==mod.norm(mod.WEBASYST_TITLE)
+              and mod.s(x.get('id'))
+          ]
+          if len(web_rows)!=1:
+              raise RuntimeError(f'Expected one Webasyst characteristic, found {len(web_rows)}')
+          webasyst_id=mod.s(web_rows[0].get('id'))
 
           report={
               'started_at':datetime.now(timezone.utc).isoformat(),
@@ -114,16 +122,30 @@ jobs:
                       except Exception:
                           extra_kit_num=None
 
-                      safe=(
-                          mod.is_brand(canonical.get('brand'))
-                          and mod.is_brand(extra.get('brand'))
-                          and canonical_code
+                      same_code=(
+                          canonical_code
                           and canonical_code==extra_code
+                      )
+                      legacy_name_guard=(
+                          group.get('match_mode')=='legacy-name-guard'
                           and canonical_name
+                          and canonical_name==extra_name
+                          and mod.is_likely_legacy_4s_variant(
+                              canonical,code_site_id,article_id,webasyst_id
+                          )
+                          and mod.is_likely_legacy_4s_variant(
+                              extra,code_site_id,article_id,webasyst_id
+                          )
+                          and not mod.generated_333_variant(canonical)
+                          and mod.generated_333_variant(extra)
+                      )
+                      safe=(
+                          canonical_name
                           and canonical_name==extra_name
                           and canonical_kit_num is not None
                           and extra_kit_num is not None
                           and extra_kit_num>canonical_kit_num
+                          and (same_code or legacy_name_guard)
                       )
                       if not safe:
                           report['skipped_unsafe']+=1
