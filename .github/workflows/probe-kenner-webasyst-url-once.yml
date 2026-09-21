@@ -1,0 +1,40 @@
+name: Probe Kenner Webasyst URL once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe-kenner-webasyst-url-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Probe product URL fields
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+          wa=WebasystClient(min_request_interval=0.4)
+          info=wa.call('shop.product.getInfo',params={'id':'1476072'})
+          out={'keys':sorted(info.keys()) if isinstance(info,dict) else [],'url':info.get('url') if isinstance(info,dict) else None,'url_name':info.get('url_name') if isinstance(info,dict) else None,'frontend_url':info.get('frontend_url') if isinstance(info,dict) else None,'product':info}
+          open('webasyst/kenner_url_probe.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps({k:out[k] for k in ('keys','url','url_name','frontend_url')},ensure_ascii=False,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add webasyst/kenner_url_probe.json
+          git commit -m 'Probe Kenner Webasyst URL field' || exit 0
+          git pull --rebase || true
+          git push || true
