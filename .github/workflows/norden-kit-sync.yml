@@ -24,6 +24,7 @@ on:
     branches: [main]
     paths:
       - 'norden-kit/sync_norden_kit.py'
+      - '.github/workflows/norden-kit-sync.yml'
 
 permissions:
   contents: write
@@ -49,26 +50,27 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Update prices and stocks after workflow changes
+      - name: Run full Norden sync after workflow changes
         if: github.event_name == 'push'
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
         run: |
           python norden-kit/sync_norden_kit.py \
-            --mode price-stock \
+            --mode full \
             --rebuild-map \
+            --max-new 100 \
             --time-budget-seconds 17000
 
-      - name: Daily update of existing Norden prices and stocks
+      - name: Daily Norden sync
         if: github.event_name == 'schedule'
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
         run: |
           python norden-kit/sync_norden_kit.py \
-            --mode price-stock \
-            --rebuild-map \
+            --mode scheduled \
+            --max-new 250 \
             --time-budget-seconds 17000
 
       - name: Run manual sync
@@ -166,15 +168,16 @@ jobs:
               f"Номер запуска GitHub: {os.getenv('RUN_ID','—')}",
               f"Причина запуска: {os.getenv('EVENT_NAME','—')}",
               "",
-              "Режим: только обновление цен и наличия уже созданных товаров Norden.",
-              "Новые карточки в этом автоматическом запуске не создаются.",
-              "Перед обновлением пересобирается сопоставление существующих карточек Norden.",
+              "Режим: обновление каталога Norden — цены, наличие и добавление новых товаров.",
+              "Существующие карточки обновляются, новые товары Norden добавляются автоматически.",
               "",
               f"Товаров в источнике Norden: {report.get('source_products','—')}",
               f"Сопоставлено существующих артикулов: {report.get('mapped_existing_articles','—')}",
               f"Артикулов источника, найденных для обновления: {report.get('mapped_source_articles_for_updates','—')}",
               f"Обновлено цен: {report.get('price_updates','—')}",
               f"Обновлено остатков по складам: {report.get('stock_updates','—')}",
+              f"Создано новых карточек: {report.get('new_products_created','—')}",
+              f"Осталось новых товаров для последующих запусков: {report.get('remaining_new_products','—')}",
               f"Несопоставленных артикулов источника: {report.get('unmapped_source_articles','—')}",
               f"Ошибок в отчёте: {len(errors)}",
               f"Предупреждений: {len(warnings)}",
