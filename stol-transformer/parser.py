@@ -471,10 +471,26 @@ class Parser:
         color = self.characteristic(chars, r"^цвет$", r"цвет.*столеш", r"декор")
         support_color = self.characteristic(chars, r"цвет.*опор", r"цвет.*нож")
         model = self.characteristic(chars, r"^модель$", r"серия", r"коллекц")
+
+        # Пример заголовка защищённого каталога:
+        # "Стол-трансформер журнальный LEVMAR Accord R D95S53 Белый мрамор [Ozon]"
+        # -> model: "LEVMAR Accord R D95S53"
+        # -> color: "Белый мрамор"
+        title_without_channel = re.sub(r"\s*\[[^\]]+\]\s*$", "", title).strip()
+        model_match = re.search(
+            r"\b(LEVMAR\s+.+?\b[A-ZА-Я]\d+(?:/?[A-ZА-Я]\d+)+)\b",
+            title_without_channel,
+            re.I,
+        )
+        if not model and model_match:
+            model = clean_text(model_match.group(1))
         if not model:
-            # Для примера "... LEVMAR Accord R D95S53 Белый мрамор ...":
-            # базовая модель остаётся в name, а цвет/артикул сохраняются отдельными полями.
-            model = re.sub(r"\s*\[[^\]]+\]\s*$", "", title).strip()
+            model = title_without_channel
+
+        if not color and model_match:
+            tail = clean_text(title_without_channel[model_match.end():])
+            if tail:
+                color = tail
 
         desc_node = soup.select_one("[itemprop='description'], .description, .product-description, [class*='description']")
         description = clean_text(desc_node.get_text("\n", strip=True)) if desc_node else ""
