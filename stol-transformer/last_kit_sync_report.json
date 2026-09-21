@@ -1,0 +1,27 @@
+{
+  "status": "УСПЕШНО",
+  "brand": "Levmar",
+  "webasyst_characteristic": "337",
+  "source_products": 119,
+  "source_duplicate_articles": [],
+  "sku_rule": "337-<KIT kit_id>",
+  "price_rules": {
+    "customer": "supplier retail * 0.95",
+    "before_discount": "supplier retail * 1.30",
+    "purchase": "NOT SENT TO KIT"
+  },
+  "stock_rule": "source has no stock field; KIT stock is not modified",
+  "created": 119,
+  "updated": 0,
+  "price_updates": 119,
+  "images_uploaded": 872,
+  "image_errors": 0,
+  "characteristics_updated": 119,
+  "missing_retail_price": [],
+  "mapped_products_missing_from_source": [],
+  "warnings": [],
+  "errors": [],
+  "complete": true,
+  "mapped_products": 119,
+  "generated_at": "2026-09-21T21:21:47.000840+00:00"
+}
