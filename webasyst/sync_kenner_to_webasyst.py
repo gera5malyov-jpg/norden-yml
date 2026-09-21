@@ -293,8 +293,6 @@ def source_features(item):
         add("Объем упаковок", " / ".join(item["cartons_volume"]))
     if item["cartons_dimensions"]:
         add("Габариты упаковок", " / ".join(item["cartons_dimensions"]))
-    if item["source_url"]:
-        add("Ссылка поставщика", item["source_url"])
 
     for title, value in item["params"]:
         add(title, value)
