@@ -1,0 +1,86 @@
+{
+  "status": "degraded",
+  "feed_url": "https://market-b2bfabrika.ru/bitrix/catalog_export/catalog-feed.xml",
+  "source_products": 112,
+  "price_articles": 164,
+  "feed_duplicate_articles": [],
+  "created": 102,
+  "updated": 0,
+  "zeroed_missing_from_feed": 0,
+  "price_updates": 102,
+  "stock_updates": 204,
+  "images_uploaded": 483,
+  "image_errors": 0,
+  "missing_purchase_price": [
+    "soho16",
+    "2kdwmws1097",
+    "dwmws1114",
+    "2KDSMKS1133",
+    "dwmws823",
+    "dvmgs892",
+    "dwmws854",
+    "Soho14",
+    "Soho008",
+    "soho010"
+  ],
+  "minimum_price_field": "minimum_price",
+  "purchase_price_field": "purchase_price",
+  "warnings": [],
+  "errors": [
+    {
+      "article": "soho16",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/variants"
+    },
+    {
+      "article": "2kdwmws1097",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/variants"
+    },
+    {
+      "article": "dwmws1114",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/variants"
+    },
+    {
+      "article": "2KDSMKS1133",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/variants"
+    },
+    {
+      "article": "dwmws823",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/variants"
+    },
+    {
+      "article": "dvmgs892",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/variants"
+    },
+    {
+      "article": "dwmws854",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/variants"
+    },
+    {
+      "article": "Soho14",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/variants"
+    },
+    {
+      "article": "Soho008",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/variants"
+    },
+    {
+      "article": "soho010",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/variants"
+    }
+  ],
+  "sku_rule": "335-<KIT kit_id>",
+  "brand": "Б2Б Фабрика",
+  "webasyst_characteristic": "335",
+  "warehouses": [
+    "МСК",
+    "СПБ привозной"
+  ],
+  "price_rules": {
+    "purchase": "Оптовый прайс: Цена Опт динамика",
+    "customer": "purchase * 1.30",
+    "before_discount": "purchase * 1.80",
+    "minimum": "purchase * 1.20"
+  },
+  "mapped_products": 102,
+  "complete": false
+}
