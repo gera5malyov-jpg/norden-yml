@@ -1,0 +1,47 @@
+name: Norden Ozon price test AF-31646769
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/triggers/norden-ozon-price-test.txt'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: norden-ozon-price-test-af-31646769
+  cancel-in-progress: false
+
+jobs:
+  update-price:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      OFFER_ID: AF-31646769
+      PROFIT_PCT: '20'
+      MIN_PROFIT_PCT: '18'
+      ACQUIRING_FALLBACK_PCT: '2'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Recalculate and update one Ozon product
+        run: python ozon/norden_price_test.py
+
+      - name: Add Russian report
+        if: always()
+        shell: bash
+        run: |
+          if [ -f ozon/norden-price-test-AF-31646769.json ]; then
+            echo "## Norden -> Ozon: AF-31646769" >> "$GITHUB_STEP_SUMMARY"
+            cat ozon/norden-price-test-AF-31646769.json >> "$GITHUB_STEP_SUMMARY"
+          fi
