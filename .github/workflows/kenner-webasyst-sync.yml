@@ -1,14 +1,10 @@
 name: Kenner Webasyst sync
 
 on:
-  schedule:
-    - cron: '0 5 * * *'
+  workflow_run:
+    workflows: ["Kenner KIT sync"]
+    types: [completed]
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'webasyst/sync_kenner_to_webasyst.py'
-      - '.github/workflows/kenner-webasyst-sync.yml'
 
 permissions:
   contents: write
@@ -19,20 +15,23 @@ concurrency:
 
 jobs:
   sync:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: Sync Kenner to Webasyst
+      - name: Sync Kenner from Yandex KIT to Webasyst
         env:
           WEBASYST_BASE_URL: https://profikompany.ru
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           KENNER_WEBASYST_WRITE_DELAY: '0.60'
         run: python webasyst/sync_kenner_to_webasyst.py
       - name: Commit sync report
