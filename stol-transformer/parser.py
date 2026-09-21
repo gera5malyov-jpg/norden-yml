@@ -36,6 +36,10 @@ PRICE_RE = re.compile(r"(?<!\d)(\d{1,3}(?:[\s\u00a0]\d{3})+|\d{4,7})(?:[.,](\d{1
 SKU_LABEL_RE = re.compile(r"(?:артикул|арт\.?|sku|код\s*(?:товара|модели)?|vendor\s*code)\s*[:№#-]*\s*([A-Za-zА-Яа-я0-9._/\-]+)", re.I)
 STOCK_RE = re.compile(r"(?:остат(?:ок|ки)|наличие|в наличии|на складе)\s*[:\-]?\s*([^\n|;]{1,80})", re.I)
 PRODUCT_HINT_RE = re.compile(r"(?:товар|product|stol-transformer|стол-трансформер|стул|кресло|стол)", re.I)
+WHOLESALE_LABEL_RE = re.compile(r"(?:оптов(?:ая|ой|ую)?\s*цена|опт\.?|закупочн(?:ая|ой|ую)?\s*цена|закупка|дилерск(?:ая|ой)\s*цена)", re.I)
+RETAIL_LABEL_RE = re.compile(r"(?:розничн(?:ая|ой|ую)?\s*цена|розница|ррц|цена\s*для\s*(?:покупателя|клиента)|retail)", re.I)
+PRICE_CHARACTERISTIC_RE = re.compile(r"(?:цена|опт|закуп|рознич|ррц|price)", re.I)
+URL_SKU_RE = re.compile(r"(?:^|[-_/])([A-ZА-Я]{1,12}\d{2,}[A-ZА-Я0-9]*)/?$", re.I)
 SKIP_EXT = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".pdf", ".zip", ".rar", ".css", ".js", ".xml"}
 SKIP_PATH_PARTS = ("/cart", "/basket", "/checkout", "/login", "/logout", "/registration", "/search", "/contacts", "/oplata", "/dostav", "/video")
 
@@ -93,11 +97,16 @@ class Product:
     url: str
     name: str
     sku: str = ""
-    price: str = ""
+    price: str = ""  # compatibility alias: same value as retail_price
+    retail_price: str = ""
+    purchase_price: str = ""
     old_price: str = ""
     stock: str = ""
     brand: str = ""
     category: str = ""
+    model: str = ""
+    color: str = ""
+    support_color: str = ""
     description: str = ""
     images: list[str] | None = None
     characteristics: dict[str, str] | None = None
@@ -219,6 +228,7 @@ class Parser:
                     name=clean_text(str(obj.get("name") or "")),
                     sku=clean_text(str(obj.get("sku") or obj.get("mpn") or "")),
                     price=price,
+                    retail_price=price,
                     stock=stock,
                     brand=clean_text(str(brand)),
                     description=clean_text(str(obj.get("description") or "")),
@@ -228,25 +238,103 @@ class Parser:
 
     def extract_characteristics(self, soup: BeautifulSoup) -> dict[str, str]:
         result: dict[str, str] = {}
+
+        def store(key: str, value: str) -> None:
+            key, value = clean_text(key).rstrip(":"), clean_text(value)
+            if not key or not value or len(key) > 100:
+                return
+            # Цены — отдельные коммерческие поля, а не характеристики товара.
+            # Особенно purchase_price/оптовую цену никогда не выгружаем как характеристику.
+            if PRICE_CHARACTERISTIC_RE.search(key):
+                return
+            result.setdefault(key, value)
+
         for table in soup.find_all("table"):
             for row in table.find_all("tr"):
                 cells = [clean_text(c.get_text(" ", strip=True)) for c in row.find_all(["th", "td"])]
-                if len(cells) >= 2 and cells[0] and cells[1] and len(cells[0]) <= 100:
-                    result.setdefault(cells[0].rstrip(":"), cells[1])
+                if len(cells) >= 2:
+                    store(cells[0], cells[1])
         for dl in soup.find_all("dl"):
             for dt in dl.find_all("dt"):
                 dd = dt.find_next_sibling("dd")
                 if dd:
-                    k, v = clean_text(dt.get_text(" ", strip=True)), clean_text(dd.get_text(" ", strip=True))
-                    if k and v:
-                        result.setdefault(k.rstrip(":"), v)
+                    store(dt.get_text(" ", strip=True), dd.get_text(" ", strip=True))
         for node in soup.select(".characteristics li, .chars li, .properties li, .specifications li, [class*='character'] li, [class*='property'] li"):
             text = clean_text(node.get_text(" ", strip=True))
             if ":" in text:
                 k, v = map(clean_text, text.split(":", 1))
-                if k and v and len(k) <= 100:
-                    result.setdefault(k, v)
+                store(k, v)
+
+        # Частый шаблон защищённых каталогов: отдельные label/value div.
+        for row in soup.select("[class*='character'] [class*='row'], [class*='property'] [class*='row'], [class*='spec'] [class*='row']"):
+            cells = [clean_text(x.get_text(" ", strip=True)) for x in row.find_all(recursive=False)]
+            cells = [x for x in cells if x]
+            if len(cells) >= 2:
+                store(cells[0], cells[1])
         return result
+
+    @staticmethod
+    def sku_from_url(page_url: str) -> str:
+        slug = urlparse(page_url).path.rstrip("/")
+        m = URL_SKU_RE.search(slug)
+        return clean_text(m.group(1)) if m else ""
+
+    @staticmethod
+    def characteristic(chars: dict[str, str], *patterns: str) -> str:
+        for key, value in chars.items():
+            if any(re.search(pattern, key, re.I) for pattern in patterns):
+                return clean_text(value)
+        return ""
+
+    def extract_price_fields(self, soup: BeautifulSoup) -> tuple[str, str, list[str]]:
+        """Return (retail_price, purchase_price, raw_prices).
+
+        Wholesale/purchase price is intentionally kept outside characteristics.
+        """
+        candidates: list[tuple[str, float]] = []
+
+        # Prefer compact containers/rows: label + amount are usually siblings.
+        selectors = "tr, li, dt, dd, [class*='price'], [class*='cost'], [class*='row'], [class*='field']"
+        seen_text: set[str] = set()
+        for node in soup.select(selectors):
+            text = clean_text(node.get_text(" ", strip=True))
+            if not text or text in seen_text or len(text) > 500:
+                continue
+            seen_text.add(text)
+            for m in PRICE_RE.finditer(text):
+                value = parse_price_text(m.group(0))
+                if value is not None:
+                    candidates.append((text, value))
+
+        full_text = clean_text(soup.get_text("\n", strip=True))
+        raw_prices = list(dict.fromkeys(clean_text(m.group(0)) for m in PRICE_RE.finditer(full_text)))[:50]
+
+        retail = ""
+        purchase = ""
+        for text, value in candidates:
+            if not purchase and WHOLESALE_LABEL_RE.search(text):
+                purchase = price_to_str(value)
+            if not retail and RETAIL_LABEL_RE.search(text):
+                retail = price_to_str(value)
+
+        # Regex fallback for label followed by the amount in the page text.
+        def labeled(pattern: re.Pattern[str]) -> str:
+            m = re.search(pattern.pattern + r"[^\d]{0,80}" + PRICE_RE.pattern, full_text, re.I)
+            if not m:
+                return ""
+            pm = PRICE_RE.search(m.group(0))
+            return price_to_str(parse_price_text(pm.group(0))) if pm else ""
+
+        purchase = purchase or labeled(WHOLESALE_LABEL_RE)
+        retail = retail or labeled(RETAIL_LABEL_RE)
+
+        # Structured retail price (public/RRP) is safe as fallback only for retail.
+        if not retail:
+            meta_price = soup.select_one("meta[itemprop='price']")
+            if meta_price and meta_price.get("content"):
+                retail = clean_text(str(meta_price.get("content")))
+
+        return retail, purchase, raw_prices
 
     def extract_variants(self, soup: BeautifulSoup) -> dict[str, list[str]]:
         variants: dict[str, list[str]] = {}
@@ -282,7 +370,9 @@ class Parser:
             u = meta.get("content")
             if u:
                 images.append(urljoin(page_url, str(u)))
-        selectors = "main img, article img, [class*='product'] img, [class*='gallery'] img, [class*='slider'] img"
+        # Только изображения, относящиеся к конкретной карточке товара.
+        # Не собираем все картинки из <main>, чтобы не подмешать баннеры/логотипы/соседние товары.
+        selectors = "[itemprop='image'], [class*='product'] img, [class*='gallery'] img, [class*='slider'] img, [class*='photo'] img"
         for img in soup.select(selectors):
             for attr in ("data-src", "data-original", "data-lazy", "src"):
                 u = img.get(attr)
@@ -305,24 +395,18 @@ class Parser:
             return None
 
         full_text = clean_text(soup.get_text("\n", strip=True))
-        prices: list[str] = []
-        for node in soup.select("[itemprop='price'], [class*='price'], [id*='price']"):
-            txt = clean_text(str(node.get("content") or node.get_text(" ", strip=True)))
-            if txt and parse_price_text(txt) is not None:
-                prices.append(txt)
-        for m in PRICE_RE.finditer(full_text):
-            prices.append(clean_text(m.group(0)))
-        prices = list(dict.fromkeys(prices))[:20]
+        retail_price, purchase_price, prices = self.extract_price_fields(soup)
 
-        price = ""
-        meta_price = soup.select_one("meta[itemprop='price']")
-        if meta_price and meta_price.get("content"):
-            price = clean_text(str(meta_price.get("content")))
-        elif jsonld and jsonld[0].price:
-            price = jsonld[0].price
-        elif prices:
-            v = parse_price_text(prices[0])
-            price = price_to_str(v) if v is not None else prices[0]
+        if not retail_price and jsonld and jsonld[0].retail_price:
+            retail_price = jsonld[0].retail_price
+        if not retail_price and prices:
+            # Только последний fallback: первая найденная цена считается розничной,
+            # если на странице нет явной пометки "оптовая/закупочная".
+            first_price = parse_price_text(prices[0])
+            if first_price is not None and not WHOLESALE_LABEL_RE.search(full_text):
+                retail_price = price_to_str(first_price)
+
+        price = retail_price
 
         old_price = ""
         for node in soup.select("[class*='old-price'], [class*='old_price'], [class*='price-old'], del, s"):
@@ -336,6 +420,8 @@ class Parser:
         sku = sku_match.group(1) if sku_match else ""
         if not sku and jsonld:
             sku = jsonld[0].sku
+        if not sku:
+            sku = self.sku_from_url(page_url)
 
         chars = self.extract_characteristics(soup)
         if not sku:
@@ -353,6 +439,14 @@ class Parser:
                 break
         if not brand and jsonld:
             brand = jsonld[0].brand
+
+        color = self.characteristic(chars, r"^цвет$", r"цвет.*столеш", r"декор")
+        support_color = self.characteristic(chars, r"цвет.*опор", r"цвет.*нож")
+        model = self.characteristic(chars, r"^модель$", r"серия", r"коллекц")
+        if not model:
+            # Для примера "... LEVMAR Accord R D95S53 Белый мрамор ...":
+            # базовая модель остаётся в name, а цвет/артикул сохраняются отдельными полями.
+            model = re.sub(r"\s*\[[^\]]+\]\s*$", "", title).strip()
 
         desc_node = soup.select_one("[itemprop='description'], .description, .product-description, [class*='description']")
         description = clean_text(desc_node.get_text("\n", strip=True)) if desc_node else ""
@@ -375,10 +469,15 @@ class Parser:
             name=title,
             sku=clean_text(sku),
             price=clean_text(price),
+            retail_price=clean_text(retail_price),
+            purchase_price=clean_text(purchase_price),
             old_price=clean_text(old_price),
             stock=stock,
             brand=brand,
             category=category_hint,
+            model=model,
+            color=color,
+            support_color=support_color,
             description=description,
             images=images,
             characteristics=chars,
@@ -434,24 +533,44 @@ class Parser:
                 if not url:
                     url = page_url
                 text = clean_text(card.get_text(" ", strip=True))
-                pval = parse_price_text(text)
                 sku_match = SKU_LABEL_RE.search(text)
+                sku = sku_match.group(1) if sku_match else self.sku_from_url(url)
                 stock_match = STOCK_RE.search(text)
+
+                card_prices = [clean_text(m.group(0)) for m in PRICE_RE.finditer(text)]
+                retail_price = ""
+                purchase_price = ""
+                for raw in card_prices:
+                    value = parse_price_text(raw)
+                    if value is None:
+                        continue
+                    pos = text.find(raw)
+                    context = text[max(0, pos - 100):pos + len(raw) + 30]
+                    if not purchase_price and WHOLESALE_LABEL_RE.search(context):
+                        purchase_price = price_to_str(value)
+                    if not retail_price and RETAIL_LABEL_RE.search(context):
+                        retail_price = price_to_str(value)
+                if not retail_price and card_prices and not WHOLESALE_LABEL_RE.search(text):
+                    value = parse_price_text(card_prices[0])
+                    retail_price = price_to_str(value) if value is not None else ""
+
                 images = []
                 img = card.find("img")
                 if img:
                     src = img.get("data-src") or img.get("src")
                     if src:
                         images = [urljoin(page_url, str(src))]
-                if pval is not None or sku_match:
+                if retail_price or purchase_price or sku:
                     products.append(Product(
                         url=url,
                         name=name,
-                        sku=sku_match.group(1) if sku_match else "",
-                        price=price_to_str(pval) if pval is not None else "",
+                        sku=sku,
+                        price=retail_price,
+                        retail_price=retail_price,
+                        purchase_price=purchase_price,
                         stock=clean_text(stock_match.group(1)) if stock_match else "",
                         images=images,
-                        raw_prices=[m.group(0) for m in PRICE_RE.finditer(text)][:10],
+                        raw_prices=card_prices[:20],
                     ))
         return products
 
@@ -508,7 +627,7 @@ class Parser:
                 merged[key] = p
                 continue
             old = merged[key]
-            for field in ("name", "sku", "price", "old_price", "stock", "brand", "category", "description"):
+            for field in ("name", "sku", "price", "retail_price", "purchase_price", "old_price", "stock", "brand", "category", "model", "color", "support_color", "description"):
                 if not getattr(old, field) and getattr(p, field):
                     setattr(old, field, getattr(p, field))
             old.images = list(dict.fromkeys((old.images or []) + (p.images or [])))
@@ -535,7 +654,7 @@ def save(products: list[Product], parser: Parser) -> dict[str, Any]:
     }
     PRODUCT_JSON.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    fields = ["sku", "name", "price", "old_price", "stock", "brand", "category", "url", "description", "images", "characteristics", "variants"]
+    fields = ["sku", "name", "model", "color", "support_color", "retail_price", "purchase_price", "old_price", "stock", "brand", "category", "url", "description", "images", "characteristics", "variants"]
     with PRODUCT_CSV.open("w", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields, delimiter=";")
         writer.writeheader()
@@ -543,7 +662,11 @@ def save(products: list[Product], parser: Parser) -> dict[str, Any]:
             writer.writerow({
                 "sku": p.sku,
                 "name": p.name,
-                "price": p.price,
+                "model": p.model,
+                "color": p.color,
+                "support_color": p.support_color,
+                "retail_price": p.retail_price,
+                "purchase_price": p.purchase_price,
                 "old_price": p.old_price,
                 "stock": p.stock,
                 "brand": p.brand,
@@ -562,7 +685,9 @@ def save(products: list[Product], parser: Parser) -> dict[str, Any]:
         "auth_mode": parser.auth_mode,
         "products": len(products),
         "with_sku": sum(bool(p.sku) for p in products),
-        "with_price": sum(bool(p.price) for p in products),
+        "with_retail_price": sum(bool(p.retail_price) for p in products),
+        "with_purchase_price": sum(bool(p.purchase_price) for p in products),
+        "with_color": sum(bool(p.color) for p in products),
         "with_stock": sum(bool(p.stock) for p in products),
         "with_images": sum(bool(p.images) for p in products),
         "pages_fetched": parser.pages_fetched,
