@@ -1,0 +1,325 @@
+name: Ozon mass enable and clean actions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-mass-enable-clean-actions.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Install requests
+        run: python -m pip install requests
+
+      - name: Enable tools, clean promos, set promo qty 1
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json, os, time, requests
+          from collections import defaultdict
+
+          BASE="https://api-seller.ozon.ru"
+          H={
+              "Client-Id":os.environ["OZON_CLIENT_ID"],
+              "Api-Key":os.environ["OZON_API_KEY"],
+              "Content-Type":"application/json",
+          }
+          S=requests.Session(); S.headers.update(H)
+
+          def call(method,path,body=None, allow_error=False):
+              last=None
+              for a in range(15):
+                  r=S.request(method,BASE+path,json=body,timeout=180)
+                  last=r
+                  if r.status_code==429:
+                      time.sleep(float(r.headers.get("Retry-After") or min(30,1+a))); continue
+                  if r.status_code>=500:
+                      time.sleep(min(30,1+a)); continue
+                  try: data=r.json() if r.content else {}
+                  except Exception: data={"raw":r.text}
+                  if r.status_code>=400 and not allow_error:
+                      print("HTTP_ERROR",method,path,r.status_code,json.dumps(data,ensure_ascii=False)[:2500])
+                  return data,r
+              return {},last
+
+          def chunks(seq,n):
+              for i in range(0,len(seq),n):
+                  yield seq[i:i+n]
+
+          # Load every product price record.
+          items=[]; seen=set(); cursor=""
+          while True:
+              d,r=call("POST","/v5/product/info/prices",{
+                  "cursor":cursor,"filter":{"visibility":"ALL"},"limit":1000
+              })
+              rows=(d or {}).get("items") or []
+              for x in rows:
+                  pid=x.get("product_id")
+                  if pid is not None and pid not in seen:
+                      seen.add(pid); items.append(x)
+              nxt=(d or {}).get("cursor") or ""
+              if not rows or not nxt or nxt==cursor: break
+              cursor=nxt
+
+          by_pid={int(x["product_id"]):x for x in items}
+          safe=[]
+          no_min=[]
+          disabled=[]
+          for x in items:
+              p=x.get("price") or {}
+              try: minp=float(p.get("min_price") or 0)
+              except: minp=0
+              row={
+                  "offer_id":x.get("offer_id"),
+                  "product_id":int(x["product_id"]),
+                  "min_price":minp,
+                  "auto_action_enabled":bool(p.get("auto_action_enabled")),
+                  "auto_add_enabled":bool(p.get("auto_add_to_ozon_actions_list_enabled")),
+              }
+              if minp>0: safe.append(row)
+              else: no_min.append(row)
+              if not row["auto_action_enabled"] or not row["auto_add_enabled"]:
+                  disabled.append(row)
+
+          report={
+              "products_total":len(items),
+              "safe_with_min_price":len(safe),
+              "without_min_price":len(no_min),
+              "disabled_before":len(disabled),
+              "flags_updated":0,
+              "flags_failed":[],
+              "timer_batches_ok":0,
+              "timer_batches_failed":0,
+              "strategy_id":None,
+              "strategy_add_failed_count":0,
+              "strategy_add_errors":[],
+              "removed_below_min":0,
+              "remove_rejected":[],
+              "stock_qty_set_1":0,
+              "stock_qty_rejected":[],
+              "action_details":[],
+          }
+
+          # IMPORTANT SAFETY RULE:
+          # Dynamic promo/price tools are enabled only when min_price > 0.
+          # This avoids exposing the five products without any price floor.
+          to_enable=[x for x in safe if not x["auto_action_enabled"] or not x["auto_add_enabled"]]
+
+          # First probe one item using ONLY control flags -- no price fields, no declared_price.
+          if to_enable:
+              probe=to_enable[0]
+              pd,pr=call("POST","/v1/product/import/prices",{
+                  "prices":[{
+                      "offer_id":probe["offer_id"],
+                      "auto_action_enabled":"ENABLED",
+                      "auto_add_to_ozon_actions_list_enabled":"ENABLED",
+                      "min_price_for_auto_actions_enabled":True
+                  }]
+              })
+              pres=(pd or {}).get("result") or []
+              probe_ok=bool(pres and pres[0].get("updated") is True)
+              print("FLAGS_PROBE",json.dumps(pd,ensure_ascii=False,sort_keys=True))
+              if probe_ok:
+                  report["flags_updated"] += 1
+                  rest=to_enable[1:]
+                  for batch in chunks(rest,500):
+                      payload={"prices":[{
+                          "offer_id":x["offer_id"],
+                          "auto_action_enabled":"ENABLED",
+                          "auto_add_to_ozon_actions_list_enabled":"ENABLED",
+                          "min_price_for_auto_actions_enabled":True
+                      } for x in batch]}
+                      d,r=call("POST","/v1/product/import/prices",payload)
+                      for rr in (d or {}).get("result") or []:
+                          if rr.get("updated") is True:
+                              report["flags_updated"] += 1
+                          else:
+                              report["flags_failed"].append({
+                                  "offer_id":rr.get("offer_id"),
+                                  "product_id":rr.get("product_id"),
+                                  "errors":rr.get("errors"),
+                              })
+              else:
+                  report["flags_failed"].append({
+                      "offer_id":probe["offer_id"],
+                      "product_id":probe["product_id"],
+                      "errors":pres[0].get("errors") if pres else pd,
+                      "note":"Probe failed, bulk flag update was not attempted to avoid unintended financial changes."
+                  })
+
+          # Refresh/extend minimum-price protection timer for every product with a real floor.
+          safe_pids=[str(x["product_id"]) for x in safe]
+          for batch in chunks(safe_pids,1000):
+              d,r=call("POST","/v1/product/action/timer/update",{"product_ids":batch})
+              if r is not None and r.status_code<400: report["timer_batches_ok"] += 1
+              else: report["timer_batches_failed"] += 1
+
+          # Enable system pricing strategy and attach every product with min_price > 0.
+          sl,sr=call("POST","/v1/pricing-strategy/list",{"page":1,"limit":49})
+          systems=[x for x in (sl or {}).get("strategies") or [] if x.get("type")=="MIN_EXT_PRICE"]
+          chosen=next((x for x in systems if x.get("enabled") is True), systems[0] if systems else None)
+          if chosen:
+              sid=str(chosen["id"]); report["strategy_id"]=sid
+              if not chosen.get("enabled"):
+                  call("POST","/v1/pricing-strategy/status",{"strategy_id":sid,"enabled":True})
+              for batch in chunks(safe_pids,500):
+                  d,r=call("POST","/v1/pricing-strategy/products/add",{
+                      "strategy_id":sid,"product_id":batch
+                  })
+                  result=(d or {}).get("result") or {}
+                  failed=int(result.get("failed_product_count") or 0)
+                  report["strategy_add_failed_count"] += failed
+                  errs=result.get("errors") or []
+                  if errs: report["strategy_add_errors"].extend(errs[:100])
+          else:
+              report["strategy_add_errors"].append({"reason":"System MIN_EXT_PRICE strategy not found"})
+
+          # Read actions and remove every participant whose action price is below current min_price.
+          actions=(call("GET","/v1/actions")[0] or {}).get("result") or []
+          for action in actions:
+              aid=action.get("id")
+              atype=action.get("action_type")
+              title=action.get("title")
+              participants=[]
+              offset=0
+              while aid:
+                  d,r=call("POST","/v1/actions/products",{
+                      "action_id":aid,"limit":1000,"offset":offset
+                  })
+                  rows=((d or {}).get("result") or {}).get("products") or []
+                  participants.extend(rows)
+                  if len(rows)<1000: break
+                  offset += 1000
+
+              remove_ids=[]
+              keep=[]
+              for pr in participants:
+                  pid=int(pr.get("id") or pr.get("product_id") or 0)
+                  info=by_pid.get(pid)
+                  minp=float(((info or {}).get("price") or {}).get("min_price") or 0)
+                  ap=float(pr.get("action_price") or 0)
+                  if minp>0 and ap>0 and ap<minp:
+                      remove_ids.append(pid)
+                  else:
+                      keep.append(pr)
+
+              removed_ok=0
+              rejected=[]
+              for batch in chunks(remove_ids,500):
+                  d,r=call("POST","/v1/actions/products/deactivate",{
+                      "action_id":aid,"product_ids":batch
+                  })
+                  res=(d or {}).get("result") or {}
+                  removed_ok += len(res.get("product_ids") or [])
+                  rejected.extend(res.get("rejected") or [])
+              report["removed_below_min"] += removed_ok
+              if rejected: report["remove_rejected"].extend(
+                  [{"action_id":aid,"action_title":title,**x} for x in rejected[:100]]
+              )
+
+              # Re-read participants after removals before forcing STOCK_DISCOUNT quantity=1.
+              remaining=[]
+              offset=0
+              while aid and atype=="STOCK_DISCOUNT":
+                  d,r=call("POST","/v1/actions/products",{
+                      "action_id":aid,"limit":1000,"offset":offset
+                  })
+                  rows=((d or {}).get("result") or {}).get("products") or []
+                  remaining.extend(rows)
+                  if len(rows)<1000: break
+                  offset += 1000
+
+              qty_ok=0
+              qty_rej=[]
+              if atype=="STOCK_DISCOUNT" and remaining:
+                  # Updating an already-participating stock-discount item through activate
+                  # keeps its action price and sets the promotion quantity.
+                  for batch in chunks(remaining,100):
+                      products=[]
+                      for pr in batch:
+                          pid=int(pr.get("id") or pr.get("product_id") or 0)
+                          ap=float(pr.get("action_price") or 0)
+                          if pid and ap>0:
+                              products.append({"product_id":pid,"action_price":ap,"stock":1})
+                      if not products: continue
+                      d,r=call("POST","/v1/actions/products/activate",{
+                          "action_id":aid,"products":products
+                      })
+                      res=(d or {}).get("result") or {}
+                      qty_ok += len(res.get("product_ids") or [])
+                      qty_rej.extend(res.get("rejected") or [])
+                  report["stock_qty_set_1"] += qty_ok
+                  if qty_rej: report["stock_qty_rejected"].extend(
+                      [{"action_id":aid,"action_title":title,**x} for x in qty_rej[:100]]
+                  )
+
+              report["action_details"].append({
+                  "action_id":aid,"title":title,"type":atype,
+                  "participants_before":len(participants),
+                  "below_min_found":len(remove_ids),
+                  "removed_ok":removed_ok,
+                  "remaining_stock_discount":len(remaining) if atype=="STOCK_DISCOUNT" else None,
+                  "qty_1_ok":qty_ok if atype=="STOCK_DISCOUNT" else None,
+              })
+
+          # Final verification snapshot.
+          # Count below-min participants remaining and flags status after propagation.
+          time.sleep(5)
+          final_items=[]; cursor=""; final_seen=set()
+          while True:
+              d,r=call("POST","/v5/product/info/prices",{
+                  "cursor":cursor,"filter":{"visibility":"ALL"},"limit":1000
+              })
+              rows=(d or {}).get("items") or []
+              for x in rows:
+                  pid=x.get("product_id")
+                  if pid is not None and pid not in final_seen:
+                      final_seen.add(pid); final_items.append(x)
+              nxt=(d or {}).get("cursor") or ""
+              if not rows or not nxt or nxt==cursor: break
+              cursor=nxt
+          final_by={int(x["product_id"]):x for x in final_items}
+          report["final_auto_action_disabled_with_min"]=sum(
+              1 for x in final_items
+              if float((x.get("price") or {}).get("min_price") or 0)>0
+              and not (x.get("price") or {}).get("auto_action_enabled")
+          )
+          report["final_auto_add_disabled_with_min"]=sum(
+              1 for x in final_items
+              if float((x.get("price") or {}).get("min_price") or 0)>0
+              and not (x.get("price") or {}).get("auto_add_to_ozon_actions_list_enabled")
+          )
+          report["without_min_price_offers"]=[x["offer_id"] for x in no_min]
+
+          final_below=[]
+          for action in actions:
+              aid=action.get("id"); offset=0
+              while aid:
+                  d,r=call("POST","/v1/actions/products",{"action_id":aid,"limit":1000,"offset":offset})
+                  rows=((d or {}).get("result") or {}).get("products") or []
+                  for pr in rows:
+                      pid=int(pr.get("id") or pr.get("product_id") or 0)
+                      info=final_by.get(pid)
+                      minp=float(((info or {}).get("price") or {}).get("min_price") or 0)
+                      ap=float(pr.get("action_price") or 0)
+                      if minp>0 and ap>0 and ap<minp:
+                          final_below.append({
+                              "action_id":aid,"product_id":pid,
+                              "offer_id":(info or {}).get("offer_id"),
+                              "action_price":ap,"min_price":minp,
+                          })
+                  if len(rows)<1000: break
+                  offset+=1000
+          report["final_below_min_count"]=len(final_below)
+          report["final_below_min_sample"]=final_below[:50]
+
+          print("FINAL_REPORT_JSON",json.dumps(report,ensure_ascii=False,sort_keys=True))
+          PY
