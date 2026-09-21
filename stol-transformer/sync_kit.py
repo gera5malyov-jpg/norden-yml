@@ -302,16 +302,7 @@ def run():
                         "sku": s(full.get("sku")),
                         "image_hash": "",
                     }
-            for start in range(0, len(stock_rows), 1000):
-        batch = stock_rows[start:start + 1000]
-        kit.request(
-            "POST",
-            "/v1/variants/stocks/bulk_update",
-            body={"items": batch},
-        )
-        report["stock_updates"] += len(batch)
-
-    save_mapping(mapping)
+            save_mapping(mapping)
         except Exception as exc:
             report["warnings"].append("Mapping rebuild warning: " + str(exc)[:500])
 
@@ -517,6 +508,15 @@ def run():
             body={"items": batch},
         )
         report["price_updates"] += len(batch)
+
+    for start in range(0, len(stock_rows), 1000):
+        batch = stock_rows[start:start + 1000]
+        kit.request(
+            "POST",
+            "/v1/variants/stocks/bulk_update",
+            body={"items": batch},
+        )
+        report["stock_updates"] += len(batch)
 
     save_mapping(mapping)
     report["mapped_products"] = len(mapping["variants"])
