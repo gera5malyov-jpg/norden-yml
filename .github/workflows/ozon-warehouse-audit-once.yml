@@ -1,0 +1,49 @@
+name: Ozon warehouse audit once
+
+on:
+  push:
+    paths:
+      - ".github/workflows/ozon-warehouse-audit-once.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - name: List Ozon warehouses
+        shell: bash
+        run: |
+          set -euo pipefail
+          code=$(curl --silent --show-error --output /tmp/warehouses.json --write-out "%{http_code}" \
+            --request POST "https://api-seller.ozon.ru/v1/warehouse/list" \
+            --header "Client-Id: $OZON_CLIENT_ID" \
+            --header "Api-Key: $OZON_API_KEY" \
+            --header "Content-Type: application/json" \
+            --data '{}')
+          echo "HTTP $code"
+          if [ "$code" != "200" ]; then
+            cat /tmp/warehouses.json
+            exit 1
+          fi
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/warehouses.json'))
+          rows=[]
+          for w in d.get('result',[]):
+              rows.append({
+                  'warehouse_id':w.get('warehouse_id'),
+                  'name':w.get('name'),
+                  'is_rfbs':w.get('is_rfbs'),
+                  'is_kgt':w.get('is_kgt'),
+                  'status':w.get('status'),
+                  'working_days':w.get('working_days'),
+                  'first_mile_type':w.get('first_mile_type'),
+              })
+          print(json.dumps(rows, ensure_ascii=False, indent=2))
+          PY
