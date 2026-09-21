@@ -1,0 +1,196 @@
+name: Archive 4S KIT duplicates
+
+on:
+  workflow_run:
+    workflows: ["Audit 4S KIT exact duplicates"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kit-api-write
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Архивировать только более новые точные дубли
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import importlib.util, json, os, pathlib, time
+          from datetime import datetime, timezone
+
+          p=pathlib.Path('4s-kit/sync_4s_kit.py')
+          spec=importlib.util.spec_from_file_location('sync4s',p)
+          mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+
+          audit_path=pathlib.Path('4s-kit/duplicate_audit.json')
+          if not audit_path.exists():
+              raise RuntimeError('Нет файла 4s-kit/duplicate_audit.json')
+          audit=json.loads(audit_path.read_text(encoding='utf-8'))
+
+          kit=mod.Kit(os.environ['YANDEX_KIT_TOKEN'])
+          chars=kit.characteristics()
+          code_site_id,article_id=mod.resolve_special_characteristics(chars)
+
+          report={
+              'started_at':datetime.now(timezone.utc).isoformat(),
+              'duplicate_groups_found':audit.get('exact_duplicate_groups',0),
+              'duplicate_extra_variants':audit.get('duplicate_extra_variants',0),
+              'archived':0,
+              'already_archived':0,
+              'skipped_unsafe':0,
+              'errors_count':0,
+              'archived_items':[],
+              'errors':[],
+          }
+
+          def safe_get(vid):
+              return kit.get_variant(vid)
+
+          for group in audit.get('groups') or []:
+              canonical_meta=group.get('canonical') or {}
+              canonical_id=str(canonical_meta.get('id') or '').strip()
+              extras=group.get('duplicates') or []
+              if not canonical_id or not extras:
+                  continue
+
+              try:
+                  canonical=safe_get(canonical_id)
+              except Exception as exc:
+                  report['errors'].append({
+                      'name':group.get('name'),
+                      'code_site':group.get('code_site'),
+                      'message':f'Не удалось прочитать старую карточку: {exc}',
+                  })
+                  continue
+
+              canonical_status=str(canonical.get('status') or '').upper()
+              canonical_code=mod.norm(mod.char_value(canonical,code_site_id))
+              canonical_name=mod.norm(canonical.get('name'))
+              canonical_kit=canonical.get('kit_id')
+              try:
+                  canonical_kit_num=int(canonical_kit)
+              except Exception:
+                  canonical_kit_num=None
+
+              if canonical_status=='ARCHIVED':
+                  report['errors'].append({
+                      'name':group.get('name'),
+                      'code_site':group.get('code_site'),
+                      'message':'Старая карточка неожиданно уже в архиве; группа пропущена',
+                  })
+                  continue
+
+              for extra_meta in extras:
+                  vid=str(extra_meta.get('id') or '').strip()
+                  if not vid or vid==canonical_id:
+                      continue
+                  try:
+                      extra=safe_get(vid)
+                      status=str(extra.get('status') or '').upper()
+                      if status=='ARCHIVED':
+                          report['already_archived']+=1
+                          continue
+
+                      extra_code=mod.norm(mod.char_value(extra,code_site_id))
+                      extra_name=mod.norm(extra.get('name'))
+                      try:
+                          extra_kit_num=int(extra.get('kit_id'))
+                      except Exception:
+                          extra_kit_num=None
+
+                      safe=(
+                          mod.is_brand(canonical.get('brand'))
+                          and mod.is_brand(extra.get('brand'))
+                          and canonical_code
+                          and canonical_code==extra_code
+                          and canonical_name
+                          and canonical_name==extra_name
+                          and canonical_kit_num is not None
+                          and extra_kit_num is not None
+                          and extra_kit_num>canonical_kit_num
+                      )
+                      if not safe:
+                          report['skipped_unsafe']+=1
+                          report['errors'].append({
+                              'name':group.get('name'),
+                              'code_site':group.get('code_site'),
+                              'canonical_kit_id':canonical.get('kit_id'),
+                              'duplicate_kit_id':extra.get('kit_id'),
+                              'message':'Проверка безопасности не подтвердила, что карточка является более новым точным дублем',
+                          })
+                          continue
+
+                      resp=kit.request('POST',f'/v1/variants/{vid}/archive')
+                      time.sleep(0.6)
+                      after=safe_get(vid)
+                      if str(after.get('status') or '').upper()!='ARCHIVED':
+                          raise RuntimeError('KIT не подтвердил статус ARCHIVED после запроса')
+
+                      report['archived']+=1
+                      report['archived_items'].append({
+                          'code_site':mod.char_value(canonical,code_site_id),
+                          'name':mod.s(canonical.get('name')),
+                          'kept_kit_id':mod.s(canonical.get('kit_id')),
+                          'archived_kit_id':mod.s(extra.get('kit_id')),
+                          'archived_sku':mod.s(extra.get('sku')),
+                      })
+                      print(
+                          'АРХИВИРОВАН ДУБЛЬ:',
+                          mod.s(extra.get('sku')),
+                          'оставлена старая:',
+                          mod.s(canonical.get('sku')),
+                          flush=True,
+                      )
+                  except Exception as exc:
+                      report['errors'].append({
+                          'name':group.get('name'),
+                          'code_site':group.get('code_site'),
+                          'duplicate_id':vid,
+                          'message':str(exc)[:700],
+                      })
+
+          report['errors_count']=len(report['errors'])
+          report['finished_at']=datetime.now(timezone.utc).isoformat()
+          out=pathlib.Path('4s-kit/archive_duplicates_report.json')
+          out.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({
+              'групп_дублей':report['duplicate_groups_found'],
+              'лишних_карточек':report['duplicate_extra_variants'],
+              'архивировано':report['archived'],
+              'уже_в_архиве':report['already_archived'],
+              'пропущено_небезопасных':report['skipped_unsafe'],
+              'ошибок':report['errors_count'],
+          },ensure_ascii=False,indent=2))
+
+          if report['errors_count']:
+              raise RuntimeError(
+                  f"Архивация завершилась не полностью: ошибок {report['errors_count']}"
+              )
+          PY
+      - name: Сохранить отчёт архивации
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 4s-kit/archive_duplicates_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save 4 Seasons duplicate archive report"
+            git pull --rebase origin main
+            git push
+          fi
