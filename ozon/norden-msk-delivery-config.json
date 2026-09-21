@@ -1,0 +1,195 @@
+{
+  "warehouse": {
+    "name": "Norden MSK",
+    "warehouse_id": 1020005029910180,
+    "delivery_method_id": 46440111,
+    "current_delivery_method_name": "Булки-N",
+    "delivery_service": "Easy Bulky",
+    "delivery_type": "rFBS non_integrated"
+  },
+  "service_area": {
+    "city": "Москва",
+    "region": "Московская область",
+    "coverage": "Москва и вся Московская область",
+    "working_days": [
+      "MONDAY",
+      "TUESDAY",
+      "WEDNESDAY",
+      "THURSDAY",
+      "FRIDAY"
+    ],
+    "delivery_days_min": 2,
+    "delivery_days_max": 7
+  },
+  "reference_package": {
+    "length_cm": 50,
+    "width_cm": 50,
+    "height_cm": 100,
+    "volume_m3": 0.25,
+    "weight_kg": 20,
+    "price_inside_mkad_rub": 2400
+  },
+  "pricing_rule": {
+    "description": "База 2400 ₽ для стандартной коробки ~20 кг внутри МКАД. Для других весовых диапазонов и зон сохраняется разница относительно тарифа Easy Bulky 15.01–25 кг внутри МКАД (765 ₽).",
+    "reference_easy_bulky_rate_rub": 765,
+    "formula_before_volume_surcharge": "2400 + (easy_bulky_rate_for_weight_and_zone - 765)",
+    "volume_rule": {
+      "standard_volume_m3": 0.25,
+      "additional_standard_volume_increment_percent": 30,
+      "formula": "base_tariff * (1 + 0.30 * max(0, ceil(total_volume_m3 / 0.25) - 1))"
+    }
+  },
+  "easy_bulky_source_table_rub": [
+    {
+      "weight_kg": "0-15",
+      "inside_mkad": 615,
+      "outside_mkad_to_a107": 765,
+      "beyond_a107": 1115
+    },
+    {
+      "weight_kg": "15.01-25",
+      "inside_mkad": 765,
+      "outside_mkad_to_a107": 865,
+      "beyond_a107": 1315
+    },
+    {
+      "weight_kg": "25.01-50",
+      "inside_mkad": 1015,
+      "outside_mkad_to_a107": 1215,
+      "beyond_a107": 2315
+    },
+    {
+      "weight_kg": "50.01-80",
+      "inside_mkad": 1115,
+      "outside_mkad_to_a107": 1315,
+      "beyond_a107": 2415
+    },
+    {
+      "weight_kg": "80.01-120",
+      "inside_mkad": 1215,
+      "outside_mkad_to_a107": 1415,
+      "beyond_a107": 2515
+    },
+    {
+      "weight_kg": "120.01-200",
+      "inside_mkad": 1665,
+      "outside_mkad_to_a107": 1865,
+      "beyond_a107": 2765
+    },
+    {
+      "weight_kg": "200.01-250",
+      "inside_mkad": 1815,
+      "outside_mkad_to_a107": 2015,
+      "beyond_a107": 2915
+    },
+    {
+      "weight_kg": "250.01-300",
+      "inside_mkad": 2115,
+      "outside_mkad_to_a107": 2315,
+      "beyond_a107": 3265
+    },
+    {
+      "weight_kg": "300.01-350",
+      "inside_mkad": 2415,
+      "outside_mkad_to_a107": 2665,
+      "beyond_a107": 3515
+    },
+    {
+      "weight_kg": "350.01-400",
+      "inside_mkad": 2765,
+      "outside_mkad_to_a107": 2965,
+      "beyond_a107": 3715
+    },
+    {
+      "weight_kg": "400.01-450",
+      "inside_mkad": 3065,
+      "outside_mkad_to_a107": 3265,
+      "beyond_a107": 4015
+    },
+    {
+      "weight_kg": "450.01-500",
+      "inside_mkad": 3365,
+      "outside_mkad_to_a107": 3565,
+      "beyond_a107": 4315
+    }
+  ],
+  "customer_base_tariffs_before_volume_surcharge_rub": [
+    {
+      "weight_kg": "0-15",
+      "inside_mkad": 2250,
+      "outside_mkad_to_a107": 2400,
+      "beyond_a107": 2750
+    },
+    {
+      "weight_kg": "15.01-25",
+      "inside_mkad": 2400,
+      "outside_mkad_to_a107": 2500,
+      "beyond_a107": 2950
+    },
+    {
+      "weight_kg": "25.01-50",
+      "inside_mkad": 2650,
+      "outside_mkad_to_a107": 2850,
+      "beyond_a107": 3950
+    },
+    {
+      "weight_kg": "50.01-80",
+      "inside_mkad": 2750,
+      "outside_mkad_to_a107": 2950,
+      "beyond_a107": 4050
+    },
+    {
+      "weight_kg": "80.01-120",
+      "inside_mkad": 2850,
+      "outside_mkad_to_a107": 3050,
+      "beyond_a107": 4150
+    },
+    {
+      "weight_kg": "120.01-200",
+      "inside_mkad": 3300,
+      "outside_mkad_to_a107": 3500,
+      "beyond_a107": 4400
+    },
+    {
+      "weight_kg": "200.01-250",
+      "inside_mkad": 3450,
+      "outside_mkad_to_a107": 3650,
+      "beyond_a107": 4550
+    },
+    {
+      "weight_kg": "250.01-300",
+      "inside_mkad": 3750,
+      "outside_mkad_to_a107": 3950,
+      "beyond_a107": 4900
+    },
+    {
+      "weight_kg": "300.01-350",
+      "inside_mkad": 4050,
+      "outside_mkad_to_a107": 4300,
+      "beyond_a107": 5150
+    },
+    {
+      "weight_kg": "350.01-400",
+      "inside_mkad": 4400,
+      "outside_mkad_to_a107": 4600,
+      "beyond_a107": 5350
+    },
+    {
+      "weight_kg": "400.01-450",
+      "inside_mkad": 4700,
+      "outside_mkad_to_a107": 4900,
+      "beyond_a107": 5650
+    },
+    {
+      "weight_kg": "450.01-500",
+      "inside_mkad": 5000,
+      "outside_mkad_to_a107": 5200,
+      "beyond_a107": 5950
+    }
+  ],
+  "source_notes": {
+    "pickup_from_supplier_rub": 600,
+    "mandatory_lift_rub": 300,
+    "note": "2400 ₽ — подтверждённая пользователем итоговая ориентировочная цена одной стандартной коробки ~20 кг внутри МКАД. Таблица Easy Bulky используется для относительной корректировки по весу и зоне."
+  }
+}
