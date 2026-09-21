@@ -1,7 +1,42 @@
-Traceback (most recent call last):
-  File "/home/runner/work/norden-yml/norden-yml/ozon/norden_price_test.py", line 92, in <module>
-    article = find_supplier_article()
-              ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/norden-yml/norden-yml/ozon/norden_price_test.py", line 64, in find_supplier_article
-    raise RuntimeError(f"Expected exactly one Norden mapping for {OFFER_ID}, found {len(matches)}")
-RuntimeError: Expected exactly one Norden mapping for AF-31646769, found 0
+PRECALC {"status": "ПОДГОТОВЛЕНО", "finished_at": "2026-09-21T21:54:59.950175+00:00", "offer_id": "AF-31646769", "norden_article": "RT-2031", "scheme": "rFBS", "purchase_price_github_rub": 11776.0, "purchase_source": "norden.yml", "ozon_sales_percent_rfbs": 51.0, "ozon_acquiring_current_amount_rub": 298.71, "ozon_acquiring_base_rub": 29871.0, "ozon_acquiring_effective_percent": 1.0, "acquiring_source": "Ozon acquiring / marketing_seller_price", "delivery_included": false, "target_profit_percent_of_purchase": 20.0, "minimum_profit_percent_of_purchase": 18.0, "old_ozon_price_rub": 30779.0, "old_marketing_seller_price_rub": 29871.0, "calculated_sale_price_rub": 29440, "calculated_min_price_rub": 28950}
+{
+  "status": "УСПЕШНО",
+  "finished_at": "2026-09-21T21:54:59.950175+00:00",
+  "offer_id": "AF-31646769",
+  "norden_article": "RT-2031",
+  "scheme": "rFBS",
+  "purchase_price_github_rub": 11776.0,
+  "purchase_source": "norden.yml",
+  "ozon_sales_percent_rfbs": 51.0,
+  "ozon_acquiring_current_amount_rub": 298.71,
+  "ozon_acquiring_base_rub": 29871.0,
+  "ozon_acquiring_effective_percent": 1.0,
+  "acquiring_source": "Ozon acquiring / marketing_seller_price",
+  "delivery_included": false,
+  "target_profit_percent_of_purchase": 20.0,
+  "minimum_profit_percent_of_purchase": 18.0,
+  "old_ozon_price_rub": 30779.0,
+  "old_marketing_seller_price_rub": 29871.0,
+  "calculated_sale_price_rub": 29440,
+  "calculated_min_price_rub": 28950,
+  "verified_ozon_price_rub": 29440.0,
+  "verified_ozon_min_price_rub": 28950.0,
+  "estimated_profit_after_commission_and_acquiring_rub": 2355.2,
+  "estimated_profit_at_min_price_rub": 2120.0,
+  "update_response": {
+    "result": [
+      {
+        "product_id": 5610536251,
+        "offer_id": "AF-31646769",
+        "updated": true,
+        "errors": [],
+        "warnings": [
+          {
+            "code": "strategy_enabled",
+            "message": "Чтобы изменить цену, удалите товар из стратегии ценообразования"
+          }
+        ]
+      }
+    ]
+  }
+}
