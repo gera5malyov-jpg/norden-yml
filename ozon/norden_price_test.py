@@ -158,10 +158,10 @@ payload = {
         "min_price_for_auto_actions_enabled": True,
         "net_price": str(int(round(purchase))),
         "currency_code": "RUB",
-        "declared_price": str(sale_price),
+        "declared_price": "18221",
         "vat": "0",
         "auto_action_enabled": "UNKNOWN",
-        "price_strategy_enabled": "UNKNOWN"
+        "price_strategy_enabled": "DISABLED"
     }]
 }
 update = post("/v1/product/import/prices", payload)
