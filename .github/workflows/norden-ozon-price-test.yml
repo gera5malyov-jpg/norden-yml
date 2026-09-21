@@ -24,6 +24,7 @@ jobs:
       PROFIT_PCT: '20'
       MIN_PROFIT_PCT: '18'
       ACQUIRING_FALLBACK_PCT: '2'
+      PROBE_ONLY: 'true'
 
     steps:
       - name: Checkout
