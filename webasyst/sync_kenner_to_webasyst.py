@@ -250,6 +250,8 @@ def main():
         "processed": 0,
         "created": 0,
         "updated_prices_stock": 0,
+        "summaries_updated_from_kit": 0,
+        "kit_variants_without_images": 0,
         "unchanged": 0,
         "features_created": 0,
         "feature_values_written": 0,
@@ -434,8 +436,30 @@ def main():
             stock = kit_stock_qty(variant, kit_stock_id)
 
             if matches:
-                # Existing Webasyst product: ONLY price/compare price/main stock.
+                # Existing Webasyst product:
+                # - prices/stock come from KIT;
+                # - short description image links are refreshed from KIT media.
                 product, sku_row = matches[0]
+                product_id = s(product.get("id"))
+
+                summary_changed = False
+                urls = image_urls(variant)
+                if urls:
+                    desired_summary = extimg_summary(urls)
+                    current_summary = s(product.get("summary"))
+                    if current_summary != desired_summary:
+                        wa.call(
+                            "shop.product.update",
+                            http_method="POST",
+                            params={"id": product_id},
+                            data={"summary": desired_summary},
+                        )
+                        report["summaries_updated_from_kit"] += 1
+                        summary_changed = True
+                else:
+                    # Never erase an existing summary merely because KIT has no media.
+                    report["kit_variants_without_images"] += 1
+
                 changes = {}
                 if money(sku_row.get("price")) != sale:
                     changes["price"] = money_str(sale)
@@ -453,13 +477,19 @@ def main():
                         data=changes,
                     )
                     report["updated_prices_stock"] += 1
+
+                if changes or summary_changed:
                     if len(report["sample_updates"]) < 20:
+                        fields = sorted(changes)
+                        if summary_changed:
+                            fields.append("summary_images_from_kit")
                         report["sample_updates"].append({
                             "sku": sku,
-                            "fields": sorted(changes),
+                            "fields": fields,
                             "price": money_str(sale),
                             "compare_price": money_str(compare),
                             "stock": stock,
+                            "images_in_summary": len(urls),
                         })
                 else:
                     report["unchanged"] += 1
