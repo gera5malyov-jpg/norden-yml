@@ -25,15 +25,14 @@ def post_form_json(url, params):
     with urllib.request.urlopen(req, timeout=30) as r:
         return r.status, json.loads(r.read().decode("utf-8"))
 
-status, key_info = get_json("https://api.e-bulky.ru/apiv2/testkey", {"key": API_KEY})
-print("testkey_http=", status)
+status, _ = get_json("https://api.e-bulky.ru/apiv2/testkey", {"key": API_KEY})
 print("testkey_ok=", status == 200)
 
-status, services = get_json("https://api.e-bulky.ru/apiv2/list-services", {"key": API_KEY})
-print("services_http=", status)
+status, _ = get_json("https://api.e-bulky.ru/apiv2/list-services", {"key": API_KEY})
+print("services_ok=", status == 200)
 
-status, warehouses = get_json("https://api.e-bulky.ru/apiv2/warehouses", {"key": API_KEY, "page": 1})
-print("warehouses_http=", status)
+status, _ = get_json("https://api.e-bulky.ru/apiv2/warehouses", {"key": API_KEY, "page": 1})
+print("warehouses_ok=", status == 200)
 
 status, calc = post_form_json("https://api.e-bulky.ru/api/v1/public/calculate", {
     "apikey": API_KEY,
@@ -46,11 +45,5 @@ status, calc = post_form_json("https://api.e-bulky.ru/api/v1/public/calculate", 
     "floor": "1",
     "cargo_lift": "true",
 })
-print("calculate_http=", status)
 response = calc.get("response") if isinstance(calc, dict) else None
-if isinstance(response, dict):
-    print("calculate_total_rub=", response.get("total"))
-    print("calculate_detail=", json.dumps(response.get("detail"), ensure_ascii=False, separators=(",", ":")))
-    print("calculate_info=", json.dumps(response.get("info"), ensure_ascii=False, separators=(",", ":")))
-else:
-    print("calculate_response=", json.dumps(calc, ensure_ascii=False, separators=(",", ":")))
+print("calculate_ok=", status == 200 and isinstance(response, dict) and response.get("total") is not None)
