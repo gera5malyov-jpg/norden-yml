@@ -1,0 +1,146 @@
+name: DEEPHOUSE KIT to Webasyst
+
+on:
+  workflow_run:
+    workflows: ["DEEPHOUSE to Yandex KIT"]
+    types: [completed]
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'webasyst/sync_deephouse_to_webasyst.py'
+      - '.github/workflows/deephouse-kit-to-webasyst.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deephouse-kit-to-webasyst
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate Python syntax
+        run: python -m py_compile webasyst/sync_deephouse_to_webasyst.py deephouse-kit/sync_deephouse_kit.py
+
+  sync:
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+
+      - name: Sync DEEPHOUSE from Yandex KIT to Webasyst
+        id: webasyst
+        continue-on-error: true
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          DEEPHOUSE_WEBASYST_WRITE_DELAY: '0.65'
+        run: python webasyst/sync_deephouse_to_webasyst.py
+
+      - name: Commit Webasyst report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          cp webasyst/last_deephouse_webasyst_sync.json /tmp/deephouse-wa.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          if [ -f /tmp/deephouse-wa.json ]; then
+            cp /tmp/deephouse-wa.json webasyst/last_deephouse_webasyst_sync.json
+          fi
+          git add webasyst/last_deephouse_webasyst_sync.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Update DEEPHOUSE Webasyst sync report'
+          git push origin HEAD:main || true
+
+      - name: Send Russian Webasyst report
+        if: always()
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          WA_OUTCOME: ${{ steps.webasyst.outcome }}
+        run: |
+          python - <<'PY'
+          import json, os, smtplib
+          from pathlib import Path
+          from email.message import EmailMessage
+
+          try:
+              r=json.loads(Path('webasyst/last_deephouse_webasyst_sync.json').read_text(encoding='utf-8'))
+          except Exception as exc:
+              r={'errors':[{'message':f'Не удалось прочитать отчет: {exc}'}]}
+
+          ok=os.getenv('WA_OUTCOME')=='success' and bool(r.get('complete'))
+          subject='[DEEPHOUSE 336] Webasyst — ' + ('загрузка завершена' if ok else 'ошибка загрузки')
+          body=f"""Автоматический отчет DEEPHOUSE: Яндекс KIT → Webasyst
+
+          Результат: {'УСПЕШНО' if ok else 'С ОШИБКАМИ'}
+          Тип товара Webasyst: deephouse-336
+          Характеристика маршрутизации: Webasyst=336
+          Склад Webasyst: Основной склад
+
+          Товаров KIT с Webasyst=336: {r.get('kit_webasyst_336_variants','—')}
+          Карточек найдено в типе Webasyst: {r.get('webasyst_products','—')}
+          Обработано: {r.get('processed','—')}
+          Создано новых: {r.get('created','—')}
+          Полностью обновлено существующих: {r.get('updated_full_content','—')}
+          Обновлено цена/остаток: {r.get('updated_prices_stock','—')}
+          Обновлено кратких описаний с изображениями: {r.get('summaries_updated_from_kit','—')}
+          Разрешено URL изображений из KIT: {r.get('file_urls_resolved','—')}
+          Дублей SKU в KIT: {r.get('kit_duplicate_skus','—')}
+          Дублей SKU в Webasyst: {r.get('webasyst_duplicate_skus','—')}
+          Ошибок: {len(r.get('errors') or [])}
+
+          Сопоставление: по артикулу DEEP-..., пробелы внутри артикула игнорируются.
+          Изображения: [extimg] в поле «Краткое описание».
+          """
+
+          errs=r.get('errors') or []
+          if errs:
+              body+='\nОшибки (первые 20):\n'
+              for x in errs[:20]:
+                  if isinstance(x,dict):
+                      body+=f"- {x.get('sku','')}: {x.get('message','')}\n"
+                  else:
+                      body+=f"- {x}\n"
+
+          user=os.getenv('SMTP_USER','').strip()
+          password=os.getenv('SMTP_PASSWORD','').replace(' ','').strip()
+          if not user or not password:
+              raise SystemExit('GMAIL_SMTP_USER/GMAIL_APP_PASSWORD are not configured')
+
+          msg=EmailMessage()
+          msg['From']=user
+          msg['To']=os.environ['RECIPIENT']
+          msg['Subject']=subject
+          msg.set_content(body)
+          with smtplib.SMTP_SSL('smtp.gmail.com',465,timeout=30) as smtp:
+              smtp.login(user,password)
+              smtp.send_message(msg)
+          PY
+
+      - name: Fail workflow if Webasyst sync failed
+        if: always()
+        env:
+          WA_OUTCOME: ${{ steps.webasyst.outcome }}
+        run: test "$WA_OUTCOME" = "success"
