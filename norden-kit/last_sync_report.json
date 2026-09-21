@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-21T04:53:40.622870+00:00",
+  "started_at": "2026-09-21T12:45:02.879133+00:00",
   "mode": "scheduled",
   "source": "api",
   "catalog_source": "API Norden; fallback Norden.xml",
@@ -7,227 +7,352 @@
   "api_error": null,
   "source_products": 8485,
   "source_duplicate_articles": 15,
-  "mapped_existing_articles": 876,
-  "planned_new_products": 7609,
+  "mapped_existing_articles": 1126,
+  "planned_new_products": 7359,
   "new_products_created": 250,
   "existing_products_patched": 250,
-  "empty_characteristics_filled": 1347,
-  "existing_products_images_filled": 245,
+  "empty_characteristics_filled": 1630,
+  "existing_products_images_filled": 249,
   "image_errors": 2,
-  "price_updates": 736,
-  "stock_updates": 1472,
+  "price_updates": 986,
+  "stock_updates": 1972,
   "minimum_price_field": "minimum_price",
   "minimum_price_supported": true,
   "warnings": [
-    "SG.721.OL: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
-    "SG.722.OL: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    "SG.537.OD.WH: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "H6301 HEADREST black: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
   ],
   "errors": [
     {
       "article": "PR.110.WH.P59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"387bfb5eab1f6bf1be2f2db54b95fc0d\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"add6a5513e6370524b9ff9ad659b67ac\"}"
     },
     {
       "article": "PR.110.WH.P59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"6ec5db526f5e6d3846aa978d74830e3b\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0b6c696b36549726d11fdfbcc9567747\"}"
     },
     {
       "article": "PR.110.WH.O59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e85d0c1b9307f58f1eb201c88baff954\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7f0798975e2a816aee2eef8db4c002e6\"}"
     },
     {
       "article": "PR.110.WH.O59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"fc981f7c614493fc63e9e35db2873445\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d6457121a699dc2e13c254c6ef7cff95\"}"
     },
     {
       "article": "PR.110.DM.P59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1da77aaaa367ef4a087413dfa5517e19\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7f6c9fd194e6d5159dd52af95a2399b6\"}"
     },
     {
       "article": "PR.110.DM.P59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"07f3402fe892877c3a24a794fcfc646f\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e56df7786dda281079092db22db5448e\"}"
     },
     {
       "article": "PR.110.DM.O59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"f35c452c23fbee0b01656598ac95eccf\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"f1065a2d52e6950055c992e4394122e7\"}"
     },
     {
       "article": "PR.110.DM.O59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"becb9266781727ec151469be39bb5b6e\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1fb80069ead0cacc81cee1809bd9bc60\"}"
     },
     {
       "article": "PR.110.OD.P59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ff3f17afc24fa557e2003bb4abf350d2\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7d1ce314d9eee3cbe1aea682733058bf\"}"
     },
     {
       "article": "PR.110.OD.P59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"69b92201606b3656ff81fb09be4ef2bf\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d9a9ca967114c88b27a02542c75cd68c\"}"
     },
     {
       "article": "PR.110.OD.O59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d15e1e36abcc303f1ca88b11dd09309b\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"912b613d0626ef37b2e1fc705ae1cc36\"}"
     },
     {
       "article": "PR.110.OD.O59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e98dd3a210a1e53150ca4b2c7caa1196\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d54418cfc78725b443a23804ca26d4d5\"}"
     },
     {
       "article": "PR.110.SH.P59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2d883ace9eeda236a0b5dcb93b0e8eae\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8816e12228db32920678d95f88ac30cf\"}"
     },
     {
       "article": "PR.110.SH.P59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4196d67aa0c472ab74e5b3c9dba3dc73\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ea7fedefd77b3835df645e4303e56a9d\"}"
     },
     {
       "article": "PR.110.SH.O59.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9430e6a7ab1f926f499cd0d6ecab987f\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e2a799bb4e98a7fc8e21d681a65a764f\"}"
     },
     {
       "article": "PR.110.SH.O59.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3b03f96949b31c7dd678be97acedad19\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a388a4b12996b659911d6a74d1eb845b\"}"
     },
     {
       "article": "6227B-HS",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"12509f37560c973aaf3795cc3647dca3\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"36e7e6229bb999752e254a7437751cb2\"}"
     },
     {
       "article": "6227B",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8a006a4a6ed38c870f1f9f8978c72c0c\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7d3f7ba8f17256039408cd752fc8efe9\"}"
     },
     {
       "article": "CB273B",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ded4368f718265c301655a285ee36537\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"36d4e75b242ed95754e1b7c5e170d215\"}"
     },
     {
       "article": "OL-060-20-18.GN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0da8d0b7b0131f3a2439219c0b3e42ce\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"20bf4fdd03a2c1c1f1881bd513e22eb1\"}"
     },
     {
       "article": "MT-4-1",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0b1862e9e013cebdfef2c1635a2f71e9\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a7e8ada74eb05f5aecf3ee77d6a44e06\"}"
     },
     {
       "article": "PJ-2",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"431f7f4f49ee1c2ca52a604f798788bc\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2eb5684981cd9789e6475dc5cc469b93\"}"
     },
     {
       "article": "PJ-3",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5233201b8df5aeabf9932713a5103e0c\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"718ea7b00476a860119f594181066340\"}"
     },
     {
       "article": "2198568",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7f16b03a7346750d374016399f2ea71e\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a15d2f3f2a7ff639741b5dcbd0af962f\"}"
     },
     {
       "article": "2198559",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"91cee72d740489977ba81950bf75fdac\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3a1e4c114bd9285f506bbe9f8820d64e\"}"
     },
     {
       "article": "2198555",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c2a3fc9ca0b9875ba4c38cde94359990\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"f7740081b43484ef19a8a765ee9ba4b4\"}"
     },
     {
       "article": "2198558",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a54205f3952009653fb333a8331d327c\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ac8eaba174d0d2a538ddf8854021499b\"}"
     },
     {
       "article": "2198557",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"08bf2af48dc7dbd91da389f9d81b7e11\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5080b528753c6daf7600f5041d643317\"}"
     },
     {
       "article": "2198556",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"08f02531851bc4baf828b010d651ae5f\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"bf807f802835e4a708de9e97397838ce\"}"
     },
     {
       "article": "2198553",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b9e8c1d650dbdb5887d8062d635ba2a6\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5d15e1d84b069711b2a882fd15ba0e24\"}"
     },
     {
       "article": "2198552",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"30dcdec769c9fd108058c81c015eb725\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d63b3c721ca7e320be8feb3aeda76e60\"}"
     },
     {
       "article": "2198539",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"eef7e71ce307d230e801edb508b1dc1e\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"138e1f98a3831ec84597a32f96429908\"}"
     },
     {
       "article": "2198572",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"078e1caa951080c85578778aca079eda\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ff0d2a697ad9454837d5d4fbc1e435a6\"}"
     },
     {
       "article": "2198569",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"179570cb34087c4da612e2541cce9564\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e22dd6a2af20d885882c10990685cd22\"}"
     },
     {
       "article": "2198575",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0c411fe4dc7263fcb383e1bc51b29c5a\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"defd090d07e4c7f2fae9c6e552a63572\"}"
     },
     {
       "article": "2198577",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7185ab7fa405433beee006d35d226eb7\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"86f6aa7eb20456f8e9f025978f241a7d\"}"
     },
     {
       "article": "2198574",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8977e99a0c2fc7f863b2a6fd1caf6d6f\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"070053b52dd10d402be5cf1740ba1168\"}"
     },
     {
       "article": "2198571",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"38ca34d7817b99a491e56bdd1edb0f63\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"889f5fc10261f97be0138f36c36b1821\"}"
     },
     {
       "article": "2198570",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"81cce94441622d75eaf136068951d846\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7ce9e52566688b51c5f96617d3b4dd4c\"}"
     },
     {
       "article": "842-253",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"30a481fdc68772a2bdcdcfb48414d9a6\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"dda4b3c3f55f6bbded7f08eb4f259f2a\"}"
+    },
+    {
+      "article": "SL-PJY2-WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"875531c7464a030c92b987c47223dea5\"}"
+    },
+    {
+      "article": "SL-PJY2-GR",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"68211d995777c2c494b1527ecf93075e\"}"
+    },
+    {
+      "article": "SL-PJY3-WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c3c46aebc64a2422fd6982a1f6bb54ec\"}"
+    },
+    {
+      "article": "SL-PJY3-GR",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cc6b7161fdb4174d3a048d608e27f6cd\"}"
+    },
+    {
+      "article": "HD-2216-4 H brown",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9ff24105c6b5f942bff8d663eac6ae27\"}"
+    },
+    {
+      "article": "HD-2216-4 L LB brown",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cf681ba77db35dd5786c72094e05ff86\"}"
+    },
+    {
+      "article": "SG.531.WH.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0d0eb2aa26f479d922078df4651c966c\"}"
+    },
+    {
+      "article": "SG.531.OL.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4e2e73ae8f48aeb5d3cb4f7dca439a4d\"}"
+    },
+    {
+      "article": "SG.531.OD.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"29e11b72d8f958a656350b780d1e5923\"}"
+    },
+    {
+      "article": "SG.532.WH.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5c72f8da8f549ece44699584e5ca3f5b\"}"
+    },
+    {
+      "article": "SG.532.OD.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"59a90426676f1fd4b2a91f691e32a852\"}"
+    },
+    {
+      "article": "SG.532.OL.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2c5da5bea2f4d41935c39aecfce50e14\"}"
+    },
+    {
+      "article": "SG.533.WH.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"67557c543d0129db340eb2bd4ce01af8\"}"
+    },
+    {
+      "article": "SG.533.OL.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9656f6e58de6e15747a5c4ecc410c3b9\"}"
+    },
+    {
+      "article": "SG.533.OD.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4727052e66f1711af832fa2d5045b383\"}"
+    },
+    {
+      "article": "SG.536.WH.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e011de005edbc216d43d9dcb31d65aef\"}"
+    },
+    {
+      "article": "SG.536.OL.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"53cc1a9497d4529e3c5b109aeb18375f\"}"
+    },
+    {
+      "article": "SG.537.WH.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"94273f626b50ecee056182eb72e24f6a\"}"
+    },
+    {
+      "article": "SG.537.OL.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1af97dd2cb18e3f2f85043a239a2eb0d\"}"
+    },
+    {
+      "article": "SG.538.WH.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"16425307178e0b1392e39ec936214c22\"}"
+    },
+    {
+      "article": "SG.538.OD.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2ce9d77899e80535f37867a2d53656d8\"}"
+    },
+    {
+      "article": "SG.538.OL.SH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a8124effeb73558df51c75e210f68c45\"}"
+    },
+    {
+      "article": "Z1-811Z_2396_1196",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"aba9e06990cf4e9abc65fff3babdb36e\"}"
+    },
+    {
+      "article": "HAD-SP-1400-1800-GR",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9619c07de7334037c6f6af6325bf881d\"}"
+    },
+    {
+      "article": "РЕКЛ.SG.1001.OL.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7080d67628b060f2c4a9032dc8eb3e52\"}"
     }
   ],
   "initial_complete": false,
   "recent_norden_mapping_merged": 0,
   "recent_norden_repair_candidates": 0,
-  "mapped_source_articles_for_updates": 876,
-  "remaining_new_products": 7359,
-  "finished_at": "2026-09-21T06:52:08.557604+00:00"
+  "mapped_source_articles_for_updates": 1126,
+  "remaining_new_products": 7109,
+  "finished_at": "2026-09-21T14:34:19.583555+00:00"
 }
