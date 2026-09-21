@@ -1,0 +1,145 @@
+name: B2B Fabrika 335 feed -> KIT -> Webasyst
+
+on:
+  schedule:
+    - cron: '15 5 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'b2b-335/sync_b2b_kit.py'
+      - 'b2b-335/prices.json'
+      - 'webasyst/sync_b2b335_to_webasyst.py'
+      - '.github/workflows/b2b335-sync.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: b2b335-feed-kit-webasyst
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Feed to Yandex KIT
+        id: kit
+        continue-on-error: true
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python b2b-335/sync_b2b_kit.py
+
+      - name: Yandex KIT to Webasyst
+        id: webasyst
+        continue-on-error: true
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          B2B335_WEBASYST_WRITE_DELAY: '0.65'
+        run: python webasyst/sync_b2b335_to_webasyst.py
+
+      - name: Commit B2B 335 state and reports
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          mkdir -p /tmp/b2b335-state
+          cp b2b-335/mapping.json /tmp/b2b335-state/mapping.json 2>/dev/null || true
+          cp b2b-335/last_sync_report.json /tmp/b2b335-state/kit-report.json 2>/dev/null || true
+          cp webasyst/last_b2b335_webasyst_sync.json /tmp/b2b335-state/wa-report.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/b2b335-state/mapping.json b2b-335/mapping.json 2>/dev/null || true
+          cp /tmp/b2b335-state/kit-report.json b2b-335/last_sync_report.json 2>/dev/null || true
+          cp /tmp/b2b335-state/wa-report.json webasyst/last_b2b335_webasyst_sync.json 2>/dev/null || true
+          git add b2b-335/mapping.json b2b-335/last_sync_report.json webasyst/last_b2b335_webasyst_sync.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update B2B Fabrika 335 sync state'
+            git push origin HEAD:main || true
+          fi
+
+      - name: Send completion email
+        if: always()
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          KIT_OUTCOME: ${{ steps.kit.outcome }}
+          WA_OUTCOME: ${{ steps.webasyst.outcome }}
+        run: |
+          python - <<'PY'
+          import json, os, smtplib
+          from email.message import EmailMessage
+          from pathlib import Path
+
+          def load(path):
+              try:
+                  return json.loads(Path(path).read_text(encoding='utf-8'))
+              except Exception:
+                  return {}
+
+          kit = load('b2b-335/last_sync_report.json')
+          wa = load('webasyst/last_b2b335_webasyst_sync.json')
+          ok = os.getenv('KIT_OUTCOME') == 'success' and os.getenv('WA_OUTCOME') == 'success'
+          subject = ('[Б2Б Фабрика 335] Загрузка завершена' if ok
+                     else '[Б2Б Фабрика 335] Ошибка загрузки')
+          body = f"""Ежедневная цепочка: фид → KIT → Webasyst
+
+          KIT:
+          результат шага: {os.getenv('KIT_OUTCOME')}
+          товаров в фиде: {kit.get('source_products', '—')}
+          создано: {kit.get('created', '—')}
+          обновлено: {kit.get('updated', '—')}
+          обнулено отсутствующих: {kit.get('zeroed_missing_from_feed', '—')}
+          без закупочной цены: {len(kit.get('missing_purchase_price') or [])}
+          ошибок: {len(kit.get('errors') or [])}
+
+          Webasyst:
+          результат шага: {os.getenv('WA_OUTCOME')}
+          обработано: {wa.get('processed', '—')}
+          создано: {wa.get('created', '—')}
+          обновлено цена/остаток: {wa.get('updated_prices_stock', '—')}
+          ошибок: {len(wa.get('errors') or [])}
+
+          Репозиторий: gera5malyov-jpg/norden-yml
+          Контур: b2b-335
+          """
+
+          user = os.getenv('SMTP_USER','').strip()
+          password = os.getenv('SMTP_PASSWORD','').strip()
+          if not user or not password:
+              raise SystemExit('GMAIL_SMTP_USER/GMAIL_APP_PASSWORD are not configured')
+          msg = EmailMessage()
+          msg['From'] = user
+          msg['To'] = os.environ['RECIPIENT']
+          msg['Subject'] = subject
+          msg.set_content(body)
+          with smtplib.SMTP('smtp.gmail.com', 587, timeout=30) as smtp:
+              smtp.starttls()
+              smtp.login(user, password)
+              smtp.send_message(msg)
+          PY
+
+      - name: Fail workflow if chain failed
+        if: always()
+        env:
+          KIT_OUTCOME: ${{ steps.kit.outcome }}
+          WA_OUTCOME: ${{ steps.webasyst.outcome }}
+        run: |
+          test "$KIT_OUTCOME" = "success"
+          test "$WA_OUTCOME" = "success"
