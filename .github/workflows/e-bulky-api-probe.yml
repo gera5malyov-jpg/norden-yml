@@ -1,0 +1,21 @@
+name: Easy Bulky API probe
+
+on:
+  push:
+    paths:
+      - ".github/workflows/e-bulky-api-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      E_BULKY: ${{ secrets.E_BULKY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe API
+        run: python3 scripts/e_bulky_api_probe.py
