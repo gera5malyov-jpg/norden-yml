@@ -1,0 +1,66 @@
+name: Ozon commission probe AF-31646770
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-commission-af-31646770.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Query Ozon commission
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json, os, requests, sys
+
+          offer_id = "AF-31646770"
+          client_id = (os.getenv("OZON_CLIENT_ID") or "").strip()
+          api_key = (os.getenv("OZON_API_KEY") or "").strip()
+          if not client_id or not api_key:
+              raise SystemExit("OZON_CLIENT_ID/OZON_API_KEY are not configured")
+
+          url = "https://api-seller.ozon.ru/v5/product/info/prices"
+          headers = {
+              "Client-Id": client_id,
+              "Api-Key": api_key,
+              "Content-Type": "application/json",
+          }
+          body = {
+              "cursor": "",
+              "filter": {"offer_id": [offer_id], "visibility": "ALL"},
+              "limit": 100,
+          }
+          r = requests.post(url, headers=headers, json=body, timeout=60)
+          print("HTTP_STATUS", r.status_code)
+          if r.status_code >= 400:
+              print("ERROR_BODY", r.text[:2000])
+              sys.exit(1)
+          data = r.json()
+          items = data.get("items") or ((data.get("result") or {}).get("items") if isinstance(data.get("result"), dict) else []) or []
+          print("ITEM_COUNT", len(items))
+          for item in items:
+              out = {
+                  "offer_id": item.get("offer_id"),
+                  "product_id": item.get("product_id"),
+                  "acquiring": item.get("acquiring"),
+                  "commissions": item.get("commissions"),
+                  "price": item.get("price"),
+                  "volume_weight": item.get("volume_weight"),
+              }
+              print("OZON_COMMISSION_RESULT", json.dumps(out, ensure_ascii=False, sort_keys=True))
+          if not items:
+              sys.exit(2)
+          PY
