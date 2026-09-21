@@ -298,10 +298,10 @@ def main():
             try:
                 it=future.result()
                 if not it['name'] or not it['price']: raise ValueError('missing name or price')
-                own_brand = norm_brand(it.get('brand')) in {'4сезона','4sezona'} or str(it.get('sku') or '').casefold().startswith('4s-')
-                if not own_brand:
-                    skipped_brand+=1
-                    continue
+                # This feed represents the supplier 4 Сезона as a whole.
+                # Do not drop products because the product page has no explicit
+                # brand or contains another manufacturer name. In Yandex KIT
+                # the managed supplier scope is Brand = "4 Сезона".
                 it['brand']='4 Сезона'
                 items.append(it)
             except Exception as e:
