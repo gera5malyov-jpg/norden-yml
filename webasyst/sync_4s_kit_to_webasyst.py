@@ -127,6 +127,13 @@ def char_value(variant, cid):
     return ""
 
 
+def kit_article(variant, article_characteristic_id):
+    # In KIT the main SKU field is shown in the UI as "Артикул".
+    # Older 4 Seasons cards often do not duplicate it into the custom
+    # characteristic named "Артикул", so the built-in SKU is authoritative.
+    return s(variant.get("sku")) or char_value(variant, article_characteristic_id)
+
+
 def kit_stock_qty(variant, warehouse_id):
     for row in variant.get("stocks") or []:
         if s(row.get("warehouse_id")) == s(warehouse_id):
@@ -435,7 +442,7 @@ def main():
         if s(variant.get("brand")) != BRAND:
             continue
         report["kit_brand_variants"] += 1
-        article = char_value(variant, article_id)
+        article = kit_article(variant, article_id)
         if not article:
             report["missing_kit_article"] += 1
             continue
@@ -530,7 +537,7 @@ def main():
 
         # New card: create full card from KIT + current parser feed.
         report["new_to_create"] += 1
-        article = char_value(variant, article_id)
+        article = kit_article(variant, article_id)
         code_site = char_value(variant, code_site_id)
         feed_row = feed_one(feed, code_site)
         name = s(variant.get("name")) or (s(feed_row.get("name")) if feed_row else "") or article
