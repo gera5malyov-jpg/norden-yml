@@ -433,13 +433,14 @@ def add_index(index,key,variant):
         index[nk].append(variant)
 
 def canonical_variant_key(v):
-    """Prefer the oldest integration/card identity: lowest numeric kit_id, then id."""
+    """Prefer the oldest card by creation time, then lowest numeric KIT ID."""
+    created=s(v.get('created_at'))
     kid=s(v.get('kit_id'))
     try:
         numeric=int(kid)
     except Exception:
         numeric=10**18
-    return (numeric,s(v.get('id')))
+    return (created or '9999-12-31T23:59:59Z',numeric,s(v.get('id')))
 
 def match_offer(offer,by_code_site,by_article,by_name):
     scores={}
@@ -512,6 +513,8 @@ def main():
     for v in variants:
         vid=s(v.get('id'))
         if not vid or not is_brand(v.get('brand')):
+            continue
+        if s(v.get('status')).upper()=='ARCHIVED':
             continue
         managed[vid]=v
         add_index(by_code_site,char_value(v,code_site_id),v)
