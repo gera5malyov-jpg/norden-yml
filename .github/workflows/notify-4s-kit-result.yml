@@ -43,7 +43,10 @@ jobs:
           from datetime import datetime, timezone
 
           user = (os.getenv("GMAIL_SMTP_USER") or "").strip()
-          password = (os.getenv("GMAIL_APP_PASSWORD") or "").strip()
+          raw_password = os.getenv("GMAIL_APP_PASSWORD") or ""
+          # Google displays app passwords in groups of 4. Accept either
+          # grouped or ungrouped form and remove all whitespace safely.
+          password = "".join(raw_password.split())
           recipient = (os.getenv("RECIPIENT") or "").strip()
           event_name = (os.getenv("EVENT_NAME") or "").strip().lower()
           conclusion = (os.getenv("RUN_CONCLUSION") or "unknown").strip().lower()
@@ -136,9 +139,41 @@ jobs:
           msg.set_content("\n".join(lines))
 
           context = ssl.create_default_context()
-          with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context, timeout=60) as smtp:
-              smtp.login(user, password)
-              smtp.send_message(msg)
+          print(
+              "Gmail SMTP diagnostics: "
+              f"user_domain={user.rsplit('@', 1)[-1] if '@' in user else '<invalid>'}, "
+              f"app_password_length={len(password)}"
+          )
+
+          errors = []
+          sent = False
+
+          # Primary: STARTTLS on 587 (Google's standard submission endpoint).
+          try:
+              with smtplib.SMTP("smtp.gmail.com", 587, timeout=60) as smtp:
+                  smtp.ehlo()
+                  smtp.starttls(context=context)
+                  smtp.ehlo()
+                  smtp.login(user, password)
+                  smtp.send_message(msg)
+              sent = True
+              print("Notification sent through Gmail SMTP STARTTLS/587")
+          except Exception as exc:
+              errors.append(f"587/STARTTLS: {type(exc).__name__}: {exc}")
+
+          # Fallback: implicit TLS on 465.
+          if not sent:
+              try:
+                  with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context, timeout=60) as smtp:
+                      smtp.login(user, password)
+                      smtp.send_message(msg)
+                  sent = True
+                  print("Notification sent through Gmail SMTP SSL/465")
+              except Exception as exc:
+                  errors.append(f"465/SSL: {type(exc).__name__}: {exc}")
+
+          if not sent:
+              raise SystemExit("Gmail send failed. " + " | ".join(errors))
 
           print(f"Notification sent to {recipient}: {subject}")
           PY
