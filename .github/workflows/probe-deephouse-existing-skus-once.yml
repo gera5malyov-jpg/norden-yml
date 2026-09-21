@@ -1,0 +1,60 @@
+name: Probe DEEPHOUSE existing Webasyst SKUs once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe-deephouse-existing-skus-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Probe existing SKUs
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, sys
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+          wa=WebasystClient(min_request_interval=0.4)
+          p=wa.call('shop.product.search',params={'hash':'type/24','offset':0,'limit':1000,'fields':'*,skus,stock_counts'})
+          rows=(p.get('products') or p.get('items') or []) if isinstance(p,dict) else p
+          if isinstance(rows,dict): rows=list(rows.values())
+          skus=[]
+          sample=[]
+          for prod in rows or []:
+              ss=prod.get('skus') or {}
+              if isinstance(ss,dict): ss=list(ss.values())
+              for row in ss or []:
+                  sku=str(row.get('sku') or '').strip()
+                  if sku: skus.append(sku)
+              if len(sample)<40:
+                  sample.append({'id':prod.get('id'),'name':prod.get('name'),'skus':[str(x.get('sku') or '').strip() for x in (ss or []) if isinstance(x,dict)]})
+          out={
+            'products_loaded':len(rows or []),
+            'sku_count':len(skus),
+            'deep_prefix_count':sum(1 for x in skus if x.upper().startswith('DEEP-')),
+            'numeric_or_combo_count':sum(1 for x in skus if not x.upper().startswith('DEEP-')),
+            'sample':sample,
+            'first_deep_skus':[x for x in skus if x.upper().startswith('DEEP-')][:50],
+            'first_non_deep_skus':[x for x in skus if not x.upper().startswith('DEEP-')][:50],
+          }
+          with open('webasyst/deephouse_existing_sku_probe.json','w',encoding='utf-8') as f: json.dump(out,f,ensure_ascii=False,indent=2)
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit probe
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add webasyst/deephouse_existing_sku_probe.json
+          git commit -m 'Probe existing DEEPHOUSE Webasyst SKUs' || exit 0
+          git pull --rebase || true
+          git push || true
