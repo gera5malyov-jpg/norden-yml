@@ -150,12 +150,17 @@ print("PRECALC " + json.dumps(base_report, ensure_ascii=False))
 
 payload = {
     "prices": [{
+        "product_id": int(before.get("product_id") or 0),
         "offer_id": OFFER_ID,
         "price": str(sale_price),
-        "min_price": str(min_price),
-        "net_price": str(int(round(purchase))),
         "old_price": str(int(round(money(price_block.get("old_price"))))),
-        "currency_code": "RUB"
+        "min_price": str(min_price),
+        "min_price_for_auto_actions_enabled": True,
+        "net_price": str(int(round(purchase))),
+        "currency_code": "RUB",
+        "vat": "0",
+        "auto_action_enabled": "UNKNOWN",
+        "price_strategy_enabled": "UNKNOWN"
     }]
 }
 update = post("/v1/product/import/prices", payload)
