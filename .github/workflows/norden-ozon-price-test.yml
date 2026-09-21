@@ -7,7 +7,7 @@ on:
       - '.github/triggers/norden-ozon-price-test.txt'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: norden-ozon-price-test-af-31646769
@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -35,7 +37,10 @@ jobs:
           python-version: '3.12'
 
       - name: Recalculate and update one Ozon product
-        run: python ozon/norden_price_test.py
+        shell: bash
+        run: |
+          set -o pipefail
+          python ozon/norden_price_test.py 2>&1 | tee ozon/norden-price-test-AF-31646769.log
 
       - name: Add Russian report
         if: always()
@@ -44,4 +49,16 @@ jobs:
           if [ -f ozon/norden-price-test-AF-31646769.json ]; then
             echo "## Norden -> Ozon: AF-31646769" >> "$GITHUB_STEP_SUMMARY"
             cat ozon/norden-price-test-AF-31646769.json >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Commit test report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ozon/norden-price-test-AF-31646769.json ozon/norden-price-test-AF-31646769.log 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m 'Save Norden Ozon price test report AF-31646769'
+            git push
           fi
