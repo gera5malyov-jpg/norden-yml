@@ -18,6 +18,7 @@ from urllib.parse import urljoin, urlparse, urldefrag
 import requests
 from bs4 import BeautifulSoup, Tag
 from requests.auth import HTTPBasicAuth
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 BASE_URL = "https://stol-transformer.ru/showcase/"
 HOST = urlparse(BASE_URL).netloc.lower()
@@ -701,60 +702,302 @@ class Parser:
                     ))
         return products
 
-    def crawl(self, max_pages: int = 2500) -> list[Product]:
-        first = self.authenticate()
-        queue = deque([first.url])
-        prefetched = {first.url: first.text}
-        seen: set[str] = set()
-        product_urls: set[str] = set()
-        card_products: list[Product] = []
-        page_categories: dict[str, str] = {}
+    def save_browser_debug(self, page, stage: str) -> None:
+        try:
+            body_text = clean_text(page.locator("body").inner_text(timeout=3000))
+        except Exception:
+            body_text = ""
+        inputs = []
+        buttons = []
+        try:
+            for frame_index, frame in enumerate(page.frames):
+                loc = frame.locator("input")
+                for i in range(min(loc.count(), 30)):
+                    item = loc.nth(i)
+                    inputs.append({
+                        "frame": frame_index,
+                        "name": item.get_attribute("name") or "",
+                        "type": item.get_attribute("type") or "text",
+                        "id": item.get_attribute("id") or "",
+                        "placeholder": item.get_attribute("placeholder") or "",
+                    })
+                bloc = frame.locator("button, input[type='submit'], input[type='button']")
+                for i in range(min(bloc.count(), 30)):
+                    item = bloc.nth(i)
+                    try:
+                        txt = clean_text(item.inner_text(timeout=500))
+                    except Exception:
+                        txt = clean_text(item.get_attribute("value") or "")
+                    buttons.append({
+                        "frame": frame_index,
+                        "text": txt[:120],
+                        "type": item.get_attribute("type") or "",
+                    })
+        except Exception:
+            pass
 
-        while queue and len(seen) < max_pages:
-            url = queue.popleft()
-            if url in seen:
+        payload = {
+            "stage": stage,
+            "url": page.url,
+            "title": page.title(),
+            "body_text_head": body_text[:1000],
+            "inputs": inputs,
+            "buttons": buttons,
+        }
+        (OUT / "browser_debug.json").write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    def browser_authenticate(self, page) -> None:
+        dialog_state = {"count": 0}
+
+        def handle_dialog(dialog):
+            msg = clean_text(dialog.message).lower()
+            dialog_state["count"] += 1
+            if re.search(r"pass|парол", msg):
+                dialog.accept(self.password)
+            elif re.search(r"login|user|логин|имя", msg):
+                dialog.accept(self.login)
+            elif dialog_state["count"] == 1:
+                dialog.accept(self.login)
+            else:
+                dialog.accept(self.password)
+
+        page.on("dialog", handle_dialog)
+        page.goto(BASE_URL, wait_until="domcontentloaded", timeout=60000)
+        page.wait_for_timeout(1500)
+        self.save_browser_debug(page, "initial")
+
+        def body_text() -> str:
+            try:
+                return clean_text(page.locator("body").inner_text(timeout=3000))
+            except Exception:
+                return ""
+
+        def looks_logged_in(text: str) -> bool:
+            return bool(
+                re.search(r"артикул|характеристик|каталог\s*·|руб|₽", text, re.I)
+                and len(page.locator("a[href*='/showcase/']").all()) > 0
+            )
+
+        text = body_text()
+        if looks_logged_in(text):
+            self.auth_mode = "browser_already_authenticated"
+            return
+
+        # На сайте форма может появляться только после нажатия "Войти".
+        try:
+            login_button = page.get_by_text(re.compile(r"^\s*Войти\s*$", re.I))
+            if login_button.count() > 0 and login_button.first.is_visible():
+                login_button.first.click(timeout=5000)
+                page.wait_for_timeout(800)
+        except Exception:
+            pass
+
+        # Ищем поля входа во всех frames.
+        target_frame = None
+        user_locator = None
+        pass_locator = None
+
+        for frame in page.frames:
+            inputs = frame.locator("input")
+            count = inputs.count()
+            if count == 0:
                 continue
-            seen.add(url)
-            try:
-                html = prefetched.pop(url, None)
-                if html is None:
-                    html = self.get(url).text
-                soup = BeautifulSoup(html, "lxml")
-                card_products.extend(self.parse_card_products(soup, url))
-                crawl_links, product_links = self.candidate_links(soup, url)
-                product_urls.update(product_links)
-                for link in crawl_links:
-                    if link not in seen:
-                        queue.append(link)
-                heading = soup.find("h1")
-                cat = clean_text(heading.get_text(" ", strip=True)) if heading else ""
-                for link in product_links:
-                    if cat:
-                        page_categories.setdefault(link, cat)
-            except Exception as exc:
-                self.errors.append({"url": url, "stage": "catalog", "message": str(exc)[:500]})
 
-        product_urls.add(first.url)
-        detailed: list[Product] = []
-        for url in sorted(product_urls):
+            visible = []
+            local_user = None
+            local_pass = None
+
+            for i in range(count):
+                item = inputs.nth(i)
+                try:
+                    if not item.is_visible():
+                        continue
+                except Exception:
+                    continue
+                typ = (item.get_attribute("type") or "text").lower()
+                if typ in {"hidden", "submit", "button", "checkbox", "radio"}:
+                    continue
+                name = item.get_attribute("name") or ""
+                ident = item.get_attribute("id") or ""
+                placeholder = item.get_attribute("placeholder") or ""
+                autocomplete = item.get_attribute("autocomplete") or ""
+                hay = " ".join([name, ident, placeholder, autocomplete])
+                visible.append(item)
+                if local_pass is None and (typ == "password" or re.search(r"pass|password|pwd|парол", hay, re.I)):
+                    local_pass = item
+                if local_user is None and re.search(r"login|user|username|email|логин", hay, re.I):
+                    local_user = item
+
+            if local_user is None and visible:
+                local_user = visible[0]
+            if local_pass is None and len(visible) >= 2:
+                local_pass = visible[1]
+
+            if local_user is not None and local_pass is not None:
+                target_frame = frame
+                user_locator = local_user
+                pass_locator = local_pass
+                break
+
+        if user_locator is not None and pass_locator is not None and target_frame is not None:
+            user_locator.fill(self.login)
+            pass_locator.fill(self.password)
+
+            submitted = False
+            submit = target_frame.locator("button[type='submit'], input[type='submit']")
+            if submit.count() > 0:
+                try:
+                    submit.first.click(timeout=5000)
+                    submitted = True
+                except Exception:
+                    pass
+            if not submitted:
+                try:
+                    target_frame.get_by_text(re.compile(r"^\s*Войти\s*$", re.I)).last.click(timeout=5000)
+                    submitted = True
+                except Exception:
+                    pass
+            if not submitted:
+                pass_locator.press("Enter")
+
             try:
-                html = prefetched.pop(url, None)
-                if html is None:
-                    html = self.get(url).text
-                product = self.extract_product(html, url, page_categories.get(url, ""))
-                if product:
-                    detailed.append(product)
-            except Exception as exc:
-                self.errors.append({"url": url, "stage": "product", "message": str(exc)[:500]})
+                page.wait_for_load_state("networkidle", timeout=15000)
+            except PlaywrightTimeoutError:
+                pass
+            page.wait_for_timeout(1000)
+
+        self.save_browser_debug(page, "after_login")
+        text = body_text()
+
+        # Если логин был через JS prompt/dialog, обработчик мог уже выполнить вход.
+        if looks_logged_in(text):
+            self.auth_mode = "playwright"
+            return
+
+        # Иногда после успешного входа нужна повторная загрузка /showcase/.
+        page.goto(BASE_URL, wait_until="domcontentloaded", timeout=60000)
+        page.wait_for_timeout(1200)
+        self.save_browser_debug(page, "reloaded_after_login")
+        text = body_text()
+        if looks_logged_in(text):
+            self.auth_mode = "playwright"
+            return
+
+        raise RuntimeError(
+            "Не удалось подтвердить вход в JS-каталог через Chromium. "
+            "См. stol-transformer/output/browser_debug.json"
+        )
+
+    def browser_render(self, page, url: str) -> str:
+        page.goto(url, wait_until="domcontentloaded", timeout=60000)
+        page.wait_for_timeout(700)
+
+        # Догружаем lazy-load / infinite-scroll карточки.
+        stable = 0
+        last_height = 0
+        for _ in range(20):
+            try:
+                height = page.evaluate("document.body.scrollHeight")
+            except Exception:
+                break
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            page.wait_for_timeout(300)
+
+            # Кнопки "Показать ещё" на каталогах.
+            for pattern in (r"Показать\s*ещ[её]", r"Загрузить\s*ещ[её]", r"Ещ[её]"):
+                try:
+                    btn = page.get_by_text(re.compile(pattern, re.I))
+                    if btn.count() > 0 and btn.first.is_visible():
+                        btn.first.click(timeout=1500)
+                        page.wait_for_timeout(500)
+                except Exception:
+                    pass
+
+            if height == last_height:
+                stable += 1
+            else:
+                stable = 0
+            last_height = height
+            if stable >= 3:
+                break
+
+        page.evaluate("window.scrollTo(0, 0)")
+        page.wait_for_timeout(150)
+        return page.content()
+
+    def crawl(self, max_pages: int = 2500) -> list[Product]:
+        queue = deque([BASE_URL])
+        seen: set[str] = set()
+        detailed: list[Product] = []
+
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=["--no-sandbox", "--disable-dev-shm-usage"],
+            )
+            context = browser.new_context(
+                user_agent=USER_AGENT,
+                locale="ru-RU",
+                viewport={"width": 1440, "height": 1200},
+            )
+            page = context.new_page()
+
+            try:
+                self.browser_authenticate(page)
+
+                while queue and len(seen) < max_pages:
+                    url = queue.popleft()
+                    if url in seen:
+                        continue
+                    seen.add(url)
+
+                    try:
+                        html = self.browser_render(page, url)
+                        self.pages_fetched += 1
+                        soup = BeautifulSoup(html, "lxml")
+
+                        crawl_links, product_links = self.candidate_links(soup, url)
+                        for link in list(dict.fromkeys(crawl_links + product_links)):
+                            if link not in seen:
+                                queue.append(link)
+
+                        # Категорию берём из хлебных крошек, если они есть.
+                        crumbs = [
+                            clean_text(x.get_text(" ", strip=True))
+                            for x in soup.select(
+                                ".breadcrumb a, .breadcrumbs a, nav[aria-label*='breadcrumb' i] a"
+                            )
+                        ]
+                        category = crumbs[-1] if crumbs else ""
+
+                        product = self.extract_product(html, url, category)
+                        if product:
+                            detailed.append(product)
+
+                    except Exception as exc:
+                        self.errors.append({
+                            "url": url,
+                            "stage": "browser_crawl",
+                            "message": str(exc)[:700],
+                        })
+            finally:
+                browser.close()
 
         merged: dict[str, Product] = {}
-        for p in card_products + detailed:
+        for p in detailed:
             key = p.sku.lower() if p.sku else p.url.lower()
             if key not in merged:
                 merged[key] = p
                 continue
             old = merged[key]
-            for field in ("name", "sku", "price", "retail_price", "purchase_price", "old_price", "stock", "brand", "category", "model", "color", "support_color", "description"):
+            for field in (
+                "name", "sku", "price", "retail_price", "purchase_price",
+                "old_price", "stock", "brand", "category", "model",
+                "color", "support_color", "description"
+            ):
                 if not getattr(old, field) and getattr(p, field):
                     setattr(old, field, getattr(p, field))
             old.images = list(dict.fromkeys((old.images or []) + (p.images or [])))
