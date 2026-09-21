@@ -637,6 +637,25 @@ class Parser:
                     products.append(url)
             elif is_productish:
                 products.append(url)
+        # JavaScript-карточки: URL может лежать не в <a>, а в data-* / onclick.
+        for node in soup.select("[data-href], [data-url], [data-link], [onclick], [role='link']"):
+            raw_values = [
+                str(node.get("data-href") or ""),
+                str(node.get("data-url") or ""),
+                str(node.get("data-link") or ""),
+            ]
+            onclick = str(node.get("onclick") or "")
+            raw_values.extend(re.findall(r"['\"]((?:https?://[^'\"]+|/showcase/[^'\"]+))['\"]", onclick, re.I))
+            for raw in raw_values:
+                url = clean_url(page_url, raw)
+                if not url:
+                    continue
+                path = urlparse(url).path.lower()
+                if path.startswith("/showcase"):
+                    crawl.append(url)
+                    if path.rstrip("/") != "/showcase":
+                        products.append(url)
+
         return list(dict.fromkeys(crawl)), list(dict.fromkeys(products))
 
     def parse_card_products(self, soup: BeautifulSoup, page_url: str) -> list[Product]:
@@ -736,6 +755,29 @@ class Parser:
         except Exception:
             pass
 
+        links = []
+        clickables = []
+        try:
+            aloc = page.locator("a[href]")
+            for i in range(min(aloc.count(), 200)):
+                item = aloc.nth(i)
+                links.append({
+                    "text": clean_text(item.inner_text(timeout=300))[:100],
+                    "href": item.get_attribute("href") or "",
+                })
+            cloc = page.locator("[onclick], [data-href], [data-url], [data-link], [role='link']")
+            for i in range(min(cloc.count(), 200)):
+                item = cloc.nth(i)
+                clickables.append({
+                    "text": clean_text(item.inner_text(timeout=300))[:100],
+                    "onclick": item.get_attribute("onclick") or "",
+                    "data_href": item.get_attribute("data-href") or "",
+                    "data_url": item.get_attribute("data-url") or "",
+                    "data_link": item.get_attribute("data-link") or "",
+                })
+        except Exception:
+            pass
+
         payload = {
             "stage": stage,
             "url": page.url,
@@ -743,6 +785,8 @@ class Parser:
             "body_text_head": body_text[:1000],
             "inputs": inputs,
             "buttons": buttons,
+            "links": links,
+            "clickables": clickables,
         }
         (OUT / "browser_debug.json").write_text(
             json.dumps(payload, ensure_ascii=False, indent=2),
@@ -776,9 +820,12 @@ class Parser:
                 return ""
 
         def looks_logged_in(text: str) -> bool:
+            # После успешного входа каталог показывает кнопку "ВЫЙТИ" и серии товаров.
+            if re.search(r"\bВЫЙТИ\b", text, re.I) and re.search(r"КАТАЛОГ\s+ПРОДУКЦИИ", text, re.I):
+                return True
             return bool(
                 re.search(r"артикул|характеристик|каталог\s*·|руб|₽", text, re.I)
-                and len(page.locator("a[href*='/showcase/']").all()) > 0
+                and page.locator("a[href*='/showcase/']").count() > 0
             )
 
         text = body_text()
