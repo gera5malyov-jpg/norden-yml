@@ -29,7 +29,7 @@ jobs:
             exit 1
           fi
           http_code="$(
-            curl --silent --show-error               --connect-timeout 30               --max-time 900               --output /tmp/kitimages-response.json               --write-out '%{http_code}'               --request POST               --header "Authorization: Bearer ${WEBASYST_API_TOKEN}"               --header "Accept: application/json"               "${KITIMAGES_SYNC_URL}"
+            curl --silent --show-error               --connect-timeout 30               --max-time 900               --output /tmp/kitimages-response.json               --write-out '%{http_code}'               --request POST               --header "Accept: application/json"               --data-urlencode "access_token=${WEBASYST_API_TOKEN}"               "${KITIMAGES_SYNC_URL}"
           )"
           echo "HTTP: ${http_code}"
           cat /tmp/kitimages-response.json || true
