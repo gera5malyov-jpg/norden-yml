@@ -1,0 +1,61 @@
+name: Probe Riva duplicate UCH once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe-riva-uch-duplicate-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe exact SKU
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,time,urllib.parse,urllib.request,urllib.error
+          sku='УЧ-00000156'
+          H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          rows=[]
+          page=1
+          while True:
+              u='https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode({'name':sku,'page':page,'per_page':100})
+              for _ in range(10):
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(u,headers=H),timeout=60) as r: p=json.loads(r.read().decode())
+                      break
+                  except urllib.error.HTTPError as e:
+                      if e.code==429:
+                          time.sleep(int(e.headers.get('Retry-After') or 3)); continue
+                      raise
+              batch=p.get('variants') or p.get('items') or p.get('results') or []
+              if isinstance(batch,dict): batch=batch.get('items') or []
+              rows.extend(batch)
+              total=p.get('total_count') or p.get('total') or (p.get('meta') or {}).get('total_count') or (p.get('meta') or {}).get('total')
+              if not batch or len(batch)<100 or (total is not None and len(rows)>=int(total)): break
+              page+=1
+          exact=[]
+          for x in rows:
+              if str(x.get('sku') or '').strip()!=sku: continue
+              b=x.get('brand')
+              if isinstance(b,dict): b=b.get('title') or b.get('name') or b.get('value')
+              exact.append({k:x.get(k) for k in ['id','kit_id','sku','name','status','created_at','updated_at','product_id','product_card_id']})
+              exact[-1]['brand']=b
+              exact[-1]['media_count']=len(x.get('media') or [])
+              exact[-1]['char_count']=len(x.get('characteristics') or [])
+          out={'sku':sku,'search_rows':len(rows),'exact_count':len(exact),'variants':exact}
+          os.makedirs('riva-kit',exist_ok=True)
+          open('riva-kit/duplicate_uch_probe.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add riva-kit/duplicate_uch_probe.json
+          git commit -m 'Probe Riva UCH duplicate' || exit 0
+          git pull --rebase || true
+          git push || true
