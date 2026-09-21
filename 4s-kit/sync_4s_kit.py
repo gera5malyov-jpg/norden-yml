@@ -432,6 +432,15 @@ def add_index(index,key,variant):
     if nk:
         index[nk].append(variant)
 
+def canonical_variant_key(v):
+    """Prefer the oldest integration/card identity: lowest numeric kit_id, then id."""
+    kid=s(v.get('kit_id'))
+    try:
+        numeric=int(kid)
+    except Exception:
+        numeric=10**18
+    return (numeric,s(v.get('id')))
+
 def match_offer(offer,by_code_site,by_article,by_name):
     scores={}
     reasons=defaultdict(set)
@@ -462,7 +471,10 @@ def match_offer(offer,by_code_site,by_article,by_name):
         for row in rows:
             if s(row.get('id')):
                 all_rows[s(row.get('id'))]=row
-    best=[all_rows[vid] for vid in best_ids if vid in all_rows]
+    best=sorted(
+        [all_rows[vid] for vid in best_ids if vid in all_rows],
+        key=canonical_variant_key,
+    )
 
     # One best card is unambiguous. If several cards share an exact supplier
     # article/code, treat them all as existing matches rather than creating a duplicate.
@@ -507,7 +519,49 @@ def main():
         add_index(by_article,s(v.get('sku')),v)
         add_index(by_name,s(v.get('name')),v)
 
-    print(f'KIT variants scanned: {len(variants)}; managed 4 Сезона: {len(managed)}',flush=True)
+    # Detect pre-existing exact duplicates before any write. Same non-empty supplier
+    # code + same normalized name must resolve to a single canonical card.
+    duplicate_variant_ids=set()
+    duplicate_groups=[]
+    for code_key, rows_for_code in by_code_site.items():
+        by_exact_name=defaultdict(list)
+        for row in rows_for_code:
+            by_exact_name[norm(row.get('name'))].append(row)
+        for name_key, same_rows in by_exact_name.items():
+            uniq={s(x.get('id')):x for x in same_rows if s(x.get('id'))}
+            group=sorted(uniq.values(),key=canonical_variant_key)
+            if code_key and name_key and len(group)>1:
+                canonical=group[0]
+                extras=group[1:]
+                duplicate_variant_ids.update(s(x.get('id')) for x in extras)
+                duplicate_groups.append({
+                    'code_site':char_value(canonical,code_site_id),
+                    'name':s(canonical.get('name')),
+                    'canonical_id':s(canonical.get('id')),
+                    'canonical_kit_id':s(canonical.get('kit_id')),
+                    'duplicate_ids':[s(x.get('id')) for x in extras],
+                    'duplicate_kit_ids':[s(x.get('kit_id')) for x in extras],
+                })
+
+    print(
+        f'KIT variants scanned: {len(variants)}; managed 4 Сезона: {len(managed)}; '
+        f'exact duplicate groups={len(duplicate_groups)} extras={len(duplicate_variant_ids)}',
+        flush=True,
+    )
+    # Remove quarantined duplicates from matching indexes. They stay in managed so
+    # the normal absent-item logic will set their СПБ/МСК stock to zero.
+    def keep_canonical(index):
+        for key in list(index.keys()):
+            index[key]=[
+                row for row in index[key]
+                if s(row.get('id')) not in duplicate_variant_ids
+            ]
+            if not index[key]:
+                del index[key]
+    keep_canonical(by_code_site)
+    keep_canonical(by_article)
+    keep_canonical(by_name)
+
     kitcats=kit.categories()
 
     report={
@@ -529,8 +583,14 @@ def main():
         'description_repairs':0,
         'brand_patched':0,'sku_fixed_to_333_kit_id':0,'code_site_filled':0,
         'webasyst_333_marked':0,
-        'absent_to_zero':0,'collisions':0,'errors':[],
+        'absent_to_zero':0,'collisions':0,
+        'existing_duplicate_groups':0,'duplicate_variants_quarantined':0,
+        'duplicate_details':[],'errors':[],
     }
+    report['existing_duplicate_groups']=len(duplicate_groups)
+    report['duplicate_variants_quarantined']=len(duplicate_variant_ids)
+    report['duplicate_details']=duplicate_groups[:300]
+
     seen_ids=set()
     price_updates={}
     stock_updates={}
@@ -566,8 +626,21 @@ def main():
             continue
 
         if rows:
+            rows=sorted(rows,key=canonical_variant_key)
             chosen=rows[0]
-            extra_rows=rows[1:]
+            extra_rows=[]
+            # A final safety guard: never write to multiple cards for one supplier offer.
+            # Any additional strong candidates are treated as collisions and left for audit.
+            if len(rows)>1:
+                report['collisions']+=1
+                for extra in rows[1:]:
+                    duplicate_variant_ids.add(s(extra.get('id')))
+                if len(report['errors'])<300:
+                    report['errors'].append({
+                        'source_code':source,
+                        'name':o.get('name'),
+                        'message':'multiple strong existing matches; only canonical oldest card updated',
+                    })
             report['matched']+=1
             reason_set=set()
             for reasons in (match_meta.get('reasons') or {}).values():
@@ -577,6 +650,21 @@ def main():
             elif 'article' in reason_set:
                 report['matched_by_article']+=1
             elif 'name' in reason_set:
+                report['matched_by_name']+=1
+
+        if chosen is None:
+            # Last-resort pre-create exact-name safety guard. Never create when an
+            # existing managed card has the same normalized name.
+            same_name_all=[
+                v for v in managed.values()
+                if norm(v.get('name'))==norm(o.get('name'))
+                and s(v.get('id')) not in duplicate_variant_ids
+            ]
+            if same_name_all:
+                same_name_all=sorted(same_name_all,key=canonical_variant_key)
+                chosen=same_name_all[0]
+                rows=[chosen]
+                report['matched']+=1
                 report['matched_by_name']+=1
 
         if chosen is None:
@@ -812,6 +900,7 @@ def main():
 
     report['absent_to_zero']=len(absent_ids)
     report['absent_stock_updates']=len(zero)
+    report['duplicate_variants_quarantined']=len(duplicate_variant_ids)
     report['finished_at']=datetime.now(timezone.utc).isoformat()
     report['status']='ok' if not report['errors'] else 'degraded'
     REPORT.parent.mkdir(parents=True,exist_ok=True)
