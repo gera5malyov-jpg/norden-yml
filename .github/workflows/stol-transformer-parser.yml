@@ -2,6 +2,12 @@ name: STOL-TRANSFORMER — Parse protected catalog
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'stol-transformer/parser.py'
+      - 'stol-transformer/requirements.txt'
+      - '.github/workflows/stol-transformer-parser.yml'
 
 permissions:
   contents: write
