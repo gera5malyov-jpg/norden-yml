@@ -1,0 +1,141 @@
+name: Notify Kenner KIT result by Gmail
+
+on:
+  workflow_run:
+    workflows: ["Kenner KIT sync"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Проверить успешность полной загрузки Kenner
+        id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_CONCLUSION: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion || 'manual' }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          from pathlib import Path
+
+          path=Path('kenner-kit/last_sync_report.json')
+          if not path.exists():
+              print('send=false')
+              print('reason=no_report')
+              raise SystemExit
+
+          try:
+              r=json.loads(path.read_text(encoding='utf-8'))
+          except Exception:
+              print('send=false')
+              print('reason=bad_report')
+              raise SystemExit
+
+          conclusion=(os.getenv('RUN_CONCLUSION') or '').strip().lower()
+          source=int(r.get('source_products') or 0)
+          processed=int(r.get('processed') or 0)
+          errors=len(r.get('errors') or [])
+          complete=bool(r.get('complete'))
+          ok=(r.get('status')=='ok' and complete and source>0 and processed==source and errors==0)
+
+          if os.getenv('EVENT_NAME')=='workflow_dispatch':
+              ok=True
+
+          print('send=' + ('true' if ok else 'false'))
+          print('source=' + str(source))
+          print('processed=' + str(processed))
+          print('created=' + str(int(r.get('created') or 0)))
+          print('updated=' + str(int(r.get('updated_existing') or 0)))
+          print('image_errors=' + str(int(r.get('image_errors') or 0)))
+          print('conclusion=' + conclusion)
+          PY
+
+      - name: Отправить готовность Kenner на shop@office-mag.com
+        if: steps.check.outputs.send == 'true'
+        env:
+          GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          RUN_URL: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.html_url || '' }}
+          RUN_ID: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.id || github.run_id }}
+        run: |
+          python - <<'PY'
+          import json, os, smtplib, ssl
+          from email.message import EmailMessage
+          from pathlib import Path
+
+          user=(os.getenv('GMAIL_SMTP_USER') or '').strip()
+          password=''.join((os.getenv('GMAIL_APP_PASSWORD') or '').split())
+          recipient=(os.getenv('RECIPIENT') or '').strip()
+          run_url=(os.getenv('RUN_URL') or '').strip()
+          run_id=(os.getenv('RUN_ID') or '').strip()
+
+          if not user or not password:
+              raise SystemExit('Не настроены GMAIL_SMTP_USER и/или GMAIL_APP_PASSWORD')
+
+          r=json.loads(Path('kenner-kit/last_sync_report.json').read_text(encoding='utf-8'))
+          source=int(r.get('source_products') or 0)
+          processed=int(r.get('processed') or 0)
+          created=int(r.get('created') or 0)
+          updated=int(r.get('updated_existing') or 0)
+          images=int(r.get('images_uploaded') or 0)
+          image_errors=int(r.get('image_errors') or 0)
+          price_updates=int(r.get('price_updates') or 0)
+          stock_updates=int(r.get('stock_updates') or 0)
+
+          subject='[Kenner → Яндекс КИТ] Загрузка каталога завершена'
+          lines=[
+              'Автоматический отчёт GitHub: Kenner → Яндекс КИТ',
+              '',
+              'Результат: УСПЕШНО',
+              f'Товаров в фиде: {source}',
+              f'Обработано: {processed}',
+              f'Создано новых карточек: {created}',
+              f'Обновлено существующих: {updated}',
+              f'Загружено изображений: {images}',
+              f'Ошибок изображений: {image_errors}',
+              f'Обновлений цен: {price_updates}',
+              f'Обновлений остатков: {stock_updates}',
+              '',
+              'Артикул: 334-<артикул поставщика>',
+              'Характеристика Webasyst: 334',
+              'Остаток: одинаково на складах МСК и СПБ привозной',
+              'Цены и остатки: ежедневное обновление через GitHub Actions',
+              f'GitHub run: {run_id}',
+          ]
+          if run_url:
+              lines.append('Ссылка на запуск GitHub: '+run_url)
+
+          msg=EmailMessage()
+          msg['From']=user
+          msg['To']=recipient
+          msg['Subject']=subject
+          msg.set_content('\n'.join(lines))
+
+          context=ssl.create_default_context()
+          errors=[]
+          try:
+              with smtplib.SMTP('smtp.gmail.com',587,timeout=60) as smtp:
+                  smtp.ehlo(); smtp.starttls(context=context); smtp.ehlo()
+                  smtp.login(user,password); smtp.send_message(msg)
+              print('Письмо отправлено на '+recipient)
+          except Exception as exc:
+              errors.append('587/STARTTLS: '+repr(exc))
+              try:
+                  with smtplib.SMTP_SSL('smtp.gmail.com',465,context=context,timeout=60) as smtp:
+                      smtp.login(user,password); smtp.send_message(msg)
+                  print('Письмо отправлено на '+recipient+' через SSL')
+              except Exception as exc2:
+                  errors.append('465/SSL: '+repr(exc2))
+                  raise SystemExit('Не удалось отправить письмо: '+' | '.join(errors))
+          PY
