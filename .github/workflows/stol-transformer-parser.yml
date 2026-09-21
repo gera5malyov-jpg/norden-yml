@@ -50,6 +50,10 @@ jobs:
           if [ -f stol-transformer/output/report.json ]; then
             cat stol-transformer/output/report.json
           fi
+          if [ -f stol-transformer/output/auth_debug.json ]; then
+            echo "=== AUTH DEBUG (no secret values) ==="
+            cat stol-transformer/output/auth_debug.json
+          fi
 
       - name: Upload parser results
         if: always()
