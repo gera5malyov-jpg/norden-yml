@@ -2,7 +2,7 @@ name: Sync 4 Сезона to Yandex KIT
 
 on:
   workflow_run:
-    workflows: ["Update 4s-mebel YML", "Fast refresh 4s brand-only feed once", "Verify 4S KIT duplicates after archive"]
+    workflows: ["Update 4s-mebel YML", "Fast refresh 4s brand-only feed once", "Archive 4S KIT duplicates"]
     types: [completed]
   workflow_dispatch:
 
@@ -45,7 +45,7 @@ jobs:
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           FOURS_EXISTING_ONLY: '0'
-          FOURS_FORCE_MEDIA_REFRESH: ${{ github.event_name == 'workflow_run' && (github.event.workflow_run.name == 'Fast refresh 4s brand-only feed once' || github.event.workflow_run.name == 'Verify 4S KIT duplicates after archive') && '1' || '0' }}
+          FOURS_FORCE_MEDIA_REFRESH: ${{ github.event_name == 'workflow_run' && (github.event.workflow_run.name == 'Fast refresh 4s brand-only feed once' || github.event.workflow_run.name == 'Archive 4S KIT duplicates') && '1' || '0' }}
         run: python 4s-kit/sync_4s_kit.py
       - name: Commit sync report
         if: always()
