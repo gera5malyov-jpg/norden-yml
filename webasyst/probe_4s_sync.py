@@ -108,12 +108,12 @@ def char_value(v, cid):
 
 def main():
     wa = WebasystClient()
-    kit = Kit(os.getenv("YANDEX_KIT_TOKEN", ""))
 
     types = wa.call("shop.type.getList")
     type_rows = list(types.values()) if isinstance(types, dict) else list(types or [])
     type_matches = find_exact(type_rows, TARGET_TYPE_NAME)
     if len(type_matches) != 1:
+        print(json.dumps({"type_candidates": [{"id": s(x.get("id")), "name": row_name(x)} for x in type_rows if "кроват" in norm(row_name(x))]}, ensure_ascii=False, indent=2))
         raise RuntimeError(f"Expected exactly one Webasyst type {TARGET_TYPE_NAME!r}; found {len(type_matches)}")
     target_type = type_matches[0]
     type_id = s(target_type.get("id"))
@@ -122,16 +122,16 @@ def main():
     stock_rows = list(stocks.values()) if isinstance(stocks, dict) else list(stocks or [])
     stock_matches = find_exact(stock_rows, TARGET_WA_STOCK)
     if len(stock_matches) != 1:
+        print(json.dumps({"stock_candidates": [{"id": s(x.get("id")), "name": row_name(x)} for x in stock_rows if "33" in norm(row_name(x)) or "кроват" in norm(row_name(x))]}, ensure_ascii=False, indent=2))
         raise RuntimeError(f"Expected exactly one Webasyst stock {TARGET_WA_STOCK!r}; found {len(stock_matches)}")
     wa_stock = stock_matches[0]
 
-    # Verify current target type count and SKU availability.
     offset = 0
     products = []
     while True:
         payload = wa.call(
             "shop.product.search",
-            params={"hash": f"type/{type_id}", "offset": offset, "limit": 1000, "fields": "*,skus"},
+            params={"hash": f"type/{type_id}", "offset": offset, "limit": 1000, "fields": "*,skus,stock_counts"},
         )
         if isinstance(payload, dict):
             batch = payload.get("products") or payload.get("items") or []
@@ -145,28 +145,6 @@ def main():
             break
         offset += len(batch)
 
-    kit_wh = kit.all("/v1/warehouses", {"status": "ACTIVE"})
-    kit_wh_matches = [x for x in kit_wh if row_name(x) == TARGET_KIT_STOCK]
-    if len(kit_wh_matches) != 1:
-        raise RuntimeError(f"Expected exactly one KIT stock {TARGET_KIT_STOCK!r}; found {len(kit_wh_matches)}")
-    kit_spb = kit_wh_matches[0]
-
-    chars = kit.all("/v1/characteristics", {"status": ["ACTIVE"]})
-    article_matches = [x for x in chars if norm(row_name(x)) == norm(ARTICLE_TITLE)]
-    if len(article_matches) != 1:
-        raise RuntimeError(f"Expected exactly one KIT characteristic {ARTICLE_TITLE!r}; found {len(article_matches)}")
-    article_id = s(article_matches[0].get("id"))
-
-    # Current 4S KIT sync report already contains the full managed-brand count.
-    report_path = os.path.join(os.path.dirname(__file__), "..", "4s-kit", "last_sync_report.json")
-    managed_count = None
-    if os.path.exists(report_path):
-        try:
-            with open(report_path, "r", encoding="utf-8") as fh:
-                managed_count = json.load(fh).get("existing_managed_variants")
-        except Exception:
-            managed_count = None
-
     wa_skus = []
     for p in products:
         skus = p.get("skus")
@@ -175,14 +153,11 @@ def main():
         elif isinstance(skus, list):
             wa_skus.extend(x for x in skus if isinstance(x, dict))
 
-    result = {
+    print(json.dumps({
         "webasyst_type": {"id": type_id, "name": row_name(target_type), "product_count": len(products), "sku_count": len(wa_skus)},
         "webasyst_stock": {"id": s(wa_stock.get("id")), "name": row_name(wa_stock)},
-        "kit_stock": {"id": s(kit_spb.get("id")), "name": row_name(kit_spb)},
-        "kit_brand_variants_from_last_sync": managed_count,
-        "kit_article_characteristic_id": article_id,
-    }
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+        "sample_sku_keys": sorted(wa_skus[0].keys()) if wa_skus else [],
+    }, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
