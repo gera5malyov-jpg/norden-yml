@@ -1,0 +1,36 @@
+name: Kenner KIT to Webasyst now
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/kenner-kit-to-webasyst-now.yml']
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Sync Kenner from KIT to Webasyst
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          KENNER_WEBASYST_WRITE_DELAY: '0.60'
+        run: python webasyst/sync_kenner_to_webasyst.py
+      - name: Commit report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add webasyst/last_kenner_webasyst_sync.json 2>/dev/null || true
+          git commit -m 'Update Kenner Webasyst sync report' || exit 0
+          git pull --rebase || true
+          git push || true
