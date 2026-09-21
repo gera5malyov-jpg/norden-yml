@@ -32,6 +32,8 @@ KIT_STOCK_NAME = "СПБ"
 BRAND = "4 Сезона"
 ARTICLE_TITLE = "Артикул"
 CODE_SITE_TITLE = "Код для сайта"
+WEBASYST_TITLE = "Webasyst"
+WEBASYST_VALUE = "333"
 FEED = ROOT / "4s-mebel.yml"
 REPORT = HERE / "last_4s_kit_sync_report.json"
 MONEY = Decimal("0.01")
@@ -382,6 +384,8 @@ def main():
         "kit_stock": KIT_STOCK_NAME,
         "kit_stock_id": None,
         "kit_brand_variants": 0,
+        "kit_webasyst_333_variants": 0,
+        "kit_skipped_without_webasyst_333": 0,
         "kit_unique_articles": 0,
         "webasyst_products": 0,
         "webasyst_skus": 0,
@@ -436,16 +440,23 @@ def main():
     article_id = s(article_char.get("id"))
     code_site_char = exact_one(kit_chars, CODE_SITE_TITLE, label="KIT characteristic")
     code_site_id = s(code_site_char.get("id"))
+    webasyst_char = exact_one(kit_chars, WEBASYST_TITLE, label="KIT characteristic")
+    webasyst_id = s(webasyst_char.get("id"))
 
     feed = parse_feed()
     _, wa_features_by_title = feature_defs(wa, type_id)
 
-    # KIT scan: only brand 4 Сезона. Duplicate articles are quarantined.
+    # KIT scan: two independent gates are required.
+    # A product must be brand 4 Сезона AND explicitly routed to Webasyst type 333.
     kit_by_article = defaultdict(list)
     for variant in kit.variants():
         if s(variant.get("brand")) != BRAND:
             continue
         report["kit_brand_variants"] += 1
+        if char_value(variant, webasyst_id) != WEBASYST_VALUE:
+            report["kit_skipped_without_webasyst_333"] += 1
+            continue
+        report["kit_webasyst_333_variants"] += 1
         article = kit_article(variant, article_id)
         if not article:
             report["missing_kit_article"] += 1
