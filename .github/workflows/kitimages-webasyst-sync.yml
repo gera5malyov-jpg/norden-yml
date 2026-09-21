@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '7,37 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/kitimages-run.txt'
 
 permissions:
   contents: read
@@ -15,10 +19,10 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 120
 
     steps:
-      - name: Run KIT images plugin sync
+      - name: Run KIT images plugin sync in bounded steps
         env:
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
@@ -35,44 +39,76 @@ jobs:
             exit 1
           fi
 
-          http_code="$(
-            curl --silent --show-error               --connect-timeout 30               --max-time 900               --output /tmp/kitimages-response.json               --write-out '%{http_code}'               --request POST               --header "Accept: application/json"               --data-urlencode "access_token=${WEBASYST_API_TOKEN}"               --data-urlencode "kit_token=${YANDEX_KIT_TOKEN}"               "${KITIMAGES_SYNC_URL}"
-          )"
+          run_key=""
+          reset=1
 
-          echo "HTTP: ${http_code}"
+          for step in $(seq 1 500); do
+            args=(
+              --silent --show-error
+              --connect-timeout 30
+              --max-time 120
+              --output /tmp/kitimages-response.json
+              --write-out '%{http_code}'
+              --request POST
+              --header "Accept: application/json"
+              --data-urlencode "access_token=${WEBASYST_API_TOKEN}"
+              --data-urlencode "kit_token=${YANDEX_KIT_TOKEN}"
+              --data-urlencode "reset=${reset}"
+            )
+            if [ -n "${run_key}" ]; then
+              args+=(--data-urlencode "run_key=${run_key}")
+            fi
 
-          python - <<'PY'
-          import json
-          from pathlib import Path
+            http_code="$(curl "${args[@]}" "${KITIMAGES_SYNC_URL}")"
+            echo "Step ${step}: HTTP ${http_code}"
 
-          path = Path("/tmp/kitimages-response.json")
-          raw = path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
-          try:
-              data = json.loads(raw)
-          except Exception:
-              print(raw[:4000])
-              raise SystemExit("Plugin returned non-JSON response")
+            if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
+              cat /tmp/kitimages-response.json || true
+              echo
+              exit 1
+            fi
 
-          report = data.get("report") or {}
-          summary = {
-              "status": data.get("status"),
-              "candidate_products": report.get("candidate_products"),
-              "matched_products": report.get("matched_products"),
-              "updated_products": report.get("updated_products"),
-              "saved_image_urls": report.get("saved_image_urls"),
-              "products_without_kit_match": report.get("products_without_kit_match"),
-              "products_without_kit_images": report.get("products_without_kit_images"),
-              "kit_duplicate_skus": report.get("kit_duplicate_skus"),
-              "errors": report.get("errors") or [],
-              "started_at": report.get("started_at"),
-              "finished_at": report.get("finished_at"),
-          }
-          print(json.dumps(summary, ensure_ascii=False, indent=2))
+            status="$(jq -r '.status // "error"' /tmp/kitimages-response.json)"
+            complete="$(jq -r '.complete // false' /tmp/kitimages-response.json)"
+            new_run_key="$(jq -r '.run_key // empty' /tmp/kitimages-response.json)"
+            phase="$(jq -r '.progress.phase // "unknown"' /tmp/kitimages-response.json)"
 
-          if data.get("status") != "ok":
-              raise SystemExit(1)
-          PY
+            if [ -n "${new_run_key}" ]; then
+              run_key="${new_run_key}"
+            fi
 
-          if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
-            exit 1
-          fi
+            jq '{
+              status,
+              complete,
+              run_key,
+              progress,
+              summary: {
+                candidate_products: .report.candidate_products,
+                candidate_skus: .report.candidate_skus,
+                kit_variants_scanned: .report.kit_variants_scanned,
+                matched_products: .report.matched_products,
+                updated_products: .report.updated_products,
+                saved_image_urls: .report.saved_image_urls,
+                products_without_kit_match: .report.products_without_kit_match,
+                products_without_kit_images: .report.products_without_kit_images,
+                kit_duplicate_skus: .report.kit_duplicate_skus,
+                removed_stale_products: .report.removed_stale_products,
+                errors: .report.errors
+              }
+            }' /tmp/kitimages-response.json
+
+            if [ "${status}" = "error" ]; then
+              exit 1
+            fi
+            if [ "${complete}" = "true" ]; then
+              echo "KIT image synchronization completed."
+              exit 0
+            fi
+
+            reset=0
+            echo "Continuing phase: ${phase}"
+            sleep 1
+          done
+
+          echo "::error::KIT image synchronization exceeded 500 steps"
+          exit 1
