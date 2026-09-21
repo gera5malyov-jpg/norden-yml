@@ -1,0 +1,63 @@
+name: Export 4S parser CSV
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/export-4s-parser-csv.yml'
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build CSV from current parser feed
+        run: |
+          python - <<'PY'
+          import csv, json, xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          root=ET.parse('4s-mebel.yml').getroot()
+          categories={x.get('id'): (x.text or '').strip() for x in root.findall('.//categories/category')}
+          offers=root.findall('.//offers/offer')
+
+          param_names=[]
+          seen=set()
+          for off in offers:
+              for p in off.findall('param'):
+                  name=(p.get('name') or '').strip()
+                  if name and name not in seen:
+                      seen.add(name)
+                      param_names.append(name)
+
+          fixed=['Наименование','Артикул поставщика','Цена','Старая цена','Наличие','Категория','URL','Описание','Изображения']
+          fields=fixed+param_names
+          out=Path('4s-parser-current.csv')
+          with out.open('w',encoding='utf-8-sig',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=fields,delimiter=';')
+              w.writeheader()
+              for off in offers:
+                  params={(p.get('name') or '').strip(): (p.text or '').strip() for p in off.findall('param') if (p.get('name') or '').strip()}
+                  row={
+                      'Наименование':(off.findtext('name') or '').strip(),
+                      'Артикул поставщика':(off.findtext('vendorCode') or '').strip(),
+                      'Цена':(off.findtext('price') or '').strip(),
+                      'Старая цена':(off.findtext('oldprice') or '').strip(),
+                      'Наличие':params.get('Наличие',''),
+                      'Категория':categories.get((off.findtext('categoryId') or '').strip(),''),
+                      'URL':(off.findtext('url') or '').strip(),
+                      'Описание':(off.findtext('description') or '').strip(),
+                      'Изображения':' | '.join((x.text or '').strip() for x in off.findall('picture') if (x.text or '').strip()),
+                  }
+                  row.update(params)
+                  w.writerow(row)
+          print(f'CSV rows={len(offers)} params={len(param_names)} file={out}')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 4s-parser-current-csv
+          path: 4s-parser-current.csv
+          if-no-files-found: error
+          retention-days: 1
