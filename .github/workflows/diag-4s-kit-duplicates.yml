@@ -1,0 +1,67 @@
+name: Diagnose 4S KIT duplicates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diag-4s-kit-duplicates.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kit-api-write
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Diagnose Dakar duplicates in KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import importlib.util, json, pathlib
+
+          path=pathlib.Path('4s-kit/sync_4s_kit.py')
+          spec=importlib.util.spec_from_file_location('sync4s', path)
+          mod=importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(mod)
+
+          kit=mod.Kit(__import__('os').environ['YANDEX_KIT_TOKEN'])
+          chars=kit.characteristics()
+          code_site_id,article_id=mod.resolve_special_characteristics(chars)
+          rows=kit.variants()
+
+          hits=[]
+          for v in rows:
+              name=mod.s(v.get('name'))
+              if 'дакар' not in name.casefold():
+                  continue
+              hits.append({
+                  'id': mod.s(v.get('id')),
+                  'kit_id': mod.s(v.get('kit_id')),
+                  'sku': mod.s(v.get('sku')),
+                  'name': name,
+                  'brand_raw': v.get('brand'),
+                  'brand_type': type(v.get('brand')).__name__,
+                  'code_site': mod.char_value(v,code_site_id),
+                  'article': mod.char_value(v,article_id),
+                  'product_id': mod.s(v.get('product_id')),
+                  'category_ids': v.get('category_ids'),
+                  'pricing': v.get('pricing'),
+              })
+
+          print('DAKAR_HITS_START')
+          print(json.dumps(hits,ensure_ascii=False,indent=2))
+          print('DAKAR_HITS_END')
+          print(f'TOTAL_VARIANTS={len(rows)} DAKAR_HITS={len(hits)}')
+          PY
