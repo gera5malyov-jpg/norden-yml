@@ -1,4 +1,4 @@
-name: Ozon Norden MSK audit once
+name: Ozon Norden MSK delivery audit once
 
 on:
   push:
@@ -16,40 +16,19 @@ jobs:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
     steps:
-      - name: Audit Norden MSK warehouse
+      - name: Audit Norden MSK delivery polygons
         shell: bash
         run: |
           set -euo pipefail
           WID=1020005029910180
+          MID=46440111
 
-          printf '{"limit":200,"warehouse_ids":[%s]}' "$WID" > /tmp/warehouse_req.json
-          curl --fail --silent --show-error \
-            --request POST "https://api-seller.ozon.ru/v2/warehouse/list" \
+          printf '{"delivery_method_id":%s,"warehouse_id":%s}' "$MID" "$WID" > /tmp/polygon_req.json
+          code=$(curl --silent --show-error --output /tmp/polygons.json --write-out "%{http_code}" \
+            --request POST "https://api-seller.ozon.ru/v1/polygon/list" \
             --header "Client-Id: $OZON_CLIENT_ID" \
             --header "Api-Key: $OZON_API_KEY" \
             --header "Content-Type: application/json" \
-            --data-binary @/tmp/warehouse_req.json \
-            > /tmp/warehouse.json
-
-          echo "WAREHOUSE:"
-          python - <<'PY'
-          import json
-          d=json.load(open('/tmp/warehouse.json'))
-          print(json.dumps(d, ensure_ascii=False, indent=2))
-          PY
-
-          printf '{"filter":{"warehouse_id":%s},"limit":100}' "$WID" > /tmp/methods_req.json
-          curl --fail --silent --show-error \
-            --request POST "https://api-seller.ozon.ru/v2/delivery-method/list" \
-            --header "Client-Id: $OZON_CLIENT_ID" \
-            --header "Api-Key: $OZON_API_KEY" \
-            --header "Content-Type: application/json" \
-            --data-binary @/tmp/methods_req.json \
-            > /tmp/methods.json
-
-          echo "DELIVERY_METHODS:"
-          python - <<'PY'
-          import json
-          d=json.load(open('/tmp/methods.json'))
-          print(json.dumps(d, ensure_ascii=False, indent=2))
-          PY
+            --data-binary @/tmp/polygon_req.json)
+          echo "POLYGON_LIST_HTTP=$code"
+          cat /tmp/polygons.json
