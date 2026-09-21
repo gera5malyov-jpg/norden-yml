@@ -1124,6 +1124,55 @@ class Parser:
                         category = crumbs[-1] if crumbs else ""
 
                         product = self.extract_product(html, url, category)
+
+                        # Одноразовая диагностика эталонной карточки AR9553:
+                        # сохраняем уже отрисованный DOM без cookies/секретов,
+                        # чтобы точно разобрать варианты цветов и подписи цен.
+                        if "AR9553" in url.upper():
+                            (OUT / "sample_AR9553.html").write_text(html, encoding="utf-8")
+                            dbg = {
+                                "url": url,
+                                "body_text": clean_text(soup.get_text("\n", strip=True))[:12000],
+                                "anchors": [
+                                    {
+                                        "text": clean_text(a.get_text(" ", strip=True))[:120],
+                                        "href": str(a.get("href") or ""),
+                                        "class": " ".join(a.get("class") or []),
+                                    }
+                                    for a in soup.find_all("a", href=True)
+                                ][:500],
+                                "swatch_nodes": [
+                                    {
+                                        "tag": n.name,
+                                        "text": clean_text(n.get_text(" ", strip=True))[:120],
+                                        "class": " ".join(n.get("class") or []),
+                                        "href": str(n.get("href") or ""),
+                                        "onclick": str(n.get("onclick") or ""),
+                                        "data_href": str(n.get("data-href") or ""),
+                                        "data_url": str(n.get("data-url") or ""),
+                                        "data_sku": str(n.get("data-sku") or ""),
+                                        "data_product": str(n.get("data-product") or ""),
+                                        "title": str(n.get("title") or ""),
+                                    }
+                                    for n in soup.select(
+                                        "[class*='swatch'], [class*='color'], [class*='variant'], "
+                                        "[data-sku], [data-product], [data-href], [data-url], [onclick]"
+                                    )
+                                ][:1000],
+                                "scripts": [
+                                    {
+                                        "src": str(s.get("src") or ""),
+                                        "type": str(s.get("type") or ""),
+                                        "text_head": clean_text(s.string or s.get_text(" ", strip=True))[:1200],
+                                    }
+                                    for s in soup.find_all("script")
+                                ][:200],
+                            }
+                            (OUT / "sample_AR9553_debug.json").write_text(
+                                json.dumps(dbg, ensure_ascii=False, indent=2),
+                                encoding="utf-8",
+                            )
+
                         if product:
                             detailed.append(product)
                             detailed.extend(
