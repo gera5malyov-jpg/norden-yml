@@ -21,40 +21,12 @@ jobs:
             echo "PEK credentials are missing"
             exit 2
           fi
+
           DATE_END="$(date -u +%F)"
           DATE_BEGIN="$(date -u -d '30 days ago' +%F)"
           BODY=$(printf '{"selectBy":1,"dateBegin":"%s","dateEnd":"%s"}' "$DATE_BEGIN" "$DATE_END")
-          HTTP_CODE=$(curl -sS -o /tmp/pek.json -w '%{http_code}'             --basic --user "$PEK_LOGIN:$PEK_API_KEY"             -H 'Content-Type: application/json; charset=utf-8'             -X POST -d "$BODY"             'https://kabinet.pecom.ru/api/v1/cargos/listallorderbylogin/')
+
+          HTTP_CODE=$(curl -sS -o /tmp/pek.json -w '%{http_code}' --basic --user "$PEK_LOGIN:$PEK_API_KEY" -H 'Content-Type: application/json; charset=utf-8' -X POST -d "$BODY" 'https://kabinet.pecom.ru/api/v1/cargos/listallorderbylogin/')
           echo "PEK_HTTP_STATUS=$HTTP_CODE"
-          python3 - <<'PY'
-import json, sys
-p='/tmp/pek.json'
-with open(p,'r',encoding='utf-8') as f:
-    data=json.load(f)
-if isinstance(data, dict) and data.get('error'):
-    e=data['error']
-    print("PEK_API_RESULT=ERROR")
-    print("PEK_API_ERROR_STATUS="+str(e.get('status','')))
-    print("PEK_API_ERROR_TITLE="+str(e.get('title',''))[:300])
-    sys.exit(3)
-if isinstance(data, dict):
-    cargos = data.get('cargos')
-    if cargos is None:
-        cargos = data.get('сargos')
-elif isinstance(data, list):
-    cargos = data
-else:
-    cargos = None
-if cargos is None:
-    print("PEK_API_RESULT=UNEXPECTED_RESPONSE")
-    sys.exit(4)
-print("PEK_API_RESULT=OK")
-print("PEK_SHIPMENTS_30D="+str(len(cargos)))
-# Privacy-safe aggregate only; do not print cargo codes, names, phones, addresses, or raw response.
-statuses={}
-for c in cargos:
-    if isinstance(c, dict):
-        s=c.get('cargoStatus')
-        statuses[str(s)] = statuses.get(str(s),0)+1
-print("PEK_STATUS_COUNTS="+json.dumps(statuses, ensure_ascii=False, sort_keys=True))
-PY
+
+          python3 -c 'import json,sys; data=json.load(open("/tmp/pek.json",encoding="utf-8")); err=data.get("error") if isinstance(data,dict) else None; print("PEK_API_RESULT=ERROR") if err else None; print("PEK_API_ERROR_STATUS="+str(err.get("status",""))) if err else None; print("PEK_API_ERROR_TITLE="+str(err.get("title",""))[:300]) if err else None; sys.exit(3) if err else None; c=(data.get("cargos") if isinstance(data,dict) else data); c=(data.get("сargos") if isinstance(data,dict) and c is None else c); print("PEK_API_RESULT=OK"); print("PEK_SHIPMENTS_30D="+str(len(c or []))); s={}; [(s.__setitem__(str(x.get("cargoStatus")),s.get(str(x.get("cargoStatus")),0)+1)) for x in (c or []) if isinstance(x,dict)]; print("PEK_STATUS_COUNTS="+json.dumps(s,ensure_ascii=False,sort_keys=True))'
