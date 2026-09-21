@@ -24,13 +24,12 @@ on:
     branches: [main]
     paths:
       - 'norden-kit/sync_norden_kit.py'
-      - '.github/workflows/norden-kit-sync.yml'
 
 permissions:
   contents: write
 
 concurrency:
-  group: norden-kit-price-stock-daily-v2
+  group: norden-kit-price-stock-daily
   cancel-in-progress: false
 
 jobs:
