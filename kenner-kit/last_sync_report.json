@@ -1,0 +1,23 @@
+{
+  "status": "ok",
+  "feed_url": "https://kennermebel.ru/marketplace/439884.xml",
+  "source_products": 61,
+  "processed": 61,
+  "created": 61,
+  "updated_existing": 0,
+  "duplicate_variants_archived": 0,
+  "images_uploaded": 1054,
+  "image_errors": 2,
+  "price_updates": 0,
+  "stock_updates": 0,
+  "errors": [],
+  "warnings": [
+    "334-325184: image failed https://cdn.insales-shop.ru/images/products/1/6921/2439084809/DO1300_bl_bl__2_.jpeg: ('Connection broken: IncompleteRead(0 bytes read, 1673313 more expected)', IncompleteRead(0 bytes read, 1673313 more expected))",
+    "334-323231: image failed https://cdn.insales-shop.ru/images/products/1/8041/3057639273/LD900_wh_wh_04.jpg: ('Connection broken: IncompleteRead(0 bytes read, 194117 more expected)', IncompleteRead(0 bytes read, 194117 more expected))"
+  ],
+  "sku_rule": "334-<supplier vendorCode>",
+  "webasyst_characteristic": "334",
+  "warehouse_rule": "same feed stock on МСК and СПБ привозной",
+  "daily_updates": "price + stock",
+  "complete": true
+}
