@@ -38,35 +38,71 @@ jobs:
           kit=mod.Kit(os.environ['YANDEX_KIT_TOKEN'])
           chars=kit.characteristics()
           code_site_id,article_id=mod.resolve_special_characteristics(chars)
-          variants=kit.variants()
+          web_rows=[
+              x for x in chars
+              if mod.norm(x.get('title'))==mod.norm(mod.WEBASYST_TITLE)
+              and mod.s(x.get('id'))
+          ]
+          if len(web_rows)!=1:
+              raise RuntimeError(f'Expected one Webasyst characteristic, found {len(web_rows)}')
+          webasyst_id=mod.s(web_rows[0].get('id'))
 
-          # KIT pagination can occasionally return the same variant on more than
-          # one page. Deduplicate by immutable variant id before duplicate analysis.
-          managed_by_id={}
-          for v in variants:
+          # Two scans + union: KIT pagination has previously repeated rows between
+          # pages, which can hide a real card from a single pass.
+          scan1=kit.variants()
+          scan2=kit.variants()
+          all_by_id={}
+          for v in scan1+scan2:
               vid=mod.s(v.get('id'))
-              if vid and mod.is_brand(v.get('brand')):
-                  managed_by_id[vid]=v
-          managed=list(managed_by_id.values())
+              if vid and mod.s(v.get('status')).upper()!='ARCHIVED':
+                  all_by_id[vid]=v
+          active=list(all_by_id.values())
 
-          grouped=defaultdict(list)
+          def likely_4s(v):
+              return mod.is_likely_legacy_4s_variant(
+                  v,code_site_id,article_id,webasyst_id
+              )
+
+          managed=[v for v in active if likely_4s(v)]
+
+          # Build both the original exact code+name identity and a legacy-name
+          # guard. The latter catches the real-world case "AF-* old card" +
+          # newer generated "333-*" card when the old card has no Код для сайта.
+          exact_code_name=defaultdict(list)
+          exact_name=defaultdict(list)
           for v in managed:
               code=mod.norm(mod.char_value(v,code_site_id))
               name=mod.norm(v.get('name'))
+              if name:
+                  exact_name[name].append(v)
               if code and name:
-                  grouped[(code,name)].append(v)
+                  exact_code_name[(code,name)].append(v)
 
-          groups=[]
-          for _, rows in grouped.items():
-              if len(rows)<2:
-                  continue
+          groups_by_ids={}
+          def add_group(rows,mode):
               unique_rows={mod.s(x.get('id')):x for x in rows if mod.s(x.get('id'))}
               rows=sorted(unique_rows.values(),key=mod.canonical_variant_key)
               if len(rows)<2:
-                  continue
+                  return
               canonical=rows[0]
-              extras=rows[1:]
-              groups.append({
+              extras=[]
+              canonical_code=mod.norm(mod.char_value(canonical,code_site_id))
+              for x in rows[1:]:
+                  same_code=(
+                      canonical_code
+                      and canonical_code==mod.norm(mod.char_value(x,code_site_id))
+                  )
+                  legacy_generated_pair=(
+                      not mod.generated_333_variant(canonical)
+                      and mod.generated_333_variant(x)
+                  )
+                  if same_code or legacy_generated_pair:
+                      extras.append(x)
+              if not extras:
+                  return
+              key=(mod.s(canonical.get('id')),tuple(mod.s(x.get('id')) for x in extras))
+              groups_by_ids[key]={
+                  'match_mode':mode,
                   'code_site':mod.char_value(canonical,code_site_id),
                   'name':mod.s(canonical.get('name')),
                   'canonical':{
@@ -74,6 +110,7 @@ jobs:
                       'kit_id':mod.s(canonical.get('kit_id')),
                       'sku':mod.s(canonical.get('sku')),
                       'article':mod.char_value(canonical,article_id),
+                      'webasyst':mod.char_value(canonical,webasyst_id),
                   },
                   'duplicates':[
                       {
@@ -81,14 +118,23 @@ jobs:
                           'kit_id':mod.s(x.get('kit_id')),
                           'sku':mod.s(x.get('sku')),
                           'article':mod.char_value(x,article_id),
+                          'code_site':mod.char_value(x,code_site_id),
+                          'webasyst':mod.char_value(x,webasyst_id),
                       } for x in extras
                   ],
-              })
+              }
 
-          groups.sort(key=lambda g:(g['code_site'],g['name']))
+          for rows in exact_code_name.values():
+              add_group(rows,'code+name')
+          for rows in exact_name.values():
+              add_group(rows,'legacy-name-guard')
+
+          groups=list(groups_by_ids.values())
+          groups.sort(key=lambda g:(g['name'],g.get('code_site') or ''))
           report={
               'generated_at':datetime.now(timezone.utc).isoformat(),
-              'kit_variants_scanned':len(variants),
+              'kit_variants_scanned':len(scan1)+len(scan2),
+              'kit_variants_unique_union':len(active),
               'managed_4s_variants':len(managed),
               'exact_duplicate_groups':len(groups),
               'duplicate_extra_variants':sum(len(g['duplicates']) for g in groups),
