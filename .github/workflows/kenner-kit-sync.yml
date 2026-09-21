@@ -1,0 +1,51 @@
+name: Kenner KIT sync
+
+on:
+  schedule:
+    - cron: '15 4 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'kenner-kit/sync_kenner_kit.py'
+      - '.github/workflows/kenner-kit-sync.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kenner-kit-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Sync Kenner catalog to Yandex KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python kenner-kit/sync_kenner_kit.py
+      - name: Commit sync report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          cp kenner-kit/last_sync_report.json /tmp/kenner-last-sync.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          if [ -f /tmp/kenner-last-sync.json ]; then
+            cp /tmp/kenner-last-sync.json kenner-kit/last_sync_report.json
+          fi
+          git add kenner-kit/last_sync_report.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Update Kenner KIT sync report'
+          git push origin HEAD:main || true
