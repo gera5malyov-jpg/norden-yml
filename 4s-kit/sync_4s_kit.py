@@ -127,6 +127,11 @@ class Kit:
         if parent_id: b['parent_id']=parent_id
         return self.request('POST','/v1/categories',body=b)
     def create_product(self,category_id): return self.request('POST','/v1/products',body={'category_ids':[str(category_id)]})
+    def create_characteristic(self,title):
+        return self.request(
+            'POST','/v1/characteristics',
+            body={'title':title,'type':'STRING','select_mode':'SINGLE'},
+        )
     def create_variant(self,body): return self.request('POST','/v1/variants',body=body)
     def patch_variant(self,variant_id,body):
         full=BASE+f'/v1/variants/{variant_id}'
@@ -196,6 +201,13 @@ def parse_feed():
                     'images':list(dict.fromkeys(
                         s(x.text) for x in e.findall('picture') if s(x.text)
                     )),
+                    'params':{
+                        s(x.attrib.get('name')):s(x.text)
+                        for x in e.findall('param')
+                        if s(x.attrib.get('name'))
+                        and s(x.text)
+                        and norm(x.attrib.get('name')) not in {norm('Наличие'),norm('Артикул')}
+                    },
                 })
             e.clear()
         if stack: stack.pop()
@@ -287,6 +299,69 @@ def final_sku_from_kit_id(kit_id):
 
 def is_managed_4s_variant(v,code_site_id):
     return is_brand(v.get('brand'))
+
+def characteristic_title_index(rows):
+    out=defaultdict(list)
+    for row in rows:
+        title=s(row.get('title'))
+        cid=s(row.get('id'))
+        if title and cid:
+            out[norm(title)].append(row)
+    return out
+
+def ensure_characteristic(kit,title,char_rows,char_index):
+    key=norm(title)
+    matches=char_index.get(key,[])
+    if matches:
+        # Prefer a STRING characteristic when duplicates happen to exist.
+        string_matches=[
+            x for x in matches
+            if s(x.get('type')).upper() in ('','STRING') and s(x.get('id'))
+        ]
+        row=(string_matches or matches)[0]
+        return s(row.get('id'))
+    created=kit.create_characteristic(title)
+    cid=s(created.get('id'))
+    if not cid:
+        raise RuntimeError(f'KIT did not return characteristic id for {title!r}')
+    char_rows.append(created)
+    char_index[key].append(created)
+    return cid
+
+def build_product_characteristics(
+    kit,offer,char_rows,char_index,code_site_id,article_id,article_value
+):
+    out=[
+        {
+            'characteristic_id':code_site_id,
+            'value':offer['source_code'],
+            'values':[offer['source_code']],
+        },
+        {
+            'characteristic_id':article_id,
+            'value':article_value,
+            'values':[article_value],
+        },
+    ]
+    used={s(code_site_id),s(article_id)}
+    for title,value in (offer.get('params') or {}).items():
+        if not s(title) or not s(value):
+            continue
+        if norm(title) in {norm(CODE_SITE_TITLE),norm(ARTICLE_TITLE),norm('Наличие')}:
+            continue
+        try:
+            cid=ensure_characteristic(kit,title,char_rows,char_index)
+        except Exception:
+            raise
+        if not cid or cid in used:
+            continue
+        used.add(cid)
+        out.append({
+            'characteristic_id':cid,
+            'value':s(value),
+            'values':[s(value)],
+        })
+    return out
 
 def generated_333_variant(v):
     kit_id=s(v.get('kit_id'))
@@ -393,7 +468,9 @@ def main():
     offers,feed_duplicates,feed_price_conflicts=dedupe_feed_offers(raw_offers)
     kit=Kit(os.getenv('YANDEX_KIT_TOKEN',''))
     wh=warehouse_map(kit.warehouses())
-    code_site_id,article_id=resolve_special_characteristics(kit.characteristics())
+    char_rows=kit.characteristics()
+    code_site_id,article_id=resolve_special_characteristics(char_rows)
+    char_index=characteristic_title_index(char_rows)
     print(f'4 Сезона feed offers: raw={len(raw_offers)} unique_codes={len(offers)} duplicates={len(feed_duplicates)}',flush=True)
 
     variants=kit.variants()
@@ -428,6 +505,8 @@ def main():
         'price_changes':0,'stock_changes':0,
         'images_uploaded':0,'image_repairs':0,'image_failures':0,
         'new_without_source_images':0,'image_errors':[],
+        'characteristics_written':0,'characteristic_repairs':0,
+        'description_repairs':0,
         'brand_patched':0,'sku_fixed_to_333_kit_id':0,'code_site_filled':0,
         'absent_to_zero':0,'collisions':0,'errors':[],
     }
@@ -511,11 +590,19 @@ def main():
                 if kit_id in (None,''):
                     created=kit.get_variant(vid); kit_id=created.get('kit_id')
                 final_sku=final_sku_from_kit_id(kit_id)
-                chars=[
-                    {'characteristic_id':code_site_id,'value':source,'values':[source]},
-                    {'characteristic_id':article_id,'value':final_sku,'values':[final_sku]},
-                ]
-                kit.patch_variant(vid,{'sku':final_sku,'brand':BRAND,'characteristics':chars})
+                chars=build_product_characteristics(
+                    kit,o,char_rows,char_index,
+                    code_site_id,article_id,final_sku,
+                )
+                patch_new={
+                    'sku':final_sku,
+                    'brand':BRAND,
+                    'characteristics':chars,
+                }
+                if o.get('description'):
+                    patch_new['description']=o['description']
+                kit.patch_variant(vid,patch_new)
+                report['characteristics_written']+=max(0,len(chars)-2)
                 chosen=kit.get_variant(vid)
                 managed[vid]=chosen
                 add_index(by_code_site,source,chosen)
@@ -553,6 +640,55 @@ def main():
                             'source_code':source,
                             'message':f'code_site patch failed: {str(exc)[:400]}',
                         })
+
+            # Repair content on cards created by this integration. This
+            # intentionally does not overwrite legacy/non-333 cards.
+            if not created_now and generated_333_variant(target):
+                repair={}
+                if o.get('description') and s(target.get('description'))!=s(o.get('description')):
+                    repair['description']=o['description']
+                try:
+                    final_article=f"333-{s(target.get('kit_id'))}"
+                    desired_chars=build_product_characteristics(
+                        kit,o,char_rows,char_index,
+                        code_site_id,article_id,final_article,
+                    )
+                    current_pairs={
+                        (s(x.get('characteristic_id')),s(x.get('value')) or (
+                            s((x.get('values') or [''])[0]) if x.get('values') else ''
+                        ))
+                        for x in (target.get('characteristics') or [])
+                    }
+                    desired_pairs={
+                        (s(x.get('characteristic_id')),s(x.get('value')))
+                        for x in desired_chars
+                    }
+                    if not desired_pairs.issubset(current_pairs):
+                        repair['characteristics']=desired_chars
+                except Exception as exc:
+                    if len(report['errors'])<300:
+                        report['errors'].append({
+                            'source_code':source,
+                            'message':f'build characteristics failed: {str(exc)[:400]}',
+                        })
+                if repair:
+                    try:
+                        kit.patch_variant(vid,repair)
+                        if 'description' in repair:
+                            report['description_repairs']+=1
+                            target['description']=repair['description']
+                        if 'characteristics' in repair:
+                            report['characteristic_repairs']+=1
+                            report['characteristics_written']+=max(
+                                0,len(repair['characteristics'])-2
+                            )
+                            target['characteristics']=repair['characteristics']
+                    except Exception as exc:
+                        if len(report['errors'])<300:
+                            report['errors'].append({
+                                'source_code':source,
+                                'message':f'content repair failed: {str(exc)[:400]}',
+                            })
 
             target_offer=o
             target_price=o.get('price')
