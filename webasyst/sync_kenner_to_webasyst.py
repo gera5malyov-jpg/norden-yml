@@ -460,35 +460,31 @@ def main():
 
             if matches:
                 product, sku_row = matches[0]
-                product_id = s(product.get("id"))
                 sku_id = s(sku_row.get("id"))
 
-                # This is a dedicated managed type, so all source content is refreshed.
-                wa.call(
-                    "shop.product.update",
-                    http_method="POST",
-                    params={"id": product_id},
-                    data={
-                        "name": item["name"],
-                        "url": readable_url,
-                        "summary": summary,
-                        "description": item["description"],
-                        "status": 1,
-                        "type_id": type_id,
-                        "features": feature_payload,
-                    },
-                )
-                wa.call(
-                    "shop.product.skus.update",
-                    http_method="POST",
-                    params={"id": sku_id},
-                    data={
-                        "sku": sku,
-                        **desired_sku,
-                    },
-                )
-                report["updated"] += 1
-                report["feature_values_written"] += len(feature_payload)
+                # Daily mode for existing Kenner products:
+                # update ONLY current price, compare price and Main warehouse stock.
+                # Product content/characteristics/summary/URL remain untouched after
+                # the successful initial import.
+                changes = {}
+                if money(sku_row.get("price")) != sale:
+                    changes["price"] = money_str(sale)
+                if money(sku_row.get("compare_price")) != old:
+                    changes["compare_price"] = money_str(old)
+                current_stock = wa_stock_qty(sku_row, stock_id)
+                if current_stock is None or current_stock != qty:
+                    changes["stock"] = {stock_id: str(qty)}
+
+                if changes:
+                    wa.call(
+                        "shop.product.skus.update",
+                        http_method="POST",
+                        params={"id": sku_id},
+                        data=changes,
+                    )
+                    report["updated"] += 1
+                else:
+                    report["unchanged"] += 1
             else:
                 created = wa.call(
                     "shop.product.add",
