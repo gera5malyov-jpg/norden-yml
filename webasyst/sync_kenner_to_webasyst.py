@@ -294,7 +294,9 @@ def main():
 
     # Scan KIT only. Webasyst=334 is the routing gate; SKU is the exact match key.
     kit_by_sku = defaultdict(list)
-    for variant in kit.list_all("/v1/variants", {}, "variants"):
+    # Restrict the KIT scan to the managed SKU namespace first, then apply
+    # Webasyst=334 as the authoritative routing gate.
+    for variant in kit.list_all("/v1/variants", {"name": SKU_PREFIX}, "variants"):
         report["kit_variants_scanned"] += 1
         if s(variant.get("status")).upper() == "ARCHIVED":
             continue
