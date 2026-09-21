@@ -1,0 +1,50 @@
+name: Probe Kenner KIT image URLs once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe-kenner-kit-image-urls-once.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Probe KIT media URLs
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,sys
+          sys.path.insert(0,'kenner-kit')
+          import sync_kenner_kit as m
+          kit=m.KitClient(os.environ['YANDEX_KIT_TOKEN'])
+          p=kit.request('GET','/v1/variants',params={'name':'334-326506','page':1,'per_page':100})
+          rows=p.get('variants') or p.get('items') or p.get('results') or []
+          if isinstance(rows,dict): rows=rows.get('items') or []
+          v=next((x for x in rows if str(x.get('sku') or '').strip()=='334-326506'),None)
+          if not v: raise SystemExit('variant not found')
+          media=v.get('media') or []
+          files=[]
+          for x in media:
+              fid=str(x.get('image_id') or '').strip()
+              if not fid: continue
+              fp=kit.request('GET','/v1/files/'+fid)
+              files.append({'media':x,'file':fp})
+          out={'variant_id':v.get('id'),'kit_id':v.get('kit_id'),'media_count':len(media),'media':media,'files':files}
+          open('kenner-kit/image_url_probe.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps({'media_count':len(media),'urls':[f['file'].get('url') for f in files]},ensure_ascii=False,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add kenner-kit/image_url_probe.json
+          git commit -m 'Probe Kenner KIT image URLs' || exit 0
+          git pull --rebase || true
+          git push || true
