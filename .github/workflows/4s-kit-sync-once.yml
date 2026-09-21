@@ -26,6 +26,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests
+      - name: Compile sync script
+        run: python -m py_compile 4s-kit/sync_4s_kit.py
       - name: Verify feed contains only brand 4 Сезона
         run: |
           python - <<'PY'
@@ -42,7 +44,7 @@ jobs:
       - name: Sync prices and stocks
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-          FOURS_EXISTING_ONLY: '1'
+          FOURS_EXISTING_ONLY: '0'
         run: python 4s-kit/sync_4s_kit.py
       - name: Commit sync report
         if: always()
