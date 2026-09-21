@@ -92,7 +92,8 @@ def index_riva_variants(rows, characteristic_titles=None):
             row, characteristic_titles, 'ID предложения Riva'
         )
         source_id = source_values[0] if source_values else ''
-        is_riva = bool(source_id) or _lower(_brand_text(row)) == 'riva'
+        brand_key = _lower(_brand_text(row))
+        is_riva = bool(source_id) or brand_key == 'riva' or brand_key.startswith('riva ')
         if not is_riva:
             continue
 
