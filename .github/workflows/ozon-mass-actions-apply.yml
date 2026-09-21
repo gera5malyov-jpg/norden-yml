@@ -101,7 +101,7 @@ jobs:
               sid=str(strategy.get("id")); report["strategy_id"]=sid
               if not strategy.get("enabled"):
                   call("POST","/v1/pricing-strategy/status",{"strategy_id":sid,"enabled":True},required=False)
-              for ch in chunks(pids,500):
+              for ch in chunks(pids,50):
                   d=call("POST","/v1/pricing-strategy/products/add",{"strategy_id":sid,"product_id":[str(x) for x in ch]},required=False)
                   report["strategy_add_requested"] += len(ch)
                   if d:
@@ -190,7 +190,7 @@ jobs:
                   scheduled=[]; offset=0
                   while True:
                       d=call("POST","/v1/actions/auto-add/products/list",{
-                          "action_id":aid,"auto_add_date":auto_date,"limit":1000,"offset":offset
+                          "action_id":aid,"auto_add_date":auto_date,"limit":100,"offset":offset
                       },required=False)
                       if not d: break
                       rows=d.get("products") or []
