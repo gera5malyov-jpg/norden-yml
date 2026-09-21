@@ -1,0 +1,51 @@
+name: Remove Kenner supplier-link feature once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/remove-kenner-supplier-link-feature-once.yml']
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Remove exact Kenner supplier-link feature
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+          wa=WebasystClient(min_request_interval=0.5)
+          code='kenner_d125631c719b'
+          info=wa.call('shop.feature.getInfo',params={'code':code})
+          if not isinstance(info,dict):
+              raise SystemExit('Feature lookup did not return an object')
+          name=str(info.get('name') or '').strip()
+          if name!='Ссылка поставщика' or str(info.get('code') or '').strip()!=code:
+              raise SystemExit(f'Safety stop: unexpected feature: {info}')
+          feature_id=str(info.get('id') or '').strip()
+          if not feature_id:
+              raise SystemExit('Feature id is missing')
+          result=wa.call('shop.feature.delete',http_method='POST',data={'id':feature_id})
+          out={'feature_before':info,'delete_result':result}
+          open('webasyst/kenner_supplier_link_cleanup.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit result
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add webasyst/kenner_supplier_link_cleanup.json 2>/dev/null || true
+          git commit -m 'Remove Kenner supplier link feature' || exit 0
+          git pull --rebase || true
+          git push || true
