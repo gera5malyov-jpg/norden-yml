@@ -132,35 +132,74 @@ def product_brand(p, ps):
 
 def params(soup):
     d={}
-    for tr in soup.find_all('tr'):
-        c=tr.find_all(['th','td'])
-        if len(c)==2:
-            k=txt(c[0].get_text(' ',strip=True)).strip(' :'); v=txt(c[1].get_text(' ',strip=True))
-            if k and v and len(k)<=120 and len(v)<=1000: d.setdefault(k,v)
-    for dl in soup.find_all('dl'):
-        for dt,dd in zip(dl.find_all('dt'),dl.find_all('dd')):
-            k=txt(dt.get_text(' ',strip=True)).strip(' :'); v=txt(dd.get_text(' ',strip=True))
-            if k and v: d.setdefault(k,v)
+    root=soup.select_one('#elementProperties .detailPropertiesTable') or soup.select_one('#elementProperties')
+    if root:
+        for tr in root.select('table.stats tr'):
+            cells=tr.find_all('td',recursive=False)
+            if len(cells)<2:
+                continue
+            name_cell=tr.select_one('td.name')
+            if not name_cell:
+                continue
+            k=txt(name_cell.get_text(' ',strip=True)).strip(' :')
+            v=txt(cells[1].get_text(' ',strip=True))
+            if k and v and len(k)<=120 and len(v)<=1000:
+                d.setdefault(k,v)
+    # Fallback to the compact characteristics block, but still only inside
+    # the current product card (never similar/recommended products).
+    if not d:
+        root=soup.select_one('#browse .changePropertiesNoGroup .elementProperties')
+        if root:
+            for row in root.select('.propertyTable'):
+                n=row.select_one('.propertyName')
+                v=row.select_one('.propertyValue')
+                k=txt(n.get_text(' ',strip=True) if n else '').strip(' :')
+                val=txt(v.get_text(' ',strip=True) if v else '')
+                if k and val:
+                    d.setdefault(k,val)
     bad={'цена','стоимость','количество','итого','название товара','ваше имя','телефон','электронная почта'}
-    return {k:v for k,v in d.items() if k.lower() not in bad}
+    return {k:v for k,v in d.items() if k.casefold() not in bad}
 
 def images(soup,p,url):
-    a=[]; raw=p.get('image')
-    if isinstance(raw,str): a.append(raw)
-    elif isinstance(raw,list):
-        for x in raw: a.append(x if isinstance(x,str) else first(x.get('url'),x.get('contentUrl')) if isinstance(x,dict) else '')
-    elif isinstance(raw,dict): a.append(first(raw.get('url'),raw.get('contentUrl')))
-    a.append(meta(soup,property='og:image'))
-    for sel in ["[class*='product'] img","[class*='gallery'] img","[class*='detail'] img"]:
-        for im in soup.select(sel): a.append(first(im.get('data-src'),im.get('data-lazy'),im.get('data-original'),im.get('src')))
+    candidates=[]
+    # ONLY the current product's gallery. Do not use JSON-LD, og:image,
+    # generic product/detail selectors, thumbnails from similar products,
+    # icons, banners, or recommendations.
+    for a in soup.select('#pictureContainer .pictureSlider .item a.zoom'):
+        candidates.append(first(
+            a.get('data-large-picture'),
+            a.get('href'),
+        ))
+    if not candidates:
+        for a in soup.select('#moreImagesCarousel .item a[data-large-picture]'):
+            candidates.append(first(a.get('data-large-picture'),a.get('href')))
+    if not candidates:
+        for im in soup.select('#pictureContainer .pictureSlider img'):
+            candidates.append(first(
+                im.get('data-src'),
+                im.get('data-lazy'),
+                im.get('data-original'),
+                im.get('src'),
+            ))
+
     out=[]; seen=set()
-    for x in a:
-        if not x or str(x).startswith('data:'): continue
-        u=urljoin(url,str(x)); pth=urlparse(u); u=urlunparse((pth.scheme,pth.netloc,pth.path,'','','')); lo=u.lower()
-        if u in seen or any(z in lo for z in ['logo','favicon','sprite','icon','captcha','yandex']): continue
-        if not any(z in lo for z in ['.jpg','.jpeg','.png','.webp','.gif','/upload/','/images/']): continue
-        seen.add(u); out.append(u)
+    for x in candidates:
+        if not x or str(x).startswith('data:'):
+            continue
+        u=urljoin(url,str(x))
+        parsed=urlparse(u)
+        u=urlunparse((parsed.scheme,parsed.netloc,parsed.path,'','',''))
+        lo=u.lower()
+        if u in seen:
+            continue
+        if not any(ext in lo for ext in ('.jpg','.jpeg','.png','.webp','.gif')):
+            continue
+        if '/upload/' not in lo:
+            continue
+        seen.add(u)
+        out.append(u)
     return out[:30]
+
 def crumbs(soup):
     links=[]
     for sel in ["[class*='breadcrumb'] a","[class*='breadcrumbs'] a","nav[aria-label*='breadcrumb' i] a"]:
@@ -177,7 +216,12 @@ def parse(u):
     soup=BeautifulSoup(get(u).text,'lxml'); p=product_ld(soup); o=offer_ld(p); body=txt(soup.get_text('\n',strip=True)); ps=params(soup)
     brand=product_brand(p,ps)
     h=soup.find('h1'); name=first(p.get('name'),h.get_text(' ',strip=True) if h else '')
-    sku=first(p.get('sku'),p.get('mpn'),p.get('productID'),ps.get('Артикул'),ps.get('артикул'))
+    article_node=soup.select_one('#catalogElement .row.article .changeArticle')
+    sku=first(
+        article_node.get_text(' ',strip=True) if article_node else '',
+        ps.get('Артикул'),ps.get('артикул'),
+        p.get('sku'),p.get('mpn'),p.get('productID'),
+    )
     if not sku:
         m=re.search(r'Артикул\s*:?\s*(.+?)(?=\s+Описание|\s+Характеристики|$)',body,re.I); sku=txt(m.group(1)).strip(' :;') if m else ''
     pr=price(first(o.get('price'),o.get('lowPrice')))
@@ -188,12 +232,19 @@ def parse(u):
     av=txt(o.get('availability')).lower()
     available='instock' in av or (not av and re.search(r'\bВ наличии\b',body,re.I) is not None)
     status='В наличии' if available else ('Под заказ' if ('outofstock' in av or 'preorder' in av or re.search(r'\bПод заказ\b',body,re.I)) else 'Наличие не указано')
-    desc=first(p.get('description'))
+    desc=''
+    t=soup.select_one('#detailText .changeDescription')
+    if t:
+        desc=txt(t.get_text(' ',strip=True))
     if not desc:
-        for sel in ["[itemprop='description']","[class*='product'] [class*='description']","[class*='detail'] [class*='description']"]:
-            t=soup.select_one(sel)
-            if t and len(txt(t.get_text(' ',strip=True)))>=20: desc=txt(t.get_text(' ',strip=True)); break
-    if not desc: desc=meta(soup,name='description')
+        t=soup.select_one('#detailText')
+        if t:
+            h=t.select_one('.heading')
+            if h:
+                h.extract()
+            desc=txt(t.get_text(' ',strip=True))
+    if not desc:
+        desc=first(p.get('description'))
     old=''
     for sel in ["[class*='old-price']","[class*='old_price']","[class*='price-old']"]:
         t=soup.select_one(sel)
