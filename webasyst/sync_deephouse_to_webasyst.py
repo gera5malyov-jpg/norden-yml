@@ -44,6 +44,15 @@ def norm(v):
     )
 
 
+def sku_key(v):
+    """Exact article matching tolerant only to whitespace/case differences."""
+    return re.sub(r"\\s+", "", s(v)).casefold()
+
+
+def canonical_sku(v):
+    return re.sub(r"\\s+", "", s(v))
+
+
 def money(v):
     if v in (None, ""):
         return None
@@ -250,6 +259,7 @@ def main():
         "processed": 0,
         "created": 0,
         "updated_prices_stock": 0,
+        "updated_full_content": 0,
         "summaries_updated_from_kit": 0,
         "kit_variants_without_images": 0,
         "unchanged": 0,
@@ -307,13 +317,17 @@ def main():
                 "stage": "kit_route",
                 "variant_id": s(variant.get("id")),
                 "sku": sku,
-                "message": "Webasyst=336 variant does not use SKU prefix 336-",
+                "message": f"Webasyst=336 variant does not use SKU prefix {SKU_PREFIX}",
             })
             continue
-        kit_by_sku[sku].append(variant)
+        kit_by_sku[sku_key(sku)].append((sku, variant))
 
     report["kit_duplicate_skus"] = sum(1 for rows in kit_by_sku.values() if len(rows) > 1)
-    kit_unique = {sku: rows[0] for sku, rows in kit_by_sku.items() if len(rows) == 1}
+    kit_unique = {
+        rows[0][0]: rows[0][1]
+        for rows in kit_by_sku.values()
+        if len(rows) == 1
+    }
 
     # Feature lookup. The supplier routing gate must exist in BOTH systems:
     # KIT Webasyst=336 <-> Webasyst Webasyst=336.
@@ -336,8 +350,9 @@ def main():
     wa_webasyst_code = next(iter(wa_webasyst_by_code))
     report["webasyst_routing_feature_code"] = wa_webasyst_code
 
-    # Existing managed Webasyst cards: type 203 is only a safety boundary.
-    # Actual supplier membership is Webasyst=336.
+    # Existing DEEPHOUSE cards are matched by article/SKU inside the target type.
+    # Webasyst=336 is written/refreshed during sync; it is NOT required beforehand,
+    # otherwise old DEEPHOUSE cards without that feature would be duplicated.
     products = load_wa_products(wa, type_id)
     report["webasyst_products"] = len(products)
     wa_by_sku = defaultdict(list)
@@ -346,15 +361,11 @@ def main():
         product_id = s(product.get("id"))
         if not product_id:
             continue
-        info = wa.call("shop.product.getInfo", params={"id": product_id})
-        features = (info or {}).get("features") or {}
-        if s(features.get(wa_webasyst_code)) != WEBASYST_VALUE:
-            continue
         managed_wa_products += 1
         for sku_row in product_skus(product):
             sku = s(sku_row.get("sku"))
             if sku:
-                wa_by_sku[sku].append((product, sku_row))
+                wa_by_sku[sku_key(sku)].append((product, sku_row))
     report["webasyst_336_products"] = managed_wa_products
     report["webasyst_duplicate_skus"] = sum(1 for rows in wa_by_sku.values() if len(rows) > 1)
 
@@ -457,8 +468,8 @@ def main():
 
     for sku, variant in sorted(kit_unique.items()):
         try:
-            # Exact item match only inside the already-routed Webasyst=336 population.
-            matches = wa_by_sku.get(sku, [])
+            # Match existing DEEPHOUSE card by article, tolerating stray whitespace.
+            matches = wa_by_sku.get(sku_key(sku), [])
             if len(matches) > 1:
                 raise RuntimeError(f"duplicate Webasyst SKU in type {type_id}: {sku}")
 
@@ -468,32 +479,47 @@ def main():
             sale, compare = prices
             stock = kit_stock_qty(variant, kit_stock_id)
 
+            # Full content payload from KIT.
+            features = {}
+            for title, value in source_features(variant).items():
+                features[ensure_feature(title)] = value
+            urls = image_urls(variant)
+            desired_summary = extimg_summary(urls) if urls else None
+            desired_name = s(variant.get("name")) or canonical_sku(sku)
+            desired_description = s(variant.get("description"))
+            desired_status = 1 if s(variant.get("status")).upper() == "PUBLISHED" else 0
+            desired_sku = canonical_sku(sku)
+
             if matches:
-                # Existing Webasyst product:
-                # - prices/stock come from KIT;
-                # - short description image links are refreshed from KIT media.
                 product, sku_row = matches[0]
                 product_id = s(product.get("id"))
 
-                summary_changed = False
-                urls = image_urls(variant)
-                if urls:
-                    desired_summary = extimg_summary(urls)
-                    current_summary = s(product.get("summary"))
-                    if current_summary != desired_summary:
-                        wa.call(
-                            "shop.product.update",
-                            http_method="POST",
-                            params={"id": product_id},
-                            data={"summary": desired_summary},
-                        )
+                product_changes = {
+                    "name": desired_name,
+                    "description": desired_description,
+                    "status": desired_status,
+                    "type_id": type_id,
+                    "features": features,
+                }
+                if desired_summary is not None:
+                    product_changes["summary"] = desired_summary
+                    if s(product.get("summary")) != desired_summary:
                         report["summaries_updated_from_kit"] += 1
-                        summary_changed = True
                 else:
-                    # Never erase an existing summary merely because KIT has no media.
                     report["kit_variants_without_images"] += 1
 
+                wa.call(
+                    "shop.product.update",
+                    http_method="POST",
+                    params={"id": product_id},
+                    data=product_changes,
+                )
+                report["updated_full_content"] += 1
+                report["feature_values_written"] += len(features)
+
                 changes = {}
+                if s(sku_row.get("sku")) != desired_sku:
+                    changes["sku"] = desired_sku
                 if money(sku_row.get("price")) != sale:
                     changes["price"] = money_str(sale)
                 if money(sku_row.get("compare_price")) != compare:
@@ -501,44 +527,35 @@ def main():
                 current_stock = wa_stock_qty(sku_row, wa_stock_id)
                 if current_stock is None or current_stock != stock:
                     changes["stock"] = {wa_stock_id: str(stock)}
+                changes["available"] = 1
+                changes["status"] = 1
 
-                if changes:
-                    wa.call(
-                        "shop.product.skus.update",
-                        http_method="POST",
-                        params={"id": s(sku_row.get("id"))},
-                        data=changes,
-                    )
-                    report["updated_prices_stock"] += 1
+                wa.call(
+                    "shop.product.skus.update",
+                    http_method="POST",
+                    params={"id": s(sku_row.get("id"))},
+                    data=changes,
+                )
+                report["updated_prices_stock"] += 1
 
-                if changes or summary_changed:
-                    if len(report["sample_updates"]) < 20:
-                        fields = sorted(changes)
-                        if summary_changed:
-                            fields.append("summary_images_from_kit")
-                        report["sample_updates"].append({
-                            "sku": sku,
-                            "fields": fields,
-                            "price": money_str(sale),
-                            "compare_price": money_str(compare),
-                            "stock": stock,
-                            "images_in_summary": len(urls),
-                        })
-                else:
-                    report["unchanged"] += 1
+                if len(report["sample_updates"]) < 20:
+                    report["sample_updates"].append({
+                        "sku": desired_sku,
+                        "fields": ["name", "description", "features", "summary", "price", "compare_price", "stock"],
+                        "price": money_str(sale),
+                        "compare_price": money_str(compare),
+                        "stock": stock,
+                        "images_in_summary": len(urls),
+                    })
+
                 report["processed"] += 1
                 continue
 
             # New Webasyst product: all content comes from KIT.
-            features = {}
-            for title, value in source_features(variant).items():
-                features[ensure_feature(title)] = value
-
-            urls = image_urls(variant)
             summary = extimg_summary(urls)
-            name = s(variant.get("name")) or sku
-            description = s(variant.get("description"))
-            readable_url = product_url(name, sku)
+            name = desired_name
+            description = desired_description
+            readable_url = product_url(name, desired_sku)
 
             created = wa.call(
                 "shop.product.add",
@@ -574,7 +591,7 @@ def main():
                 http_method="POST",
                 params={"id": s(skus[0].get("id"))},
                 data={
-                    "sku": sku,
+                    "sku": desired_sku,
                     "price": money_str(sale),
                     "compare_price": money_str(compare),
                     "stock": {wa_stock_id: str(stock)},
@@ -586,10 +603,10 @@ def main():
             report["created"] += 1
             report["feature_values_written"] += len(features)
             report["processed"] += 1
-            wa_by_sku[sku].append(({"id": product_id}, skus[0]))
+            wa_by_sku[sku_key(desired_sku)].append(({"id": product_id}, skus[0]))
             if len(report["sample_new"]) < 20:
                 report["sample_new"].append({
-                    "sku": sku,
+                    "sku": desired_sku,
                     "product_id": product_id,
                     "name": name,
                     "url": readable_url,
