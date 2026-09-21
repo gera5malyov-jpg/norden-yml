@@ -147,6 +147,8 @@ payload = {
         "offer_id": OFFER_ID,
         "price": str(sale_price),
         "min_price": str(min_price),
+        "net_price": str(int(round(purchase))),
+        "old_price": str(int(round(money(price_block.get("old_price"))))),
         "currency_code": "RUB"
     }]
 }
