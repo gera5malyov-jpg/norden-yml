@@ -168,7 +168,7 @@ payload = {
         "old_price": str(int(round(money(price_block.get("old_price"))))),
         "min_price": str(min_price),
         "min_price_for_auto_actions_enabled": True,
-        "net_price": str(int(round(purchase))),
+        "net_price": "0",
         "currency_code": "RUB",
         "declared_price": "18221",
         "vat": "0",
