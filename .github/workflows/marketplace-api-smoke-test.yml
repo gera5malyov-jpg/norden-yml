@@ -1,0 +1,79 @@
+name: Marketplace API smoke test
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/marketplace-api-smoke-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+      WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
+
+    steps:
+      - name: Check secret presence
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in OZON_CLIENT_ID OZON_API_KEY YANDEX_MARKET_API_KEY WB_API_TOKEN; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Secret $name is missing or empty"
+              missing=1
+            else
+              echo "$name: PRESENT"
+            fi
+          done
+          exit "$missing"
+
+      - name: Ozon API read-only check
+        shell: bash
+        run: |
+          set -euo pipefail
+          code=$(curl --silent --show-error --output /tmp/ozon.json --write-out "%{http_code}" \
+            --request POST "https://api-seller.ozon.ru/v3/product/list" \
+            --header "Client-Id: $OZON_CLIENT_ID" \
+            --header "Api-Key: $OZON_API_KEY" \
+            --header "Content-Type: application/json" \
+            --data '{"filter":{"visibility":"ALL"},"limit":1}')
+          if [ "$code" != "200" ]; then
+            echo "::error::Ozon API authentication/read check failed: HTTP $code"
+            exit 1
+          fi
+          echo "Ozon API: OK"
+
+      - name: Yandex Market API read-only check
+        shell: bash
+        run: |
+          set -euo pipefail
+          code=$(curl --silent --show-error --output /tmp/yandex.json --write-out "%{http_code}" \
+            --request GET "https://api.partner.market.yandex.ru/v2/campaigns?limit=1" \
+            --header "Api-Key: $YANDEX_MARKET_API_KEY" \
+            --header "Accept: application/json")
+          if [ "$code" != "200" ]; then
+            echo "::error::Yandex Market API authentication/read check failed: HTTP $code"
+            exit 1
+          fi
+          echo "Yandex Market API: OK"
+
+      - name: Wildberries API read-only check
+        shell: bash
+        run: |
+          set -euo pipefail
+          code=$(curl --silent --show-error --output /tmp/wb.txt --write-out "%{http_code}" \
+            --request GET "https://common-api.wildberries.ru/ping" \
+            --header "Authorization: $WB_API_TOKEN")
+          if [ "$code" != "200" ]; then
+            echo "::error::Wildberries API authentication/read check failed: HTTP $code"
+            exit 1
+          fi
+          echo "Wildberries API: OK"
