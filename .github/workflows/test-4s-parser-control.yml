@@ -46,10 +46,10 @@ jobs:
             'Страна производства':'Россия',
             'Цвет':'Бежевый',
             'Артикул':'4s-bank03-bel-bej',
-            'Доставка':'1-2 дня',
-            'Самовывоз':'Завтра',
           }
           for k,v in expected.items():
               assert item['params'].get(k)==v, (k,item['params'].get(k),v)
+          assert 'Доставка' not in item['params'], item['params']
+          assert 'Самовывоз' not in item['params'], item['params']
           print('CONTROL_PRODUCT_OK')
           PY
