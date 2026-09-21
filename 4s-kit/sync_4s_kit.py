@@ -470,6 +470,7 @@ def main():
             seen_ids.add(vid)
 
             target_offer=o
+            target_price=o.get('price')
             if source in feed_price_conflicts:
                 name_matches=[
                     row for row in feed_groups[source]
@@ -477,8 +478,14 @@ def main():
                 ]
                 if len(name_matches)==1:
                     target_offer=name_matches[0]
-
-            target_price=target_offer.get('price')
+                    target_price=target_offer.get('price')
+                else:
+                    target_price=None
+                    if len(report['errors'])<300:
+                        report['errors'].append({
+                            'source_code':source,
+                            'message':'conflicting feed prices could not be resolved by exact name match',
+                        })
             if (
                 not created_now
                 and target_price is not None
