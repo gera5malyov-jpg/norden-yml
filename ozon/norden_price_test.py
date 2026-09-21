@@ -12,6 +12,7 @@ API_KEY = os.environ.get("OZON_API_KEY", "").strip()
 PROFIT_PCT = float(os.environ.get("PROFIT_PCT", "20"))
 MIN_PROFIT_PCT = float(os.environ.get("MIN_PROFIT_PCT", "18"))
 ACQUIRING_FALLBACK_PCT = float(os.environ.get("ACQUIRING_FALLBACK_PCT", "2"))
+PROBE_ONLY = os.environ.get("PROBE_ONLY", "false").strip().lower() in {"1", "true", "yes", "on"}
 REPORT = ROOT / "ozon" / f"norden-price-test-{OFFER_ID}.json"
 
 if not CLIENT_ID or not API_KEY:
@@ -91,6 +92,11 @@ def ceil_rub(x):
 article = find_supplier_article()
 purchase = purchase_from_github_feed(article)
 before = get_ozon()
+if PROBE_ONLY:
+    probe = {"status": "ДИАГНОСТИКА", "offer_id": OFFER_ID, "norden_article": article, "purchase_price_github_rub": purchase, "ozon_raw": before}
+    REPORT.write_text(json.dumps(probe, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps(probe, ensure_ascii=False, indent=2))
+    raise SystemExit(0)
 commissions = before.get("commissions") or {}
 commission_pct = money(commissions.get("sales_percent_rfbs"))
 if commission_pct <= 0:
