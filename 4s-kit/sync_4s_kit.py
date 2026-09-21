@@ -358,7 +358,7 @@ def build_product_characteristics(
     for title,value in (offer.get('params') or {}).items():
         if not s(title) or not s(value):
             continue
-        if norm(title) in {norm(CODE_SITE_TITLE),norm(ARTICLE_TITLE),norm('Наличие')}:
+        if norm(title) in {norm(CODE_SITE_TITLE),norm(ARTICLE_TITLE),norm('Наличие'),norm('Доставка'),norm('Самовывоз')}:
             continue
         try:
             cid=ensure_characteristic(kit,title,char_rows,char_index)
