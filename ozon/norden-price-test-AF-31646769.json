@@ -1,6 +1,6 @@
 {
-  "status": "ПОДГОТОВЛЕНО",
-  "finished_at": "2026-09-21T21:05:23.916787+00:00",
+  "status": "ОШИБКА",
+  "finished_at": "2026-09-21T21:05:58.827668+00:00",
   "offer_id": "AF-31646769",
   "norden_article": "RT-2031",
   "scheme": "rFBS",
@@ -17,5 +17,26 @@
   "old_ozon_price_rub": 30779.0,
   "old_marketing_seller_price_rub": 29871.0,
   "calculated_sale_price_rub": 29440,
-  "calculated_min_price_rub": 28950
+  "calculated_min_price_rub": 28950,
+  "update_response": {
+    "result": [
+      {
+        "product_id": 5610536251,
+        "offer_id": "AF-31646769",
+        "updated": false,
+        "errors": [
+          {
+            "code": "declared_price_too_big",
+            "message": "Должна быть ниже размера возмещения 18221 ₽"
+          }
+        ],
+        "warnings": [
+          {
+            "code": "strategy_enabled",
+            "message": "Чтобы изменить цену, удалите товар из стратегии ценообразования"
+          }
+        ]
+      }
+    ]
+  }
 }

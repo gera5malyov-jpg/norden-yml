@@ -1,33 +1,5 @@
-PRECALC {"status": "ПОДГОТОВЛЕНО", "finished_at": "2026-09-21T21:05:23.916787+00:00", "offer_id": "AF-31646769", "norden_article": "RT-2031", "scheme": "rFBS", "purchase_price_github_rub": 11776.0, "purchase_source": "norden.yml", "ozon_sales_percent_rfbs": 51.0, "ozon_acquiring_current_amount_rub": 298.71, "ozon_acquiring_base_rub": 29871.0, "ozon_acquiring_effective_percent": 1.0, "acquiring_source": "Ozon acquiring / marketing_seller_price", "delivery_included": false, "target_profit_percent_of_purchase": 20.0, "minimum_profit_percent_of_purchase": 18.0, "old_ozon_price_rub": 30779.0, "old_marketing_seller_price_rub": 29871.0, "calculated_sale_price_rub": 29440, "calculated_min_price_rub": 28950}
+PRECALC {"status": "ПОДГОТОВЛЕНО", "finished_at": "2026-09-21T21:05:58.827668+00:00", "offer_id": "AF-31646769", "norden_article": "RT-2031", "scheme": "rFBS", "purchase_price_github_rub": 11776.0, "purchase_source": "norden.yml", "ozon_sales_percent_rfbs": 51.0, "ozon_acquiring_current_amount_rub": 298.71, "ozon_acquiring_base_rub": 29871.0, "ozon_acquiring_effective_percent": 1.0, "acquiring_source": "Ozon acquiring / marketing_seller_price", "delivery_included": false, "target_profit_percent_of_purchase": 20.0, "minimum_profit_percent_of_purchase": 18.0, "old_ozon_price_rub": 30779.0, "old_marketing_seller_price_rub": 29871.0, "calculated_sale_price_rub": 29440, "calculated_min_price_rub": 28950}
 Traceback (most recent call last):
-  File "/home/runner/work/norden-yml/norden-yml/ozon/norden_price_test.py", line 34, in post
-    with urllib.request.urlopen(req, timeout=90) as resp:
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py", line 215, in urlopen
-    return opener.open(url, data, timeout)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py", line 521, in open
-    response = meth(req, response)
-               ^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py", line 630, in http_response
-    response = self.parent.error(
-               ^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py", line 559, in error
-    return self._call_chain(*args)
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py", line 492, in _call_chain
-    result = func(*args)
-             ^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py", line 639, in http_error_default
-    raise HTTPError(req.full_url, code, msg, hdrs, fp)
-urllib.error.HTTPError: HTTP Error 400: Bad Request
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "/home/runner/work/norden-yml/norden-yml/ozon/norden_price_test.py", line 167, in <module>
-    update = post("/v1/product/import/prices", payload)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/norden-yml/norden-yml/ozon/norden_price_test.py", line 42, in post
-    raise RuntimeError(f"Ozon API {path}: HTTP {exc.code}: {body[:1500]}") from exc
-RuntimeError: Ozon API /v1/product/import/prices: HTTP 400: {"code":3,"message":"proto: (line 1:237): invalid value for string field declared_price: {"}
+  File "/home/runner/work/norden-yml/norden-yml/ozon/norden_price_test.py", line 174, in <module>
+    raise RuntimeError("Ozon rejected price update: " + json.dumps(update, ensure_ascii=False))
+RuntimeError: Ozon rejected price update: {"result": [{"product_id": 5610536251, "offer_id": "AF-31646769", "updated": false, "errors": [{"code": "declared_price_too_big", "message": "Должна быть ниже размера возмещения 18221 ₽"}], "warnings": [{"code": "strategy_enabled", "message": "Чтобы изменить цену, удалите товар из стратегии ценообразования"}]}]}
