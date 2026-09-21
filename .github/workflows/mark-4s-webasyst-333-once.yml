@@ -1,0 +1,135 @@
+name: Mark all 4S products Webasyst 333
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/mark-4s-webasyst-333-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kit-api-write
+  cancel-in-progress: false
+
+jobs:
+  mark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Проставить Webasyst 333 всем товарам бренда 4 Сезона
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import importlib.util, json, os, pathlib
+          from datetime import datetime, timezone
+
+          p=pathlib.Path('4s-kit/sync_4s_kit.py')
+          spec=importlib.util.spec_from_file_location('sync4s',p)
+          mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+
+          kit=mod.Kit(os.environ['YANDEX_KIT_TOKEN'])
+          chars=kit.characteristics()
+          char_index=mod.characteristic_title_index(chars)
+          webasyst_id=mod.ensure_characteristic(
+              kit,mod.WEBASYST_TITLE,chars,char_index
+          )
+
+          # Два прохода и объединение по immutable id: KIT иногда повторяет строки
+          # между страницами, из-за чего одиночный проход может пропустить карточку.
+          scan1=kit.variants()
+          scan2=kit.variants()
+          by_id={}
+          for v in scan1+scan2:
+              vid=mod.s(v.get('id'))
+              if vid:
+                  by_id[vid]=v
+
+          targets=[]
+          archived=0
+          for v in by_id.values():
+              if mod.norm(v.get('brand')) != mod.norm(mod.BRAND):
+                  continue
+              if mod.s(v.get('status')).upper()=='ARCHIVED':
+                  archived+=1
+                  continue
+              targets.append(v)
+
+          report={
+              'started_at':datetime.now(timezone.utc).isoformat(),
+              'scan1_rows':len(scan1),
+              'scan2_rows':len(scan2),
+              'unique_variants':len(by_id),
+              'brand_4s_active':len(targets),
+              'brand_4s_archived_skipped':archived,
+              'already_333':0,
+              'updated_to_333':0,
+              'errors_count':0,
+              'errors':[],
+          }
+
+          for n,v in enumerate(targets,1):
+              vid=mod.s(v.get('id'))
+              current=mod.char_value(v,webasyst_id)
+              if current==mod.WEBASYST_VALUE:
+                  report['already_333']+=1
+              else:
+                  try:
+                      new_chars=mod.with_characteristic_values(
+                          v,{webasyst_id:mod.WEBASYST_VALUE}
+                      )
+                      kit.patch_variant(vid,{'characteristics':new_chars})
+                      after=kit.get_variant(vid)
+                      if mod.char_value(after,webasyst_id)!=mod.WEBASYST_VALUE:
+                          raise RuntimeError('KIT не подтвердил Webasyst=333 после PATCH')
+                      report['updated_to_333']+=1
+                  except Exception as exc:
+                      report['errors'].append({
+                          'id':vid,
+                          'kit_id':mod.s(v.get('kit_id')),
+                          'sku':mod.s(v.get('sku')),
+                          'name':mod.s(v.get('name')),
+                          'message':str(exc)[:700],
+                      })
+              if n%100==0 or n==len(targets):
+                  print(
+                      f"Обработано {n}/{len(targets)}; "
+                      f"уже 333={report['already_333']}; "
+                      f"проставлено={report['updated_to_333']}; "
+                      f"ошибок={len(report['errors'])}",
+                      flush=True,
+                  )
+
+          report['errors_count']=len(report['errors'])
+          report['finished_at']=datetime.now(timezone.utc).isoformat()
+          report['status']='ok' if not report['errors'] else 'degraded'
+          out=pathlib.Path('4s-kit/webasyst_333_full_brand_report.json')
+          out.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({k:v for k,v in report.items() if k!='errors'},ensure_ascii=False,indent=2))
+
+          if report['errors']:
+              raise RuntimeError(
+                  f"Webasyst=333 проставлен не полностью: ошибок {report['errors_count']}"
+              )
+          PY
+      - name: Сохранить отчёт
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 4s-kit/webasyst_333_full_brand_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save full 4 Seasons Webasyst 333 report"
+            git pull --rebase origin main
+            git push
+          fi
