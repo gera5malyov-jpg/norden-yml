@@ -274,6 +274,7 @@ def dedupe_feed_offers(offers):
     return unique,duplicate_codes,price_conflicts
 
 def main():
+    existing_only=s(os.getenv('FOURS_EXISTING_ONLY')).casefold() in {'1','true','yes','y'}
     cats,raw_offers=parse_feed()
     offers,feed_duplicates,feed_price_conflicts=dedupe_feed_offers(raw_offers)
     kit=Kit(os.getenv('YANDEX_KIT_TOKEN',''))
@@ -303,12 +304,13 @@ def main():
 
     report={
         'started_at':datetime.now(timezone.utc).isoformat(),
+        'existing_only':existing_only,
         'feed_offers_raw':len(raw_offers),'feed_unique_source_codes':len(offers),
         'feed_duplicate_source_codes':len(feed_duplicates),
         'feed_price_conflicts':len(feed_price_conflicts),
         'kit_variants_scanned':len(variants),
         'existing_managed_variants':len(managed),
-        'matched':0,'created':0,'price_changes':0,'stock_changes':0,
+        'matched':0,'created':0,'skipped_new_existing_only':0,'price_changes':0,'stock_changes':0,
         'brand_patched':0,'sku_fixed_to_333_kit_id':0,'code_site_filled':0,
         'absent_to_zero':0,'collisions':0,'errors':[],
     }
@@ -342,6 +344,9 @@ def main():
             continue
 
         if chosen is None:
+            if existing_only:
+                report['skipped_new_existing_only']+=1
+                continue
             if o['price'] is None:
                 report['errors'].append({'source_code':source,'message':'new product has no valid price; creation skipped'})
                 continue
