@@ -178,6 +178,16 @@ class RivaFeedTests(unittest.TestCase):
         self.assertIn('УЧ-00000156', by_sku)
         self.assertEqual(by_sku['УЧ-00000156'][0]['id'], 'v-uch')
 
+    def test_existing_duplicate_bucket_never_causes_new_creation(self):
+        offer = list(iter_offers(self.tmp.name))[0]
+        rows = [
+            {'id':'newer','kit_id':200,'sku':offer.kit_sku,'name':'X','brand':'RIVA','characteristics':[]},
+            {'id':'legacy','kit_id':100,'sku':offer.kit_sku,'name':'Y','brand':'Riva Chair','characteristics':[]},
+        ]
+        by_source, by_sku, _ = index_riva_variants(rows, {})
+        variant = resolve_variant(offer, by_source, by_sku, {})
+        self.assertEqual(variant['id'], 'legacy')
+
     def test_missing_site_code_is_skipped_without_stopping_feed(self):
         xml = SAMPLE.replace(
             '<param name="Код для сайта">SITE-1290597</param>',
