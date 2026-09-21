@@ -168,7 +168,6 @@ payload = {
         "old_price": str(int(round(money(price_block.get("old_price"))))),
         "min_price": str(min_price),
         "min_price_for_auto_actions_enabled": True,
-        "net_price": "0",
         "currency_code": "RUB",
         "declared_price": "18221",
         "vat": "0",
@@ -189,6 +188,7 @@ time.sleep(3)
 after = get_ozon()
 after_price = money((after.get("price") or {}).get("price"))
 after_min = money((after.get("price") or {}).get("min_price"))
+after_net_price = money((after.get("price") or {}).get("net_price"))
 net_sale = sale_price * denom - purchase
 net_min = min_price * denom - purchase
 
@@ -197,6 +197,7 @@ report.update({
     "status": "УСПЕШНО",
     "verified_ozon_price_rub": after_price,
     "verified_ozon_min_price_rub": after_min,
+    "verified_ozon_net_price_rub": after_net_price,
     "estimated_profit_after_commission_and_acquiring_rub": round(net_sale, 2),
     "estimated_profit_at_min_price_rub": round(net_min, 2),
     "update_response": update,
