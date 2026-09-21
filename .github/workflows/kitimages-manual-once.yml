@@ -1,0 +1,46 @@
+name: KIT images sync manual once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kitimages-manual-once.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kitimages-webasyst-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Run KIT images plugin sync
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          KITIMAGES_SYNC_URL: https://profikompany.ru/kitimages-sync/
+        run: |
+          set -euo pipefail
+          if [ -z "${WEBASYST_API_TOKEN:-}" ]; then
+            echo "::error::WEBASYST_API_TOKEN is not configured"
+            exit 1
+          fi
+          http_code="$(
+            curl --silent --show-error               --connect-timeout 30               --max-time 900               --output /tmp/kitimages-response.json               --write-out '%{http_code}'               --request POST               --header "Authorization: Bearer ${WEBASYST_API_TOKEN}"               --header "Accept: application/json"               "${KITIMAGES_SYNC_URL}"
+          )"
+          echo "HTTP: ${http_code}"
+          cat /tmp/kitimages-response.json || true
+          echo
+          if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
+            exit 1
+          fi
+          python - <<'PY'
+          import json
+          with open('/tmp/kitimages-response.json', encoding='utf-8') as f:
+              data=json.load(f)
+          if data.get('status') != 'ok':
+              raise SystemExit(1)
+          PY
