@@ -100,6 +100,13 @@ if PROBE_ONLY:
     REPORT.write_text(json.dumps(probe, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(probe, ensure_ascii=False, indent=2))
     raise SystemExit(0)
+product_id_str = str(int(before.get("product_id") or 0))
+strategy_delete_response = post("/v1/pricing-strategy/products/delete", {
+    "product_id": [product_id_str]
+})
+strategy_verify_response = post("/v1/pricing-strategy/strategy-ids-by-product-ids", {
+    "product_id": [product_id_str]
+})
 commissions = before.get("commissions") or {}
 commission_pct = money(commissions.get("sales_percent_rfbs"))
 if commission_pct <= 0:
@@ -135,6 +142,8 @@ base_report = {
     "scheme": "rFBS",
     "purchase_price_github_rub": purchase,
     "purchase_source": "norden.yml",
+    "pricing_strategy_delete_response": strategy_delete_response,
+    "pricing_strategy_verify_response": strategy_verify_response,
     "ozon_sales_percent_rfbs": commission_pct,
     "ozon_acquiring_current_amount_rub": acquiring_amount,
     "ozon_acquiring_base_rub": acquiring_base,
