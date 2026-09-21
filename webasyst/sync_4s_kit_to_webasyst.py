@@ -386,6 +386,10 @@ def main():
         "webasyst_products": 0,
         "webasyst_skus": 0,
         "matched": 0,
+        "matched_by_article": 0,
+        "matched_by_code_site": 0,
+        "matched_by_name": 0,
+        "ambiguous_fallback_matches": 0,
         "unchanged": 0,
         "existing_to_update": 0,
         "existing_updated": 0,
@@ -457,7 +461,11 @@ def main():
     products = load_wa_products(wa, type_id)
     report["webasyst_products"] = len(products)
     wa_by_article = defaultdict(list)
+    wa_by_name = defaultdict(list)
     for product in products:
+        pname = norm(product.get("name"))
+        if pname:
+            wa_by_name[pname].append(product)
         for sku in product_skus(product):
             report["webasyst_skus"] += 1
             article = s(sku.get("sku"))
@@ -485,6 +493,30 @@ def main():
             continue
 
         rows = wa_by_article.get(article_key, [])
+        match_reason = "article" if rows else ""
+        code_site = char_value(variant, code_site_id)
+
+        # Fallback 1: "Код для сайта" in KIT may be the legacy Webasyst SKU.
+        # Fallback 2: exact product name, only when unique inside target type 79.
+        if not rows and code_site:
+            candidates = wa_by_article.get(norm(code_site), [])
+            if len(candidates) == 1:
+                rows = candidates
+                match_reason = "code_site"
+            elif len(candidates) > 1:
+                report["ambiguous_fallback_matches"] += 1
+
+        if not rows:
+            name_key = norm(variant.get("name"))
+            products_by_name = wa_by_name.get(name_key, []) if name_key else []
+            if len(products_by_name) == 1:
+                skus_by_name = product_skus(products_by_name[0])
+                if len(skus_by_name) == 1:
+                    rows = [(products_by_name[0], skus_by_name[0])]
+                    match_reason = "name"
+            elif len(products_by_name) > 1:
+                report["ambiguous_fallback_matches"] += 1
+
         prices = desired_prices(variant)
         if prices is None:
             report["missing_price"] += 1
@@ -496,6 +528,7 @@ def main():
 
         if rows:
             report["matched"] += 1
+            report[f"matched_by_{match_reason}"] += 1
             product, sku = rows[0]
             changes = sku_update_payload(sku, desired, wa_stock_id)
             if not changes:
@@ -508,6 +541,9 @@ def main():
                     "article": s(sku.get("sku")),
                     "product_id": s(product.get("id")),
                     "sku_id": s(sku.get("id")),
+                    "match_reason": match_reason,
+                    "kit_article": kit_article(variant, article_id),
+                    "kit_code_site": code_site,
                     "fields": sorted(changes.keys()),
                     "desired_price": money_str(desired["price"]),
                     "desired_compare_price": money_str(desired["compare_price"]),
