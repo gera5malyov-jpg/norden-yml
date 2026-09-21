@@ -26,6 +26,8 @@ BRAND='4 Сезона'
 WAREHOUSE_TITLES=('СПБ','МСК')
 CODE_SITE_TITLE='Код для сайта'
 ARTICLE_TITLE='Артикул'
+WEBASYST_TITLE='Webasyst'
+WEBASYST_VALUE='333'
 MONEY=Decimal('0.01')
 
 def s(v): return str(v or '').strip()
@@ -241,18 +243,22 @@ def char_value(v,cid):
             return s(x.get('value')) or (s((x.get('values') or [''])[0]) if x.get('values') else '')
     return ''
 
-def with_code_site(v,code_site_id,source_code):
-    replace={str(code_site_id)}
+def with_characteristic_values(v, values):
+    replace={str(cid) for cid in values}
     out=[
         x for x in (v.get('characteristics') or [])
         if s(x.get('characteristic_id')) not in replace
     ]
-    out.append({
-        'characteristic_id':code_site_id,
-        'value':source_code,
-        'values':[source_code],
-    })
+    for cid,value in values.items():
+        out.append({
+            'characteristic_id':cid,
+            'value':s(value),
+            'values':[s(value)],
+        })
     return out
+
+def with_code_site(v,code_site_id,source_code):
+    return with_characteristic_values(v,{code_site_id:source_code})
 
 def current_stock(v,wid):
     for x in v.get('stocks') or []:
@@ -329,7 +335,7 @@ def ensure_characteristic(kit,title,char_rows,char_index):
     return cid
 
 def build_product_characteristics(
-    kit,offer,char_rows,char_index,code_site_id,article_id,article_value
+    kit,offer,char_rows,char_index,code_site_id,article_id,webasyst_id,article_value
 ):
     out=[
         {
@@ -342,8 +348,13 @@ def build_product_characteristics(
             'value':article_value,
             'values':[article_value],
         },
+        {
+            'characteristic_id':webasyst_id,
+            'value':WEBASYST_VALUE,
+            'values':[WEBASYST_VALUE],
+        },
     ]
-    used={s(code_site_id),s(article_id)}
+    used={s(code_site_id),s(article_id),s(webasyst_id)}
     for title,value in (offer.get('params') or {}).items():
         if not s(title) or not s(value):
             continue
@@ -472,7 +483,14 @@ def main():
     char_rows=kit.characteristics()
     code_site_id,article_id=resolve_special_characteristics(char_rows)
     char_index=characteristic_title_index(char_rows)
-    print(f'4 Сезона feed offers: raw={len(raw_offers)} unique_codes={len(offers)} duplicates={len(feed_duplicates)}',flush=True)
+    webasyst_id=ensure_characteristic(
+        kit,WEBASYST_TITLE,char_rows,char_index
+    )
+    print(
+        f'4 Сезона feed offers: raw={len(raw_offers)} unique_codes={len(offers)} '
+        f'duplicates={len(feed_duplicates)}; Webasyst characteristic id={webasyst_id}',
+        flush=True,
+    )
 
     variants=kit.variants()
     by_code_site=defaultdict(list)
@@ -510,6 +528,7 @@ def main():
         'characteristics_written':0,'characteristic_repairs':0,
         'description_repairs':0,
         'brand_patched':0,'sku_fixed_to_333_kit_id':0,'code_site_filled':0,
+        'webasyst_333_marked':0,
         'absent_to_zero':0,'collisions':0,'errors':[],
     }
     seen_ids=set()
@@ -594,7 +613,7 @@ def main():
                 final_sku=final_sku_from_kit_id(kit_id)
                 chars=build_product_characteristics(
                     kit,o,char_rows,char_index,
-                    code_site_id,article_id,final_sku,
+                    code_site_id,article_id,webasyst_id,final_sku,
                 )
                 patch_new={
                     'sku':final_sku,
@@ -613,6 +632,7 @@ def main():
                 report['created']+=1
                 report['sku_fixed_to_333_kit_id']+=1
                 report['code_site_filled']+=1
+                report['webasyst_333_marked']+=1
                 created_now=True
             except Exception as exc:
                 report['errors'].append({'source_code':source,'message':str(exc)[:500]})
@@ -626,21 +646,32 @@ def main():
                 continue
             seen_ids.add(vid)
 
-            # Once an existing card is matched by name/article/code, persist the
-            # supplier article in "Код для сайта" for deterministic future runs.
-            if not created_now and char_value(target,code_site_id)!=source:
+            # Persist deterministic supplier mapping and the explicit
+            # Webasyst routing marker. Only confirmed 4 Seasons matches get 333.
+            need_code_site=char_value(target,code_site_id)!=source
+            need_webasyst=char_value(target,webasyst_id)!=WEBASYST_VALUE
+            if not created_now and (need_code_site or need_webasyst):
                 try:
-                    chars=with_code_site(target,code_site_id,source)
+                    chars=with_characteristic_values(
+                        target,
+                        {
+                            code_site_id:source,
+                            webasyst_id:WEBASYST_VALUE,
+                        },
+                    )
                     kit.patch_variant(vid,{'characteristics':chars})
                     target=dict(target)
                     target['characteristics']=chars
-                    report['code_site_filled']+=1
-                    add_index(by_code_site,source,target)
+                    if need_code_site:
+                        report['code_site_filled']+=1
+                        add_index(by_code_site,source,target)
+                    if need_webasyst:
+                        report['webasyst_333_marked']+=1
                 except Exception as exc:
                     if len(report['errors'])<300:
                         report['errors'].append({
                             'source_code':source,
-                            'message':f'code_site patch failed: {str(exc)[:400]}',
+                            'message':f'KIT mapping marker patch failed: {str(exc)[:400]}',
                         })
 
             # Repair content on cards created by this integration. This
@@ -653,7 +684,7 @@ def main():
                     final_article=f"333-{s(target.get('kit_id'))}"
                     desired_chars=build_product_characteristics(
                         kit,o,char_rows,char_index,
-                        code_site_id,article_id,final_article,
+                        code_site_id,article_id,webasyst_id,final_article,
                     )
                     current_pairs={
                         (s(x.get('characteristic_id')),s(x.get('value')) or (
