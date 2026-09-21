@@ -2,7 +2,7 @@ name: Norden KIT sync
 
 on:
   schedule:
-    - cron: '17 */3 * * *'
+    - cron: '17 3 * * *'
   workflow_dispatch:
     inputs:
       mode:
@@ -50,28 +50,27 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run initial full Norden import
+      - name: Update prices and stocks after workflow changes
         if: github.event_name == 'push'
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
         run: |
           python norden-kit/sync_norden_kit.py \
-            --mode full \
+            --mode price-stock \
             --rebuild-map \
-            --max-new 100 \
             --time-budget-seconds 17000
 
-      - name: Run scheduled three-hour sync
+      - name: Daily update of existing Norden prices and stocks
         if: github.event_name == 'schedule'
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
         run: |
           python norden-kit/sync_norden_kit.py \
-            --mode scheduled \
-            --max-new 250 \
-            --time-budget-seconds 9000
+            --mode price-stock \
+            --rebuild-map \
+            --time-budget-seconds 17000
 
       - name: Run manual sync
         if: github.event_name == 'workflow_dispatch'
@@ -118,3 +117,133 @@ jobs:
             sleep $((i * 5))
           done
           exit 1
+
+      - name: Send Norden report by email
+        if: always()
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          RUN_STATUS: ${{ job.status }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import smtplib
+          import ssl
+          from datetime import datetime, timezone
+          from email.message import EmailMessage
+          from pathlib import Path
+
+          def load_report():
+              p = Path("norden-kit/last_sync_report.json")
+              if not p.exists():
+                  return {}
+              try:
+                  return json.loads(p.read_text(encoding="utf-8"))
+              except Exception:
+                  return {}
+
+          report = load_report()
+          raw_status = (os.getenv("RUN_STATUS") or "unknown").strip().lower()
+          status = {
+              "success": "УСПЕШНО",
+              "failure": "ЗАВЕРШЕНО С ОШИБКАМИ",
+              "cancelled": "ОТМЕНЕНО",
+              "skipped": "ПРОПУЩЕНО",
+          }.get(raw_status, raw_status.upper() or "НЕИЗВЕСТНО")
+
+          errors = report.get("errors") or []
+          warnings = report.get("warnings") or []
+          subject = f"[Norden → KIT] Ежедневное обновление — {status}"
+
+          lines = [
+              "Автоматический отчёт по каталогу Norden → Яндекс KIT",
+              "",
+              f"Результат: {status}",
+              f"Номер запуска GitHub: {os.getenv('RUN_ID','—')}",
+              f"Причина запуска: {os.getenv('EVENT_NAME','—')}",
+              "",
+              "Режим: только обновление цен и наличия уже созданных товаров Norden.",
+              "Новые карточки в этом автоматическом запуске не создаются.",
+              "Перед обновлением пересобирается сопоставление существующих карточек Norden.",
+              "",
+              f"Товаров в источнике Norden: {report.get('source_products','—')}",
+              f"Сопоставлено существующих артикулов: {report.get('mapped_existing_articles','—')}",
+              f"Артикулов источника, найденных для обновления: {report.get('mapped_source_articles_for_updates','—')}",
+              f"Обновлено цен: {report.get('price_updates','—')}",
+              f"Обновлено остатков по складам: {report.get('stock_updates','—')}",
+              f"Несопоставленных артикулов источника: {report.get('unmapped_source_articles','—')}",
+              f"Ошибок в отчёте: {len(errors)}",
+              f"Предупреждений: {len(warnings)}",
+              "",
+              "Склады наличия: МСК и СПБ привозной.",
+              f"Источник данных: {report.get('source','—')}",
+              f"Начало данных отчёта: {report.get('started_at','—')}",
+              f"Окончание данных отчёта: {report.get('finished_at','—')}",
+          ]
+
+          if errors:
+              lines += ["", "Первые ошибки:"]
+              for e in errors[:10]:
+                  if isinstance(e, dict):
+                      article = e.get("article") or e.get("sku") or ""
+                      stage = e.get("stage") or ""
+                      msg = e.get("message") or str(e)
+                      lines.append(f"- {article} {stage}: {msg}".strip())
+                  else:
+                      lines.append(f"- {e}")
+
+          if warnings:
+              lines += ["", "Первые предупреждения:"]
+              for w in warnings[:10]:
+                  lines.append(f"- {w}")
+
+          run_url = os.getenv("RUN_URL","").strip()
+          if run_url:
+              lines += ["", f"GitHub Actions: {run_url}"]
+
+          lines += ["", f"Время отправки UTC: {datetime.now(timezone.utc).isoformat(timespec='seconds')}"]
+
+          user = (os.getenv("SMTP_USER") or "").strip()
+          password = "".join((os.getenv("SMTP_PASSWORD") or "").split())
+          recipient = (os.getenv("RECIPIENT") or "").strip()
+          if not user or not password:
+              raise SystemExit("Не настроены GMAIL_SMTP_USER и/или GMAIL_APP_PASSWORD.")
+
+          msg = EmailMessage()
+          msg["From"] = user
+          msg["To"] = recipient
+          msg["Subject"] = subject
+          msg.set_content("\n".join(lines))
+
+          ctx = ssl.create_default_context()
+          sent = False
+          failures = []
+          try:
+              with smtplib.SMTP("smtp.gmail.com", 587, timeout=60) as smtp:
+                  smtp.ehlo()
+                  smtp.starttls(context=ctx)
+                  smtp.ehlo()
+                  smtp.login(user, password)
+                  smtp.send_message(msg)
+              sent = True
+          except Exception as exc:
+              failures.append(f"587/STARTTLS: {type(exc).__name__}: {exc}")
+
+          if not sent:
+              try:
+                  with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ctx, timeout=60) as smtp:
+                      smtp.login(user, password)
+                      smtp.send_message(msg)
+                  sent = True
+              except Exception as exc:
+                  failures.append(f"465/SSL: {type(exc).__name__}: {exc}")
+
+          if not sent:
+              raise SystemExit("Не удалось отправить письмо. " + " | ".join(failures))
+          print(f"Письмо отправлено на {recipient}: {subject}")
+          PY
