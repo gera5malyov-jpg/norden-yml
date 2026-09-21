@@ -1,0 +1,74 @@
+name: Archive Riva UCH duplicates once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/archive-riva-uch-duplicates-once.yml']
+permissions:
+  contents: write
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Archive duplicates, keep original
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,time,urllib.parse,urllib.request,urllib.error
+          SKU='УЧ-00000156'; KEEP_KIT_ID=1500556
+          H={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          def call(req):
+              for _ in range(12):
+                  try:
+                      with urllib.request.urlopen(req,timeout=60) as r:
+                          body=r.read().decode('utf-8','replace')
+                          return r.status, body
+                  except urllib.error.HTTPError as e:
+                      if e.code==429:
+                          time.sleep(int(e.headers.get('Retry-After') or 3)); continue
+                      raise
+              raise RuntimeError('retry exhausted')
+          def query():
+              u='https://api.kit.yandex.net/v1/variants?'+urllib.parse.urlencode({'name':SKU,'page':1,'per_page':100})
+              _,body=call(urllib.request.Request(u,headers=H))
+              p=json.loads(body); rows=p.get('variants') or p.get('items') or p.get('results') or []
+              if isinstance(rows,dict): rows=rows.get('items') or []
+              return [x for x in rows if str(x.get('sku') or '').strip()==SKU]
+          before=query()
+          exact=[x for x in before if str(x.get('brand') or '').strip().casefold().startswith('riva')]
+          keeper=[x for x in exact if int(x.get('kit_id') or 0)==KEEP_KIT_ID]
+          if len(keeper)!=1:
+              raise RuntimeError(f'Expected exactly one keeper {KEEP_KIT_ID}, got {len(keeper)}')
+          archived=[]; failures=[]
+          for x in exact:
+              if int(x.get('kit_id') or 0)==KEEP_KIT_ID: continue
+              vid=str(x.get('id') or '').strip()
+              if not vid: continue
+              req=urllib.request.Request(f'https://api.kit.yandex.net/v1/variants/{vid}/archive',data=b'',method='POST',headers=H)
+              try:
+                  status,body=call(req)
+                  archived.append({'id':vid,'kit_id':x.get('kit_id'),'status':status})
+              except Exception as e:
+                  failures.append({'id':vid,'kit_id':x.get('kit_id'),'error':str(e)})
+              time.sleep(0.5)
+          after=query()
+          active_exact=[x for x in after if str(x.get('sku') or '').strip()==SKU]
+          out={'sku':SKU,'keeper_kit_id':KEEP_KIT_ID,'before_count':len(exact),'archived_count':len(archived),'failures':failures,'after_active_count':len(active_exact),'after_active':[{'id':x.get('id'),'kit_id':x.get('kit_id'),'brand':x.get('brand'),'status':x.get('status'),'name':x.get('name')} for x in active_exact]}
+          os.makedirs('riva-kit',exist_ok=True)
+          open('riva-kit/duplicate_uch_cleanup.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          if failures or len(active_exact)!=1 or int(active_exact[0].get('kit_id') or 0)!=KEEP_KIT_ID:
+              raise SystemExit(2)
+          PY
+      - name: Commit result
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add riva-kit/duplicate_uch_cleanup.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Archive duplicate Riva UCH variants'
+          git pull --rebase || true
+          git push || true
