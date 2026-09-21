@@ -1,0 +1,52 @@
+name: Kenner Webasyst sync
+
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'webasyst/sync_kenner_to_webasyst.py'
+      - '.github/workflows/kenner-webasyst-sync.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kenner-webasyst-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Sync Kenner to Webasyst
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          KENNER_WEBASYST_WRITE_DELAY: '0.60'
+        run: python webasyst/sync_kenner_to_webasyst.py
+      - name: Commit sync report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          cp webasyst/last_kenner_webasyst_sync.json /tmp/kenner-webasyst-sync.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          if [ -f /tmp/kenner-webasyst-sync.json ]; then
+            cp /tmp/kenner-webasyst-sync.json webasyst/last_kenner_webasyst_sync.json
+          fi
+          git add webasyst/last_kenner_webasyst_sync.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Update Kenner Webasyst sync report'
+          git push origin HEAD:main || true
