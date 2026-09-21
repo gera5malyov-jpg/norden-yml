@@ -1,0 +1,69 @@
+name: Norden archived purchase price probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-archived-cost-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Install requests
+        run: python -m pip install requests
+      - name: Test archived characteristic
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import html, os, re, time, requests
+          BASE="https://api.kit.yandex.net"
+          H={"Authorization":f"Bearer {(os.getenv('YANDEX_KIT_TOKEN') or '').strip()}","Accept":"application/json"}
+          s=requests.Session(); s.headers.update(H)
+          vid="019e2154-c0f5-795d-b425-92248f4a41fc"
+          cid="01a0c5ac-22cf-7091-a708-42186d711071"
+          sentinel="987654.32"
+          def call(method,path,body=None,ctype=None):
+              for a in range(12):
+                  time.sleep(0.5)
+                  h={}
+                  if body is not None: h["Content-Type"]=ctype or "application/json"
+                  r=s.request(method,BASE+path,json=body,headers=h,timeout=60)
+                  print("HTTP",method,path,r.status_code)
+                  if r.status_code==429:
+                      time.sleep(float(r.headers.get("Retry-After") or 2)); continue
+                  if r.status_code>=500:
+                      time.sleep(2); continue
+                  return r
+              return r
+          g=call("GET",f"/v1/variants/{vid}")
+          if g.status_code!=200: raise SystemExit(g.text[:1000])
+          original=g.json()
+          base=[x for x in (original.get("characteristics") or []) if str(x.get("characteristic_id"))!=cid]
+          entry={"characteristic_id":cid,"value":sentinel,"values":[sentinel]}
+          try:
+              p=call("PATCH",f"/v1/variants/{vid}",{"characteristics":base+[entry]},"application/merge-patch+json")
+              print("PATCH_BODY",p.text[:1000])
+              if p.status_code>=400: raise SystemExit("ARCHIVED_CHARACTERISTIC_REJECTED")
+              time.sleep(2)
+              v=call("GET",f"/v1/variants/{vid}").json()
+              persisted=[x for x in (v.get("characteristics") or []) if str(x.get("characteristic_id"))==cid]
+              print("PERSISTED",persisted)
+              st=call("GET","/v1/store").json()
+              url=(st.get("b2c_url") or "").rstrip("/")+(original.get("relative_link_url") or "")
+              pg=requests.get(url,timeout=60,headers={"User-Agent":"Mozilla/5.0"})
+              tx=re.sub(r"(?is)<script\b.*?</script>|<style\b.*?</style>"," ",pg.text)
+              tx=re.sub(r"(?s)<[^>]+>"," ",tx)
+              tx=re.sub(r"\s+"," ",html.unescape(tx))
+              print("STOREFRONT_HTTP",pg.status_code)
+              print("STOREFRONT_COST_PRESENT",sentinel in tx or "Закупочная цена Norden" in tx)
+              print("ARCHIVED_HIDDEN_RESULT",bool(persisted) and sentinel not in tx and "Закупочная цена Norden" not in tx)
+          finally:
+              r=call("PATCH",f"/v1/variants/{vid}",{"characteristics":base},"application/merge-patch+json")
+              print("RESTORE",r.status_code)
+          PY
