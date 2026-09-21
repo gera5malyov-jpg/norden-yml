@@ -1,0 +1,73 @@
+name: KIT images sync to Webasyst
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17,47 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kitimages-webasyst-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Run KIT images plugin sync
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          KITIMAGES_SYNC_URL: https://profikompany.ru/kitimages-sync/
+        run: |
+          set -euo pipefail
+
+          if [ -z "${WEBASYST_API_TOKEN:-}" ]; then
+            echo "::error::WEBASYST_API_TOKEN is not configured"
+            exit 1
+          fi
+
+          http_code="$(
+            curl --silent --show-error               --connect-timeout 30               --max-time 900               --output /tmp/kitimages-response.json               --write-out '%{http_code}'               --request POST               --header "Authorization: Bearer ${WEBASYST_API_TOKEN}"               --header "Accept: application/json"               "${KITIMAGES_SYNC_URL}"
+          )"
+
+          echo "HTTP: ${http_code}"
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("/tmp/kitimages-response.json")
+          raw = path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
+          try:
+              data = json.loads(raw)
+          except Exception:
+              print(raw[:4000])
+              raise SystemExit("Plugin returned non-JSON response")
+
+          report = data.get("report") or {}
+          summary = {
+              "status": data.get("status"),
+              "candidate_products": report.get("candidate_products"),
+              "matched_products": report.get("matched_products"),
+              "updated_products": report.get("updated_products"),
+              "saved_image_urls": report.get("saved_image_urls"),
+              "products_without_kit_match": report.get("products_without_kit_match"),
+              "products_without_kit_images": report.get("products_without_kit_images"),
+              "kit_duplicate_skus": report.get("kit_duplicate_skus"),
+              "errors": report.get("errors") or [],
+              "started_at": report.get("started_at"),
+              "finished_at": report.get("finished_at"),
+          }
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+
+          if data.get("status") != "ok":
+              raise SystemExit(1)
+          PY
+
+          if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
+            exit 1
+          fi
