@@ -122,30 +122,26 @@ jobs:
                       except Exception:
                           extra_kit_num=None
 
-                      same_code=(
-                          canonical_code
-                          and canonical_code==extra_code
+                      canonical_created=mod.s(canonical.get('created_at'))
+                      extra_created=mod.s(extra.get('created_at'))
+                      newer_by_time=bool(
+                          canonical_created and extra_created
+                          and extra_created>canonical_created
                       )
-                      legacy_name_guard=(
-                          group.get('match_mode')=='legacy-name-guard'
-                          and canonical_name
-                          and canonical_name==extra_name
-                          and mod.is_likely_legacy_4s_variant(
-                              canonical,code_site_id,article_id,webasyst_id
-                          )
-                          and mod.is_likely_legacy_4s_variant(
-                              extra,code_site_id,article_id,webasyst_id
-                          )
-                          and not mod.generated_333_variant(canonical)
-                          and mod.generated_333_variant(extra)
-                      )
-                      safe=(
-                          canonical_name
-                          and canonical_name==extra_name
-                          and canonical_kit_num is not None
+                      newer_by_kit=bool(
+                          canonical_kit_num is not None
                           and extra_kit_num is not None
                           and extra_kit_num>canonical_kit_num
-                          and (same_code or legacy_name_guard)
+                      )
+
+                      # User rule: if ACTIVE cards of brand "4 Сезона" have the
+                      # same normalized name, keep the oldest and archive newer ones.
+                      safe=(
+                          mod.norm(canonical.get('brand'))==mod.norm(mod.BRAND)
+                          and mod.norm(extra.get('brand'))==mod.norm(mod.BRAND)
+                          and canonical_name
+                          and canonical_name==extra_name
+                          and (newer_by_time or newer_by_kit)
                       )
                       if not safe:
                           report['skipped_unsafe']+=1
@@ -154,7 +150,7 @@ jobs:
                               'code_site':group.get('code_site'),
                               'canonical_kit_id':canonical.get('kit_id'),
                               'duplicate_kit_id':extra.get('kit_id'),
-                              'message':'Проверка безопасности не подтвердила, что карточка является более новым точным дублем',
+                              'message':'Проверка безопасности не подтвердила, что карточка является более новым дублем по наименованию',
                           })
                           continue
 
