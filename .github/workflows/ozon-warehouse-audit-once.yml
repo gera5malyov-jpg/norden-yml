@@ -16,7 +16,7 @@ jobs:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
     steps:
-      - name: List Ozon warehouses
+      - name: Audit Ozon warehouses and delivery methods
         shell: bash
         run: |
           set -euo pipefail
@@ -25,25 +25,50 @@ jobs:
             --header "Client-Id: $OZON_CLIENT_ID" \
             --header "Api-Key: $OZON_API_KEY" \
             --header "Content-Type: application/json" \
-            --data '{"limit":100}')
-          echo "HTTP $code"
+            --data '{"limit":200}')
+          echo "warehouse/list HTTP $code"
           if [ "$code" != "200" ]; then
             cat /tmp/warehouses.json
             exit 1
           fi
+
           python - <<'PY'
-          import json
+          import json, os, urllib.request, urllib.error
           d=json.load(open('/tmp/warehouses.json'))
-          rows=[]
-          for w in d.get('result',[]):
-              rows.append({
+          ws=d.get('warehouses') or []
+          print("WAREHOUSES:")
+          for w in ws:
+              print(json.dumps({
                   'warehouse_id':w.get('warehouse_id'),
                   'name':w.get('name'),
                   'is_rfbs':w.get('is_rfbs'),
                   'is_kgt':w.get('is_kgt'),
                   'status':w.get('status'),
+                  'warehouse_type':w.get('warehouse_type'),
                   'working_days':w.get('working_days'),
-                  'first_mile_type':w.get('first_mile_type'),
-              })
-          print(json.dumps(rows, ensure_ascii=False, indent=2))
+                  'phone':w.get('phone'),
+                  'address_info':w.get('address_info'),
+                  'cut_in_time':w.get('cut_in_time'),
+                  'sla_cut_in':w.get('sla_cut_in'),
+                  'pause_at':w.get('pause_at'),
+              }, ensure_ascii=False))
+
+          headers={
+              'Client-Id':os.environ['OZON_CLIENT_ID'],
+              'Api-Key':os.environ['OZON_API_KEY'],
+              'Content-Type':'application/json',
+              'Accept':'application/json',
+          }
+          for w in ws:
+              wid=w.get('warehouse_id')
+              if not wid: continue
+              body=json.dumps({'filter':{'warehouse_id':int(wid)},'limit':100}).encode()
+              req=urllib.request.Request('https://api-seller.ozon.ru/v2/delivery-method/list',data=body,headers=headers,method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as resp:
+                      dd=json.load(resp)
+                      print(f"DELIVERY_METHODS warehouse_id={wid}:")
+                      print(json.dumps(dd, ensure_ascii=False))
+              except urllib.error.HTTPError as e:
+                  print(f"DELIVERY_METHODS warehouse_id={wid}: HTTP {e.code} {e.read().decode('utf-8','replace')[:2000]}")
           PY
