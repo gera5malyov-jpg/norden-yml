@@ -1,782 +1,237 @@
 {
-  "started_at": "2026-09-21T20:08:08.259828+00:00",
-  "mode": "price-stock",
-  "source": "api-short",
+  "started_at": "2026-09-21T20:15:10.696618+00:00",
+  "mode": "full",
+  "source": "api",
   "catalog_source": "API Norden; fallback Norden.xml",
   "price_stock_source": "API Norden; fallback Norden.group -K8%.xml",
   "api_error": null,
   "source_products": 8485,
   "source_duplicate_articles": 15,
-  "mapped_existing_articles": 389,
-  "planned_new_products": 0,
-  "new_products_created": 0,
-  "existing_products_patched": 0,
-  "empty_characteristics_filled": 0,
-  "existing_products_images_filled": 0,
-  "image_errors": 0,
-  "price_updates": 421,
-  "stock_updates": 842,
-  "minimum_price_field": "minimum_price",
-  "minimum_price_supported": true,
-  "warnings": [],
-  "errors": [],
-  "initial_complete": false,
-  "kit_mapping_method": "targeted_current_norden_skus",
-  "kit_target_skus": 528,
-  "kit_brand_norden_seen": 528,
-  "unresolved_existing_count": 107,
-  "unresolved_existing_sample": [
+  "mapped_existing_articles": 390,
+  "planned_new_products": 8095,
+  "new_products_created": 100,
+  "existing_products_patched": 100,
+  "empty_characteristics_filled": 901,
+  "existing_products_images_filled": 93,
+  "image_errors": 6,
+  "price_updates": 100,
+  "stock_updates": 200,
+  "minimum_price_field": null,
+  "minimum_price_supported": false,
+  "warnings": [
+    "AG.240.AN.AN.AR: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "CS325.500W: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "CS325.600W: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "C1918 CF brown leather: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "6227A: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "6227A-HS: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+  ],
+  "errors": [
     {
-      "sku": "AF-31094457",
-      "kit_id": 607013,
-      "code_for_site": "216B-Сhrome-B-BB",
-      "name": "Кресло для персонала / Tema Сhrome LB 2D",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.WH.P59.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"819cb9a1a16034fec63d5ffb494343b0\"}"
     },
     {
-      "sku": "AF-31390738",
-      "kit_id": 607083,
-      "code_for_site": "HD-2216H grey",
-      "name": "Кресло Parker grey HD-2216H grey",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.WH.P59.BL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d0035a85b8b1de75ce49c4c6c957729c\"}"
     },
     {
-      "sku": "AF-30834843",
-      "kit_id": 607071,
-      "code_for_site": "RF-8106B PU",
-      "name": "Кресло офисное / Lotus EVO / черно - белая экокожа/ пластиковая крестовина",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.WH.O59.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"248e0830710a891ba74e1948f1dfe623\"}"
     },
     {
-      "sku": "AF-31390740",
-      "kit_id": 607016,
-      "code_for_site": "HD-2216L grey",
-      "name": "Кресло Parker LB grey HD-2216L grey",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.WH.O59.BL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"72e885db9e6db8961bb079924f6f9d63\"}"
     },
     {
-      "sku": "AF-31390736",
-      "kit_id": 607014,
-      "code_for_site": "HD-2216H",
-      "name": "Кресло Parker HD-2216H",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.DM.P59.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8eba2e7dce5fc7030e8ddbe86234d518\"}"
     },
     {
-      "sku": "AF-31390737",
-      "kit_id": 607081,
-      "code_for_site": "HD-2216H-1 Fabric",
-      "name": "Кресло Parker Fabric HD-2216H-1 Fabric",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.DM.P59.BL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"fa01aad3a568b5afd71171be8626feb6\"}"
     },
     {
-      "sku": "AF-31390739",
-      "kit_id": 607082,
-      "code_for_site": "HD-2216L",
-      "name": "Кресло Parker LB HD-2216L",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.DM.O59.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"106dc11bfe3b1550bc7041bbc7acdeab\"}"
     },
     {
-      "sku": "AF-30895666",
-      "kit_id": 110372,
-      "code_for_site": "C1918 CF brown leath",
-      "name": "Кресло офисное Бордо CF коричневая кожа алюминий крестовина",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.DM.O59.BL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ebe987b3c011453c43cb59ea48494b01\"}"
     },
     {
-      "sku": "AF-31166344",
-      "kit_id": 109962,
-      "code_for_site": "2311 ivory",
-      "name": "Кресло для руководителя Bern ivory 2311 ivory",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.OD.P59.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"6426da2c29c18e1e47ef75de52c72be2\"}"
     },
     {
-      "sku": "AF-31366818",
-      "kit_id": 109595,
-      "code_for_site": "FG-8631A",
-      "name": "Кресло для руководителя Sirio FG-8631A",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.OD.P59.BL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"99542b75f591c4601e2cbfbe128459dd\"}"
     },
     {
-      "sku": "AF-31366817",
-      "kit_id": 109591,
-      "code_for_site": "FG-1813A",
-      "name": "Кресло офисное Bilbao FG-1813A",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.OD.O59.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4f530c5f25be390823b5293c802b4e1e\"}"
     },
     {
-      "sku": "AF-31385532",
-      "kit_id": 108610,
-      "code_for_site": "U-059B-BS",
-      "name": "Кресло Light LB grey U-059B-BS",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.OD.O59.BL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e1108e440b1fed1bd14b4b016035ece1\"}"
     },
     {
-      "sku": "AF-30965426",
-      "kit_id": 108479,
-      "code_for_site": "CH-330B-BS-W-GG",
-      "name": "Кресло для персонала Baden CH-330B-BS-W-GG",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.SH.P59.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d9e713734d7394cfb33db9a2cca49009\"}"
     },
     {
-      "sku": "AF-31367113",
-      "kit_id": 106379,
-      "code_for_site": "FG-1822A-2",
-      "name": "Кресло для руководителя Titanium FG-1822A-2",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.SH.P59.BL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"179c0a1e0604ae94ac6e483e8ca86c9a\"}"
     },
     {
-      "sku": "алюминиевая база / серая ткань CF",
-      "kit_id": 106686,
-      "code_for_site": "",
-      "name": "Конференц-кресло Liverpool New CF grey fabric L347LCA-1-CF-grey fabric n",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.SH.O59.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5bd3bca14286635e727345c2a03df821\"}"
     },
     {
-      "sku": "AF-31381183",
-      "kit_id": 107117,
-      "code_for_site": "U-059B-HS",
-      "name": "Кресло офисное Light LB gray U-059B-HS",
-      "reason": "Code for site not found in Norden source"
+      "article": "PR.110.SH.O59.BL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0e9604532c81dd6319a1ca7773d2823b\"}"
     },
     {
-      "sku": "AF-31366819",
-      "kit_id": 106269,
-      "code_for_site": "FG-1822A-1",
-      "name": "Кресло офисное Titanium FG-1822A-1",
-      "reason": "Code for site not found in Norden source"
+      "article": "6227B-HS",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a6527bbd5d7304162f3a0fbe56dabd12\"}"
     },
     {
-      "sku": "AF-31202498",
-      "kit_id": 106982,
-      "code_for_site": "K-1190-10-1 white",
-      "name": "Cтул /Нексус вуд K-1190-10-1 WHITE",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31366023",
-      "kit_id": 106722,
-      "code_for_site": "HY-839C W",
-      "name": "Конференц-кресло Swift HY-839C W",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30675188",
-      "kit_id": 106975,
-      "code_for_site": "H-100F-35",
-      "name": "Кресло офисное Техно хром / черная экокожа мультиблок",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31166345",
-      "kit_id": 105658,
-      "code_for_site": "2311 CF ivory",
-      "name": "Конференц-кресло Bern CF ivory 2311 CF ivory",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31165053",
-      "kit_id": 105657,
-      "code_for_site": "2311 black",
-      "name": "Кресло для руководителя / Bern black 2311 black",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31213688",
-      "kit_id": 105656,
-      "code_for_site": "2311 CF black",
-      "name": "Конференц-кресло / Bern CF black 2311 CF black",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31208325",
-      "kit_id": 105097,
-      "code_for_site": "AM 13-09A",
-      "name": "Кресло офисное Zion AM 13-09A",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31347600",
-      "kit_id": 105949,
-      "code_for_site": "P3124-02",
-      "name": "Кресло для руководителя Магистр P3124-02",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31163131",
-      "kit_id": 105149,
-      "code_for_site": "TS2301-10-2",
-      "name": "Кресла для руководителя / Стартрек TS2301-10-2",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30834842",
-      "kit_id": 105775,
-      "code_for_site": "RF-8106A PU",
-      "name": "Кресло офисное Lotus EVO черно - красная экокожа пластиковая крестовина",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31156834",
-      "kit_id": 104892,
-      "code_for_site": "L347HCA-grey fabric",
-      "name": "Кресло офисное / Liverpool grey fabric L347HCA-grey fabric",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31155794",
-      "kit_id": 105857,
-      "code_for_site": "RF-8107A",
-      "name": "Геймерское кресло / Lotus ONERF-8107A",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31208408",
-      "kit_id": 105045,
-      "code_for_site": "AM 6007A",
-      "name": "Кресло офисное Lion AM 6007A",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31336214",
-      "kit_id": 105320,
-      "code_for_site": "824 grey",
-      "name": "Стул офисный Five grey 824 grey",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31215050",
-      "kit_id": 105649,
-      "code_for_site": "F181-F black leather",
-      "name": "Кресло для руководителя Porsche F181-F black leather",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31208409",
-      "kit_id": 104585,
-      "code_for_site": "AM 1716A",
-      "name": "Кресло офисное Sorbonne AM 1716A",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31234426",
-      "kit_id": 104646,
-      "code_for_site": "831 yellow",
-      "name": "Офисный стул Eleven yellow 831 yellow",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31208415",
-      "kit_id": 104376,
-      "code_for_site": "AM 128B PU",
-      "name": "Кресло офисное Arctic LB экокожа AM 128B PU",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30941338",
-      "kit_id": 105826,
-      "code_for_site": "919A",
-      "name": "Офисное кресло TENDER Черный",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31208411",
-      "kit_id": 104584,
-      "code_for_site": "AM 1716B",
-      "name": "Кресло офисное Sorbonne LB AM 1716B",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31210784",
-      "kit_id": 104471,
-      "code_for_site": "829 grey",
-      "name": "Офисный стул Nine 829 grey",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30539763",
-      "kit_id": 104992,
-      "code_for_site": "CH-193B-К304D-1*N207",
-      "name": "Кресло офисное Спэйс LB черный пластик черная сетка оранжевая ткань",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30539766",
-      "kit_id": 104779,
-      "code_for_site": "CH-240C-OA2000*OS800",
-      "name": "Кресло офисное Стайл 1 CF хром черная сетка черная ткань",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30675160",
-      "kit_id": 104852,
-      "code_for_site": "WH001-blackleather",
-      "name": "Кресло офисное Патио черная кожа алюминиевая крестовина",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30756512",
-      "kit_id": 104528,
-      "code_for_site": "NG-28PL",
-      "name": "Кресло офисное Реал хром сетка (черная)крестовина хром",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31225144",
-      "kit_id": 104758,
-      "code_for_site": "823/824 grey",
-      "name": "Офисный стул /Eight grey 823/824 grey",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30898996",
-      "kit_id": 104523,
-      "code_for_site": "CH-329A",
-      "name": "Кресло офисное Ронин черная экокожа",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30893903",
-      "kit_id": 104243,
-      "code_for_site": "CX0398H01 black",
-      "name": "Кресло офисное Тесла CX0398H01 black",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30899017",
-      "kit_id": 104512,
-      "code_for_site": "U-020C-OA2000*OS-01",
-      "name": "Кресло офисное Стронг CF U-020C-OA2000*OS-01",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30895662",
-      "kit_id": 104244,
-      "code_for_site": "CX0398H01 grey+silve",
-      "name": "Кресло офисное Тесла серебристый пластик серая спинка черная сидушка",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30899013",
-      "kit_id": 104088,
-      "code_for_site": "CX1168M01 gray - bla",
-      "name": "Кресло офисное Стиль черный пластик серая спинка черная сидушка",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30756505",
-      "kit_id": 104798,
-      "code_for_site": "H-1182-70-5",
-      "name": "Кресло офисное Мэдисон (ivory) серый пластик слоновая кость",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30899006",
-      "kit_id": 104366,
-      "code_for_site": "JZR1008 -BL005-DWB10",
-      "name": "Кресло офисное Лондон офис LB черный пластик сетка ткань",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30539672",
-      "kit_id": 104742,
-      "code_for_site": "H-103-35",
-      "name": "Кресло офисное / Зуум / (black) черная экокожа",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30899005",
-      "kit_id": 104752,
-      "code_for_site": "CH-180B-OA2016*АК30-",
-      "name": "Кресло офисное / Интер LB черный пластик серая сетка зеленая ткань",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30834950",
-      "kit_id": 104162,
-      "code_for_site": "CH-226B-OA2000*OS800",
-      "name": "Кресло офисное Сильвия LB CH-226B-OA2000*OS800",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30756498",
-      "kit_id": 104234,
-      "code_for_site": "8005A blue",
-      "name": "Кресло офисное Денвер черная сетка синяя ткань черный пластик",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30756499",
-      "kit_id": 104232,
-      "code_for_site": "8005A-2 cian",
-      "name": "Кресло офисное Денвер серая сетка морская волна ткань серый пластик",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30756500",
-      "kit_id": 104233,
-      "code_for_site": "8005A-2 gray",
-      "name": "Кресло офисное Денвер серая сетка ткань пластик",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30986053",
-      "kit_id": 104281,
-      "code_for_site": "CH-203A-B-BB",
-      "name": "Кресло для руководителя Vogue aluminium CH-203A-B-BB",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30986224",
-      "kit_id": 104280,
-      "code_for_site": "CH-203B-B-BB",
-      "name": "Кресло для руководителя Vogue aluminium LB CH-203B-B-BB",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31072381",
-      "kit_id": 104777,
-      "code_for_site": "216A-2D-B-BB",
-      "name": "Кресло для персонала Tema 2D 216A-2D-B-BB",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30965427",
-      "kit_id": 104778,
-      "code_for_site": "P039A-M02-05",
-      "name": "Кресло для персонала Techo P039A-M02-05",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30967252",
-      "kit_id": 104097,
-      "code_for_site": "P039B-M02-05",
-      "name": "Кресло для персонала Techo LB P039B-M02-05",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30834887",
-      "kit_id": 105001,
-      "code_for_site": "H-1113-35",
-      "name": "Кресло офисное / Даллас / (black) черная экокожа",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30899001",
-      "kit_id": 104247,
-      "code_for_site": "YS-0816H(D+TW) black",
-      "name": "Кресло офисное Варио черный пластик черная сетка ткань",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31201780",
-      "kit_id": 104719,
-      "code_for_site": "CH-359A black",
-      "name": "Кресло офисное / Cosmo black CH-359A black",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31201781",
-      "kit_id": 104216,
-      "code_for_site": "CH-359A grey",
-      "name": "Кресло офисное / Cosmo grey CH-359A grey",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31223178",
-      "kit_id": 104788,
-      "code_for_site": "H-1133-70-8",
-      "name": "Кресло для руководителя Президент H-1133-70-8",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31223614",
-      "kit_id": 104197,
-      "code_for_site": "P2346-L09 leather",
-      "name": "Кресло для руководителя Честер P2346-L09 leather",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30941342",
-      "kit_id": 104561,
-      "code_for_site": "A13-B-BB",
-      "name": "Кресло оператора TERRA LB A13-B-BB",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31300982",
-      "kit_id": 104930,
-      "code_for_site": "AM 188A-3",
-      "name": "Кресло для руководителя Grand ivory AM 188A-3",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30910707",
-      "kit_id": 104916,
-      "code_for_site": "909R-1-1",
-      "name": "Кресло офисное Лорри (black plastic black) черный пластик черная сетка",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30994777",
-      "kit_id": 104214,
-      "code_for_site": "8001A-2 grey",
-      "name": "Кресло для руководителя Бостон SL 8001A-2 grey",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30946966",
-      "kit_id": 104636,
-      "code_for_site": "AM3-H(white)",
-      "name": "Кресло для руководителя Wave white AM3-H(white)",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31221521",
-      "kit_id": 104259,
-      "code_for_site": "H-2021-86",
-      "name": "Кресло для руководителя Парламент H-2021-86",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31211107",
-      "kit_id": 105000,
-      "code_for_site": "P2338-L09 leather",
-      "name": "Кресло для руководителя Боттичелли P2338-L09 leather",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31221516",
-      "kit_id": 104440,
-      "code_for_site": "H-2029",
-      "name": "Кресло для руководителя Бонд H-2029",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31221520",
-      "kit_id": 104260,
-      "code_for_site": "H-2021-70-8",
-      "name": "Кресло для руководителя Парламент H-2021-70-8",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31298151",
-      "kit_id": 104256,
-      "code_for_site": "H-1178-70",
-      "name": "Кресло для руководителя Джек H-1178-70",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31221522",
-      "kit_id": 104257,
-      "code_for_site": "H-2021-70-30",
-      "name": "Кресло для руководителя Парламент H-2021-70-30",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31298153",
-      "kit_id": 104163,
-      "code_for_site": "HA-900-70",
-      "name": "Кресло для руководителя Модена HA-900-70",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30756516",
-      "kit_id": 104540,
-      "code_for_site": "YS1505A-black",
-      "name": "Кресло офисное / Трон / черная кожа",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31183680",
-      "kit_id": 104637,
-      "code_for_site": "CH-312A-W-RR",
-      "name": "Кресло для руководителя Ruby CH-312A-W-RR",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30945267",
-      "kit_id": 104643,
-      "code_for_site": "EIT-001A",
-      "name": "Кресло для руководителя Malmo EIT-001A черное",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30995525",
-      "kit_id": 104797,
-      "code_for_site": "EVA-004B",
-      "name": "Кресло для руководителя Monro EVA-004B",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31221519",
-      "kit_id": 104364,
-      "code_for_site": "ZR8637H black leathe",
-      "name": "Кресло для руководителя Лондон ЛЮКС ZR8637H black leather",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30756517",
-      "kit_id": 104538,
-      "code_for_site": "YS1505A-brown",
-      "name": "Кресло офисное / Трон / коричневая кожа",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31211973",
-      "kit_id": 104750,
-      "code_for_site": "CH-366A-wb",
-      "name": "Кресло для руководителя Fredo CH-366A-wb",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31165844",
-      "kit_id": 104998,
-      "code_for_site": "P2338-L02 leather",
-      "name": "Кресло для руководителя / Боттичелли P2338-L02 leather",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31221517",
-      "kit_id": 104231,
-      "code_for_site": "8005A black",
-      "name": "Кресло для персонала Денвер 8005A black",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31298152",
-      "kit_id": 104741,
-      "code_for_site": "H-103-322",
-      "name": "Кресло для руководителя Зуум H-103-322",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30966570",
-      "kit_id": 104560,
-      "code_for_site": "A13-B-GB",
-      "name": "Кресло для персонала Terra LB A13-B-GB",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30882720",
-      "kit_id": 104851,
-      "code_for_site": "9132 white leather",
-      "name": "Кресло офисное / Моцарт ivоry кожа алюминий крестовина золотого цвета",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31072384",
-      "kit_id": 104633,
-      "code_for_site": "216B-Сhrome-B-GG",
-      "name": "Кресло для персонала Tema Сhrome LB 2D 216B-Сhrome-B-GG",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30985934",
-      "kit_id": 104624,
-      "code_for_site": "A3-M(black)",
-      "name": "Кресло для персонала Wave T A3-M(black)",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31072382",
-      "kit_id": 104632,
-      "code_for_site": "216B",
-      "name": "Кресло для персонала Tema LB 216B",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31221643",
-      "kit_id": 104677,
-      "code_for_site": "CH-178A",
-      "name": "Кресло для персонала Scanno CH-178A",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31221523",
-      "kit_id": 104261,
-      "code_for_site": "H-2021-86 leather",
-      "name": "Кресло для руководителя Парламент H-2021-86 leather",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31301349",
-      "kit_id": 104242,
-      "code_for_site": "CX0398H01 grey+black",
-      "name": "Кресло для персонала/Тесла CX0398H01 grey+black",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31301348",
-      "kit_id": 104241,
-      "code_for_site": "CX0398H01 white+blac",
-      "name": "Кресло для персонала/Тесла CX0398H01 white+black",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31211975",
-      "kit_id": 104496,
-      "code_for_site": "HB-102-05",
-      "name": "Конференц-кресло Хельмут CF HB-102-05",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31223181",
-      "kit_id": 104572,
-      "code_for_site": "HB-101-322",
-      "name": "Конференц-кресло Харман CF HB-101-322",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30939651",
-      "kit_id": 104991,
-      "code_for_site": "CH-193A-1-К304D-14*N",
-      "name": "Кресло для персонала Спэйс gray",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30939652",
-      "kit_id": 104559,
-      "code_for_site": "CH-219B-HS-К304D-14*",
-      "name": "Кресло для персонала Практик grey LB",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31223180",
-      "kit_id": 104972,
-      "code_for_site": "",
-      "name": "Кресло для персонала Харман LB HA-101-322",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31155792",
-      "kit_id": 104796,
-      "code_for_site": "CH-193B-К304D-1*N204",
-      "name": "Кресло для персонала / Спэйс LBCH-193B-К304D-1*N204",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31136638",
-      "kit_id": 104606,
-      "code_for_site": "336G-LB",
-      "name": "Компьютерное кресло Play LB grey336G-LB",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-31213917",
-      "kit_id": 104766,
-      "code_for_site": "CX0898H-1-171",
-      "name": "Кресло для персонала IQ CX0898H-1-171",
-      "reason": "Code for site not found in Norden source"
-    },
-    {
-      "sku": "AF-30945286",
-      "kit_id": 104635,
-      "code_for_site": "AM3-H(black)",
-      "name": "Кресло для персонала Wave черное AM3-H(black)",
-      "reason": "Code for site not found in Norden source"
+      "article": "6227B",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e660124e174937a802afa29fdd6909bc\"}"
     }
   ],
-  "mapped_source_articles_for_updates": 389,
-  "unmapped_source_articles": 8096,
-  "finished_at": "2026-09-21T20:28:27.570471+00:00"
+  "initial_complete": false,
+  "kit_mapping_method": "seed_existing_site_codes",
+  "kit_seed_codes": 528,
+  "unresolved_existing_count": 105,
+  "unresolved_existing_sample": [
+    "RF-8106B PU",
+    "216B-Сhrome-B-BB",
+    "HD-2216L grey",
+    "HD-2216H grey",
+    "HD-2216H-1 Fabric",
+    "HD-2216L",
+    "HD-2216H",
+    "C1918 CF brown leath",
+    "2311 ivory",
+    "FG-8631A",
+    "FG-1813A",
+    "U-059B-BS",
+    "CH-330B-BS-W-GG",
+    "U-059B-HS",
+    "FG-1822A-2",
+    "FG-1822A-1",
+    "HY-839C W",
+    "H-100F-35",
+    "K-1190-10-1 white",
+    "RF-8107A",
+    "AM 6007A",
+    "F181-F black leather",
+    "AM 13-09A",
+    "2311 CF ivory",
+    "2311 black",
+    "TS2301-10-2",
+    "2311 CF black",
+    "919A",
+    "P3124-02",
+    "824 grey",
+    "RF-8106A PU",
+    "L347HCA-grey fabric",
+    "829 grey",
+    "831 yellow",
+    "823/824 grey",
+    "AM 1716A",
+    "AM 128B PU",
+    "AM 1716B",
+    "CH-193B-К304D-1*N207",
+    "CH-240C-OA2000*OS800",
+    "WH001-blackleather",
+    "CH-226B-OA2000*OS800",
+    "NG-28PL",
+    "CX0398H01 grey+silve",
+    "CH-329A",
+    "CX1168M01 gray - bla",
+    "CX0398H01 black",
+    "U-020C-OA2000*OS-01",
+    "H-1182-70-5",
+    "JZR1008 -BL005-DWB10",
+    "909R-1-1",
+    "H-103-35",
+    "CH-180B-OA2016*АК30-",
+    "8005A blue",
+    "8005A-2 gray",
+    "8005A-2 cian",
+    "H-1113-35",
+    "CH-203A-B-BB",
+    "P039A-M02-05",
+    "CH-203B-B-BB",
+    "216A-2D-B-BB",
+    "P039B-M02-05",
+    "YS-0816H(D+TW) black",
+    "CH-359A black",
+    "CH-359A grey",
+    "A13-B-BB",
+    "H-1133-70-8",
+    "P2346-L09 leather",
+    "AM 188A-3",
+    "AM3-H(white)",
+    "8001A-2 grey",
+    "H-2021-86 leather",
+    "H-2029",
+    "H-2021-70-8",
+    "H-2021-86",
+    "P2338-L09 leather",
+    "H-2021-70-30",
+    "ZR8637H black leathe",
+    "HA-900-70",
+    "H-1178-70",
+    "CH-312A-W-RR",
+    "EIT-001A",
+    "EVA-004B",
+    "CH-366A-wb",
+    "YS1505A-black",
+    "YS1505A-brown",
+    "9132 white leather",
+    "P2338-L02 leather",
+    "H-103-322",
+    "8005A black",
+    "AM3-H(black)",
+    "A3-M(black)",
+    "A13-B-GB",
+    "216B-Сhrome-B-GG",
+    "CH-193B-К304D-1*N204",
+    "216B",
+    "CH-178A",
+    "CX0898H-1-171",
+    "CX0398H01 grey+black",
+    "CX0398H01 white+blac",
+    "HB-102-05",
+    "HB-101-322",
+    "CH-219B-HS-К304D-14*",
+    "CH-193A-1-К304D-14*N",
+    "336G-LB"
+  ],
+  "recent_norden_mapping_merged": 0,
+  "recent_norden_repair_candidates": 0,
+  "mapped_source_articles_for_updates": 390,
+  "remaining_new_products": 7995,
+  "finished_at": "2026-09-21T21:36:19.688720+00:00"
 }
