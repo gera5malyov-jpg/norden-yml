@@ -40,10 +40,14 @@ jobs:
           code_site_id,article_id=mod.resolve_special_characteristics(chars)
           variants=kit.variants()
 
-          managed=[]
+          # KIT pagination can occasionally return the same variant on more than
+          # one page. Deduplicate by immutable variant id before duplicate analysis.
+          managed_by_id={}
           for v in variants:
-              if mod.s(v.get('id')) and mod.is_brand(v.get('brand')):
-                  managed.append(v)
+              vid=mod.s(v.get('id'))
+              if vid and mod.is_brand(v.get('brand')):
+                  managed_by_id[vid]=v
+          managed=list(managed_by_id.values())
 
           grouped=defaultdict(list)
           for v in managed:
@@ -56,7 +60,10 @@ jobs:
           for _, rows in grouped.items():
               if len(rows)<2:
                   continue
-              rows=sorted(rows,key=mod.canonical_variant_key)
+              unique_rows={mod.s(x.get('id')):x for x in rows if mod.s(x.get('id'))}
+              rows=sorted(unique_rows.values(),key=mod.canonical_variant_key)
+              if len(rows)<2:
+                  continue
               canonical=rows[0]
               extras=rows[1:]
               groups.append({
