@@ -157,7 +157,7 @@ def params(soup):
                 val=txt(v.get_text(' ',strip=True) if v else '')
                 if k and val:
                     d.setdefault(k,val)
-    bad={'цена','стоимость','количество','итого','название товара','ваше имя','телефон','электронная почта'}
+    bad={'цена','стоимость','количество','итого','название товара','ваше имя','телефон','электронная почта','доставка','самовывоз'}
     return {k:v for k,v in d.items() if k.casefold() not in bad}
 
 def images(soup,p,url):
