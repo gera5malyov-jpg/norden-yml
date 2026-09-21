@@ -1,0 +1,54 @@
+name: Inspect Kenner feed once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/inspect-kenner-feed-once.yml']
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect feed
+        run: |
+          python - <<'PY'
+          import json, os, requests, xml.etree.ElementTree as ET, collections
+          url='https://kennermebel.ru/marketplace/439884.xml'
+          r=requests.get(url,timeout=120,headers={'User-Agent':'Mozilla/5.0'})
+          r.raise_for_status()
+          os.makedirs('kenner-kit',exist_ok=True)
+          open('kenner-kit/feed.xml','wb').write(r.content)
+          root=ET.fromstring(r.content)
+          offers=[]
+          cats=[]
+          for x in root.iter():
+              tag=x.tag.split('}')[-1]
+              if tag=='category':
+                  cats.append({'id':x.attrib.get('id'),'parentId':x.attrib.get('parentId'),'text':(x.text or '').strip()})
+              if tag=='offer':
+                  d={'attrib':dict(x.attrib)}
+                  for c in list(x):
+                      t=c.tag.split('}')[-1]
+                      if t=='param':
+                          d.setdefault('params',[]).append({'name':c.attrib.get('name'),'unit':c.attrib.get('unit'),'value':(c.text or '').strip()})
+                      else:
+                          v=(c.text or '').strip()
+                          if t in d:
+                              d[t]=d[t] if isinstance(d[t],list) else [d[t]]
+                              d[t].append(v)
+                          else:d[t]=v
+                  offers.append(d)
+          out={'http_status':r.status_code,'bytes':len(r.content),'root':root.tag,'category_count':len(cats),'offer_count':len(offers),'categories_sample':cats[:20],'offers_sample':offers[:5]}
+          open('kenner-kit/feed_inspect.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit report
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add kenner-kit/feed_inspect.json
+          git commit -m 'Inspect Kenner feed' || exit 0
+          git pull --rebase || true
+          git push || true
