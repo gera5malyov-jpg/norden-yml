@@ -39,7 +39,15 @@ jobs:
           for v in exact[:3]:
               d=get('/v1/variants/'+str(v['id']))
               found.append({'id':d.get('id'),'kit_id':d.get('kit_id'),'sku':d.get('sku'),'name':d.get('name'),'media':d.get('media') or []})
-          out={'sku':sku,'samples':found}
+          files=[]
+          for sample in found:
+              for m in sample.get('media') or []:
+                  iid=str(m.get('image_id') or '').strip()
+                  if iid:
+                      files.append({'image_id':iid,'file':get('/v1/files/'+iid)})
+                      if len(files)>=3: break
+              if len(files)>=3: break
+          out={'sku':sku,'samples':found,'files':files}
           os.makedirs('kenner-kit',exist_ok=True)
           open('kenner-kit/media_probe.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
           print(json.dumps(out,ensure_ascii=False,indent=2))
