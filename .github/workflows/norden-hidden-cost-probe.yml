@@ -33,15 +33,30 @@ jobs:
           S = requests.Session()
           S.headers.update(H)
 
+          last_call = 0.0
           def req(method, path, *, body=None, params=None, ctype=None):
+              nonlocal_dummy = None
+              global last_call
               h = {}
               if body is not None:
                   h["Content-Type"] = ctype or "application/json"
-              r = S.request(method, BASE + path, json=body, params=params, headers=h, timeout=60)
-              print("HTTP", method, path, r.status_code)
-              if r.status_code >= 400:
-                  return r, None
-              return r, (r.json() if r.content else {})
+              for attempt in range(12):
+                  delay = 0.45 - (time.monotonic() - last_call)
+                  if delay > 0:
+                      time.sleep(delay)
+                  last_call = time.monotonic()
+                  r = S.request(method, BASE + path, json=body, params=params, headers=h, timeout=60)
+                  print("HTTP", method, path, r.status_code)
+                  if r.status_code == 429:
+                      time.sleep(float(r.headers.get("Retry-After") or min(10, 1 + attempt)))
+                      continue
+                  if r.status_code >= 500:
+                      time.sleep(min(10, 1 + attempt))
+                      continue
+                  if r.status_code >= 400:
+                      return r, None
+                  return r, (r.json() if r.content else {})
+              return r, None
 
           # Choose a mapped Norden variant, so we never touch an unrelated supplier.
           mapping = json.load(open("norden-kit/kit_mapping.json", encoding="utf-8"))
