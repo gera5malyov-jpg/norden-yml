@@ -1,25 +1,29 @@
-name: STOL-TRANSFORMER — Parse protected catalog
+name: Levmar 337 — Parse + KIT sync
 
 on:
   workflow_dispatch:
+  schedule:
+    # GitHub checks weekly; state guard runs the real job only once every ~14 days.
+    - cron: "17 3 * * 1"
   push:
     branches: [main]
     paths:
-      - 'stol-transformer/parser.py'
-      - 'stol-transformer/requirements.txt'
-      - '.github/workflows/stol-transformer-parser.yml'
+      - "stol-transformer/parser.py"
+      - "stol-transformer/sync_kit.py"
+      - "stol-transformer/requirements.txt"
+      - ".github/workflows/stol-transformer-parser.yml"
 
 permissions:
   contents: write
 
 concurrency:
-  group: stol-transformer-parser
+  group: levmar-337-sync
   cancel-in-progress: false
 
 jobs:
-  parse:
+  sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
 
     steps:
       - name: Checkout
@@ -27,18 +31,58 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check 14-day schedule
+        id: due
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone, timedelta
+          from pathlib import Path
+
+          event = os.environ.get("GITHUB_EVENT_NAME", "")
+          due = True
+          reason = "manual-or-code-run"
+
+          if event == "schedule":
+              state = Path("stol-transformer/last_schedule_state.json")
+              if state.exists():
+                  try:
+                      raw = json.loads(state.read_text(encoding="utf-8"))
+                      last = datetime.fromisoformat(str(raw.get("last_success_at", "")).replace("Z", "+00:00"))
+                      now = datetime.now(timezone.utc)
+                      if now - last < timedelta(days=13):
+                          due = False
+                          reason = f"last successful sync was {now-last} ago"
+                      else:
+                          reason = f"more than 13 days since last successful sync: {now-last}"
+                  except Exception as exc:
+                      reason = f"state unreadable, running safely: {exc}"
+              else:
+                  reason = "no previous schedule state"
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.write(f"run={'true' if due else 'false'}\n")
+              fh.write(f"reason={reason}\n")
+
+          print("RUN" if due else "SKIP", reason)
+          PY
+
       - name: Setup Python
+        if: steps.due.outputs.run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
+        if: steps.due.outputs.run == 'true'
         run: |
           pip install -r stol-transformer/requirements.txt
           python -m playwright install --with-deps chromium
 
-      - name: Parse protected catalog
-        id: parse
+      - name: Parse protected Levmar catalog
+        if: steps.due.outputs.run == 'true'
         env:
           STOL_TRANSFORMER_LOGIN: ${{ secrets.STOL_TRANSFORMER_LOGIN }}
           STOL_TRANSFORMER_PASSWORD: ${{ secrets.STOL_TRANSFORMER_PASSWORD }}
@@ -46,36 +90,39 @@ jobs:
           STOL_TRANSFORMER_DELAY: "0.15"
         run: python stol-transformer/parser.py
 
-      - name: Show report
-        if: always()
+      - name: Sync Levmar to KIT
+        if: steps.due.outputs.run == 'true'
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python stol-transformer/sync_kit.py
+
+      - name: Show Russian summary
+        if: always() && steps.due.outputs.run == 'true'
+        shell: bash
         run: |
+          echo "=== ПАРСЕР LEVMAR ==="
           if [ -f stol-transformer/output/report.json ]; then
             cat stol-transformer/output/report.json
           fi
-          if [ -f stol-transformer/output/auth_debug.json ]; then
-            echo "=== AUTH DEBUG (no secret values) ==="
-            cat stol-transformer/output/auth_debug.json
+          echo
+          echo "=== ЗАГРУЗКА В KIT ==="
+          if [ -f stol-transformer/last_kit_sync_report.json ]; then
+            cat stol-transformer/last_kit_sync_report.json
           fi
 
-      - name: Upload parser results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: stol-transformer-catalog-${{ github.run_number }}
-          path: stol-transformer/output/
-          if-no-files-found: warn
-          retention-days: 30
-
-      - name: Commit parsed catalog
-        if: success()
+      # Full parser output contains protected supplier pricing and is intentionally
+      # NOT committed and NOT uploaded as an artifact in this public repository.
+      - name: Persist safe KIT mapping and schedule state
+        if: success() && steps.due.outputs.run == 'true'
+        shell: bash
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add stol-transformer/output/
+          git add             stol-transformer/kit_mapping.json             stol-transformer/last_kit_sync_report.json             stol-transformer/last_schedule_state.json
           if git diff --cached --quiet; then
-            echo "No catalog changes"
+            echo "Нет изменений состояния"
             exit 0
           fi
-          git commit -m "Update STOL-TRANSFORMER parsed catalog"
+          git commit -m "Update Levmar 337 KIT sync state"
           git pull --rebase origin main
           git push origin HEAD:main
