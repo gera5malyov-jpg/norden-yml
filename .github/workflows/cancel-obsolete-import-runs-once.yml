@@ -22,7 +22,7 @@ jobs:
           python - <<'PY'
           import os, urllib.request, urllib.error
           repo=os.environ['GITHUB_REPOSITORY']
-          for run_id in (35611841240,):
+          for run_id in (35612440643,):
               url=f'https://api.github.com/repos/{repo}/actions/runs/{run_id}/cancel'
               req=urllib.request.Request(url,data=b'',method='POST',headers={
                   'Authorization':'Bearer '+os.environ['GH_TOKEN'],
