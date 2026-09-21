@@ -445,7 +445,7 @@ def main():
         for entry in variant.get("characteristics") or []:
             cid = s(entry.get("characteristic_id"))
             title = s((char_by_id.get(cid) or {}).get("title"))
-            if not title or norm(title) == norm("Ссылка поставщика"):
+            if not title or norm(title) in {norm("Ссылка поставщика"), norm("Закупочная цена")}:
                 continue
             value = char_value(variant, cid)
             if value:
