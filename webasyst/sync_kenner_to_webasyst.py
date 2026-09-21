@@ -74,6 +74,20 @@ def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 
+TRANSLIT = str.maketrans({
+    "а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"e","ж":"zh","з":"z","и":"i","й":"y",
+    "к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f",
+    "х":"h","ц":"ts","ч":"ch","ш":"sh","щ":"sch","ъ":"","ы":"y","ь":"","э":"e","ю":"yu","я":"ya",
+})
+
+def product_url(name, sku):
+    text = unicodedata.normalize("NFKC", s(name)).casefold().translate(TRANSLIT)
+    text = re.sub(r"[^a-z0-9]+", "-", text).strip("-")
+    sku_part = re.sub(r"[^a-z0-9]+", "-", s(sku).casefold()).strip("-")
+    base = text[:140].strip("-") or "kenner"
+    return (base + "-" + sku_part).strip("-")
+
+
 def listify(payload, keys=()):
     if isinstance(payload, list):
         return [x for x in payload if isinstance(x, dict)]
@@ -436,6 +450,7 @@ def main():
                 old = Decimal("0.00")
             qty = as_int(item["stock"])
             summary = extimg_summary(item["pictures"])
+            readable_url = product_url(item["name"], sku)
 
             desired_sku = {
                 "price": money_str(sale),
@@ -457,6 +472,7 @@ def main():
                     params={"id": product_id},
                     data={
                         "name": item["name"],
+                        "url": readable_url,
                         "summary": summary,
                         "description": item["description"],
                         "status": 1,
@@ -481,6 +497,7 @@ def main():
                     http_method="POST",
                     data={
                         "name": item["name"],
+                        "url": readable_url,
                         "type_id": type_id,
                         "currency": "RUB",
                         "summary": summary,
@@ -519,6 +536,7 @@ def main():
                 report["sample"].append({
                     "sku": sku,
                     "name": item["name"],
+                    "url": readable_url,
                     "stock": qty,
                     "price": money_str(sale),
                     "compare_price": money_str(old),
