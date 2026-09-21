@@ -148,7 +148,24 @@ def resolve_variant(offer, by_source, by_sku, characteristic_titles=None):
     if len(exact_name) == 1:
         return exact_name[0]
 
-    return None
+    # Same Код для сайта / SKU is authoritative and must be unique.
+    # If duplicates already exist, select one existing card deterministically
+    # instead of creating yet another duplicate. Prefer a legacy Riva-branded
+    # card, otherwise keep the oldest KIT card.
+    legacy = [
+        row for row in bucket
+        if _lower(_brand_text(row)) != 'riva'
+        and _lower(_brand_text(row)).startswith('riva')
+    ]
+    pool = legacy or bucket
+    return min(
+        pool,
+        key=lambda row: (
+            int(row.get('kit_id') or 10**18),
+            str(row.get('created_at') or '9999'),
+            str(row.get('id') or ''),
+        ),
+    )
 
 
 def build_price_update(offer, variant):
