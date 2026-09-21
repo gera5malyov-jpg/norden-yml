@@ -1,0 +1,37 @@
+{
+  "status": "ОШИБКА",
+  "finished_at": "2026-09-21T20:52:23.929092+00:00",
+  "offer_id": "AF-31646769",
+  "norden_article": "RT-2031",
+  "scheme": "rFBS",
+  "purchase_price_github_rub": 11776.0,
+  "purchase_source": "norden.yml",
+  "ozon_sales_percent_rfbs": 51.0,
+  "ozon_acquiring_current_amount_rub": 321.2,
+  "ozon_acquiring_base_rub": 32120.0,
+  "ozon_acquiring_effective_percent": 1.0,
+  "acquiring_source": "Ozon acquiring / marketing_seller_price",
+  "delivery_included": false,
+  "target_profit_percent_of_purchase": 20.0,
+  "minimum_profit_percent_of_purchase": 18.0,
+  "old_ozon_price_rub": 32120.0,
+  "old_marketing_seller_price_rub": 32120.0,
+  "calculated_sale_price_rub": 29440,
+  "calculated_min_price_rub": 28950,
+  "update_response": {
+    "result": [
+      {
+        "product_id": 5610536251,
+        "offer_id": "AF-31646769",
+        "updated": false,
+        "errors": [
+          {
+            "code": "declared_price_too_small",
+            "message": "Должна быть больше 0 ₽"
+          }
+        ],
+        "warnings": []
+      }
+    ]
+  }
+}
