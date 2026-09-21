@@ -26,6 +26,10 @@ WEBASYST_VALUE = "337"
 SKU_PREFIX = "337-"
 ROOT_CATEGORY = "Levmar"
 MONEY = Decimal("0.01")
+WAREHOUSE_QUANTITIES = {
+    "МСК": 100,
+    "СПБ привозной": 100,
+}
 
 # Hard rule: supplier wholesale/purchase price is NEVER sent to KIT.
 PRICE_KEY_RE = re.compile(r"(?:цена|опт|закуп|рознич|ррц|price|cost)", re.I)
@@ -188,7 +192,8 @@ def run():
             "before_discount": "supplier retail * 1.30",
             "purchase": "NOT SENT TO KIT",
         },
-        "stock_rule": "source has no stock field; KIT stock is not modified",
+        "stock_rule": "МСК = 100; СПБ привозной = 100 for every Levmar product",
+        "stock_updates": 0,
         "created": 0,
         "updated": 0,
         "price_updates": 0,
@@ -201,6 +206,21 @@ def run():
         "errors": [],
         "complete": False,
     }
+
+    warehouses = kit.list_all("/v1/warehouses", {"status": "ACTIVE"}, "warehouses")
+    warehouse_ids = {
+        s(row.get("title")): s(row.get("id"))
+        for row in warehouses
+        if s(row.get("id"))
+    }
+    missing_warehouses = [
+        name for name in WAREHOUSE_QUANTITIES
+        if name not in warehouse_ids
+    ]
+    if missing_warehouses:
+        raise RuntimeError(
+            "KIT warehouses not found: " + ", ".join(missing_warehouses)
+        )
 
     categories = kit.list_all("/v1/categories", {"status": "ACTIVE"}, "categories")
 
@@ -282,7 +302,16 @@ def run():
                         "sku": s(full.get("sku")),
                         "image_hash": "",
                     }
-            save_mapping(mapping)
+            for start in range(0, len(stock_rows), 1000):
+        batch = stock_rows[start:start + 1000]
+        kit.request(
+            "POST",
+            "/v1/variants/stocks/bulk_update",
+            body={"items": batch},
+        )
+        report["stock_updates"] += len(batch)
+
+    save_mapping(mapping)
         except Exception as exc:
             report["warnings"].append("Mapping rebuild warning: " + str(exc)[:500])
 
@@ -338,6 +367,7 @@ def run():
         return media
 
     price_rows = []
+    stock_rows = []
 
     for key, item in offers.items():
         try:
@@ -403,6 +433,14 @@ def run():
                     "product_id": product_id,
                     "brand": BRAND,
                     "characteristics": source_chars(item),
+                    "stocks": [
+                        {
+                            "warehouse_id": warehouse_ids[name],
+                            "quantity": quantity,
+                            "reserved": 0,
+                        }
+                        for name, quantity in WAREHOUSE_QUANTITIES.items()
+                    ],
                 }
                 if ps:
                     body["pricing"] = {
@@ -453,6 +491,13 @@ def run():
                     "variant_id": variant_id,
                     "price": f"{ps['before_discount']:.2f}",
                     "manual_discount_price": f"{ps['customer']:.2f}",
+                })
+
+            for warehouse_name, quantity in WAREHOUSE_QUANTITIES.items():
+                stock_rows.append({
+                    "variant_id": variant_id,
+                    "warehouse_id": warehouse_ids[warehouse_name],
+                    "quantity": quantity,
                 })
         except Exception as exc:
             report["errors"].append({
