@@ -373,50 +373,46 @@ class Parser:
     def extract_price_fields(self, soup: BeautifulSoup) -> tuple[str, str, list[str]]:
         """Return (retail_price, purchase_price, raw_prices).
 
-        Wholesale/purchase price is intentionally kept outside characteristics.
+        Site-specific rule for the protected LEVMAR catalog:
+        the large first price is the dealer/wholesale price, while the amount
+        explicitly marked "розница" is the retail price.
+        Wholesale/purchase price never goes into characteristics.
         """
-        candidates: list[tuple[str, float]] = []
-
-        # Prefer compact containers/rows: label + amount are usually siblings.
-        selectors = "tr, li, dt, dd, [class*='price'], [class*='cost'], [class*='row'], [class*='field']"
-        seen_text: set[str] = set()
-        for node in soup.select(selectors):
-            text = clean_text(node.get_text(" ", strip=True))
-            if not text or text in seen_text or len(text) > 500:
-                continue
-            seen_text.add(text)
-            for m in PRICE_RE.finditer(text):
-                value = parse_price_text(m.group(0))
-                if value is not None:
-                    candidates.append((text, value))
-
-        full_text = clean_text(soup.get_text("\n", strip=True))
+        full_text = clean_text(soup.get_text(" ", strip=True))
         raw_prices = list(dict.fromkeys(clean_text(m.group(0)) for m in PRICE_RE.finditer(full_text)))[:50]
 
-        retail = ""
-        purchase = ""
-        for text, value in candidates:
-            if not purchase and WHOLESALE_LABEL_RE.search(text):
-                purchase = price_to_str(value)
-            if not retail and RETAIL_LABEL_RE.search(text):
-                retail = price_to_str(value)
+        def value_after_label(pattern: re.Pattern[str]) -> str:
+            for label_match in pattern.finditer(full_text):
+                tail = full_text[label_match.end(): label_match.end() + 140]
+                pm = PRICE_RE.search(tail)
+                if pm:
+                    value = parse_price_text(pm.group(0))
+                    if value is not None:
+                        return price_to_str(value)
+            return ""
 
-        # Regex fallback for label followed by the amount in the page text.
-        def labeled(pattern: re.Pattern[str]) -> str:
-            m = re.search(pattern.pattern + r"[^\d]{0,80}" + PRICE_RE.pattern, full_text, re.I)
-            if not m:
-                return ""
-            pm = PRICE_RE.search(m.group(0))
-            return price_to_str(parse_price_text(pm.group(0))) if pm else ""
+        retail = value_after_label(RETAIL_LABEL_RE)
+        purchase = value_after_label(WHOLESALE_LABEL_RE)
 
-        purchase = purchase or labeled(WHOLESALE_LABEL_RE)
-        retail = retail or labeled(RETAIL_LABEL_RE)
+        parsed_unique: list[str] = []
+        for raw in raw_prices:
+            value = parse_price_text(raw)
+            if value is not None:
+                normalized = price_to_str(value)
+                if normalized not in parsed_unique:
+                    parsed_unique.append(normalized)
 
-        # Structured retail price (public/RRP) is safe as fallback only for retail.
-        if not retail:
-            meta_price = soup.select_one("meta[itemprop='price']")
-            if meta_price and meta_price.get("content"):
-                retail = clean_text(str(meta_price.get("content")))
+        # Protected catalog fallback:
+        # e.g. "15 600 ₽ розница 22 500 ₽" => purchase=15600, retail=22500.
+        if retail:
+            if not purchase:
+                purchase = next((x for x in parsed_unique if x != retail), "")
+        elif len(parsed_unique) >= 2:
+            purchase = purchase or parsed_unique[0]
+            retail = parsed_unique[1]
+        elif len(parsed_unique) == 1:
+            # A lone protected price is dealer/purchase, not public retail.
+            purchase = purchase or parsed_unique[0]
 
         return retail, purchase, raw_prices
 
@@ -464,7 +460,7 @@ class Parser:
                 return
             absolute = urljoin(page_url, value)
             low = absolute.lower()
-            if any(x in low for x in ("logo", "favicon", "sprite", "icon-", "/icons/")):
+            if any(x in low for x in ("logo", "favicon", "sprite", "icon-", "/icons/", "/uploads/swatches/")):
                 return
             images.append(absolute)
 
@@ -509,15 +505,8 @@ class Parser:
         full_text = clean_text(soup.get_text("\n", strip=True))
         retail_price, purchase_price, prices = self.extract_price_fields(soup)
 
-        if not retail_price and jsonld and jsonld[0].retail_price:
-            retail_price = jsonld[0].retail_price
-        if not retail_price and prices:
-            # Только последний fallback: первая найденная цена считается розничной,
-            # если на странице нет явной пометки "оптовая/закупочная".
-            first_price = parse_price_text(prices[0])
-            if first_price is not None and not WHOLESALE_LABEL_RE.search(full_text):
-                retail_price = price_to_str(first_price)
-
+        # В защищённом каталоге structured/main price может быть именно оптовой,
+        # поэтому не используем JSON-LD как fallback для retail_price.
         price = retail_price
 
         old_price = ""
@@ -575,6 +564,14 @@ class Parser:
             tail = clean_text(title_without_channel[model_match.end():])
             if tail:
                 color = tail
+
+        # На карточках itemprop=name иногда указывает на блок "Артикул".
+        # Для Excel/интеграции формируем понятное товарное имя из модели и цвета.
+        if re.match(r"^артикул\b", title, re.I) or len(title) < 8:
+            brand_model = model if re.search(r"\bLEVMAR\b", model, re.I) else f"LEVMAR {model}"
+            title = clean_text(
+                f"Стол-трансформер {brand_model}" + (f" — {color}" if color else "")
+            )
 
         desc_node = soup.select_one("[itemprop='description'], .description, .product-description, [class*='description']")
         description = clean_text(desc_node.get_text("\n", strip=True)) if desc_node else ""
@@ -975,6 +972,112 @@ class Parser:
         page.wait_for_timeout(150)
         return page.content()
 
+    def browser_collect_swatch_variants(self, page, base_url: str, category: str) -> list[Product]:
+        """Click every color swatch and capture the concrete SKU shown after selection.
+
+        The supplier catalog exposes one representative URL per model; colors are
+        JS-controlled swatches. Each selected color is therefore parsed as its
+        own product position and deduplicated later by SKU.
+        """
+        results: list[Product] = []
+        selector = "img[src*='/uploads/swatches/'], img[data-src*='/uploads/swatches/']"
+
+        try:
+            swatches = page.locator(selector)
+            count = min(swatches.count(), 80)
+        except Exception:
+            return results
+
+        if count <= 0:
+            return results
+
+        swatch_keys: list[str] = []
+        for i in range(count):
+            item = swatches.nth(i)
+            key = (
+                item.get_attribute("src")
+                or item.get_attribute("data-src")
+                or item.get_attribute("alt")
+                or item.get_attribute("title")
+                or f"index:{i}"
+            )
+            if key not in swatch_keys:
+                swatch_keys.append(key)
+
+        debug_rows = []
+
+        for key in swatch_keys:
+            try:
+                # Re-open the representative URL so every click starts from a stable DOM.
+                page.goto(base_url, wait_until="domcontentloaded", timeout=60000)
+                page.wait_for_timeout(450)
+
+                clicked = page.evaluate(
+                    """key => {
+                        const imgs = [...document.querySelectorAll(
+                          "img[src*='/uploads/swatches/'], img[data-src*='/uploads/swatches/']"
+                        )];
+                        const el = imgs.find((img, idx) =>
+                          img.getAttribute('src') === key ||
+                          img.getAttribute('data-src') === key ||
+                          img.getAttribute('alt') === key ||
+                          img.getAttribute('title') === key ||
+                          key === ('index:' + idx)
+                        );
+                        if (!el) return false;
+                        const target = el.closest(
+                          "button,a,label,[role='button'],[onclick],[data-color],[data-value],[data-id]"
+                        ) || el;
+                        target.click();
+                        return true;
+                    }""",
+                    key,
+                )
+                if not clicked:
+                    continue
+
+                page.wait_for_timeout(650)
+                try:
+                    page.wait_for_load_state("networkidle", timeout=2500)
+                except PlaywrightTimeoutError:
+                    pass
+
+                html = page.content()
+                product = self.extract_product(html, page.url or base_url, category)
+                if not product or not product.sku:
+                    continue
+
+                results.append(product)
+                debug_rows.append({
+                    "swatch": key,
+                    "sku": product.sku,
+                    "color": product.color,
+                    "url": product.url,
+                    "retail_price": product.retail_price,
+                    "purchase_price": product.purchase_price,
+                    "images": len(product.images or []),
+                })
+            except Exception as exc:
+                self.errors.append({
+                    "url": base_url,
+                    "stage": "swatch_variant",
+                    "message": f"{key}: {str(exc)[:500]}",
+                })
+
+        if debug_rows:
+            debug_path = OUT / "variant_debug.json"
+            try:
+                current = json.loads(debug_path.read_text(encoding="utf-8")) if debug_path.exists() else []
+            except Exception:
+                current = []
+            current.append({"base_url": base_url, "variants": debug_rows})
+            debug_path.write_text(
+                json.dumps(current, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+
+        return results
+
     def crawl(self, max_pages: int = 2500) -> list[Product]:
         queue = deque([BASE_URL])
         seen: set[str] = set()
@@ -1023,6 +1126,9 @@ class Parser:
                         product = self.extract_product(html, url, category)
                         if product:
                             detailed.append(product)
+                            detailed.extend(
+                                self.browser_collect_swatch_variants(page, url, category)
+                            )
 
                     except Exception as exc:
                         self.errors.append({
@@ -1107,6 +1213,7 @@ def save(products: list[Product], parser: Parser) -> dict[str, Any]:
         "with_color": sum(bool(p.color) for p in products),
         "with_stock": sum(bool(p.stock) for p in products),
         "with_images": sum(bool(p.images) for p in products),
+        "total_images": sum(len(p.images or []) for p in products),
         "pages_fetched": parser.pages_fetched,
         "errors_count": len(parser.errors),
         "errors": parser.errors[:200],
