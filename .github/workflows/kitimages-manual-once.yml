@@ -18,9 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Run KIT images plugin sync
+      - name: Test Yandex KIT token and run plugin sync
         env:
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           KITIMAGES_SYNC_URL: https://profikompany.ru/kitimages-sync/
         run: |
           set -euo pipefail
@@ -28,10 +29,27 @@ jobs:
             echo "::error::WEBASYST_API_TOKEN is not configured"
             exit 1
           fi
+          if [ -z "${YANDEX_KIT_TOKEN:-}" ]; then
+            echo "::error::YANDEX_KIT_TOKEN is not configured"
+            exit 1
+          fi
+
+          kit_code="$(
+            curl --silent --show-error               --connect-timeout 20               --max-time 60               --output /tmp/kit-token-test.json               --write-out '%{http_code}'               --header "Authorization: Bearer ${YANDEX_KIT_TOKEN}"               --header "Accept: application/json"               "https://api.kit.yandex.net/v1/variants?page=1&per_page=1"
+          )"
+          echo "KIT API HTTP: ${kit_code}"
+          if [ "${kit_code}" -lt 200 ] || [ "${kit_code}" -ge 300 ]; then
+            python - <<'PY'
+          from pathlib import Path
+          print(Path('/tmp/kit-token-test.json').read_text(encoding='utf-8', errors='replace')[:1500])
+          PY
+            exit 2
+          fi
+
           http_code="$(
             curl --silent --show-error               --connect-timeout 30               --max-time 900               --output /tmp/kitimages-response.json               --write-out '%{http_code}'               --request POST               --header "Accept: application/json"               --data-urlencode "access_token=${WEBASYST_API_TOKEN}"               "${KITIMAGES_SYNC_URL}"
           )"
-          echo "HTTP: ${http_code}"
+          echo "PLUGIN HTTP: ${http_code}"
           cat /tmp/kitimages-response.json || true
           echo
           if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
