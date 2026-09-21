@@ -229,13 +229,17 @@ def char_value(v,cid):
             return s(x.get('value')) or (s((x.get('values') or [''])[0]) if x.get('values') else '')
     return ''
 
-def merged_special_chars(v,code_site_id,article_id,source_code,final_article):
-    replace={str(code_site_id),str(article_id)}
-    out=[x for x in (v.get('characteristics') or []) if s(x.get('characteristic_id')) not in replace]
-    out.extend([
-        {'characteristic_id':code_site_id,'value':source_code,'values':[source_code]},
-        {'characteristic_id':article_id,'value':final_article,'values':[final_article]},
-    ])
+def with_code_site(v,code_site_id,source_code):
+    replace={str(code_site_id)}
+    out=[
+        x for x in (v.get('characteristics') or [])
+        if s(x.get('characteristic_id')) not in replace
+    ]
+    out.append({
+        'characteristic_id':code_site_id,
+        'value':source_code,
+        'values':[source_code],
+    })
     return out
 
 def current_stock(v,wid):
@@ -319,48 +323,93 @@ def prepare_media(kit,offer,report):
 def dedupe_feed_offers(offers):
     grouped=defaultdict(list)
     for offer in offers:
-        grouped[offer['source_code']].append(offer)
+        key=(norm(offer.get('source_code')),norm(offer.get('name')))
+        grouped[key].append(offer)
     unique=[]
-    duplicate_codes={}
+    duplicate_identities={}
     price_conflicts={}
-    for source,rows in grouped.items():
-        rows=sorted(rows,key=lambda x:(x.get('id') or '',x.get('name') or ''))
+    for key,rows in grouped.items():
+        rows=sorted(rows,key=lambda x:(x.get('url') or '',x.get('id') or ''))
         unique.append(rows[0])
         if len(rows)>1:
-            duplicate_codes[source]=len(rows)
-            prices=sorted({str(x['price']) for x in rows if x.get('price') is not None})
+            label=f"{rows[0].get('source_code')} | {rows[0].get('name')}"
+            duplicate_identities[label]=len(rows)
+            prices=sorted({
+                str(x['price']) for x in rows if x.get('price') is not None
+            })
             if len(prices)>1:
-                price_conflicts[source]=prices
-    return unique,duplicate_codes,price_conflicts
+                price_conflicts[label]=prices
+    return unique,duplicate_identities,price_conflicts
+
+def add_index(index,key,variant):
+    nk=norm(key)
+    if nk:
+        index[nk].append(variant)
+
+def match_offer(offer,by_code_site,by_article,by_name):
+    scores={}
+    reasons=defaultdict(set)
+
+    def add(rows,points,reason):
+        for row in rows:
+            vid=s(row.get('id'))
+            if not vid:
+                continue
+            scores[vid]=scores.get(vid,0)+points
+            reasons[vid].add(reason)
+
+    source=norm(offer.get('source_code'))
+    name=norm(offer.get('name'))
+    if source:
+        add(by_code_site.get(source,[]),100,'code_site')
+        add(by_article.get(source,[]),60,'article')
+    if name:
+        add(by_name.get(name,[]),40,'name')
+
+    if not scores:
+        return [],False,{}
+
+    best_score=max(scores.values())
+    best_ids=[vid for vid,score in scores.items() if score==best_score]
+    all_rows={}
+    for rows in (by_code_site.get(source,[]),by_article.get(source,[]),by_name.get(name,[])):
+        for row in rows:
+            if s(row.get('id')):
+                all_rows[s(row.get('id'))]=row
+    best=[all_rows[vid] for vid in best_ids if vid in all_rows]
+
+    # One best card is unambiguous. If several cards share an exact supplier
+    # article/code, treat them all as existing matches rather than creating a duplicate.
+    strong=best_score>=60
+    ambiguous=len(best)>1 and not strong
+    return best,ambiguous,{
+        'score':best_score,
+        'reasons':{vid:sorted(reasons[vid]) for vid in best_ids},
+    }
 
 def main():
     existing_only=s(os.getenv('FOURS_EXISTING_ONLY')).casefold() in {'1','true','yes','y'}
     cats,raw_offers=parse_feed()
     offers,feed_duplicates,feed_price_conflicts=dedupe_feed_offers(raw_offers)
-    feed_groups=defaultdict(list)
-    for row in raw_offers:
-        feed_groups[row['source_code']].append(row)
     kit=Kit(os.getenv('YANDEX_KIT_TOKEN',''))
     wh=warehouse_map(kit.warehouses())
     code_site_id,article_id=resolve_special_characteristics(kit.characteristics())
     print(f'4 Сезона feed offers: raw={len(raw_offers)} unique_codes={len(offers)} duplicates={len(feed_duplicates)}',flush=True)
 
     variants=kit.variants()
-    by_source=defaultdict(list)
+    by_code_site=defaultdict(list)
+    by_article=defaultdict(list)
+    by_name=defaultdict(list)
     managed={}
     for v in variants:
         vid=s(v.get('id'))
         if not vid or not is_brand(v.get('brand')):
             continue
         managed[vid]=v
-        source=char_value(v,code_site_id)
-        if source:
-            by_source[source].append(v)
-        sku=s(v.get('sku'))
-        # Existing cards may still use the supplier article as SKU.
-        # Generated 333-<kit_id> SKU is not treated as a source code.
-        if sku and not sku.startswith('333-'):
-            by_source[sku].append(v)
+        add_index(by_code_site,char_value(v,code_site_id),v)
+        add_index(by_article,char_value(v,article_id),v)
+        add_index(by_article,s(v.get('sku')),v)
+        add_index(by_name,s(v.get('name')),v)
 
     print(f'KIT variants scanned: {len(variants)}; managed 4 Сезона: {len(managed)}',flush=True)
     kitcats=kit.categories()
@@ -369,11 +418,13 @@ def main():
         'started_at':datetime.now(timezone.utc).isoformat(),
         'existing_only':existing_only,
         'feed_offers_raw':len(raw_offers),'feed_unique_source_codes':len(offers),
-        'feed_duplicate_source_codes':len(feed_duplicates),
+        'feed_duplicate_article_name_identities':len(feed_duplicates),
         'feed_price_conflicts':len(feed_price_conflicts),
         'kit_variants_scanned':len(variants),
         'existing_managed_variants':len(managed),
-        'matched':0,'matched_variants':0,'created':0,'skipped_new_existing_only':0,
+        'matched':0,'matched_variants':0,'matched_by_code_site':0,
+        'matched_by_article':0,'matched_by_name':0,'ambiguous_name_matches':0,
+        'created':0,'skipped_new_existing_only':0,
         'price_changes':0,'stock_changes':0,
         'images_uploaded':0,'image_repairs':0,'image_failures':0,
         'new_without_source_images':0,'image_errors':[],
@@ -381,35 +432,52 @@ def main():
         'absent_to_zero':0,'collisions':0,'errors':[],
     }
     seen_ids=set()
-    claimed_variants={}
     price_updates={}
     stock_updates={}
     report['feed_price_conflict_details']={
-        source:prices for source,prices in list(feed_price_conflicts.items())[:200]
+        key:prices for key,prices in list(feed_price_conflicts.items())[:200]
     }
 
     for n,o in enumerate(offers,1):
         source=o['source_code']
-        unique={}
-        for row in by_source.get(source,[]):
-            if s(row.get('id')): unique[s(row.get('id'))]=row
-        rows=list(unique.values())
+        rows,ambiguous,match_meta=match_offer(
+            o,by_code_site,by_article,by_name
+        )
         chosen=None
         extra_rows=[]
         created_now=False
+
+        if rows and ambiguous:
+            # Same normalized name points to more than one card but no exact article/code
+            # distinguishes them. Treat them as existing so we do not create duplicates,
+            # but do not overwrite their price or Код для сайта blindly.
+            report['ambiguous_name_matches']+=1
+            report['collisions']+=1
+            for candidate in rows:
+                vid=s(candidate.get('id'))
+                if vid:
+                    seen_ids.add(vid)
+            if len(report['errors'])<300:
+                report['errors'].append({
+                    'source_code':source,
+                    'name':o.get('name'),
+                    'message':'ambiguous name-only match; no new product created',
+                })
+            continue
+
         if rows:
             chosen=rows[0]
             extra_rows=rows[1:]
-            for candidate in rows:
-                chosen_id=s(candidate.get('id'))
-                owner=claimed_variants.get(chosen_id)
-                if owner and owner!=source:
-                    report['collisions']+=1
-                    report['errors'].append({
-                        'source_code':source,
-                        'message':f'variant {chosen_id} already mapped to source {owner}',
-                    })
-                claimed_variants[chosen_id]=source
+            report['matched']+=1
+            reason_set=set()
+            for reasons in (match_meta.get('reasons') or {}).values():
+                reason_set.update(reasons)
+            if 'code_site' in reason_set:
+                report['matched_by_code_site']+=1
+            elif 'article' in reason_set:
+                report['matched_by_article']+=1
+            elif 'name' in reason_set:
+                report['matched_by_name']+=1
 
         if chosen is None:
             if existing_only:
@@ -449,7 +517,10 @@ def main():
                 ]
                 kit.patch_variant(vid,{'sku':final_sku,'brand':BRAND,'characteristics':chars})
                 chosen=kit.get_variant(vid)
-                by_source[source]=[chosen]; managed[vid]=chosen
+                managed[vid]=chosen
+                add_index(by_code_site,source,chosen)
+                add_index(by_article,final_sku,chosen)
+                add_index(by_name,o.get('name'),chosen)
                 report['created']+=1
                 report['sku_fixed_to_333_kit_id']+=1
                 report['code_site_filled']+=1
@@ -457,9 +528,6 @@ def main():
             except Exception as exc:
                 report['errors'].append({'source_code':source,'message':str(exc)[:500]})
                 continue
-        else:
-            report['matched']+=1
-
         targets=[chosen]+extra_rows if chosen is not None else []
         report['matched_variants']+=len(targets) if not created_now else 0
 
@@ -469,23 +537,34 @@ def main():
                 continue
             seen_ids.add(vid)
 
-            target_offer=o
-            target_price=o.get('price')
-            if source in feed_price_conflicts:
-                name_matches=[
-                    row for row in feed_groups[source]
-                    if norm(row.get('name'))==norm(target.get('name'))
-                ]
-                if len(name_matches)==1:
-                    target_offer=name_matches[0]
-                    target_price=target_offer.get('price')
-                else:
-                    target_price=None
+            # Once an existing card is matched by name/article/code, persist the
+            # supplier article in "Код для сайта" for deterministic future runs.
+            if not created_now and char_value(target,code_site_id)!=source:
+                try:
+                    chars=with_code_site(target,code_site_id,source)
+                    kit.patch_variant(vid,{'characteristics':chars})
+                    target=dict(target)
+                    target['characteristics']=chars
+                    report['code_site_filled']+=1
+                    add_index(by_code_site,source,target)
+                except Exception as exc:
                     if len(report['errors'])<300:
                         report['errors'].append({
                             'source_code':source,
-                            'message':'conflicting feed prices could not be resolved by exact name match',
+                            'message':f'code_site patch failed: {str(exc)[:400]}',
                         })
+
+            target_offer=o
+            target_price=o.get('price')
+            identity_label=f"{source} | {o.get('name')}"
+            if identity_label in feed_price_conflicts:
+                target_price=None
+                if len(report['errors'])<300:
+                    report['errors'].append({
+                        'source_code':source,
+                        'name':o.get('name'),
+                        'message':'same supplier article+name has conflicting prices; price unchanged',
+                    })
             if (
                 not created_now
                 and target_price is not None
