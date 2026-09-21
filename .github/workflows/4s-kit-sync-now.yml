@@ -43,7 +43,7 @@ jobs:
       - name: Sync prices and stocks now
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-          FOURS_EXISTING_ONLY: '1'
+          FOURS_EXISTING_ONLY: '0'
         run: python 4s-kit/sync_4s_kit.py
 
       - name: Commit sync report
