@@ -1,0 +1,33 @@
+name: Probe 4S Webasyst sync
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'webasyst/probe_4s_sync.py'
+      - '.github/workflows/probe-4s-webasyst.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: probe-4s-webasyst
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Probe mappings
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python webasyst/probe_4s_sync.py
