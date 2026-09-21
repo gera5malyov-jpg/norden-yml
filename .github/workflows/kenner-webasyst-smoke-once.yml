@@ -1,0 +1,33 @@
+name: Kenner Webasyst smoke once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/kenner-webasyst-smoke-once.yml']
+permissions:
+  contents: write
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Import one Kenner product to Webasyst
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          MAX_ITEMS: '1'
+          KENNER_WEBASYST_WRITE_DELAY: '0.60'
+        run: python webasyst/sync_kenner_to_webasyst.py
+      - name: Commit report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add webasyst/last_kenner_webasyst_sync.json 2>/dev/null || true
+          git commit -m 'Kenner Webasyst smoke report' || exit 0
+          git pull --rebase || true
+          git push || true
