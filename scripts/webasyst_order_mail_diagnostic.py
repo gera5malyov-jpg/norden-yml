@@ -123,3 +123,5 @@ for oid in [41037,41028,40618,40482]:
         # classify only; never print text/params values
         blob=(" ".join(str(x.get(k) or "") for k in ["text","log_record","action_name"])).lower()
         out(f"WA_TL_{oid}_{j}_SEND_WORD",int(any(s in blob for s in ["отправ","уведом","email","e-mail","mail","письм"])))
+
+# diagnostic trigger 2026-09-22
