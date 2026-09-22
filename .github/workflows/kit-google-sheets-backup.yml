@@ -1,0 +1,84 @@
+name: KIT → Google Sheets backup
+
+on:
+  schedule:
+    - cron: '35 0 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'kit-backup/**'
+      - '.github/workflows/kit-google-sheets-backup.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kit-google-sheets-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: pip install --disable-pip-version-check -r kit-backup/requirements.txt
+
+      - name: Выгрузить KIT и синхронизировать Google Таблицу
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: '1xZUeaWUr-6O3KK0MO-1U7IGBKXXfgcmZ-EJ-w-2wWug'
+          YML_FALLBACK_URL: 'https://yastore-prod-persist.s3.yandex.net/feeds/yml/019a5a60-ce41-7872-aa9d-d7720c268dab.xml'
+        run: python kit-backup/sync_kit_backup.py
+
+      - name: Сохранить полную резервную копию в GitHub Actions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kit-full-backup-${{ github.run_id }}
+          path: |
+            kit-backup/runtime/kit_full_backup.json.gz
+            kit-backup/runtime/last_report.json
+          if-no-files-found: warn
+          retention-days: 90
+          compression-level: 0
+
+      - name: Итог в GitHub Actions
+        if: always()
+        run: |
+          if [ -f kit-backup/runtime/last_report.json ]; then
+            echo '## KIT backup' >> "$GITHUB_STEP_SUMMARY"
+            echo '' >> "$GITHUB_STEP_SUMMARY"
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          p = Path("kit-backup/runtime/last_report.json")
+          d = json.loads(p.read_text(encoding="utf-8"))
+          c = d.get("counts", {})
+          print(f"- Источник: **{d.get('source', '—')}**")
+          print(f"- Товаров / вариантов: **{c.get('variants', '—')}**")
+          print(f"- Значений характеристик: **{c.get('characteristic_values', '—')}**")
+          print(f"- Остатков: **{c.get('stocks', '—')}**")
+          print(f"- Медиа: **{c.get('media', '—')}**")
+          print(f"- Google Sheets: **{'УСПЕШНО' if d.get('google_synced') else 'НЕ СИНХРОНИЗИРОВАНО'}**")
+          print(f"- Сообщение: {d.get('google_message', '—')}")
+          warnings = d.get("warnings") or []
+          if warnings:
+              print("- Предупреждения:")
+              for w in warnings:
+                  print(f"  - {w}")
+          PY
+          else
+            echo 'Отчёт не создан.' >> "$GITHUB_STEP_SUMMARY"
+          fi
