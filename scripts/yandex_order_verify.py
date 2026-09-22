@@ -86,8 +86,14 @@ expected_name=" ".join(str(buyer.get(k) or "").strip() for k in ("lastName","fir
 actual_shipping=float(info.get("shipping") or 0)
 shipping_dt=str(info.get("shipping_datetime") or "")
 params=info.get("params") or {}
+acts=wa.call("shop.order.actions",params={"id":rows[0]["id"]})
+allowed={str(x.get("id") or "") for x in (acts or []) if isinstance(x,dict)}
 
 print("VERIFY_WEBASYST_ORDER_FOUND=1")
+print("VERIFY_WEBASYST_STATE="+str(info.get("state_id") or ""))
+print("VERIFY_EDITSHIPPINGDETAILS_ALLOWED="+("1" if "editshippingdetails" in allowed else "0"))
+print("VERIFY_SHIPPING_DATETIME="+str(info.get("shipping_datetime") or ""))
+print("VERIFY_YANDEX_STATUS="+str(order.get("status") or ""))
 expected_tokens=sorted(x.lower() for x in expected_name.split() if x)
 actual_tokens=sorted(x.lower() for x in actual_name.split() if x)
 print("VERIFY_BUYER_NAME_MATCH="+("1" if expected_tokens and actual_tokens==expected_tokens else "0"))
