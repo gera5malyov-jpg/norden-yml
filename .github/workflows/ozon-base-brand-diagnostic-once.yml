@@ -1,0 +1,133 @@
+name: Ozon scan base product brand fields
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-base-brand-diagnostic-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Scan v3 product info list for brand values
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, sys
+          from collections import Counter, defaultdict
+          from pathlib import Path
+          sys.path.insert(0, 'ozon')
+          import brand_sync_once as b
+
+          catalog = b.list_products()
+          ids = [int(x.get('product_id') or 0) for x in catalog if int(x.get('product_id') or 0)]
+
+          items = []
+          for batch in b.chunks(ids, 1000):
+              data = b.post('/v3/product/info/list', {'product_id': batch})
+              items.extend(data.get('items') or data.get('result', {}).get('items') or [])
+
+          source = b.SOURCE_BRANDS
+          exact = []
+          brandish = Counter()
+          brandish_samples = defaultdict(list)
+
+          def walk(obj, path, root):
+              if isinstance(obj, dict):
+                  for k, v in obj.items():
+                      p = path + [str(k)]
+                      kl = str(k).lower()
+                      if 'brand' in kl or 'бренд' in kl:
+                          if isinstance(v, (str, int, float, bool)) or v is None:
+                              brandish[( '.'.join(p), str(v) )] += 1
+                              if len(brandish_samples['.'.join(p)]) < 5:
+                                  brandish_samples['.'.join(p)].append(v)
+                          else:
+                              s = json.dumps(v, ensure_ascii=False, sort_keys=True)
+                              brandish[( '.'.join(p), s )] += 1
+                              if len(brandish_samples['.'.join(p)]) < 5:
+                                  brandish_samples['.'.join(p)].append(v)
+                      walk(v, p, root)
+              elif isinstance(obj, list):
+                  for i, v in enumerate(obj):
+                      walk(v, path + [f'[{i}]'], root)
+              elif isinstance(obj, str):
+                  if b.norm(obj) in source:
+                      exact.append({
+                          'offer_id': str(root.get('offer_id') or ''),
+                          'product_id': int(root.get('id') or root.get('product_id') or 0),
+                          'name': str(root.get('name') or ''),
+                          'path': '.'.join(path),
+                          'value': obj,
+                      })
+
+          for item in items:
+              walk(item, [], item)
+
+          out = {
+              'products_loaded': len(items),
+              'exact_source_brand_matches': exact,
+              'brandish_fields': [
+                  {'path': p, 'value': v, 'count': c}
+                  for (p,v), c in brandish.most_common(500)
+              ],
+              'brandish_samples': dict(brandish_samples),
+          }
+          Path('ozon/base_brand_diagnostic.json').write_text(
+              json.dumps(out, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8'
+          )
+          lines = [
+              '# Ozon — бренд в базовой информации товара',
+              '',
+              f"- Товаров загружено: **{len(items)}**",
+              f"- Точных совпадений RIVA/RV DESIGN: **{len(exact)}**",
+              '',
+              '## Точные совпадения',
+              '',
+              '| Артикул | Путь | Значение |',
+              '|---|---|---|',
+          ]
+          for x in exact[:500]:
+              lines.append(f"| `{x['offer_id']}` | `{x['path']}` | {x['value']} |")
+          lines += [
+              '',
+              '## Поля, похожие на бренд',
+              '',
+              '| Путь | Значение | Кол-во |',
+              '|---|---|---:|',
+          ]
+          for row in out['brandish_fields'][:200]:
+              val = row['value'].replace('|','\\|')
+              if len(val) > 180:
+                  val = val[:177] + '...'
+              lines.append(f"| `{row['path']}` | {val} | {row['count']} |")
+          Path('ozon/base_brand_diagnostic.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          print(json.dumps({'products_loaded': len(items), 'exact_matches': len(exact), 'brandish_fields': len(brandish)}, ensure_ascii=False))
+          PY
+
+      - name: Commit diagnostic report
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add ozon/base_brand_diagnostic.json ozon/base_brand_diagnostic.md
+          git commit -m "Ozon: diagnose base brand field" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
