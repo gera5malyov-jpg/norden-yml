@@ -222,19 +222,24 @@ def change_state(order_id: str, target: str) -> bool:
 
 def comment(o: dict) -> str:
     source = LABEL[o["source"]]
-    return (
-        f"Импортировано из {source}.\n"
-        f"Номер заказа источника: {o['external_id']}\n"
-        f"Дата заказа источника: {o.get('created_at','')}\n"
-        f"Статус источника: {o.get('status_raw','')}\n"
-        f"Статусы синхронизируются только {source} → Webasyst. "
-        "Из Webasyst статусы обратно не передаются."
-    )
+    lines = [
+        f"Импортировано из {source}.",
+        f"Номер заказа источника: {o['external_id']}",
+        f"Дата заказа источника: {o.get('created_at','')}",
+        f"Статус источника: {o.get('status_raw','')}",
+    ]
+    if o.get("delivery_price") not in (None, ""):
+        lines.append(f"Стоимость доставки: {float(o['delivery_price']):.2f} ₽")
+    if o.get("lift_price") not in (None, ""):
+        lines.append(f"Стоимость подъема: {float(o['lift_price']):.2f} ₽")
+    if s(o.get("lift_type")):
+        lines.append(f"Тип подъема: {s(o.get('lift_type'))}")
+    if s(o.get("delivery_to") or o.get("delivery_from")):
+        lines.append(f"Крайняя дата доставки: {s(o.get('delivery_to') or o.get('delivery_from'))}")
+    lines.append(f"Статусы синхронизируются только {source} → Webasyst. Из Webasyst статусы обратно не передаются.")
+    return "\n".join(lines)
 
-def create_order(o: dict, items: List[dict]) -> str:
-    if DRY_RUN:
-        return "DRY-RUN"
-    add_items = [{"sku_id": x["sku_id"], "quantity": x["quantity"]} for x in items]
+def marketplace_order_params(o: dict) -> dict:
     params = {
         "mp_key": key(o["source"], o["external_id"]),
         "mp_source": o["source"],
@@ -244,9 +249,72 @@ def create_order(o: dict, items: List[dict]) -> str:
         "shipping_name": o.get("shipping_name") or LABEL[o["source"]],
         "payment_name": o.get("payment_name") or LABEL[o["source"]],
     }
+    for k in ("delivery_price", "lift_price", "lift_type", "delivery_from", "delivery_to", "delivery_time_from", "delivery_time_to"):
+        v = o.get(k)
+        if v not in (None, ""):
+            params["mp_" + k] = str(v)
+    return params
+
+def order_customer(o: dict) -> dict:
+    buyer = o.get("buyer") or {}
+    if not isinstance(buyer, dict):
+        return {}
+    out = {}
+    for src, dst in (("firstName", "firstname"), ("lastName", "lastname"), ("middleName", "middlename")):
+        if s(buyer.get(src)):
+            out[dst] = s(buyer.get(src))
+    full = " ".join(x for x in (out.get("lastname", ""), out.get("firstname", ""), out.get("middlename", "")) if x).strip()
+    if full:
+        out["name"] = full
+    if s(buyer.get("phone")):
+        out["phone"] = s(buyer.get("phone"))
+    return out
+
+def order_shipping_address(o: dict) -> dict:
+    a = o.get("shipping_address") or {}
+    return a if isinstance(a, dict) else {}
+
+def update_order_details(order_id: str, o: dict):
+    if DRY_RUN or not order_id:
+        return
+    info = wa.call("shop.order.getInfo", params={"id": order_id})
+    existing_params = dict(info.get("params") or {}) if isinstance(info, dict) else {}
+    existing_params.update(marketplace_order_params(o))
+    data = {"id": order_id, "params": existing_params, "comment": comment(o)}
+    customer = order_customer(o)
+    if customer:
+        data["customer"] = customer
+    address = order_shipping_address(o)
+    if address:
+        data["shipping_address"] = address
+    shipping_total = o.get("shipping_total")
+    if shipping_total not in (None, ""):
+        data["shipping"] = f"{float(shipping_total):.2f}"
+    wa.call("shop.order.save", http_method="POST", data=data)
+
+    # Webasyst stores the courier delivery deadline through the editshippingdetails action.
+    delivery_date = s(o.get("delivery_to") or o.get("delivery_from"))
+    if delivery_date:
+        acts = wa.call("shop.order.actions", params={"id": order_id})
+        acts = acts if isinstance(acts, list) else (acts.get("actions") or acts.get("items") or []) if isinstance(acts, dict) else []
+        allowed = {s(x.get("id")) for x in acts if isinstance(x, dict)}
+        if "editshippingdetails" in allowed:
+            action_data = {"id": order_id, "action": "editshippingdetails", "shipping_date": delivery_date}
+            if s(o.get("delivery_time_from")):
+                action_data["shipping_time_from"] = s(o.get("delivery_time_from"))[:5]
+            if s(o.get("delivery_time_to")):
+                action_data["shipping_time_to"] = s(o.get("delivery_time_to"))[:5]
+            wa.call("shop.order.action", http_method="POST", data=action_data)
+
+def create_order(o: dict, items: List[dict]) -> str:
+    if DRY_RUN:
+        return "DRY-RUN"
+    add_items = [{"sku_id": x["sku_id"], "quantity": x["quantity"]} for x in items]
+    params = marketplace_order_params(o)
+    customer = order_customer(o) or {"name": LABEL[o["source"]]}
     created = wa.call("shop.order.add", http_method="POST", data={
         "items": add_items,
-        "contact": {"name": LABEL[o["source"]]},
+        "contact": customer,
         "comment": comment(o),
         "params": params,
     })
@@ -272,7 +340,16 @@ def create_order(o: dict, items: List[dict]) -> str:
         if x.get("price") is not None:
             row["price"] = f"{float(x['price']):.2f}"
         save_items.append(row)
-    wa.call("shop.order.save", http_method="POST", data={"id": oid, "items": save_items, "params": params})
+    save_data = {"id": oid, "items": save_items, "params": params, "comment": comment(o)}
+    customer = order_customer(o)
+    if customer:
+        save_data["customer"] = customer
+    address = order_shipping_address(o)
+    if address:
+        save_data["shipping_address"] = address
+    if o.get("shipping_total") not in (None, ""):
+        save_data["shipping"] = f"{float(o['shipping_total']):.2f}"
+    wa.call("shop.order.save", http_method="POST", data=save_data)
     return oid
 
 def process(o: dict):
@@ -313,6 +390,8 @@ def process(o: dict):
             oid = create_order(o, resolved)
             stat["created"] += 1
             report["created"] += 1
+        if oid != "DRY-RUN":
+            update_order_details(oid, o)
         if oid != "DRY-RUN" and change_state(oid, s(o.get("target_state"))):
             stat["status_updated"] += 1
             report["status_updated"] += 1
@@ -338,6 +417,35 @@ def yandex_state(status: str, sub: str) -> str:
 
 def pval(x: Any) -> float:
     return num(x.get("value")) if isinstance(x, dict) else num(x)
+
+def yandex_order_detail(headers: dict, campaign_id: str, order_id: str) -> dict:
+    r = net.req("GET", f"https://api.partner.market.yandex.ru/v2/campaigns/{campaign_id}/orders/{order_id}", headers=headers, tries=3)
+    if not r.ok:
+        return {}
+    d = r.json()
+    if isinstance(d, dict):
+        return d.get("order") if isinstance(d.get("order"), dict) else d.get("result") if isinstance(d.get("result"), dict) else d
+    return {}
+
+def yandex_buyer_info(headers: dict, campaign_id: str, order_id: str, status: str) -> dict:
+    if s(status).upper() not in {"PROCESSING", "DELIVERY", "PICKUP", "DELIVERED"}:
+        return {}
+    r = net.req("GET", f"https://api.partner.market.yandex.ru/v2/campaigns/{campaign_id}/orders/{order_id}/buyer", headers=headers, tries=2)
+    if not r.ok:
+        return {}
+    d = r.json()
+    if isinstance(d, dict) and isinstance(d.get("result"), dict):
+        return d["result"]
+    return d if isinstance(d, dict) else {}
+
+def normalize_yandex_address(address: Any) -> dict:
+    if not isinstance(address, dict):
+        return {}
+    out = {}
+    for k in ("country", "postcode", "city", "region", "street", "house", "building", "block", "apartment", "floor", "entrance"):
+        if s(address.get(k)):
+            out[k] = s(address.get(k))
+    return out
 
 def load_yandex_market():
     token = s(os.getenv("YANDEX_MARKET_API_KEY"))
@@ -377,15 +485,55 @@ def load_yandex_market():
                         "price": total / qty if total > 0 else None,
                     })
                 status, sub = s(o.get("status")), s(o.get("substatus"))
-                delivery = o.get("delivery") or {}
+                order_id = s(o.get("orderId"))
+                campaign_id = s(o.get("campaignId"))
+                detail = yandex_order_detail(h, campaign_id, order_id) if campaign_id and order_id else {}
+                buyer = yandex_buyer_info(h, campaign_id, order_id, status) if campaign_id and order_id else {}
+                if not buyer and isinstance(detail.get("buyer"), dict):
+                    buyer = detail.get("buyer") or {}
+
+                delivery = detail.get("delivery") if isinstance(detail.get("delivery"), dict) else (o.get("delivery") or {})
                 service = s(delivery.get("serviceName")) if isinstance(delivery, dict) else ""
+                dates = delivery.get("dates") if isinstance(delivery, dict) and isinstance(delivery.get("dates"), dict) else {}
+                dprice = num(delivery.get("price")) if isinstance(delivery, dict) and delivery.get("price") not in (None, "") else None
+                lprice = num(delivery.get("liftPrice")) if isinstance(delivery, dict) and delivery.get("liftPrice") not in (None, "") else None
+                ltype = s(delivery.get("liftType")) if isinstance(delivery, dict) else ""
+                if not ltype and isinstance(o.get("services"), dict):
+                    ltype = s((o.get("services") or {}).get("liftType"))
+
+                # Business API provides the total delivery amount incl. lift. Use it as a fallback.
+                business_delivery = ((o.get("prices") or {}).get("delivery") or {}) if isinstance(o.get("prices"), dict) else {}
+                business_delivery_total = pval(business_delivery.get("payment")) + pval(business_delivery.get("subsidy"))
+                if dprice is None and business_delivery_total > 0:
+                    dprice = business_delivery_total
+                shipping_total = None
+                if dprice is not None or lprice is not None:
+                    shipping_total = float(dprice or 0) + float(lprice or 0)
+
+                address = {}
+                if isinstance(delivery, dict):
+                    raw_address = delivery.get("address")
+                    if not isinstance(raw_address, dict) and isinstance(delivery.get("courier"), dict):
+                        raw_address = (delivery.get("courier") or {}).get("address")
+                    address = normalize_yandex_address(raw_address)
+
                 out.append({
-                    "source": "yandex_market", "external_id": s(o.get("orderId")),
+                    "source": "yandex_market", "external_id": order_id,
                     "created_at": iso(created) if created else s(o.get("creationDate")),
                     "status_raw": status + ("/" + sub if sub else ""),
                     "target_state": yandex_state(status, sub), "items": items,
                     "shipping_name": "Яндекс Маркет" + (f" / {service}" if service else ""),
                     "payment_name": "Яндекс Маркет / " + s(o.get("paymentType") or o.get("paymentMethod")),
+                    "buyer": buyer,
+                    "shipping_address": address,
+                    "delivery_price": dprice,
+                    "lift_price": lprice,
+                    "lift_type": ltype,
+                    "shipping_total": shipping_total,
+                    "delivery_from": s(dates.get("fromDate")),
+                    "delivery_to": s(dates.get("toDate") or dates.get("fromDate")),
+                    "delivery_time_from": s(dates.get("fromTime")),
+                    "delivery_time_to": s(dates.get("toTime")),
                 })
             paging = root.get("paging") if isinstance(root, dict) else None
             token_page = (paging or {}).get("nextPageToken") if isinstance(paging, dict) else None
