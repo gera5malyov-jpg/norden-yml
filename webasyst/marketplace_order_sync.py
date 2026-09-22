@@ -384,12 +384,20 @@ def load_wb():
     h = {"Authorization": token, "Accept": "application/json"}
     start = datetime.now(timezone.utc) - timedelta(days=WB_DAYS)
     params = {"dateFrom": start.strftime("%Y-%m-%dT%H:%M:%S"), "flag": 0}
-    r = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/orders", headers=h, params=params)
+    # WB Statistics API applies a strict seller-level throttle. Avoid repeated 429 retries,
+    # because each retry can keep the bucket hot. Cool down first, then send one request.
+    time.sleep(75)
+    r = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/orders", headers=h, params=params, tries=1)
+    if r.status_code == 429:
+        time.sleep(75)
+        r = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/orders", headers=h, params=params, tries=1)
     if not r.ok: raise RuntimeError(f"WB orders HTTP {r.status_code}")
     orders = r.json() if isinstance(r.json(), list) else []
-    # Statistics endpoints are limited to 1 request/minute per seller.
-    time.sleep(62)
-    rs = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/sales", headers=h, params=params)
+    time.sleep(75)
+    rs = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/sales", headers=h, params=params, tries=1)
+    if rs.status_code == 429:
+        time.sleep(75)
+        rs = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/sales", headers=h, params=params, tries=1)
     sales = rs.json() if rs.ok and isinstance(rs.json(), list) else []
     sold = {s(x.get("srid")) for x in sales if isinstance(x, dict) and s(x.get("srid")) and not x.get("isStorno")}
     groups = defaultdict(list)
