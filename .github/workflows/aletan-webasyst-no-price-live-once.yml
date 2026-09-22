@@ -65,3 +65,5 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m 'Обновить отчёт Алетан Webasyst без закупочной цены'
           git push origin HEAD:main || true
+
+# rerun 2026-09-22 no-price live
