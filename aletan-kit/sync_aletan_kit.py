@@ -134,21 +134,41 @@ def download_price_xlsx(dest):
         context = browser.new_context(accept_downloads=True, locale="ru-RU")
         page = context.new_page()
         page.goto(PRICE_PAGE_URL, wait_until="domcontentloaded", timeout=120000)
-        click_any(
-            page,
-            [
-                page.get_by_role("button", name=re.compile("необходим", re.I)),
-                page.get_by_role("button", name=re.compile("essential", re.I)),
-                page.get_by_text(re.compile("Только необходимые", re.I)),
-                page.get_by_text(re.compile("Allow essential", re.I)),
-            ],
-            timeout=2500,
-        )
-        page.wait_for_timeout(8000)
+
+        # Сначала закрываем баннер cookies на внешней странице.
+        for consent in [
+            page.get_by_text("Allow essential cookies", exact=True),
+            page.get_by_role("button", name=re.compile("Allow essential cookies", re.I)),
+            page.get_by_text(re.compile("Только необходимые", re.I)),
+            page.get_by_role("button", name=re.compile("необходим", re.I)),
+        ]:
+            try:
+                if consent.count() and consent.first.is_visible():
+                    consent.first.click(timeout=5000, force=True)
+                    break
+            except Exception:
+                pass
+
+        page.wait_for_timeout(5000)
+
+        # Редактор таблицы работает внутри iframe volga.yandex.ru/spreadsheet.
+        editor = None
+        for _ in range(30):
+            for frame in page.frames:
+                if "volga.yandex.ru/spreadsheet" in frame.url:
+                    editor = frame
+                    break
+            if editor is not None:
+                break
+            page.wait_for_timeout(500)
+        if editor is None:
+            raise RuntimeError("Не найден iframe редактора Яндекс Таблиц")
+
+        page.wait_for_timeout(5000)
 
         # В публичном режиме Яндекс Таблиц есть отдельная кнопка Download,
         # которая сразу экспортирует XLSX без меню «Файл».
-        direct_download = page.get_by_test_id("Download")
+        direct_download = editor.get_by_test_id("Download")
         if direct_download.count() and direct_download.first.is_visible():
             with page.expect_download(timeout=120000) as di:
                 direct_download.first.click(timeout=8000)
@@ -158,21 +178,21 @@ def download_price_xlsx(dest):
             if not click_any(
                 page,
                 [
-                    page.get_by_role("button", name=re.compile(r"^Файл$", re.I)),
-                    page.get_by_role("menuitem", name=re.compile(r"^Файл$", re.I)),
-                    page.get_by_text("Файл", exact=True),
-                    page.get_by_role("button", name=re.compile(r"^File$", re.I)),
-                    page.get_by_text("File", exact=True),
+                    editor.get_by_role("button", name=re.compile(r"^Файл$", re.I)),
+                    editor.get_by_role("menuitem", name=re.compile(r"^Файл$", re.I)),
+                    editor.get_by_text("Файл", exact=True),
+                    editor.get_by_role("button", name=re.compile(r"^File$", re.I)),
+                    editor.get_by_text("File", exact=True),
                 ],
                 timeout=5000,
             ):
-                visible = page.locator("button:visible").all_inner_texts()
+                visible = editor.locator("button:visible").all_inner_texts()
                 try:
-                    body_text = page.locator("body").inner_text(timeout=3000)[:1500]
+                    body_text = editor.locator("body").inner_text(timeout=3000)[:1500]
                 except Exception:
                     body_text = ""
                 try:
-                    test_ids = page.locator("[data-testid]").evaluate_all(
+                    test_ids = editor.locator("[data-testid]").evaluate_all(
                         "(els) => els.slice(0, 80).map(e => e.getAttribute('data-testid'))"
                     )
                 except Exception:
@@ -189,12 +209,12 @@ def download_price_xlsx(dest):
                 )
 
             page.wait_for_timeout(800)
-            excel = page.get_by_text(re.compile(r"Microsoft\\s*Excel.*xlsx", re.I))
+            excel = editor.get_by_text(re.compile(r"Microsoft\\s*Excel.*xlsx", re.I))
             if not (excel.count() and excel.first.is_visible()):
                 for loc in [
-                    page.get_by_role("menuitem", name=re.compile("Скачать|Download", re.I)),
-                    page.get_by_text(re.compile(r"^Скачать$", re.I)),
-                    page.get_by_text(re.compile(r"^Download$", re.I)),
+                    editor.get_by_role("menuitem", name=re.compile("Скачать|Download", re.I)),
+                    editor.get_by_text(re.compile(r"^Скачать$", re.I)),
+                    editor.get_by_text(re.compile(r"^Download$", re.I)),
                 ]:
                     try:
                         if loc.count() and loc.first.is_visible():
@@ -209,9 +229,9 @@ def download_price_xlsx(dest):
 
             final = None
             for loc in [
-                page.get_by_test_id("ms_excel"),
-                page.get_by_text(re.compile(r"Microsoft\\s*Excel.*xlsx", re.I)),
-                page.get_by_role("menuitem", name=re.compile(r"Microsoft\\s*Excel", re.I)),
+                editor.get_by_test_id("ms_excel"),
+                editor.get_by_text(re.compile(r"Microsoft\\s*Excel.*xlsx", re.I)),
+                editor.get_by_role("menuitem", name=re.compile(r"Microsoft\\s*Excel", re.I)),
             ]:
                 try:
                     if loc.count() and loc.first.is_visible():
