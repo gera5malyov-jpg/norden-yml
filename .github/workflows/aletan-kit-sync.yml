@@ -3,7 +3,7 @@ name: Алетан → KIT — цены раз в 2 недели
 on:
   schedule:
     # GitHub cron не умеет "каждые 14 дней".
-    # Проверяем каждый понедельник; live-запуск проходит только если
+    # Проверяем каждый вторник; live-запуск проходит только если
     # с последнего успешного обновления прошло >= 14 дней.
     - cron: '35 12 * * 2'
   workflow_dispatch:
@@ -58,8 +58,8 @@ jobs:
           args=()
 
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            # Одноразовый live-запуск после подтверждённого dry-run.
-            args+=(--force)
+            # Изменения кода всегда проверяем без записи в KIT.
+            args+=(--dry-run --force)
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
             if [[ "${{ inputs.force }}" == "true" ]]; then args+=(--force); fi
