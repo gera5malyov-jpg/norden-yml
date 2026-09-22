@@ -1,0 +1,110 @@
+{
+  "generated_at": "2026-09-22T09:58:22.797953+00:00",
+  "ozon": {
+    "fbs": {
+      "ok": true,
+      "count_sample": 28,
+      "statuses": {
+        "cancelled": 1,
+        "delivered": 6,
+        "delivering": 21
+      },
+      "substatuses": {
+        "posting_canceled": 1,
+        "posting_conditionally_delivered": 1,
+        "posting_in_courier_service": 2,
+        "posting_on_way_to_city": 18,
+        "posting_received": 6
+      },
+      "has_products": true,
+      "sample_product_fields": [
+        "currency_code",
+        "imei",
+        "is_blr_traceable",
+        "is_marketplace_buyout",
+        "name",
+        "offer_id",
+        "price",
+        "quantity",
+        "sku"
+      ]
+    },
+    "fbo": {
+      "ok": true,
+      "count_sample": 0,
+      "statuses": {},
+      "has_products": false
+    }
+  },
+  "webasyst": {
+    "ok": true,
+    "order_states": [
+      {
+        "id": "new",
+        "name": "Новый"
+      },
+      {
+        "id": "processing",
+        "name": "Подтвержден"
+      },
+      {
+        "id": "auth",
+        "name": "Средства заблокированы"
+      },
+      {
+        "id": "paid",
+        "name": "Оплачен"
+      },
+      {
+        "id": "shipped",
+        "name": "Передан в доставку"
+      },
+      {
+        "id": "izgotavlivaetsya",
+        "name": "Изготавливается/комплектуется"
+      },
+      {
+        "id": "ozhidaem-oplaty",
+        "name": "Ожидаем оплаты"
+      },
+      {
+        "id": "napomnit-ob-opla",
+        "name": "Напомнить об оплате"
+      },
+      {
+        "id": "completed",
+        "name": "Выполнен"
+      },
+      {
+        "id": "refunded",
+        "name": "Возврат"
+      },
+      {
+        "id": "otmenen",
+        "name": "Отменен"
+      },
+      {
+        "id": "deleted",
+        "name": "Удален"
+      },
+      {
+        "id": "pos",
+        "name": "Заказ на кассе"
+      },
+      {
+        "id": "pickup",
+        "name": "На выдачу"
+      },
+      {
+        "id": "fulfilling",
+        "name": "На сборке"
+      },
+      {
+        "id": "sendpin",
+        "name": "sendpin"
+      }
+    ]
+  },
+  "read_only": true,
+  "contains_pii": false
+}
