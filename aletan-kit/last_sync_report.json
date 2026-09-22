@@ -1,7 +1,2671 @@
 {
-  "status": "error",
+  "status": "ok",
   "dry_run": true,
-  "error": "Не найдено ни одного надежного совпадения Алетан между прайсом и KIT",
+  "brand_rule": "только точный бренд Алетан",
+  "creation_rule": "новые товары не создаются",
+  "update_scope": "только цены",
+  "purchase_price_storage": "закупочная цена в KIT не записывается",
+  "price_rule": {
+    "Цена для покупателя": "закупка × 1.30",
+    "Цена до скидки": "закупка × 1.60"
+  },
+  "interval_days": 14,
   "catalog_url": "https://aletan.ru/upload/aletan_catalog_export.csv",
-  "price_page_url": "https://docs.360.yandex.ru/view/d/_xpJcObcgUxWnp71fA8UZyPegnqahzm72s0qoIz-cKg6VUZsT1dCXzlhdw"
+  "price_page_url": "https://docs.360.yandex.ru/view/d/_xpJcObcgUxWnp71fA8UZyPegnqahzm72s0qoIz-cKg6VUZsT1dCXzlhdw",
+  "errors": [],
+  "warnings": [],
+  "catalog_rows_total": 839,
+  "catalog_aletan_unique_vendor_codes": 771,
+  "catalog_duplicate_vendor_codes": [
+    "В214G",
+    "В405G",
+    "T705QU",
+    "T706Q",
+    "T209W",
+    "М104Q",
+    "М604W",
+    "М406W",
+    "BR202W",
+    "BR204W",
+    "BR206W",
+    "BR208W",
+    "W408",
+    "MRS404W",
+    "MRS305Q",
+    "MRS804G",
+    "T702W",
+    "В602/1BLG",
+    "W301BL",
+    "T706W",
+    "T706G",
+    "М903G",
+    "В104",
+    "В301G",
+    "В216",
+    "В802",
+    "В402",
+    "В302",
+    "BR108W"
+  ],
+  "price_diagnostics": [
+    {
+      "sheet": "Marlette",
+      "overlap": 92,
+      "sku_col": 5,
+      "first_data_row": 7,
+      "header_rows": [
+        {
+          "row": 1,
+          "values": [
+            "Обратите внимание на вкладки с полным ассортиментом мебели",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 2,
+          "values": [
+            "",
+            "Оптовый прайс 19.06.2026          https://aletan.ru                        info@aletan.ru                                 +7(499) 398-20-62",
+            "",
+            "Изготовление по индивидуальным размерам",
+            "ГАРАНТИЯ 18 МЕСЯЦЕВ",
+            "Срок изготовления: 20-45 рабочих дней.",
+            "",
+            "Продавая мебель Вы зарабатываете от 50% до 70%",
+            "",
+            "Возможно выкрасить в любой цвет по каталогу RAL, NCS  (доплата +15%)",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 3,
+          "values": [
+            "MARLETTE",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 4,
+          "values": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 5,
+          "values": [
+            "Фото",
+            "Название",
+            "Размеры (Ш*Г*В),см.",
+            "Цвет",
+            "Арт.",
+            "Цена ФАБРИКИ",
+            "Реком.цена",
+            "Объем,м3",
+            "Кол. уп.,шт.",
+            "Вес,кг.",
+            "Ссылка",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 6,
+          "values": [
+            "",
+            "Стол квадратный",
+            "60*60*62",
+            "Слоновая кость (RAL9010)",
+            "В101",
+            "30330",
+            "49700",
+            "0.067",
+            "2",
+            "15.6",
+            "https://aletan.ru/catalog/stoly_i_stulya/stoliki/stol_kvadratnyy_provans/",
+            "",
+            ""
+          ]
+        }
+      ],
+      "numeric_columns": [
+        {
+          "col": 2,
+          "numeric_matches": 6,
+          "median_to_catalog_price": 1.1738,
+          "samples": [
+            {
+              "code": "В202",
+              "value": "120200.00"
+            },
+            {
+              "code": "В204",
+              "value": "140200.00"
+            },
+            {
+              "code": "В206",
+              "value": "160200.00"
+            },
+            {
+              "code": "В208",
+              "value": "180200.00"
+            },
+            {
+              "code": "В212",
+              "value": "120200.00"
+            }
+          ]
+        },
+        {
+          "col": 3,
+          "numeric_matches": 42,
+          "median_to_catalog_price": 18.1622,
+          "samples": [
+            {
+              "code": "B102",
+              "value": "1006062.00"
+            },
+            {
+              "code": "В105",
+              "value": "1052393.50"
+            },
+            {
+              "code": "В106",
+              "value": "765103.00"
+            },
+            {
+              "code": "В107",
+              "value": "46.54"
+            },
+            {
+              "code": "В108",
+              "value": "1113852.00"
+            }
+          ]
+        },
+        {
+          "col": 4,
+          "numeric_matches": 92,
+          "median_to_catalog_price": 0.0743,
+          "samples": [
+            {
+              "code": "В101BL",
+              "value": "9005.00"
+            },
+            {
+              "code": "B102",
+              "value": "9010.00"
+            },
+            {
+              "code": "B102BL",
+              "value": "9005.00"
+            },
+            {
+              "code": "В104BL",
+              "value": "9005.00"
+            },
+            {
+              "code": "В105",
+              "value": "9010.00"
+            }
+          ]
+        },
+        {
+          "col": 5,
+          "numeric_matches": 92,
+          "median_to_catalog_price": 0.0038,
+          "samples": [
+            {
+              "code": "В101BL",
+              "value": "101.00"
+            },
+            {
+              "code": "B102",
+              "value": "102.00"
+            },
+            {
+              "code": "B102BL",
+              "value": "102.00"
+            },
+            {
+              "code": "В104BL",
+              "value": "104.00"
+            },
+            {
+              "code": "В105",
+              "value": "105.00"
+            }
+          ]
+        },
+        {
+          "col": 6,
+          "numeric_matches": 42,
+          "median_to_catalog_price": 0.6065,
+          "samples": [
+            {
+              "code": "B102",
+              "value": "34840.00"
+            },
+            {
+              "code": "В105",
+              "value": "42530.00"
+            },
+            {
+              "code": "В106",
+              "value": "20620.00"
+            },
+            {
+              "code": "В107",
+              "value": "17770.00"
+            },
+            {
+              "code": "В108",
+              "value": "23940.00"
+            }
+          ]
+        },
+        {
+          "col": 7,
+          "numeric_matches": 42,
+          "median_to_catalog_price": 1.0,
+          "samples": [
+            {
+              "code": "B102",
+              "value": "57400.00"
+            },
+            {
+              "code": "В105",
+              "value": "69700.00"
+            },
+            {
+              "code": "В106",
+              "value": "33700.00"
+            },
+            {
+              "code": "В107",
+              "value": "29300.00"
+            },
+            {
+              "code": "В108",
+              "value": "39500.00"
+            }
+          ]
+        },
+        {
+          "col": 8,
+          "numeric_matches": 32,
+          "median_to_catalog_price": 0.0,
+          "samples": [
+            {
+              "code": "B102",
+              "value": "0.08"
+            },
+            {
+              "code": "В105",
+              "value": "0.10"
+            },
+            {
+              "code": "В106",
+              "value": "0.05"
+            },
+            {
+              "code": "В107",
+              "value": "0.10"
+            },
+            {
+              "code": "В108",
+              "value": "0.22"
+            }
+          ]
+        },
+        {
+          "col": 9,
+          "numeric_matches": 42,
+          "median_to_catalog_price": 0.0,
+          "samples": [
+            {
+              "code": "B102",
+              "value": "1.00"
+            },
+            {
+              "code": "В105",
+              "value": "2.00"
+            },
+            {
+              "code": "В106",
+              "value": "1.00"
+            },
+            {
+              "code": "В107",
+              "value": "1.00"
+            },
+            {
+              "code": "В108",
+              "value": "1.00"
+            }
+          ]
+        },
+        {
+          "col": 10,
+          "numeric_matches": 42,
+          "median_to_catalog_price": 0.0005,
+          "samples": [
+            {
+              "code": "B102",
+              "value": "20.00"
+            },
+            {
+              "code": "В105",
+              "value": "20.00"
+            },
+            {
+              "code": "В106",
+              "value": "10.00"
+            },
+            {
+              "code": "В107",
+              "value": "6.00"
+            },
+            {
+              "code": "В108",
+              "value": "11.00"
+            }
+          ]
+        },
+        {
+          "col": 11,
+          "numeric_matches": 44,
+          "median_to_catalog_price": 0.0,
+          "samples": [
+            {
+              "code": "В202",
+              "value": "0.12"
+            },
+            {
+              "code": "В202BL",
+              "value": "0.12"
+            },
+            {
+              "code": "В204",
+              "value": "0.14"
+            },
+            {
+              "code": "В204BL",
+              "value": "0.14"
+            },
+            {
+              "code": "В206",
+              "value": "0.16"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "Marlette-Wood",
+      "overlap": 99,
+      "sku_col": 5,
+      "first_data_row": 5,
+      "header_rows": [
+        {
+          "row": 1,
+          "values": [
+            "Обратите внимание на вкладки с полным ассортиментом мебели",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 2,
+          "values": [
+            "MARLETTE-WOOD",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 3,
+          "values": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 4,
+          "values": [
+            "Фото",
+            "Название",
+            "Размеры (Ш*Г*В),см.",
+            "Цвет",
+            "Арт.",
+            "Цена ФАБРИКИ",
+            "Реком.цена",
+            "Объем,м3",
+            "Кол. уп.,шт.",
+            "Вес,кг.",
+            "Ссылка",
+            ""
+          ]
+        }
+      ],
+      "numeric_columns": [
+        {
+          "col": 2,
+          "numeric_matches": 9,
+          "median_to_catalog_price": 1.0801,
+          "samples": [
+            {
+              "code": "W202",
+              "value": "120200.00"
+            },
+            {
+              "code": "W204",
+              "value": "140200.00"
+            },
+            {
+              "code": "W206",
+              "value": "160200.00"
+            },
+            {
+              "code": "W208",
+              "value": "180200.00"
+            },
+            {
+              "code": "W212",
+              "value": "120200.00"
+            }
+          ]
+        },
+        {
+          "col": 3,
+          "numeric_matches": 49,
+          "median_to_catalog_price": 11.3808,
+          "samples": [
+            {
+              "code": "W101",
+              "value": "606062.00"
+            },
+            {
+              "code": "W102",
+              "value": "1006062.00"
+            },
+            {
+              "code": "W104",
+              "value": "138885.00"
+            },
+            {
+              "code": "W105",
+              "value": "1052393.50"
+            },
+            {
+              "code": "W106",
+              "value": "765103.00"
+            }
+          ]
+        },
+        {
+          "col": 4,
+          "numeric_matches": 99,
+          "median_to_catalog_price": 0.0646,
+          "samples": [
+            {
+              "code": "W101",
+              "value": "9010.00"
+            },
+            {
+              "code": "W101BL",
+              "value": "9005.00"
+            },
+            {
+              "code": "W102",
+              "value": "9010.00"
+            },
+            {
+              "code": "W102BL",
+              "value": "9005.00"
+            },
+            {
+              "code": "W104",
+              "value": "9010.00"
+            }
+          ]
+        },
+        {
+          "col": 5,
+          "numeric_matches": 99,
+          "median_to_catalog_price": 0.0031,
+          "samples": [
+            {
+              "code": "W101",
+              "value": "101.00"
+            },
+            {
+              "code": "W101BL",
+              "value": "101.00"
+            },
+            {
+              "code": "W102",
+              "value": "102.00"
+            },
+            {
+              "code": "W102BL",
+              "value": "102.00"
+            },
+            {
+              "code": "W104",
+              "value": "104.00"
+            }
+          ]
+        },
+        {
+          "col": 6,
+          "numeric_matches": 50,
+          "median_to_catalog_price": 0.6063,
+          "samples": [
+            {
+              "code": "W101",
+              "value": "41600.00"
+            },
+            {
+              "code": "W102",
+              "value": "53600.00"
+            },
+            {
+              "code": "W104",
+              "value": "35800.00"
+            },
+            {
+              "code": "W105",
+              "value": "48500.00"
+            },
+            {
+              "code": "W106",
+              "value": "24700.00"
+            }
+          ]
+        },
+        {
+          "col": 7,
+          "numeric_matches": 50,
+          "median_to_catalog_price": 1.0,
+          "samples": [
+            {
+              "code": "W101",
+              "value": "68600.00"
+            },
+            {
+              "code": "W102",
+              "value": "88400.00"
+            },
+            {
+              "code": "W104",
+              "value": "58700.00"
+            },
+            {
+              "code": "W105",
+              "value": "79700.00"
+            },
+            {
+              "code": "W106",
+              "value": "39700.00"
+            }
+          ]
+        },
+        {
+          "col": 8,
+          "numeric_matches": 36,
+          "median_to_catalog_price": 0.0,
+          "samples": [
+            {
+              "code": "W101",
+              "value": "0.07"
+            },
+            {
+              "code": "W102",
+              "value": "0.08"
+            },
+            {
+              "code": "W104",
+              "value": "0.18"
+            },
+            {
+              "code": "W105",
+              "value": "0.10"
+            },
+            {
+              "code": "W106",
+              "value": "0.05"
+            }
+          ]
+        },
+        {
+          "col": 9,
+          "numeric_matches": 47,
+          "median_to_catalog_price": 0.0,
+          "samples": [
+            {
+              "code": "W101",
+              "value": "2.00"
+            },
+            {
+              "code": "W102",
+              "value": "1.00"
+            },
+            {
+              "code": "W104",
+              "value": "1.00"
+            },
+            {
+              "code": "W105",
+              "value": "2.00"
+            },
+            {
+              "code": "W106",
+              "value": "1.00"
+            }
+          ]
+        },
+        {
+          "col": 10,
+          "numeric_matches": 47,
+          "median_to_catalog_price": 0.0003,
+          "samples": [
+            {
+              "code": "W101",
+              "value": "15.60"
+            },
+            {
+              "code": "W102",
+              "value": "20.00"
+            },
+            {
+              "code": "W104",
+              "value": "18.00"
+            },
+            {
+              "code": "W105",
+              "value": "20.00"
+            },
+            {
+              "code": "W106",
+              "value": "10.00"
+            }
+          ]
+        },
+        {
+          "col": 11,
+          "numeric_matches": 49,
+          "median_to_catalog_price": 0.0,
+          "samples": [
+            {
+              "code": "W202",
+              "value": "0.12"
+            },
+            {
+              "code": "W202BL",
+              "value": "0.12"
+            },
+            {
+              "code": "W204",
+              "value": "0.14"
+            },
+            {
+              "code": "W204BL",
+              "value": "0.14"
+            },
+            {
+              "code": "W206",
+              "value": "0.16"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "TESORO",
+      "overlap": 78,
+      "sku_col": 5,
+      "first_data_row": 5,
+      "header_rows": [
+        {
+          "row": 1,
+          "values": [
+            "Обратите внимание на вкладки с полным ассортиментом мебели",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 2,
+          "values": [
+            "TESORO",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 3,
+          "values": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 4,
+          "values": [
+            "Фото",
+            "Наименование",
+            "Размер(мм) ШхГхВ",
+            "Цвет",
+            "Арт.",
+            "Опт (руб.)",
+            "Розница (руб.)",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        }
+      ],
+      "numeric_columns": [
+        {
+          "col": 2,
+          "numeric_matches": 10,
+          "median_to_catalog_price": 0.0,
+          "samples": [
+            {
+              "code": "T301W",
+              "value": "1.00"
+            },
+            {
+              "code": "T303W",
+              "value": "3.00"
+            },
+            {
+              "code": "T315W",
+              "value": "5.00"
+            },
+            {
+              "code": "T401W",
+              "value": "3.00"
+            },
+            {
+              "code": "T403W",
+              "value": "32.00"
+            }
+          ]
+        },
+        {
+          "col": 3,
+          "numeric_matches": 39,
+          "median_to_catalog_price": 58489.2277,
+          "samples": [
+            {
+              "code": "T101W",
+              "value": "600600550.00"
+            },
+            {
+              "code": "T102W",
+              "value": "1200600550.00"
+            },
+            {
+              "code": "T104W",
+              "value": "108050790.00"
+            },
+            {
+              "code": "T105W",
+              "value": "1055230925.00"
+            },
+            {
+              "code": "T108W",
+              "value": "1200400450.00"
+            }
+          ]
+        },
+        {
+          "col": 5,
+          "numeric_matches": 78,
+          "median_to_catalog_price": 0.003,
+          "samples": [
+            {
+              "code": "T101W",
+              "value": "101.00"
+            },
+            {
+              "code": "T101G",
+              "value": "101.00"
+            },
+            {
+              "code": "T101Q",
+              "value": "101.00"
+            },
+            {
+              "code": "T101BL",
+              "value": "101.00"
+            },
+            {
+              "code": "T102W",
+              "value": "102.00"
+            }
+          ]
+        },
+        {
+          "col": 6,
+          "numeric_matches": 39,
+          "median_to_catalog_price": 0.625,
+          "samples": [
+            {
+              "code": "T101W",
+              "value": "29500.00"
+            },
+            {
+              "code": "T102W",
+              "value": "33300.00"
+            },
+            {
+              "code": "T104W",
+              "value": "21000.00"
+            },
+            {
+              "code": "T105W",
+              "value": "39700.00"
+            },
+            {
+              "code": "T108W",
+              "value": "22700.00"
+            }
+          ]
+        },
+        {
+          "col": 7,
+          "numeric_matches": 39,
+          "median_to_catalog_price": 1.0,
+          "samples": [
+            {
+              "code": "T101W",
+              "value": "47200.00"
+            },
+            {
+              "code": "T102W",
+              "value": "53280.00"
+            },
+            {
+              "code": "T104W",
+              "value": "33600.00"
+            },
+            {
+              "code": "T105W",
+              "value": "63520.00"
+            },
+            {
+              "code": "T108W",
+              "value": "36300.00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "MAJESSA",
+      "overlap": 125,
+      "sku_col": 5,
+      "first_data_row": 5,
+      "header_rows": [
+        {
+          "row": 1,
+          "values": [
+            "Обратите внимание на вкладки с полным ассортиментом мебели",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 2,
+          "values": [
+            "MAJESSA",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 3,
+          "values": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 4,
+          "values": [
+            "Фото",
+            "Название",
+            "Размеры (Ш*Г*В),см.",
+            "Цвет",
+            "Арт.",
+            "Цена ФАБРИКИ",
+            "Реком.цена",
+            "Объем,м3",
+            "Кол. уп.,шт.",
+            "Вес,кг.",
+            "Ссылка"
+          ]
+        }
+      ],
+      "numeric_columns": [
+        {
+          "col": 2,
+          "numeric_matches": 9,
+          "median_to_catalog_price": 0.0,
+          "samples": [
+            {
+              "code": "М301W",
+              "value": "1.00"
+            },
+            {
+              "code": "М303W",
+              "value": "3.00"
+            },
+            {
+              "code": "М315W",
+              "value": "5.00"
+            },
+            {
+              "code": "М401W",
+              "value": "3.00"
+            },
+            {
+              "code": "М403W",
+              "value": "32.00"
+            }
+          ]
+        },
+        {
+          "col": 3,
+          "numeric_matches": 45,
+          "median_to_catalog_price": 62163.4136,
+          "samples": [
+            {
+              "code": "М101W",
+              "value": "600600550.00"
+            },
+            {
+              "code": "М102W",
+              "value": "1200600550.00"
+            },
+            {
+              "code": "М104W",
+              "value": "108050790.00"
+            },
+            {
+              "code": "М106W",
+              "value": "780501090.00"
+            },
+            {
+              "code": "М107W",
+              "value": "600400450.00"
+            }
+          ]
+        },
+        {
+          "col": 5,
+          "numeric_matches": 125,
+          "median_to_catalog_price": 0.0033,
+          "samples": [
+            {
+              "code": "М101W",
+              "value": "101.00"
+            },
+            {
+              "code": "М101G",
+              "value": "101.00"
+            },
+            {
+              "code": "М101Q",
+              "value": "101.00"
+            },
+            {
+              "code": "М101BL",
+              "value": "101.00"
+            },
+            {
+              "code": "М102W",
+              "value": "102.00"
+            }
+          ]
+        },
+        {
+          "col": 6,
+          "numeric_matches": 45,
+          "median_to_catalog_price": 0.6061,
+          "samples": [
+            {
+              "code": "М101W",
+              "value": "29530.00"
+            },
+            {
+              "code": "М102W",
+              "value": "33380.00"
+            },
+            {
+              "code": "М104W",
+              "value": "21010.00"
+            },
+            {
+              "code": "М106W",
+              "value": "19880.00"
+            },
+            {
+              "code": "М107W",
+              "value": "17600.00"
+            }
+          ]
+        },
+        {
+          "col": 7,
+          "numeric_matches": 45,
+          "median_to_catalog_price": 1.0,
+          "samples": [
+            {
+              "code": "М101W",
+              "value": "48720.00"
+            },
+            {
+              "code": "М102W",
+              "value": "55070.00"
+            },
+            {
+              "code": "М104W",
+              "value": "34660.00"
+            },
+            {
+              "code": "М106W",
+              "value": "32800.00"
+            },
+            {
+              "code": "М107W",
+              "value": "29040.00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "BARI",
+      "overlap": 17,
+      "sku_col": 5,
+      "first_data_row": 17,
+      "header_rows": [
+        {
+          "row": 9,
+          "values": [
+            "",
+            "Столик журнальный",
+            "1200*600*550",
+            "White",
+            "BR102W",
+            "31900",
+            "51000",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 10,
+          "values": [
+            "",
+            "",
+            "",
+            "Grey",
+            "BR102G",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 11,
+          "values": [
+            "",
+            "",
+            "",
+            "Quartz",
+            "BR102Q",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 12,
+          "values": [
+            "",
+            "",
+            "",
+            "Black",
+            "BR102BL",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 13,
+          "values": [
+            "",
+            "Зеркало прямоугольное(горизонтальное)",
+            "1080*50*790",
+            "White",
+            "BR104W",
+            "24100",
+            "38560",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 14,
+          "values": [
+            "",
+            "",
+            "",
+            "Grey",
+            "BR104G",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 15,
+          "values": [
+            "",
+            "",
+            "",
+            "Quartz",
+            "BR104Q",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 16,
+          "values": [
+            "",
+            "",
+            "",
+            "Black",
+            "BR104BL",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        }
+      ],
+      "numeric_columns": [
+        {
+          "col": 2,
+          "numeric_matches": 7,
+          "median_to_catalog_price": 0.0,
+          "samples": [
+            {
+              "code": "BR301W",
+              "value": "1.00"
+            },
+            {
+              "code": "BR315W",
+              "value": "5.00"
+            },
+            {
+              "code": "BR401W",
+              "value": "3.00"
+            },
+            {
+              "code": "BR403W",
+              "value": "32.00"
+            },
+            {
+              "code": "BR802W",
+              "value": "2.00"
+            }
+          ]
+        },
+        {
+          "col": 3,
+          "numeric_matches": 16,
+          "median_to_catalog_price": 32488.6684,
+          "samples": [
+            {
+              "code": "BR107",
+              "value": "600400450.00"
+            },
+            {
+              "code": "BR301W",
+              "value": "515450615.00"
+            },
+            {
+              "code": "BR315W",
+              "value": "6504501180.00"
+            },
+            {
+              "code": "BR304W",
+              "value": "1600450615.00"
+            },
+            {
+              "code": "BR305W",
+              "value": "1800450615.00"
+            }
+          ]
+        },
+        {
+          "col": 5,
+          "numeric_matches": 17,
+          "median_to_catalog_price": 0.0038,
+          "samples": [
+            {
+              "code": "BR107",
+              "value": "107.00"
+            },
+            {
+              "code": "BR301W",
+              "value": "301.00"
+            },
+            {
+              "code": "BR301G",
+              "value": "301.00"
+            },
+            {
+              "code": "BR315W",
+              "value": "315.00"
+            },
+            {
+              "code": "BR304W",
+              "value": "304.00"
+            }
+          ]
+        },
+        {
+          "col": 6,
+          "numeric_matches": 16,
+          "median_to_catalog_price": 0.6251,
+          "samples": [
+            {
+              "code": "BR107",
+              "value": "17160.00"
+            },
+            {
+              "code": "BR301W",
+              "value": "31460.00"
+            },
+            {
+              "code": "BR315W",
+              "value": "62920.00"
+            },
+            {
+              "code": "BR304W",
+              "value": "68640.00"
+            },
+            {
+              "code": "BR305W",
+              "value": "82940.00"
+            }
+          ]
+        },
+        {
+          "col": 7,
+          "numeric_matches": 16,
+          "median_to_catalog_price": 1.0,
+          "samples": [
+            {
+              "code": "BR107",
+              "value": "27450.00"
+            },
+            {
+              "code": "BR301W",
+              "value": "49700.00"
+            },
+            {
+              "code": "BR315W",
+              "value": "99700.00"
+            },
+            {
+              "code": "BR304W",
+              "value": "109800.00"
+            },
+            {
+              "code": "BR305W",
+              "value": "132700.00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "Мягкая мебель",
+      "overlap": 0
+    },
+    {
+      "sheet": "MARSO",
+      "overlap": 84,
+      "sku_col": 5,
+      "first_data_row": 16,
+      "header_rows": [
+        {
+          "row": 8,
+          "values": [
+            "",
+            "Столик журнальный",
+            "1200*600*550",
+            "Белый",
+            "MRS102W",
+            "31900",
+            "51000",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 9,
+          "values": [
+            "",
+            "",
+            "",
+            "Серый",
+            "MRS102G",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 10,
+          "values": [
+            "",
+            "",
+            "",
+            "Каменно-серый",
+            "MRS102Q",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 11,
+          "values": [
+            "",
+            "",
+            "",
+            "Черный",
+            "MRS102BL",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 12,
+          "values": [
+            "",
+            "Зеркало прямоугольное(горизонтальное)",
+            "1080*50*790",
+            "Белый",
+            "MRS104W",
+            "24100",
+            "38560",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 13,
+          "values": [
+            "",
+            "",
+            "",
+            "Серый",
+            "MRS104G",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 14,
+          "values": [
+            "",
+            "",
+            "",
+            "Каменно-серый",
+            "MRS104Q",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "row": 15,
+          "values": [
+            "",
+            "",
+            "",
+            "Черный",
+            "MRS104BL",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        }
+      ],
+      "numeric_columns": [
+        {
+          "col": 2,
+          "numeric_matches": 5,
+          "median_to_catalog_price": 0.0,
+          "samples": [
+            {
+              "code": "MRS301W",
+              "value": "1.00"
+            },
+            {
+              "code": "MRS302W",
+              "value": "2.00"
+            },
+            {
+              "code": "MRS315W",
+              "value": "5.00"
+            },
+            {
+              "code": "MRS401W",
+              "value": "3.00"
+            },
+            {
+              "code": "MRS406W",
+              "value": "6.00"
+            }
+          ]
+        },
+        {
+          "col": 3,
+          "numeric_matches": 21,
+          "median_to_catalog_price": 22742.4413,
+          "samples": [
+            {
+              "code": "MRS107",
+              "value": "600400450.00"
+            },
+            {
+              "code": "MRS301W",
+              "value": "515450615.00"
+            },
+            {
+              "code": "MRS302W",
+              "value": "515450615.00"
+            },
+            {
+              "code": "MRS315W",
+              "value": "6504501180.00"
+            },
+            {
+              "code": "MRS304W",
+              "value": "1600450615.00"
+            }
+          ]
+        },
+        {
+          "col": 5,
+          "numeric_matches": 84,
+          "median_to_catalog_price": 0.0042,
+          "samples": [
+            {
+              "code": "MRS107",
+              "value": "107.00"
+            },
+            {
+              "code": "MRS301W",
+              "value": "301.00"
+            },
+            {
+              "code": "MRS301G",
+              "value": "301.00"
+            },
+            {
+              "code": "MRS301Q",
+              "value": "301.00"
+            },
+            {
+              "code": "MRS301BL",
+              "value": "301.00"
+            }
+          ]
+        },
+        {
+          "col": 6,
+          "numeric_matches": 21,
+          "median_to_catalog_price": 0.6251,
+          "samples": [
+            {
+              "code": "MRS107",
+              "value": "17160.00"
+            },
+            {
+              "code": "MRS301W",
+              "value": "31460.00"
+            },
+            {
+              "code": "MRS302W",
+              "value": "36190.00"
+            },
+            {
+              "code": "MRS315W",
+              "value": "62920.00"
+            },
+            {
+              "code": "MRS304W",
+              "value": "68640.00"
+            }
+          ]
+        },
+        {
+          "col": 7,
+          "numeric_matches": 21,
+          "median_to_catalog_price": 1.0,
+          "samples": [
+            {
+              "code": "MRS107",
+              "value": "27450.00"
+            },
+            {
+              "code": "MRS301W",
+              "value": "49700.00"
+            },
+            {
+              "code": "MRS302W",
+              "value": "57900.00"
+            },
+            {
+              "code": "MRS315W",
+              "value": "99700.00"
+            },
+            {
+              "code": "MRS304W",
+              "value": "109800.00"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "price_sheet": "ALL",
+  "price_purchase_header": "Цена ФАБРИКИ / Опт",
+  "price_catalog_overlap": 491,
+  "purchase_prices_unique": 487,
+  "purchase_price_conflicts": {
+    "В107": [
+      "17700",
+      "17770"
+    ],
+    "В107BL": [
+      "17700",
+      "17770"
+    ],
+    "В108": [
+      "23900",
+      "23940"
+    ],
+    "В108BL": [
+      "23900",
+      "23940"
+    ]
+  },
+  "purchase_price_suspicious": {},
+  "price_sheets_used": [
+    {
+      "sheet": "Marlette",
+      "overlap": 92,
+      "header_row": 5,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 92,
+      "explicit_prices": 53,
+      "inherited_prices": 50,
+      "median_purchase_to_catalog": 0.6065
+    },
+    {
+      "sheet": "Marlette-Wood",
+      "overlap": 99,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 99,
+      "explicit_prices": 53,
+      "inherited_prices": 49,
+      "median_purchase_to_catalog": 0.6063
+    },
+    {
+      "sheet": "TESORO",
+      "overlap": 78,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Опт (руб.)",
+      "prices_found": 78,
+      "explicit_prices": 72,
+      "inherited_prices": 39,
+      "median_purchase_to_catalog": 0.625
+    },
+    {
+      "sheet": "MAJESSA",
+      "overlap": 125,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 125,
+      "explicit_prices": 72,
+      "inherited_prices": 80,
+      "median_purchase_to_catalog": 0.6061
+    },
+    {
+      "sheet": "BARI",
+      "overlap": 17,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 17,
+      "explicit_prices": 73,
+      "inherited_prices": 1,
+      "median_purchase_to_catalog": 0.6251
+    },
+    {
+      "sheet": "MARSO",
+      "overlap": 84,
+      "header_row": 3,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 84,
+      "explicit_prices": 27,
+      "inherited_prices": 63,
+      "median_purchase_to_catalog": 0.625
+    }
+  ],
+  "price_source_unsafe": false,
+  "kit_aletan_active_variants": 800,
+  "kit_detailed_variant_reads": 0,
+  "kit_aletan_samples": [
+    {
+      "variant_id": "01a0a4bc-1489-7bf4-bf86-ce2e6381523a",
+      "sku": "AF-31623033",
+      "name": "Шкаф 4 двери Тесоро черный T804BL",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "T804BL"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7bed-b81c-89a2986f8410",
+      "sku": "AF-31623035",
+      "name": "Шкаф 4 двери Тесоро серый T804G",
+      "brand": "Алетан",
+      "candidate_codes": []
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7be7-86b1-60a2c0105c07",
+      "sku": "AF-31623034",
+      "name": "Шкаф 4 двери Тесоро коричневый T804Q",
+      "brand": "Алетан",
+      "candidate_codes": []
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7bde-9c4f-a0422979c137",
+      "sku": "AF-31623036",
+      "name": "Шкаф 4 двери Тесоро белый T804W",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "T804W"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7bd7-831a-2bad2b111ceb",
+      "sku": "AF-31622697",
+      "name": "Шкаф 4 двери М804W белый",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "М804W"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7bcf-b05e-5a4c6947d98d",
+      "sku": "AF-31622695",
+      "name": "Шкаф 4 двери М804Q коричневый",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "М804Q"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7bc8-b601-9fa5ae71dfde",
+      "sku": "AF-31622696",
+      "name": "Шкаф 4 двери М804G серый",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "М804G"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7bc0-a38f-020f8b1575e2",
+      "sku": "AF-31622694",
+      "name": "Шкаф 4 двери М804BL черный",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "М804BL"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7bb8-b081-6eef1069a764",
+      "sku": "AF-31622641",
+      "name": "Шкаф 4 двери В804G",
+      "brand": "Алетан",
+      "candidate_codes": []
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7bb1-95de-f3ee50a43189",
+      "sku": "AF-31622865",
+      "name": "Шкаф 4 двери В804BLG",
+      "brand": "Алетан",
+      "candidate_codes": []
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7bab-b9aa-ea55333569d5",
+      "sku": "AF-31622853",
+      "name": "Шкаф 4 двери В804BL",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "В804BL"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7ba4-97bb-63a300cf31ec",
+      "sku": "AF-31622653",
+      "name": "Шкаф 4 двери В804",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "В804"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7b9d-bf54-68bde16b391c",
+      "sku": "AF-31622976",
+      "name": "Шкаф 4 двери W804BL",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "W804BL"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7b8f-9553-04205e9a6bdc",
+      "sku": "AF-31622931",
+      "name": "Шкаф 4 двери W804",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "W804"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7b8a-953c-05a15e3461a8",
+      "sku": "AF-31622529",
+      "name": "Шкаф 4 двери BR804W White",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "BR804W"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7b84-a00f-d49fde7b4487",
+      "sku": "AF-31623037",
+      "name": "Шкаф 3 двери Тесоро черный T803BL",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "T803BL"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7b7f-bf3c-3027ed15b3e1",
+      "sku": "AF-31623039",
+      "name": "Шкаф 3 двери Тесоро серый T803G",
+      "brand": "Алетан",
+      "candidate_codes": []
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7b78-aec9-fb4b92b03d9d",
+      "sku": "AF-31623038",
+      "name": "Шкаф 3 двери Тесоро коричневый T803Q",
+      "brand": "Алетан",
+      "candidate_codes": []
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7b72-8a59-6b58ec1f7966",
+      "sku": "AF-31623040",
+      "name": "Шкаф 3 двери Тесоро белый T803W",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "T803W"
+      ]
+    },
+    {
+      "variant_id": "01a0a4bc-1489-7b6b-a5df-12e51f77ca3f",
+      "sku": "AF-31622701",
+      "name": "Шкаф 3 двери М803W белый",
+      "brand": "Алетан",
+      "candidate_codes": [
+        "М803W"
+      ]
+    }
+  ],
+  "kit_ambiguous_vendor_codes": [
+    "W702BL/1"
+  ],
+  "matched_vendor_codes": 486,
+  "unmatched_price_vendor_codes": [
+    "W702BL/1"
+  ],
+  "duplicate_variant_matches": {},
+  "price_updates_needed": 6,
+  "prices_unchanged": 480,
+  "pending_updates": [
+    {
+      "vendor_code": "В304",
+      "variant_id": "01a0a4bc-1489-7955-974c-327714bf0b7e",
+      "kit_sku": "AF-31622612",
+      "name": "Тумба ТВ В304",
+      "purchase": "67563.00",
+      "new_customer_price": "87831.90",
+      "new_old_price": "108100.80",
+      "current_customer_price": "87832.00",
+      "current_old_price": "108101.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 52,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      }
+    },
+    {
+      "vendor_code": "В304BL",
+      "variant_id": "01a0a4bc-1489-795b-b8e4-0d601e57e9f9",
+      "kit_sku": "AF-31622823",
+      "name": "Тумба ТВ В304BL",
+      "purchase": "67563.00",
+      "new_customer_price": "87831.90",
+      "new_old_price": "108100.80",
+      "current_customer_price": "87832.00",
+      "current_old_price": "108101.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 53,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      }
+    },
+    {
+      "vendor_code": "В408",
+      "variant_id": "01a0a4bc-1488-7dcd-aa05-d554e5f0d73e",
+      "kit_sku": "AF-31622665",
+      "name": "Комод 8 ящиков В408",
+      "purchase": "91172.00",
+      "new_customer_price": "118523.60",
+      "new_old_price": "145875.20",
+      "current_customer_price": "118524.00",
+      "current_old_price": "145876.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 68,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      }
+    },
+    {
+      "vendor_code": "В408BL",
+      "variant_id": "01a0a4bc-1488-7dd5-b3b9-3cee64a34fb7",
+      "kit_sku": "AF-31622878",
+      "name": "Комод 8 ящиков В408BL",
+      "purchase": "91172.00",
+      "new_customer_price": "118523.60",
+      "new_old_price": "145875.20",
+      "current_customer_price": "118524.00",
+      "current_old_price": "145876.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 69,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      }
+    },
+    {
+      "vendor_code": "В601",
+      "variant_id": "01a0a4bc-1488-7a06-bf69-596076a278f7",
+      "kit_sku": "AF-31622610",
+      "name": "Витрина стеклянная R В601",
+      "purchase": "79845.00",
+      "new_customer_price": "103798.50",
+      "new_old_price": "127752.00",
+      "current_customer_price": "103799.00",
+      "current_old_price": "127752.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 70,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      }
+    },
+    {
+      "vendor_code": "В601BL",
+      "variant_id": "01a0a4bc-1488-7a0d-845e-5f2932e1b3ae",
+      "kit_sku": "AF-31622821",
+      "name": "Витрина стеклянная R В601BL",
+      "purchase": "79845.00",
+      "new_customer_price": "103798.50",
+      "new_old_price": "127752.00",
+      "current_customer_price": "103799.00",
+      "current_old_price": "127752.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 71,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      }
+    }
+  ],
+  "examples": [
+    {
+      "vendor_code": "B102",
+      "kit_sku": "AF-31622794",
+      "purchase": "34840.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 8,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "45292.00",
+      "new_old_price": "55744.00",
+      "current_customer_price": "45292.00",
+      "current_old_price": "55744.00"
+    },
+    {
+      "vendor_code": "B102BL",
+      "kit_sku": "AF-31622883",
+      "purchase": "34840.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 9,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "45292.00",
+      "new_old_price": "55744.00",
+      "current_customer_price": "45292.00",
+      "current_old_price": "55744.00"
+    },
+    {
+      "vendor_code": "B109",
+      "kit_sku": "AF-31622613",
+      "purchase": "75780.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 20,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "98514.00",
+      "new_old_price": "121248.00",
+      "current_customer_price": "98514.00",
+      "current_old_price": "121248.00"
+    },
+    {
+      "vendor_code": "B109/1",
+      "kit_sku": "AF-31647109",
+      "purchase": "55430.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 24,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "72059.00",
+      "new_old_price": "88688.00",
+      "current_customer_price": "72059.00",
+      "current_old_price": "88688.00"
+    },
+    {
+      "vendor_code": "B110",
+      "kit_sku": "AF-31622614",
+      "purchase": "45030.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 22,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "58539.00",
+      "new_old_price": "72048.00",
+      "current_customer_price": "58539.00",
+      "current_old_price": "72048.00"
+    },
+    {
+      "vendor_code": "BR107",
+      "kit_sku": "AF-31622545",
+      "purchase": "17160.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 17,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "22308.00",
+      "new_old_price": "27456.00",
+      "current_customer_price": "22308.00",
+      "current_old_price": "27456.00"
+    },
+    {
+      "vendor_code": "BR301G",
+      "kit_sku": "AF-31654109",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 26,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
+    },
+    {
+      "vendor_code": "BR301W",
+      "kit_sku": "AF-31622543",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 25,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
+    },
+    {
+      "vendor_code": "BR304W",
+      "kit_sku": "AF-31622540",
+      "purchase": "68640.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 37,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "89232.00",
+      "new_old_price": "109824.00",
+      "current_customer_price": "89232.00",
+      "current_old_price": "109824.00"
+    },
+    {
+      "vendor_code": "BR305W",
+      "kit_sku": "AF-31622539",
+      "purchase": "82940.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 41,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "107822.00",
+      "new_old_price": "132704.00",
+      "current_customer_price": "107822.00",
+      "current_old_price": "132704.00"
+    },
+    {
+      "vendor_code": "BR315W",
+      "kit_sku": "AF-31622541",
+      "purchase": "62920.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 33,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "81796.00",
+      "new_old_price": "100672.00",
+      "current_customer_price": "81796.00",
+      "current_old_price": "100672.00"
+    },
+    {
+      "vendor_code": "BR401W",
+      "kit_sku": "AF-31622538",
+      "purchase": "73150.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 45,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "95095.00",
+      "new_old_price": "117040.00",
+      "current_customer_price": "95095.00",
+      "current_old_price": "117040.00"
+    },
+    {
+      "vendor_code": "BR403W",
+      "kit_sku": "AF-31622537",
+      "purchase": "92950.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 49,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "120835.00",
+      "new_old_price": "148720.00",
+      "current_customer_price": "120835.00",
+      "current_old_price": "148720.00"
+    },
+    {
+      "vendor_code": "BR601L/W",
+      "kit_sku": "AF-31647108",
+      "purchase": "87070.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 65,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "113191.00",
+      "new_old_price": "139312.00",
+      "current_customer_price": "113191.00",
+      "current_old_price": "139312.00"
+    },
+    {
+      "vendor_code": "BR601R/W",
+      "kit_sku": "AF-31647119",
+      "purchase": "87070.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 61,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "113191.00",
+      "new_old_price": "139312.00",
+      "current_customer_price": "113191.00",
+      "current_old_price": "139312.00"
+    },
+    {
+      "vendor_code": "BR603W",
+      "kit_sku": "AF-31622533",
+      "purchase": "99700.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 69,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "129610.00",
+      "new_old_price": "159520.00",
+      "current_customer_price": "129610.00",
+      "current_old_price": "159520.00"
+    },
+    {
+      "vendor_code": "BR604W",
+      "kit_sku": "AF-31622532",
+      "purchase": "98700.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 73,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "128310.00",
+      "new_old_price": "157920.00",
+      "current_customer_price": "128310.00",
+      "current_old_price": "157920.00"
+    },
+    {
+      "vendor_code": "BR802W",
+      "kit_sku": "AF-31622531",
+      "purchase": "106600.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 85,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "138580.00",
+      "new_old_price": "170560.00",
+      "current_customer_price": "138580.00",
+      "current_old_price": "170560.00"
+    },
+    {
+      "vendor_code": "BR803W",
+      "kit_sku": "AF-31622530",
+      "purchase": "157270.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 89,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "204451.00",
+      "new_old_price": "251632.00",
+      "current_customer_price": "204451.00",
+      "current_old_price": "251632.00"
+    },
+    {
+      "vendor_code": "BR804W",
+      "kit_sku": "AF-31622529",
+      "purchase": "189700.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 93,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "246610.00",
+      "new_old_price": "303520.00",
+      "current_customer_price": "246610.00",
+      "current_old_price": "303520.00"
+    },
+    {
+      "vendor_code": "BR902W",
+      "kit_sku": "AF-31622528",
+      "purchase": "51920.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 97,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "67496.00",
+      "new_old_price": "83072.00",
+      "current_customer_price": "67496.00",
+      "current_old_price": "83072.00"
+    },
+    {
+      "vendor_code": "BR903W",
+      "kit_sku": "AF-31622527",
+      "purchase": "65340.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 101,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "84942.00",
+      "new_old_price": "104544.00",
+      "current_customer_price": "84942.00",
+      "current_old_price": "104544.00"
+    },
+    {
+      "vendor_code": "MRS107",
+      "kit_sku": "AF-31647106",
+      "purchase": "17160.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 16,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "22308.00",
+      "new_old_price": "27456.00",
+      "current_customer_price": "22308.00",
+      "current_old_price": "27456.00"
+    },
+    {
+      "vendor_code": "MRS301BL",
+      "kit_sku": "AF-31654021",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 27,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
+    },
+    {
+      "vendor_code": "MRS301G",
+      "kit_sku": "AF-31654019",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 25,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
+    },
+    {
+      "vendor_code": "MRS301Q",
+      "kit_sku": "AF-31654020",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 26,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
+    },
+    {
+      "vendor_code": "MRS301W",
+      "kit_sku": "AF-31647102",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 24,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
+    },
+    {
+      "vendor_code": "MRS302BL",
+      "kit_sku": "AF-31654024",
+      "purchase": "36190.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 31,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "47047.00",
+      "new_old_price": "57904.00",
+      "current_customer_price": "47047.00",
+      "current_old_price": "57904.00"
+    },
+    {
+      "vendor_code": "MRS302G",
+      "kit_sku": "AF-31654022",
+      "purchase": "36190.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 29,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "47047.00",
+      "new_old_price": "57904.00",
+      "current_customer_price": "47047.00",
+      "current_old_price": "57904.00"
+    },
+    {
+      "vendor_code": "MRS302Q",
+      "kit_sku": "AF-31654023",
+      "purchase": "36190.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 30,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "47047.00",
+      "new_old_price": "57904.00",
+      "current_customer_price": "47047.00",
+      "current_old_price": "57904.00"
+    }
+  ],
+  "price_updates_sent": 0
 }
