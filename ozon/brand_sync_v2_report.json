@@ -1,0 +1,14 @@
+{
+  "ok": false,
+  "products_loaded": 10398,
+  "brand_groups": 87,
+  "matched": 0,
+  "submitted": 0,
+  "verified": 0,
+  "not_changed": 0,
+  "changed": [],
+  "skipped": [],
+  "diagnostics": [],
+  "task_ids": [],
+  "error": "Ozon API /v1/description-category/attribute/values/search: HTTP 400: {\"code\":3, \"message\":\"Request validation error: invalid SearchAttributeValuesRequest.Limit: value must be inside range (0, 100]\"}"
+}
