@@ -861,7 +861,7 @@ def run(args):
     if not matched:
         raise RuntimeError("Не найдено ни одного надежного совпадения Алетан между прайсом и KIT")
 
-    updates, unchanged, examples = [], 0, []
+    updates, unchanged, examples, pending_details = [], 0, [], []
     for code in matched:
         purchase = detected["prices"][code]
         sale = q2(purchase * Decimal("1.30"))
@@ -888,9 +888,31 @@ def run(args):
             unchanged += 1
         else:
             updates.append({"variant_id": vid, "price": str(old), "manual_discount_price": str(sale)})
+            if len(pending_details) < 100:
+                pending_details.append({
+                    "vendor_code": code,
+                    "variant_id": vid,
+                    "kit_sku": s(variant.get("sku")),
+                    "name": s(variant.get("name")),
+                    "purchase": str(q2(purchase)),
+                    "new_customer_price": str(sale),
+                    "new_old_price": str(old),
+                    "current_customer_price": None if current_sale is None else str(q2(current_sale)),
+                    "current_old_price": None if current_old is None else str(q2(current_old)),
+                    "purchase_source": detected.get("sources", {}).get(code),
+                })
 
+    variant_to_codes = {}
+    for code in matched:
+        vid = s(index[code].get("id"))
+        if vid:
+            variant_to_codes.setdefault(vid, []).append(code)
+    report["duplicate_variant_matches"] = {
+        vid: codes for vid, codes in variant_to_codes.items() if len(codes) > 1
+    }
     report["price_updates_needed"] = len(updates)
     report["prices_unchanged"] = unchanged
+    report["pending_updates"] = pending_details
     report["examples"] = examples
 
     if not args.dry_run and updates:
