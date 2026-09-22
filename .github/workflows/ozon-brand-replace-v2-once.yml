@@ -1,0 +1,49 @@
+name: Ozon brand replacement v2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-brand-replace-v2-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ozon-brand-replace-v2-once
+  cancel-in-progress: false
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Replace RIVA/RV DESIGN brands with Megapolis
+        run: python ozon/brand_sync_v2.py
+
+      - name: Commit v2 report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add ozon/brand_sync_v2_report.json ozon/brand_sync_v2_report.md 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No report changes"
+            exit 0
+          fi
+          git commit -m "Ozon: brand sync v2 report"
+          git pull --rebase origin main
+          git push origin HEAD:main
