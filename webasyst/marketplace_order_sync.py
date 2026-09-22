@@ -88,6 +88,18 @@ def dt(v: Any) -> Optional[datetime]:
 def iso(x: datetime) -> str:
     return x.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
+def ymd(v: Any) -> str:
+    text = s(v)
+    if not text:
+        return ""
+    for fmt in ("%d-%m-%Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(text, fmt).strftime("%Y-%m-%d")
+        except Exception:
+            pass
+    x = dt(text)
+    return x.strftime("%Y-%m-%d") if x else ""
+
 def key(source: str, external_id: str) -> str:
     return hashlib.sha256(f"{source}|{external_id}".encode()).hexdigest()[:32]
 
@@ -261,10 +273,13 @@ def order_customer(o: dict) -> dict:
     if not isinstance(buyer, dict):
         return {}
     out = {}
-    for src, dst in (("firstName", "firstname"), ("lastName", "lastname"), ("middleName", "middlename")):
-        if s(buyer.get(src)):
-            out[dst] = s(buyer.get(src))
-    full = " ".join(x for x in (out.get("lastname", ""), out.get("firstname", ""), out.get("middlename", "")) if x).strip()
+    full = " ".join(
+        x for x in (
+            s(buyer.get("lastName")),
+            s(buyer.get("firstName")),
+            s(buyer.get("middleName")),
+        ) if x
+    ).strip()
     if full:
         out["name"] = full
     if s(buyer.get("phone")):
@@ -294,7 +309,7 @@ def update_order_details(order_id: str, o: dict):
     wa.call("shop.order.save", http_method="POST", data=data)
 
     # Webasyst stores the courier delivery deadline through the editshippingdetails action.
-    delivery_date = s(o.get("delivery_to") or o.get("delivery_from"))
+    delivery_date = ymd(o.get("delivery_to") or o.get("delivery_from"))
     if delivery_date:
         acts = wa.call("shop.order.actions", params={"id": order_id})
         acts = acts if isinstance(acts, list) else (acts.get("actions") or acts.get("items") or []) if isinstance(acts, dict) else []
