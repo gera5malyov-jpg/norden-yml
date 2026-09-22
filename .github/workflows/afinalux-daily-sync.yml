@@ -1,8 +1,6 @@
 name: Afina Garden → KIT → Webasyst — ежедневно
 
 on:
-  push:
-    branches: [main]
   schedule:
     - cron: '20 6 * * *'
   workflow_dispatch:
