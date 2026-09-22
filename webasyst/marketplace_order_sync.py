@@ -198,6 +198,19 @@ def existing_order(source: str, ext: str) -> Optional[dict]:
         raise RuntimeError(f"duplicate imported order {source}/{ext}")
     return rows[0] if rows else None
 
+def existing_order_by_param(param: str, value: str) -> Optional[dict]:
+    value = s(value)
+    if not value:
+        return None
+    p = wa.call("shop.order.search", params={
+        "hash": f"search/params.{param}={value}", "limit": 10, "fields": "*,state"
+    })
+    rows = p.get("orders") if isinstance(p, dict) else p if isinstance(p, list) else []
+    rows = [x for x in (rows or []) if isinstance(x, dict)]
+    if len(rows) > 1:
+        raise RuntimeError(f"duplicate imported order param {param}={value}")
+    return rows[0] if rows else None
+
 def path_to(start: str, target: str):
     if not target or start == target:
         return []
@@ -438,6 +451,10 @@ def process(o: dict):
         })
     try:
         old = existing_order(source, ext)
+        if not old and source == "wildberries":
+            old = existing_order_by_param("mp_wb_order_id", s(o.get("wb_order_id")))
+        if not old and source == "wildberries":
+            old = existing_order_by_param("mp_wb_rid", s(o.get("wb_rid")))
         if old:
             oid = s(old.get("id"))
             stat["existing"] += 1
@@ -741,7 +758,7 @@ def load_wb():
         client = {}
         shipping_address = {}
         wb_order_id = ""
-        wb_rid = ""
+        wb_rid = next((s(row.get("srid")) for row in rows if s(row.get("srid"))), "")
         wb_order_uid = ""
         wb_delivery_type = ""
         recipient_name = ""
