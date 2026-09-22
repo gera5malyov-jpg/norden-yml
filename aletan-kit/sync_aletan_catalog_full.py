@@ -284,6 +284,20 @@ def run(dry_run=False, force=False):
     report["kit_detailed_variant_reads"] = detailed_reads
     report["kit_ambiguous_vendor_codes"] = sorted(kit_ambiguous)[:100]
 
+    # Остатки 100/100 применяются ко ВСЕМ активным карточкам бренда Алетан,
+    # даже если в текущем прайсе нет закупочной цены.
+    all_brand_rows = kit.list_all("/v1/variants", {"name": BRAND}, "variants")
+    all_brand_active = [
+        row for row in all_brand_rows
+        if norm(row.get("brand")) == norm(BRAND)
+        and s(row.get("status")).upper() != "ARCHIVED"
+        and s(row.get("id"))
+    ]
+    unique_brand_variants = {}
+    for row in all_brand_active:
+        unique_brand_variants[s(row.get("id"))] = row
+    report["kit_stock_variants_targeted"] = len(unique_brand_variants)
+
     characteristics = kit.list_all("/v1/characteristics", {"status": "ACTIVE"}, "characteristics")
     article_char = exact_named(characteristics, "Артикул поставщика")
     if article_char is None and not dry_run:
@@ -331,7 +345,16 @@ def run(dry_run=False, force=False):
         return cid
 
     price_batch = []
-    stock_batch = []
+    stock_batch = [
+        {
+            "variant_id": variant_id,
+            "warehouse_id": warehouse_ids[wh],
+            "quantity": STOCK_QTY,
+        }
+        for variant_id in unique_brand_variants
+        for wh in WAREHOUSE_NAMES
+    ]
+    report["stock_updates"] = len(stock_batch)
 
     for code, item in catalog.items():
         if code in kit_ambiguous:
@@ -348,13 +371,6 @@ def run(dry_run=False, force=False):
         if variant:
             report["existing_matched"] += 1
             vid = s(variant.get("id"))
-            for wh in WAREHOUSE_NAMES:
-                stock_batch.append({
-                    "variant_id": vid,
-                    "warehouse_id": warehouse_ids[wh],
-                    "quantity": STOCK_QTY,
-                })
-                report["stock_updates"] += 1
             if purchase is not None:
                 price_batch.append({
                     "variant_id": vid,
