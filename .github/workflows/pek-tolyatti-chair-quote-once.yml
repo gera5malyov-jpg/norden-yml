@@ -1,0 +1,110 @@
+name: PEK quote Moscow to Tolyatti chairs
+
+on:
+  push:
+    paths:
+      - '.github/workflows/pek-tolyatti-chair-quote-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Calculate PEK public API quote
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, urllib.parse, urllib.request
+
+          def fetch_json(url, params=None):
+              if params:
+                  qs = urllib.parse.urlencode(params, doseq=True)
+                  url = url + ('&' if '?' in url else '?') + qs
+              req = urllib.request.Request(url, headers={'User-Agent':'Mozilla/5.0'})
+              with urllib.request.urlopen(req, timeout=45) as r:
+                  raw = r.read()
+              for enc in ('utf-8','cp1251'):
+                  try:
+                      return json.loads(raw.decode(enc))
+                  except Exception:
+                      pass
+              raise RuntimeError(raw[:500])
+
+          towns = fetch_json('https://pecom.ru/ru/calc/towns.php')
+
+          def find_city(exact):
+              hits = []
+              for region, cities in towns.items():
+                  if isinstance(cities, dict):
+                      for cid, name in cities.items():
+                          if str(name).strip().casefold() == exact.casefold():
+                              hits.append((str(cid), str(name), str(region)))
+              if not hits:
+                  raise RuntimeError(f'City not found: {exact}')
+              return hits[0]
+
+          moscow = find_city('Москва')
+          tolyatti = find_city('Тольятти')
+          print('MOSCOW=', moscow)
+          print('TOLYATTI=', tolyatti)
+
+          endpoint = 'https://calc.pecom.ru/bitrix/components/pecom/calc/ajax.php'
+
+          scenarios = [
+              ('working_053', 0.60, 0.58, 1.52, 0.53, 64.0),
+              ('conservative_0643', 0.60, 0.58, 1.85, 0.643, 64.0),
+          ]
+          zones = [
+              (0, 'без въезда'),
+              (1, 'МОЖД'),
+              (2, 'ТТК'),
+              (3, 'Садовое'),
+          ]
+
+          def cost_sum(block):
+              total = 0.0
+              if not isinstance(block, list):
+                  return total
+              for x in block:
+                  if isinstance(x, (list, tuple)) and len(x) >= 3:
+                      try:
+                          total += float(x[2])
+                      except Exception:
+                          pass
+              return total
+
+          for sname, w, l, h, vol, weight in scenarios:
+              for zone, zname in zones:
+                  params = []
+                  for i in range(3):
+                      for v in (w, l, h, vol, weight, 0, 0):
+                          params.append((f'places[{i}][]', v))
+                  params += [
+                      ('take[town]', moscow[0]),
+                      ('take[moscow]', zone),
+                      ('deliver[town]', tolyatti[0]),
+                      ('strah', 0),
+                      ('pal', 0),
+                  ]
+                  data = fetch_json(endpoint, params)
+                  take = cost_sum(data.get('take'))
+                  auto = cost_sum(data.get('auto'))
+                  autong = cost_sum(data.get('autonegabarit'))
+                  add = sum(cost_sum(data.get(k)) for k in ('ADD','ADD_1','ADD_2','ADD_3','ADD_4'))
+                  linehaul = autong if autong and autong != auto else auto
+                  total = take + linehaul + add
+                  out = {
+                      'scenario': sname,
+                      'pickup_zone': zname,
+                      'pickup_cost': round(take,2),
+                      'linehaul_cost': round(linehaul,2),
+                      'add_cost': round(add,2),
+                      'total_to_terminal': round(total,2),
+                      'periods': data.get('periods'),
+                      'errors': data.get('error'),
+                  }
+                  print('QUOTE_JSON=' + json.dumps(out, ensure_ascii=False))
+          PY
