@@ -1,5 +1,5 @@
 {
-  "status": "degraded",
+  "status": "ok",
   "dry_run": true,
   "type_name": "aletan.ru",
   "webasyst_stock": "Основной склад",
@@ -23,14 +23,14 @@
   "kit_ambiguous_codes": [
     "W702BL/1"
   ],
-  "errors": [
+  "errors": [],
+  "warnings": [
     {
       "vendor_code": "W702BL/1",
       "stage": "match",
-      "message": "В Webasyst найдено несколько товаров типа aletan.ru с одним vendorCode"
+      "message": "Пропущено без изменений: в Webasyst найдено несколько товаров типа aletan.ru с одним vendorCode"
     }
   ],
-  "warnings": [],
   "sample_new": [
     {
       "vendor_code": "B101",
@@ -485,7 +485,7 @@
       "stock": 100
     }
   ],
-  "complete": false,
+  "complete": true,
   "catalog_unique_vendor_codes": 771,
   "catalog_duplicate_vendor_codes": [
     "BR108W",
