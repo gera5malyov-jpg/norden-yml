@@ -591,10 +591,14 @@ def run_source(name: str, loader):
         print(f"ОШИБКА источника {name}: {type(e).__name__}: {str(e)[:600]}", file=sys.stderr)
 
 def main():
-    run_source("yandex_market", load_yandex_market)
-    run_source("wildberries", load_wb)
-    run_source("yandex_kit", load_kit)
-    run_source("ozon", load_ozon)
+    if "yandex_market" in SYNC_SOURCES:
+        run_source("yandex_market", load_yandex_market)
+    if "wildberries" in SYNC_SOURCES:
+        run_source("wildberries", load_wb)
+    if "yandex_kit" in SYNC_SOURCES:
+        run_source("yandex_kit", load_kit)
+    if "ozon" in SYNC_SOURCES:
+        run_source("ozon", load_ozon)
     report["finished_at"] = iso(datetime.now(timezone.utc))
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 2 if report["errors"] else 0
