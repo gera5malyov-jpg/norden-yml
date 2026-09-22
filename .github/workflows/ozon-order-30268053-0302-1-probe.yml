@@ -1,0 +1,27 @@
+name: Probe Ozon order 30268053-0302-1
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ozon-order-30268053-0302-1-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Проверить структуру заказа Ozon без вывода персональных данных
+        env:
+          TARGET_EXTERNAL_ID: '30268053-0302-1'
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: python scripts/ozon_order_schema_probe.py
