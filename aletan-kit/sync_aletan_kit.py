@@ -10,7 +10,7 @@ import sys
 import tempfile
 import time
 from datetime import datetime, timezone
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP, ROUND_CEILING
 from pathlib import Path
 from urllib.parse import parse_qs, quote, urlencode, urlparse
 
@@ -52,6 +52,10 @@ def money(value):
 
 def q2(value):
     return Decimal(value).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+def ruble_up(value):
+    """KIT хранит цены целыми рублями и округляет дробь вверх."""
+    return Decimal(value).quantize(Decimal("1"), rounding=ROUND_CEILING)
 
 def load_state():
     if not STATE_PATH.exists():
@@ -804,7 +808,10 @@ def run(args):
         "creation_rule": "новые товары не создаются",
         "update_scope": "только цены",
         "purchase_price_storage": "закупочная цена в KIT не записывается",
-        "price_rule": {"Цена для покупателя": "закупка × 1.30", "Цена до скидки": "закупка × 1.60"},
+        "price_rule": {
+            "Цена для покупателя": "закупка × 1.30, округление вверх до 1 ₽",
+            "Цена до скидки": "закупка × 1.60, округление вверх до 1 ₽",
+        },
         "interval_days": MIN_INTERVAL_DAYS,
         "catalog_url": CATALOG_URL,
         "price_page_url": PRICE_PAGE_URL,
@@ -833,7 +840,8 @@ def run(args):
     with tempfile.TemporaryDirectory(prefix="aletan-price-") as td:
         price_file = Path(td) / "aletan-price.xlsx"
         download_price_xlsx(price_file)
-        report["price_diagnostics"] = workbook_price_diagnostics(price_file, catalog)
+        if s(os.environ.get("ALETAN_PRICE_DIAGNOSTICS")) == "1":
+            report["price_diagnostics"] = workbook_price_diagnostics(price_file, catalog)
         detected = detect_price_map(price_file, catalog)
 
     report.update({
@@ -864,8 +872,8 @@ def run(args):
     updates, unchanged, examples, pending_details = [], 0, [], []
     for code in matched:
         purchase = detected["prices"][code]
-        sale = q2(purchase * Decimal("1.30"))
-        old = q2(purchase * Decimal("1.60"))
+        sale = ruble_up(purchase * Decimal("1.30"))
+        old = ruble_up(purchase * Decimal("1.60"))
         variant = index[code]
         vid = s(variant.get("id"))
         if "pricing" not in variant:
