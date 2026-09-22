@@ -1,0 +1,149 @@
+name: Ozon find actual brand field
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-brand-field-diagnostic-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Scan exact source brand values across all attributes
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from collections import defaultdict
+          from pathlib import Path
+          import sys
+
+          sys.path.insert(0, 'ozon')
+          import brand_sync_once as b
+
+          catalog = b.list_products()
+          ids = [int(x.get('product_id') or 0) for x in catalog if int(x.get('product_id') or 0)]
+          products = b.get_product_attributes(ids)
+
+          matches = []
+          groups_needed = set()
+          for p in products:
+              cat = int(p.get('description_category_id') or 0)
+              typ = int(p.get('type_id') or 0)
+              for a in p.get('attributes') or []:
+                  aid = int(a.get('id') or a.get('attribute_id') or 0)
+                  for v in a.get('values') or []:
+                      text = str(v.get('value') or '').strip()
+                      if b.norm(text) in b.SOURCE_BRANDS:
+                          matches.append({
+                              'offer_id': str(p.get('offer_id') or ''),
+                              'product_id': int(p.get('id') or p.get('product_id') or 0),
+                              'name': str(p.get('name') or ''),
+                              'description_category_id': cat,
+                              'type_id': typ,
+                              'attribute_id': aid,
+                              'value': text,
+                              'dictionary_value_id': int(v.get('dictionary_value_id') or 0),
+                          })
+                          groups_needed.add((cat, typ))
+
+          meta = {}
+          for cat, typ in sorted(groups_needed):
+              try:
+                  attrs = b.get_category_attributes(cat, typ)
+                  for a in attrs:
+                      meta[(cat, typ, int(a.get('id') or 0))] = {
+                          'name': str(a.get('name') or ''),
+                          'type': a.get('type'),
+                          'is_required': a.get('is_required'),
+                      }
+              except Exception as exc:
+                  meta[(cat, typ, -1)] = {'error': str(exc)}
+
+          for m in matches:
+              m['attribute_meta'] = meta.get((
+                  m['description_category_id'],
+                  m['type_id'],
+                  m['attribute_id'],
+              ), {})
+
+          summary = defaultdict(int)
+          for m in matches:
+              key = (
+                  m['description_category_id'],
+                  m['type_id'],
+                  m['attribute_id'],
+                  (m.get('attribute_meta') or {}).get('name') or '',
+                  m['value'],
+              )
+              summary[key] += 1
+
+          out = {
+              'products_loaded': len(products),
+              'matches': matches,
+              'summary': [
+                  {
+                      'description_category_id': k[0],
+                      'type_id': k[1],
+                      'attribute_id': k[2],
+                      'attribute_name': k[3],
+                      'source_value': k[4],
+                      'count': c,
+                  }
+                  for k, c in sorted(summary.items(), key=lambda x: (-x[1], x[0]))
+              ],
+          }
+
+          Path('ozon/brand_field_diagnostic.json').write_text(
+              json.dumps(out, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8'
+          )
+
+          lines = [
+              '# Ozon — диагностика поля бренда',
+              '',
+              f"- Товаров загружено: **{len(products)}**",
+              f"- Найдено точных значений RIVA/RV DESIGN во всех атрибутах: **{len(matches)}**",
+              '',
+              '| Категория | Тип | Атрибут ID | Название атрибута | Значение | Кол-во |',
+              '|---:|---:|---:|---|---|---:|',
+          ]
+          for row in out['summary'][:200]:
+              lines.append(
+                  f"| {row['description_category_id']} | {row['type_id']} | "
+                  f"{row['attribute_id']} | {row['attribute_name']} | "
+                  f"{row['source_value']} | {row['count']} |"
+              )
+          Path('ozon/brand_field_diagnostic.md').write_text(
+              '\n'.join(lines) + '\n',
+              encoding='utf-8'
+          )
+          print(json.dumps({'products_loaded': len(products), 'matches': len(matches)}, ensure_ascii=False))
+          PY
+
+      - name: Commit diagnostic
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add ozon/brand_field_diagnostic.json ozon/brand_field_diagnostic.md
+          git commit -m "Ozon: diagnose brand field" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
