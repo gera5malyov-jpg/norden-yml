@@ -242,7 +242,7 @@ def run(dry_run=False, force=False):
         if not due:
             report["status"] = "skipped"
             report["reason"] = "С последнего успешного live-обновления прошло менее 14 дней"
-            REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+            REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
             print(json.dumps(report, ensure_ascii=False, indent=2))
             return 0
 
@@ -450,7 +450,7 @@ def run(dry_run=False, force=False):
 
     report["status"] = "ok"
     report["complete"] = not report["errors"]
-    REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
 
@@ -464,7 +464,7 @@ def main():
         return run(args.dry_run, args.force)
     except Exception as exc:
         report = {"status": "error", "dry_run": bool(args.dry_run), "error": str(exc)[:3000]}
-        REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 1
 
