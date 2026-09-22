@@ -17,7 +17,10 @@ if r.ok:
     if rows:
         o=rows[0]
         out["yandex_market"]["order_fields"]=sorted(o.keys())
-        out["yandex_market"]["item_fields"]=sorted((o.get("items") or [{}])[0].keys()) if o.get("items") else []
+        item=(o.get("items") or [{}])[0] if o.get("items") else {}
+        out["yandex_market"]["item_fields"]=sorted(item.keys()) if isinstance(item,dict) else []
+        out["yandex_market"]["item_prices"]=item.get("prices") if isinstance(item,dict) else None
+        out["yandex_market"]["order_prices"]=o.get("prices")
         out["yandex_market"]["delivery_fields"]=sorted((o.get("delivery") or {}).keys()) if isinstance(o.get("delivery"),dict) else []
 
 kt=os.environ.get("YANDEX_KIT_TOKEN","").strip()
@@ -54,10 +57,23 @@ if "yandex_kit" not in out:
         if dt>=cutoff: recent.append(o)
     sample=recent[0] if recent else (orders[0] if orders else {})
     out["yandex_kit"]={"http":200,"total_orders":len(orders),"total_count":total,"recent_30d":len(recent),"order_fields":sorted(sample.keys()) if sample else []}
-    for key in ("items","order_items","products","lines"):
-        if isinstance(sample.get(key),list) and sample[key]:
-            out["yandex_kit"]["items_key"]=key
-            out["yandex_kit"]["item_fields"]=sorted(sample[key][0].keys())
-            break
+    if sample and sample.get("id"):
+        dd=ks.get("https://api.kit.yandex.net/v1/orders/"+str(sample["id"]),timeout=60)
+        if dd.ok:
+            detail=dd.json()
+            out["yandex_kit"]["detail_fields"]=sorted(detail.keys()) if isinstance(detail,dict) else []
+            for key in ("items","order_items","products","lines"):
+                if isinstance(detail,dict) and isinstance(detail.get(key),list) and detail[key]:
+                    out["yandex_kit"]["items_key"]=key
+                    out["yandex_kit"]["item_fields"]=sorted(detail[key][0].keys())
+                    break
+            if isinstance(detail,dict) and isinstance(detail.get("delivery_chunks"),list) and detail["delivery_chunks"]:
+                ch=detail["delivery_chunks"][0]
+                out["yandex_kit"]["delivery_chunk_fields"]=sorted(ch.keys()) if isinstance(ch,dict) else []
+                for key in ("items","products","order_items","lines"):
+                    if isinstance(ch,dict) and isinstance(ch.get(key),list) and ch[key]:
+                        out["yandex_kit"]["chunk_items_key"]=key
+                        out["yandex_kit"]["chunk_item_fields"]=sorted(ch[key][0].keys())
+                        break
 
 print(json.dumps(out,ensure_ascii=False,indent=2))
