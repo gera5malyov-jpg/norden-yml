@@ -7,6 +7,10 @@ on:
       - '.github/workflows/marketplace-orders-webasyst-dry-run.yml'
   workflow_dispatch:
 
+concurrency:
+  group: marketplace-orders-webasyst-dry-run
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
