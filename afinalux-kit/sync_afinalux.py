@@ -532,6 +532,106 @@ def build_wa_index(wa, products, feed_items):
     return by_key, ambiguous, fallback_matches
 
 
+def extract_product_id(payload):
+    if isinstance(payload, dict):
+        for key in ("id", "product_id"):
+            if payload.get(key) not in (None, ""):
+                return s(payload.get(key))
+        product = payload.get("product")
+        if isinstance(product, dict) and product.get("id") not in (None, ""):
+            return s(product.get("id"))
+    return ""
+
+
+def extimg_summary(urls):
+    urls = [s(x) for x in urls if s(x)]
+    if not urls:
+        return ""
+    return "[extimg]\n" + "\n".join(urls)
+
+
+def product_url(name, sku):
+    # Stable ASCII-only URL from supplier article.
+    code = unicodedata.normalize("NFKC", s(sku)).casefold()
+    code = code.translate(str.maketrans({
+        "а":"a","в":"b","с":"c","е":"e","н":"h","к":"k","м":"m","о":"o",
+        "р":"p","т":"t","х":"x","у":"y",
+    }))
+    code = re.sub(r"[^0-9a-z]+", "-", code).strip("-")
+    return ("afina-" + (code or "garden"))[:180].strip("-")
+
+
+def global_wa_exact_sku(wa, sku):
+    payload = wa.call(
+        "shop.product.search",
+        params={
+            "hash": f"search/sku={sku}",
+            "limit": 50,
+            "fields": "*,skus,stock_counts",
+        },
+    )
+    products = listify(payload, ("products", "items"))
+    matches = []
+    for product in products:
+        pid = s(product.get("id"))
+        skus = product_skus(product) or get_product_skus(wa, pid)
+        for row in skus:
+            if norm(row.get("sku")) == norm(sku):
+                matches.append((product, row))
+    return matches
+
+
+def ensure_kit_category(kit, categories, title, parent_id=""):
+    matches = [
+        row for row in categories
+        if norm(row.get("title")) == norm(title)
+        and s(row.get("parent_id")) == s(parent_id)
+    ]
+    if matches:
+        return s(matches[0].get("id"))
+    created = kit.create_category(title, parent_id or None)
+    cid = s(created.get("id"))
+    if not cid:
+        raise RuntimeError(f"KIT did not return category id for {title!r}")
+    row = dict(created)
+    row.setdefault("parent_id", parent_id)
+    categories.append(row)
+    return cid
+
+
+def ensure_kit_characteristic(kit, characteristics, title):
+    matches = [
+        row for row in characteristics
+        if norm(row.get("title")) == norm(title)
+    ]
+    if matches:
+        return s(matches[0].get("id"))
+    created = kit.create_characteristic(title)
+    cid = s(created.get("id"))
+    if not cid:
+        raise RuntimeError(f"KIT did not return characteristic id for {title!r}")
+    characteristics.append(created)
+    return cid
+
+
+def exact_kit_sku_rows(kit, sku):
+    payload = kit.request(
+        "GET",
+        "/v1/variants",
+        params={"name": sku, "page": 1, "per_page": 100},
+    )
+    rows = payload.get("variants") or payload.get("items") or payload.get("results") or []
+    if isinstance(rows, dict):
+        rows = rows.get("items") or []
+    return [
+        row for row in rows
+        if isinstance(row, dict)
+        and s(row.get("status")).upper() != "ARCHIVED"
+        and norm(row.get("sku")) == norm(sku)
+    ]
+
+
+
 def run(args):
     report = {
         "started_at": now_iso(),
