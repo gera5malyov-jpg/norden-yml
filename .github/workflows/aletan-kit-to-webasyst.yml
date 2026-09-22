@@ -35,8 +35,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m py_compile webasyst/sync_aletan_to_webasyst.py alentan-kit/sync_aletan_catalog_full.py
-        continue-on-error: true
       - name: Validate exact files
         run: python -m py_compile webasyst/sync_aletan_to_webasyst.py aletan-kit/sync_aletan_catalog_full.py aletan-kit/sync_aletan_kit.py webasyst/client.py
 
