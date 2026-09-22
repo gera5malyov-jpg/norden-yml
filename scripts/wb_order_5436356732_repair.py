@@ -65,6 +65,18 @@ try:
 except Exception:
     buyer={}
 
+# Resolve the article to Webasyst SKU ids for reliable matching.
+sku_ids=set()
+if article:
+    ps=wa.call("shop.product.search",params={"hash":f"search/query={article}","limit":100,"fields":"id,name,skus"})
+    prows=ps.get("products") if isinstance(ps,dict) else ps if isinstance(ps,list) else []
+    for p in prows or []:
+        skus=p.get("skus") or {}
+        skus=list(skus.values()) if isinstance(skus,dict) else skus if isinstance(skus,list) else []
+        for sk in skus:
+            if isinstance(sk,dict) and str(sk.get("sku") or "").strip()==article:
+                sku_ids.add(str(sk.get("id") or ""))
+
 # Find the existing WB order in Webasyst. Historical importer used gNumber, so match
 # by source + exact article/SKU + nearest source creation date rather than creating a duplicate.
 sr=wa.call("shop.order.search",params={
@@ -73,6 +85,14 @@ sr=wa.call("shop.order.search",params={
     "fields":"*,state"
 })
 rows=sr.get("orders") if isinstance(sr,dict) else sr if isinstance(sr,list) else []
+# Fallback for orders created by older importers without mp_source.
+if not rows and article:
+    alt=wa.call("shop.order.search",params={"hash":f"search/query={article}","limit":100,"fields":"*,state"})
+    rows=alt.get("orders") if isinstance(alt,dict) else alt if isinstance(alt,list) else []
+# Exact WB order number may also be present in a comment/parameter from an older importer.
+if not rows:
+    alt=wa.call("shop.order.search",params={"hash":f"search/query={TARGET}","limit":100,"fields":"*,state"})
+    rows=alt.get("orders") if isinstance(alt,dict) else alt if isinstance(alt,list) else []
 if not rows:
     raise SystemExit("WEBASYST_WB_ORDER_NOT_FOUND")
 
@@ -89,7 +109,8 @@ for row in rows:
     params=info.get("params") or {}
     items=info.get("items") or []
     sku_codes={str(x.get("sku_code") or x.get("sku") or "").strip() for x in items if isinstance(x,dict)}
-    if article and article not in sku_codes:
+    order_sku_ids={str(x.get("sku_id") or "").strip() for x in items if isinstance(x,dict)}
+    if article and article not in sku_codes and not (sku_ids & order_sku_ids):
         continue
     score=0.0
     mp_created=str(params.get("mp_created_at") or "")
