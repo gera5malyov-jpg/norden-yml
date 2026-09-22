@@ -306,10 +306,13 @@ def main():
         code for code, rows in wa_by_code.items() if len(rows) > 1
     )[:100]
 
-    for code, variant in sorted(kit_index.items()):
-        if code not in catalog or code in kit_ambiguous:
-            continue
-        if len(wa_by_code.get(code, [])) > 1:
+    # Проходим по полному каталогу Алетан. KIT используется только как источник цены:
+    # если надежной цены в KIT нет, товар в Webasyst всё равно создаётся, но ценовые поля не меняются.
+    for code in sorted(catalog):
+        item = catalog[code]
+        matches = wa_by_code.get(code, [])
+
+        if len(matches) > 1:
             report["errors"].append({
                 "vendor_code": code,
                 "stage": "match",
@@ -317,23 +320,23 @@ def main():
             })
             continue
 
-        detail = variant
-        if "pricing" not in detail:
-            detail = kit.get_variant(s(variant.get("id")))
-        prices = desired_prices(detail)
-        if not prices:
-            report["warnings"].append({
-                "vendor_code": code,
-                "stage": "price",
-                "message": "Пропущено: в KIT нет корректной цены для покупателя",
-            })
-            continue
-        sale, compare = prices
-        item = catalog[code]
-        matches = wa_by_code.get(code, [])
+        prices = None
+        variant = kit_index.get(code)
+        if variant is not None and code not in kit_ambiguous:
+            detail = variant
+            if "pricing" not in detail:
+                detail = kit.get_variant(s(variant.get("id")))
+            prices = desired_prices(detail)
 
         if matches:
             product = matches[0]
+            # Если цены нет, существующий товар не трогаем по цене.
+            # Остаток 100 уже применён выше общим проходом по типу aletan.ru.
+            if not prices:
+                report["existing_without_price_unchanged"] += 1
+                continue
+
+            sale, compare = prices
             product_id = s(product.get("id"))
             skus = product_skus(product) or get_product_skus(wa, product_id)
             if len(skus) != 1:
@@ -377,9 +380,24 @@ def main():
                 })
             continue
 
+        # Товара в Webasyst ещё нет — создаём всегда.
+        # При наличии цены передаём её; без цены ценовые поля намеренно отсутствуют.
+        sale = compare = None
+        sku_data = {
+            "stock": {stock_id: str(WA_STOCK_QTY)},
+            "available": 1,
+            "status": 1,
+        }
+        if prices:
+            sale, compare = prices
+            sku_data["price"] = money_str(sale)
+            sku_data["compare_price"] = money_str(compare)
+
         summary = extimg_summary(item["pictures"])
         if args.dry_run:
             report["would_create"] += 1
+            if not prices:
+                report["would_create_without_price"] += 1
         else:
             created = wa.call(
                 "shop.product.add",
@@ -392,13 +410,7 @@ def main():
                     "summary": summary,
                     "description": item["description"],
                     "status": 1,
-                    "skus": [{
-                        "price": money_str(sale),
-                        "compare_price": money_str(compare),
-                        "stock": {stock_id: str(WA_STOCK_QTY)},
-                        "available": 1,
-                        "status": 1,
-                    }],
+                    "skus": [sku_data],
                 },
             )
             product_id = extract_product_id(created)
@@ -407,20 +419,25 @@ def main():
             skus = get_product_skus(wa, product_id)
             if len(skus) != 1:
                 raise RuntimeError(f"{code}: новый товар имеет {len(skus)} SKU вместо 1")
+
+            sku_update = {
+                "sku": code,
+                "stock": {stock_id: str(WA_STOCK_QTY)},
+                "available": 1,
+                "status": 1,
+            }
+            if prices:
+                sku_update["price"] = money_str(sale)
+                sku_update["compare_price"] = money_str(compare)
             wa.call(
                 "shop.product.skus.update",
                 http_method="POST",
                 params={"id": s(skus[0].get("id"))},
-                data={
-                    "sku": code,
-                    "price": money_str(sale),
-                    "compare_price": money_str(compare),
-                    "stock": {stock_id: str(WA_STOCK_QTY)},
-                    "available": 1,
-                    "status": 1,
-                },
+                data=sku_update,
             )
             report["created"] += 1
+            if not prices:
+                report["created_without_price"] += 1
             wa_by_code[code].append({"id": product_id, "name": item["name"], "skus": skus})
 
         if len(report["sample_new"]) < 25:
@@ -428,8 +445,9 @@ def main():
                 "vendor_code": code,
                 "sku": code,
                 "name": item["name"],
-                "price": money_str(sale),
-                "compare_price": money_str(compare),
+                "price": money_str(sale) if prices else None,
+                "compare_price": money_str(compare) if prices else None,
+                "price_action": "установлена из KIT" if prices else "не изменялась / не задавалась",
                 "stock": WA_STOCK_QTY,
                 "images": len(item["pictures"]),
             })
