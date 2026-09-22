@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: marketplace-orders-webasyst-live
+  group: marketplace-orders-webasyst-wb-now
   cancel-in-progress: true
 
 permissions:
