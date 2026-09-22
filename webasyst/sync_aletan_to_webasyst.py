@@ -316,10 +316,10 @@ def main():
         matches = wa_by_code.get(code, [])
 
         if len(matches) > 1:
-            report["errors"].append({
+            report["warnings"].append({
                 "vendor_code": code,
                 "stage": "match",
-                "message": "В Webasyst найдено несколько товаров типа aletan.ru с одним vendorCode",
+                "message": "Пропущено без изменений: в Webasyst найдено несколько товаров типа aletan.ru с одним vendorCode",
             })
             continue
 
