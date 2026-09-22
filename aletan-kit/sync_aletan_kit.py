@@ -167,9 +167,25 @@ def download_price_xlsx(dest):
                 timeout=5000,
             ):
                 visible = page.locator("button:visible").all_inner_texts()
+                try:
+                    body_text = page.locator("body").inner_text(timeout=3000)[:1500]
+                except Exception:
+                    body_text = ""
+                try:
+                    test_ids = page.locator("[data-testid]").evaluate_all(
+                        "(els) => els.slice(0, 80).map(e => e.getAttribute('data-testid'))"
+                    )
+                except Exception:
+                    test_ids = []
+                frames = [frame.url for frame in page.frames]
                 raise RuntimeError(
                     "Не найдена кнопка Download или меню «Файл». "
-                    + "Видимые кнопки: " + " | ".join(visible[:30])
+                    + "title=" + page.title()
+                    + "; url=" + page.url
+                    + "; frames=" + " || ".join(frames[:10])
+                    + "; testids=" + " | ".join(str(x) for x in test_ids[:80])
+                    + "; buttons=" + " | ".join(visible[:30])
+                    + "; body=" + body_text.replace("\\n", " | ")
                 )
 
             page.wait_for_timeout(800)
