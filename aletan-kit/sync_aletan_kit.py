@@ -275,10 +275,12 @@ def download_price_xlsx(dest):
         raise RuntimeError("Яндекс Таблица скачалась некорректно")
 
 PRICE_POSITIVE = (
-    ("закуп", 120), ("оптов", 100), ("опт", 90), ("дилер", 85),
-    ("цена поставщика", 110), ("входная", 80), ("себесто", 70), ("цена", 35),
+    ("закуп", 140), ("оптов", 120), ("опт", 110), ("дилер", 100),
+    ("цена поставщика", 130), ("входная", 90), ("себесто", 80),
 )
-PRICE_NEGATIVE = ("ррц", "рознич", "рекоменд", "маркет", "до скид", "продаж")
+PRICE_NEGATIVE = (
+    "ррц", "рознич", "рекоменд", "реком", "маркет", "до скид", "продаж",
+)
 
 def workbook_price_diagnostics(path, catalog):
     """Краткая диагностика ценовых колонок по всем листам прайса."""
@@ -368,6 +370,7 @@ def detect_price_map(path, catalog):
     wb = load_workbook(path, read_only=True, data_only=True)
     catalog_codes = set(catalog)
     best = None
+    diagnostics = []
 
     for ws in wb.worksheets:
         values = [list(row) for row in ws.iter_rows(values_only=True)]
@@ -406,6 +409,13 @@ def detect_price_map(path, catalog):
 
         rowh = values[header_row]
         headers = [s(rowh[c]) if c < len(rowh) else "" for c in range(max_cols)]
+        diagnostics.append({
+            "sheet": ws.title,
+            "header_row": header_row + 1,
+            "sku_col": sku_col + 1,
+            "overlap": overlap,
+            "headers": headers,
+        })
         candidates = []
         for col, header in enumerate(headers):
             if col == sku_col:
@@ -481,7 +491,12 @@ def detect_price_map(path, catalog):
 
     wb.close()
     if best is None or len(best["prices"]) < 3:
-        raise RuntimeError("Не удалось надежно определить артикул и закупочную цену в прайсе")
+        raise RuntimeError(
+            "Не удалось надежно определить именно закупочную/оптовую цену. "
+            + "Заголовки листов с совпадающими артикулами: "
+            + json.dumps(diagnostics[:12], ensure_ascii=False)
+        )
+    best["diagnostics"] = diagnostics
     return best
 
 class KitClient:
