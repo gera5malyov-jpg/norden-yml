@@ -1,0 +1,388 @@
+{
+  "generated_at": "2026-09-22T10:49:57.724733+00:00",
+  "status": "УСПЕШНО",
+  "route": {
+    "from": {
+      "code": 44,
+      "city": "Москва",
+      "region": "Москва"
+    },
+    "to": {
+      "code": 431,
+      "city": "Тольятти",
+      "region": "Самарская область"
+    }
+  },
+  "cargo": {
+    "chairs": 30,
+    "places": 3,
+    "chairs_per_place": 10,
+    "weight_per_chair_kg": 6.4,
+    "weight_per_place_kg": 64,
+    "total_weight_kg": 192
+  },
+  "quotes": [
+    {
+      "scenario": "working_053",
+      "http": 200,
+      "package_cm": [
+        58,
+        60,
+        152
+      ],
+      "package_weight_kg": 64.0,
+      "total_volume_m3": 1.587,
+      "tariffs": [
+        {
+          "tariff_code": 121,
+          "tariff_name": "Магистральный экспресс дверь-дверь",
+          "tariff_description": "",
+          "delivery_mode": 1,
+          "delivery_sum": 23834.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 123,
+          "tariff_name": "Магистральный экспресс дверь-склад",
+          "tariff_description": "",
+          "delivery_mode": 2,
+          "delivery_sum": 20980.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 122,
+          "tariff_name": "Магистральный экспресс склад-дверь",
+          "tariff_description": "",
+          "delivery_mode": 3,
+          "delivery_sum": 20980.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 62,
+          "tariff_name": "Магистральный экспресс склад-склад",
+          "tariff_description": "",
+          "delivery_mode": 4,
+          "delivery_sum": 18126.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 480,
+          "tariff_name": "Экспресс дверь-дверь",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 1,
+          "delivery_sum": 51810.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 481,
+          "tariff_name": "Экспресс дверь-склад",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 2,
+          "delivery_sum": 50045.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 482,
+          "tariff_name": "Экспресс склад-дверь",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 3,
+          "delivery_sum": 50045.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 483,
+          "tariff_name": "Экспресс склад-склад",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 4,
+          "delivery_sum": 48280.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 605,
+          "tariff_name": "Экспресс постамат-дверь",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 8,
+          "delivery_sum": 50045.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 606,
+          "tariff_name": "Экспресс постамат-склад",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 9,
+          "delivery_sum": 48280.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 748,
+          "tariff_name": "Сборный груз дверь-дверь",
+          "tariff_description": "Наземная доставка тяжеловесных отправлений, погрузо-разгрузочные работы не включены в тариф.\nДля корректного отображения офисов, обрабатывающих заказы по тарифу \"сборный груз\" необходимо выбрать доп.тип заказа \"сборный груз\" \n",
+          "delivery_mode": 1,
+          "delivery_sum": 15810.0,
+          "period_min": 3,
+          "period_max": 3,
+          "calendar_min": 3,
+          "calendar_max": 4,
+          "services": null
+        },
+        {
+          "tariff_code": 749,
+          "tariff_name": "Сборный груз дверь-склад",
+          "tariff_description": "Наземная доставка тяжеловесных отправлений, погрузо-разгрузочные работы не включены в тариф.\nДля корректного отображения офисов, обрабатывающих заказы по тарифу \"сборный груз\" необходимо выбрать доп.тип заказа \"сборный груз\" \n",
+          "delivery_mode": 2,
+          "delivery_sum": 14210.0,
+          "period_min": 3,
+          "period_max": 3,
+          "calendar_min": 3,
+          "calendar_max": 4,
+          "services": null
+        },
+        {
+          "tariff_code": 750,
+          "tariff_name": "Сборный груз склад-дверь",
+          "tariff_description": "Наземная доставка тяжеловесных отправлений, погрузо-разгрузочные работы не включены в тариф.\nДля корректного отображения офисов, обрабатывающих заказы по тарифу \"сборный груз\" необходимо выбрать доп.тип заказа \"сборный груз\" \n",
+          "delivery_mode": 3,
+          "delivery_sum": 13560.0,
+          "period_min": 3,
+          "period_max": 3,
+          "calendar_min": 3,
+          "calendar_max": 4,
+          "services": null
+        },
+        {
+          "tariff_code": 751,
+          "tariff_name": "Сборный груз склад-склад",
+          "tariff_description": "Наземная доставка тяжеловесных отправлений, погрузо-разгрузочные работы не включены в тариф.\nДля корректного отображения офисов, обрабатывающих заказы по тарифу \"сборный груз\" необходимо выбрать доп.тип заказа \"сборный груз\" \n",
+          "delivery_mode": 4,
+          "delivery_sum": 11960.0,
+          "period_min": 3,
+          "period_max": 3,
+          "calendar_min": 3,
+          "calendar_max": 4,
+          "services": null
+        }
+      ]
+    },
+    {
+      "scenario": "conservative_0643",
+      "http": 200,
+      "package_cm": [
+        58,
+        60,
+        185
+      ],
+      "package_weight_kg": 64.0,
+      "total_volume_m3": 1.931,
+      "tariffs": [
+        {
+          "tariff_code": 121,
+          "tariff_name": "Магистральный экспресс дверь-дверь",
+          "tariff_description": "",
+          "delivery_mode": 1,
+          "delivery_sum": 28871.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 123,
+          "tariff_name": "Магистральный экспресс дверь-склад",
+          "tariff_description": "",
+          "delivery_mode": 2,
+          "delivery_sum": 25465.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 122,
+          "tariff_name": "Магистральный экспресс склад-дверь",
+          "tariff_description": "",
+          "delivery_mode": 3,
+          "delivery_sum": 25465.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 62,
+          "tariff_name": "Магистральный экспресс склад-склад",
+          "tariff_description": "",
+          "delivery_mode": 4,
+          "delivery_sum": 22059.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 480,
+          "tariff_name": "Экспресс дверь-дверь",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 1,
+          "delivery_sum": 62850.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 481,
+          "tariff_name": "Экспресс дверь-склад",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 2,
+          "delivery_sum": 60740.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 482,
+          "tariff_name": "Экспресс склад-дверь",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 3,
+          "delivery_sum": 60740.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 483,
+          "tariff_name": "Экспресс склад-склад",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 4,
+          "delivery_sum": 58630.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 605,
+          "tariff_name": "Экспресс постамат-дверь",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 8,
+          "delivery_sum": 60740.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 606,
+          "tariff_name": "Экспресс постамат-склад",
+          "tariff_description": "Экспресс-доставка",
+          "delivery_mode": 9,
+          "delivery_sum": 58630.0,
+          "period_min": 2,
+          "period_max": 3,
+          "calendar_min": 2,
+          "calendar_max": 3,
+          "services": null
+        },
+        {
+          "tariff_code": 748,
+          "tariff_name": "Сборный груз дверь-дверь",
+          "tariff_description": "Наземная доставка тяжеловесных отправлений, погрузо-разгрузочные работы не включены в тариф.\nДля корректного отображения офисов, обрабатывающих заказы по тарифу \"сборный груз\" необходимо выбрать доп.тип заказа \"сборный груз\" \n",
+          "delivery_mode": 1,
+          "delivery_sum": 19090.0,
+          "period_min": 3,
+          "period_max": 3,
+          "calendar_min": 3,
+          "calendar_max": 4,
+          "services": null
+        },
+        {
+          "tariff_code": 749,
+          "tariff_name": "Сборный груз дверь-склад",
+          "tariff_description": "Наземная доставка тяжеловесных отправлений, погрузо-разгрузочные работы не включены в тариф.\nДля корректного отображения офисов, обрабатывающих заказы по тарифу \"сборный груз\" необходимо выбрать доп.тип заказа \"сборный груз\" \n",
+          "delivery_mode": 2,
+          "delivery_sum": 17140.0,
+          "period_min": 3,
+          "period_max": 3,
+          "calendar_min": 3,
+          "calendar_max": 4,
+          "services": null
+        },
+        {
+          "tariff_code": 750,
+          "tariff_name": "Сборный груз склад-дверь",
+          "tariff_description": "Наземная доставка тяжеловесных отправлений, погрузо-разгрузочные работы не включены в тариф.\nДля корректного отображения офисов, обрабатывающих заказы по тарифу \"сборный груз\" необходимо выбрать доп.тип заказа \"сборный груз\" \n",
+          "delivery_mode": 3,
+          "delivery_sum": 16490.0,
+          "period_min": 3,
+          "period_max": 3,
+          "calendar_min": 3,
+          "calendar_max": 4,
+          "services": null
+        },
+        {
+          "tariff_code": 751,
+          "tariff_name": "Сборный груз склад-склад",
+          "tariff_description": "Наземная доставка тяжеловесных отправлений, погрузо-разгрузочные работы не включены в тариф.\nДля корректного отображения офисов, обрабатывающих заказы по тарифу \"сборный груз\" необходимо выбрать доп.тип заказа \"сборный груз\" \n",
+          "delivery_mode": 4,
+          "delivery_sum": 14540.0,
+          "period_min": 3,
+          "period_max": 3,
+          "calendar_min": 3,
+          "calendar_max": 4,
+          "services": null
+        }
+      ]
+    }
+  ]
+}
