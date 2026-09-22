@@ -1,6 +1,6 @@
 {
   "status": "ok",
-  "dry_run": false,
+  "dry_run": true,
   "brand_rule": "только точный бренд Алетан",
   "creation_rule": "новые товары не создаются",
   "update_scope": "только цены",
@@ -14,7 +14,6 @@
   "price_page_url": "https://docs.360.yandex.ru/view/d/_xpJcObcgUxWnp71fA8UZyPegnqahzm72s0qoIz-cKg6VUZsT1dCXzlhdw",
   "errors": [],
   "warnings": [],
-  "days_since_last_success": null,
   "catalog_rows_total": 839,
   "catalog_aletan_unique_vendor_codes": 771,
   "catalog_duplicate_vendor_codes": [
@@ -2109,8 +2108,8 @@
   "unmatched_price_vendor_codes": [
     "W702BL/1"
   ],
-  "price_updates_needed": 486,
-  "prices_unchanged": 0,
+  "price_updates_needed": 6,
+  "prices_unchanged": 480,
   "examples": [
     {
       "vendor_code": "B102",
@@ -2124,8 +2123,8 @@
       },
       "new_customer_price": "45292.00",
       "new_old_price": "55744.00",
-      "current_customer_price": "57400.00",
-      "current_old_price": "57400.00"
+      "current_customer_price": "45292.00",
+      "current_old_price": "55744.00"
     },
     {
       "vendor_code": "B102BL",
@@ -2139,8 +2138,8 @@
       },
       "new_customer_price": "45292.00",
       "new_old_price": "55744.00",
-      "current_customer_price": "57400.00",
-      "current_old_price": "57400.00"
+      "current_customer_price": "45292.00",
+      "current_old_price": "55744.00"
     },
     {
       "vendor_code": "B109",
@@ -2154,8 +2153,8 @@
       },
       "new_customer_price": "98514.00",
       "new_old_price": "121248.00",
-      "current_customer_price": "124700.00",
-      "current_old_price": "124700.00"
+      "current_customer_price": "98514.00",
+      "current_old_price": "121248.00"
     },
     {
       "vendor_code": "B109/1",
@@ -2169,8 +2168,8 @@
       },
       "new_customer_price": "72059.00",
       "new_old_price": "88688.00",
-      "current_customer_price": "91460.00",
-      "current_old_price": "91460.00"
+      "current_customer_price": "72059.00",
+      "current_old_price": "88688.00"
     },
     {
       "vendor_code": "B110",
@@ -2184,8 +2183,8 @@
       },
       "new_customer_price": "58539.00",
       "new_old_price": "72048.00",
-      "current_customer_price": "74300.00",
-      "current_old_price": "74300.00"
+      "current_customer_price": "58539.00",
+      "current_old_price": "72048.00"
     },
     {
       "vendor_code": "BR107",
@@ -2199,8 +2198,8 @@
       },
       "new_customer_price": "22308.00",
       "new_old_price": "27456.00",
-      "current_customer_price": "27450.00",
-      "current_old_price": "27450.00"
+      "current_customer_price": "22308.00",
+      "current_old_price": "27456.00"
     },
     {
       "vendor_code": "BR301G",
@@ -2214,8 +2213,8 @@
       },
       "new_customer_price": "40898.00",
       "new_old_price": "50336.00",
-      "current_customer_price": "49700.00",
-      "current_old_price": "49700.00"
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
     },
     {
       "vendor_code": "BR301W",
@@ -2229,8 +2228,8 @@
       },
       "new_customer_price": "40898.00",
       "new_old_price": "50336.00",
-      "current_customer_price": "49700.00",
-      "current_old_price": "49700.00"
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
     },
     {
       "vendor_code": "BR304W",
@@ -2244,8 +2243,8 @@
       },
       "new_customer_price": "89232.00",
       "new_old_price": "109824.00",
-      "current_customer_price": "109800.00",
-      "current_old_price": "109800.00"
+      "current_customer_price": "89232.00",
+      "current_old_price": "109824.00"
     },
     {
       "vendor_code": "BR305W",
@@ -2259,8 +2258,8 @@
       },
       "new_customer_price": "107822.00",
       "new_old_price": "132704.00",
-      "current_customer_price": "132700.00",
-      "current_old_price": "132700.00"
+      "current_customer_price": "107822.00",
+      "current_old_price": "132704.00"
     },
     {
       "vendor_code": "BR315W",
@@ -2274,8 +2273,8 @@
       },
       "new_customer_price": "81796.00",
       "new_old_price": "100672.00",
-      "current_customer_price": "99700.00",
-      "current_old_price": "99700.00"
+      "current_customer_price": "81796.00",
+      "current_old_price": "100672.00"
     },
     {
       "vendor_code": "BR401W",
@@ -2289,8 +2288,8 @@
       },
       "new_customer_price": "95095.00",
       "new_old_price": "117040.00",
-      "current_customer_price": "117400.00",
-      "current_old_price": "117400.00"
+      "current_customer_price": "95095.00",
+      "current_old_price": "117040.00"
     },
     {
       "vendor_code": "BR403W",
@@ -2304,7 +2303,7 @@
       },
       "new_customer_price": "120835.00",
       "new_old_price": "148720.00",
-      "current_customer_price": "148720.00",
+      "current_customer_price": "120835.00",
       "current_old_price": "148720.00"
     },
     {
@@ -2319,8 +2318,8 @@
       },
       "new_customer_price": "113191.00",
       "new_old_price": "139312.00",
-      "current_customer_price": "139300.00",
-      "current_old_price": "139300.00"
+      "current_customer_price": "113191.00",
+      "current_old_price": "139312.00"
     },
     {
       "vendor_code": "BR601R/W",
@@ -2334,8 +2333,8 @@
       },
       "new_customer_price": "113191.00",
       "new_old_price": "139312.00",
-      "current_customer_price": "139300.00",
-      "current_old_price": "139300.00"
+      "current_customer_price": "113191.00",
+      "current_old_price": "139312.00"
     },
     {
       "vendor_code": "BR603W",
@@ -2349,7 +2348,7 @@
       },
       "new_customer_price": "129610.00",
       "new_old_price": "159520.00",
-      "current_customer_price": "159520.00",
+      "current_customer_price": "129610.00",
       "current_old_price": "159520.00"
     },
     {
@@ -2364,7 +2363,7 @@
       },
       "new_customer_price": "128310.00",
       "new_old_price": "157920.00",
-      "current_customer_price": "157920.00",
+      "current_customer_price": "128310.00",
       "current_old_price": "157920.00"
     },
     {
@@ -2379,8 +2378,8 @@
       },
       "new_customer_price": "138580.00",
       "new_old_price": "170560.00",
-      "current_customer_price": "169700.00",
-      "current_old_price": "169700.00"
+      "current_customer_price": "138580.00",
+      "current_old_price": "170560.00"
     },
     {
       "vendor_code": "BR803W",
@@ -2394,8 +2393,8 @@
       },
       "new_customer_price": "204451.00",
       "new_old_price": "251632.00",
-      "current_customer_price": "251600.00",
-      "current_old_price": "251600.00"
+      "current_customer_price": "204451.00",
+      "current_old_price": "251632.00"
     },
     {
       "vendor_code": "BR804W",
@@ -2409,8 +2408,8 @@
       },
       "new_customer_price": "246610.00",
       "new_old_price": "303520.00",
-      "current_customer_price": "298700.00",
-      "current_old_price": "298700.00"
+      "current_customer_price": "246610.00",
+      "current_old_price": "303520.00"
     },
     {
       "vendor_code": "BR902W",
@@ -2424,8 +2423,8 @@
       },
       "new_customer_price": "67496.00",
       "new_old_price": "83072.00",
-      "current_customer_price": "82700.00",
-      "current_old_price": "82700.00"
+      "current_customer_price": "67496.00",
+      "current_old_price": "83072.00"
     },
     {
       "vendor_code": "BR903W",
@@ -2439,8 +2438,8 @@
       },
       "new_customer_price": "84942.00",
       "new_old_price": "104544.00",
-      "current_customer_price": "104500.00",
-      "current_old_price": "104500.00"
+      "current_customer_price": "84942.00",
+      "current_old_price": "104544.00"
     },
     {
       "vendor_code": "MRS107",
@@ -2454,8 +2453,8 @@
       },
       "new_customer_price": "22308.00",
       "new_old_price": "27456.00",
-      "current_customer_price": "26400.00",
-      "current_old_price": "26400.00"
+      "current_customer_price": "22308.00",
+      "current_old_price": "27456.00"
     },
     {
       "vendor_code": "MRS301BL",
@@ -2469,8 +2468,8 @@
       },
       "new_customer_price": "40898.00",
       "new_old_price": "50336.00",
-      "current_customer_price": "49700.00",
-      "current_old_price": "49700.00"
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
     },
     {
       "vendor_code": "MRS301G",
@@ -2484,8 +2483,8 @@
       },
       "new_customer_price": "40898.00",
       "new_old_price": "50336.00",
-      "current_customer_price": "49700.00",
-      "current_old_price": "49700.00"
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
     },
     {
       "vendor_code": "MRS301Q",
@@ -2499,8 +2498,8 @@
       },
       "new_customer_price": "40898.00",
       "new_old_price": "50336.00",
-      "current_customer_price": "49700.00",
-      "current_old_price": "49700.00"
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
     },
     {
       "vendor_code": "MRS301W",
@@ -2514,8 +2513,8 @@
       },
       "new_customer_price": "40898.00",
       "new_old_price": "50336.00",
-      "current_customer_price": "49700.00",
-      "current_old_price": "49700.00"
+      "current_customer_price": "40898.00",
+      "current_old_price": "50336.00"
     },
     {
       "vendor_code": "MRS302BL",
@@ -2529,8 +2528,8 @@
       },
       "new_customer_price": "47047.00",
       "new_old_price": "57904.00",
-      "current_customer_price": "57900.00",
-      "current_old_price": "57900.00"
+      "current_customer_price": "47047.00",
+      "current_old_price": "57904.00"
     },
     {
       "vendor_code": "MRS302G",
@@ -2544,8 +2543,8 @@
       },
       "new_customer_price": "47047.00",
       "new_old_price": "57904.00",
-      "current_customer_price": "57900.00",
-      "current_old_price": "57900.00"
+      "current_customer_price": "47047.00",
+      "current_old_price": "57904.00"
     },
     {
       "vendor_code": "MRS302Q",
@@ -2559,9 +2558,9 @@
       },
       "new_customer_price": "47047.00",
       "new_old_price": "57904.00",
-      "current_customer_price": "57900.00",
-      "current_old_price": "57900.00"
+      "current_customer_price": "47047.00",
+      "current_old_price": "57904.00"
     }
   ],
-  "price_updates_sent": 486
+  "price_updates_sent": 0
 }
