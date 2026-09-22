@@ -1,0 +1,78 @@
+name: CDEK API
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Действие
+        required: true
+        default: auth-check
+        type: choice
+        options:
+          - auth-check
+          - tariff-list
+      from_code:
+        description: Код города отправления CDEK
+        required: false
+        type: string
+      to_code:
+        description: Код города назначения CDEK
+        required: false
+        type: string
+      weight_g:
+        description: Вес одной упаковки, г
+        required: false
+        default: '31000'
+        type: string
+      length_cm:
+        description: Длина, см
+        required: false
+        default: '50'
+        type: string
+      width_cm:
+        description: Ширина, см
+        required: false
+        default: '50'
+        type: string
+      height_cm:
+        description: Высота, см
+        required: false
+        default: '100'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  cdek:
+    runs-on: ubuntu-latest
+    env:
+      CDEK_CLIENT_ID: ${{ secrets.CDEK_CLIENT_ID }}
+      CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установить Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: pip install -r requirements.txt
+
+      - name: Проверить CDEK API
+        if: ${{ inputs.action == 'auth-check' }}
+        run: python cdek/cdek_api.py auth-check
+
+      - name: Рассчитать доступные тарифы
+        if: ${{ inputs.action == 'tariff-list' }}
+        run: |
+          test -n "${{ inputs.from_code }}" || (echo "ОШИБКА: не указан from_code" && exit 1)
+          test -n "${{ inputs.to_code }}" || (echo "ОШИБКА: не указан to_code" && exit 1)
+          python cdek/cdek_api.py tariff-list \
+            --from-code "${{ inputs.from_code }}" \
+            --to-code "${{ inputs.to_code }}" \
+            --weight "${{ inputs.weight_g }}" \
+            --length "${{ inputs.length_cm }}" \
+            --width "${{ inputs.width_cm }}" \
+            --height "${{ inputs.height_cm }}"
