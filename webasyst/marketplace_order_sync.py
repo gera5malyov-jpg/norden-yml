@@ -264,7 +264,7 @@ def marketplace_order_params(o: dict) -> dict:
         "shipping_name": o.get("shipping_name") or LABEL[o["source"]],
         "payment_name": o.get("payment_name") or LABEL[o["source"]],
     }
-    for k in ("delivery_price", "lift_price", "lift_type", "delivery_from", "delivery_to", "delivery_time_from", "delivery_time_to", "recipient_name"):
+    for k in ("delivery_price", "lift_price", "lift_type", "delivery_from", "delivery_to", "delivery_time_from", "delivery_time_to", "recipient_name", "wb_order_id", "wb_rid", "wb_order_uid", "wb_delivery_type"):
         v = o.get(k)
         if v not in (None, ""):
             params["mp_" + k] = str(v)
@@ -599,10 +599,101 @@ def load_yandex_market():
 
 # ---------- Wildberries ----------
 
+def wb_marketplace_dbs_snapshot(headers: dict) -> tuple[dict, dict]:
+    """Return DBS orders keyed by rid and buyer info keyed by numeric order id.
+    Marketplace endpoints are used for address/customer enrichment; no status writes.
+    """
+    base = "https://marketplace-api.wildberries.ru"
+    orders = []
+    try:
+        r = net.req("GET", base + "/api/v3/dbs/orders/new", headers=headers, tries=3)
+        if r.ok and isinstance(r.json(), dict):
+            orders.extend(x for x in (r.json().get("orders") or []) if isinstance(x, dict))
+    except Exception:
+        pass
+
+    now = datetime.now(timezone.utc)
+    for back in (0, 30):
+        end = now - timedelta(days=back)
+        start = end - timedelta(days=29)
+        nxt = 0
+        for _ in range(20):
+            try:
+                r = net.req("GET", base + "/api/v3/dbs/orders", headers=headers, params={
+                    "limit": 1000,
+                    "next": nxt,
+                    "dateFrom": int(start.timestamp()),
+                    "dateTo": int(end.timestamp()),
+                }, tries=3)
+            except Exception:
+                break
+            if not r.ok:
+                break
+            d = r.json() if isinstance(r.json(), dict) else {}
+            batch = [x for x in (d.get("orders") or []) if isinstance(x, dict)]
+            orders.extend(batch)
+            nn = int(d.get("next") or 0)
+            if not batch or not nn or nn == nxt:
+                break
+            nxt = nn
+
+    by_rid = {}
+    ids = []
+    for o in orders:
+        rid = s(o.get("rid"))
+        if rid:
+            by_rid[rid] = o
+        oid = o.get("id")
+        if oid not in (None, ""):
+            try:
+                ids.append(int(oid))
+            except Exception:
+                pass
+
+    clients = {}
+    for i in range(0, len(ids), 100):
+        chunk = ids[i:i+100]
+        if not chunk:
+            continue
+        try:
+            r = net.req("POST", base + "/api/v3/dbs/orders/client", headers={**headers, "Content-Type": "application/json"}, body={"orders": chunk}, tries=3)
+        except Exception:
+            continue
+        if not r.ok:
+            continue
+        d = r.json() if isinstance(r.json(), dict) else {}
+        for row in (d.get("orders") or []):
+            if not isinstance(row, dict):
+                continue
+            oid = row.get("orderID")
+            if oid not in (None, ""):
+                clients[str(oid)] = row
+    return by_rid, clients
+
+def wb_buyer_from_client(client: dict) -> dict:
+    if not isinstance(client, dict):
+        return {}
+    name = s(client.get("fullName"))
+    if not name:
+        name = " ".join(x for x in (
+            s(client.get("lastName")), s(client.get("firstName")), s(client.get("middleName"))
+        ) if x).strip()
+    replacement = s(client.get("replacementPhone"))
+    phone = replacement or s(client.get("phone"))
+    if phone and not replacement and s(client.get("phoneCode")):
+        phone = phone + " доб. " + s(client.get("phoneCode"))
+    out = {}
+    if name:
+        out["name"] = name
+    if phone:
+        out["phone"] = phone
+    return out
+
 def load_wb():
     token = s(os.getenv("WB_API_TOKEN"))
     if not token: return []
     h = {"Authorization": token, "Accept": "application/json"}
+    dbs_by_rid, dbs_clients = wb_marketplace_dbs_snapshot(h)
     start = datetime.now(timezone.utc) - timedelta(days=WB_DAYS)
     params = {"dateFrom": start.strftime("%Y-%m-%dT%H:%M:%S"), "flag": 0}
     # Statistics API is strictly throttled. Net.req follows WB's X-Ratelimit-Retry header.
@@ -637,12 +728,48 @@ def load_wb():
             d = dt(row.get("date"))
             if d and (created is None or d < created): created = d
         items = [{"sku": code, "quantity": q, "price": total/q if q else None} for code, (q, total) in agg.items()]
+
+        # Match the Statistics row to the DBS Marketplace order by rid/srid.
+        # This lets us copy delivery address and buyer data into Webasyst without
+        # changing the historical external id (gNumber), so no duplicate is created.
+        detail = {}
+        for row in rows:
+            rid = s(row.get("srid"))
+            if rid and rid in dbs_by_rid:
+                detail = dbs_by_rid[rid]
+                break
+        client = {}
+        shipping_address = {}
+        wb_order_id = ""
+        wb_rid = ""
+        wb_order_uid = ""
+        wb_delivery_type = ""
+        recipient_name = ""
+        if detail:
+            wb_order_id = s(detail.get("id"))
+            wb_rid = s(detail.get("rid"))
+            wb_order_uid = s(detail.get("orderUid"))
+            wb_delivery_type = s(detail.get("deliveryType"))
+            addr = detail.get("address") if isinstance(detail.get("address"), dict) else {}
+            full_address = s(addr.get("fullAddress"))
+            if full_address:
+                shipping_address = {"street": full_address}
+            client = dbs_clients.get(wb_order_id) or {}
+            recipient_name = s(client.get("fullName")) if isinstance(client, dict) else ""
+
         out.append({
             "source": "wildberries", "external_id": ext,
             "created_at": iso(created) if created else "",
             "status_raw": "CANCELLED" if canceled else "SOLD" if all_sold else "ORDERED",
             "target_state": "otmenen" if canceled else "completed" if all_sold else "processing",
             "items": items, "shipping_name": "Wildberries", "payment_name": "Wildberries",
+            "buyer": wb_buyer_from_client(client),
+            "recipient_name": recipient_name,
+            "shipping_address": shipping_address,
+            "wb_order_id": wb_order_id,
+            "wb_rid": wb_rid,
+            "wb_order_uid": wb_order_uid,
+            "wb_delivery_type": wb_delivery_type,
         })
     return out
 
