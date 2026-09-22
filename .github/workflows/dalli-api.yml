@@ -1,0 +1,93 @@
+name: Dalli API
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Действие
+        required: true
+        default: auth-check
+        type: choice
+        options:
+          - auth-check
+          - delivery-cost
+      to_address:
+        description: Полный адрес получателя
+        required: false
+        default: 'Санкт-Петербург, Невский проспект, 1'
+        type: string
+      weight_kg:
+        description: Вес одного места, кг
+        required: false
+        default: '31'
+        type: string
+      length_cm:
+        description: Длина, см
+        required: false
+        default: '50'
+        type: string
+      width_cm:
+        description: Ширина, см
+        required: false
+        default: '50'
+        type: string
+      height_cm:
+        description: Высота, см
+        required: false
+        default: '100'
+        type: string
+      places:
+        description: Количество одинаковых мест
+        required: false
+        default: '1'
+        type: string
+      order_price:
+        description: Сумма наложенного платежа, руб.
+        required: false
+        default: '0'
+        type: string
+      insurance_price:
+        description: Объявленная стоимость, руб.
+        required: false
+        default: '0'
+        type: string
+      sender_code:
+        description: Код адреса забора Dalli (если требуется договором/филиалом)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  dalli:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      DALLI_TOKEN: ${{ secrets.DALLI_TOKEN }}
+      DALLI_API_BASE_URL: https://spbapi.dalli-service.com/v1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установить Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Проверить токен Dalli
+        if: ${{ inputs.action == 'auth-check' }}
+        run: python dalli/dalli_api.py auth-check --to "${{ inputs.to_address }}"
+
+      - name: Рассчитать доставку Dalli
+        if: ${{ inputs.action == 'delivery-cost' }}
+        run: |
+          python dalli/dalli_api.py delivery-cost \
+            --to "${{ inputs.to_address }}" \
+            --weight "${{ inputs.weight_kg }}" \
+            --length "${{ inputs.length_cm }}" \
+            --width "${{ inputs.width_cm }}" \
+            --height "${{ inputs.height_cm }}" \
+            --places "${{ inputs.places }}" \
+            --order-price "${{ inputs.order_price }}" \
+            --insurance-price "${{ inputs.insurance_price }}" \
+            --sender-code "${{ inputs.sender_code }}"
