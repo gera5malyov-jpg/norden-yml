@@ -2,6 +2,7 @@ name: Verify Yandex order 61653679298
 # verify normalized buyer and deadline
 # verify populated shipping interval
 # diagnose current workflow state
+# verify final persisted deadline
 
 on:
   push:
