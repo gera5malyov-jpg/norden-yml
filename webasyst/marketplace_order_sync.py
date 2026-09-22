@@ -296,6 +296,20 @@ def update_order_details(order_id: str, o: dict):
     info = wa.call("shop.order.getInfo", params={"id": order_id})
     existing_params = dict(info.get("params") or {}) if isinstance(info, dict) else {}
     existing_params.update(marketplace_order_params(o))
+
+    # Persist the delivery interval directly in order params too. Webasyst derives the
+    # visible delivery interval from these params even in custom states where the
+    # editshippingdetails workflow action is unavailable.
+    delivery_date = ymd(o.get("delivery_to") or o.get("delivery_from"))
+    if delivery_date:
+        time_from = s(o.get("delivery_time_from"))[:5] or "00:00"
+        time_to = s(o.get("delivery_time_to"))[:5] or "23:59"
+        existing_params["shipping_start_datetime"] = f"{delivery_date} {time_from}:00"
+        existing_params["shipping_end_datetime"] = f"{delivery_date} {time_to}:00"
+        existing_params["shipping_params_desired_delivery.date"] = delivery_date
+        existing_params["shipping_params_desired_delivery.date_str"] = delivery_date
+        existing_params["shipping_params_desired_delivery.interval"] = f"{time_from}-{time_to}"
+
     data = {"id": order_id, "params": existing_params, "comment": comment(o)}
     customer = order_customer(o)
     if customer:
