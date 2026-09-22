@@ -280,6 +280,90 @@ PRICE_POSITIVE = (
 )
 PRICE_NEGATIVE = ("ррц", "рознич", "рекоменд", "маркет", "до скид", "продаж")
 
+def workbook_price_diagnostics(path, catalog):
+    """Краткая диагностика ценовых колонок по всем листам прайса."""
+    wb = load_workbook(path, read_only=True, data_only=True)
+    catalog_codes = set(catalog)
+    result = []
+    try:
+        for ws in wb.worksheets:
+            values = [list(row) for row in ws.iter_rows(values_only=True)]
+            max_cols = max((len(r) for r in values), default=0)
+            if not values or not max_cols:
+                continue
+
+            overlap_by_col = []
+            for col in range(max_cols):
+                found = set()
+                for row in values:
+                    if col < len(row):
+                        code = clean_code(row[col])
+                        if code in catalog_codes:
+                            found.add(code)
+                overlap_by_col.append((len(found), col))
+            overlap, sku_col = max(overlap_by_col, default=(0, 0))
+            if overlap < 1:
+                result.append({"sheet": ws.title, "overlap": overlap})
+                continue
+
+            first_match = next(
+                (i for i, row in enumerate(values)
+                 if sku_col < len(row) and clean_code(row[sku_col]) in catalog_codes),
+                None,
+            )
+            if first_match is None:
+                continue
+
+            # Показываем строки непосредственно перед первыми товарами: там обычно
+            # находится многоуровневая шапка прайса.
+            header_rows = []
+            for i in range(max(0, first_match - 8), first_match):
+                row = values[i]
+                header_rows.append({
+                    "row": i + 1,
+                    "values": [s(row[col]) if col < len(row) else "" for col in range(max_cols)],
+                })
+
+            columns = []
+            for col in range(max_cols):
+                numeric = 0
+                ratios = []
+                samples = []
+                for row in values[first_match:]:
+                    if sku_col >= len(row) or col >= len(row):
+                        continue
+                    code = clean_code(row[sku_col])
+                    if code not in catalog_codes:
+                        continue
+                    p = money(row[col])
+                    if p is None:
+                        continue
+                    numeric += 1
+                    if len(samples) < 5:
+                        samples.append({"code": code, "value": str(q2(p))})
+                    retail = catalog[code].get("catalog_price")
+                    if retail:
+                        ratios.append(float(p / retail))
+                if numeric:
+                    columns.append({
+                        "col": col + 1,
+                        "numeric_matches": numeric,
+                        "median_to_catalog_price": None if not ratios else round(statistics.median(ratios), 4),
+                        "samples": samples,
+                    })
+
+            result.append({
+                "sheet": ws.title,
+                "overlap": overlap,
+                "sku_col": sku_col + 1,
+                "first_data_row": first_match + 1,
+                "header_rows": header_rows,
+                "numeric_columns": columns,
+            })
+    finally:
+        wb.close()
+    return result
+
 def detect_price_map(path, catalog):
     wb = load_workbook(path, read_only=True, data_only=True)
     catalog_codes = set(catalog)
@@ -621,6 +705,7 @@ def run(args):
     with tempfile.TemporaryDirectory(prefix="aletan-price-") as td:
         price_file = Path(td) / "aletan-price.xlsx"
         download_price_xlsx(price_file)
+        report["price_diagnostics"] = workbook_price_diagnostics(price_file, catalog)
         detected = detect_price_map(price_file, catalog)
 
     report.update({
@@ -637,6 +722,16 @@ def run(args):
 
     kit = KitClient(token)
     index, kit_ambiguous, samples, branded_count, detailed_reads = build_kit_index(kit, set(detected["prices"]))
+    unsafe_price_header = any(
+        word in norm(detected["price_header"])
+        for word in ("реком", "рекоменд", "рознич", "ррц", "продаж")
+    )
+    report["price_source_unsafe"] = unsafe_price_header
+    if unsafe_price_header and not args.dry_run:
+        raise RuntimeError(
+            "Автоблокировка: выбранная колонка прайса похожа на розничную/рекомендованную, а не закупочную"
+        )
+
     report["kit_aletan_active_variants"] = branded_count
     report["kit_detailed_variant_reads"] = detailed_reads
     report["kit_aletan_samples"] = samples
