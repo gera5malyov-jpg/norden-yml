@@ -1,0 +1,39 @@
+name: Marketplace orders to Webasyst
+
+on:
+  push:
+    paths:
+      - '.github/workflows/marketplace-orders-webasyst.yml'
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: marketplace-orders-webasyst-live
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Перенести заказы маркетплейсов в Webasyst
+        env:
+          DRY_RUN: '0'
+          SYNC_SOURCES: 'yandex_market,yandex_kit,ozon'
+          OZON_ORDER_IMPORT_CUTOFF: '2026-09-22T11:08:40Z'
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python webasyst/marketplace_order_sync.py
