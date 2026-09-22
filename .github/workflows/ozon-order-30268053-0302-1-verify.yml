@@ -1,0 +1,29 @@
+name: Verify Ozon order 30268053-0302-1
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ozon-order-30268053-0302-1-verify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Проверить заказ Ozon без вывода персональных данных
+        env:
+          TARGET_EXTERNAL_ID: '30268053-0302-1'
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python scripts/ozon_order_verify.py
