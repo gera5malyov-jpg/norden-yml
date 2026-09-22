@@ -18,6 +18,7 @@ sys.path.insert(0, str(HERE))
 from client import WebasystClient
 
 DRY_RUN = str(os.getenv("DRY_RUN", "1")).strip().lower() not in {"0", "false", "no", "off"}
+SYNC_SOURCES = {x.strip().lower() for x in str(os.getenv("SYNC_SOURCES", "yandex_market,wildberries,yandex_kit,ozon")).split(",") if x.strip()}
 OZON_CUTOFF = os.getenv("OZON_ORDER_IMPORT_CUTOFF", "2026-09-22T11:08:40Z")
 YANDEX_DAYS = 30
 WB_DAYS = 60
