@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T14:01:27.817628+00:00",
+  "generated_at": "2026-09-22T14:02:51.115919+00:00",
   "request": {
     "from_address": "Россия, Москва, Варшавское шоссе, 42",
     "to_address": "Россия, Москва, Тверская улица, 1",
@@ -19,8 +19,9 @@
       "status": "УСПЕШНО",
       "api_delivery_rub": 1315.0,
       "pickup_rub": 600.0,
-      "mandatory_service_rub": 300.0,
-      "total_rub": 2215.0,
+      "mandatory_service_included_rub": 300.0,
+      "mandatory_service_extra_rub": 0.0,
+      "total_rub": 1915.0,
       "raw_response": {
         "detail": {
           "base": "1015",
@@ -307,8 +308,9 @@
       ]
     },
     "pek": {
-      "status": "УСПЕШНО",
+      "status": "НЕТ_ТАРИФА",
       "total_rub": 0,
+      "error": "PEK API не вернул платный внутригородской тариф для одного филиала; 0 ₽ не считается действительной ценой.",
       "est_delivery_time_days": null,
       "services": [],
       "branch_sender": "Москва Восток",
@@ -317,12 +319,8 @@
   },
   "comparison": [
     {
-      "carrier": "PEK",
-      "total_rub": 0.0
-    },
-    {
       "carrier": "e-bulky",
-      "total_rub": 2215.0
+      "total_rub": 1915.0
     },
     {
       "carrier": "CDEK",
@@ -330,7 +328,7 @@
     }
   ],
   "cheapest": {
-    "carrier": "PEK",
-    "total_rub": 0.0
+    "carrier": "e-bulky",
+    "total_rub": 1915.0
   }
 }
