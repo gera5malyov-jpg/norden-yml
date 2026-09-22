@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T14:04:13.472562+00:00",
+  "generated_at": "2026-09-22T18:01:21.972874+00:00",
   "request": {
     "from_address": "Россия, Москва, Варшавское шоссе, 42",
     "to_address": "Россия, Москва, Тверская улица, 1",
@@ -77,235 +77,12 @@
       }
     },
     "cdek": {
-      "status": "УСПЕШНО",
-      "from_code": 44,
-      "to_code": 44,
-      "best_door_to_door_or_lowest": {
-        "tariff_code": 139,
-        "tariff_name": "Посылка дверь-дверь",
-        "delivery_mode": 1,
-        "delivery_sum": 2495.0,
-        "period_min": 1,
-        "period_max": 2
-      },
-      "tariffs": [
-        {
-          "tariff_code": 357,
-          "tariff_name": "Фулфилмент. Выдача склад-дверь",
-          "delivery_mode": 3,
-          "delivery_sum": 800.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 358,
-          "tariff_name": "Фулфилмент. Выдача склад-склад",
-          "delivery_mode": 4,
-          "delivery_sum": 100.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 158,
-          "tariff_name": "Забор груза дверь-склад",
-          "delivery_mode": 2,
-          "delivery_sum": 650.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 139,
-          "tariff_name": "Посылка дверь-дверь",
-          "delivery_mode": 1,
-          "delivery_sum": 2495.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 138,
-          "tariff_name": "Посылка дверь-склад",
-          "delivery_mode": 2,
-          "delivery_sum": 2065.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 137,
-          "tariff_name": "Посылка склад-дверь",
-          "delivery_mode": 3,
-          "delivery_sum": 2065.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 136,
-          "tariff_name": "Посылка склад-склад",
-          "delivery_mode": 4,
-          "delivery_sum": 1635.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 366,
-          "tariff_name": "Посылка дверь-постамат",
-          "delivery_mode": 6,
-          "delivery_sum": 2065.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 368,
-          "tariff_name": "Посылка склад-постамат",
-          "delivery_mode": 7,
-          "delivery_sum": 1635.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 121,
-          "tariff_name": "Магистральный экспресс дверь-дверь",
-          "delivery_mode": 1,
-          "delivery_sum": 2770.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 123,
-          "tariff_name": "Магистральный экспресс дверь-склад",
-          "delivery_mode": 2,
-          "delivery_sum": 2060.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 122,
-          "tariff_name": "Магистральный экспресс склад-дверь",
-          "delivery_mode": 3,
-          "delivery_sum": 2060.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 62,
-          "tariff_name": "Магистральный экспресс склад-склад",
-          "delivery_mode": 4,
-          "delivery_sum": 1350.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 522,
-          "tariff_name": "Магистральный экспресс дверь-постамат",
-          "delivery_mode": 6,
-          "delivery_sum": 2060.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 523,
-          "tariff_name": "Магистральный экспресс склад-постамат",
-          "delivery_mode": 7,
-          "delivery_sum": 1350.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 480,
-          "tariff_name": "Экспресс дверь-дверь",
-          "delivery_mode": 1,
-          "delivery_sum": 3090.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 481,
-          "tariff_name": "Экспресс дверь-склад",
-          "delivery_mode": 2,
-          "delivery_sum": 2880.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 482,
-          "tariff_name": "Экспресс склад-дверь",
-          "delivery_mode": 3,
-          "delivery_sum": 2880.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 483,
-          "tariff_name": "Экспресс склад-склад",
-          "delivery_mode": 4,
-          "delivery_sum": 2670.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 485,
-          "tariff_name": "Экспресс дверь-постамат",
-          "delivery_mode": 6,
-          "delivery_sum": 2880.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 486,
-          "tariff_name": "Экспресс склад-постамат",
-          "delivery_mode": 7,
-          "delivery_sum": 2670.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 605,
-          "tariff_name": "Экспресс постамат-дверь",
-          "delivery_mode": 8,
-          "delivery_sum": 2880.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 606,
-          "tariff_name": "Экспресс постамат-склад",
-          "delivery_mode": 9,
-          "delivery_sum": 2670.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 607,
-          "tariff_name": "Экспресс постамат-постамат",
-          "delivery_mode": 10,
-          "delivery_sum": 2670.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 748,
-          "tariff_name": "Сборный груз дверь-дверь",
-          "delivery_mode": 1,
-          "delivery_sum": 2700.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 749,
-          "tariff_name": "Сборный груз дверь-склад",
-          "delivery_mode": 2,
-          "delivery_sum": 1800.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 750,
-          "tariff_name": "Сборный груз склад-дверь",
-          "delivery_mode": 3,
-          "delivery_sum": 1800.0,
-          "period_min": 1,
-          "period_max": 2
-        }
-      ]
+      "status": "ОШИБКА",
+      "error": "<urlopen error timed out>"
+    },
+    "dalli": {
+      "status": "ОШИБКА",
+      "error": "DALLI_TOKEN secret missing"
     },
     "pek": {
       "status": "УСПЕШНО",
@@ -325,10 +102,6 @@
     {
       "carrier": "e-bulky",
       "total_rub": 1915.0
-    },
-    {
-      "carrier": "CDEK",
-      "total_rub": 2495.0
     },
     {
       "carrier": "PEK",
