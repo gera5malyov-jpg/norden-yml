@@ -1,0 +1,182 @@
+name: Ozon find RIVA brands via product report
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-riva-report-scan-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate and scan Ozon product report
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv, io, json, os, sys, time, urllib.request, urllib.error, zipfile
+          from pathlib import Path
+
+          BASE='https://api-seller.ozon.ru'
+          H={
+            'Client-Id':os.environ['OZON_CLIENT_ID'],
+            'Api-Key':os.environ['OZON_API_KEY'],
+            'Content-Type':'application/json',
+            'Accept':'application/json',
+          }
+          def post(path,payload):
+              req=urllib.request.Request(BASE+path,data=json.dumps(payload,ensure_ascii=False).encode(),headers=H,method='POST')
+              with urllib.request.urlopen(req,timeout=120) as r:
+                  raw=r.read().decode('utf-8')
+                  return json.loads(raw) if raw else {}
+
+          c=post('/v1/report/products/create',{
+              'language':'RU',
+              'offer_id':[],
+              'search':'',
+              'sku':[],
+              'visibility':'ALL'
+          })
+          code=((c.get('result') or {}).get('code') or c.get('code') or '').strip()
+          if not code:
+              raise RuntimeError('Ozon did not return report code: '+json.dumps(c,ensure_ascii=False)[:1000])
+
+          info=None
+          for _ in range(90):
+              info=post('/v1/report/info',{'code':code})
+              result=info.get('result') or info.get('report') or info
+              status=str(result.get('status') or '').lower()
+              file_url=str(result.get('file') or '')
+              if file_url and status in ('success','done','ready','completed',''):
+                  break
+              if status in ('failed','error'):
+                  raise RuntimeError('Report failed: '+json.dumps(info,ensure_ascii=False)[:2000])
+              time.sleep(3)
+          else:
+              raise RuntimeError('Timed out waiting for report: '+json.dumps(info,ensure_ascii=False)[:2000])
+
+          result=info.get('result') or info.get('report') or info
+          file_url=str(result.get('file') or '')
+          if not file_url:
+              raise RuntimeError('Report ready but no file URL: '+json.dumps(info,ensure_ascii=False)[:2000])
+
+          with urllib.request.urlopen(file_url,timeout=120) as r:
+              data=r.read()
+
+          outdir=Path('ozon/report_scan')
+          outdir.mkdir(parents=True,exist_ok=True)
+          (outdir/'raw_report.bin').write_bytes(data)
+
+          payload=data
+          filename='report.csv'
+          if data[:2]==b'PK':
+              z=zipfile.ZipFile(io.BytesIO(data))
+              names=[n for n in z.namelist() if not n.endswith('/')]
+              if not names:
+                  raise RuntimeError('Empty ZIP report')
+              filename=names[0]
+              payload=z.read(filename)
+
+          text=None
+          enc_used=None
+          for enc in ('utf-8-sig','utf-8','cp1251','windows-1251'):
+              try:
+                  t=payload.decode(enc)
+                  if '\x00' not in t[:1000]:
+                      text=t; enc_used=enc; break
+              except Exception:
+                  pass
+          if text is None:
+              raise RuntimeError('Could not decode report; first bytes='+repr(payload[:20]))
+
+          # auto delimiter
+          sample=text[:20000]
+          try:
+              dialect=csv.Sniffer().sniff(sample,delimiters=';,\t')
+              delim=dialect.delimiter
+          except Exception:
+              delim=';'
+
+          rows=list(csv.reader(io.StringIO(text),delimiter=delim))
+          if not rows:
+              raise RuntimeError('Decoded report has no rows')
+          header=rows[0]
+          terms=('RIVA CHAIR','RV DESIGN')
+          matches=[]
+          for row in rows[1:]:
+              joined=' | '.join(row)
+              n=' '.join(joined.upper().split())
+              if any(term in n for term in terms):
+                  obj={header[i] if i<len(header) else f'col_{i}': row[i] for i in range(len(row))}
+                  matches.append(obj)
+
+          # find likely offer/article columns and brand columns
+          lower=[str(x).strip().lower() for x in header]
+          offer_cols=[i for i,h in enumerate(lower) if any(k in h for k in ('артикул','offer','seller sku','sku продавца'))]
+          brand_cols=[i for i,h in enumerate(lower) if 'бренд' in h or 'brand' in h]
+          concise=[]
+          for row in rows[1:]:
+              joined=' | '.join(row)
+              n=' '.join(joined.upper().split())
+              if any(term in n for term in terms):
+                  concise.append({
+                      'offer_candidates': {header[i]:row[i] for i in offer_cols if i < len(row)},
+                      'brand_candidates': {header[i]:row[i] for i in brand_cols if i < len(row)},
+                      'row': {header[i]:row[i] for i in range(min(len(header),len(row)))},
+                  })
+
+          summary={
+              'report_code':code,
+              'status':result.get('status'),
+              'file_url':file_url,
+              'inner_filename':filename,
+              'encoding':enc_used,
+              'delimiter':delim,
+              'header':header,
+              'offer_columns':[header[i] for i in offer_cols],
+              'brand_columns':[header[i] for i in brand_cols],
+              'matched_rows':len(matches),
+              'matches':concise,
+          }
+          (outdir/'riva_report_scan.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          md=[
+              '# Ozon — поиск RIVA/RV DESIGN в товарном отчёте','',
+              f"- Строк в отчёте: **{max(0,len(rows)-1)}**",
+              f"- Найдено строк: **{len(matches)}**",
+              f"- Колонки артикула: **{', '.join(summary['offer_columns']) or 'не определены'}**",
+              f"- Колонки бренда: **{', '.join(summary['brand_columns']) or 'не определены'}**",
+              '',
+              '| № | Артикул | Бренд |',
+              '|---:|---|---|',
+          ]
+          for i,x in enumerate(concise[:1000],1):
+              offer=' / '.join(str(v) for v in x['offer_candidates'].values() if v)
+              brand=' / '.join(str(v) for v in x['brand_candidates'].values() if v)
+              md.append(f"| {i} | `{offer}` | {brand} |")
+          (outdir/'riva_report_scan.md').write_text('\n'.join(md)+'\n',encoding='utf-8')
+          print(json.dumps({'rows':len(rows)-1,'matches':len(matches),'offer_columns':summary['offer_columns'],'brand_columns':summary['brand_columns']},ensure_ascii=False))
+          PY
+
+      - name: Commit scan
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add ozon/report_scan/riva_report_scan.json ozon/report_scan/riva_report_scan.md
+          git commit -m "Ozon: scan RIVA brands in product report" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
