@@ -1,6 +1,9 @@
 name: Wildberries orders to Webasyst
 
 on:
+  push:
+    paths:
+      - '.github/workflows/wildberries-orders-webasyst.yml'
   schedule:
     - cron: '17 */3 * * *'
   workflow_dispatch:
