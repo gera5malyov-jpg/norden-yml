@@ -503,7 +503,9 @@ def sku_candidates(sku, source_codes):
 def build_kit_index(kit, source_codes):
     chars = kit.list_all("/v1/characteristics", {"status": "ACTIVE"}, "characteristics")
     char_titles = {s(x.get("id")): s(x.get("title")) for x in chars if s(x.get("id"))}
-    rows = kit.list_all("/v1/variants", {"brand": BRAND}, "variants")
+    # В KIT параметр brand игнорируется. name выполняет общий поиск и
+    # name=Алетан возвращает товары бренда Алетан (проверено API).
+    rows = kit.list_all("/v1/variants", {"name": BRAND}, "variants")
     branded = [
         v for v in rows
         if norm(v.get("brand")) == norm(BRAND)
@@ -520,6 +522,17 @@ def build_kit_index(kit, source_codes):
 
         variant = row
         keys = sku_candidates(variant.get("sku"), source_codes)
+
+        # В существующих карточках KIT внутренний SKU часто вида AF-...,
+        # а vendorCode Алетан сохранён в названии (например T804BL).
+        product_name = s(variant.get("name"))
+        if product_name:
+            for code in source_codes:
+                if not code:
+                    continue
+                pattern = r"(?<![0-9A-Za-zА-Яа-яЁё])" + re.escape(code) + r"(?![0-9A-Za-zА-Яа-яЁё])"
+                if re.search(pattern, product_name, flags=re.IGNORECASE):
+                    keys.append(code)
 
         # Если в выдаче списка уже есть характеристики — используем их сразу.
         keys.extend(
