@@ -1825,15 +1825,109 @@
       ]
     }
   ],
-  "price_sheet": "TESORO",
-  "price_header_row_1based": 4,
-  "price_sku_column_1based": 5,
-  "price_price_column_1based": 6,
-  "price_sku_header": "Арт.",
-  "price_purchase_header": "Опт (руб.)",
-  "price_catalog_overlap": 78,
-  "purchase_prices_unique": 39,
-  "purchase_price_conflicts": {},
+  "price_sheet": "ALL",
+  "price_purchase_header": "Цена ФАБРИКИ / Опт",
+  "price_catalog_overlap": 491,
+  "purchase_prices_unique": 487,
+  "purchase_price_conflicts": {
+    "В107": [
+      "17700",
+      "17770"
+    ],
+    "В107BL": [
+      "17700",
+      "17770"
+    ],
+    "В108": [
+      "23900",
+      "23940"
+    ],
+    "В108BL": [
+      "23900",
+      "23940"
+    ]
+  },
+  "purchase_price_suspicious": {},
+  "price_sheets_used": [
+    {
+      "sheet": "Marlette",
+      "overlap": 92,
+      "header_row": 5,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 92,
+      "explicit_prices": 53,
+      "inherited_prices": 50,
+      "median_purchase_to_catalog": 0.6065
+    },
+    {
+      "sheet": "Marlette-Wood",
+      "overlap": 99,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 99,
+      "explicit_prices": 53,
+      "inherited_prices": 49,
+      "median_purchase_to_catalog": 0.6063
+    },
+    {
+      "sheet": "TESORO",
+      "overlap": 78,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Опт (руб.)",
+      "prices_found": 78,
+      "explicit_prices": 72,
+      "inherited_prices": 39,
+      "median_purchase_to_catalog": 0.625
+    },
+    {
+      "sheet": "MAJESSA",
+      "overlap": 125,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 125,
+      "explicit_prices": 72,
+      "inherited_prices": 80,
+      "median_purchase_to_catalog": 0.6061
+    },
+    {
+      "sheet": "BARI",
+      "overlap": 17,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 17,
+      "explicit_prices": 73,
+      "inherited_prices": 1,
+      "median_purchase_to_catalog": 0.6251
+    },
+    {
+      "sheet": "MARSO",
+      "overlap": 84,
+      "header_row": 3,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 84,
+      "explicit_prices": 27,
+      "inherited_prices": 63,
+      "median_purchase_to_catalog": 0.625
+    }
+  ],
   "price_source_unsafe": false,
   "kit_aletan_active_variants": 800,
   "kit_detailed_variant_reads": 0,
@@ -1843,7 +1937,9 @@
       "sku": "AF-31623033",
       "name": "Шкаф 4 двери Тесоро черный T804BL",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "T804BL"
+      ]
     },
     {
       "variant_id": "01a0a4bc-1489-7bed-b81c-89a2986f8410",
@@ -1873,28 +1969,36 @@
       "sku": "AF-31622697",
       "name": "Шкаф 4 двери М804W белый",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "М804W"
+      ]
     },
     {
       "variant_id": "01a0a4bc-1489-7bcf-b05e-5a4c6947d98d",
       "sku": "AF-31622695",
       "name": "Шкаф 4 двери М804Q коричневый",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "М804Q"
+      ]
     },
     {
       "variant_id": "01a0a4bc-1489-7bc8-b601-9fa5ae71dfde",
       "sku": "AF-31622696",
       "name": "Шкаф 4 двери М804G серый",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "М804G"
+      ]
     },
     {
       "variant_id": "01a0a4bc-1489-7bc0-a38f-020f8b1575e2",
       "sku": "AF-31622694",
       "name": "Шкаф 4 двери М804BL черный",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "М804BL"
+      ]
     },
     {
       "variant_id": "01a0a4bc-1489-7bb8-b081-6eef1069a764",
@@ -1915,42 +2019,54 @@
       "sku": "AF-31622853",
       "name": "Шкаф 4 двери В804BL",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "В804BL"
+      ]
     },
     {
       "variant_id": "01a0a4bc-1489-7ba4-97bb-63a300cf31ec",
       "sku": "AF-31622653",
       "name": "Шкаф 4 двери В804",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "В804"
+      ]
     },
     {
       "variant_id": "01a0a4bc-1489-7b9d-bf54-68bde16b391c",
       "sku": "AF-31622976",
       "name": "Шкаф 4 двери W804BL",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "W804BL"
+      ]
     },
     {
       "variant_id": "01a0a4bc-1489-7b8f-9553-04205e9a6bdc",
       "sku": "AF-31622931",
       "name": "Шкаф 4 двери W804",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "W804"
+      ]
     },
     {
       "variant_id": "01a0a4bc-1489-7b8a-953c-05a15e3461a8",
       "sku": "AF-31622529",
       "name": "Шкаф 4 двери BR804W White",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "BR804W"
+      ]
     },
     {
       "variant_id": "01a0a4bc-1489-7b84-a00f-d49fde7b4487",
       "sku": "AF-31623037",
       "name": "Шкаф 3 двери Тесоро черный T803BL",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "T803BL"
+      ]
     },
     {
       "variant_id": "01a0a4bc-1489-7b7f-bf3c-3027ed15b3e1",
@@ -1980,284 +2096,470 @@
       "sku": "AF-31622701",
       "name": "Шкаф 3 двери М803W белый",
       "brand": "Алетан",
-      "candidate_codes": []
+      "candidate_codes": [
+        "М803W"
+      ]
     }
   ],
-  "kit_ambiguous_vendor_codes": [],
-  "matched_vendor_codes": 39,
-  "unmatched_price_vendor_codes": [],
-  "price_updates_needed": 39,
+  "kit_ambiguous_vendor_codes": [
+    "W702BL/1"
+  ],
+  "matched_vendor_codes": 486,
+  "unmatched_price_vendor_codes": [
+    "W702BL/1"
+  ],
+  "price_updates_needed": 486,
   "prices_unchanged": 0,
   "examples": [
     {
-      "vendor_code": "T101W",
-      "kit_sku": "AF-31654098",
-      "purchase": "29500.00",
-      "new_customer_price": "38350.00",
-      "new_old_price": "47200.00",
-      "current_customer_price": "47200.00",
-      "current_old_price": "47200.00"
+      "vendor_code": "B102",
+      "kit_sku": "AF-31622794",
+      "purchase": "34840.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 8,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "45292.00",
+      "new_old_price": "55744.00",
+      "current_customer_price": "57400.00",
+      "current_old_price": "57400.00"
     },
     {
-      "vendor_code": "T102W",
-      "kit_sku": "AF-31623117",
-      "purchase": "33300.00",
-      "new_customer_price": "43290.00",
-      "new_old_price": "53280.00",
-      "current_customer_price": "53280.00",
-      "current_old_price": "53280.00"
+      "vendor_code": "B102BL",
+      "kit_sku": "AF-31622883",
+      "purchase": "34840.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 9,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "45292.00",
+      "new_old_price": "55744.00",
+      "current_customer_price": "57400.00",
+      "current_old_price": "57400.00"
     },
     {
-      "vendor_code": "T104W",
-      "kit_sku": "AF-31623114",
-      "purchase": "21000.00",
-      "new_customer_price": "27300.00",
-      "new_old_price": "33600.00",
-      "current_customer_price": "33600.00",
-      "current_old_price": "33600.00"
+      "vendor_code": "B109",
+      "kit_sku": "AF-31622613",
+      "purchase": "75780.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 20,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "98514.00",
+      "new_old_price": "121248.00",
+      "current_customer_price": "124700.00",
+      "current_old_price": "124700.00"
     },
     {
-      "vendor_code": "T105W",
-      "kit_sku": "AF-31654102",
-      "purchase": "39700.00",
-      "new_customer_price": "51610.00",
-      "new_old_price": "63520.00",
-      "current_customer_price": "63520.00",
-      "current_old_price": "63520.00"
+      "vendor_code": "B109/1",
+      "kit_sku": "AF-31647109",
+      "purchase": "55430.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 24,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "72059.00",
+      "new_old_price": "88688.00",
+      "current_customer_price": "91460.00",
+      "current_old_price": "91460.00"
     },
     {
-      "vendor_code": "T108W",
-      "kit_sku": "AF-31623108",
-      "purchase": "22700.00",
-      "new_customer_price": "29510.00",
-      "new_old_price": "36320.00",
-      "current_customer_price": "36300.00",
-      "current_old_price": "36300.00"
+      "vendor_code": "B110",
+      "kit_sku": "AF-31622614",
+      "purchase": "45030.00",
+      "purchase_source": {
+        "sheet": "Marlette",
+        "row": 22,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "58539.00",
+      "new_old_price": "72048.00",
+      "current_customer_price": "74300.00",
+      "current_old_price": "74300.00"
     },
     {
-      "vendor_code": "T202BL",
-      "kit_sku": "AF-31623020",
-      "purchase": "61900.00",
-      "new_customer_price": "80470.00",
-      "new_old_price": "99040.00",
-      "current_customer_price": "98700.00",
-      "current_old_price": "98700.00"
+      "vendor_code": "BR107",
+      "kit_sku": "AF-31622545",
+      "purchase": "17160.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 17,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "22308.00",
+      "new_old_price": "27456.00",
+      "current_customer_price": "27450.00",
+      "current_old_price": "27450.00"
     },
     {
-      "vendor_code": "T202W",
-      "kit_sku": "AF-31623023",
-      "purchase": "61900.00",
-      "new_customer_price": "80470.00",
-      "new_old_price": "99040.00",
-      "current_customer_price": "98700.00",
-      "current_old_price": "98700.00"
+      "vendor_code": "BR301G",
+      "kit_sku": "AF-31654109",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 26,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "49700.00",
+      "current_old_price": "49700.00"
     },
     {
-      "vendor_code": "T204BL",
-      "kit_sku": "AF-31623025",
-      "purchase": "67700.00",
-      "new_customer_price": "88010.00",
-      "new_old_price": "108320.00",
-      "current_customer_price": "108300.00",
-      "current_old_price": "108300.00"
+      "vendor_code": "BR301W",
+      "kit_sku": "AF-31622543",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 25,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "49700.00",
+      "current_old_price": "49700.00"
     },
     {
-      "vendor_code": "T204W",
-      "kit_sku": "AF-31623028",
-      "purchase": "67700.00",
-      "new_customer_price": "88010.00",
-      "new_old_price": "108320.00",
-      "current_customer_price": "108300.00",
-      "current_old_price": "108300.00"
+      "vendor_code": "BR304W",
+      "kit_sku": "AF-31622540",
+      "purchase": "68640.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 37,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "89232.00",
+      "new_old_price": "109824.00",
+      "current_customer_price": "109800.00",
+      "current_old_price": "109800.00"
     },
     {
-      "vendor_code": "T206BL",
-      "kit_sku": "AF-31623015",
-      "purchase": "76500.00",
-      "new_customer_price": "99450.00",
-      "new_old_price": "122400.00",
-      "current_customer_price": "122400.00",
-      "current_old_price": "122400.00"
+      "vendor_code": "BR305W",
+      "kit_sku": "AF-31622539",
+      "purchase": "82940.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 41,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "107822.00",
+      "new_old_price": "132704.00",
+      "current_customer_price": "132700.00",
+      "current_old_price": "132700.00"
     },
     {
-      "vendor_code": "T206W",
-      "kit_sku": "AF-31623018",
-      "purchase": "76500.00",
-      "new_customer_price": "99450.00",
-      "new_old_price": "122400.00",
-      "current_customer_price": "122400.00",
-      "current_old_price": "122400.00"
+      "vendor_code": "BR315W",
+      "kit_sku": "AF-31622541",
+      "purchase": "62920.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 33,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "81796.00",
+      "new_old_price": "100672.00",
+      "current_customer_price": "99700.00",
+      "current_old_price": "99700.00"
     },
     {
-      "vendor_code": "T206W/ПМ",
-      "kit_sku": "AF-31654124",
-      "purchase": "106400.00",
-      "new_customer_price": "138320.00",
-      "new_old_price": "170240.00",
+      "vendor_code": "BR401W",
+      "kit_sku": "AF-31622538",
+      "purchase": "73150.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 45,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "95095.00",
+      "new_old_price": "117040.00",
+      "current_customer_price": "117400.00",
+      "current_old_price": "117400.00"
+    },
+    {
+      "vendor_code": "BR403W",
+      "kit_sku": "AF-31622537",
+      "purchase": "92950.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 49,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "120835.00",
+      "new_old_price": "148720.00",
+      "current_customer_price": "148720.00",
+      "current_old_price": "148720.00"
+    },
+    {
+      "vendor_code": "BR601L/W",
+      "kit_sku": "AF-31647108",
+      "purchase": "87070.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 65,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "113191.00",
+      "new_old_price": "139312.00",
+      "current_customer_price": "139300.00",
+      "current_old_price": "139300.00"
+    },
+    {
+      "vendor_code": "BR601R/W",
+      "kit_sku": "AF-31647119",
+      "purchase": "87070.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 61,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "113191.00",
+      "new_old_price": "139312.00",
+      "current_customer_price": "139300.00",
+      "current_old_price": "139300.00"
+    },
+    {
+      "vendor_code": "BR603W",
+      "kit_sku": "AF-31622533",
+      "purchase": "99700.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 69,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "129610.00",
+      "new_old_price": "159520.00",
+      "current_customer_price": "159520.00",
+      "current_old_price": "159520.00"
+    },
+    {
+      "vendor_code": "BR604W",
+      "kit_sku": "AF-31622532",
+      "purchase": "98700.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 73,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "128310.00",
+      "new_old_price": "157920.00",
+      "current_customer_price": "157920.00",
+      "current_old_price": "157920.00"
+    },
+    {
+      "vendor_code": "BR802W",
+      "kit_sku": "AF-31622531",
+      "purchase": "106600.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 85,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "138580.00",
+      "new_old_price": "170560.00",
       "current_customer_price": "169700.00",
       "current_old_price": "169700.00"
     },
     {
-      "vendor_code": "T208BL",
-      "kit_sku": "AF-31623010",
-      "purchase": "82500.00",
-      "new_customer_price": "107250.00",
-      "new_old_price": "132000.00",
-      "current_customer_price": "131700.00",
-      "current_old_price": "131700.00"
+      "vendor_code": "BR803W",
+      "kit_sku": "AF-31622530",
+      "purchase": "157270.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 89,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "204451.00",
+      "new_old_price": "251632.00",
+      "current_customer_price": "251600.00",
+      "current_old_price": "251600.00"
     },
     {
-      "vendor_code": "T208W",
-      "kit_sku": "AF-31623013",
-      "purchase": "82500.00",
-      "new_customer_price": "107250.00",
-      "new_old_price": "132000.00",
-      "current_customer_price": "131700.00",
-      "current_old_price": "131700.00"
+      "vendor_code": "BR804W",
+      "kit_sku": "AF-31622529",
+      "purchase": "189700.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 93,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "246610.00",
+      "new_old_price": "303520.00",
+      "current_customer_price": "298700.00",
+      "current_old_price": "298700.00"
     },
     {
-      "vendor_code": "T209BL",
-      "kit_sku": "AF-31622996",
-      "purchase": "50140.00",
-      "new_customer_price": "65182.00",
-      "new_old_price": "80224.00",
-      "current_customer_price": "80200.00",
-      "current_old_price": "80200.00"
+      "vendor_code": "BR902W",
+      "kit_sku": "AF-31622528",
+      "purchase": "51920.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 97,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "67496.00",
+      "new_old_price": "83072.00",
+      "current_customer_price": "82700.00",
+      "current_old_price": "82700.00"
     },
     {
-      "vendor_code": "T209BL/ПМ",
-      "kit_sku": "AF-31647116",
-      "purchase": "79000.00",
-      "new_customer_price": "102700.00",
-      "new_old_price": "126400.00",
-      "current_customer_price": "126400.00",
-      "current_old_price": "126400.00"
+      "vendor_code": "BR903W",
+      "kit_sku": "AF-31622527",
+      "purchase": "65340.00",
+      "purchase_source": {
+        "sheet": "BARI",
+        "row": 101,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "84942.00",
+      "new_old_price": "104544.00",
+      "current_customer_price": "104500.00",
+      "current_old_price": "104500.00"
     },
     {
-      "vendor_code": "T209G/ПМ",
-      "kit_sku": "AF-31647118",
-      "purchase": "79000.00",
-      "new_customer_price": "102700.00",
-      "new_old_price": "126400.00",
-      "current_customer_price": "126400.00",
-      "current_old_price": "126400.00"
+      "vendor_code": "MRS107",
+      "kit_sku": "AF-31647106",
+      "purchase": "17160.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 16,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "22308.00",
+      "new_old_price": "27456.00",
+      "current_customer_price": "26400.00",
+      "current_old_price": "26400.00"
     },
     {
-      "vendor_code": "T209Q",
-      "kit_sku": "AF-31622997",
-      "purchase": "50140.00",
-      "new_customer_price": "65182.00",
-      "new_old_price": "80224.00",
-      "current_customer_price": "80200.00",
-      "current_old_price": "80200.00"
+      "vendor_code": "MRS301BL",
+      "kit_sku": "AF-31654021",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 27,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "49700.00",
+      "current_old_price": "49700.00"
     },
     {
-      "vendor_code": "T301W",
-      "kit_sku": "AF-31623104",
-      "purchase": "30600.00",
-      "new_customer_price": "39780.00",
-      "new_old_price": "48960.00",
-      "current_customer_price": "48960.00",
-      "current_old_price": "48960.00"
+      "vendor_code": "MRS301G",
+      "kit_sku": "AF-31654019",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 25,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "49700.00",
+      "current_old_price": "49700.00"
     },
     {
-      "vendor_code": "T303W",
-      "kit_sku": "AF-31623100",
-      "purchase": "34100.00",
-      "new_customer_price": "44330.00",
-      "new_old_price": "54560.00",
-      "current_customer_price": "54560.00",
-      "current_old_price": "54560.00"
+      "vendor_code": "MRS301Q",
+      "kit_sku": "AF-31654020",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 26,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "49700.00",
+      "current_old_price": "49700.00"
     },
     {
-      "vendor_code": "T304W",
-      "kit_sku": "AF-31623092",
-      "purchase": "63900.00",
-      "new_customer_price": "83070.00",
-      "new_old_price": "102240.00",
-      "current_customer_price": "102240.00",
-      "current_old_price": "102240.00"
+      "vendor_code": "MRS301W",
+      "kit_sku": "AF-31647102",
+      "purchase": "31460.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 24,
+        "header": "Цена ФАБРИКИ",
+        "inherited": false
+      },
+      "new_customer_price": "40898.00",
+      "new_old_price": "50336.00",
+      "current_customer_price": "49700.00",
+      "current_old_price": "49700.00"
     },
     {
-      "vendor_code": "T305W",
-      "kit_sku": "AF-31623088",
-      "purchase": "78100.00",
-      "new_customer_price": "101530.00",
-      "new_old_price": "124960.00",
-      "current_customer_price": "124900.00",
-      "current_old_price": "124900.00"
+      "vendor_code": "MRS302BL",
+      "kit_sku": "AF-31654024",
+      "purchase": "36190.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 31,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "47047.00",
+      "new_old_price": "57904.00",
+      "current_customer_price": "57900.00",
+      "current_old_price": "57900.00"
     },
     {
-      "vendor_code": "T315W",
-      "kit_sku": "AF-31623096",
-      "purchase": "54800.00",
-      "new_customer_price": "71240.00",
-      "new_old_price": "87680.00",
-      "current_customer_price": "87680.00",
-      "current_old_price": "87680.00"
+      "vendor_code": "MRS302G",
+      "kit_sku": "AF-31654022",
+      "purchase": "36190.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 29,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "47047.00",
+      "new_old_price": "57904.00",
+      "current_customer_price": "57900.00",
+      "current_old_price": "57900.00"
     },
     {
-      "vendor_code": "T401W",
-      "kit_sku": "AF-31623084",
-      "purchase": "67800.00",
-      "new_customer_price": "88140.00",
-      "new_old_price": "108480.00",
-      "current_customer_price": "108400.00",
-      "current_old_price": "108400.00"
-    },
-    {
-      "vendor_code": "T403W",
-      "kit_sku": "AF-31623080",
-      "purchase": "88100.00",
-      "new_customer_price": "114530.00",
-      "new_old_price": "140960.00",
-      "current_customer_price": "140960.00",
-      "current_old_price": "140960.00"
-    },
-    {
-      "vendor_code": "T404W",
-      "kit_sku": "AF-31623076",
-      "purchase": "74980.00",
-      "new_customer_price": "97474.00",
-      "new_old_price": "119968.00",
-      "current_customer_price": "119960.00",
-      "current_old_price": "119960.00"
-    },
-    {
-      "vendor_code": "T406W",
-      "kit_sku": "AF-31623072",
-      "purchase": "83720.00",
-      "new_customer_price": "108836.00",
-      "new_old_price": "133952.00",
-      "current_customer_price": "133900.00",
-      "current_old_price": "133900.00"
-    },
-    {
-      "vendor_code": "T603W",
-      "kit_sku": "AF-31623066",
-      "purchase": "104700.00",
-      "new_customer_price": "136110.00",
-      "new_old_price": "167520.00",
-      "current_customer_price": "167500.00",
-      "current_old_price": "167500.00"
-    },
-    {
-      "vendor_code": "T604W",
-      "kit_sku": "AF-31647166",
-      "purchase": "99700.00",
-      "new_customer_price": "129610.00",
-      "new_old_price": "159520.00",
-      "current_customer_price": "159500.00",
-      "current_old_price": "159500.00"
-    },
-    {
-      "vendor_code": "T605W",
-      "kit_sku": "AF-31623062",
-      "purchase": "69500.00",
-      "new_customer_price": "90350.00",
-      "new_old_price": "111200.00",
-      "current_customer_price": "111200.00",
-      "current_old_price": "111200.00"
+      "vendor_code": "MRS302Q",
+      "kit_sku": "AF-31654023",
+      "purchase": "36190.00",
+      "purchase_source": {
+        "sheet": "MARSO",
+        "row": 30,
+        "header": "Цена ФАБРИКИ",
+        "inherited": true
+      },
+      "new_customer_price": "47047.00",
+      "new_old_price": "57904.00",
+      "current_customer_price": "57900.00",
+      "current_old_price": "57900.00"
     }
   ],
   "price_updates_sent": 0
