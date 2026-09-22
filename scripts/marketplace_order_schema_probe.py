@@ -57,6 +57,25 @@ if "yandex_kit" not in out:
         if dt>=cutoff: recent.append(o)
     sample=recent[0] if recent else (orders[0] if orders else {})
     out["yandex_kit"]={"http":200,"total_orders":len(orders),"total_count":total,"recent_30d":len(recent),"order_fields":sorted(sample.keys()) if sample else []}
+    if isinstance(sample,dict) and isinstance(sample.get("delivery_chunks"),list) and sample["delivery_chunks"]:
+        ch=sample["delivery_chunks"][0]
+        out["yandex_kit"]["list_chunk_fields"]=sorted(ch.keys()) if isinstance(ch,dict) else []
+        if isinstance(ch,dict):
+            for key in ("items","products","order_items","lines"):
+                if isinstance(ch.get(key),list) and ch[key]:
+                    out["yandex_kit"]["list_chunk_items_key"]=key
+                    out["yandex_kit"]["list_chunk_item_fields"]=sorted(ch[key][0].keys())
+                    break
+            di=ch.get("delivery_info")
+            if isinstance(di,dict):
+                out["yandex_kit"]["list_delivery_info_fields"]=sorted(di.keys())
+    if isinstance(sample,dict):
+        client=sample.get("client")
+        if isinstance(client,dict):
+            out["yandex_kit"]["client_fields"]=sorted(client.keys())
+        payment=sample.get("payment")
+        if isinstance(payment,dict):
+            out["yandex_kit"]["payment_fields"]=sorted(payment.keys())
     if sample and sample.get("id"):
         dd=ks.get("https://api.kit.yandex.net/v1/orders/"+str(sample["id"]),timeout=60)
         if dd.ok:
