@@ -106,3 +106,20 @@ for o in horders:
     if n>=20:
         break
 out("WA_STOREFRONT_HISTORY_COUNT",n)
+
+
+print("WA_SELECTED_LOG_TIMELINE_BEGIN=1")
+for oid in [41037,41028,40618,40482]:
+    try:
+        logs=client.call("shop.order.log", params={"id":oid}) or []
+    except Exception as e:
+        out(f"WA_TL_{oid}_ERROR",type(e).__name__)
+        continue
+    for j,x in enumerate(logs,1):
+        if not isinstance(x,dict): continue
+        out(f"WA_TL_{oid}_{j}_ACTION",str(x.get("action_id") or ""))
+        out(f"WA_TL_{oid}_{j}_DATETIME",x.get("datetime") or x.get("create_datetime") or "")
+        out(f"WA_TL_{oid}_{j}_KEYS",",".join(sorted(x.keys())))
+        # classify only; never print text/params values
+        blob=(" ".join(str(x.get(k) or "") for k in ["text","log_record","action_name"])).lower()
+        out(f"WA_TL_{oid}_{j}_SEND_WORD",int(any(s in blob for s in ["отправ","уведом","email","e-mail","mail","письм"])))
