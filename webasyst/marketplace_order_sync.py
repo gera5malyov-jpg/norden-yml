@@ -126,6 +126,7 @@ report = {
     "existing": 0,
     "status_updated": 0,
     "skipped_unmatched_sku": 0,
+    "unmatched": [],
     "errors": 0,
 }
 
@@ -273,6 +274,12 @@ def process(o: dict):
         if not match:
             stat["skipped"] += 1
             report["skipped_unmatched_sku"] += 1
+            if len(report["unmatched"]) < 30:
+                report["unmatched"].append({
+                    "source": source,
+                    "external_id": ext,
+                    "sku": s(item.get("sku")),
+                })
             return
         resolved.append({
             **match,
@@ -380,6 +387,8 @@ def load_wb():
     r = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/orders", headers=h, params=params)
     if not r.ok: raise RuntimeError(f"WB orders HTTP {r.status_code}")
     orders = r.json() if isinstance(r.json(), list) else []
+    # Statistics endpoints are limited to 1 request/minute per seller.
+    time.sleep(62)
     rs = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/sales", headers=h, params=params)
     sales = rs.json() if rs.ok and isinstance(rs.json(), list) else []
     sold = {s(x.get("srid")) for x in sales if isinstance(x, dict) and s(x.get("srid")) and not x.get("isStorno")}
