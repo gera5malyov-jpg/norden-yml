@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import mimetypes
 import os
 import re
 import sys
@@ -13,6 +14,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_CEILING
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 
@@ -24,6 +26,7 @@ FEED_URL = "https://afinalux.ru/index.php?route=feed/yandex_yml"
 BRAND = "Afina Garden"
 WEBASYST_TYPE = "afinalux"
 WEBASYST_STOCK = "Основной склад"
+KIT_ROOT_CATEGORY = "Afina Garden"
 REPORT_PATH = Path(__file__).resolve().parent / "last_sync_report.json"
 KIT_API = "https://api.kit.yandex.net"
 
@@ -76,6 +79,17 @@ def child_text(node, tag):
     return ""
 
 
+def all_child_text(node, tag):
+    wanted = tag.casefold()
+    out = []
+    for child in list(node):
+        if str(child.tag).split("}")[-1].casefold() == wanted:
+            value = s(child.text)
+            if value and value not in out:
+                out.append(value)
+    return out
+
+
 def load_feed():
     r = requests.get(
         FEED_URL,
@@ -84,6 +98,15 @@ def load_feed():
     )
     r.raise_for_status()
     root = ET.fromstring(r.content)
+
+    source_categories = {}
+    for node in root.iter():
+        if str(node.tag).split("}")[-1].casefold() != "category":
+            continue
+        cid = s(node.attrib.get("id"))
+        title = s(node.text)
+        if cid and title:
+            source_categories[cid] = title
 
     items = {}
     duplicates = defaultdict(list)
@@ -118,7 +141,10 @@ def load_feed():
 
         item = {
             "vendor_code": code,
-            "name": child_text(offer, "name"),
+            "name": child_text(offer, "name") or child_text(offer, "model") or code,
+            "description": child_text(offer, "description"),
+            "category_id": child_text(offer, "categoryId"),
+            "pictures": all_child_text(offer, "picture"),
             "purchase": purchase,
             "customer_price": customer_price,
             "compare_price": compare_price,
@@ -139,7 +165,7 @@ def load_feed():
     for key in duplicates:
         items.pop(key, None)
 
-    return items, duplicates, raw_offers, non_brand, invalid_purchase
+    return items, duplicates, raw_offers, non_brand, invalid_purchase, source_categories
 
 
 class KitClient:
@@ -150,7 +176,7 @@ class KitClient:
         self.session = requests.Session()
         self.last_request_at = 0.0
 
-    def request(self, method, path, *, params=None, body=None, timeout=120):
+    def request(self, method, path, *, params=None, body=None, files=None, timeout=120):
         url = path if path.startswith("http") else KIT_API + path
         for attempt in range(12):
             delay = 0.50 - (time.monotonic() - self.last_request_at)
@@ -164,7 +190,7 @@ class KitClient:
             }
             try:
                 r = self.session.request(
-                    method, url, params=params, json=body, headers=headers, timeout=timeout
+                    method, url, params=params, json=body, files=files, headers=headers, timeout=timeout
                 )
             except requests.RequestException:
                 if attempt == 11:
@@ -202,8 +228,50 @@ class KitClient:
             page += 1
         return rows
 
+    def create_category(self, title, parent_id=None):
+        body = {"title": title}
+        if parent_id:
+            body["parent_id"] = parent_id
+        return self.request("POST", "/v1/categories", body=body)
+
+    def create_characteristic(self, title):
+        return self.request(
+            "POST",
+            "/v1/characteristics",
+            body={"title": title, "type": "STRING", "select_mode": "SINGLE"},
+        )
+
+    def create_product(self, category_id):
+        return self.request("POST", "/v1/products", body={"category_ids": [category_id]})
+
+    def create_variant(self, body):
+        return self.request("POST", "/v1/variants", body=body, timeout=180)
+
     def get_variant(self, variant_id):
         return self.request("GET", f"/v1/variants/{variant_id}")
+
+    def patch_variant(self, variant_id, body):
+        return self.request("PATCH", f"/v1/variants/{variant_id}", body=body)
+
+    def upload_image_url(self, url):
+        response = requests.get(
+            url,
+            timeout=120,
+            headers={"User-Agent": "Mozilla/5.0 Afina-Garden-Sync"},
+        )
+        response.raise_for_status()
+        content_type = (
+            response.headers.get("Content-Type")
+            or mimetypes.guess_type(urlparse(url).path)[0]
+            or "image/jpeg"
+        )
+        ext = os.path.splitext(urlparse(url).path)[1] or ".jpg"
+        return self.request(
+            "POST",
+            "/v1/files",
+            files={"file": ("afina" + ext[:10], response.content, content_type)},
+            timeout=180,
+        )
 
     def update_prices(self, items):
         for start in range(0, len(items), 5000):
@@ -295,43 +363,55 @@ def build_kit_index(kit, feed_items):
         if s(x.get("id"))
     }
 
-    # Параметр brand в KIT ненадёжен, а поиск name не ищет по бренду.
-    # Поэтому делаем полный безопасный проход по вариантам и уже локально
-    # оставляем только точный бренд Afina Garden.
     rows = kit.list_all("/v1/variants", {}, "variants")
-    branded = [
+    active = [
         row for row in rows
-        if norm(row.get("brand")) == norm(BRAND)
-        and s(row.get("status")).upper() != "ARCHIVED"
+        if s(row.get("status")).upper() != "ARCHIVED"
     ]
 
     by_key = {}
     ambiguous = defaultdict(list)
     detailed_reads = 0
+    afina_count = 0
 
-    for row in branded:
+    for row in active:
         vid = s(row.get("id"))
         if not vid:
             continue
-        variant = row
-        keys = candidate_feed_keys(variant, feed_items, char_titles)
 
-        # Если в списочной выдаче нет характеристик и по SKU/названию
-        # сопоставить не удалось, читаем детальную карточку.
-        if not keys and not (variant.get("characteristics") or []):
+        row_brand = norm(row.get("brand"))
+        if row_brand == norm(BRAND):
+            afina_count += 1
+
+        keys = candidate_feed_keys(row, feed_items, char_titles)
+        if not keys:
+            continue
+
+        variant = row
+        if not s(row.get("brand")) or not (row.get("characteristics") or []):
             try:
                 variant = kit.get_variant(vid)
                 detailed_reads += 1
-                keys = candidate_feed_keys(variant, feed_items, char_titles)
             except Exception:
-                keys = []
+                variant = row
 
+        keys = candidate_feed_keys(variant, feed_items, char_titles)
         if len(keys) != 1:
             if len(keys) > 1:
                 ambiguous["variant:" + vid].extend(keys)
             continue
 
         key = keys[0]
+        exact_sku = norm(variant.get("sku")) == key
+        variant_brand = norm(variant.get("brand"))
+
+        # Exact SKU is authoritative unless the card clearly belongs to another brand.
+        if variant_brand and variant_brand != norm(BRAND):
+            ambiguous[key].append("brand_conflict:" + s(variant.get("brand")) + ":" + vid)
+            continue
+        if not exact_sku and variant_brand != norm(BRAND):
+            continue
+
         if key in by_key and s(by_key[key].get("id")) != vid:
             ambiguous[key].append(s(by_key[key].get("id")))
             ambiguous[key].append(vid)
@@ -339,7 +419,8 @@ def build_kit_index(kit, feed_items):
         elif key not in ambiguous:
             by_key[key] = variant
 
-    return by_key, ambiguous, len(branded), detailed_reads
+    return by_key, ambiguous, afina_count, detailed_reads, chars
+
 
 def product_skus(product):
     value = product.get("skus")
@@ -424,6 +505,101 @@ def build_wa_index(wa, products, feed_items):
     return by_key, ambiguous, fallback_matches
 
 
+def extract_product_id(payload):
+    if isinstance(payload, dict):
+        for key in ("id", "product_id"):
+            if payload.get(key) not in (None, ""):
+                return s(payload.get(key))
+        product = payload.get("product")
+        if isinstance(product, dict) and product.get("id") not in (None, ""):
+            return s(product.get("id"))
+    return ""
+
+
+def extimg_summary(urls):
+    urls = [s(x) for x in urls if s(x)]
+    if not urls:
+        return ""
+    return "[extimg]\n" + "\n".join(urls)
+
+
+def product_url(name, sku):
+    base = unicodedata.normalize("NFKC", s(name)).casefold()
+    base = re.sub(r"[^0-9a-zа-яё]+", "-", base).strip("-")
+    code = re.sub(r"[^0-9a-z]+", "-", s(sku).casefold()).strip("-")
+    return ("afina-" + (base[:100] or "garden") + "-" + code).strip("-")
+
+
+def global_wa_exact_sku(wa, sku):
+    payload = wa.call(
+        "shop.product.search",
+        params={
+            "hash": f"search/sku={sku}",
+            "limit": 50,
+            "fields": "*,skus,stock_counts",
+        },
+    )
+    products = listify(payload, ("products", "items"))
+    matches = []
+    for product in products:
+        pid = s(product.get("id"))
+        skus = product_skus(product) or get_product_skus(wa, pid)
+        for row in skus:
+            if norm(row.get("sku")) == norm(sku):
+                matches.append((product, row))
+    return matches
+
+
+def ensure_kit_category(kit, categories, title, parent_id=""):
+    matches = [
+        row for row in categories
+        if norm(row.get("title")) == norm(title)
+        and s(row.get("parent_id")) == s(parent_id)
+    ]
+    if matches:
+        return s(matches[0].get("id"))
+    created = kit.create_category(title, parent_id or None)
+    cid = s(created.get("id"))
+    if not cid:
+        raise RuntimeError(f"KIT did not return category id for {title!r}")
+    row = dict(created)
+    row.setdefault("parent_id", parent_id)
+    categories.append(row)
+    return cid
+
+
+def ensure_kit_characteristic(kit, characteristics, title):
+    matches = [
+        row for row in characteristics
+        if norm(row.get("title")) == norm(title)
+    ]
+    if matches:
+        return s(matches[0].get("id"))
+    created = kit.create_characteristic(title)
+    cid = s(created.get("id"))
+    if not cid:
+        raise RuntimeError(f"KIT did not return characteristic id for {title!r}")
+    characteristics.append(created)
+    return cid
+
+
+def exact_kit_sku_rows(kit, sku):
+    payload = kit.request(
+        "GET",
+        "/v1/variants",
+        params={"name": sku, "page": 1, "per_page": 100},
+    )
+    rows = payload.get("variants") or payload.get("items") or payload.get("results") or []
+    if isinstance(rows, dict):
+        rows = rows.get("items") or []
+    return [
+        row for row in rows
+        if isinstance(row, dict)
+        and s(row.get("status")).upper() != "ARCHIVED"
+        and norm(row.get("sku")) == norm(sku)
+    ]
+
+
 def run(args):
     report = {
         "started_at": now_iso(),
@@ -438,17 +614,26 @@ def run(args):
             "customer_price": "закупочная цена × 1.30, округление вверх до 1 ₽",
             "compare_price": "закупочная цена × 1.60, округление вверх до 1 ₽",
             "webasyst_main_stock": "точный YML <stock>",
-            "creation": "новые товары не создаются ни в KIT, ни в Webasyst",
+            "creation": "если точного артикула нет — создать новую карточку в KIT и Webasyst",
+            "duplicate_guard": "перед созданием повторная точная проверка SKU/артикула",
             "purchase_price_storage": "закупочная цена отдельным полем не записывается",
         },
         "errors": [],
         "warnings": [],
     }
 
-    feed_items, feed_duplicates, raw_offers, non_brand, invalid_purchase = load_feed()
+    (
+        feed_items,
+        feed_duplicates,
+        raw_offers,
+        non_brand,
+        invalid_purchase,
+        source_categories,
+    ) = load_feed()
     report.update({
         "feed_offers_total": raw_offers,
         "feed_brand_items_unique": len(feed_items),
+        "feed_categories": len(source_categories),
         "feed_non_brand_offers": non_brand,
         "feed_invalid_purchase": invalid_purchase[:100],
         "feed_duplicate_vendor_codes": [
@@ -463,24 +648,221 @@ def run(args):
         )
 
     kit = KitClient(os.getenv("YANDEX_KIT_TOKEN"))
-    kit_index, kit_ambiguous, kit_brand_count, detail_reads = build_kit_index(
-        kit, feed_items
-    )
+    (
+        kit_index,
+        kit_ambiguous,
+        kit_brand_count,
+        detail_reads,
+        kit_characteristics,
+    ) = build_kit_index(kit, feed_items)
+
     report.update({
-        "kit_afina_active_variants": kit_brand_count,
-        "kit_matched": len(kit_index),
+        "kit_afina_active_variants_before": kit_brand_count,
+        "kit_matched_before_creation": len(kit_index),
         "kit_detailed_reads": detail_reads,
         "kit_ambiguous": dict(list(kit_ambiguous.items())[:100]),
-        "kit_unmatched_vendor_codes": [
-            feed_items[k]["vendor_code"]
-            for k in sorted(set(feed_items) - set(kit_index))
-        ][:100],
+        "kit_created": 0,
+        "kit_would_create": 0,
+        "kit_reused_exact_sku": 0,
+        "kit_brand_fixed": 0,
+        "kit_images_uploaded": 0,
+        "kit_image_errors": 0,
     })
 
-    if not kit_index:
-        raise RuntimeError(
-            "Safety stop: no exact Afina Garden matches found in KIT"
-        )
+    # Prepare KIT categories/characteristics only when creation may be needed.
+    kit_categories = kit.list_all(
+        "/v1/categories", {"status": "ACTIVE"}, "categories"
+    )
+    root_category_id = ""
+    source_to_kit_category = {}
+    supplier_article_cid = ""
+    site_code_cid = ""
+
+    def ensure_creation_metadata():
+        nonlocal root_category_id, supplier_article_cid, site_code_cid
+        if not root_category_id:
+            root_category_id = ensure_kit_category(
+                kit, kit_categories, KIT_ROOT_CATEGORY
+            )
+        if not supplier_article_cid:
+            supplier_article_cid = ensure_kit_characteristic(
+                kit, kit_characteristics, "Артикул поставщика"
+            )
+        if not site_code_cid:
+            site_code_cid = ensure_kit_characteristic(
+                kit, kit_characteristics, "Код для сайта"
+            )
+
+    missing_kit_keys = [
+        key for key in sorted(feed_items)
+        if key not in kit_index and key not in kit_ambiguous
+    ]
+
+    for key in missing_kit_keys:
+        item = feed_items[key]
+        code = item["vendor_code"]
+        try:
+            exact = exact_kit_sku_rows(kit, code)
+            if len(exact) > 1:
+                report["errors"].append({
+                    "stage": "kit_duplicate_guard",
+                    "vendor_code": code,
+                    "message": f"Найдено {len(exact)} активных карточек KIT с точным SKU",
+                })
+                continue
+
+            if len(exact) == 1:
+                variant = kit.get_variant(s(exact[0].get("id")))
+                existing_brand = s(variant.get("brand"))
+                if existing_brand and norm(existing_brand) != norm(BRAND):
+                    report["errors"].append({
+                        "stage": "kit_brand_conflict",
+                        "vendor_code": code,
+                        "variant_id": s(variant.get("id")),
+                        "message": f"Точный SKU уже занят брендом {existing_brand!r}; новая карточка не создана",
+                    })
+                    continue
+                if not args.dry_run and norm(existing_brand) != norm(BRAND):
+                    kit.patch_variant(s(variant.get("id")), {"brand": BRAND})
+                    variant["brand"] = BRAND
+                    report["kit_brand_fixed"] += 1
+                kit_index[key] = variant
+                report["kit_reused_exact_sku"] += 1
+                continue
+
+            if args.dry_run:
+                report["kit_would_create"] += 1
+                continue
+
+            ensure_creation_metadata()
+            source_cat = s(item.get("category_id"))
+            category_id = root_category_id
+            if source_cat:
+                if source_cat not in source_to_kit_category:
+                    title = source_categories.get(source_cat) or source_cat
+                    source_to_kit_category[source_cat] = ensure_kit_category(
+                        kit, kit_categories, title, root_category_id
+                    )
+                category_id = source_to_kit_category[source_cat]
+
+            product = kit.create_product(category_id)
+            product_id = s(product.get("id"))
+            if not product_id:
+                raise RuntimeError("KIT did not return product id")
+
+            characteristics = [
+                {
+                    "characteristic_id": supplier_article_cid,
+                    "value": code,
+                    "values": [code],
+                },
+                {
+                    "characteristic_id": site_code_cid,
+                    "value": code,
+                    "values": [code],
+                },
+            ]
+
+            media = []
+            for picture in item.get("pictures") or []:
+                if len(media) >= 10:
+                    break
+                try:
+                    uploaded = kit.upload_image_url(picture)
+                    image_id = s(uploaded.get("id"))
+                    if image_id:
+                        media.append({
+                            "type": "IMAGE",
+                            "display_sequence": len(media),
+                            "image_id": image_id,
+                        })
+                        report["kit_images_uploaded"] += 1
+                except Exception as exc:
+                    report["kit_image_errors"] += 1
+                    if len(report["warnings"]) < 200:
+                        report["warnings"].append({
+                            "stage": "kit_image",
+                            "vendor_code": code,
+                            "message": str(exc)[:500],
+                        })
+
+            body = {
+                "sku": code,
+                "name": item["name"],
+                "description": item.get("description") or "",
+                "status": "PUBLISHED",
+                "product_id": product_id,
+                "brand": BRAND,
+                "characteristics": characteristics,
+                "pricing": {
+                    "price": money_str(item["compare_price"]),
+                    "manual_discount_price": money_str(item["customer_price"]),
+                },
+            }
+            if media:
+                body["media"] = media
+
+            created = kit.create_variant(body)
+            variant_id = s(created.get("id"))
+            if not variant_id:
+                raise RuntimeError("KIT did not return variant id")
+            created["id"] = variant_id
+            created.setdefault("sku", code)
+            created.setdefault("brand", BRAND)
+            kit_index[key] = created
+            report["kit_created"] += 1
+        except Exception as exc:
+            report["errors"].append({
+                "stage": "kit_create",
+                "vendor_code": code,
+                "message": str(exc)[:1000],
+            })
+
+    report["kit_matched_after_creation"] = len(kit_index)
+    report["kit_unmatched_after_creation"] = [
+        feed_items[k]["vendor_code"]
+        for k in sorted(set(feed_items) - set(kit_index))
+        if k not in kit_ambiguous
+    ][:100]
+
+    # Bring exact existing cards to the correct brand where safe.
+    for key, variant in list(kit_index.items()):
+        vid = s(variant.get("id"))
+        if not vid or args.dry_run:
+            continue
+        if norm(variant.get("brand")) != norm(BRAND):
+            try:
+                detail = kit.get_variant(vid)
+                current_brand = s(detail.get("brand"))
+                if not current_brand or norm(current_brand) == norm(BRAND):
+                    if norm(current_brand) != norm(BRAND):
+                        kit.patch_variant(vid, {"brand": BRAND})
+                        report["kit_brand_fixed"] += 1
+                    variant["brand"] = BRAND
+            except Exception as exc:
+                if len(report["warnings"]) < 200:
+                    report["warnings"].append({
+                        "stage": "kit_brand_fix",
+                        "vendor_code": feed_items[key]["vendor_code"],
+                        "message": str(exc)[:500],
+                    })
+
+    kit_updates = []
+    for key, variant in sorted(kit_index.items()):
+        item = feed_items[key]
+        vid = s(variant.get("id"))
+        if not vid:
+            continue
+        kit_updates.append({
+            "variant_id": vid,
+            "price": money_str(item["compare_price"]),
+            "manual_discount_price": money_str(item["customer_price"]),
+        })
+
+    report["kit_price_updates_planned"] = len(kit_updates)
+    if not args.dry_run and kit_updates:
+        kit.update_prices(kit_updates)
+    report["kit_price_updates_sent"] = 0 if args.dry_run else len(kit_updates)
 
     wa = WebasystClient(min_request_interval=float(
         os.getenv("AFINALUX_WEBASYST_WRITE_DELAY", "0.55")
@@ -500,29 +882,119 @@ def run(args):
     report.update({
         "webasyst_type_id": type_id,
         "webasyst_stock_id": stock_id,
-        "webasyst_products_in_type": len(wa_products),
-        "webasyst_matched": len(wa_index),
+        "webasyst_products_in_type_before": len(wa_products),
+        "webasyst_matched_before_creation": len(wa_index),
         "webasyst_name_fallback_matches": wa_fallback,
         "webasyst_ambiguous": dict(list(wa_ambiguous.items())[:100]),
-        "webasyst_unmatched_vendor_codes": [
-            feed_items[k]["vendor_code"]
-            for k in sorted(set(feed_items) - set(wa_index))
-        ][:100],
+        "webasyst_created": 0,
+        "webasyst_would_create": 0,
+        "webasyst_existing_rerouted_to_type": 0,
     })
 
-    kit_updates = []
-    for key, variant in sorted(kit_index.items()):
-        item = feed_items[key]
-        kit_updates.append({
-            "variant_id": s(variant.get("id")),
-            "price": money_str(item["compare_price"]),
-            "manual_discount_price": money_str(item["customer_price"]),
-        })
+    missing_wa_keys = [
+        key for key in sorted(feed_items)
+        if key not in wa_index and key not in wa_ambiguous
+    ]
 
-    report["kit_price_updates_planned"] = len(kit_updates)
-    if not args.dry_run and kit_updates:
-        kit.update_prices(kit_updates)
-    report["kit_price_updates_sent"] = 0 if args.dry_run else len(kit_updates)
+    for key in missing_wa_keys:
+        item = feed_items[key]
+        code = item["vendor_code"]
+        try:
+            exact = global_wa_exact_sku(wa, code)
+            # De-duplicate same product/SKU pair if API search returns repeated rows.
+            uniq = {}
+            for product, sku in exact:
+                uniq[(s(product.get("id")), s(sku.get("id")))] = (product, sku)
+            exact = list(uniq.values())
+
+            if len(exact) > 1:
+                report["errors"].append({
+                    "stage": "webasyst_duplicate_guard",
+                    "vendor_code": code,
+                    "message": f"Найдено {len(exact)} карточек Webasyst с точным SKU",
+                })
+                continue
+
+            if len(exact) == 1:
+                product, sku = exact[0]
+                pid = s(product.get("id"))
+                if not args.dry_run and s(product.get("type_id")) != type_id:
+                    wa.call(
+                        "shop.product.update",
+                        http_method="POST",
+                        params={"id": pid},
+                        data={"type_id": type_id},
+                    )
+                    product["type_id"] = type_id
+                    report["webasyst_existing_rerouted_to_type"] += 1
+                wa_index[key] = (product, sku)
+                continue
+
+            if args.dry_run:
+                report["webasyst_would_create"] += 1
+                continue
+
+            created = wa.call(
+                "shop.product.add",
+                http_method="POST",
+                data={
+                    "name": item["name"] or code,
+                    "url": product_url(item["name"], code),
+                    "type_id": type_id,
+                    "currency": "RUB",
+                    "summary": extimg_summary(item.get("pictures") or []),
+                    "description": item.get("description") or "",
+                    "status": 1,
+                    "skus": [{
+                        "price": money_str(item["customer_price"]),
+                        "compare_price": money_str(item["compare_price"]),
+                        "stock": {stock_id: str(item["stock"])},
+                        "available": 1 if item["stock"] > 0 else 0,
+                        "status": 1,
+                    }],
+                },
+            )
+            product_id = extract_product_id(created)
+            if not product_id:
+                raise RuntimeError(
+                    f"shop.product.add did not return product id: {str(created)[:300]}"
+                )
+
+            skus = get_product_skus(wa, product_id)
+            if len(skus) != 1:
+                raise RuntimeError(
+                    f"New Webasyst product {product_id} unexpectedly has {len(skus)} SKUs"
+                )
+            sku_row = skus[0]
+            wa.call(
+                "shop.product.skus.update",
+                http_method="POST",
+                params={"id": s(sku_row.get("id"))},
+                data={
+                    "sku": code,
+                    "price": money_str(item["customer_price"]),
+                    "compare_price": money_str(item["compare_price"]),
+                    "stock": {stock_id: str(item["stock"])},
+                    "available": 1 if item["stock"] > 0 else 0,
+                    "status": 1,
+                },
+            )
+            sku_row["sku"] = code
+            wa_index[key] = ({"id": product_id, "type_id": type_id}, sku_row)
+            report["webasyst_created"] += 1
+        except Exception as exc:
+            report["errors"].append({
+                "stage": "webasyst_create",
+                "vendor_code": code,
+                "message": str(exc)[:1000],
+            })
+
+    report["webasyst_matched_after_creation"] = len(wa_index)
+    report["webasyst_unmatched_after_creation"] = [
+        feed_items[k]["vendor_code"]
+        for k in sorted(set(feed_items) - set(wa_index))
+        if k not in wa_ambiguous
+    ][:100]
 
     wa_updates = 0
     wa_samples = []
