@@ -1,0 +1,23 @@
+name: NetAngels mail diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/netangels-mail-diagnostic.yml"
+      - "scripts/netangels_mail_diagnostic.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Diagnose NetAngels mail
+        run: python3 scripts/netangels_mail_diagnostic.py
