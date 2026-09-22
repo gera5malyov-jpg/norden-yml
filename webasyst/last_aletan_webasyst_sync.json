@@ -1,14 +1,17 @@
 {
-  "status": "ok",
-  "dry_run": false,
+  "status": "degraded",
+  "dry_run": true,
   "type_name": "aletan.ru",
   "webasyst_stock": "Основной склад",
   "webasyst_stock_qty": 100,
   "match_rule": "vendorCode: exact SKU first, then exact token in product name",
   "created": 0,
-  "would_create": 0,
-  "updated": 591,
-  "would_update": 0,
+  "created_without_price": 0,
+  "would_create": 179,
+  "would_create_without_price": 179,
+  "updated": 0,
+  "would_update": 591,
+  "existing_without_price_unchanged": 0,
   "kit_matched": 591,
   "webasyst_products_before": 800,
   "webasyst_stock_products_targeted": 800,
@@ -20,9 +23,266 @@
   "kit_ambiguous_codes": [
     "W702BL/1"
   ],
-  "errors": [],
+  "errors": [
+    {
+      "vendor_code": "W702BL/1",
+      "stage": "match",
+      "message": "В Webasyst найдено несколько товаров типа aletan.ru с одним vendorCode"
+    }
+  ],
   "warnings": [],
-  "sample_new": [],
+  "sample_new": [
+    {
+      "vendor_code": "B101",
+      "sku": "B101",
+      "name": "Стол кофейный квадратный В101",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 3
+    },
+    {
+      "vendor_code": "B101G",
+      "sku": "B101G",
+      "name": "Стол кофейный квадратный В101G",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 3
+    },
+    {
+      "vendor_code": "B109BL",
+      "sku": "B109BL",
+      "name": "Прихожая В109BL",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 1
+    },
+    {
+      "vendor_code": "B109BLG",
+      "sku": "B109BLG",
+      "name": "Прихожая В109BLG",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 2
+    },
+    {
+      "vendor_code": "BR303W",
+      "sku": "BR303W",
+      "name": "Тумба прикроватная 2 ящика BR302W White",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 9
+    },
+    {
+      "vendor_code": "T102QU",
+      "sku": "T102QU",
+      "name": "Столик журнальный Тесоро коричневый T102Q",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 4
+    },
+    {
+      "vendor_code": "T104GR",
+      "sku": "T104GR",
+      "name": "Зеркало прямоугольное (горизонтальное) Тесоро серое T104G",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 2
+    },
+    {
+      "vendor_code": "T104QU",
+      "sku": "T104QU",
+      "name": "Зеркало прямоугольное (горизонтальное) Тесоро коричневое T104Q",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 2
+    },
+    {
+      "vendor_code": "T106/1BL",
+      "sku": "T106/1BL",
+      "name": "Зеркало прямоугольное (вертикальное) Тесоро черное T106BL",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 2
+    },
+    {
+      "vendor_code": "T106/1GR",
+      "sku": "T106/1GR",
+      "name": "Зеркало прямоугольное (вертикальное) Тесоро серое T106G",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 3
+    },
+    {
+      "vendor_code": "T106/1QU",
+      "sku": "T106/1QU",
+      "name": "Зеркало прямоугольное (вертикальное) Тесоро коричневое T106Q",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 2
+    },
+    {
+      "vendor_code": "T106/1W",
+      "sku": "T106/1W",
+      "name": "Зеркало прямоугольное (вертикальное) Тесоро белое T106W",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 2
+    },
+    {
+      "vendor_code": "T108GR",
+      "sku": "T108GR",
+      "name": "Скамья Тесоро серая T108G",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 5
+    },
+    {
+      "vendor_code": "T108QU",
+      "sku": "T108QU",
+      "name": "Скамья Тесоро коричневая T108Q",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 5
+    },
+    {
+      "vendor_code": "T202 ПМ BL",
+      "sku": "T202 ПМ BL",
+      "name": "Кровать с жесткой спинкой 120*200, с подъемным ортопедическим основанием Тесоро черная T202BL/ПМ",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 4
+    },
+    {
+      "vendor_code": "T202 ПМ GR",
+      "sku": "T202 ПМ GR",
+      "name": "Кровать с жесткой спинкой 120*200, с подъемным ортопедическим основанием Тесоро серая T202G/ПМ",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 4
+    },
+    {
+      "vendor_code": "T202 ПМ QU",
+      "sku": "T202 ПМ QU",
+      "name": "Кровать с жесткой спинкой 120*200, с подъемным ортопедическим основанием Тесоро коричневая T202Q/ПМ",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 4
+    },
+    {
+      "vendor_code": "T202 ПМ W",
+      "sku": "T202 ПМ W",
+      "name": "Кровать с жесткой спинкой 120*200, с подъемным ортопедическим основанием T202W/ПМ Тесоро белая",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 5
+    },
+    {
+      "vendor_code": "T202GR",
+      "sku": "T202GR",
+      "name": "Кровать с жесткой спинкой 120x200 Тесоро серая T202G",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 4
+    },
+    {
+      "vendor_code": "T202QU",
+      "sku": "T202QU",
+      "name": "Кровать с жесткой спинкой 120x200 Тесоро коричневая T202Q",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 4
+    },
+    {
+      "vendor_code": "T204 ПМ BL",
+      "sku": "T204 ПМ BL",
+      "name": "Кровать с жесткой спинкой 140*200, с подъемным ортопедическим основанием Тесоро черная T204BL/ПМ",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 4
+    },
+    {
+      "vendor_code": "T204 ПМ GR",
+      "sku": "T204 ПМ GR",
+      "name": "Кровать с жесткой спинкой 140*200, с подъемным ортопедическим основанием Тесоро серая T204G/ПМ",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 5
+    },
+    {
+      "vendor_code": "T204 ПМ QU",
+      "sku": "T204 ПМ QU",
+      "name": "Кровать с жесткой спинкой 140*200, с подъемным ортопедическим основанием Тесоро коричневая T204Q/ПМ",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 4
+    },
+    {
+      "vendor_code": "T204 ПМ W",
+      "sku": "T204 ПМ W",
+      "name": "Кровать с жесткой спинкой 140*200, с подъемным ортопедическим основанием Тесоро белая",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 5
+    },
+    {
+      "vendor_code": "T204GR",
+      "sku": "T204GR",
+      "name": "Кровать с жесткой спинкой 140x200 Тесоро серая T204G",
+      "price": null,
+      "compare_price": null,
+      "price_action": "не изменялась / не задавалась",
+      "stock": 100,
+      "images": 4
+    }
+  ],
   "sample_updates": [
     {
       "vendor_code": "B1001",
@@ -225,7 +485,7 @@
       "stock": 100
     }
   ],
-  "complete": true,
+  "complete": false,
   "catalog_unique_vendor_codes": 771,
   "catalog_duplicate_vendor_codes": [
     "BR108W",
