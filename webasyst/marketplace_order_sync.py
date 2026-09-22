@@ -19,6 +19,7 @@ from client import WebasystClient
 
 DRY_RUN = str(os.getenv("DRY_RUN", "1")).strip().lower() not in {"0", "false", "no", "off"}
 SYNC_SOURCES = {x.strip().lower() for x in str(os.getenv("SYNC_SOURCES", "yandex_market,wildberries,yandex_kit,ozon")).split(",") if x.strip()}
+TARGET_EXTERNAL_ID = str(os.getenv("TARGET_EXTERNAL_ID", "")).strip()
 OZON_CUTOFF = os.getenv("OZON_ORDER_IMPORT_CUTOFF", "2026-09-22T11:08:40Z")
 YANDEX_DAYS = 30
 WB_DAYS = 60
@@ -357,6 +358,8 @@ def process(o: dict):
     stat = sr(source)
     stat["read"] += 1
     ext = s(o.get("external_id"))
+    if TARGET_EXTERNAL_ID and ext != TARGET_EXTERNAL_ID:
+        return
     if not ext or not o.get("items"):
         stat["skipped"] += 1
         return
