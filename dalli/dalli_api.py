@@ -32,7 +32,7 @@ class DalliClient:
     def _post_xml(self, path: str, root: ET.Element) -> ET.Element:
         body = ET.tostring(root, encoding="utf-8", xml_declaration=True)
         req = urllib.request.Request(
-            f"{self.base_url}/{path.lstrip('/')}",
+            self.base_url + "/",
             data=body,
             method="POST",
             headers={
