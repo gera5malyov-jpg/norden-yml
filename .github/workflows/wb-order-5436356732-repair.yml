@@ -1,0 +1,28 @@
+name: Repair WB order 5436356732
+
+on:
+  push:
+    paths:
+      - '.github/workflows/wb-order-5436356732-repair.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Исправить заказ WB в Webasyst
+        env:
+          TARGET_WB_ORDER_ID: '5436356732'
+          WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python scripts/wb_order_5436356732_repair.py
