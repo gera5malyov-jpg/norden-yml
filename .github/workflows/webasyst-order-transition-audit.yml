@@ -1,0 +1,38 @@
+name: Webasyst order transition audit
+
+on:
+  push:
+    paths:
+      - 'scripts/webasyst_order_transition_audit.py'
+      - '.github/workflows/webasyst-order-transition-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Audit order workflow
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python scripts/webasyst_order_transition_audit.py
+      - name: Save audit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add webasyst/order_transition_audit.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Save Webasyst order transition audit"
+          git pull --rebase origin main
+          git push
