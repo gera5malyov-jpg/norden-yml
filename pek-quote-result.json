@@ -1,0 +1,240 @@
+{
+  "route": {
+    "from": [
+      "-446",
+      "Москва",
+      "Москва Восток"
+    ],
+    "to": [
+      "-475",
+      "Тольятти",
+      "Тольятти"
+    ]
+  },
+  "cargo": {
+    "chairs": 30,
+    "places": 3,
+    "chairs_per_place": 10,
+    "weight_per_chair_kg": 6.4,
+    "weight_per_place_kg": 64.0,
+    "total_weight_kg": 192.0
+  },
+  "quotes": [
+    {
+      "scenario": "working_053",
+      "place_dims_m": [
+        0.6,
+        0.58,
+        1.52
+      ],
+      "place_volume_m3": 0.53,
+      "total_volume_m3": 1.59,
+      "pickup_zone": "без въезда",
+      "pickup_cost": 0.0,
+      "linehaul_cost": 0.0,
+      "add_cost": 0.0,
+      "total_to_terminal": 0.0,
+      "periods": "<br/><p><b>Количество суток в пути</b>: <span class='periods js-periods-hint'><span class='periods__days'>3 - 4</span><span class='periods__star'>*</span></span><br/><b>Дни отправки</b>: пн, вт, ср, чт, пт</p><br/>",
+      "errors": null,
+      "raw_take": [
+        "Стоимость забора груза",
+        "Москва",
+        2700
+      ],
+      "raw_auto": [
+        "Стоимость перевозки груза",
+        "Москва Восток - Тольятти",
+        9823.53
+      ]
+    },
+    {
+      "scenario": "working_053",
+      "place_dims_m": [
+        0.6,
+        0.58,
+        1.52
+      ],
+      "place_volume_m3": 0.53,
+      "total_volume_m3": 1.59,
+      "pickup_zone": "МОЖД",
+      "pickup_cost": 0.0,
+      "linehaul_cost": 0.0,
+      "add_cost": 0.0,
+      "total_to_terminal": 0.0,
+      "periods": "<br/><p><b>Количество суток в пути</b>: <span class='periods js-periods-hint'><span class='periods__days'>3 - 4</span><span class='periods__star'>*</span></span><br/><b>Дни отправки</b>: пн, вт, ср, чт, пт</p><br/>",
+      "errors": null,
+      "raw_take": [
+        "Стоимость забора груза",
+        "Москва",
+        2700
+      ],
+      "raw_auto": [
+        "Стоимость перевозки груза",
+        "Москва Восток - Тольятти",
+        9823.53
+      ]
+    },
+    {
+      "scenario": "working_053",
+      "place_dims_m": [
+        0.6,
+        0.58,
+        1.52
+      ],
+      "place_volume_m3": 0.53,
+      "total_volume_m3": 1.59,
+      "pickup_zone": "ТТК",
+      "pickup_cost": 0.0,
+      "linehaul_cost": 0.0,
+      "add_cost": 0.0,
+      "total_to_terminal": 0.0,
+      "periods": "<br/><p><b>Количество суток в пути</b>: <span class='periods js-periods-hint'><span class='periods__days'>3 - 4</span><span class='periods__star'>*</span></span><br/><b>Дни отправки</b>: пн, вт, ср, чт, пт</p><br/>",
+      "errors": null,
+      "raw_take": [
+        "Стоимость забора груза",
+        "Москва",
+        2700
+      ],
+      "raw_auto": [
+        "Стоимость перевозки груза",
+        "Москва Восток - Тольятти",
+        9823.53
+      ]
+    },
+    {
+      "scenario": "working_053",
+      "place_dims_m": [
+        0.6,
+        0.58,
+        1.52
+      ],
+      "place_volume_m3": 0.53,
+      "total_volume_m3": 1.59,
+      "pickup_zone": "Садовое",
+      "pickup_cost": 0.0,
+      "linehaul_cost": 0.0,
+      "add_cost": 0.0,
+      "total_to_terminal": 0.0,
+      "periods": "<br/><p><b>Количество суток в пути</b>: <span class='periods js-periods-hint'><span class='periods__days'>3 - 4</span><span class='periods__star'>*</span></span><br/><b>Дни отправки</b>: пн, вт, ср, чт, пт</p><br/>",
+      "errors": null,
+      "raw_take": [
+        "Стоимость забора груза",
+        "Москва",
+        2700
+      ],
+      "raw_auto": [
+        "Стоимость перевозки груза",
+        "Москва Восток - Тольятти",
+        9823.53
+      ]
+    },
+    {
+      "scenario": "conservative_0643",
+      "place_dims_m": [
+        0.6,
+        0.58,
+        1.85
+      ],
+      "place_volume_m3": 0.643,
+      "total_volume_m3": 1.929,
+      "pickup_zone": "без въезда",
+      "pickup_cost": 0.0,
+      "linehaul_cost": 0.0,
+      "add_cost": 0.0,
+      "total_to_terminal": 0.0,
+      "periods": "<br/><p><b>Количество суток в пути</b>: <span class='periods js-periods-hint'><span class='periods__days'>3 - 4</span><span class='periods__star'>*</span></span><br/><b>Дни отправки</b>: пн, вт, ср, чт, пт</p><br/>",
+      "errors": null,
+      "raw_take": [
+        "Стоимость забора груза",
+        "Москва",
+        5800
+      ],
+      "raw_auto": [
+        "Стоимость перевозки груза",
+        "Москва Восток - Тольятти",
+        11875.65
+      ]
+    },
+    {
+      "scenario": "conservative_0643",
+      "place_dims_m": [
+        0.6,
+        0.58,
+        1.85
+      ],
+      "place_volume_m3": 0.643,
+      "total_volume_m3": 1.929,
+      "pickup_zone": "МОЖД",
+      "pickup_cost": 0.0,
+      "linehaul_cost": 0.0,
+      "add_cost": 0.0,
+      "total_to_terminal": 0.0,
+      "periods": "<br/><p><b>Количество суток в пути</b>: <span class='periods js-periods-hint'><span class='periods__days'>3 - 4</span><span class='periods__star'>*</span></span><br/><b>Дни отправки</b>: пн, вт, ср, чт, пт</p><br/>",
+      "errors": null,
+      "raw_take": [
+        "Стоимость забора груза",
+        "Москва",
+        5800
+      ],
+      "raw_auto": [
+        "Стоимость перевозки груза",
+        "Москва Восток - Тольятти",
+        11875.65
+      ]
+    },
+    {
+      "scenario": "conservative_0643",
+      "place_dims_m": [
+        0.6,
+        0.58,
+        1.85
+      ],
+      "place_volume_m3": 0.643,
+      "total_volume_m3": 1.929,
+      "pickup_zone": "ТТК",
+      "pickup_cost": 0.0,
+      "linehaul_cost": 0.0,
+      "add_cost": 0.0,
+      "total_to_terminal": 0.0,
+      "periods": "<br/><p><b>Количество суток в пути</b>: <span class='periods js-periods-hint'><span class='periods__days'>3 - 4</span><span class='periods__star'>*</span></span><br/><b>Дни отправки</b>: пн, вт, ср, чт, пт</p><br/>",
+      "errors": null,
+      "raw_take": [
+        "Стоимость забора груза",
+        "Москва",
+        5800
+      ],
+      "raw_auto": [
+        "Стоимость перевозки груза",
+        "Москва Восток - Тольятти",
+        11875.65
+      ]
+    },
+    {
+      "scenario": "conservative_0643",
+      "place_dims_m": [
+        0.6,
+        0.58,
+        1.85
+      ],
+      "place_volume_m3": 0.643,
+      "total_volume_m3": 1.929,
+      "pickup_zone": "Садовое",
+      "pickup_cost": 0.0,
+      "linehaul_cost": 0.0,
+      "add_cost": 0.0,
+      "total_to_terminal": 0.0,
+      "periods": "<br/><p><b>Количество суток в пути</b>: <span class='periods js-periods-hint'><span class='periods__days'>3 - 4</span><span class='periods__star'>*</span></span><br/><b>Дни отправки</b>: пн, вт, ср, чт, пт</p><br/>",
+      "errors": null,
+      "raw_take": [
+        "Стоимость забора груза",
+        "Москва",
+        5800
+      ],
+      "raw_auto": [
+        "Стоимость перевозки груза",
+        "Москва Восток - Тольятти",
+        11875.65
+      ]
+    }
+  ]
+}
