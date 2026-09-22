@@ -275,17 +275,30 @@ def order_customer(o: dict) -> dict:
     if not isinstance(buyer, dict):
         return {}
     out = {}
+    last_name = s(buyer.get("lastName"))
+    first_name = s(buyer.get("firstName"))
+    middle_name = s(buyer.get("middleName"))
     full = s(buyer.get("name"))
+
+    # Yandex gives structured name fields. Ozon gives one full-name string.
+    # Populate both the computed contact fields and a full display name so Webasyst
+    # does not keep the generic marketplace contact created by the first import.
+    if not (last_name or first_name or middle_name) and full:
+        parts = [x for x in full.split() if x]
+        if len(parts) >= 2:
+            last_name, first_name = parts[0], parts[1]
+            middle_name = " ".join(parts[2:]) if len(parts) > 2 else ""
     if not full:
-        full = " ".join(
-            x for x in (
-                s(buyer.get("lastName")),
-                s(buyer.get("firstName")),
-                s(buyer.get("middleName")),
-            ) if x
-        ).strip()
+        full = " ".join(x for x in (last_name, first_name, middle_name) if x).strip()
+
     if full:
         out["name"] = full
+    if first_name:
+        out["firstname"] = first_name
+    if last_name:
+        out["lastname"] = last_name
+    if middle_name:
+        out["middlename"] = middle_name
     if s(buyer.get("phone")):
         out["phone"] = s(buyer.get("phone"))
     if s(buyer.get("customer_email") or buyer.get("email")):
