@@ -9,7 +9,7 @@ wa=WebasystClient(min_request_interval=0.15)
 settings=wa.call("shop.settings.get")
 states=settings.get("order_states") or []
 if isinstance(states,dict): states=list(states.values())
-out={"states":[],"observed_transitions":[]}
+out={"states":[],"observed_transitions":[],"stock_counting_action":settings.get("stock_counting_action"),"ignore_stock_count":settings.get("ignore_stock_count")}
 for st in states:
     if not isinstance(st,dict): continue
     out["states"].append({
