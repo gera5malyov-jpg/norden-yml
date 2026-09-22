@@ -122,6 +122,22 @@ for row in rows:
             score=999999999
     candidates.append((score,oid,info))
 
+if not candidates and len(rows)==1 and target_dt:
+    oid=str(rows[0].get("id") or "")
+    if oid:
+        info=wa.call("shop.order.getInfo",params={"id":oid})
+        p=info.get("params") or {}
+        mp_created=str(p.get("mp_created_at") or "")
+        try:
+            wd=datetime.fromisoformat(mp_created.replace("Z","+00:00"))
+            delta=abs((wd-target_dt).total_seconds())
+        except Exception:
+            delta=999999999
+        # Only one historical WB order exists in Webasyst and its source timestamp is
+        # within 6 hours of the Marketplace DBS order. Treat it as the same order.
+        if delta <= 6*3600:
+            candidates.append((delta,oid,info))
+
 if not candidates:
     print("DIAG_TARGET_ARTICLE="+article)
     print("DIAG_TARGET_CREATED="+created)
