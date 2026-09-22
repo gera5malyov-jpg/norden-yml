@@ -65,7 +65,7 @@ jobs:
             if [[ "${{ inputs.force }}" == "true" ]]; then args+=(--force); fi
           fi
 
-          python aletan-kit/sync_aletan_kit.py "${args[@]}"
+          python aletan-kit/sync_aletan_catalog_full.py "${args[@]}"
 
       - name: Сохранить русскоязычный отчёт и дату последнего успеха
         if: always()
@@ -74,16 +74,16 @@ jobs:
           git config user.name github-actions
           git config user.email actions@github.com
 
-          cp aletan-kit/last_sync_report.json /tmp/aletan-report.json 2>/dev/null || true
+          cp aletan-kit/last_catalog_sync_report.json /tmp/aletan-catalog-report.json 2>/dev/null || true
           cp aletan-kit/state.json /tmp/aletan-state.json 2>/dev/null || true
 
           git fetch origin main
           git reset --hard origin/main
 
-          cp /tmp/aletan-report.json aletan-kit/last_sync_report.json 2>/dev/null || true
+          cp /tmp/aletan-catalog-report.json aletan-kit/last_catalog_sync_report.json 2>/dev/null || true
           cp /tmp/aletan-state.json aletan-kit/state.json 2>/dev/null || true
 
-          git add aletan-kit/last_sync_report.json aletan-kit/state.json 2>/dev/null || true
+          git add aletan-kit/last_catalog_sync_report.json aletan-kit/state.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
-          git commit -m 'Обновить отчёт Алетан KIT'
+          git commit -m 'Обновить отчёт каталога Алетан KIT'
           git push origin HEAD:main || true
