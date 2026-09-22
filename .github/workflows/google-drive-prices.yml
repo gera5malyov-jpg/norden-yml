@@ -19,8 +19,7 @@ jobs:
   prices:
     runs-on: ubuntu-latest
     env:
-      GOOGLE_DRIVE_PRICES_FOLDER_ID: "1iKh4RGaq1ViyWmHENjp8oeuauHmWEyj9"
-      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      GOOGLE_DRIVE_PRICES_FOLDER_URL: "https://drive.google.com/drive/folders/1iKh4RGaq1ViyWmHENjp8oeuauHmWEyj9"
 
     steps:
       - name: Получить код
@@ -31,18 +30,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Установить доступ к Google Drive
-        run: pip install --disable-pip-version-check google-api-python-client google-auth
+      - name: Установить загрузчик Google Drive
+        run: pip install --disable-pip-version-check "gdown>=6.1,<7"
 
-      - name: Проверить секрет Google
-        shell: bash
-        run: |
-          if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
-            echo "::error::Не задан GitHub secret GOOGLE_SERVICE_ACCOUNT_JSON"
-            exit 1
-          fi
-
-      - name: Проверить папку Прайсы
+      - name: Проверить публичный доступ к папке Прайсы
         if: ${{ inputs.mode == 'check' }}
         run: python scripts/google_drive_prices.py --list-only
 
@@ -55,6 +46,7 @@ jobs:
         shell: bash
         run: |
           if git status --porcelain -- runtime/prices | grep -q .; then
-            echo "::warning::runtime/prices не должен коммититься. Файлы остаются только на временном runner GitHub Actions."
+            echo "::error::runtime/prices не должен коммититься в Git."
+            exit 1
           fi
-          find runtime/prices -type f -printf '%P\n' | sort
+          echo "Файлы используются только во временном runner GitHub Actions."
