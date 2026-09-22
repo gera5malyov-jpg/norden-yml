@@ -114,6 +114,7 @@ def create_new(order):
         "mp_wb_rid":rid,
         "mp_wb_order_uid":s(order.get("orderUid")),
         "mp_wb_delivery_type":s(order.get("deliveryType")),
+        "mp_wb_live_capture":"1",
         "shipping_name":"Wildberries",
         "payment_name":"Wildberries",
     }
@@ -177,7 +178,7 @@ for row in rows or []:
         info=wa.call("shop.order.getInfo",params={"id":oid})
         params=info.get("params") or {}
         wb_id=s(params.get("mp_wb_order_id"))
-        if wb_id:
+        if wb_id and s(params.get("mp_wb_live_capture"))=="1":
             known[wb_id]=oid
     except Exception:
         errors+=1
