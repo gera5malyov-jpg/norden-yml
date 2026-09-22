@@ -1,0 +1,156 @@
+name: Norden content enrichment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-content-enrichment.yml'
+  workflow_dispatch:
+    inputs:
+      start_index:
+        description: 'Target index to continue from'
+        required: false
+        default: '0'
+        type: string
+      batch_size:
+        description: 'Cards per run'
+        required: false
+        default: '250'
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: norden-kit-price-stock-daily
+  cancel-in-progress: false
+
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Resolve batch
+        id: batch
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "start=${{ inputs.start_index }}" >> "$GITHUB_OUTPUT"
+            echo "size=${{ inputs.batch_size }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "start=0" >> "$GITHUB_OUTPUT"
+            echo "size=250" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Enrich images and characteristics only
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python norden-kit/enrich_norden_content.py             --start-index "${{ steps.batch.outputs.start }}"             --batch-size "${{ steps.batch.outputs.size }}"
+
+      - name: Read progress
+        id: progress
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          p='norden-kit/content_enrichment_report.json'
+          if not os.path.exists(p):
+              print('continue=false')
+              print('next=0')
+              print('remaining=0')
+              raise SystemExit
+          r=json.load(open(p,encoding='utf-8'))
+          nxt=int(r.get('next_index') or 0)
+          remaining=int(r.get('remaining') or 0)
+          print('continue=' + ('true' if remaining > 0 else 'false'))
+          print('next=' + str(nxt))
+          print('remaining=' + str(remaining))
+          print('processed=' + str(int(r.get('processed') or 0)))
+          print('images=' + str(int(r.get('cards_images_filled') or 0)))
+          print('chars=' + str(int(r.get('characteristics_added') or 0)))
+          print('errors=' + str(len(r.get('errors') or [])))
+          PY
+
+      - name: Commit enrichment report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions
+          git config user.email actions@github.com
+          cp norden-kit/content_enrichment_report.json /tmp/content_enrichment_report.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/content_enrichment_report.json norden-kit/content_enrichment_report.json 2>/dev/null || true
+          git add norden-kit/content_enrichment_report.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Update Norden content enrichment progress"
+          for i in 1 2 3 4 5; do
+            git push origin HEAD:main && exit 0
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/content_enrichment_report.json norden-kit/content_enrichment_report.json 2>/dev/null || true
+            git add norden-kit/content_enrichment_report.json 2>/dev/null || true
+            git commit -m "Update Norden content enrichment progress" || true
+            sleep $((i * 5))
+          done
+          exit 1
+
+      - name: Queue next content batch
+        if: steps.progress.outputs.continue == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEXT_INDEX: ${{ steps.progress.outputs.next }}
+          BATCH_SIZE: ${{ steps.batch.outputs.size }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          repo=os.environ['GITHUB_REPOSITORY']
+          url=f"https://api.github.com/repos/{repo}/actions/workflows/norden-content-enrichment.yml/dispatches"
+          body=json.dumps({
+              'ref':'main',
+              'inputs':{
+                  'start_index':os.environ['NEXT_INDEX'],
+                  'batch_size':os.environ['BATCH_SIZE'],
+              }
+          }).encode()
+          req=urllib.request.Request(url,data=body,method='POST',headers={
+              'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+              'Accept':'application/vnd.github+json',
+              'X-GitHub-Api-Version':'2022-11-28',
+              'Content-Type':'application/json',
+          })
+          with urllib.request.urlopen(req,timeout=30) as resp:
+              if resp.status != 204:
+                  raise RuntimeError(f'dispatch status {resp.status}')
+          PY
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "Processed: ${{ steps.progress.outputs.processed }}"
+          echo "Images filled: ${{ steps.progress.outputs.images }}"
+          echo "Characteristics added: ${{ steps.progress.outputs.chars }}"
+          echo "Errors: ${{ steps.progress.outputs.errors }}"
+          echo "Remaining: ${{ steps.progress.outputs.remaining }}"
