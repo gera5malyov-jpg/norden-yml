@@ -1,0 +1,206 @@
+name: Build KIT to Ozon category comparison
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/category-audit-compare-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install rapidfuzz
+      - name: Build comparison
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv, json, re, unicodedata
+          from collections import Counter, defaultdict
+          from pathlib import Path
+          from rapidfuzz import fuzz, process
+
+          root=Path('category-audit')
+          kit=json.loads((root/'kit_categories.json').read_text(encoding='utf-8'))
+          oz=json.loads((root/'ozon_categories_flat.json').read_text(encoding='utf-8'))
+          oz=[x for x in oz if not x.get('disabled')]
+
+          STOP={'и','для','в','на','с','по','из','к','от','под','без','со','или','а'}
+          SERVICE={'категория 1-го уровня','не указана','default'}
+
+          def norm(s):
+              s=unicodedata.normalize('NFKC',str(s or '')).casefold()
+              s=s.replace('ё','е')
+              s=re.sub(r'[^0-9a-zа-я]+',' ',s)
+              return ' '.join(s.split())
+
+          def tokens(s):
+              return {x for x in norm(s).split() if x not in STOP and len(x)>1}
+
+          by_id={str(x.get('id')):x for x in kit if x.get('id')}
+          path_cache={}
+          def kit_path(row):
+              rid=str(row.get('id') or '')
+              if rid in path_cache:
+                  return path_cache[rid]
+              out=[]; seen=set(); cur=row
+              while cur and str(cur.get('id') or '') not in seen:
+                  seen.add(str(cur.get('id') or ''))
+                  title=str(cur.get('title') or '').strip()
+                  if title: out.append(title)
+                  pid=str(cur.get('parent_id') or '')
+                  cur=by_id.get(pid) if pid else None
+              out.reverse()
+              p=' > '.join(out)
+              path_cache[rid]=p
+              return p
+
+          # Duplicate signals within KIT
+          title_counts=Counter(norm(x.get('title')) for x in kit if norm(x.get('title')))
+          path_counts=Counter(norm(kit_path(x)) for x in kit if norm(kit_path(x)))
+
+          oz_names=[str(x.get('name') or '') for x in oz]
+          oz_norm=[norm(x) for x in oz_names]
+          exact=defaultdict(list)
+          for i,n in enumerate(oz_norm):
+              if n: exact[n].append(i)
+
+          def context_score(kpath, opath):
+              kt=tokens(kpath); ot=tokens(opath)
+              if not kt or not ot: return 0.0
+              return 100.0*len(kt & ot)/max(1,len(kt | ot))
+
+          def pick_candidate(row):
+              title=str(row.get('title') or '').strip()
+              kp=kit_path(row)
+              n=norm(title)
+              if n in exact:
+                  inds=exact[n]
+                  best=max(inds,key=lambda i: context_score(kp,oz[i].get('path','')))
+                  return best,100.0,'Точное совпадение'
+
+              # Get top fuzzy candidates by name; rerank by context.
+              candidates=process.extract(
+                  n,
+                  oz_norm,
+                  scorer=fuzz.WRatio,
+                  limit=12,
+                  score_cutoff=45,
+              )
+              best=None
+              for _,name_score,i in candidates:
+                  ctx=context_score(kp,oz[i].get('path',''))
+                  # lexical score dominates; context breaks ambiguous furniture names.
+                  combined=float(name_score)*0.88 + ctx*0.12
+                  item=(combined,float(name_score),ctx,i)
+                  if best is None or item>best:
+                      best=item
+              if best is None:
+                  return None,0.0,'Нет совпадения'
+              combined,name_score,ctx,i=best
+              return i,round(combined,1),'Нечёткое совпадение'
+
+          rows=[]
+          action_counts=Counter()
+          confidence_counts=Counter()
+
+          for x in kit:
+              title=str(x.get('title') or '').strip()
+              kp=kit_path(x)
+              parent=by_id.get(str(x.get('parent_id') or '')) or {}
+              dup_title=title_counts[norm(title)]>1 if norm(title) else False
+              dup_path=path_counts[norm(kp)]>1 if norm(kp) else False
+
+              if norm(title) in SERVICE:
+                  rec={
+                      'name':'','path':'','kind':'','description_category_id':'','type_id':''
+                  }
+                  score=100.0; mt='Служебная категория'
+                  confidence='Служебная'
+                  action='Не менять'
+                  proposed=title
+                  comment='Служебная категория KIT; не приводить к Ozon автоматически.'
+              else:
+                  idx,score,mt=pick_candidate(x)
+                  rec=oz[idx] if idx is not None else {'name':'','path':'','kind':'','description_category_id':'','type_id':''}
+                  same=norm(title)==norm(rec.get('name'))
+                  if score>=96:
+                      confidence='Высокая'
+                      action='Оставить' if same else 'Переименовать'
+                  elif score>=88:
+                      confidence='Средняя'
+                      action='Проверить перед переименованием'
+                  else:
+                      confidence='Низкая'
+                      action='Проверить вручную'
+                  proposed=rec.get('name') or ''
+                  comments=[]
+                  if dup_title: comments.append('Название встречается в KIT несколько раз.')
+                  if dup_path: comments.append('Есть полный дубль пути категории.')
+                  if rec.get('kind')=='type': comments.append('Совпадение с типом товара Ozon, а не промежуточной категорией.')
+                  if score<88: comments.append('Автоматическое переименование небезопасно.')
+                  comment=' '.join(comments)
+
+              action_counts[action]+=1
+              confidence_counts[confidence]+=1
+              rows.append({
+                  'KIT ID':x.get('id',''),
+                  'Текущий путь KIT':kp,
+                  'Текущая категория':title,
+                  'Родитель KIT':parent.get('title',''),
+                  'Скрыта в меню':'Да' if x.get('is_hidden_in_menu') else 'Нет',
+                  'Дубль названия в KIT':'Да' if dup_title else 'Нет',
+                  'Дубль полного пути':'Да' if dup_path else 'Нет',
+                  'Предлагаемое название':proposed,
+                  'Путь Ozon':rec.get('path',''),
+                  'Уровень Ozon':rec.get('kind',''),
+                  'Ozon description_category_id':rec.get('description_category_id','') or '',
+                  'Ozon type_id':rec.get('type_id','') or '',
+                  'Тип совпадения':mt,
+                  'Оценка совпадения':score,
+                  'Уверенность':confidence,
+                  'Предлагаемое действие':action,
+                  'Комментарий':comment,
+              })
+
+          cols=list(rows[0])
+          with (root/'comparison.csv').open('w',encoding='utf-8-sig',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=cols)
+              w.writeheader(); w.writerows(rows)
+
+          # priority review: all renames + duplicates + medium/low
+          priority=[r for r in rows if r['Предлагаемое действие']!='Оставить' or r['Дубль названия в KIT']=='Да' or r['Дубль полного пути']=='Да']
+          with (root/'comparison_priority.csv').open('w',encoding='utf-8-sig',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=cols)
+              w.writeheader(); w.writerows(priority)
+
+          summary={
+              'kit_categories':len(rows),
+              'ozon_active_nodes':len(oz),
+              'actions':dict(action_counts),
+              'confidence':dict(confidence_counts),
+              'priority_rows':len(priority),
+          }
+          (root/'comparison_summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit comparison
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add category-audit/comparison*.csv category-audit/comparison_summary.json
+          git commit -m "Build KIT to Ozon category comparison" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
