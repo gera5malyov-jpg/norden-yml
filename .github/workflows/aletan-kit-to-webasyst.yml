@@ -1,0 +1,103 @@
+name: Алетан KIT → Webasyst aletan.ru
+
+on:
+  workflow_run:
+    workflows: ["Алетан → KIT — цены раз в 2 недели"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Только проверка без записи в Webasyst'
+        required: true
+        default: true
+        type: boolean
+  push:
+    branches: [main]
+    paths:
+      - 'webasyst/sync_aletan_to_webasyst.py'
+      - 'aletan-kit/sync_aletan_catalog_full.py'
+      - '.github/workflows/aletan-kit-to-webasyst.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aletan-kit-to-webasyst
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile webasyst/sync_aletan_to_webasyst.py alentan-kit/sync_aletan_catalog_full.py
+        continue-on-error: true
+      - name: Validate exact files
+        run: python -m py_compile webasyst/sync_aletan_to_webasyst.py aletan-kit/sync_aletan_catalog_full.py aletan-kit/sync_aletan_kit.py webasyst/client.py
+
+  sync:
+    needs: validate
+    if: >
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'schedule')
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests openpyxl
+
+      - name: Сопоставить Алетан с типом aletan.ru
+        id: sync
+        continue-on-error: true
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          ALETAN_WEBASYST_WRITE_DELAY: '0.65'
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            args+=(--dry-run)
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.dry_run }}" == "true" ]]; then
+            args+=(--dry-run)
+          fi
+          python webasyst/sync_aletan_to_webasyst.py "${args[@]}"
+
+      - name: Сохранить отчёт Webasyst
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          cp webasyst/last_aletan_webasyst_sync.json /tmp/aletan-wa.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          if [ -f /tmp/aletan-wa.json ]; then
+            cp /tmp/aletan-wa.json webasyst/last_aletan_webasyst_sync.json
+          fi
+          git add webasyst/last_aletan_webasyst_sync.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Обновить отчёт Алетан Webasyst'
+          git push origin HEAD:main || true
+
+      - name: Завершить с ошибкой при проблемах
+        if: always()
+        env:
+          SYNC_OUTCOME: ${{ steps.sync.outcome }}
+        run: test "$SYNC_OUTCOME" = "success"
