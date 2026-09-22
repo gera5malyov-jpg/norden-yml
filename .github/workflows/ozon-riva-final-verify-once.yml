@@ -1,0 +1,126 @@
+name: Ozon final verify RIVA brands
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-riva-final-verify-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify no old brand IDs remain
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          from collections import Counter
+          sys.path.insert(0, 'ozon')
+          import brand_sync_once as b
+
+          SOURCE={115843344:'RIVA Chair',970976483:'RIVA Chair',971871159:'RV DESIGN'}
+          TARGET=115868128
+          def list_vis(vis):
+              out=[]; last=''; seen=set()
+              while True:
+                  body={'filter':{'visibility':vis},'limit':1000}
+                  if last: body['last_id']=last
+                  data=b.post('/v3/product/list',body)
+                  res=data.get('result') or {}
+                  items=res.get('items') or []
+                  out.extend(items)
+                  new=res.get('last_id') or ''
+                  total=int(res.get('total') or 0)
+                  if not items or len(out)>=total or not new or new==last or new in seen: break
+                  seen.add(last); last=new
+              return out
+          active=list_vis('ALL')
+          archived=list_vis('ARCHIVED')
+          bypid={}
+          archived_ids=set()
+          for x in active:
+              pid=int(x.get('product_id') or 0)
+              if pid: bypid[pid]=x
+          for x in archived:
+              pid=int(x.get('product_id') or 0)
+              if pid:
+                  bypid[pid]=x
+                  archived_ids.add(pid)
+
+          products=b.get_product_attributes(list(bypid))
+          remaining=[]
+          target_count=0
+          source_counts=Counter()
+          for p in products:
+              pid=int(p.get('id') or p.get('product_id') or 0)
+              offer=str(p.get('offer_id') or '')
+              for a in p.get('attributes') or []:
+                  if int(a.get('id') or a.get('attribute_id') or 0)!=85:
+                      continue
+                  for v in a.get('values') or []:
+                      did=int(v.get('dictionary_value_id') or 0)
+                      if did==TARGET:
+                          target_count+=1
+                      if did in SOURCE:
+                          source_counts[SOURCE[did]]+=1
+                          remaining.append({
+                              'product_id':pid,
+                              'offer_id':offer,
+                              'name':str(p.get('name') or ''),
+                              'old_brand':SOURCE[did],
+                              'old_brand_id':did,
+                              'archived':pid in archived_ids,
+                          })
+
+          report={
+              'active_count':len(active),
+              'archived_count':len(archived),
+              'total_unique':len(bypid),
+              'remaining_old_brands':len(remaining),
+              'remaining_by_brand':dict(source_counts),
+              'megapolis_target_id_count':target_count,
+              'remaining':remaining,
+              'ok':len(remaining)==0,
+          }
+          Path('ozon/riva_final_verify.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          lines=[
+              '# Ozon — финальная проверка брендов RIVA/RV DESIGN','',
+              f"- Результат: **{'УСПЕШНО' if report['ok'] else 'ОСТАЛИСЬ СТАРЫЕ БРЕНДЫ'}**",
+              f"- Неархивных товаров: **{report['active_count']}**",
+              f"- Архивных товаров: **{report['archived_count']}**",
+              f"- Всего уникальных товаров: **{report['total_unique']}**",
+              f"- Осталось RIVA Chair / RV DESIGN: **{report['remaining_old_brands']}**",
+              f"- Товаров с выбранным ID «Мегаполис»: **{report['megapolis_target_id_count']}**",
+          ]
+          if remaining:
+              lines += ['','| Артикул | Старый бренд | Архив |','|---|---|---|']
+              for x in remaining[:1000]:
+                  lines.append(f"| `{x['offer_id']}` | {x['old_brand']} | {'да' if x['archived'] else 'нет'} |")
+          Path('ozon/riva_final_verify.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+          print(json.dumps(report,ensure_ascii=False))
+          PY
+      - name: Commit verification
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add ozon/riva_final_verify.json ozon/riva_final_verify.md
+          git commit -m "Ozon: final verify RIVA brand replacement" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
