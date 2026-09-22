@@ -1,0 +1,46 @@
+name: Ozon brand replacement v3 all products
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-brand-replace-v3-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ozon-brand-replace-v3-once
+  cancel-in-progress: false
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Replace RIVA/RV DESIGN brands in active and archived products
+        run: python ozon/brand_sync_v3.py
+      - name: Commit v3 report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add ozon/brand_sync_v3_report.json ozon/brand_sync_v3_report.md 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No report changes"
+            exit 0
+          fi
+          git commit -m "Ozon: brand sync v3 report"
+          git pull --rebase origin main
+          git push origin HEAD:main
