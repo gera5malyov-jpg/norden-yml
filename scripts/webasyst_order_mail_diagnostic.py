@@ -125,3 +125,17 @@ for oid in [41037,41028,40618,40482]:
         out(f"WA_TL_{oid}_{j}_SEND_WORD",int(any(s in blob for s in ["отправ","уведом","email","e-mail","mail","письм"])))
 
 # diagnostic trigger 2026-09-22
+
+# contact email presence diagnostic
+for oid in [41037, 41028, 40923]:
+    try:
+        info = client.call("shop.order.getInfo", params={"id": oid}) or {}
+        contact = info.get("contact") or {}
+        email = (contact.get("email") or "").strip()
+        out(f"WA_ORDER_{oid}_CONTACT_EMAIL_PRESENT", int(bool(email)))
+        out(f"WA_ORDER_{oid}_CONTACT_ID_PRESENT", int(bool(info.get("contact_id"))))
+        params = info.get("params") or {}
+        storefront = str(params.get("storefront") or "")
+        out(f"WA_ORDER_{oid}_STOREFRONT_MATCH", int(storefront == "profikompany.ru"))
+    except Exception as e:
+        out(f"WA_ORDER_{oid}_INFO_ERROR", type(e).__name__)
