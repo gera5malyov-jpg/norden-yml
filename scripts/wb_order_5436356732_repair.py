@@ -123,6 +123,22 @@ for row in rows:
     candidates.append((score,oid,info))
 
 if not candidates:
+    print("DIAG_TARGET_ARTICLE="+article)
+    print("DIAG_TARGET_CREATED="+created)
+    print("DIAG_SOURCE_ROWS="+str(len(rows)))
+    for idx,row in enumerate(rows[:20]):
+        oid=str(row.get("id") or "")
+        if not oid: continue
+        info=wa.call("shop.order.getInfo",params={"id":oid})
+        p=info.get("params") or {}
+        its=info.get("items") or []
+        codes=[str(x.get("sku_code") or x.get("sku") or "") for x in its if isinstance(x,dict)]
+        ids=[str(x.get("sku_id") or "") for x in its if isinstance(x,dict)]
+        print(f"DIAG_ROW_{idx}_ORDER_ID="+oid)
+        print(f"DIAG_ROW_{idx}_MP_EXTERNAL_ID="+str(p.get("mp_external_id") or ""))
+        print(f"DIAG_ROW_{idx}_MP_CREATED="+str(p.get("mp_created_at") or ""))
+        print(f"DIAG_ROW_{idx}_SKU_CODES="+",".join(codes))
+        print(f"DIAG_ROW_{idx}_SKU_IDS="+",".join(ids))
     raise SystemExit("WEBASYST_MATCH_NOT_FOUND")
 candidates.sort(key=lambda x:x[0])
 if len(candidates)>1 and candidates[0][0]==candidates[1][0]:
