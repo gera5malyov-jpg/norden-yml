@@ -1,0 +1,65 @@
+name: Ozon brand sync once
+
+on:
+  push:
+    paths:
+      - 'ozon/brand_sync_once.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ozon-brand-sync-once
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      BRAND_REPORT_JSON: ozon/brand_sync_report.json
+      BRAND_REPORT_MD: ozon/brand_sync_report.md
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check Ozon credentials
+        shell: bash
+        run: |
+          if [ -z "$OZON_CLIENT_ID" ] || [ -z "$OZON_API_KEY" ]; then
+            echo "::error::OZON_CLIENT_ID / OZON_API_KEY are not configured"
+            exit 2
+          fi
+
+      - name: Change selected brands to Megapolis
+        run: python ozon/brand_sync_once.py
+
+      - name: Add report to job summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$BRAND_REPORT_MD" ]; then
+            cat "$BRAND_REPORT_MD" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Commit report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ozon/brand_sync_report.json ozon/brand_sync_report.md 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No report changes to commit"
+          else
+            git commit -m "Ozon: brand sync report"
+            git push
+          fi
