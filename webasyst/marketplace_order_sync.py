@@ -102,7 +102,22 @@ class Net:
                 time.sleep(min(20, 2 + i * 2))
                 continue
             if r.status_code == 429:
-                time.sleep(min(30, 3 + i * 3))
+                # WB and some marketplace APIs return an explicit safe retry delay.
+                # Respect it; short blind retries can keep the token bucket exhausted.
+                raw_retry = r.headers.get("X-Ratelimit-Retry") or r.headers.get("Retry-After")
+                raw_reset = r.headers.get("X-Ratelimit-Reset")
+                try:
+                    wait = float(raw_retry) if raw_retry not in (None, "") else 0.0
+                except (TypeError, ValueError):
+                    wait = 0.0
+                if wait <= 0:
+                    try:
+                        wait = float(raw_reset) if raw_reset not in (None, "") else 0.0
+                    except (TypeError, ValueError):
+                        wait = 0.0
+                if wait <= 0:
+                    wait = 65.0
+                time.sleep(min(600.0, wait + 2.0))
                 last = RuntimeError("429")
                 continue
             if r.status_code >= 500:
@@ -384,20 +399,12 @@ def load_wb():
     h = {"Authorization": token, "Accept": "application/json"}
     start = datetime.now(timezone.utc) - timedelta(days=WB_DAYS)
     params = {"dateFrom": start.strftime("%Y-%m-%dT%H:%M:%S"), "flag": 0}
-    # WB Statistics API applies a strict seller-level throttle. Avoid repeated 429 retries,
-    # because each retry can keep the bucket hot. Cool down first, then send one request.
-    time.sleep(75)
-    r = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/orders", headers=h, params=params, tries=1)
-    if r.status_code == 429:
-        time.sleep(75)
-        r = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/orders", headers=h, params=params, tries=1)
+    # Statistics API is strictly throttled. Net.req follows WB's X-Ratelimit-Retry header.
+    r = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/orders", headers=h, params=params, tries=4)
     if not r.ok: raise RuntimeError(f"WB orders HTTP {r.status_code}")
     orders = r.json() if isinstance(r.json(), list) else []
-    time.sleep(75)
-    rs = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/sales", headers=h, params=params, tries=1)
-    if rs.status_code == 429:
-        time.sleep(75)
-        rs = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/sales", headers=h, params=params, tries=1)
+    time.sleep(65)
+    rs = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/sales", headers=h, params=params, tries=4)
     sales = rs.json() if rs.ok and isinstance(rs.json(), list) else []
     sold = {s(x.get("srid")) for x in sales if isinstance(x, dict) and s(x.get("srid")) and not x.get("isStorno")}
     groups = defaultdict(list)
