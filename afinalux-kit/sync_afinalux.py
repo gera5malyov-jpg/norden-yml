@@ -317,7 +317,6 @@ def char_values(variant, char_titles):
         norm("Артикул поставщика"),
         norm("Артикул"),
         norm("Код для сайта"),
-        norm("Модель"),
     }
     for row in variant.get("characteristics") or []:
         cid = s(row.get("characteristic_id"))
@@ -334,46 +333,31 @@ def char_values(variant, char_titles):
 
 def candidate_feed_keys(variant, feed_items, char_titles):
     source_keys = set(feed_items)
-
-    # 1. Точное совпадение SKU/характеристик — самый сильный ключ.
     direct = []
+
+    # Only strong identifiers: SKU, supplier article, article and site code.
+    # Generic model values (e.g. T133) are excluded to avoid false bundle matches.
     for value in [variant.get("sku"), *char_values(variant, char_titles)]:
         key = norm(value)
         if key in source_keys:
             direct.append(key)
+
     direct = list(dict.fromkeys(direct))
     if len(direct) == 1:
         return direct
     if len(direct) > 1:
-        # Если один код является более полным составным артикулом, берём его.
-        max_len = max(map(len, direct))
-        longest = [k for k in direct if len(k) == max_len]
-        return longest if len(longest) == 1 else direct
+        return direct
 
     name_key = norm(variant.get("name"))
     if not name_key:
         return []
 
-    # 2. Точное совпадение названия карточки с названием из фида.
     exact_name = [
         key for key, item in feed_items.items()
         if norm(item.get("name")) == name_key
     ]
-    if len(exact_name) == 1:
-        return exact_name
+    return exact_name if len(exact_name) == 1 else []
 
-    # 3. Артикул внутри названия. Для составных комплектов короткий код
-    # (например T133) может входить в длинный. Приоритет уникальному
-    # самому длинному совпадению.
-    matches = [
-        key for key in source_keys
-        if len(key) >= 4 and key in name_key
-    ]
-    if not matches:
-        return []
-    max_len = max(map(len, matches))
-    longest = [k for k in matches if len(k) == max_len]
-    return longest if len(longest) == 1 else matches
 
 def build_kit_index(kit, feed_items):
     chars = kit.list_all(
@@ -391,6 +375,7 @@ def build_kit_index(kit, feed_items):
         if s(row.get("status")).upper() != "ARCHIVED"
     ]
 
+    source_keys = set(feed_items)
     by_key = {}
     ambiguous = defaultdict(list)
     detailed_reads = 0
@@ -402,20 +387,22 @@ def build_kit_index(kit, feed_items):
             continue
 
         row_brand = norm(row.get("brand"))
-        if row_brand == norm(BRAND):
+        row_sku_key = norm(row.get("sku"))
+        is_afina = row_brand == norm(BRAND)
+        if is_afina:
             afina_count += 1
 
-        keys = candidate_feed_keys(row, feed_items, char_titles)
-        if not keys:
+        # Read every Afina Garden detail card, because list responses often omit
+        # characteristics where the supplier article is stored.
+        if not is_afina and row_sku_key not in source_keys:
             continue
 
         variant = row
-        if not s(row.get("brand")) or not (row.get("characteristics") or []):
-            try:
-                variant = kit.get_variant(vid)
-                detailed_reads += 1
-            except Exception:
-                variant = row
+        try:
+            variant = kit.get_variant(vid)
+            detailed_reads += 1
+        except Exception:
+            variant = row
 
         keys = candidate_feed_keys(variant, feed_items, char_titles)
         if len(keys) != 1:
@@ -424,12 +411,13 @@ def build_kit_index(kit, feed_items):
             continue
 
         key = keys[0]
-        exact_sku = norm(variant.get("sku")) == key
         variant_brand = norm(variant.get("brand"))
+        exact_sku = norm(variant.get("sku")) == key
 
-        # Exact SKU is authoritative unless the card clearly belongs to another brand.
         if variant_brand and variant_brand != norm(BRAND):
-            ambiguous[key].append("brand_conflict:" + s(variant.get("brand")) + ":" + vid)
+            ambiguous[key].append(
+                "brand_conflict:" + s(variant.get("brand")) + ":" + vid
+            )
             continue
         if not exact_sku and variant_brand != norm(BRAND):
             continue
@@ -490,6 +478,12 @@ def build_wa_index(wa, products, feed_items):
     ambiguous = defaultdict(list)
     fallback_matches = 0
 
+    feed_names = defaultdict(list)
+    for key, item in feed_items.items():
+        name_key = norm(item.get("name"))
+        if name_key:
+            feed_names[name_key].append(key)
+
     for product in products:
         pid = s(product.get("id"))
         skus = product_skus(product) or get_product_skus(wa, pid)
@@ -503,37 +497,29 @@ def build_wa_index(wa, products, feed_items):
         if len(direct) == 1:
             key, sku = direct[0]
         elif len(direct) > 1:
-            max_len = max(len(x[0]) for x in direct)
-            longest = [x for x in direct if len(x[0]) == max_len]
-            if len(longest) != 1:
-                ambiguous["product:" + pid].extend(x[0] for x in direct)
-                continue
-            key, sku = longest[0]
+            ambiguous["product:" + pid].extend(x[0] for x in direct)
+            continue
         else:
             if len(skus) != 1:
                 continue
 
             name_key = norm(product.get("name"))
-            exact_name = [
-                k for k, item in feed_items.items()
-                if norm(item.get("name")) == name_key
-            ]
+            exact_name = feed_names.get(name_key, [])
             if len(exact_name) == 1:
                 key, sku = exact_name[0], skus[0]
                 fallback_matches += 1
             else:
+                # Last fallback is intentionally conservative. Short codes such
+                # as T133 are not used because they occur inside bundle names.
                 matches = [
                     k for k in source_keys
-                    if len(k) >= 4 and k in name_key
+                    if len(k) >= 8 and k in name_key
                 ]
-                if not matches:
+                if len(matches) != 1:
+                    if len(matches) > 1:
+                        ambiguous["product:" + pid].extend(matches)
                     continue
-                max_len = max(map(len, matches))
-                longest = [k for k in matches if len(k) == max_len]
-                if len(longest) != 1:
-                    ambiguous["product:" + pid].extend(matches)
-                    continue
-                key, sku = longest[0], skus[0]
+                key, sku = matches[0], skus[0]
                 fallback_matches += 1
 
         if key in by_key and s(by_key[key][0].get("id")) != pid:
@@ -544,6 +530,7 @@ def build_wa_index(wa, products, feed_items):
             by_key[key] = (product, sku)
 
     return by_key, ambiguous, fallback_matches
+
 
 def run(args):
     report = {
