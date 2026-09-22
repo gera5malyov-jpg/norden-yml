@@ -476,38 +476,80 @@ def characteristic_values(variant, char_titles):
         out.extend(clean_code(v) for v in vals if clean_code(v))
     return list(dict.fromkeys(out))
 
+def sku_candidates(sku, source_codes):
+    sku = clean_code(sku)
+    if not sku:
+        return []
+    out = []
+    if sku in source_codes:
+        out.append(sku)
+
+    # Проверяем только реальные хвосты SKU, а не весь справочник поставщика.
+    # Это покрывает форматы вроде 337-ABC123, KIT-337-ABC-123 и т.п.
+    for sep in ("-", "_", "/", " "):
+        if sep not in sku:
+            continue
+        parts = [p for p in sku.split(sep) if p]
+        for start in range(1, len(parts)):
+            candidate = sep.join(parts[start:])
+            if candidate in source_codes:
+                out.append(candidate)
+        tail = parts[-1] if parts else ""
+        if tail in source_codes:
+            out.append(tail)
+    return list(dict.fromkeys(out))
+
+
 def build_kit_index(kit, source_codes):
     chars = kit.list_all("/v1/characteristics", {"status": "ACTIVE"}, "characteristics")
     char_titles = {s(x.get("id")): s(x.get("title")) for x in chars if s(x.get("id"))}
     rows = kit.list_all("/v1/variants", {"brand": BRAND}, "variants")
-    branded = [v for v in rows if norm(v.get("brand")) == norm(BRAND) and s(v.get("status")).upper() != "ARCHIVED"]
+    branded = [
+        v for v in rows
+        if norm(v.get("brand")) == norm(BRAND)
+        and s(v.get("status")).upper() != "ARCHIVED"
+    ]
 
     by_code, ambiguous, samples = {}, {}, []
+    detailed_reads = 0
+
     for row in branded:
         vid = s(row.get("id"))
         if not vid:
             continue
+
         variant = row
-        if not (variant.get("characteristics") or []):
+        keys = sku_candidates(variant.get("sku"), source_codes)
+
+        # Если в выдаче списка уже есть характеристики — используем их сразу.
+        keys.extend(
+            k for k in characteristic_values(variant, char_titles)
+            if k in source_codes
+        )
+
+        # Детальную карточку читаем только когда SKU/списочная выдача
+        # не позволили определить артикул поставщика.
+        if not keys and not (variant.get("characteristics") or []):
             try:
                 variant = kit.get_variant(vid)
+                detailed_reads += 1
+                keys.extend(sku_candidates(variant.get("sku"), source_codes))
+                keys.extend(
+                    k for k in characteristic_values(variant, char_titles)
+                    if k in source_codes
+                )
             except Exception:
                 pass
-        keys = []
-        sku = clean_code(variant.get("sku"))
-        if sku in source_codes:
-            keys.append(sku)
-        if sku:
-            for code in source_codes:
-                if len(code) >= 4 and sku.endswith("-" + code):
-                    keys.append(code)
-        keys.extend(k for k in characteristic_values(variant, char_titles) if k in source_codes)
+
         keys = list(dict.fromkeys(keys))
 
         if len(samples) < 20:
             samples.append({
-                "variant_id": vid, "sku": s(variant.get("sku")), "name": s(variant.get("name")),
-                "brand": s(variant.get("brand")), "candidate_codes": keys,
+                "variant_id": vid,
+                "sku": s(variant.get("sku")),
+                "name": s(variant.get("name")),
+                "brand": s(variant.get("brand")),
+                "candidate_codes": keys,
             })
 
         for code in keys:
@@ -515,9 +557,11 @@ def build_kit_index(kit, source_codes):
                 ambiguous.setdefault(code, [by_code[code]]).append(variant)
             else:
                 by_code[code] = variant
+
     for code in ambiguous:
         by_code.pop(code, None)
-    return by_code, ambiguous, samples, len(branded)
+
+    return by_code, ambiguous, samples, len(branded), detailed_reads
 
 def current_prices(variant):
     p = variant.get("pricing") or {}
@@ -575,8 +619,9 @@ def run(args):
     })
 
     kit = KitClient(token)
-    index, kit_ambiguous, samples, branded_count = build_kit_index(kit, set(detected["prices"]))
+    index, kit_ambiguous, samples, branded_count, detailed_reads = build_kit_index(kit, set(detected["prices"]))
     report["kit_aletan_active_variants"] = branded_count
+    report["kit_detailed_variant_reads"] = detailed_reads
     report["kit_aletan_samples"] = samples
     report["kit_ambiguous_vendor_codes"] = list(kit_ambiguous)[:50]
 
