@@ -1,6 +1,6 @@
 {
   "status": "ok",
-  "dry_run": true,
+  "dry_run": false,
   "brand": "Алетан",
   "creation_rule": "создавать отсутствующие товары с SKU=vendorCode",
   "category_rule": "Алетан/<category из CSV>",
@@ -525,6 +525,7 @@
     }
   ],
   "sample_new": [],
+  "days_since_last_success": null,
   "catalog_rows_total": 839,
   "catalog_unique_vendor_codes": 771,
   "catalog_duplicate_vendor_codes": [
