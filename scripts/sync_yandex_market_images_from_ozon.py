@@ -54,6 +54,13 @@ def call(session: requests.Session, method: str, url: str, *, body=None, params=
             delay = float(r.headers.get("Retry-After") or min(20, attempt + 1))
             time.sleep(delay)
             continue
+        # Yandex Market uses HTTP 420 when the per-minute points limit is reached.
+        # Wait for the quota window to reset and retry the SAME batch.
+        if r.status_code == 420 and "rate limit" in r.text.lower():
+            delay = float(r.headers.get("Retry-After") or 65)
+            print(f"RATE_LIMIT_WAIT {delay}s {method} {url}", flush=True)
+            time.sleep(delay)
+            continue
         if r.status_code >= 500:
             time.sleep(min(20, attempt + 1))
             continue
