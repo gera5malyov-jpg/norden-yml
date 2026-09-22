@@ -1,5 +1,5 @@
 name: Marketplace orders to Webasyst
-# live sync: suppress duplicate WB run
+# live sync: yandex buyer and delivery repair
 
 on:
   push:
@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: marketplace-orders-webasyst-wb-now
-  cancel-in-progress: true
+  group: marketplace-orders-webasyst-live
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -29,7 +29,7 @@ jobs:
       - name: Перенести заказы маркетплейсов в Webasyst
         env:
           DRY_RUN: '0'
-          SYNC_SOURCES: 'none'
+          SYNC_SOURCES: 'yandex_market,yandex_kit,ozon'
           OZON_ORDER_IMPORT_CUTOFF: '2026-09-22T11:08:40Z'
           OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
           OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
