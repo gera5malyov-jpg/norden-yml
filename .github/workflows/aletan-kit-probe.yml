@@ -17,26 +17,35 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install --disable-pip-version-check requests
-      - name: Проверить фильтр brand
+      - name: Проверить фильтры поиска KIT
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         shell: bash
         run: |
           python - <<'PY'
           import os, json, collections, requests
-          r=requests.get(
-              "https://api.kit.yandex.net/v1/variants",
-              params={"brand":"Алетан","page":1,"per_page":100},
-              headers={"Authorization":"Bearer "+os.environ["YANDEX_KIT_TOKEN"],"Accept":"application/json"},
-              timeout=60,
-          )
-          print("HTTP", r.status_code)
-          r.raise_for_status()
-          p=r.json()
-          rows=p.get("variants") or p.get("items") or p.get("results") or []
-          if isinstance(rows,dict): rows=rows.get("items") or []
-          print("TOTAL", p.get("total_count") or p.get("total"))
-          print("ROWS", len(rows))
-          print("BRANDS", json.dumps(collections.Counter(str(x.get("brand") or "") for x in rows).most_common(20), ensure_ascii=False))
-          print("SAMPLE", json.dumps([{"id":x.get("id"),"sku":x.get("sku"),"brand":x.get("brand")} for x in rows[:10]], ensure_ascii=False))
+          url="https://api.kit.yandex.net/v1/variants"
+          headers={"Authorization":"Bearer "+os.environ["YANDEX_KIT_TOKEN"],"Accept":"application/json"}
+          tests=[
+              ("brand", {"brand":"Алетан","page":1,"per_page":100}),
+              ("name", {"name":"Алетан","page":1,"per_page":100}),
+              ("search", {"search":"Алетан","page":1,"per_page":100}),
+              ("query", {"query":"Алетан","page":1,"per_page":100}),
+              ("q", {"q":"Алетан","page":1,"per_page":100}),
+              ("per_page_1000", {"page":1,"per_page":1000}),
+          ]
+          for label,params in tests:
+              try:
+                  r=requests.get(url,params=params,headers=headers,timeout=60)
+                  print("TEST",label,"HTTP",r.status_code)
+                  if not r.ok:
+                      print("BODY",r.text[:500]); continue
+                  p=r.json()
+                  rows=p.get("variants") or p.get("items") or p.get("results") or []
+                  if isinstance(rows,dict): rows=rows.get("items") or []
+                  brands=collections.Counter(str(x.get("brand") or "") for x in rows)
+                  print("TEST",label,"TOTAL",p.get("total_count") or p.get("total"),"ROWS",len(rows),"BRANDS",json.dumps(brands.most_common(10),ensure_ascii=False))
+                  print("TEST",label,"SAMPLE",json.dumps([{"sku":x.get("sku"),"name":x.get("name"),"brand":x.get("brand")} for x in rows[:5]],ensure_ascii=False))
+              except Exception as e:
+                  print("TEST",label,"ERROR",repr(e))
           PY
