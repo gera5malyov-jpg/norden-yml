@@ -609,10 +609,12 @@ def load_wb():
     r = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/orders", headers=h, params=params, tries=4)
     if not r.ok: raise RuntimeError(f"WB orders HTTP {r.status_code}")
     orders = r.json() if isinstance(r.json(), list) else []
-    time.sleep(65)
-    rs = net.req("GET", "https://statistics-api.wildberries.ru/api/v1/supplier/sales", headers=h, params=params, tries=4)
-    sales = rs.json() if rs.ok and isinstance(rs.json(), list) else []
-    sold = {s(x.get("srid")) for x in sales if isinstance(x, dict) and s(x.get("srid")) and not x.get("isStorno")}
+
+    # Do not call supplier/sales in the same run: the Statistics API token currently
+    # has a seller-level throttle and the second request is rejected with 429.
+    # Import/status therefore uses the order row itself: cancelled -> cancelled,
+    # realized/supplied -> completed, otherwise -> processing.
+    sold = set()
     groups = defaultdict(list)
     for row in orders:
         if isinstance(row, dict):
@@ -629,7 +631,9 @@ def load_wb():
                 agg[code][1] += num(row.get("finishedPrice") or row.get("priceWithDisc") or row.get("totalPrice"))
             canceled = canceled or bool(row.get("isCancel"))
             sid = s(row.get("srid"))
-            if sid and sid not in sold: all_sold = False
+            realized = bool(row.get("isRealization")) or bool(row.get("isSupply"))
+            if not realized:
+                all_sold = False
             d = dt(row.get("date"))
             if d and (created is None or d < created): created = d
         items = [{"sku": code, "quantity": q, "price": total/q if q else None} for code, (q, total) in agg.items()]
