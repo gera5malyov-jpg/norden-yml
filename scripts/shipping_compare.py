@@ -69,13 +69,17 @@ def quote_ebulky():
         raise RuntimeError("e-bulky response has no total: "+jdump(response)[:1000])
     api_total = float(api_total)
     pickup = float(req.get("e_bulky_pickup_fixed_rub",0))
-    mandatory = float(req.get("e_bulky_mandatory_service_rub",0))
+    configured_mandatory = float(req.get("e_bulky_mandatory_service_rub",0))
+    detail = response.get("detail") if isinstance(response.get("detail"), dict) else {}
+    included_mandatory = float(detail.get("option_skid_kgt") or 0)
+    mandatory_extra = max(0.0, configured_mandatory - included_mandatory)
     return {
         "status":"УСПЕШНО",
         "api_delivery_rub": round(api_total,2),
         "pickup_rub": round(pickup,2),
-        "mandatory_service_rub": round(mandatory,2),
-        "total_rub": round(api_total + pickup + mandatory,2),
+        "mandatory_service_included_rub": round(included_mandatory,2),
+        "mandatory_service_extra_rub": round(mandatory_extra,2),
+        "total_rub": round(api_total + pickup + mandatory_extra,2),
         "raw_response": response
     }
 
@@ -199,9 +203,20 @@ def quote_pek():
             "info":s.get("info"),
             "cost":s.get("cost"),
         })
+    total = tr.get("costTotal")
+    if total is None or float(total) <= 0:
+        return {
+            "status":"НЕТ_ТАРИФА",
+            "total_rub":total,
+            "error":"PEK API не вернул платный внутригородской тариф для одного филиала; 0 ₽ не считается действительной ценой.",
+            "est_delivery_time_days":tr.get("estDeliveryTime"),
+            "services":services,
+            "branch_sender":ans.get("branchSender"),
+            "branch_receiver":ans.get("branchReceiver")
+        }
     return {
         "status":"УСПЕШНО",
-        "total_rub":tr.get("costTotal"),
+        "total_rub":total,
         "est_delivery_time_days":tr.get("estDeliveryTime"),
         "services":services,
         "branch_sender":ans.get("branchSender"),
