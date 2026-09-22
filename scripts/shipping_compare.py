@@ -205,17 +205,77 @@ def quote_pek():
         })
     total = tr.get("costTotal")
     if total is None or float(total) <= 0:
+        # PEK private API can return 0 for intra-branch Moscow routes.
+        # Fall back to the public calculator used on pecom.ru.
+        _, towns = http_json("https://pecom.ru/ru/calc/towns.php")
+        def city_id(name):
+            hits=[]
+            if isinstance(towns,dict):
+                for region,cities in towns.items():
+                    if isinstance(cities,dict):
+                        for cid,cname in cities.items():
+                            if str(cname).strip().casefold()==name.casefold():
+                                hits.append(str(cid))
+            if not hits:
+                raise RuntimeError("PEK public calculator city not found: "+name)
+            return hits[0]
+        from_id=city_id(req["from_city"])
+        to_id=city_id(req["to_city"])
+        params=[]
+        vals=[
+            float(req["width_cm"])/100,
+            float(req["height_cm"])/100,
+            float(req["length_cm"])/100,
+            round(vol,6),
+            float(req["weight_kg"]),
+            0,0
+        ]
+        for v in vals:
+            params.append(("places[0][]",v))
+        params += [
+            ("take[town]",from_id),
+            ("take[moscow]",0),
+            ("deliver[town]",to_id),
+            ("deliver[moscow]",0),
+            ("strah",0),
+            ("pal",0)
+        ]
+        url="https://calc.pecom.ru/bitrix/components/pecom/calc/ajax.php?"+urllib.parse.urlencode(params)
+        _, pub=http_json(url)
+        def part(x):
+            if isinstance(x,(list,tuple)) and len(x)>=3:
+                try: return float(x[2])
+                except Exception: return 0.0
+            return 0.0
+        take=part(pub.get("take"))
+        deliver=part(pub.get("deliver"))
+        auto=part(pub.get("autonegabarit")) or part(pub.get("auto"))
+        add=sum(part(pub.get(k)) for k in ("ADD","ADD_1","ADD_2","ADD_3","ADD_4"))
+        public_total=take+deliver+auto+add
+        if public_total <= 0:
+            return {
+                "status":"НЕТ_ТАРИФА",
+                "total_rub":0,
+                "error":"PEK private and public calculators did not return a valid paid quote.",
+                "branch_sender":ans.get("branchSender"),
+                "branch_receiver":ans.get("branchReceiver")
+            }
         return {
-            "status":"НЕТ_ТАРИФА",
-            "total_rub":total,
-            "error":"PEK API не вернул платный внутригородской тариф для одного филиала; 0 ₽ не считается действительной ценой.",
-            "est_delivery_time_days":tr.get("estDeliveryTime"),
+            "status":"УСПЕШНО",
+            "source":"public_calculator_fallback",
+            "pickup_rub":round(take,2),
+            "linehaul_rub":round(auto,2),
+            "delivery_rub":round(deliver,2),
+            "additional_rub":round(add,2),
+            "total_rub":round(public_total,2),
+            "est_delivery_time_days":None,
             "services":services,
             "branch_sender":ans.get("branchSender"),
             "branch_receiver":ans.get("branchReceiver")
         }
     return {
         "status":"УСПЕШНО",
+        "source":"private_api",
         "total_rub":total,
         "est_delivery_time_days":tr.get("estDeliveryTime"),
         "services":services,
