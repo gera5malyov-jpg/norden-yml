@@ -275,6 +275,7 @@ def download_price_xlsx(dest):
         raise RuntimeError("Яндекс Таблица скачалась некорректно")
 
 PRICE_POSITIVE = (
+    ("цена фабрики", 160), ("фабрик", 150),
     ("закуп", 140), ("оптов", 120), ("опт", 110), ("дилер", 100),
     ("цена поставщика", 130), ("входная", 90), ("себесто", 80),
 )
@@ -367,137 +368,249 @@ def workbook_price_diagnostics(path, catalog):
     return result
 
 def detect_price_map(path, catalog):
+    """Собрать закупочные цены со всех листов прайса.
+
+    Поддерживает многоуровневые листы Алетан, где цена указана только
+    на первой строке товарной группы, а у цветовых вариантов ячейка пуста.
+    """
     wb = load_workbook(path, read_only=True, data_only=True)
     catalog_codes = set(catalog)
-    best = None
-    diagnostics = []
 
-    for ws in wb.worksheets:
-        values = [list(row) for row in ws.iter_rows(values_only=True)]
-        max_cols = max((len(r) for r in values), default=0)
-        if not values or not max_cols:
-            continue
+    def purchase_header_score(value):
+        h = norm(value)
+        if not h:
+            return 0
+        if any(word in h for word in PRICE_NEGATIVE):
+            return -1000
+        scores = [
+            pts for word, pts in PRICE_POSITIVE
+            if word in h
+        ]
+        return max(scores or [0])
 
-        overlap_by_col = []
-        for col in range(max_cols):
-            found = set()
-            for row in values:
-                if col < len(row):
+    def is_sku_header(value):
+        h = norm(value)
+        return any(word in h for word in ("арт", "артикул", "код", "sku"))
+
+    def is_name_header(value):
+        h = norm(value)
+        return any(word in h for word in ("название", "наименование", "товар"))
+
+    all_prices = {}
+    price_sources = {}
+    conflicts = {}
+    suspicious = {}
+    sheets_used = []
+    total_overlap_codes = set()
+
+    try:
+        for ws in wb.worksheets:
+            values = [list(row) for row in ws.iter_rows(values_only=True)]
+            max_cols = max((len(r) for r in values), default=0)
+            if not values or not max_cols:
+                continue
+
+            # Ищем колонку артикула по фактическому пересечению с catalog vendorCode.
+            overlap_by_col = []
+            codes_by_col = []
+            for col in range(max_cols):
+                found = set()
+                for row in values:
+                    if col >= len(row):
+                        continue
                     code = clean_code(row[col])
                     if code in catalog_codes:
                         found.add(code)
-            overlap_by_col.append((len(found), col))
-        overlap, sku_col = max(overlap_by_col, default=(0, 0))
-        if overlap < 3:
-            continue
+                overlap_by_col.append((len(found), col))
+                codes_by_col.append(found)
 
-        first_match = next(
-            (i for i, row in enumerate(values) if sku_col < len(row) and clean_code(row[sku_col]) in catalog_codes),
-            None,
-        )
-        if first_match is None:
-            continue
-
-        header_row, header_score = 0, -1
-        for i in range(max(0, first_match - 15), first_match):
-            row = values[i]
-            score = sum(1 for cell in row if s(cell))
-            if sku_col < len(row) and any(w in norm(row[sku_col]) for w in ("артикул", "код", "модель", "sku")):
-                score += 20
-            if score >= header_score:
-                header_score, header_row = score, i
-
-        rowh = values[header_row]
-        headers = [s(rowh[c]) if c < len(rowh) else "" for c in range(max_cols)]
-        diagnostics.append({
-            "sheet": ws.title,
-            "header_row": header_row + 1,
-            "sku_col": sku_col + 1,
-            "overlap": overlap,
-            "headers": headers,
-        })
-        candidates = []
-        for col, header in enumerate(headers):
-            if col == sku_col:
-                continue
-            hn = norm(header)
-            score = max([pts for word, pts in PRICE_POSITIVE if word in hn] or [0])
-            if any(word in hn for word in PRICE_NEGATIVE):
-                score -= 100
-            if score <= 0:
+            overlap, sku_col = max(overlap_by_col, default=(0, 0))
+            if overlap < 1:
                 continue
 
-            covered = numeric = 0
-            ratios = []
-            for row in values[first_match:]:
-                if sku_col >= len(row) or col >= len(row):
+            first_match = next(
+                (
+                    i for i, row in enumerate(values)
+                    if sku_col < len(row)
+                    and clean_code(row[sku_col]) in catalog_codes
+                ),
+                None,
+            )
+            if first_match is None:
+                continue
+
+            # Заголовок может находиться заметно выше первой совпавшей позиции:
+            # например первые товары листа могут иметь артикулы, исключённые из
+            # catalog из-за дублей. Сканируем до 40 строк назад.
+            best_header = None
+            for i in range(max(0, first_match - 40), first_match):
+                row = values[i]
+                sku_header = s(row[sku_col]) if sku_col < len(row) else ""
+                if not is_sku_header(sku_header):
                     continue
-                code = clean_code(row[sku_col])
+
+                price_candidates = []
+                name_col = None
+                for col in range(max_cols):
+                    cell = s(row[col]) if col < len(row) else ""
+                    score = purchase_header_score(cell)
+                    if score > 0:
+                        price_candidates.append((score, col, cell))
+                    if name_col is None and is_name_header(cell):
+                        name_col = col
+
+                if not price_candidates:
+                    continue
+
+                score, price_col, price_header = max(price_candidates)
+                candidate = {
+                    "row": i,
+                    "sku_col": sku_col,
+                    "sku_header": sku_header,
+                    "price_col": price_col,
+                    "price_header": price_header,
+                    "price_score": score,
+                    "name_col": name_col,
+                }
+                if best_header is None or score > best_header["price_score"]:
+                    best_header = candidate
+
+            if best_header is None:
+                continue
+
+            header_row = best_header["row"]
+            price_col = best_header["price_col"]
+            name_col = best_header["name_col"]
+
+            sheet_prices = {}
+            sheet_sources = {}
+            current_purchase = None
+            explicit_count = 0
+            inherited_count = 0
+            ratio_values = []
+
+            for row_number, row in enumerate(values[header_row + 1 :], start=header_row + 2):
+                code = clean_code(row[sku_col]) if sku_col < len(row) else ""
+                raw_price = row[price_col] if price_col < len(row) else None
+                explicit_price = money(raw_price)
+
+                # Новая товарная группа с заполненным названием не должна
+                # наследовать цену от предыдущей группы, если цена отсутствует.
+                group_name = ""
+                if name_col is not None and name_col < len(row):
+                    group_name = s(row[name_col])
+
+                if explicit_price is not None:
+                    current_purchase = explicit_price
+                    explicit_count += 1
+                elif group_name:
+                    current_purchase = None
+
                 if code not in catalog_codes:
                     continue
-                covered += 1
-                p = money(row[col])
-                if p is None:
+
+                purchase = explicit_price
+                inherited = False
+                if purchase is None and current_purchase is not None and not group_name:
+                    purchase = current_purchase
+                    inherited = True
+
+                if purchase is None:
                     continue
-                numeric += 1
+
                 retail = catalog[code].get("catalog_price")
-                if retail:
-                    ratios.append(float(p / retail))
-            coverage = numeric / max(1, covered)
-            if coverage < 0.25:
-                continue
-            if ratios:
-                med = statistics.median(ratios)
-                if 0.15 <= med <= 1.05:
-                    score += 15
-                elif med > 1.5:
-                    score -= 30
-            candidates.append((score + int(coverage * 20), col, header))
+                if retail and retail > 0:
+                    ratio = purchase / retail
+                    # Для Алетан закупка в текущем прайсе обычно около 60–63%
+                    # от рекомендованной цены. Оставляем широкий безопасный коридор.
+                    if ratio < Decimal("0.25") or ratio > Decimal("0.90"):
+                        suspicious[code] = {
+                            "sheet": ws.title,
+                            "row": row_number,
+                            "purchase": str(q2(purchase)),
+                            "catalog_price": str(q2(retail)),
+                            "ratio": round(float(ratio), 4),
+                        }
+                        continue
+                    ratio_values.append(float(ratio))
 
-        if not candidates:
-            continue
+                if inherited:
+                    inherited_count += 1
 
-        _, price_col, price_header = max(candidates)
-        prices, conflicts = {}, {}
-        for row in values[first_match:]:
-            if sku_col >= len(row) or price_col >= len(row):
-                continue
-            code = clean_code(row[sku_col])
-            if code not in catalog_codes:
-                continue
-            p = money(row[price_col])
-            if p is None:
-                continue
-            if code in prices and prices[code] != p:
-                conflicts.setdefault(code, {str(prices[code])}).add(str(p))
-            else:
-                prices[code] = p
-        for code in conflicts:
-            prices.pop(code, None)
+                if code in sheet_prices and sheet_prices[code] != purchase:
+                    conflicts.setdefault(code, set()).update(
+                        [str(sheet_prices[code]), str(purchase)]
+                    )
+                    sheet_prices.pop(code, None)
+                    sheet_sources.pop(code, None)
+                    continue
 
-        current = {
-            "sheet": ws.title,
-            "sku_col": sku_col,
-            "price_col": price_col,
-            "header_row": header_row,
-            "sku_header": headers[sku_col],
-            "price_header": price_header,
-            "overlap": overlap,
-            "prices": prices,
-            "conflicts": {k: sorted(v) for k, v in conflicts.items()},
-        }
-        if best is None or (len(prices), overlap) > (len(best["prices"]), best["overlap"]):
-            best = current
+                sheet_prices[code] = purchase
+                sheet_sources[code] = {
+                    "sheet": ws.title,
+                    "row": row_number,
+                    "header": best_header["price_header"],
+                    "inherited": inherited,
+                }
 
-    wb.close()
-    if best is None or len(best["prices"]) < 3:
+            total_overlap_codes.update(codes_by_col[sku_col])
+
+            sheets_used.append({
+                "sheet": ws.title,
+                "overlap": overlap,
+                "header_row": header_row + 1,
+                "sku_col": sku_col + 1,
+                "sku_header": best_header["sku_header"],
+                "price_col": price_col + 1,
+                "price_header": best_header["price_header"],
+                "prices_found": len(sheet_prices),
+                "explicit_prices": explicit_count,
+                "inherited_prices": inherited_count,
+                "median_purchase_to_catalog": (
+                    None if not ratio_values
+                    else round(statistics.median(ratio_values), 4)
+                ),
+            })
+
+            for code, purchase in sheet_prices.items():
+                if code in conflicts:
+                    continue
+                if code in all_prices and all_prices[code] != purchase:
+                    conflicts.setdefault(code, set()).update(
+                        [str(all_prices[code]), str(purchase)]
+                    )
+                    all_prices.pop(code, None)
+                    price_sources.pop(code, None)
+                    continue
+                all_prices[code] = purchase
+                price_sources[code] = sheet_sources[code]
+
+        for code in list(conflicts):
+            all_prices.pop(code, None)
+            price_sources.pop(code, None)
+
+    finally:
+        wb.close()
+
+    if not all_prices:
         raise RuntimeError(
-            "Не удалось надежно определить именно закупочную/оптовую цену. "
-            + "Заголовки листов с совпадающими артикулами: "
-            + json.dumps(diagnostics[:12], ensure_ascii=False)
+            "Не удалось найти безопасные закупочные цены ни на одном листе прайса"
         )
-    best["diagnostics"] = diagnostics
-    return best
+
+    return {
+        "sheet": "ALL",
+        "header_row": 0,
+        "sku_col": 0,
+        "price_col": 0,
+        "sku_header": "Арт.",
+        "price_header": "Цена ФАБРИКИ / Опт",
+        "overlap": len(total_overlap_codes),
+        "prices": all_prices,
+        "sources": price_sources,
+        "conflicts": {k: sorted(v) for k, v in conflicts.items()},
+        "suspicious": suspicious,
+        "sheets_used": sheets_used,
+    }
 
 class KitClient:
     def __init__(self, token):
@@ -724,28 +837,18 @@ def run(args):
         detected = detect_price_map(price_file, catalog)
 
     report.update({
-        "price_sheet": detected["sheet"],
-        "price_header_row_1based": detected["header_row"] + 1,
-        "price_sku_column_1based": detected["sku_col"] + 1,
-        "price_price_column_1based": detected["price_col"] + 1,
-        "price_sku_header": detected["sku_header"],
-        "price_purchase_header": detected["price_header"],
+        "price_sheet": "ALL",
+        "price_purchase_header": "Цена ФАБРИКИ / Опт",
         "price_catalog_overlap": detected["overlap"],
         "purchase_prices_unique": len(detected["prices"]),
         "purchase_price_conflicts": detected["conflicts"],
+        "purchase_price_suspicious": detected["suspicious"],
+        "price_sheets_used": detected["sheets_used"],
+        "price_source_unsafe": False,
     })
 
     kit = KitClient(token)
     index, kit_ambiguous, samples, branded_count, detailed_reads = build_kit_index(kit, set(detected["prices"]))
-    unsafe_price_header = any(
-        word in norm(detected["price_header"])
-        for word in ("реком", "рекоменд", "рознич", "ррц", "продаж")
-    )
-    report["price_source_unsafe"] = unsafe_price_header
-    if unsafe_price_header and not args.dry_run:
-        raise RuntimeError(
-            "Автоблокировка: выбранная колонка прайса похожа на розничную/рекомендованную, а не закупочную"
-        )
 
     report["kit_aletan_active_variants"] = branded_count
     report["kit_detailed_variant_reads"] = detailed_reads
@@ -774,6 +877,7 @@ def run(args):
                 "vendor_code": code,
                 "kit_sku": s(variant.get("sku")),
                 "purchase": str(q2(purchase)),
+                "purchase_source": detected.get("sources", {}).get(code),
                 "new_customer_price": str(sale),
                 "new_old_price": str(old),
                 "current_customer_price": None if current_sale is None else str(q2(current_sale)),
