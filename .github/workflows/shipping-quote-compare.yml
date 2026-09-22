@@ -21,6 +21,8 @@ jobs:
       CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
       PEK_LOGIN: ${{ secrets.PEK_LOGIN }}
       PEK_API_KEY: ${{ secrets.PEK_API_KEY }}
+      DALLI_TOKEN: ${{ secrets.DALLI_TOKEN }}
+      DALLI_API_BASE_URL: https://spbapi.dalli-service.com/v1
     steps:
       - uses: actions/checkout@v4
       - name: Рассчитать доставку
