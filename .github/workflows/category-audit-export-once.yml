@@ -1,0 +1,132 @@
+name: Export KIT and Ozon categories for audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/category-audit-export-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Export categories
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, requests
+          from pathlib import Path
+
+          out = Path('category-audit')
+          out.mkdir(exist_ok=True)
+
+          # KIT categories
+          kit_headers = {
+              'Authorization': 'Bearer ' + os.environ['YANDEX_KIT_TOKEN'],
+              'Accept': 'application/json',
+          }
+          rows=[]
+          page=1
+          while True:
+              r=requests.get(
+                  'https://api.kit.yandex.net/v1/categories',
+                  headers=kit_headers,
+                  params={'page':page,'per_page':100,'status':['ACTIVE']},
+                  timeout=60,
+              )
+              r.raise_for_status()
+              data=r.json()
+              items=data.get('items') or data.get('results') or data.get('categories') or data.get('data') or []
+              if isinstance(items, dict):
+                  items=items.get('items') or []
+              rows.extend([x for x in items if isinstance(x,dict)])
+              total=data.get('total') or data.get('total_count')
+              if total is None and isinstance(data.get('meta'),dict):
+                  total=data['meta'].get('total') or data['meta'].get('total_count')
+              if not items or (total is not None and len(rows)>=int(total)) or len(items)<100:
+                  break
+              page+=1
+          (out/'kit_categories.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2),encoding='utf-8')
+
+          # Ozon category tree
+          oz_headers = {
+              'Client-Id': os.environ['OZON_CLIENT_ID'],
+              'Api-Key': os.environ['OZON_API_KEY'],
+              'Content-Type':'application/json',
+              'Accept':'application/json',
+          }
+          r=requests.post(
+              'https://api-seller.ozon.ru/v1/description-category/tree',
+              headers=oz_headers,
+              json={'language':'RU'},
+              timeout=90,
+          )
+          r.raise_for_status()
+          oz=r.json()
+          (out/'ozon_category_tree.json').write_text(json.dumps(oz,ensure_ascii=False,indent=2),encoding='utf-8')
+
+          flat=[]
+          def walk(nodes,path):
+              for n in nodes or []:
+                  if not isinstance(n,dict):
+                      continue
+                  if n.get('category_name'):
+                      name=str(n['category_name']).strip()
+                      p=path+[name]
+                      flat.append({
+                          'kind':'category',
+                          'name':name,
+                          'path':' > '.join(p),
+                          'description_category_id':n.get('description_category_id'),
+                          'type_id':None,
+                          'disabled':bool(n.get('disabled')),
+                      })
+                      walk(n.get('children') or [],p)
+                  elif n.get('type_name'):
+                      name=str(n['type_name']).strip()
+                      p=path+[name]
+                      flat.append({
+                          'kind':'type',
+                          'name':name,
+                          'path':' > '.join(p),
+                          'description_category_id':None,
+                          'type_id':n.get('type_id'),
+                          'disabled':bool(n.get('disabled')),
+                      })
+                      walk(n.get('children') or [],p)
+          walk(oz.get('result') or [],[])
+          (out/'ozon_categories_flat.json').write_text(json.dumps(flat,ensure_ascii=False,indent=2),encoding='utf-8')
+
+          summary={
+              'kit_categories':len(rows),
+              'ozon_flat_nodes':len(flat),
+              'ozon_active_nodes':sum(1 for x in flat if not x['disabled']),
+          }
+          (out/'summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit audit export
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add category-audit/
+          git commit -m "Export KIT and Ozon categories for audit" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
