@@ -104,12 +104,12 @@ def load_feed():
         urls.append("http://" + FEED_URL[len("https://"):])
 
     session = requests.Session()
-    for attempt in range(10):
+    for attempt in range(6):
         url = urls[attempt % len(urls)]
         try:
             response = session.get(
                 url,
-                timeout=120,
+                timeout=(10, 25),
                 headers={"User-Agent": "Mozilla/5.0 Afina-Garden-KIT-Webasyst-Sync/1.0"},
                 allow_redirects=True,
             )
@@ -119,7 +119,7 @@ def load_feed():
         except requests.RequestException as exc:
             last_error = exc
             response = None
-            time.sleep(min(30, 2 + attempt * 3))
+            time.sleep(min(12, 2 + attempt * 2))
     if response is None or not response.content:
         raise RuntimeError(f"Cannot download Afina Garden feed after retries: {last_error}")
 
