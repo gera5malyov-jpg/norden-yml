@@ -1,0 +1,26 @@
+name: Package category audit files
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/category-audit-package-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload category audit CSV files
+        uses: actions/upload-artifact@v4
+        with:
+          name: category-audit-csv
+          path: |
+            category-audit/comparison.csv
+            category-audit/comparison_priority.csv
+            category-audit/comparison_summary.json
+          retention-days: 7
