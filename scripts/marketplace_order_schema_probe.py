@@ -77,3 +77,5 @@ if "yandex_kit" not in out:
                         break
 
 print(json.dumps(out,ensure_ascii=False,indent=2))
+
+# retry after KIT rate limit
