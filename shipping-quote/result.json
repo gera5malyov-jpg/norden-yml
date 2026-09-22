@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T18:04:03.288480+00:00",
+  "generated_at": "2026-09-22T18:05:54.116162+00:00",
   "request": {
     "from_address": "Россия, Санкт-Петербург, 7-я Красноармейская улица, 25",
     "to_address": "Россия, Санкт-Петербург, Невский проспект, 1",
@@ -251,8 +251,30 @@
       ]
     },
     "dalli": {
-      "status": "ОШИБКА",
-      "error": "Dalli HTTP 404: <!DOCTYPE html>\n<html style=\"height:100%\">\n<head>\n\t<title>404 Not Found</title>\n</head>\n<body style=\"color: #444; margin:0;font: normal 14px/20px Arial, Helvetica, sans-serif; height:100%; background-color: #fff;\">\n\t<div style=\"height:auto; min-height:100%; \">\n\t\t<div style=\"text-align: center; width:800px; margin-left: -400px; position:absolute; top: 30%; left:50%;\">\n        \t<h1 style=\"margin:0; font-size:150px; line-height:150px; font-weight:bold;\">404</h1>\n\t\t\t<h2 style=\"margin-top:20px;font-size: 30px;\">Not Found</h2>\n            <p>The resource requested could not be found <b>http://spbapi.dalli-service.com/v1/deliverycost</b> on this\n                server!</p>\n        </div>\n\t</div>\n\n\t<div style=\"color:#f0f0f0; font-size:12px;margin:auto;padding:0px 30px 0px 30px;position:relative;clear:both;height:100px;margin-top:-101px;background-color:#474747;border-top: 1px solid rgba(0,0,0,0.15);box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset;\">\n\t</div>\n</body>\n</html>\n"
+      "status": "УСПЕШНО",
+      "source": "Dalli SPB API v1",
+      "best_courier_or_lowest": {
+        "service": "30",
+        "typedelivery": "KUR",
+        "price": 2001.0,
+        "delivery_period": 1,
+        "msg": "Доставка на следующий день после передачи заказа в курьерскую службу. Стоимость включает 7% НДС",
+        "zone": "0",
+        "VATrate": "7"
+      },
+      "total_rub": 2001.0,
+      "tariffs": [
+        {
+          "service": "30",
+          "typedelivery": "KUR",
+          "price": 2001.0,
+          "delivery_period": 1,
+          "msg": "Доставка на следующий день после передачи заказа в курьерскую службу. Стоимость включает 7% НДС",
+          "zone": "0",
+          "VATrate": "7"
+        }
+      ],
+      "sender_code_used": null
     },
     "pek": {
       "status": "УСПЕШНО",
@@ -270,6 +292,10 @@
   },
   "comparison": [
     {
+      "carrier": "Dalli",
+      "total_rub": 2001.0
+    },
+    {
       "carrier": "CDEK",
       "total_rub": 2495.0
     },
@@ -279,7 +305,7 @@
     }
   ],
   "cheapest": {
-    "carrier": "CDEK",
-    "total_rub": 2495.0
+    "carrier": "Dalli",
+    "total_rub": 2001.0
   }
 }
