@@ -7,12 +7,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   quote:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Calculate PEK public API quote
         shell: bash
         run: |
@@ -26,12 +27,13 @@ jobs:
               req = urllib.request.Request(url, headers={'User-Agent':'Mozilla/5.0'})
               with urllib.request.urlopen(req, timeout=45) as r:
                   raw = r.read()
+              last = None
               for enc in ('utf-8','cp1251'):
                   try:
                       return json.loads(raw.decode(enc))
-                  except Exception:
-                      pass
-              raise RuntimeError(raw[:500])
+                  except Exception as e:
+                      last = e
+              raise RuntimeError(f'Cannot decode JSON: {last}; body={raw[:500]!r}')
 
           towns = fetch_json('https://pecom.ru/ru/calc/towns.php')
 
@@ -48,9 +50,6 @@ jobs:
 
           moscow = find_city('Москва')
           tolyatti = find_city('Тольятти')
-          print('MOSCOW=', moscow)
-          print('TOLYATTI=', tolyatti)
-
           endpoint = 'https://calc.pecom.ru/bitrix/components/pecom/calc/ajax.php'
 
           scenarios = [
@@ -76,6 +75,19 @@ jobs:
                           pass
               return total
 
+          results = {
+              'route': {'from': moscow, 'to': tolyatti},
+              'cargo': {
+                  'chairs': 30,
+                  'places': 3,
+                  'chairs_per_place': 10,
+                  'weight_per_chair_kg': 6.4,
+                  'weight_per_place_kg': 64.0,
+                  'total_weight_kg': 192.0
+              },
+              'quotes': []
+          }
+
           for sname, w, l, h, vol, weight in scenarios:
               for zone, zname in zones:
                   params = []
@@ -96,8 +108,11 @@ jobs:
                   add = sum(cost_sum(data.get(k)) for k in ('ADD','ADD_1','ADD_2','ADD_3','ADD_4'))
                   linehaul = autong if autong and autong != auto else auto
                   total = take + linehaul + add
-                  out = {
+                  results['quotes'].append({
                       'scenario': sname,
+                      'place_dims_m': [w,l,h],
+                      'place_volume_m3': vol,
+                      'total_volume_m3': round(vol*3, 3),
                       'pickup_zone': zname,
                       'pickup_cost': round(take,2),
                       'linehaul_cost': round(linehaul,2),
@@ -105,6 +120,24 @@ jobs:
                       'total_to_terminal': round(total,2),
                       'periods': data.get('periods'),
                       'errors': data.get('error'),
-                  }
-                  print('QUOTE_JSON=' + json.dumps(out, ensure_ascii=False))
+                      'raw_take': data.get('take'),
+                      'raw_auto': data.get('auto'),
+                  })
+
+          with open('pek-quote-result.json','w',encoding='utf-8') as f:
+              json.dump(results,f,ensure_ascii=False,indent=2)
+          print(json.dumps(results,ensure_ascii=False,indent=2))
           PY
+
+      - name: Save quote result
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pek-quote-result.json
+          if git diff --cached --quiet; then
+            echo "No result changes"
+          else
+            git commit -m "Save PEK Moscow-Tolyatti quote result"
+            git push
+          fi
