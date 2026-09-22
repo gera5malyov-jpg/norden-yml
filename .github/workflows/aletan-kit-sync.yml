@@ -28,7 +28,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: aletan-kit-sync
+  group: aletan-kit-sync-v2
   cancel-in-progress: true
 
 jobs:
