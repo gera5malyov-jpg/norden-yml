@@ -27,6 +27,7 @@ jobs:
       - name: Проверить перенос заказов без записи
         env:
           DRY_RUN: '1'
+          SYNC_SOURCES: 'yandex_market,yandex_kit,ozon'
           OZON_ORDER_IMPORT_CUTOFF: '2026-09-22T11:08:40Z'
           OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
           OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
