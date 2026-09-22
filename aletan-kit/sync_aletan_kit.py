@@ -525,14 +525,18 @@ def build_kit_index(kit, source_codes):
 
         # В существующих карточках KIT внутренний SKU часто вида AF-...,
         # а vendorCode Алетан сохранён в названии (например T804BL).
+        # Не перебираем весь прайс: вытаскиваем токены из названия и
+        # проверяем их за O(1) по set артикулов поставщика.
         product_name = s(variant.get("name"))
         if product_name:
-            for code in source_codes:
-                if not code:
-                    continue
-                pattern = r"(?<![0-9A-Za-zА-Яа-яЁё])" + re.escape(code) + r"(?![0-9A-Za-zА-Яа-яЁё])"
-                if re.search(pattern, product_name, flags=re.IGNORECASE):
-                    keys.append(code)
+            name_tokens = re.findall(r"[0-9A-Za-zА-Яа-яЁё][0-9A-Za-zА-Яа-яЁё._/-]*", product_name)
+            for token in name_tokens:
+                token = clean_code(token)
+                if token in source_codes:
+                    keys.append(token)
+                stripped = token.strip("()[]{}.,;:!?")
+                if stripped in source_codes:
+                    keys.append(stripped)
 
         # Если в выдаче списка уже есть характеристики — используем их сразу.
         keys.extend(
