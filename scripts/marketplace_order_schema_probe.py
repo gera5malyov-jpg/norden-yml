@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json, os
 from datetime import datetime, timedelta, timezone
-import requests
+import requests, time
 
 out={"generated_at":datetime.now(timezone.utc).isoformat()}
 
@@ -28,7 +28,12 @@ ks=requests.Session()
 ks.headers.update({"Authorization":"Bearer "+kt,"Accept":"application/json"})
 orders=[]; page=1; total=None
 while True:
-    rr=ks.get("https://api.kit.yandex.net/v1/orders",params={"page":page,"per_page":100},timeout=60)
+    rr=None
+    for attempt in range(8):
+        rr=ks.get("https://api.kit.yandex.net/v1/orders",params={"page":page,"per_page":100},timeout=60)
+        if rr.status_code!=429:
+            break
+        time.sleep(3+attempt*2)
     if not rr.ok:
         out["yandex_kit"]={"http":rr.status_code,"error":rr.text[:500]}
         break
