@@ -1,0 +1,22 @@
+name: Webasyst order mail diagnostic
+
+on:
+  push:
+    paths:
+      - '.github/workflows/webasyst-order-mail-diagnostic.yml'
+      - 'scripts/webasyst_order_mail_diagnostic.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Diagnose Webasyst order notifications prerequisites
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python3 scripts/webasyst_order_mail_diagnostic.py
