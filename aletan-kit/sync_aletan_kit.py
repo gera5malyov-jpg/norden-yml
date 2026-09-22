@@ -146,56 +146,69 @@ def download_price_xlsx(dest):
         )
         page.wait_for_timeout(8000)
 
-        if not click_any(
-            page,
-            [
-                page.get_by_role("button", name=re.compile(r"^Файл$", re.I)),
-                page.get_by_role("menuitem", name=re.compile(r"^Файл$", re.I)),
-                page.get_by_text("Файл", exact=True),
-                page.get_by_role("button", name=re.compile(r"^File$", re.I)),
-                page.get_by_text("File", exact=True),
-            ],
-            timeout=5000,
-        ):
-            raise RuntimeError("Не найдено меню «Файл» в публичной Яндекс Таблице")
+        # В публичном режиме Яндекс Таблиц есть отдельная кнопка Download,
+        # которая сразу экспортирует XLSX без меню «Файл».
+        direct_download = page.get_by_test_id("Download")
+        if direct_download.count() and direct_download.first.is_visible():
+            with page.expect_download(timeout=120000) as di:
+                direct_download.first.click(timeout=8000)
+            di.value.save_as(str(dest))
+        else:
+            # Fallback для редакторского интерфейса: Файл → Скачать → Excel.
+            if not click_any(
+                page,
+                [
+                    page.get_by_role("button", name=re.compile(r"^Файл$", re.I)),
+                    page.get_by_role("menuitem", name=re.compile(r"^Файл$", re.I)),
+                    page.get_by_text("Файл", exact=True),
+                    page.get_by_role("button", name=re.compile(r"^File$", re.I)),
+                    page.get_by_text("File", exact=True),
+                ],
+                timeout=5000,
+            ):
+                visible = page.locator("button:visible").all_inner_texts()
+                raise RuntimeError(
+                    "Не найдена кнопка Download или меню «Файл». "
+                    + "Видимые кнопки: " + " | ".join(visible[:30])
+                )
 
-        page.wait_for_timeout(800)
-        excel = page.get_by_text(re.compile(r"Microsoft\s*Excel.*xlsx", re.I))
-        if not (excel.count() and excel.first.is_visible()):
+            page.wait_for_timeout(800)
+            excel = page.get_by_text(re.compile(r"Microsoft\\s*Excel.*xlsx", re.I))
+            if not (excel.count() and excel.first.is_visible()):
+                for loc in [
+                    page.get_by_role("menuitem", name=re.compile("Скачать|Download", re.I)),
+                    page.get_by_text(re.compile(r"^Скачать$", re.I)),
+                    page.get_by_text(re.compile(r"^Download$", re.I)),
+                ]:
+                    try:
+                        if loc.count() and loc.first.is_visible():
+                            try:
+                                loc.first.hover(timeout=4000)
+                            except Exception:
+                                loc.first.click(timeout=4000)
+                            page.wait_for_timeout(1000)
+                            break
+                    except Exception:
+                        pass
+
+            final = None
             for loc in [
-                page.get_by_role("menuitem", name=re.compile("Скачать|Download", re.I)),
-                page.get_by_text(re.compile(r"^Скачать$", re.I)),
-                page.get_by_text(re.compile(r"^Download$", re.I)),
+                page.get_by_test_id("ms_excel"),
+                page.get_by_text(re.compile(r"Microsoft\\s*Excel.*xlsx", re.I)),
+                page.get_by_role("menuitem", name=re.compile(r"Microsoft\\s*Excel", re.I)),
             ]:
                 try:
                     if loc.count() and loc.first.is_visible():
-                        try:
-                            loc.first.hover(timeout=4000)
-                        except Exception:
-                            loc.first.click(timeout=4000)
-                        page.wait_for_timeout(1000)
+                        final = loc.first
                         break
                 except Exception:
                     pass
+            if final is None:
+                raise RuntimeError("Не найден пункт «Microsoft Excel (.xlsx)»")
 
-        final = None
-        for loc in [
-            page.get_by_test_id("ms_excel"),
-            page.get_by_text(re.compile(r"Microsoft\s*Excel.*xlsx", re.I)),
-            page.get_by_role("menuitem", name=re.compile(r"Microsoft\s*Excel", re.I)),
-        ]:
-            try:
-                if loc.count() and loc.first.is_visible():
-                    final = loc.first
-                    break
-            except Exception:
-                pass
-        if final is None:
-            raise RuntimeError("Не найден пункт «Microsoft Excel (.xlsx)»")
-
-        with page.expect_download(timeout=120000) as di:
-            final.click(timeout=8000)
-        di.value.save_as(str(dest))
+            with page.expect_download(timeout=120000) as di:
+                final.click(timeout=8000)
+            di.value.save_as(str(dest))
         browser.close()
 
     if not dest.exists() or dest.stat().st_size < 1000:
