@@ -1,6 +1,7 @@
 name: Repair Yandex order 61653679298
 # retry buyer name and normalized deadline
 # ensure Webasyst shipping interval is populated
+# persist delivery interval in params
 
 on:
   push:
