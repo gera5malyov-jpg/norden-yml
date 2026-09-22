@@ -190,7 +190,7 @@ def quote_dalli():
     body=ET.tostring(root,encoding="utf-8",xml_declaration=True)
     base=os.environ.get("DALLI_API_BASE_URL","https://spbapi.dalli-service.com/v1").rstrip("/")
     request=urllib.request.Request(
-        base+"/deliverycost",
+        base+"/",
         data=body,
         method="POST",
         headers={
