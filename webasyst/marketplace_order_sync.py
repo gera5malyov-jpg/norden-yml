@@ -247,6 +247,8 @@ def comment(o: dict) -> str:
         lines.append(f"Стоимость подъема: {float(o['lift_price']):.2f} ₽")
     if s(o.get("lift_type")):
         lines.append(f"Тип подъема: {s(o.get('lift_type'))}")
+    if s(o.get("recipient_name")):
+        lines.append(f"Получатель: {s(o.get('recipient_name'))}")
     if s(o.get("delivery_to") or o.get("delivery_from")):
         lines.append(f"Крайняя дата доставки: {s(o.get('delivery_to') or o.get('delivery_from'))}")
     lines.append(f"Статусы синхронизируются только {source} → Webasyst. Из Webasyst статусы обратно не передаются.")
@@ -262,7 +264,7 @@ def marketplace_order_params(o: dict) -> dict:
         "shipping_name": o.get("shipping_name") or LABEL[o["source"]],
         "payment_name": o.get("payment_name") or LABEL[o["source"]],
     }
-    for k in ("delivery_price", "lift_price", "lift_type", "delivery_from", "delivery_to", "delivery_time_from", "delivery_time_to"):
+    for k in ("delivery_price", "lift_price", "lift_type", "delivery_from", "delivery_to", "delivery_time_from", "delivery_time_to", "recipient_name"):
         v = o.get(k)
         if v not in (None, ""):
             params["mp_" + k] = str(v)
@@ -273,17 +275,21 @@ def order_customer(o: dict) -> dict:
     if not isinstance(buyer, dict):
         return {}
     out = {}
-    full = " ".join(
-        x for x in (
-            s(buyer.get("lastName")),
-            s(buyer.get("firstName")),
-            s(buyer.get("middleName")),
-        ) if x
-    ).strip()
+    full = s(buyer.get("name"))
+    if not full:
+        full = " ".join(
+            x for x in (
+                s(buyer.get("lastName")),
+                s(buyer.get("firstName")),
+                s(buyer.get("middleName")),
+            ) if x
+        ).strip()
     if full:
         out["name"] = full
     if s(buyer.get("phone")):
         out["phone"] = s(buyer.get("phone"))
+    if s(buyer.get("customer_email") or buyer.get("email")):
+        out["email"] = s(buyer.get("customer_email") or buyer.get("email"))
     return out
 
 def order_shipping_address(o: dict) -> dict:
@@ -635,6 +641,38 @@ def ozon_state(status: str) -> str:
     if st in {"arbitration", "client_arbitration"}: return "processing"
     return "new"
 
+def ozon_posting_detail(headers: dict, posting_number: str) -> dict:
+    body = {
+        "posting_number": posting_number,
+        "with": {
+            "analytics_data": False,
+            "barcodes": False,
+            "financial_data": False,
+            "translit": False,
+        },
+    }
+    r = net.req("POST", "https://api-seller.ozon.ru/v3/posting/fbs/get", headers=headers, body=body, tries=3)
+    if not r.ok:
+        return {}
+    d = r.json()
+    return d.get("result") if isinstance(d, dict) and isinstance(d.get("result"), dict) else d if isinstance(d, dict) else {}
+
+def normalize_ozon_address(address: Any) -> dict:
+    if not isinstance(address, dict):
+        return {}
+    out = {}
+    if s(address.get("country")):
+        out["country"] = s(address.get("country"))
+    if s(address.get("region")):
+        out["region"] = s(address.get("region"))
+    if s(address.get("city")):
+        out["city"] = s(address.get("city"))
+    if s(address.get("zip_code")):
+        out["zip"] = s(address.get("zip_code"))
+    if s(address.get("address_tail")):
+        out["street"] = s(address.get("address_tail"))
+    return out
+
 def load_ozon():
     cid, secret = s(os.getenv("OZON_CLIENT_ID")), s(os.getenv("OZON_API_KEY"))
     if not cid or not secret: return []
@@ -668,17 +706,38 @@ def load_ozon():
             for o in rows:
                 created = dt(o.get("in_process_at") or o.get("created_at") or o.get("shipment_date"))
                 if not created or created < cutoff: continue
+                posting_number = s(o.get("posting_number"))
+                detail = ozon_posting_detail(h, posting_number) if kind == "FBS" and posting_number else {}
+                src = detail or o
                 items = [{
                     "sku": s(x.get("offer_id")),
                     "quantity": max(1, int(num(x.get("quantity"), 1))),
                     "price": num(x.get("price")) if x.get("price") not in (None, "") else None,
-                } for x in (o.get("products") or []) if isinstance(x, dict)]
-                status, sub = s(o.get("status")), s(o.get("substatus"))
+                } for x in (src.get("products") or o.get("products") or []) if isinstance(x, dict)]
+                status, sub = s(src.get("status") or o.get("status")), s(src.get("substatus") or o.get("substatus"))
+                customer = src.get("customer") if isinstance(src.get("customer"), dict) else {}
+                address = normalize_ozon_address(customer.get("address") if isinstance(customer, dict) else {})
+                delivery_price = num(src.get("delivery_price")) if src.get("delivery_price") not in (None, "") else None
+                prr = src.get("prr_option") if isinstance(src.get("prr_option"), dict) else {}
+                lift_price = num(prr.get("price")) if prr.get("price") not in (None, "") else None
+                lift_type = s(prr.get("code"))
+                shipping_total = None
+                if delivery_price is not None or lift_price is not None:
+                    shipping_total = float(delivery_price or 0) + float(lift_price or 0)
+                recipient_name = s(customer.get("name")) if isinstance(customer, dict) else ""
                 out.append({
-                    "source": "ozon", "external_id": s(o.get("posting_number")),
+                    "source": "ozon", "external_id": posting_number,
                     "created_at": iso(created), "status_raw": status + ("/"+sub if sub else ""),
                     "target_state": ozon_state(status), "items": items,
                     "shipping_name": f"Ozon / {kind}", "payment_name": "Ozon",
+                    "buyer": customer,
+                    "recipient_name": recipient_name,
+                    "shipping_address": address,
+                    "delivery_price": delivery_price,
+                    "lift_price": lift_price,
+                    "lift_type": lift_type,
+                    "shipping_total": shipping_total,
+                    "delivery_to": s(src.get("delivering_date")),
                 })
             if len(rows) < 1000: break
             offset += len(rows)
