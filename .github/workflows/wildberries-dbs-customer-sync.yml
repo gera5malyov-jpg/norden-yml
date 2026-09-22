@@ -1,0 +1,33 @@
+name: Wildberries DBS customer sync
+
+on:
+  push:
+    paths:
+      - '.github/workflows/wildberries-dbs-customer-sync.yml'
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: wildberries-dbs-customer-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Синхронизировать ФИО телефон и адрес WB DBS
+        env:
+          WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python webasyst/wb_dbs_live_sync.py
