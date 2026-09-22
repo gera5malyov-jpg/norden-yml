@@ -1,9 +1,783 @@
 {
-  "started_at": "2026-09-22T12:15:00.784228+00:00",
-  "finished_at": "2026-09-22T12:15:00.784244+00:00",
-  "status": "error",
+  "started_at": "2026-09-22T12:16:26.753631+00:00",
+  "status": "ok",
   "dry_run": false,
   "feed_url": "https://afinalux.ru/index.php?route=feed/yandex_yml",
   "brand_expected": "Afina Garden",
-  "error": "Safety stop: no exact Afina Garden matches found in KIT"
+  "webasyst_type": "afinalux",
+  "webasyst_stock": "Основной склад",
+  "rules": {
+    "purchase_price": "YML <opt1mln>",
+    "customer_price": "закупочная цена × 1.30, округление вверх до 1 ₽",
+    "compare_price": "закупочная цена × 1.60, округление вверх до 1 ₽",
+    "webasyst_main_stock": "точный YML <stock>",
+    "creation": "новые товары не создаются ни в KIT, ни в Webasyst",
+    "purchase_price_storage": "закупочная цена отдельным полем не записывается"
+  },
+  "errors": [],
+  "warnings": [],
+  "feed_offers_total": 276,
+  "feed_brand_items_unique": 276,
+  "feed_non_brand_offers": 0,
+  "feed_invalid_purchase": [],
+  "feed_duplicate_vendor_codes": [],
+  "feed_zero_stock": 7,
+  "kit_afina_active_variants": 275,
+  "kit_matched": 162,
+  "kit_detailed_reads": 4,
+  "kit_ambiguous": {
+    "afm4030ggrey": [
+      "01a0a59d-892d-7d15-b70e-36ca51ab4688",
+      "01a0a59d-892d-7cf9-9035-f0008b89e45d"
+    ],
+    "variant:01a0a59d-892d-7cbc-9e27-3f0f6baf59a6": [
+      "afm709at133beige11",
+      "t133"
+    ],
+    "variant:01a0a59d-892d-7ca5-826e-ade31430200f": [
+      "afm803abeige",
+      "afm803abeigeterracotta"
+    ],
+    "variant:01a0a59d-892d-7ca2-8576-66606ef3fd76": [
+      "afm803abeigegreen",
+      "afm803abeige"
+    ],
+    "t133": [
+      "01a0a59d-892d-7c9b-9e0b-c7c8c481cf44",
+      "01a0a59d-892d-7c97-9214-8030cffca888"
+    ],
+    "variant:01a0a59d-892d-7c8d-a90a-44df2db3ca2a": [
+      "afm709at133beige21",
+      "t133"
+    ],
+    "y137cw53brown": [
+      "01a0a59d-892d-7cca-a048-1fd9c9d50d87",
+      "01a0a59d-892d-7c26-a177-016efcc2ce3f"
+    ],
+    "y79bw56lightbrown": [
+      "01a0a59d-892d-7cdb-be71-6c0643aa35ad",
+      "01a0a59d-892d-7c22-b033-7ff334fd968b"
+    ],
+    "y79cw85latte": [
+      "01a0a59d-892d-7c1e-8cfe-f34c19e59c58",
+      "01a0a59d-892d-7c17-9507-7089232faef9"
+    ],
+    "y137cw85latte": [
+      "01a0a59d-892d-7bb8-97f8-93139b0593ed",
+      "01a0a59d-892d-7bb5-a336-bd1e768dc769"
+    ],
+    "variant:01a0a59d-892d-7ba9-8e70-1e7c63f8cdc2": [
+      "s54cw85latte",
+      "t198cs54cw85latte"
+    ],
+    "y79aw53brown": [
+      "01a0a59d-892d-7c10-9a22-e37e2e434735",
+      "01a0a59d-892d-7b8a-85ce-ce2216772be7"
+    ],
+    "variant:01a0a59d-892d-7b67-8956-513b7760416a": [
+      "t347s65aw53brown",
+      "s65aw53brown"
+    ],
+    "variant:01a0a59d-892d-7b60-9a9e-7099528ed1eb": [
+      "t130lv520bbbeigebeige",
+      "lv520bbbeigebeige"
+    ],
+    "variant:01a0a59d-892d-7b5d-a784-d41fd8db513a": [
+      "lv520bbbrownbeige",
+      "t130lv520bbbrownbeige"
+    ],
+    "variant:01a0a59d-892d-7b45-8780-31e5edd8df3e": [
+      "s59bw65lightbrown",
+      "t256bs59bw65lightbrown"
+    ],
+    "variant:01a0a59d-892d-7ae7-8bd5-47821ce8d56e": [
+      "t256as59aw53brown",
+      "s59aw53brown"
+    ],
+    "variant:01a0a59d-892d-7ad5-9a95-9aa7fa81b6f4": [
+      "t365s65bw65lightbrown",
+      "s65bw65lightbrown"
+    ],
+    "variant:01a0a59d-892d-7a60-aecf-822a010b13b4": [
+      "t706y137cw85latte4pcs",
+      "y137cw85latte"
+    ],
+    "variant:01a0a59d-892d-7a31-84dc-5eedbaeddf0a": [
+      "t282bnty137cw53brown2pcs",
+      "y137cw53brown"
+    ],
+    "variant:01a0a59d-892d-7a2d-b04c-9d66a4701a07": [
+      "t282bnty137cw53brown4pcs",
+      "y137cw53brown"
+    ],
+    "y137cw56lightbrown": [
+      "01a0a59d-892d-7aa8-b734-8ede97d7f077",
+      "01a0a59d-892d-7a23-a167-2a9388f12a2a"
+    ],
+    "variant:01a0a59d-892d-79fd-ae6b-4b66937fbd64": [
+      "t198dy137cw53brown6pcs",
+      "y137cw53brown"
+    ],
+    "variant:01a0a59d-892d-79f7-b026-826bfed46dca": [
+      "y137cw56lightbrown",
+      "t197aty137cw56lightbrown4pcs"
+    ],
+    "variant:01a0a59d-892d-79ea-b267-e7bd770a8927": [
+      "t282bnty137cw56lightbrown4pcs",
+      "y137cw56lightbrown"
+    ],
+    "variant:01a0a59d-892d-79dd-b9a7-0fc239a26999": [
+      "y137cw56lightbrown",
+      "t282anty137cw56lightbrown4pcs"
+    ],
+    "variant:01a0a59d-892d-79d8-afe7-10e64b1efe8b": [
+      "t198dy137cw53brown4pcs",
+      "y137cw53brown"
+    ],
+    "variant:01a0a59d-892d-79d1-be66-44f302fd89a5": [
+      "t198bs54bw56lightbrown",
+      "s54bw56lightbrown"
+    ],
+    "variant:01a0a59d-892d-79cb-ae00-7b08ede917c6": [
+      "s54aw53brown",
+      "t198as54aw53brown"
+    ],
+    "variant:01a0a59d-892d-79c0-8fdb-9e67dee516c6": [
+      "y137cw56lightbrown",
+      "t25by137cw56lightbrown2pcs"
+    ],
+    "variant:01a0a59d-892d-79b9-b2a4-7f4169e294c0": [
+      "y137cw56lightbrown",
+      "t282bnty137cw56lightbrown2pcs"
+    ],
+    "variant:01a0a59d-892d-78f7-ae86-676491b109ed": [
+      "y137cw53brown",
+      "t25ay137cw53brown2pcs"
+    ],
+    "variant:01a0a59d-892d-78f0-8093-31e98d4a7815": [
+      "t197answ53y137cw53brown4pcs",
+      "y137cw53brown"
+    ]
+  },
+  "kit_unmatched_vendor_codes": [
+    "AFM-1015B Blue-white (3х6)",
+    "AFM-1015C White (3х6)",
+    "AFM-1030W White (6x12)",
+    "AFM-270/8kR-Beige",
+    "AFM-4030A Brown 4pcs",
+    "AFM-4030G Grey",
+    "AFM-4030G Grey 4pcs",
+    "AFM-503A Black",
+    "AFM-503B Olive",
+    "AFM-510B Olive",
+    "AFM-511A Black",
+    "AFM-511B Olive",
+    "AFM-511C White",
+    "AFM-512B Olive",
+    "AFM-709A-T133 Beige (1+1)",
+    "AFM-709A-T133 Beige (2+1)",
+    "AFM-803A Beige-Green",
+    "AFM-803A Beige-Terracotta",
+    "AFM-803A-T133 Beige (2+1)",
+    "AFM-803A-T133 Beige-Green (2+1)",
+    "AFM-803A-T133 Beige-Terracotta (2+1)",
+    "LV-520BB Brown-Beige",
+    "T130-LV520BB-Beige_Beige",
+    "T130-LV520BB-Brown_Beige",
+    "T133",
+    "T197ANS-W53/Y137C-W53 Brown 4Pcs",
+    "T197ANS/Y350A-W53 Brown 4Pcs",
+    "T197AT/Y137C-W56 Light brown 4Pcs",
+    "T197BT/Y137C-W53 Brown 4Pcs",
+    "T197BT/Y137C-W56 Light brown 4Pcs",
+    "T197BT/Y350A-W53 Brown 4Pcs",
+    "T198A/S54A-W53 Brown",
+    "T198B/S54B-W56 Light brown",
+    "T198B/Y79B-W56 4PCS Light Brown",
+    "T198C/S54C-W85 Latte",
+    "T198C/Y79C-W85 Latte 4Pcs",
+    "T198D/Y137B-W56 Light Brown 4Pcs",
+    "T198D/Y137C-W53 Brown 4Pcs",
+    "T198D/Y137C-W53 Brown 6Pcs",
+    "T198D/Y137C-W85 Latte 4Pcs",
+    "T217/LV-217-4Pcs Beige",
+    "T217/LV-217-6Pcs Beige",
+    "T219/LV-217-4 Pcs Beige",
+    "T219/LV-217-6 Pcs Beige",
+    "T256A/S59A-W53 Brown",
+    "T256A/Y350A-W53 4PCS Brown",
+    "T256A/YC379A-W53 Brown 4Pcs",
+    "T256A/YC379A-W53 Brown 6Pcs",
+    "T256A/YC380A-W53 Brown 4Pcs",
+    "T256A/YC380A-W53 Brown 6Pcs",
+    "T256B/S59B-W65 Light brown",
+    "T256B/Y379B-W65 Light Brown 4Pcs",
+    "T256B/Y380B-W65 Light Brown 4Pcs",
+    "T256C/Y376C-W85 Latte 4Pcs",
+    "T256С/Y380С-W85 4Pcs",
+    "T257A/Y350A-W53 4PCS Brown",
+    "T257A/YC379A-W53 Brown 4Pcs",
+    "T257A/YC380A-W53 Brown 4Pcs",
+    "T257B/Y490 Beige 4Pcs",
+    "T257C/Y380C-W85-90x90 4Pcs Latte",
+    "T25A/Y137C-W53 Brown 2Pcs",
+    "T25B/Y137C-W56 Light brown 2Pcs",
+    "T25C/Y137C-W85 Latte 2Pcs",
+    "T282ANT/Y137C-W53 Brown 2Pcs",
+    "T282ANT/Y137C-W53 Brown 4Pcs",
+    "T282ANT/Y137C-W56 Light brown 2Pcs",
+    "T282ANT/Y137C-W56 Light Brown 4Pcs",
+    "T282BNT/Y137C-W53 Brown 2Pcs",
+    "T282BNT/Y137C-W53 Brown 4Pcs",
+    "T282BNT/Y137C-W56 Light brown 2Pcs",
+    "T282BNT/Y137C-W56 Light Brown 4Pcs",
+    "T286A/Y137C-W53 Brown 4Pcs",
+    "T347/S65A-W53 Brown",
+    "T347/S65A/Y380A-W53 Brown 8PCS",
+    "T347/Y380A-W53 Brown 8PCS",
+    "T365/S65B-W65 Light Brown",
+    "T365/S65/Y380B-W65 8PCS Light Brown 8Pcs",
+    "T365/Y380B-W65 6PCS Light Brown",
+    "T365/Y380B-W65 8PCS Light Brown",
+    "T365/Y380C-W85 6PCS Latte",
+    "T365/Y380C-W85 Latte 8pcs",
+    "T368/Y490 Beige 4Pcs",
+    "T390AD/Y390A-W63 Brown",
+    "T390GD/Y390G-W78 Grey",
+    "T438/Y380A-W53 Brown 10PCS",
+    "T438/Y380C-W85 Latte 10PCS",
+    "T601/Y350A-W53 Brown 2Pcs",
+    "T601/Y350C-W85 Latte 2Pcs",
+    "T601/Y79A-W53 Brown 2Pcs",
+    "T601/Y79B-W56 Light Brown 2Pcs",
+    "T601/Y79C-W85 Latte 2Pcs",
+    "T605SWT/Y350B-W53 Brown 2Pcs",
+    "T605SWT/Y350C-W85 Latte 2Pcs",
+    "T605SWT/Y79A-W53 Brown 2Pcs",
+    "T605SWT/Y79B-W56 Light Brown 2Pcs",
+    "T605SWT/Y79C-W85 Latte 2Pcs",
+    "T705ANT/Y137C-W85 Latte 2Pcs",
+    "T705ANT/Y137C-W85 Latte 4Pcs",
+    "T705ANT/Y350-W85 Latte 2Pcs",
+    "T705ANT/Y350-W85 Latte 4Pcs"
+  ],
+  "webasyst_type_id": "63",
+  "webasyst_stock_id": "66",
+  "webasyst_products_in_type": 279,
+  "webasyst_matched": 162,
+  "webasyst_name_fallback_matches": 192,
+  "webasyst_ambiguous": {
+    "product:1236386": [
+      "afm709at133beige11",
+      "t133"
+    ],
+    "product:1236382": [
+      "afm709at133beige21",
+      "t133"
+    ],
+    "product:1137210": [
+      "t256as59aw53brown",
+      "s59aw53brown"
+    ],
+    "afm4030ggrey": [
+      "1137230",
+      "1126285"
+    ],
+    "t133": [
+      "1236383",
+      "919544"
+    ],
+    "product:919378": [
+      "afm803abeigegreen",
+      "afm803abeige"
+    ],
+    "product:919379": [
+      "afm803abeige",
+      "afm803abeigeterracotta"
+    ],
+    "y79cw85latte": [
+      "943595",
+      "917988"
+    ],
+    "y79bw56lightbrown": [
+      "943599",
+      "917987"
+    ],
+    "y137cw53brown": [
+      "989059",
+      "706115"
+    ],
+    "y79aw53brown": [
+      "943594",
+      "695509"
+    ],
+    "y137cw85latte": [
+      "1137219",
+      "377297"
+    ],
+    "product:377295": [
+      "s54cw85latte",
+      "t198cs54cw85latte"
+    ],
+    "product:339979": [
+      "t347s65aw53brown",
+      "s65aw53brown"
+    ],
+    "product:221842": [
+      "t130lv520bbbeigebeige",
+      "lv520bbbeigebeige"
+    ],
+    "product:221841": [
+      "lv520bbbrownbeige",
+      "t130lv520bbbrownbeige"
+    ],
+    "product:149391": [
+      "s59bw65lightbrown",
+      "t256bs59bw65lightbrown"
+    ],
+    "product:149324": [
+      "t365s65bw65lightbrown",
+      "s65bw65lightbrown"
+    ],
+    "product:149255": [
+      "t706y137cw85latte4pcs",
+      "y137cw85latte"
+    ],
+    "product:149232": [
+      "t282bnty137cw53brown2pcs",
+      "y137cw53brown"
+    ],
+    "product:149231": [
+      "t282bnty137cw53brown4pcs",
+      "y137cw53brown"
+    ],
+    "y137cw56lightbrown": [
+      "149308",
+      "149219"
+    ],
+    "product:149181": [
+      "t198dy137cw53brown6pcs",
+      "y137cw53brown"
+    ],
+    "product:149175": [
+      "y137cw56lightbrown",
+      "t197aty137cw56lightbrown4pcs"
+    ],
+    "product:149167": [
+      "y137cw56lightbrown",
+      "t282anty137cw56lightbrown4pcs"
+    ],
+    "product:149168": [
+      "t282bnty137cw56lightbrown4pcs",
+      "y137cw56lightbrown"
+    ],
+    "product:149166": [
+      "t198dy137cw53brown4pcs",
+      "y137cw53brown"
+    ],
+    "product:149157": [
+      "t198bs54bw56lightbrown",
+      "s54bw56lightbrown"
+    ],
+    "product:149155": [
+      "s54aw53brown",
+      "t198as54aw53brown"
+    ],
+    "product:149153": [
+      "y137cw56lightbrown",
+      "t25by137cw56lightbrown2pcs"
+    ],
+    "product:149144": [
+      "y137cw56lightbrown",
+      "t282bnty137cw56lightbrown2pcs"
+    ],
+    "product:148972": [
+      "y137cw53brown",
+      "t25ay137cw53brown2pcs"
+    ],
+    "product:148955": [
+      "t197answ53y137cw53brown4pcs",
+      "y137cw53brown"
+    ]
+  },
+  "webasyst_unmatched_vendor_codes": [
+    "AFM-1015B Blue-white (3х6)",
+    "AFM-1015C White (3х6)",
+    "AFM-1030W White (6x12)",
+    "AFM-270/8kR-Beige",
+    "AFM-4030A Brown 4pcs",
+    "AFM-4030G Grey",
+    "AFM-4030G Grey 4pcs",
+    "AFM-503A Black",
+    "AFM-503B Olive",
+    "AFM-510B Olive",
+    "AFM-511A Black",
+    "AFM-511B Olive",
+    "AFM-511C White",
+    "AFM-512B Olive",
+    "AFM-709A-T133 Beige (1+1)",
+    "AFM-709A-T133 Beige (2+1)",
+    "AFM-803A Beige-Green",
+    "AFM-803A Beige-Terracotta",
+    "AFM-803A-T133 Beige (2+1)",
+    "AFM-803A-T133 Beige-Green (2+1)",
+    "AFM-803A-T133 Beige-Terracotta (2+1)",
+    "LV-520BB Brown-Beige",
+    "T130-LV520BB-Beige_Beige",
+    "T130-LV520BB-Brown_Beige",
+    "T133",
+    "T197ANS-W53/Y137C-W53 Brown 4Pcs",
+    "T197ANS/Y350A-W53 Brown 4Pcs",
+    "T197AT/Y137C-W56 Light brown 4Pcs",
+    "T197BT/Y137C-W53 Brown 4Pcs",
+    "T197BT/Y137C-W56 Light brown 4Pcs",
+    "T197BT/Y350A-W53 Brown 4Pcs",
+    "T198A/S54A-W53 Brown",
+    "T198B/S54B-W56 Light brown",
+    "T198B/Y79B-W56 4PCS Light Brown",
+    "T198C/S54C-W85 Latte",
+    "T198C/Y79C-W85 Latte 4Pcs",
+    "T198D/Y137B-W56 Light Brown 4Pcs",
+    "T198D/Y137C-W53 Brown 4Pcs",
+    "T198D/Y137C-W53 Brown 6Pcs",
+    "T198D/Y137C-W85 Latte 4Pcs",
+    "T217/LV-217-4Pcs Beige",
+    "T217/LV-217-6Pcs Beige",
+    "T219/LV-217-4 Pcs Beige",
+    "T219/LV-217-6 Pcs Beige",
+    "T256A/S59A-W53 Brown",
+    "T256A/Y350A-W53 4PCS Brown",
+    "T256A/YC379A-W53 Brown 4Pcs",
+    "T256A/YC379A-W53 Brown 6Pcs",
+    "T256A/YC380A-W53 Brown 4Pcs",
+    "T256A/YC380A-W53 Brown 6Pcs",
+    "T256B/S59B-W65 Light brown",
+    "T256B/Y379B-W65 Light Brown 4Pcs",
+    "T256B/Y380B-W65 Light Brown 4Pcs",
+    "T256C/Y376C-W85 Latte 4Pcs",
+    "T256С/Y380С-W85 4Pcs",
+    "T257A/Y350A-W53 4PCS Brown",
+    "T257A/YC379A-W53 Brown 4Pcs",
+    "T257A/YC380A-W53 Brown 4Pcs",
+    "T257B/Y490 Beige 4Pcs",
+    "T257C/Y380C-W85-90x90 4Pcs Latte",
+    "T25A/Y137C-W53 Brown 2Pcs",
+    "T25B/Y137C-W56 Light brown 2Pcs",
+    "T25C/Y137C-W85 Latte 2Pcs",
+    "T282ANT/Y137C-W53 Brown 2Pcs",
+    "T282ANT/Y137C-W53 Brown 4Pcs",
+    "T282ANT/Y137C-W56 Light brown 2Pcs",
+    "T282ANT/Y137C-W56 Light Brown 4Pcs",
+    "T282BNT/Y137C-W53 Brown 2Pcs",
+    "T282BNT/Y137C-W53 Brown 4Pcs",
+    "T282BNT/Y137C-W56 Light brown 2Pcs",
+    "T282BNT/Y137C-W56 Light Brown 4Pcs",
+    "T286A/Y137C-W53 Brown 4Pcs",
+    "T347/S65A-W53 Brown",
+    "T347/S65A/Y380A-W53 Brown 8PCS",
+    "T347/Y380A-W53 Brown 8PCS",
+    "T365/S65B-W65 Light Brown",
+    "T365/S65/Y380B-W65 8PCS Light Brown 8Pcs",
+    "T365/Y380B-W65 6PCS Light Brown",
+    "T365/Y380B-W65 8PCS Light Brown",
+    "T365/Y380C-W85 6PCS Latte",
+    "T365/Y380C-W85 Latte 8pcs",
+    "T368/Y490 Beige 4Pcs",
+    "T390AD/Y390A-W63 Brown",
+    "T390GD/Y390G-W78 Grey",
+    "T438/Y380A-W53 Brown 10PCS",
+    "T438/Y380C-W85 Latte 10PCS",
+    "T601/Y350A-W53 Brown 2Pcs",
+    "T601/Y350C-W85 Latte 2Pcs",
+    "T601/Y79A-W53 Brown 2Pcs",
+    "T601/Y79B-W56 Light Brown 2Pcs",
+    "T601/Y79C-W85 Latte 2Pcs",
+    "T605SWT/Y350B-W53 Brown 2Pcs",
+    "T605SWT/Y350C-W85 Latte 2Pcs",
+    "T605SWT/Y79A-W53 Brown 2Pcs",
+    "T605SWT/Y79B-W56 Light Brown 2Pcs",
+    "T605SWT/Y79C-W85 Latte 2Pcs",
+    "T705ANT/Y137C-W85 Latte 2Pcs",
+    "T705ANT/Y137C-W85 Latte 4Pcs",
+    "T705ANT/Y350-W85 Latte 2Pcs",
+    "T705ANT/Y350-W85 Latte 4Pcs"
+  ],
+  "kit_price_updates_planned": 162,
+  "kit_price_updates_sent": 162,
+  "webasyst_updates_planned": 162,
+  "webasyst_updates_sent": 162,
+  "samples": [
+    {
+      "vendor_code": "A30A2-W53 Brown",
+      "product_id": "149362",
+      "sku_id": "30266431",
+      "purchase": "25500",
+      "customer_price": "33150",
+      "compare_price": "40800",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A30B2-W56 Light Brown",
+      "product_id": "149365",
+      "sku_id": "30266434",
+      "purchase": "25500",
+      "customer_price": "33150",
+      "compare_price": "40800",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A30C2-W85 Latte",
+      "product_id": "1137215",
+      "sku_id": "31316089",
+      "purchase": "25500",
+      "customer_price": "33150",
+      "compare_price": "40800",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A35A2-W53 Brown",
+      "product_id": "149364",
+      "sku_id": "30266433",
+      "purchase": "29900",
+      "customer_price": "38870",
+      "compare_price": "47840",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A35C2-W85 Latte",
+      "product_id": "149361",
+      "sku_id": "30266430",
+      "purchase": "29900",
+      "customer_price": "38870",
+      "compare_price": "47840",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A37B Beige",
+      "product_id": "919377",
+      "sku_id": "31096467",
+      "purchase": "21500",
+      "customer_price": "27950",
+      "compare_price": "34400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A37C Grey-Blue",
+      "product_id": "919373",
+      "sku_id": "31096463",
+      "purchase": "21500",
+      "customer_price": "27950",
+      "compare_price": "34400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1015A Green-white (3х6)",
+      "product_id": "149101",
+      "sku_id": "30266170",
+      "purchase": "13900",
+      "customer_price": "18070",
+      "compare_price": "22240",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1022A Green (3х3/2.4х2.4)",
+      "product_id": "148891",
+      "sku_id": "30265959",
+      "purchase": "3300",
+      "customer_price": "4290",
+      "compare_price": "5280",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1022B Blue (3х3/2.4х2.4)",
+      "product_id": "1236362",
+      "sku_id": "31415498",
+      "purchase": "3300",
+      "customer_price": "4290",
+      "compare_price": "5280",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1022C White (3х3/2.4х2.4)",
+      "product_id": "1236369",
+      "sku_id": "31415505",
+      "purchase": "3300",
+      "customer_price": "4290",
+      "compare_price": "5280",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1026W White (4х6)",
+      "product_id": "1236370",
+      "sku_id": "31415506",
+      "purchase": "38500",
+      "customer_price": "50050",
+      "compare_price": "61600",
+      "stock": 0
+    },
+    {
+      "vendor_code": "AFM-1027W White (4х8)",
+      "product_id": "1236363",
+      "sku_id": "31415499",
+      "purchase": "49900",
+      "customer_price": "64870",
+      "compare_price": "79840",
+      "stock": 0
+    },
+    {
+      "vendor_code": "AFM-1029W White (5х10)",
+      "product_id": "1236372",
+      "sku_id": "31415508",
+      "purchase": "72900",
+      "customer_price": "94770",
+      "compare_price": "116640",
+      "stock": 1
+    },
+    {
+      "vendor_code": "AFM-1032FB Beige (4x4)",
+      "product_id": "149334",
+      "sku_id": "30266403",
+      "purchase": "39000",
+      "customer_price": "50700",
+      "compare_price": "62400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1032W White (5х8)",
+      "product_id": "1236364",
+      "sku_id": "31415500",
+      "purchase": "62000",
+      "customer_price": "80600",
+      "compare_price": "99200",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1035NA Green (3x3/2.4x2.4)",
+      "product_id": "149106",
+      "sku_id": "30266175",
+      "purchase": "6500",
+      "customer_price": "8450",
+      "compare_price": "10400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1035NB Blue (3x3/2.4x2.4)",
+      "product_id": "148896",
+      "sku_id": "30265964",
+      "purchase": "6500",
+      "customer_price": "8450",
+      "compare_price": "10400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1035NC White (3x3/2.4x2.4)",
+      "product_id": "149107",
+      "sku_id": "30266176",
+      "purchase": "6500",
+      "customer_price": "8450",
+      "compare_price": "10400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1036NA Green (3x3/2.4x2.4)",
+      "product_id": "148897",
+      "sku_id": "30265965",
+      "purchase": "7900",
+      "customer_price": "10270",
+      "compare_price": "12640",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1036NB Grey (3x3/2.4x2.4)",
+      "product_id": "148898",
+      "sku_id": "30265966",
+      "purchase": "7900",
+      "customer_price": "10270",
+      "compare_price": "12640",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1040NA Green (3х3)",
+      "product_id": "149108",
+      "sku_id": "30266177",
+      "purchase": "6900",
+      "customer_price": "8970",
+      "compare_price": "11040",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1040NB Blue (3х3)",
+      "product_id": "149109",
+      "sku_id": "30266178",
+      "purchase": "6900",
+      "customer_price": "8970",
+      "compare_price": "11040",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1045A Green-white (3х9)",
+      "product_id": "149110",
+      "sku_id": "30266179",
+      "purchase": "17900",
+      "customer_price": "23270",
+      "compare_price": "28640",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1045C White (3х9)",
+      "product_id": "1236371",
+      "sku_id": "31415507",
+      "purchase": "17900",
+      "customer_price": "23270",
+      "compare_price": "28640",
+      "stock": 0
+    },
+    {
+      "vendor_code": "AFM-1048H Green (2х2х2)",
+      "product_id": "148899",
+      "sku_id": "30265967",
+      "purchase": "10500",
+      "customer_price": "13650",
+      "compare_price": "16800",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1061NA Green (2х3)",
+      "product_id": "149112",
+      "sku_id": "30266181",
+      "purchase": "6500",
+      "customer_price": "8450",
+      "compare_price": "10400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1061NB Blue (2х3)",
+      "product_id": "149113",
+      "sku_id": "30266182",
+      "purchase": "6500",
+      "customer_price": "8450",
+      "compare_price": "10400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-107A Brown",
+      "product_id": "1145970",
+      "sku_id": "31324845",
+      "purchase": "52500",
+      "customer_price": "68250",
+      "compare_price": "84000",
+      "stock": 0
+    },
+    {
+      "vendor_code": "AFM-107B Beige",
+      "product_id": "1145971",
+      "sku_id": "31324846",
+      "purchase": "52500",
+      "customer_price": "68250",
+      "compare_price": "84000",
+      "stock": 100
+    }
+  ],
+  "finished_at": "2026-09-22T12:38:02.117879+00:00",
+  "complete": true
 }
