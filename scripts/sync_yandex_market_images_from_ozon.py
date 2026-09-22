@@ -9,7 +9,7 @@ import requests
 
 OZON_BASE = "https://api-seller.ozon.ru"
 YANDEX_BASE = "https://api.partner.market.yandex.ru"
-BUSINESS_ID = str(os.getenv("YANDEX_MARKET_BUSINESS_ID") or "117585391").strip()
+PREFERRED_BUSINESS_ID = str(os.getenv("YANDEX_MARKET_BUSINESS_ID") or "").strip()
 
 OZON_CLIENT_ID = (os.getenv("OZON_CLIENT_ID") or "").strip()
 OZON_API_KEY = (os.getenv("OZON_API_KEY") or "").strip()
@@ -157,7 +157,60 @@ def load_ozon_images() -> Dict[str, List[str]]:
     return images
 
 
-def load_yandex_offers() -> Dict[str, Dict[str, Any]]:
+def discover_yandex_business_id() -> str:
+    data = call(
+        yandex,
+        "GET",
+        YANDEX_BASE + "/v2/campaigns",
+        params={"limit": 100},
+    )
+    campaigns = data.get("campaigns")
+    if campaigns is None and isinstance(data.get("result"), dict):
+        campaigns = data["result"].get("campaigns")
+    campaigns = campaigns or []
+
+    candidates = []
+    for campaign in campaigns:
+        business = campaign.get("business") or {}
+        bid = str(business.get("id") or "").strip()
+        if not bid:
+            continue
+        candidates.append({
+            "business_id": bid,
+            "business_name": str(business.get("name") or ""),
+            "campaign_id": campaign.get("id"),
+            "domain": campaign.get("domain"),
+            "apiAvailability": campaign.get("apiAvailability"),
+        })
+
+    available = [x for x in candidates if x.get("apiAvailability") in (None, "AVAILABLE")]
+    pool = available or candidates
+    unique_ids = sorted({x["business_id"] for x in pool})
+
+    if PREFERRED_BUSINESS_ID and PREFERRED_BUSINESS_ID in unique_ids:
+        chosen = PREFERRED_BUSINESS_ID
+    elif len(unique_ids) == 1:
+        chosen = unique_ids[0]
+    else:
+        mega_ids = sorted({
+            x["business_id"] for x in pool
+            if "мегаполис" in (x.get("business_name") or "").lower()
+            or "megapolis" in (x.get("business_name") or "").lower()
+        })
+        if len(mega_ids) == 1:
+            chosen = mega_ids[0]
+        else:
+            raise RuntimeError(
+                "Не удалось однозначно выбрать кабинет Яндекс Маркета. "
+                + json.dumps(pool, ensure_ascii=False)[:4000]
+            )
+
+    print("YANDEX_BUSINESS_SELECTED", chosen)
+    print("YANDEX_CAMPAIGNS", json.dumps(pool, ensure_ascii=False)[:4000])
+    return chosen
+
+
+def load_yandex_offers(business_id: str) -> Dict[str, Dict[str, Any]]:
     offers: Dict[str, Dict[str, Any]] = {}
     token = None
     while True:
@@ -167,7 +220,7 @@ def load_yandex_offers() -> Dict[str, Dict[str, Any]]:
         data = call(
             yandex,
             "POST",
-            f"{YANDEX_BASE}/v2/businesses/{BUSINESS_ID}/offer-mappings",
+            f"{YANDEX_BASE}/v2/businesses/{business_id}/offer-mappings",
             body={},
             params=params,
         )
@@ -184,7 +237,7 @@ def load_yandex_offers() -> Dict[str, Dict[str, Any]]:
     return offers
 
 
-def update_yandex(batch: List[Tuple[str, List[str]]]) -> Dict[str, Any]:
+def update_yandex(batch: List[Tuple[str, List[str]]], business_id: str) -> Dict[str, Any]:
     payload = {
         "offerMappings": [
             {
@@ -199,7 +252,7 @@ def update_yandex(batch: List[Tuple[str, List[str]]]) -> Dict[str, Any]:
     return call(
         yandex,
         "POST",
-        f"{YANDEX_BASE}/v2/businesses/{BUSINESS_ID}/offer-mappings/update",
+        f"{YANDEX_BASE}/v2/businesses/{business_id}/offer-mappings/update",
         body=payload,
     )
 
@@ -226,8 +279,9 @@ def response_errors(data: Dict[str, Any]) -> List[Any]:
 
 
 def main() -> int:
+    business_id = discover_yandex_business_id()
     report: Dict[str, Any] = {
-        "business_id": BUSINESS_ID,
+        "business_id": business_id,
         "ozon_with_images": 0,
         "yandex_active_offers": 0,
         "matched_exact": 0,
@@ -247,7 +301,7 @@ def main() -> int:
         raise RuntimeError("Яндекс Маркет API не подтвердил токен: " + json.dumps(auth, ensure_ascii=False)[:2000])
 
     ozon_images = load_ozon_images()
-    yandex_offers = load_yandex_offers()
+    yandex_offers = load_yandex_offers(business_id)
 
     report["ozon_with_images"] = len(ozon_images)
     report["yandex_active_offers"] = len(yandex_offers)
@@ -288,7 +342,7 @@ def main() -> int:
 
     # Безопасный пробный запрос на один товар. Меняем только pictures.
     probe = [to_update[0]]
-    probe_data = update_yandex(probe)
+    probe_data = update_yandex(probe, business_id)
     probe_errors = response_errors(probe_data)
     if probe_errors:
         raise RuntimeError(
@@ -300,7 +354,7 @@ def main() -> int:
     # Остальные товары — пакетами не более 100, как рекомендует Яндекс.
     for batch in chunks(to_update[1:], 100):
         try:
-            data = update_yandex(batch)
+            data = update_yandex(batch, business_id)
             errs = response_errors(data)
             if errs:
                 report["failed_batches"].append({
