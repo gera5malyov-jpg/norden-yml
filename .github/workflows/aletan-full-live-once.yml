@@ -1,0 +1,69 @@
+name: Алетан — применить KIT и Webasyst один раз
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aletan-full-live-once.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aletan-full-live-once
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: |
+          python -m pip install --disable-pip-version-check requests openpyxl playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Применить Алетан в KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python aletan-kit/sync_aletan_catalog_full.py --force
+
+      - name: Применить Алетан в Webasyst
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          ALETAN_WEBASYST_WRITE_DELAY: '0.65'
+        run: python webasyst/sync_aletan_to_webasyst.py
+
+      - name: Сохранить итоговые отчёты
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+
+          cp aletan-kit/last_catalog_sync_report.json /tmp/aletan-kit-live.json 2>/dev/null || true
+          cp aletan-kit/state.json /tmp/aletan-state-live.json 2>/dev/null || true
+          cp webasyst/last_aletan_webasyst_sync.json /tmp/aletan-wa-live.json 2>/dev/null || true
+
+          git fetch origin main
+          git reset --hard origin/main
+
+          cp /tmp/aletan-kit-live.json aletan-kit/last_catalog_sync_report.json 2>/dev/null || true
+          cp /tmp/aletan-state-live.json aletan-kit/state.json 2>/dev/null || true
+          cp /tmp/aletan-wa-live.json webasyst/last_aletan_webasyst_sync.json 2>/dev/null || true
+
+          git add aletan-kit/last_catalog_sync_report.json aletan-kit/state.json webasyst/last_aletan_webasyst_sync.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Применить Алетан в KIT и Webasyst'
+          git push origin HEAD:main || true
