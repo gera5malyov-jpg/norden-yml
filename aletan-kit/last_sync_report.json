@@ -1,6 +1,6 @@
 {
   "status": "ok",
-  "dry_run": true,
+  "dry_run": false,
   "brand_rule": "только точный бренд Алетан",
   "creation_rule": "новые товары не создаются",
   "update_scope": "только цены",
@@ -14,6 +14,7 @@
   "price_page_url": "https://docs.360.yandex.ru/view/d/_xpJcObcgUxWnp71fA8UZyPegnqahzm72s0qoIz-cKg6VUZsT1dCXzlhdw",
   "errors": [],
   "warnings": [],
+  "days_since_last_success": null,
   "catalog_rows_total": 839,
   "catalog_aletan_unique_vendor_codes": 771,
   "catalog_duplicate_vendor_codes": [
@@ -2562,5 +2563,5 @@
       "current_old_price": "57900.00"
     }
   ],
-  "price_updates_sent": 0
+  "price_updates_sent": 486
 }
