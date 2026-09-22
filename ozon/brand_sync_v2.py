@@ -20,7 +20,7 @@ def search_values(category_id, type_id, attribute_id, value):
         "description_category_id": int(category_id),
         "type_id": int(type_id),
         "value": value,
-        "limit": 1000,
+        "limit": 100,
     })
     return data.get("result") or []
 
