@@ -1,0 +1,51 @@
+name: Ozon brand replacement to Megapolis
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-brand-replace-direct-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ozon-brand-replace-direct-once
+  cancel-in-progress: false
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      BRAND_REPORT_JSON: ozon/brand_sync_report.json
+      BRAND_REPORT_MD: ozon/brand_sync_report.md
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Change selected Ozon brands to Megapolis
+        run: python ozon/brand_sync_once.py
+
+      - name: Commit brand sync report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add ozon/brand_sync_report.json ozon/brand_sync_report.md 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No report changes"
+            exit 0
+          fi
+          git commit -m "Ozon: brand sync report"
+          git pull --rebase origin main
+          git push origin HEAD:main
