@@ -21,6 +21,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'aletan-kit/sync_aletan_catalog_full.py'
       - 'aletan-kit/sync_aletan_kit.py'
       - '.github/workflows/aletan-kit-sync.yml'
 
