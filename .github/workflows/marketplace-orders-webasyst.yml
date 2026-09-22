@@ -11,7 +11,7 @@ on:
 
 concurrency:
   group: marketplace-orders-webasyst-live
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
