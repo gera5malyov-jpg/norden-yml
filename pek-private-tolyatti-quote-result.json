@@ -52,6 +52,7 @@
       "scenario": "working_053",
       "request": {
         "currencyCode": "643",
+        "plannedDateTime": "2026-09-23T10:00:00",
         "types": [
           3
         ],
@@ -106,20 +107,69 @@
       "response": {
         "http": 200,
         "data": {
-          "error": {
-            "fields": [
-              {
-                "Key": "plannedDateTime",
-                "Value": [
-                  "Не указана расчетная дата"
-                ]
-              }
-            ],
-            "title": "Ошибка валидации",
-            "message": "Детальные сообщения об ошибках приведены отдельно для каждого поля",
-            "error": null,
-            "status": 400
-          }
+          "hasError": false,
+          "errorMessage": null,
+          "currencyCode": "643",
+          "branchSenderUID": "b473ce9f-dd68-44ea-a4b2-4cb63b6e970d",
+          "branchSender": "Москва Восток",
+          "branchReceiverUID": "64adbe34-a185-11dc-a911-000a5e19ccb4",
+          "branchReceiver": "Тольятти",
+          "transfers": [
+            {
+              "type": 3,
+              "transportingType": null,
+              "hasError": false,
+              "errorMessage": null,
+              "costTotal": 12523.53,
+              "estDeliveryTime": 5,
+              "services": [
+                {
+                  "serviceType": "Перевозка",
+                  "senderCity": "Москва Восток",
+                  "cost": 9823.53,
+                  "info": "Автоперевозка",
+                  "services": null
+                },
+                {
+                  "serviceType": "Перевозка",
+                  "senderCity": "Москва Восток",
+                  "cost": 2700.0,
+                  "info": "Забор груза",
+                  "services": []
+                }
+              ]
+            }
+          ],
+          "transportingTimes": [
+            "0001-01-01T00:00:01",
+            "0001-01-01T15:00:01"
+          ],
+          "commonTerms": [
+            {
+              "type": 3,
+              "transportingType": null,
+              "branchSender": "Москва Восток",
+              "branchReceiver": "Тольятти",
+              "discountedDeliveryWeekDays": [],
+              "transporting": [
+                "3",
+                "5"
+              ],
+              "transportingWithDelivery": [
+                "5",
+                "6"
+              ],
+              "transportingWithPickup": "5",
+              "transportingWithDeliveryWithPickup": "6",
+              "senderShippingDays": [
+                1,
+                2,
+                3,
+                4,
+                5
+              ]
+            }
+          ]
         }
       }
     },
@@ -127,6 +177,7 @@
       "scenario": "conservative_0643",
       "request": {
         "currencyCode": "643",
+        "plannedDateTime": "2026-09-23T10:00:00",
         "types": [
           3
         ],
@@ -181,20 +232,69 @@
       "response": {
         "http": 200,
         "data": {
-          "error": {
-            "fields": [
-              {
-                "Key": "plannedDateTime",
-                "Value": [
-                  "Не указана расчетная дата"
-                ]
-              }
-            ],
-            "title": "Ошибка валидации",
-            "message": "Детальные сообщения об ошибках приведены отдельно для каждого поля",
-            "error": null,
-            "status": 400
-          }
+          "hasError": false,
+          "errorMessage": null,
+          "currencyCode": "643",
+          "branchSenderUID": "b473ce9f-dd68-44ea-a4b2-4cb63b6e970d",
+          "branchSender": "Москва Восток",
+          "branchReceiverUID": "64adbe34-a185-11dc-a911-000a5e19ccb4",
+          "branchReceiver": "Тольятти",
+          "transfers": [
+            {
+              "type": 3,
+              "transportingType": null,
+              "hasError": false,
+              "errorMessage": null,
+              "costTotal": 17675.65,
+              "estDeliveryTime": 5,
+              "services": [
+                {
+                  "serviceType": "Перевозка",
+                  "senderCity": "Москва Восток",
+                  "cost": 11875.65,
+                  "info": "Автоперевозка",
+                  "services": null
+                },
+                {
+                  "serviceType": "Перевозка",
+                  "senderCity": "Москва Восток",
+                  "cost": 5800.0,
+                  "info": "Забор груза",
+                  "services": []
+                }
+              ]
+            }
+          ],
+          "transportingTimes": [
+            "0001-01-01T00:00:01",
+            "0001-01-01T15:00:01"
+          ],
+          "commonTerms": [
+            {
+              "type": 3,
+              "transportingType": null,
+              "branchSender": "Москва Восток",
+              "branchReceiver": "Тольятти",
+              "discountedDeliveryWeekDays": [],
+              "transporting": [
+                "3",
+                "5"
+              ],
+              "transportingWithDelivery": [
+                "5",
+                "6"
+              ],
+              "transportingWithPickup": "5",
+              "transportingWithDeliveryWithPickup": "6",
+              "senderShippingDays": [
+                1,
+                2,
+                3,
+                4,
+                5
+              ]
+            }
+          ]
         }
       }
     }
