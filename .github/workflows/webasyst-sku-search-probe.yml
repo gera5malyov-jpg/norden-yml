@@ -1,0 +1,21 @@
+name: Webasyst SKU search probe
+on:
+  push:
+    paths:
+      - 'scripts/webasyst_sku_search_probe.py'
+      - '.github/workflows/webasyst-sku-search-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python scripts/webasyst_sku_search_probe.py
