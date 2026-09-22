@@ -72,6 +72,9 @@ if found:
         cr=post(path,{"orders":[TARGET]})
         print(label+"_HTTP="+str(cr.status_code))
         if cr.ok:
-            rows=cr.json().get("orders") or []
+            payload=cr.json()
+            print(label+"_ROOT_FIELDS="+(",".join(sorted(payload.keys())) if isinstance(payload,dict) else type(payload).__name__))
+            rows=payload.get("orders") or [] if isinstance(payload,dict) else []
+            print(label+"_COUNT="+str(len(rows) if isinstance(rows,list) else -1))
             if rows and isinstance(rows[0],dict):
                 print(label+"_FIELDS="+",".join(sorted(rows[0].keys())))
