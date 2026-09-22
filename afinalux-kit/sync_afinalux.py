@@ -33,11 +33,10 @@ def s(v):
 
 
 def norm(v):
-    return re.sub(
-        r"[^0-9a-zа-яё]+",
-        "",
-        unicodedata.normalize("NFKC", s(v)).casefold(),
-    )
+    text = unicodedata.normalize("NFKC", s(v)).casefold()
+    # Унифицируем визуально одинаковые символы в артикулах/размерах.
+    text = text.replace("х", "x").replace("×", "x")
+    return re.sub(r"[^0-9a-zа-яё]+", "", text)
 
 
 def money(v):
@@ -296,10 +295,10 @@ def build_kit_index(kit, feed_items):
         if s(x.get("id"))
     }
 
-    rows = kit.list_all("/v1/variants", {"name": BRAND}, "variants")
-    if not rows:
-        rows = kit.list_all("/v1/variants", {"name": "Afina"}, "variants")
-
+    # Параметр brand в KIT ненадёжен, а поиск name не ищет по бренду.
+    # Поэтому делаем полный безопасный проход по вариантам и уже локально
+    # оставляем только точный бренд Afina Garden.
+    rows = kit.list_all("/v1/variants", {}, "variants")
     branded = [
         row for row in rows
         if norm(row.get("brand")) == norm(BRAND)
@@ -316,6 +315,9 @@ def build_kit_index(kit, feed_items):
             continue
         variant = row
         keys = candidate_feed_keys(variant, feed_items, char_titles)
+
+        # Если в списочной выдаче нет характеристик и по SKU/названию
+        # сопоставить не удалось, читаем детальную карточку.
         if not keys and not (variant.get("characteristics") or []):
             try:
                 variant = kit.get_variant(vid)
@@ -338,7 +340,6 @@ def build_kit_index(kit, feed_items):
             by_key[key] = variant
 
     return by_key, ambiguous, len(branded), detailed_reads
-
 
 def product_skus(product):
     value = product.get("skus")
