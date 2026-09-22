@@ -1,0 +1,194 @@
+name: Norden efficient initial bootstrap
+# Fast missing-product bootstrap. Creates base cards first; full content enrichment stays in the regular Norden sync.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-efficient-bootstrap.yml'
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: 'Missing Norden products to create this run'
+        required: true
+        default: '600'
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: norden-kit-price-stock-daily
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Resolve batch size
+        id: batch
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "size=${{ inputs.batch_size }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "size=600" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create next missing Norden products
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=norden-kit python norden-kit/bootstrap_norden_kit.py             --max-new "${{ steps.batch.outputs.size }}"
+
+      - name: Preserve bootstrap state
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions
+          git config user.email actions@github.com
+
+          mkdir -p /tmp/norden-bootstrap-state
+          cp norden-kit/kit_mapping.json /tmp/norden-bootstrap-state/kit_mapping.json 2>/dev/null || true
+          cp norden-kit/bootstrap_report.json /tmp/norden-bootstrap-state/bootstrap_report.json 2>/dev/null || true
+
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/norden-bootstrap-state/kit_mapping.json norden-kit/kit_mapping.json 2>/dev/null || true
+          cp /tmp/norden-bootstrap-state/bootstrap_report.json norden-kit/bootstrap_report.json 2>/dev/null || true
+
+          git add norden-kit/kit_mapping.json norden-kit/bootstrap_report.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Update Norden bootstrap state"
+          for i in 1 2 3 4 5; do
+            git push origin HEAD:main && exit 0
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/norden-bootstrap-state/kit_mapping.json norden-kit/kit_mapping.json 2>/dev/null || true
+            cp /tmp/norden-bootstrap-state/bootstrap_report.json norden-kit/bootstrap_report.json 2>/dev/null || true
+            git add norden-kit/kit_mapping.json norden-kit/bootstrap_report.json 2>/dev/null || true
+            git commit -m "Update Norden bootstrap state" || true
+            sleep $((i * 5))
+          done
+          exit 1
+
+      - name: Decide whether to continue
+        id: next
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          p='norden-kit/bootstrap_report.json'
+          if not os.path.exists(p):
+              print('continue=false')
+              raise SystemExit
+          r=json.load(open(p,encoding='utf-8'))
+          created=int(r.get('new_products_created') or 0)
+          remaining=int(r.get('remaining_eligible') or 0)
+          status=str(r.get('status') or '')
+          print('continue=' + ('true' if created > 0 and remaining > 0 and status != 'failed' else 'false'))
+          print('created=' + str(created))
+          print('remaining=' + str(remaining))
+          print('remaining_without_price=' + str(int(r.get('remaining_without_price') or 0)))
+          PY
+
+      - name: Queue next Norden bootstrap batch
+        if: steps.next.outputs.continue == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BATCH_SIZE: ${{ steps.batch.outputs.size }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          repo=os.environ['GITHUB_REPOSITORY']
+          url=f"https://api.github.com/repos/{repo}/actions/workflows/norden-efficient-bootstrap.yml/dispatches"
+          body=json.dumps({'ref':'main','inputs':{'batch_size':os.environ['BATCH_SIZE']}}).encode()
+          req=urllib.request.Request(url,data=body,method='POST',headers={
+              'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+              'Accept':'application/vnd.github+json',
+              'X-GitHub-Api-Version':'2022-11-28',
+              'Content-Type':'application/json',
+          })
+          with urllib.request.urlopen(req,timeout=30) as resp:
+              if resp.status != 204:
+                  raise RuntimeError(f'dispatch status {resp.status}')
+          PY
+
+      - name: Send Norden bootstrap report by email
+        if: always()
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          RUN_STATUS: ${{ job.status }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, smtplib, ssl
+          from email.message import EmailMessage
+          from pathlib import Path
+
+          p=Path('norden-kit/bootstrap_report.json')
+          r=json.loads(p.read_text(encoding='utf-8')) if p.exists() else {}
+          raw=(os.getenv('RUN_STATUS') or 'unknown').lower()
+          status={'success':'УСПЕШНО','failure':'ЗАВЕРШЕНО С ОШИБКАМИ','cancelled':'ОТМЕНЕНО'}.get(raw,raw.upper())
+
+          lines=[
+            'Загрузка Norden → Яндекс KIT',
+            '',
+            f'Результат запуска: {status}',
+            f"Товаров у Norden: {r.get('source_products','—')}",
+            f"Создано новых карточек в этом пакете: {r.get('new_products_created','—')}",
+            f"Осталось товаров с корректной ценой: {r.get('remaining_eligible','—')}",
+            f"Осталось товаров без закупочной цены: {r.get('remaining_without_price','—')}",
+            f"Ошибок: {len(r.get('errors') or [])}",
+            '',
+            'Загрузка следующих пакетов запускается автоматически, пока остаются товары с корректной ценой.',
+            f"GitHub Actions: {os.getenv('RUN_URL','')}",
+          ]
+
+          user=(os.getenv('SMTP_USER') or '').strip()
+          password=''.join((os.getenv('SMTP_PASSWORD') or '').split())
+          recipient=(os.getenv('RECIPIENT') or '').strip()
+          if not user or not password:
+              raise SystemExit('Не настроена почта для отчёта')
+
+          msg=EmailMessage()
+          msg['From']=user
+          msg['To']=recipient
+          msg['Subject']=f'[Norden → KIT] Первичная загрузка — {status}'
+          msg.set_content('\n'.join(lines))
+          ctx=ssl.create_default_context()
+
+          try:
+              with smtplib.SMTP('smtp.gmail.com',587,timeout=60) as smtp:
+                  smtp.ehlo(); smtp.starttls(context=ctx); smtp.ehlo()
+                  smtp.login(user,password); smtp.send_message(msg)
+          except Exception:
+              with smtplib.SMTP_SSL('smtp.gmail.com',465,context=ctx,timeout=60) as smtp:
+                  smtp.login(user,password); smtp.send_message(msg)
+          PY
