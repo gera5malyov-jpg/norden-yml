@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import base64, json, os, sys, urllib.parse, urllib.request, urllib.error
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 
 REQ_PATH = "shipping-quote/request.json"
@@ -148,6 +149,101 @@ def quote_cdek():
         "tariffs":simple
     }
 
+# ---------- Dalli ----------
+def quote_dalli():
+    token=os.environ.get("DALLI_TOKEN","").strip()
+    if not token:
+        raise RuntimeError("DALLI_TOKEN secret missing")
+
+    from_city=str(req.get("from_city","")).strip().casefold()
+    if "санкт-петербург" not in from_city and from_city not in ("спб","saint petersburg","st petersburg"):
+        return {
+            "status":"НЕ_ПРИМЕНИМО",
+            "reason":"Подключен Санкт-Петербургский аккаунт Dalli; расчет выполняется для отправлений из Санкт-Петербурга."
+        }
+
+    root=ET.Element("deliverycost")
+    ET.SubElement(root,"auth",{"token":token})
+    ET.SubElement(root,"partner").text="DS"
+    ET.SubElement(root,"to").text=req["to_address"]
+
+    sender_code=str(req.get("dalli_sender_code","")).strip()
+    if sender_code:
+        ET.SubElement(root,"sendercode").text=sender_code
+
+    declared=float(req.get("declared_value_rub",0) or 0)
+    ET.SubElement(root,"price").text="0"
+    ET.SubElement(root,"inshprice").text=f"{declared:.2f}"
+    ET.SubElement(root,"cashservices").text="NO"
+
+    packages=ET.SubElement(root,"packages")
+    places=max(1,int(req.get("places",1)))
+    for _ in range(places):
+        ET.SubElement(packages,"package",{
+            "weight":f"{float(req['weight_kg']):g}",
+            "length":f"{float(req['length_cm']):g}",
+            "width":f"{float(req['width_cm']):g}",
+            "height":f"{float(req['height_cm']):g}",
+        })
+    ET.SubElement(root,"output").text="x2"
+
+    body=ET.tostring(root,encoding="utf-8",xml_declaration=True)
+    base=os.environ.get("DALLI_API_BASE_URL","https://spbapi.dalli-service.com/v1").rstrip("/")
+    request=urllib.request.Request(
+        base+"/deliverycost",
+        data=body,
+        method="POST",
+        headers={
+            "Content-Type":"application/xml; charset=utf-8",
+            "Accept":"application/xml, text/xml, */*",
+            "User-Agent":"megapolis-shipping-quote/1.0",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request,timeout=60) as resp:
+            raw=resp.read()
+    except urllib.error.HTTPError as e:
+        raw=e.read().decode("utf-8","replace")
+        raise RuntimeError(f"Dalli HTTP {e.code}: {raw[:1000]}") from e
+
+    parsed=ET.fromstring(raw)
+    if parsed.get("error"):
+        raise RuntimeError(
+            f"Dalli API error={parsed.get('error')}: {parsed.get('errormsg','неизвестная ошибка')}"
+        )
+
+    prices=[]
+    for node in parsed.findall("price"):
+        item=dict(node.attrib)
+        if item.get("price") is not None:
+            try: item["price"]=float(item["price"])
+            except Exception: pass
+        if item.get("delivery_period") is not None:
+            try: item["delivery_period"]=int(item["delivery_period"])
+            except Exception: pass
+        prices.append(item)
+
+    if not prices and parsed.get("price") is not None:
+        item=dict(parsed.attrib)
+        try: item["price"]=float(item["price"])
+        except Exception: pass
+        prices=[item]
+
+    courier=[p for p in prices if p.get("typedelivery")=="KUR" and isinstance(p.get("price"),(int,float))]
+    paid=courier or [p for p in prices if isinstance(p.get("price"),(int,float))]
+    best=min(paid,key=lambda x:float(x["price"])) if paid else None
+    if not best:
+        raise RuntimeError("Dalli не вернул доступный тариф: "+ET.tostring(parsed,encoding="unicode")[:1500])
+
+    return {
+        "status":"УСПЕШНО",
+        "source":"Dalli SPB API v1",
+        "best_courier_or_lowest":best,
+        "total_rub":round(float(best["price"]),2),
+        "tariffs":prices,
+        "sender_code_used":sender_code or None
+    }
+
 # ---------- PEK private API ----------
 def quote_pek():
     login=os.environ.get("PEK_LOGIN","").strip()
@@ -285,6 +381,7 @@ def quote_pek():
 
 safe("e_bulky", quote_ebulky)
 safe("cdek", quote_cdek)
+safe("dalli", quote_dalli)
 safe("pek", quote_pek)
 
 # comparison
@@ -296,6 +393,9 @@ cd=result["carriers"].get("cdek",{})
 best=cd.get("best_door_to_door_or_lowest") if isinstance(cd,dict) else None
 if cd.get("status")=="УСПЕШНО" and best and best.get("delivery_sum") is not None:
     offers.append({"carrier":"CDEK","total_rub":float(best["delivery_sum"])})
+dl=result["carriers"].get("dalli",{})
+if dl.get("status")=="УСПЕШНО" and dl.get("total_rub") is not None:
+    offers.append({"carrier":"Dalli","total_rub":float(dl["total_rub"])})
 pk=result["carriers"].get("pek",{})
 if pk.get("status")=="УСПЕШНО" and pk.get("total_rub") is not None:
     offers.append({"carrier":"PEK","total_rub":float(pk["total_rub"])})
