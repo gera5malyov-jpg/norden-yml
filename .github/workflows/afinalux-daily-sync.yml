@@ -1,6 +1,11 @@
 name: Afina Garden → KIT → Webasyst — ежедневно
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'afinalux-kit/sync_afinalux.py'
+      - '.github/workflows/afinalux-daily-sync.yml'
   schedule:
     - cron: '20 6 * * *'
   workflow_dispatch:
