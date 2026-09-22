@@ -1,0 +1,60 @@
+name: Google Drive — прайсы
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Режим"
+        required: true
+        default: "check"
+        type: choice
+        options:
+          - check
+          - download
+
+permissions:
+  contents: read
+
+jobs:
+  prices:
+    runs-on: ubuntu-latest
+    env:
+      GOOGLE_DRIVE_PRICES_FOLDER_ID: "1iKh4RGaq1ViyWmHENjp8oeuauHmWEyj9"
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Установить доступ к Google Drive
+        run: pip install --disable-pip-version-check google-api-python-client google-auth
+
+      - name: Проверить секрет Google
+        shell: bash
+        run: |
+          if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::error::Не задан GitHub secret GOOGLE_SERVICE_ACCOUNT_JSON"
+            exit 1
+          fi
+
+      - name: Проверить папку Прайсы
+        if: ${{ inputs.mode == 'check' }}
+        run: python scripts/google_drive_prices.py --list-only
+
+      - name: Скачать прайсы во временную рабочую папку
+        if: ${{ inputs.mode == 'download' }}
+        run: python scripts/google_drive_prices.py --dest runtime/prices
+
+      - name: Проверить, что прайсы не попали в Git
+        if: ${{ inputs.mode == 'download' }}
+        shell: bash
+        run: |
+          if git status --porcelain -- runtime/prices | grep -q .; then
+            echo "::warning::runtime/prices не должен коммититься. Файлы остаются только на временном runner GitHub Actions."
+          fi
+          find runtime/prices -type f -printf '%P\n' | sort
