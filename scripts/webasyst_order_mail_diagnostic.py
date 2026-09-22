@@ -69,3 +69,40 @@ for label,method,params in [
     except Exception as e:
         out(f"WA_{label}_API_OK",0)
         out(f"WA_{label}_API_ERROR",type(e).__name__)
+
+
+print("WA_STOREFRONT_MAIL_HISTORY_BEGIN=1")
+hist = client.call("shop.order.search", params={"limit":120, "fields":"*,sales_channel"})
+horders=(hist or {}).get("orders") or []
+n=0
+for o in horders:
+    sc=o.get("sales_channel") or {}
+    scid=str(sc.get("id") or "") if isinstance(sc,dict) else str(sc)
+    if not scid.startswith("storefront:profikompany.ru"):
+        continue
+    oid=o.get("id")
+    try:
+        logs=client.call("shop.order.log", params={"id":oid}) or []
+    except Exception:
+        continue
+    mail_like=0
+    blank=0
+    for x in logs:
+        if not isinstance(x,dict):
+            continue
+        aid=str(x.get("action_id") or "")
+        if aid=="":
+            blank+=1
+        txt=str(x.get("text") or "").lower()
+        rec=str(x.get("log_record") or "").lower()
+        if aid=="" and ("notification" in txt or "уведомлен" in txt or "email" in txt or "envelope" in txt or "письм" in txt or "notification" in rec):
+            mail_like+=1
+    n+=1
+    out(f"WA_SF_{n}_ID",oid)
+    out(f"WA_SF_{n}_CREATED",o.get("create_datetime"))
+    out(f"WA_SF_{n}_STATE",o.get("state_id"))
+    out(f"WA_SF_{n}_BLANK_LOGS",blank)
+    out(f"WA_SF_{n}_MAIL_LOGS",mail_like)
+    if n>=20:
+        break
+out("WA_STOREFRONT_HISTORY_COUNT",n)
