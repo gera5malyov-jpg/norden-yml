@@ -1,0 +1,261 @@
+{
+  "status": "ok",
+  "dry_run": true,
+  "type_name": "aletan.ru",
+  "webasyst_stock": "Основной склад",
+  "webasyst_stock_qty": 100,
+  "match_rule": "vendorCode: exact SKU first, then exact token in product name",
+  "created": 0,
+  "would_create": 0,
+  "updated": 0,
+  "would_update": 591,
+  "kit_matched": 591,
+  "webasyst_products_before": 800,
+  "webasyst_ambiguous_codes": [
+    "W702BL/1"
+  ],
+  "kit_ambiguous_codes": [
+    "W702BL/1"
+  ],
+  "errors": [],
+  "warnings": [],
+  "sample_new": [],
+  "sample_updates": [
+    {
+      "vendor_code": "B1001",
+      "product_id": "1474987",
+      "existing_sku": "AF-31654125",
+      "price": "136800.00",
+      "compare_price": "136800.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B102",
+      "product_id": "1443656",
+      "existing_sku": "AF-31622794",
+      "price": "45292.00",
+      "compare_price": "55744.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B102BL",
+      "product_id": "1443745",
+      "existing_sku": "AF-31622883",
+      "price": "45292.00",
+      "compare_price": "55744.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B102BLG",
+      "product_id": "1443747",
+      "existing_sku": "AF-31622885",
+      "price": "57400.00",
+      "compare_price": "57400.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B102G",
+      "product_id": "1443654",
+      "existing_sku": "AF-31622792",
+      "price": "57400.00",
+      "compare_price": "57400.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B109",
+      "product_id": "1443475",
+      "existing_sku": "AF-31622613",
+      "price": "98514.00",
+      "compare_price": "121248.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B109/1",
+      "product_id": "1467971",
+      "existing_sku": "AF-31647109",
+      "price": "72059.00",
+      "compare_price": "88688.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B109/1G",
+      "product_id": "1467972",
+      "existing_sku": "AF-31647110",
+      "price": "91460.00",
+      "compare_price": "91460.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B109G",
+      "product_id": "1443498",
+      "existing_sku": "AF-31622636",
+      "price": "124700.00",
+      "compare_price": "124700.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B110",
+      "product_id": "1443476",
+      "existing_sku": "AF-31622614",
+      "price": "58539.00",
+      "compare_price": "72048.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B110G",
+      "product_id": "1443484",
+      "existing_sku": "AF-31622622",
+      "price": "74300.00",
+      "compare_price": "74300.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B307",
+      "product_id": "1474973",
+      "existing_sku": "AF-31654111",
+      "price": "54600.00",
+      "compare_price": "54600.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "B307G",
+      "product_id": "1443670",
+      "existing_sku": "AF-31622808",
+      "price": "54600.00",
+      "compare_price": "54600.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR107",
+      "product_id": "1443407",
+      "existing_sku": "AF-31622545",
+      "price": "22308.00",
+      "compare_price": "27456.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR301G",
+      "product_id": "1474971",
+      "existing_sku": "AF-31654109",
+      "price": "40898.00",
+      "compare_price": "50336.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR301W",
+      "product_id": "1443405",
+      "existing_sku": "AF-31622543",
+      "price": "40898.00",
+      "compare_price": "50336.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR304W",
+      "product_id": "1443402",
+      "existing_sku": "AF-31622540",
+      "price": "89232.00",
+      "compare_price": "109824.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR305W",
+      "product_id": "1443401",
+      "existing_sku": "AF-31622539",
+      "price": "107822.00",
+      "compare_price": "132704.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR315W",
+      "product_id": "1443403",
+      "existing_sku": "AF-31622541",
+      "price": "81796.00",
+      "compare_price": "100672.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR401W",
+      "product_id": "1443400",
+      "existing_sku": "AF-31622538",
+      "price": "95095.00",
+      "compare_price": "117040.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR403W",
+      "product_id": "1443399",
+      "existing_sku": "AF-31622537",
+      "price": "120835.00",
+      "compare_price": "148720.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR601L/W",
+      "product_id": "1467970",
+      "existing_sku": "AF-31647108",
+      "price": "113191.00",
+      "compare_price": "139312.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR601R/W",
+      "product_id": "1467981",
+      "existing_sku": "AF-31647119",
+      "price": "113191.00",
+      "compare_price": "139312.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR603W",
+      "product_id": "1443395",
+      "existing_sku": "AF-31622533",
+      "price": "129610.00",
+      "compare_price": "159520.00",
+      "stock": 100
+    },
+    {
+      "vendor_code": "BR604W",
+      "product_id": "1443394",
+      "existing_sku": "AF-31622532",
+      "price": "128310.00",
+      "compare_price": "157920.00",
+      "stock": 100
+    }
+  ],
+  "complete": true,
+  "catalog_unique_vendor_codes": 771,
+  "catalog_duplicate_vendor_codes": [
+    "BR108W",
+    "BR202W",
+    "BR204W",
+    "BR206W",
+    "BR208W",
+    "MRS305Q",
+    "MRS404W",
+    "MRS804G",
+    "T209W",
+    "T702W",
+    "T705QU",
+    "T706G",
+    "T706Q",
+    "T706W",
+    "W301BL",
+    "W408",
+    "В104",
+    "В214G",
+    "В216",
+    "В301G",
+    "В302",
+    "В402",
+    "В405G",
+    "В602/1BLG",
+    "В802",
+    "М104Q",
+    "М406W",
+    "М604W",
+    "М903G"
+  ],
+  "type_id": "202",
+  "webasyst_stock_id": "66",
+  "ambiguous_webasyst_products": []
+}
