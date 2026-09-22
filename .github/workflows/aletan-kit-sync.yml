@@ -5,7 +5,7 @@ on:
     # GitHub cron не умеет "каждые 14 дней".
     # Проверяем каждый понедельник; live-запуск проходит только если
     # с последнего успешного обновления прошло >= 14 дней.
-    - cron: '35 5 * * 1'
+    - cron: '35 12 * * 2'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -58,7 +58,8 @@ jobs:
           args=()
 
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            args+=(--dry-run --force)
+            # Одноразовый live-запуск после подтверждённого dry-run.
+            args+=(--force)
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
             if [[ "${{ inputs.force }}" == "true" ]]; then args+=(--force); fi
