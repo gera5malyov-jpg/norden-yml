@@ -1,0 +1,202 @@
+{
+  "zone_lookup": {
+    "http": 200,
+    "data": {
+      "zoneId": "235ce8a5-91ee-11e5-94cc-00155d668909",
+      "zoneName": "Тольятти город",
+      "branchUID": "64adbe34-a185-11dc-a911-000a5e19ccb4",
+      "bitrixId": "475",
+      "branchCode": "ТЛ",
+      "branchTitle": "Тольятти",
+      "mainWarehouseId": "36cf9b70-a415-11dc-a911-000a5e19ccb4",
+      "warehousePoint": {
+        "latitude": 53.525601,
+        "longitude": 49.469486
+      },
+      "GeoData": {
+        "precision": "bad",
+        "kind": "locality",
+        "Address": {
+          "country_code": "RU",
+          "formatted": "Россия, Самарская область, Тольятти",
+          "postal_code": null,
+          "Components": [
+            {
+              "kind": "country",
+              "name": "Россия"
+            },
+            {
+              "kind": "province",
+              "name": "Приволжский федеральный округ"
+            },
+            {
+              "kind": "province",
+              "name": "Самарская область"
+            },
+            {
+              "kind": "area",
+              "name": "городской округ Тольятти"
+            },
+            {
+              "kind": "locality",
+              "name": "Тольятти"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "receiverWarehouseId": "36cf9b70-a415-11dc-a911-000a5e19ccb4",
+  "quotes": [
+    {
+      "scenario": "working_053",
+      "request": {
+        "currencyCode": "643",
+        "types": [
+          3
+        ],
+        "receiverWarehouseId": "36cf9b70-a415-11dc-a911-000a5e19ccb4",
+        "isOpenCarSender": false,
+        "isOpenCarReceiver": false,
+        "isHyperMarket": false,
+        "isInsurance": false,
+        "isPickUp": true,
+        "isDelivery": false,
+        "needReturnDocuments": false,
+        "needArrangeTransportationDocuments": false,
+        "pickupServices": {
+          "isLoading": false,
+          "floor": 0,
+          "carryingDistance": 0,
+          "isElevator": false
+        },
+        "pickup": {
+          "address": "Россия, Москва"
+        },
+        "cargos": [
+          {
+            "length": 0.58,
+            "width": 0.6,
+            "height": 1.52,
+            "volume": 0.53,
+            "isHP": false,
+            "sealingPositionsCount": 0,
+            "weight": 64.0
+          },
+          {
+            "length": 0.58,
+            "width": 0.6,
+            "height": 1.52,
+            "volume": 0.53,
+            "isHP": false,
+            "sealingPositionsCount": 0,
+            "weight": 64.0
+          },
+          {
+            "length": 0.58,
+            "width": 0.6,
+            "height": 1.52,
+            "volume": 0.53,
+            "isHP": false,
+            "sealingPositionsCount": 0,
+            "weight": 64.0
+          }
+        ]
+      },
+      "response": {
+        "http": 200,
+        "data": {
+          "error": {
+            "fields": [
+              {
+                "Key": "plannedDateTime",
+                "Value": [
+                  "Не указана расчетная дата"
+                ]
+              }
+            ],
+            "title": "Ошибка валидации",
+            "message": "Детальные сообщения об ошибках приведены отдельно для каждого поля",
+            "error": null,
+            "status": 400
+          }
+        }
+      }
+    },
+    {
+      "scenario": "conservative_0643",
+      "request": {
+        "currencyCode": "643",
+        "types": [
+          3
+        ],
+        "receiverWarehouseId": "36cf9b70-a415-11dc-a911-000a5e19ccb4",
+        "isOpenCarSender": false,
+        "isOpenCarReceiver": false,
+        "isHyperMarket": false,
+        "isInsurance": false,
+        "isPickUp": true,
+        "isDelivery": false,
+        "needReturnDocuments": false,
+        "needArrangeTransportationDocuments": false,
+        "pickupServices": {
+          "isLoading": false,
+          "floor": 0,
+          "carryingDistance": 0,
+          "isElevator": false
+        },
+        "pickup": {
+          "address": "Россия, Москва"
+        },
+        "cargos": [
+          {
+            "length": 0.58,
+            "width": 0.6,
+            "height": 1.85,
+            "volume": 0.643,
+            "isHP": false,
+            "sealingPositionsCount": 0,
+            "weight": 64.0
+          },
+          {
+            "length": 0.58,
+            "width": 0.6,
+            "height": 1.85,
+            "volume": 0.643,
+            "isHP": false,
+            "sealingPositionsCount": 0,
+            "weight": 64.0
+          },
+          {
+            "length": 0.58,
+            "width": 0.6,
+            "height": 1.85,
+            "volume": 0.643,
+            "isHP": false,
+            "sealingPositionsCount": 0,
+            "weight": 64.0
+          }
+        ]
+      },
+      "response": {
+        "http": 200,
+        "data": {
+          "error": {
+            "fields": [
+              {
+                "Key": "plannedDateTime",
+                "Value": [
+                  "Не указана расчетная дата"
+                ]
+              }
+            ],
+            "title": "Ошибка валидации",
+            "message": "Детальные сообщения об ошибках приведены отдельно для каждого поля",
+            "error": null,
+            "status": 400
+          }
+        }
+      }
+    }
+  ]
+}
