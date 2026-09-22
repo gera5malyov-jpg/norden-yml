@@ -333,25 +333,47 @@ def char_values(variant, char_titles):
 
 
 def candidate_feed_keys(variant, feed_items, char_titles):
-    keys = []
     source_keys = set(feed_items)
 
+    # 1. Точное совпадение SKU/характеристик — самый сильный ключ.
+    direct = []
     for value in [variant.get("sku"), *char_values(variant, char_titles)]:
         key = norm(value)
         if key in source_keys:
-            keys.append(key)
-
-    if keys:
-        return list(dict.fromkeys(keys))
+            direct.append(key)
+    direct = list(dict.fromkeys(direct))
+    if len(direct) == 1:
+        return direct
+    if len(direct) > 1:
+        # Если один код является более полным составным артикулом, берём его.
+        max_len = max(map(len, direct))
+        longest = [k for k in direct if len(k) == max_len]
+        return longest if len(longest) == 1 else direct
 
     name_key = norm(variant.get("name"))
-    if name_key:
-        for key in source_keys:
-            if len(key) >= 4 and key in name_key:
-                keys.append(key)
+    if not name_key:
+        return []
 
-    return list(dict.fromkeys(keys))
+    # 2. Точное совпадение названия карточки с названием из фида.
+    exact_name = [
+        key for key, item in feed_items.items()
+        if norm(item.get("name")) == name_key
+    ]
+    if len(exact_name) == 1:
+        return exact_name
 
+    # 3. Артикул внутри названия. Для составных комплектов короткий код
+    # (например T133) может входить в длинный. Приоритет уникальному
+    # самому длинному совпадению.
+    matches = [
+        key for key in source_keys
+        if len(key) >= 4 and key in name_key
+    ]
+    if not matches:
+        return []
+    max_len = max(map(len, matches))
+    longest = [k for k in matches if len(k) == max_len]
+    return longest if len(longest) == 1 else matches
 
 def build_kit_index(kit, feed_items):
     chars = kit.list_all(
@@ -471,6 +493,7 @@ def build_wa_index(wa, products, feed_items):
     for product in products:
         pid = s(product.get("id"))
         skus = product_skus(product) or get_product_skus(wa, pid)
+
         direct = []
         for sku in skus:
             key = norm(sku.get("sku"))
@@ -480,20 +503,38 @@ def build_wa_index(wa, products, feed_items):
         if len(direct) == 1:
             key, sku = direct[0]
         elif len(direct) > 1:
-            ambiguous["product:" + pid].extend(x[0] for x in direct)
-            continue
-        else:
-            name_key = norm(product.get("name"))
-            matches = [
-                key for key in source_keys
-                if len(key) >= 4 and key in name_key
-            ]
-            if len(matches) != 1 or len(skus) != 1:
-                if len(matches) > 1:
-                    ambiguous["product:" + pid].extend(matches)
+            max_len = max(len(x[0]) for x in direct)
+            longest = [x for x in direct if len(x[0]) == max_len]
+            if len(longest) != 1:
+                ambiguous["product:" + pid].extend(x[0] for x in direct)
                 continue
-            key, sku = matches[0], skus[0]
-            fallback_matches += 1
+            key, sku = longest[0]
+        else:
+            if len(skus) != 1:
+                continue
+
+            name_key = norm(product.get("name"))
+            exact_name = [
+                k for k, item in feed_items.items()
+                if norm(item.get("name")) == name_key
+            ]
+            if len(exact_name) == 1:
+                key, sku = exact_name[0], skus[0]
+                fallback_matches += 1
+            else:
+                matches = [
+                    k for k in source_keys
+                    if len(k) >= 4 and k in name_key
+                ]
+                if not matches:
+                    continue
+                max_len = max(map(len, matches))
+                longest = [k for k in matches if len(k) == max_len]
+                if len(longest) != 1:
+                    ambiguous["product:" + pid].extend(matches)
+                    continue
+                key, sku = longest[0], skus[0]
+                fallback_matches += 1
 
         if key in by_key and s(by_key[key][0].get("id")) != pid:
             ambiguous[key].append(s(by_key[key][0].get("id")))
@@ -503,102 +544,6 @@ def build_wa_index(wa, products, feed_items):
             by_key[key] = (product, sku)
 
     return by_key, ambiguous, fallback_matches
-
-
-def extract_product_id(payload):
-    if isinstance(payload, dict):
-        for key in ("id", "product_id"):
-            if payload.get(key) not in (None, ""):
-                return s(payload.get(key))
-        product = payload.get("product")
-        if isinstance(product, dict) and product.get("id") not in (None, ""):
-            return s(product.get("id"))
-    return ""
-
-
-def extimg_summary(urls):
-    urls = [s(x) for x in urls if s(x)]
-    if not urls:
-        return ""
-    return "[extimg]\n" + "\n".join(urls)
-
-
-def product_url(name, sku):
-    base = unicodedata.normalize("NFKC", s(name)).casefold()
-    base = re.sub(r"[^0-9a-zа-яё]+", "-", base).strip("-")
-    code = re.sub(r"[^0-9a-z]+", "-", s(sku).casefold()).strip("-")
-    return ("afina-" + (base[:100] or "garden") + "-" + code).strip("-")
-
-
-def global_wa_exact_sku(wa, sku):
-    payload = wa.call(
-        "shop.product.search",
-        params={
-            "hash": f"search/sku={sku}",
-            "limit": 50,
-            "fields": "*,skus,stock_counts",
-        },
-    )
-    products = listify(payload, ("products", "items"))
-    matches = []
-    for product in products:
-        pid = s(product.get("id"))
-        skus = product_skus(product) or get_product_skus(wa, pid)
-        for row in skus:
-            if norm(row.get("sku")) == norm(sku):
-                matches.append((product, row))
-    return matches
-
-
-def ensure_kit_category(kit, categories, title, parent_id=""):
-    matches = [
-        row for row in categories
-        if norm(row.get("title")) == norm(title)
-        and s(row.get("parent_id")) == s(parent_id)
-    ]
-    if matches:
-        return s(matches[0].get("id"))
-    created = kit.create_category(title, parent_id or None)
-    cid = s(created.get("id"))
-    if not cid:
-        raise RuntimeError(f"KIT did not return category id for {title!r}")
-    row = dict(created)
-    row.setdefault("parent_id", parent_id)
-    categories.append(row)
-    return cid
-
-
-def ensure_kit_characteristic(kit, characteristics, title):
-    matches = [
-        row for row in characteristics
-        if norm(row.get("title")) == norm(title)
-    ]
-    if matches:
-        return s(matches[0].get("id"))
-    created = kit.create_characteristic(title)
-    cid = s(created.get("id"))
-    if not cid:
-        raise RuntimeError(f"KIT did not return characteristic id for {title!r}")
-    characteristics.append(created)
-    return cid
-
-
-def exact_kit_sku_rows(kit, sku):
-    payload = kit.request(
-        "GET",
-        "/v1/variants",
-        params={"name": sku, "page": 1, "per_page": 100},
-    )
-    rows = payload.get("variants") or payload.get("items") or payload.get("results") or []
-    if isinstance(rows, dict):
-        rows = rows.get("items") or []
-    return [
-        row for row in rows
-        if isinstance(row, dict)
-        and s(row.get("status")).upper() != "ARCHIVED"
-        and norm(row.get("sku")) == norm(sku)
-    ]
-
 
 def run(args):
     report = {
@@ -1038,8 +983,22 @@ def run(args):
     report["webasyst_updates_sent"] = 0 if args.dry_run else wa_updates
     report["samples"] = wa_samples
     report["finished_at"] = now_iso()
-    report["status"] = "ok" if not report["errors"] else "degraded"
-    report["complete"] = not report["errors"]
+    expected_existing = min(len(feed_items), max(kit_brand_count, len(wa_products)))
+    coverage_floor = max(1, expected_existing - 3)
+    coverage_ok = (
+        len(kit_index) >= coverage_floor
+        and len(wa_index) >= coverage_floor
+    )
+    if not coverage_ok:
+        report["warnings"].append({
+            "stage": "coverage",
+            "message": (
+                f"Неполное сопоставление: KIT {len(kit_index)}/{kit_brand_count}, "
+                f"Webasyst {len(wa_index)}/{len(wa_products)}"
+            ),
+        })
+    report["status"] = "ok" if not report["errors"] and coverage_ok else "degraded"
+    report["complete"] = not report["errors"] and coverage_ok
 
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(
