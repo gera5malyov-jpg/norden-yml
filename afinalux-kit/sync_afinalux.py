@@ -91,13 +91,33 @@ def all_child_text(node, tag):
 
 
 def load_feed():
-    r = requests.get(
-        FEED_URL,
-        timeout=120,
-        headers={"User-Agent": "Mozilla/5.0 Afina-Garden-KIT-Webasyst-Sync/1.0"},
-    )
-    r.raise_for_status()
-    root = ET.fromstring(r.content)
+    last_error = None
+    response = None
+    urls = [FEED_URL]
+    if FEED_URL.startswith("https://"):
+        urls.append("http://" + FEED_URL[len("https://"):])
+
+    session = requests.Session()
+    for attempt in range(10):
+        url = urls[attempt % len(urls)]
+        try:
+            response = session.get(
+                url,
+                timeout=120,
+                headers={"User-Agent": "Mozilla/5.0 Afina-Garden-KIT-Webasyst-Sync/1.0"},
+                allow_redirects=True,
+            )
+            response.raise_for_status()
+            if response.content:
+                break
+        except requests.RequestException as exc:
+            last_error = exc
+            response = None
+            time.sleep(min(30, 2 + attempt * 3))
+    if response is None or not response.content:
+        raise RuntimeError(f"Cannot download Afina Garden feed after retries: {last_error}")
+
+    root = ET.fromstring(response.content)
 
     source_categories = {}
     for node in root.iter():
