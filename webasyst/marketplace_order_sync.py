@@ -315,11 +315,17 @@ def update_order_details(order_id: str, o: dict):
         acts = acts if isinstance(acts, list) else (acts.get("actions") or acts.get("items") or []) if isinstance(acts, dict) else []
         allowed = {s(x.get("id")) for x in acts if isinstance(x, dict)}
         if "editshippingdetails" in allowed:
-            action_data = {"id": order_id, "action": "editshippingdetails", "shipping_date": delivery_date}
-            if s(o.get("delivery_time_from")):
-                action_data["shipping_time_from"] = s(o.get("delivery_time_from"))[:5]
-            if s(o.get("delivery_time_to")):
-                action_data["shipping_time_to"] = s(o.get("delivery_time_to"))[:5]
+            # Webasyst saves shipping_datetime only when date AND both time bounds are present.
+            # If Yandex gives only the date, use the full day so the latest delivery date is preserved.
+            time_from = s(o.get("delivery_time_from"))[:5] or "00:00"
+            time_to = s(o.get("delivery_time_to"))[:5] or "23:59"
+            action_data = {
+                "id": order_id,
+                "action": "editshippingdetails",
+                "shipping_date": delivery_date,
+                "shipping_time_from": time_from,
+                "shipping_time_to": time_to,
+            }
             wa.call("shop.order.action", http_method="POST", data=action_data)
 
 def create_order(o: dict, items: List[dict]) -> str:
