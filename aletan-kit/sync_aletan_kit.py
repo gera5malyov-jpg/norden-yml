@@ -12,6 +12,7 @@ import time
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
+from urllib.parse import parse_qs, quote, urlencode, urlparse
 
 import requests
 from openpyxl import load_workbook
@@ -163,6 +164,29 @@ def download_price_xlsx(dest):
             page.wait_for_timeout(500)
         if editor is None:
             raise RuntimeError("Не найден iframe редактора Яндекс Таблиц")
+
+        # Исходник уже является XLSX. В публичном viewer Яндекса его можно
+        # получить через session/dv/download/source, используя token и resource-url
+        # из iframe. Запрос делаем тем же browser context, чтобы сохранить cookies.
+        try:
+            parsed = urlparse(editor.url)
+            params = parse_qs(parsed.query)
+            session_token = (params.get("token") or [""])[0]
+            resource_url = (params.get("resource-url") or [""])[0]
+            if session_token and resource_url:
+                query = urlencode({"mode": "ATTACHEMENT", "url": resource_url})
+                source_url = (
+                    f"{parsed.scheme}://{parsed.netloc}/session/dv/download/source/"
+                    f"{quote(session_token, safe='')}?{query}"
+                )
+                response = context.request.get(source_url, timeout=120000)
+                body = response.body()
+                if response.ok and body[:2] == b"PK":
+                    dest.write_bytes(body)
+                    browser.close()
+                    return
+        except Exception:
+            pass
 
         page.wait_for_timeout(5000)
 
