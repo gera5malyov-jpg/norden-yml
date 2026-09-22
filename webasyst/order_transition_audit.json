@@ -1,0 +1,328 @@
+{
+  "states": [
+    {
+      "id": "new",
+      "name": "Новый",
+      "available_actions": [
+        "process",
+        "edit",
+        "editshippingdetails",
+        "message",
+        "otmenen",
+        "editcode",
+        "initpay",
+        "sendpin"
+      ]
+    },
+    {
+      "id": "processing",
+      "name": "Подтвержден",
+      "available_actions": [
+        "izgotavlivaetsya",
+        "otmenen",
+        "pay",
+        "ship",
+        "complete",
+        "comment",
+        "edit",
+        "editshippingdetails",
+        "message",
+        "editcode",
+        "ozhidaem-oplaty",
+        "initpay",
+        "sendpin"
+      ]
+    },
+    {
+      "id": "auth",
+      "name": "Средства заблокированы",
+      "available_actions": [
+        "capture",
+        "cancel",
+        "comment",
+        "message",
+        "sendpin"
+      ]
+    },
+    {
+      "id": "paid",
+      "name": "Оплачен",
+      "available_actions": [
+        "izgotavlivaetsya",
+        "ship",
+        "editshippingdetails",
+        "complete",
+        "refund",
+        "comment",
+        "message",
+        "editcode",
+        "sendpin"
+      ]
+    },
+    {
+      "id": "shipped",
+      "name": "Передан в доставку",
+      "available_actions": [
+        "refund",
+        "ship",
+        "editshippingdetails",
+        "complete",
+        "comment",
+        "message",
+        "editcode",
+        "sendpin"
+      ]
+    },
+    {
+      "id": "izgotavlivaetsya",
+      "name": "Изготавливается/комплектуется",
+      "available_actions": [
+        "refund",
+        "otmenen",
+        "pay",
+        "ship",
+        "edit",
+        "complete",
+        "message",
+        "comment"
+      ]
+    },
+    {
+      "id": "ozhidaem-oplaty",
+      "name": "Ожидаем оплаты",
+      "available_actions": [
+        "ship",
+        "edit",
+        "message",
+        "izgotavlivaetsya",
+        "editcode",
+        "complete",
+        "pay",
+        "otmenen",
+        "napomnit-ob-oplate1"
+      ]
+    },
+    {
+      "id": "napomnit-ob-opla",
+      "name": "Напомнить об оплате",
+      "available_actions": [
+        "otmenen",
+        "ozhidaem-oplaty"
+      ]
+    },
+    {
+      "id": "completed",
+      "name": "Выполнен",
+      "available_actions": [
+        "refund",
+        "otmenen",
+        "comment",
+        "message",
+        "editcode"
+      ]
+    },
+    {
+      "id": "refunded",
+      "name": "Возврат",
+      "available_actions": [
+        "restore",
+        "message"
+      ]
+    },
+    {
+      "id": "otmenen",
+      "name": "Отменен",
+      "available_actions": [
+        "process",
+        "edit",
+        "restore",
+        "message",
+        "comment"
+      ]
+    },
+    {
+      "id": "deleted",
+      "name": "Удален",
+      "available_actions": []
+    },
+    {
+      "id": "pos",
+      "name": "Заказ на кассе",
+      "available_actions": [
+        "process",
+        "initpay",
+        "pay",
+        "ship",
+        "complete",
+        "comment",
+        "edit",
+        "editcode",
+        "editshippingdetails",
+        "message",
+        "delete",
+        "sendpin"
+      ]
+    },
+    {
+      "id": "pickup",
+      "name": "На выдачу",
+      "available_actions": [
+        "pickup",
+        "initpay",
+        "comment",
+        "edit",
+        "editcode",
+        "editshippingdetails",
+        "message",
+        "delete",
+        "sendpin"
+      ]
+    },
+    {
+      "id": "fulfilling",
+      "name": "На сборке",
+      "available_actions": [
+        "ship",
+        "editcode",
+        "editshippingdetails",
+        "complete",
+        "comment",
+        "delete",
+        "message"
+      ]
+    },
+    {
+      "id": "sendpin",
+      "name": "sendpin",
+      "available_actions": []
+    }
+  ],
+  "observed_transitions": [
+    {
+      "action_id": "complete",
+      "action_name": "Выполнен",
+      "from": "new",
+      "to": "completed",
+      "count": 126
+    },
+    {
+      "action_id": "process",
+      "action_name": "В обработку",
+      "from": "new",
+      "to": "processing",
+      "count": 49
+    },
+    {
+      "action_id": "ozhidaem-oplaty",
+      "action_name": "Ожидаем оплаты",
+      "from": "processing",
+      "to": "ozhidaem-oplaty",
+      "count": 30
+    },
+    {
+      "action_id": "otmenen",
+      "action_name": "Отменен",
+      "from": "new",
+      "to": "otmenen",
+      "count": 27
+    },
+    {
+      "action_id": "otmenen",
+      "action_name": "Отменен",
+      "from": "completed",
+      "to": "otmenen",
+      "count": 24
+    },
+    {
+      "action_id": "otmenen",
+      "action_name": "Отменен",
+      "from": "ozhidaem-oplaty",
+      "to": "otmenen",
+      "count": 18
+    },
+    {
+      "action_id": "izgotavlivaetsya",
+      "action_name": "Изготавливается",
+      "from": "paid",
+      "to": "izgotavlivaetsya",
+      "count": 17
+    },
+    {
+      "action_id": "pay",
+      "action_name": "Оплачен",
+      "from": "ozhidaem-oplaty",
+      "to": "paid",
+      "count": 15
+    },
+    {
+      "action_id": "complete",
+      "action_name": "Выполнен",
+      "from": "shipped",
+      "to": "completed",
+      "count": 13
+    },
+    {
+      "action_id": "ship",
+      "action_name": "Отправлен",
+      "from": "izgotavlivaetsya",
+      "to": "shipped",
+      "count": 13
+    },
+    {
+      "action_id": "otmenen",
+      "action_name": "Отменен",
+      "from": "processing",
+      "to": "otmenen",
+      "count": 10
+    },
+    {
+      "action_id": "complete",
+      "action_name": "Выполнен",
+      "from": "processing",
+      "to": "completed",
+      "count": 5
+    },
+    {
+      "action_id": "restore",
+      "action_name": "Восстановить",
+      "from": "otmenen",
+      "to": "ozhidaem-oplaty",
+      "count": 3
+    },
+    {
+      "action_id": "pay",
+      "action_name": "Оплачен",
+      "from": "processing",
+      "to": "paid",
+      "count": 2
+    },
+    {
+      "action_id": "restore",
+      "action_name": "Восстановить",
+      "from": "otmenen",
+      "to": "new",
+      "count": 2
+    },
+    {
+      "action_id": "izgotavlivaetsya",
+      "action_name": "Изготавливается",
+      "from": "processing",
+      "to": "izgotavlivaetsya",
+      "count": 2
+    },
+    {
+      "action_id": "complete",
+      "action_name": "Выполнен",
+      "from": "izgotavlivaetsya",
+      "to": "completed",
+      "count": 1
+    },
+    {
+      "action_id": "complete",
+      "action_name": "Выполнен",
+      "from": "otmenen",
+      "to": "completed",
+      "count": 1
+    }
+  ]
+}
