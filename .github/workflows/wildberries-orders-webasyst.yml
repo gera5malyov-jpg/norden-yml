@@ -1,0 +1,32 @@
+name: Wildberries orders to Webasyst
+
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: wildberries-orders-webasyst
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Перенести заказы Wildberries в Webasyst
+        env:
+          DRY_RUN: '0'
+          SYNC_SOURCES: 'wildberries'
+          WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python webasyst/marketplace_order_sync.py
