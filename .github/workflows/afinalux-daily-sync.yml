@@ -11,6 +11,11 @@ on:
         required: true
         default: false
         type: boolean
+  push:
+    branches: [main]
+    paths:
+      - 'afinalux-kit/sync_afinalux.py'
+      - '.github/workflows/afinalux-daily-sync.yml'
 
 permissions:
   contents: write
