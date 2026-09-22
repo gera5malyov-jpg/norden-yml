@@ -20,7 +20,12 @@ from urllib.parse import urlparse
 import requests
 import urllib3.util.connection as urllib3_connection
 
-# На GitHub-hosted runner у afinalux.ru периодически выбирается недоступный IPv6-маршрут.\n# Принудительно используем IPv4 для requests/urllib3.\nurllib3_connection.allowed_gai_family = lambda: socket.AF_INET\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT / "webasyst"))
+# На GitHub-hosted runner у afinalux.ru периодически выбирается недоступный IPv6-маршрут.
+# Принудительно используем IPv4 для requests/urllib3.
+urllib3_connection.allowed_gai_family = lambda: socket.AF_INET
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "webasyst"))
 from client import WebasystClient
 
 FEED_URL = "https://afinalux.ru/index.php?route=feed/yandex_yml"
