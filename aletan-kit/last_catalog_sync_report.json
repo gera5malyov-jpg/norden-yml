@@ -1,0 +1,671 @@
+{
+  "status": "ok",
+  "dry_run": true,
+  "brand": "Алетан",
+  "creation_rule": "создавать отсутствующие товары с SKU=vendorCode",
+  "category_rule": "Алетан/<category из CSV>",
+  "price_rule": {
+    "Цена для покупателя": "закупка × 1.30, вверх до 1 ₽",
+    "Цена до скидки": "закупка × 1.60, вверх до 1 ₽"
+  },
+  "stock_rule": {
+    "МСК": 100,
+    "СПБ привозной": 100
+  },
+  "created": 0,
+  "would_create": 0,
+  "existing_matched": 591,
+  "price_updates": 486,
+  "stock_updates": 1182,
+  "skipped_no_purchase_price": 179,
+  "skipped_ambiguous_kit": 1,
+  "images_uploaded": 0,
+  "image_errors": 0,
+  "errors": [],
+  "warnings": [
+    {
+      "vendor_code": "B101",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "W702/1BL",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "B109BLG",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "В306G",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД01Е02",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД01Е08",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД01Е33",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД01Е34",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД01Е03",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД01Е18",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД01Е21",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД01Е25",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД01Е30",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД01Е23",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП01Е02",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП01Е22",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП01Е12",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП01Е18",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП01Е24",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП01Е27",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП01Е28",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП01Е32",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП01Е33",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП01Е34",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП02Е02",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП02Е22",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП02Е12",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП02Е18",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП02Е24",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП02Е27",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП02Е28",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП02Е32",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП02Е33",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП02Е34",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП03Е02",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП03Е22",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП03Е12",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП03Е18",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП03Е24",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП03Е27",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП03Е28",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП03Е32",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП03Е33",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МП03Е34",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД02Е02",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД02Е03",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД02Е21",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД02Е23",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД02Е08",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД02Е18",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД02Е25",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД02Е30",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД02Е33",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "МД02Е34",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T102QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T104GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T104QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T106/1W",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T106/1GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T106/1QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T106/1BL",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T108GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T108QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T301GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T301QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T303GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T303QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T315GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T315QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T304GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T304QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T305GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T305QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T401GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T401QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T403GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T403QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T404GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T404QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T406GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T406QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T601R W",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T601R GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T601R QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T601R BL",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T601L W",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T601L GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T601L QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T601L BL",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T603GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T603QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T604GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T604QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T605GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T605QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T606GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T606QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T709GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T709QU",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    },
+    {
+      "vendor_code": "T705GR",
+      "stage": "create",
+      "message": "Новый товар не создан: в прайсе нет надежной закупочной цены"
+    }
+  ],
+  "sample_new": [],
+  "catalog_rows_total": 839,
+  "catalog_unique_vendor_codes": 771,
+  "catalog_duplicate_vendor_codes": [
+    "BR108W",
+    "BR202W",
+    "BR204W",
+    "BR206W",
+    "BR208W",
+    "MRS305Q",
+    "MRS404W",
+    "MRS804G",
+    "T209W",
+    "T702W",
+    "T705QU",
+    "T706G",
+    "T706Q",
+    "T706W",
+    "W301BL",
+    "W408",
+    "В104",
+    "В214G",
+    "В216",
+    "В301G",
+    "В302",
+    "В402",
+    "В405G",
+    "В602/1BLG",
+    "В802",
+    "М104Q",
+    "М406W",
+    "М604W",
+    "М903G"
+  ],
+  "purchase_prices_unique": 487,
+  "price_sheets_used": [
+    {
+      "sheet": "Marlette",
+      "overlap": 92,
+      "header_row": 5,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 92,
+      "explicit_prices": 53,
+      "inherited_prices": 50,
+      "median_purchase_to_catalog": 0.6065
+    },
+    {
+      "sheet": "Marlette-Wood",
+      "overlap": 99,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 99,
+      "explicit_prices": 53,
+      "inherited_prices": 49,
+      "median_purchase_to_catalog": 0.6063
+    },
+    {
+      "sheet": "TESORO",
+      "overlap": 78,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Опт (руб.)",
+      "prices_found": 78,
+      "explicit_prices": 72,
+      "inherited_prices": 39,
+      "median_purchase_to_catalog": 0.625
+    },
+    {
+      "sheet": "MAJESSA",
+      "overlap": 125,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 125,
+      "explicit_prices": 72,
+      "inherited_prices": 80,
+      "median_purchase_to_catalog": 0.6061
+    },
+    {
+      "sheet": "BARI",
+      "overlap": 17,
+      "header_row": 4,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 17,
+      "explicit_prices": 73,
+      "inherited_prices": 1,
+      "median_purchase_to_catalog": 0.6251
+    },
+    {
+      "sheet": "MARSO",
+      "overlap": 84,
+      "header_row": 3,
+      "sku_col": 5,
+      "sku_header": "Арт.",
+      "price_col": 6,
+      "price_header": "Цена ФАБРИКИ",
+      "prices_found": 84,
+      "explicit_prices": 27,
+      "inherited_prices": 63,
+      "median_purchase_to_catalog": 0.625
+    }
+  ],
+  "purchase_price_conflicts": {
+    "В107": [
+      "17700",
+      "17770"
+    ],
+    "В107BL": [
+      "17700",
+      "17770"
+    ],
+    "В108": [
+      "23900",
+      "23940"
+    ],
+    "В108BL": [
+      "23900",
+      "23940"
+    ]
+  },
+  "kit_warehouses": {
+    "МСК": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
+    "СПБ привозной": "01a0a0e3-a119-72a1-b4cb-da76a3bfd74c"
+  },
+  "kit_aletan_active_variants_before": 800,
+  "kit_detailed_variant_reads": 0,
+  "kit_ambiguous_vendor_codes": [
+    "W702BL/1"
+  ],
+  "supplier_article_characteristic_id": "01a0c3ff-c45e-7512-8d63-bc7c6bb7bec3",
+  "complete": true
+}
