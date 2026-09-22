@@ -237,25 +237,26 @@ def create_order(o: dict, items: List[dict]) -> str:
     if not oid:
         raise RuntimeError("Webasyst did not return order id")
     # Preserve marketplace line prices after creation.
+    created_items = created.get("items") or []
+    created_by_sku = {}
+    for ci in created_items:
+        if isinstance(ci, dict) and s(ci.get("sku_id")):
+            created_by_sku.setdefault(s(ci.get("sku_id")), []).append(ci)
     save_items = []
     for x in items:
-        row = {"sku_id": x["sku_id"], "quantity": x["quantity"]}
+        candidates = created_by_sku.get(s(x["sku_id"])) or []
+        ci = candidates.pop(0) if candidates else {}
+        row = {
+            "item_id": s(ci.get("id")),
+            "product_id": x["product_id"],
+            "sku_id": x["sku_id"],
+            "quantity": x["quantity"],
+        }
         if x.get("price") is not None:
             row["price"] = f"{float(x['price']):.2f}"
         save_items.append(row)
     wa.call("shop.order.save", http_method="POST", data={"id": oid, "items": save_items, "params": params})
     return oid
-
-def update_source_meta(oid: str, o: dict):
-    if DRY_RUN:
-        return
-    wa.call("shop.order.save", http_method="POST", data={"id": oid, "params": {
-        "mp_key": key(o["source"], o["external_id"]),
-        "mp_source": o["source"],
-        "mp_external_id": o["external_id"],
-        "mp_status": o.get("status_raw") or "",
-        "mp_created_at": o.get("created_at") or "",
-    }})
 
 def process(o: dict):
     source = o["source"]
@@ -284,7 +285,7 @@ def process(o: dict):
             oid = s(old.get("id"))
             stat["existing"] += 1
             report["existing"] += 1
-            update_source_meta(oid, o)
+            # Do not rewrite order items when only the source status changed.
         else:
             oid = create_order(o, resolved)
             stat["created"] += 1
