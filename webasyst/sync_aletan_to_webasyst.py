@@ -212,6 +212,9 @@ def main():
         "would_update": 0,
         "kit_matched": 0,
         "webasyst_products_before": 0,
+        "webasyst_stock_products_targeted": 0,
+        "webasyst_stock_updates": 0,
+        "webasyst_stock_skipped_multi_sku": 0,
         "webasyst_ambiguous_codes": [],
         "kit_ambiguous_codes": [],
         "errors": [],
@@ -248,6 +251,41 @@ def main():
 
     wa_products = load_wa_products(wa, type_id)
     report["webasyst_products_before"] = len(wa_products)
+
+    # Остаток 100 применяется ко ВСЕМ товарам точного типа aletan.ru,
+    # независимо от того, сопоставилась ли закупочная цена/vendorCode.
+    stock_targets = []
+    for product in wa_products:
+        product_id = s(product.get("id"))
+        skus = product_skus(product) or get_product_skus(wa, product_id)
+        if len(skus) != 1:
+            report["webasyst_stock_skipped_multi_sku"] += 1
+            if len(report["warnings"]) < 100:
+                report["warnings"].append({
+                    "product_id": product_id,
+                    "stage": "stock_all",
+                    "message": f"Остаток не изменён: у товара {len(skus)} SKU вместо 1",
+                })
+            continue
+        sku_row = skus[0]
+        stock_targets.append((product_id, sku_row))
+    report["webasyst_stock_products_targeted"] = len(stock_targets)
+
+    if not args.dry_run:
+        for product_id, sku_row in stock_targets:
+            wa.call(
+                "shop.product.skus.update",
+                http_method="POST",
+                params={"id": s(sku_row.get("id"))},
+                data={
+                    "stock": {stock_id: str(WA_STOCK_QTY)},
+                    "available": 1,
+                    "status": 1,
+                },
+            )
+            report["webasyst_stock_updates"] += 1
+    else:
+        report["webasyst_stock_updates"] = len(stock_targets)
 
     wa_by_code = defaultdict(list)
     ambiguous_products = []
@@ -323,7 +361,6 @@ def main():
                     data={
                         "price": money_str(sale),
                         "compare_price": money_str(compare),
-                        "stock": {stock_id: str(WA_STOCK_QTY)},
                         "available": 1,
                         "status": 1,
                     },
