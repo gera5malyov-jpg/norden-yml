@@ -1,8 +1,6 @@
 name: Afina Garden → KIT → Webasyst — ежедневно
 
 on:
-  push:
-    branches: [main]
   schedule:
     # 06:20 UTC = 09:20 Europe/Helsinki while UTC+3
     - cron: '20 6 * * *'
