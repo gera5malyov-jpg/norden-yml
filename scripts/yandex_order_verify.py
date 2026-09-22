@@ -19,6 +19,16 @@ def v(x):
 def digits(x):
     return re.sub(r"\D","",str(x or ""))
 
+def ymd(x):
+    t=str(x or "").strip()
+    for fmt in ("%d-%m-%Y","%Y-%m-%d"):
+        try:
+            from datetime import datetime
+            return datetime.strptime(t,fmt).strftime("%Y-%m-%d")
+        except Exception:
+            pass
+    return ""
+
 # Find target in business-wide list.
 r=requests.get("https://api.partner.market.yandex.ru/v2/campaigns",headers=h,params={"limit":100},timeout=60)
 r.raise_for_status()
@@ -59,7 +69,8 @@ if not delivery_price:
     bd=((order.get("prices") or {}).get("delivery") or {})
     delivery_price=v(bd.get("payment"))+v(bd.get("subsidy"))
 expected_shipping=delivery_price+lift_price
-expected_date=str(dates.get("toDate") or dates.get("fromDate") or "")
+expected_date=ymd(dates.get("toDate") or dates.get("fromDate") or "")
+lift_type=str(delivery.get("liftType") or "")
 
 wa=WebasystClient(min_request_interval=0.2)
 mp_key=hashlib.sha256(f"yandex_market|{TARGET}".encode()).hexdigest()[:32]
@@ -77,10 +88,13 @@ shipping_dt=str(info.get("shipping_datetime") or "")
 params=info.get("params") or {}
 
 print("VERIFY_WEBASYST_ORDER_FOUND=1")
-print("VERIFY_BUYER_NAME_MATCH="+("1" if expected_name and actual_name==expected_name else "0"))
+expected_tokens=sorted(x.lower() for x in expected_name.split() if x)
+actual_tokens=sorted(x.lower() for x in actual_name.split() if x)
+print("VERIFY_BUYER_NAME_MATCH="+("1" if expected_tokens and actual_tokens==expected_tokens else "0"))
 print("VERIFY_BUYER_PHONE_MATCH="+("1" if buyer.get("phone") and digits(actual_phone)==digits(buyer.get("phone")) else "0"))
 print(f"VERIFY_EXPECTED_DELIVERY_PRICE={delivery_price:.2f}")
 print(f"VERIFY_EXPECTED_LIFT_PRICE={lift_price:.2f}")
+print("VERIFY_EXPECTED_LIFT_TYPE="+lift_type)
 print(f"VERIFY_EXPECTED_SHIPPING_TOTAL={expected_shipping:.2f}")
 print(f"VERIFY_ACTUAL_SHIPPING_TOTAL={actual_shipping:.2f}")
 print("VERIFY_SHIPPING_MATCH="+("1" if abs(actual_shipping-expected_shipping)<0.01 else "0"))
