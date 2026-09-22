@@ -1,0 +1,38 @@
+name: Shipping quote compare
+
+on:
+  push:
+    paths:
+      - 'shipping-quote/request.json'
+      - 'scripts/shipping_compare.py'
+      - '.github/workflows/shipping-quote-compare.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      E_BULKY: ${{ secrets.E_BULKY }}
+      CDEK_CLIENT_ID: ${{ secrets.CDEK_CLIENT_ID }}
+      CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
+      PEK_LOGIN: ${{ secrets.PEK_LOGIN }}
+      PEK_API_KEY: ${{ secrets.PEK_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Рассчитать доставку
+        run: python3 scripts/shipping_compare.py
+      - name: Сохранить результат
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add shipping-quote/result.json
+          if git diff --cached --quiet; then
+            echo "No result changes"
+          else
+            git commit -m "Update shipping quote result"
+            git push
+          fi
