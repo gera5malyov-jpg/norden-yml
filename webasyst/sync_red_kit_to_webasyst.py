@@ -409,6 +409,10 @@ def main():
             ],
             key=lambda x: int(x.get("display_sequence") or 0),
         )
+        if DRY_RUN:
+            # Preflight validates matching/content without spending API calls
+            # resolving every KIT image URL. Live mode resolves and writes all URLs.
+            return [f"kit-file:{s(row.get('image_id'))}" for row in media if s(row.get("image_id"))]
         for row in media:
             file_id = s(row.get("image_id"))
             if not file_id:
