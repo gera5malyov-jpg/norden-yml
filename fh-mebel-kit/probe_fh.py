@@ -37,6 +37,7 @@ def main():
             "scripts":[],
             "links":[],
             "images":[],
+            "param_controls":[],
         }
         for el in soup.find_all("select"):
             page["selects"].append({
@@ -50,6 +51,9 @@ def main():
             parent=text(el.parent.get_text(" ",strip=True) if el.parent else "")
             if any(k in blob+" "+parent.lower() for k in ["price","mod","variant","size","razmer","mirror","zerkal","spal","color","cvet","id"]):
                 page["inputs"].append({"attrs":attrs,"parent_text":parent[:500]})
+                if "js_affect_param_value" in (el.get("class") or []) and str(el.get("name") or "").startswith("param"):
+                    par=el.parent
+                    page["param_controls"].append({"input":attrs,"parent_html":str(par)[:5000],"parent_text":parent[:1200]})
         for el in soup.find_all(True):
             cls=" ".join(el.get("class",[])).lower()
             eid=(el.get("id") or "").lower()
@@ -57,6 +61,10 @@ def main():
             if ("price" in cls or "price" in eid or re.search(r"\b\d[\d\s,.]{2,}\s*руб",tx,re.I)) and len(tx)<500:
                 page["price_nodes"].append({"tag":el.name,"id":el.get("id"),"class":el.get("class"),"text":tx[:450],"attrs":dict(el.attrs)})
                 if len(page["price_nodes"])>=80: break
+        for node in soup.find_all(True):
+            d={k:v for k,v in node.attrs.items() if str(k).startswith("data-param")}
+            if d:
+                page["param_controls"].append({"tag":node.name,"attrs":dict(node.attrs),"data_params":d,"text":text(node.get_text(" ",strip=True))[:700],"html":str(node)[:5000]})
         for sc in soup.find_all("script"):
             body=sc.string or sc.get_text("\n")
             if not body: continue
