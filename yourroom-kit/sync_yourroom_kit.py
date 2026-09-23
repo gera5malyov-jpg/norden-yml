@@ -1080,3 +1080,62 @@ def run(dry_run=False, force=False, max_items=0):
 
     previous_count = int(state.get("last_sitemap_count") or 0)
     safe_full_catalog = not max_items and len(urls) >= 500 and (not previous_count or len(urls) >= int(previous_count * 0.70))
+
+    if safe_full_catalog:
+        current_sitemap = set(urls)
+        for key, mapping in list(state_items.items()):
+            if key in current_sitemap or key in seen_now:
+                continue
+            vid = s((mapping or {}).get("variant_id"))
+            if not vid:
+                continue
+            stock_batch.append({"variant_id": vid, "warehouse_id": warehouse_id, "quantity": 0})
+            mapping["active"] = False
+            mapping["missing_since"] = mapping.get("missing_since") or iso_now()
+            report["zeroed_missing"] += 1
+            report["stock_updates"] += 1
+    else:
+        report["warnings"].append({
+            "stage": "zero_missing",
+            "message": "Обнуление исчезнувших отключено: обход был неполным или sitemap подозрительно уменьшился",
+        })
+
+    if price_batch:
+        kit.update_prices(price_batch)
+    if stock_batch:
+        kit.update_stocks(stock_batch)
+
+    state["last_sitemap_count"] = len(urls)
+    state["supplier"] = SUPPLIER
+    state["region"] = "Санкт-Петербург"
+    report["complete"] = not report["errors"]
+    report["status"] = "УСПЕШНО" if report["complete"] else "ЗАВЕРШЕНО С ОШИБКАМИ"
+    report["finished_at"] = iso_now()
+    if report["complete"]:
+        state["last_success_at"] = report["finished_at"]
+    save_state(state)
+    write_report(report)
+    return 0 if report["complete"] else 2
+
+
+def main():
+    p = argparse.ArgumentParser(description="yourroom.ru (Санкт-Петербург) → Яндекс KIT")
+    p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--force", action="store_true")
+    p.add_argument("--max-items", type=int, default=0)
+    args = p.parse_args()
+    try:
+        return run(dry_run=args.dry_run, force=args.force, max_items=max(0, args.max_items))
+    except Exception as exc:
+        write_report({
+            "status": "ОШИБКА",
+            "complete": False,
+            "dry_run": bool(args.dry_run),
+            "error": str(exc)[:3000],
+            "finished_at": iso_now(),
+        })
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
