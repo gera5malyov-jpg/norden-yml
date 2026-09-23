@@ -216,6 +216,20 @@ def is_scalar_feature(row):
 
 
 def main():
+    # One-shot de-duplication for the queued optimized run created while the
+    # previous safe RED sync was already executing. If that previous run
+    # committed a complete report, this specific queued run reuses it instead
+    # of writing the same content twice. If the previous run failed, normal
+    # processing continues.
+    if os.getenv("GITHUB_RUN_ID") == "35918687571" and REPORT.exists():
+        try:
+            previous = json.loads(REPORT.read_text(encoding="utf-8"))
+        except Exception:
+            previous = {}
+        if previous.get("complete") is True and previous.get("dry_run") is False:
+            print(json.dumps(previous, ensure_ascii=False, indent=2), flush=True)
+            return 0
+
     kit = KitClient(os.getenv("YANDEX_KIT_TOKEN", ""))
     wa = WebasystClient(min_request_interval=WA_DELAY)
 
