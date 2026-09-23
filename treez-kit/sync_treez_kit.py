@@ -281,17 +281,11 @@ def gallery_images(item):
             page = html.unescape(r.text)
 
             full = re.findall(
-                r"""https?://[^"'<>\s]+/photos/resize/1600_1800/[^"'<>\s]+""",
+                r"""(?:https?://[^"'<>\s]+)?/photos/resize/1600_1800/[^"'<>\s]+""",
                 page,
                 flags=re.I,
             )
-            if not full:
-                relative = re.findall(
-                    r"""(?:href|src)\s*=\s*["']([^"']+/photos/resize/1600_1800/[^"']+)["']""",
-                    page,
-                    flags=re.I,
-                )
-                full = [urljoin(product_url, x) for x in relative]
+            full = [urljoin(product_url, x) for x in full]
 
             for url in full:
                 url = url.split("?", 1)[0]
