@@ -25,9 +25,12 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests
+      - name: Проверить синтаксис синхронизации
+        run: python -m py_compile webasyst/marketplace_order_sync.py
       - name: Перенести заказы Wildberries в Webasyst
         env:
           DRY_RUN: '0'
+          CHAT_AUTOMATION_START: '2026-09-23T19:35:00Z'
           SYNC_SOURCES: 'wildberries'
           WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
