@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# one-off trigger for Ozon 97426764-0177-1
 from __future__ import annotations
 
 import json
