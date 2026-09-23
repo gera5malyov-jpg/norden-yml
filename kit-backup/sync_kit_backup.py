@@ -617,6 +617,34 @@ def build_source_enrichment(data, fallback_url=None):
     except Exception as exc:
         warnings.append(f"Riva: закупочная цена не обновлена: {exc}")
 
+    # Радуга: закупочные цены из актуального оптового прайса СПб.
+    raduga_prices = {}
+    try:
+        raduga_payload = _read_json(REPO_ROOT / "kit-backup" / "raduga_purchase_prices.json", {})
+        raduga_prices = {
+            _source_key(k): v
+            for k, v in (raduga_payload.get("prices") or {}).items()
+            if clean(k) and v not in (None, "")
+        }
+    except Exception as exc:
+        warnings.append(f"Радуга: закупочная цена не обновлена: {exc}")
+
+    def raduga_purchase(*candidates):
+        for raw in candidates:
+            value = clean(raw).strip()
+            if not value:
+                continue
+            key = _source_key(value)
+            if key in raduga_prices:
+                return raduga_prices[key]
+            # Для цветовых/вариантных SKU берем базовый артикул поставщика в начале строки.
+            match = re.match(r"(?iu)^((?:NR|DV|PP|PR|P|S)\d{3}[А-ЯA-Z]?)", value)
+            if match:
+                base_key = _source_key(match.group(1))
+                if base_key in raduga_prices:
+                    return raduga_prices[base_key]
+        return None
+
     # Остальные источники определяем только по сильным признакам карточки.
     for v in data.get("variants") or []:
         vid = clean(v.get("id"))
@@ -641,6 +669,8 @@ def build_source_enrichment(data, fallback_url=None):
             put(vid, "Б2Б Фабрика")
         elif webasyst == "333" or brand_n == _norm_title("4 Сезона"):
             put(vid, "4 Сезона")
+        elif raduga_purchase(supplier_article, sku) not in (None, ""):
+            put(vid, "Радуга", raduga_purchase(supplier_article, sku))
         elif brand_n == _norm_title("Afina Garden"):
             purchase = afina_prices.get(_source_key(supplier_article or sku))
             put(vid, "Afina Garden", purchase)
