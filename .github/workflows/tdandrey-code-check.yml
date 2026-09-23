@@ -1,0 +1,40 @@
+name: ТД Андрей — проверка кода
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tdandrey-kit/loader.py'
+      - 'tdandrey-kit/payload.*'
+      - '.github/workflows/tdandrey-code-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Проверить целостность payload
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib
+          root=Path('tdandrey-kit')
+          data=''.join((root/f'payload.{i:02d}').read_text().strip() for i in range(1,5))
+          source=gzip.decompress(base64.b64decode(data))
+          got=hashlib.sha256(source).hexdigest()
+          expected='fb8f23f6dcdc97f23516b3209d9bae047d5879d6a77938768dcb42ba4751c4fc'
+          print('sha256:', got)
+          if got != expected:
+              raise SystemExit('Payload checksum mismatch')
+          PY
+      - name: Проверить запуск
+        run: python tdandrey-kit/loader.py --help
