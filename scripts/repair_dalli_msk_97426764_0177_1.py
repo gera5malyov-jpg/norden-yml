@@ -103,8 +103,11 @@ def repair():
         raise RuntimeError("Заказ не найден в корзине Dalli МСК")
 
     customer=o.get("customer") if isinstance(o.get("customer"),dict) else {}
-    person=s(customer.get("name"))
-    phone=s(customer.get("phone"))
+    addressee=o.get("addressee") if isinstance(o.get("addressee"),dict) else {}
+    person=s(addressee.get("name") or customer.get("name"))
+    base_phone=s(addressee.get("phone") or customer.get("phone"))
+    phone_pin=s(addressee.get("pin"))
+    phone=base_phone + (f" доб. {phone_pin}" if phone_pin else "")
     address=address_from_ozon(o)
     if not person or not phone or not address:
         raise RuntimeError("Ozon не вернул ФИО/телефон/адрес полностью")
@@ -191,6 +194,8 @@ def repair():
         "sent_to_delivery": False,
         "barcode": s(v.findtext("barcode")) or barcode,
         "phone_exactly_from_ozon": exact_phone,
+        "phone_has_extension": bool(phone_pin),
+        "phone_extension_length": len(phone_pin),
         "phone_length": len(vphone),
         "note_present_in_ozon": bool(note),
         "instruction_matches_ozon_note": vinstruction==note,
