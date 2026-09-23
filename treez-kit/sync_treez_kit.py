@@ -210,32 +210,64 @@ class Kit(base.KitClient):
             )
 
     def upload_url(self, url, filename_prefix="treez"):
-        delay = 0.55 - (time.monotonic() - self.last_request_at)
-        if delay > 0:
-            time.sleep(delay)
-        self.last_request_at = time.monotonic()
+        src = None
+        for attempt in range(5):
+            try:
+                src = requests.get(
+                    url,
+                    timeout=120,
+                    headers={"User-Agent": "Mozilla/5.0 Treez-KIT-Sync"},
+                )
+                if src.status_code == 429 or src.status_code >= 500:
+                    time.sleep(min(10, 1 + attempt * 2))
+                    continue
+                src.raise_for_status()
+                break
+            except requests.RequestException:
+                if attempt == 4:
+                    raise
+                time.sleep(min(10, 1 + attempt * 2))
+        if src is None:
+            raise RuntimeError("Не удалось скачать файл")
 
-        src = requests.get(url, timeout=120, headers={"User-Agent": "Mozilla/5.0 Treez-KIT-Sync"})
-        src.raise_for_status()
         if len(src.content) > 90 * 1024 * 1024:
             raise RuntimeError("Файл больше 90 МБ")
 
+        parsed_path = urlparse(url).path
         content_type = (
             src.headers.get("Content-Type")
-            or mimetypes.guess_type(urlparse(url).path)[0]
+            or mimetypes.guess_type(parsed_path)[0]
             or "application/octet-stream"
         )
-        ext = os.path.splitext(urlparse(url).path)[1] or ".bin"
+        original_name = os.path.basename(parsed_path)
+        if not original_name:
+            ext = os.path.splitext(parsed_path)[1] or ".bin"
+            original_name = filename_prefix + ext[:10]
+
         endpoint = KIT_API + "/v1/files"
         headers = {"Authorization": "Bearer " + self.token, "Accept": "application/json"}
-        r = self.session.post(
-            endpoint,
-            headers=headers,
-            files={"file": (filename_prefix + ext[:10], src.content, content_type)},
-            timeout=180,
-        )
-        r.raise_for_status()
-        return r.json() if r.content else {}
+
+        for attempt in range(8):
+            delay = 0.9 - (time.monotonic() - self.last_request_at)
+            if delay > 0:
+                time.sleep(delay)
+            self.last_request_at = time.monotonic()
+
+            r = self.session.post(
+                endpoint,
+                headers=headers,
+                files={"file": (original_name, src.content, content_type)},
+                timeout=180,
+            )
+            if r.status_code == 429 or r.status_code >= 500:
+                if attempt == 7:
+                    r.raise_for_status()
+                time.sleep(float(r.headers.get("Retry-After") or min(15, 2 + attempt * 2)))
+                continue
+            r.raise_for_status()
+            return r.json() if r.content else {}
+
+        raise RuntimeError("KIT file upload retries exhausted")
 
 
 def exact_named(rows, title, parent_id=None):
@@ -307,24 +339,35 @@ def build_media(kit, item, report):
     gallery = gallery_images(item)
     report["gallery_images_found"] = report.get("gallery_images_found", 0) + len(gallery)
     for url in gallery:
-        try:
-            uploaded = kit.upload_url(url, "treez-image")
-            file_id = s(uploaded.get("id"))
-            if file_id:
-                media.append({
-                    "type": "IMAGE",
-                    "display_sequence": len(media),
-                    "image_id": file_id,
-                })
-                report["images_uploaded"] += 1
-        except Exception as exc:
+        candidates = [url]
+        if "/photos/resize/1600_1800/" in url:
+            candidates.append(url.replace("/photos/resize/1600_1800/", "/photos/resize/1000_1286/"))
+
+        last_exc = None
+        for candidate in candidates:
+            try:
+                uploaded = kit.upload_url(candidate, "treez-image")
+                file_id = s(uploaded.get("id"))
+                if file_id:
+                    media.append({
+                        "type": "IMAGE",
+                        "display_sequence": len(media),
+                        "image_id": file_id,
+                    })
+                    report["images_uploaded"] += 1
+                    last_exc = None
+                    break
+            except Exception as exc:
+                last_exc = exc
+
+        if last_exc is not None:
             report["image_errors"] += 1
             if len(report["warnings"]) < 200:
                 report["warnings"].append({
                     "source_code": item["source_code"],
                     "stage": "image",
                     "url": url,
-                    "message": str(exc)[:500],
+                    "message": str(last_exc)[:500],
                 })
     return media
 
