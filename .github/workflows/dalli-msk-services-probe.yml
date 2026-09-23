@@ -1,0 +1,17 @@
+name: Probe Dalli MSK services
+on:
+  push:
+    paths:
+      - '.github/workflows/dalli-msk-services-probe.yml'
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - env:
+          DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+        run: python scripts/dalli_msk_services_probe.py
