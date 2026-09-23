@@ -1,0 +1,175 @@
+name: RED KIT to Webasyst full content
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'red-kit/trigger-sync.txt'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: red-kit-to-webasyst
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests
+
+      - name: Validate Python syntax
+        run: python -m py_compile webasyst/sync_red_kit_to_webasyst.py webasyst/client.py
+
+      - name: Preflight RED sync without writes
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          DRY_RUN: '1'
+          RED_KIT_REQUEST_DELAY: '0.40'
+          RED_WEBASYST_WRITE_DELAY: '0.55'
+        run: python webasyst/sync_red_kit_to_webasyst.py
+
+      - name: Sync RED content from KIT to Webasyst
+        id: red_sync
+        continue-on-error: true
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          DRY_RUN: '0'
+          RED_KIT_REQUEST_DELAY: '0.40'
+          RED_WEBASYST_WRITE_DELAY: '0.55'
+        run: python webasyst/sync_red_kit_to_webasyst.py
+
+      - name: Commit RED sync report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          cp webasyst/last_red_webasyst_sync.json /tmp/last-red-webasyst-sync.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          if [ -f /tmp/last-red-webasyst-sync.json ]; then
+            cp /tmp/last-red-webasyst-sync.json webasyst/last_red_webasyst_sync.json
+          fi
+          git add webasyst/last_red_webasyst_sync.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Update RED KIT to Webasyst sync report'
+          git push origin HEAD:main || true
+
+      - name: Send RED sync report by email
+        if: always()
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          SYNC_OUTCOME: ${{ steps.red_sync.outcome }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import smtplib
+          from pathlib import Path
+          from email.message import EmailMessage
+
+          path = Path('webasyst/last_red_webasyst_sync.json')
+          try:
+              raw = path.read_bytes()
+              r = json.loads(raw.decode('utf-8'))
+          except Exception as exc:
+              raw = json.dumps(
+                  {'status': 'ОШИБКА', 'message': f'Не удалось прочитать отчет: {exc}'},
+                  ensure_ascii=False,
+                  indent=2,
+              ).encode('utf-8')
+              r = {'errors': [{'message': str(exc)}], 'complete': False}
+
+          ok = os.getenv('SYNC_OUTCOME') == 'success' and bool(r.get('complete'))
+          subject = 'RED KIT → Webasyst — ' + ('УСПЕШНО' if ok else 'С ОШИБКАМИ')
+
+          body = f'''Отчет синхронизации товаров RED-: Яндекс KIT → Webasyst
+
+Результат: {'УСПЕШНО' if ok else 'ЗАВЕРШЕНО С ОШИБКАМИ'}
+
+Артикулов RED- в KIT: {r.get('kit_red_variants', '—')}
+Уникальных артикулов RED- в KIT: {r.get('kit_unique_skus', '—')}
+Найдено совпадений в Webasyst: {r.get('matched', '—')}
+Обработано: {r.get('processed', '—')}
+Обновлено карточек: {r.get('updated', '—')}
+Не найдено в Webasyst: {r.get('missing_in_webasyst', '—')}
+
+Изображения:
+- обновлены в поле «Краткое описание» через [extimg]: {r.get('summaries_updated', '—')}
+- URL изображений получено из KIT: {r.get('file_urls_resolved', '—')}
+- товаров RED- без изображений в KIT: {r.get('variants_without_images', '—')}
+
+Характеристики:
+- значений записано из KIT: {r.get('feature_values_written', '—')}
+- новых характеристик Webasyst создано: {r.get('features_created', '—')}
+
+Контроль:
+- цены НЕ изменялись;
+- остатки НЕ изменялись;
+- вызовов shop.product.skus.update: {((r.get('policy') or {}).get('sku_update_calls', '—'))}.
+
+Дубли SKU в KIT: {r.get('kit_duplicate_skus', '—')}
+Дубли RED-SKU в Webasyst: {r.get('webasyst_duplicate_red_skus', '—')}
+Конфликтов (несколько RED-SKU в одной карточке): {r.get('product_conflicts', '—')}
+Ошибок: {len(r.get('errors') or [])}
+'''
+
+          missing = r.get('missing_skus_sample') or []
+          if missing:
+              body += '\nНе найдено в Webasyst (пример, до 100):\n'
+              body += '\n'.join(f'- {x}' for x in missing[:100]) + '\n'
+
+          errors = r.get('errors') or []
+          if errors:
+              body += '\nОшибки (первые 30):\n'
+              for x in errors[:30]:
+                  if isinstance(x, dict):
+                      body += f"- {x.get('sku', '')}: {x.get('message', '')}\n"
+                  else:
+                      body += f'- {x}\n'
+
+          user = os.getenv('SMTP_USER', '').strip()
+          password = os.getenv('SMTP_PASSWORD', '').replace(' ', '').strip()
+          if not user or not password:
+              raise SystemExit('GMAIL_SMTP_USER/GMAIL_APP_PASSWORD are not configured')
+
+          msg = EmailMessage()
+          msg['From'] = user
+          msg['To'] = os.environ['RECIPIENT']
+          msg['Subject'] = subject
+          msg.set_content(body)
+          msg.add_attachment(
+              raw,
+              maintype='application',
+              subtype='json',
+              filename='last_red_webasyst_sync.json',
+          )
+
+          with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=30) as smtp:
+              smtp.login(user, password)
+              smtp.send_message(msg)
+          PY
+
+      - name: Fail workflow if RED sync failed
+        if: always()
+        env:
+          SYNC_OUTCOME: ${{ steps.red_sync.outcome }}
+        run: test "$SYNC_OUTCOME" = "success"
