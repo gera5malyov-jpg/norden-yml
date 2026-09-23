@@ -861,3 +861,222 @@ def run(dry_run=False, force=False, max_items=0):
     if dry_run:
         report["status"] = "ПРОВЕРКА УСПЕШНА"
         report["complete"] = not report["errors"]
+        report["finished_at"] = iso_now()
+        write_report(report)
+        return 0
+
+    token = s(os.environ.get("YANDEX_KIT_TOKEN"))
+    if not token:
+        raise RuntimeError("YANDEX_KIT_TOKEN не настроен")
+    kit = Kit(token)
+
+    warehouses = kit.list_all("/v1/warehouses", {"status": "ACTIVE"}, "warehouses")
+    wh = exact_title(warehouses, WAREHOUSE_NAME)
+    if not wh:
+        raise RuntimeError(f"Склад KIT {WAREHOUSE_NAME!r} не найден")
+    warehouse_id = s(wh.get("id"))
+    report["warehouse_id"] = warehouse_id
+
+    categories = kit.list_all("/v1/categories", {"status": "ACTIVE"}, "categories")
+    root = exact_title(categories, ROOT_CATEGORY, parent_id="")
+    if root:
+        root_id = s(root.get("id"))
+    else:
+        root = kit.create_category(ROOT_CATEGORY)
+        root_id = s(root.get("id"))
+        categories.append(dict(root, parent_id=""))
+    if not root_id:
+        raise RuntimeError("Не удалось создать/найти корневую категорию")
+
+    category_cache = {}
+    def category_for(card):
+        parent = root_id
+        path = [x for x in card.get("category_path") or [] if x and not SOURCE_NAME_RE.search(x)]
+        for title in path:
+            key = (parent, title)
+            if key in category_cache:
+                parent = category_cache[key]
+                continue
+            row = exact_title(categories, title, parent_id=parent)
+            if row:
+                cid = s(row.get("id"))
+            else:
+                row = kit.create_category(title, parent)
+                cid = s(row.get("id"))
+                categories.append(dict(row, parent_id=parent))
+            category_cache[key] = cid or parent
+            parent = category_cache[key]
+        return parent
+
+    characteristics = kit.list_all("/v1/characteristics", {"status": "ACTIVE"}, "characteristics")
+    char_by_title = {norm(x.get("title")): x for x in characteristics if s(x.get("id"))}
+    def ensure_char(title):
+        key = norm(title)
+        row = char_by_title.get(key)
+        if row:
+            return s(row.get("id"))
+        row = kit.create_characteristic(title)
+        cid = s(row.get("id"))
+        if not cid:
+            raise RuntimeError(f"KIT не вернул id характеристики {title!r}")
+        char_by_title[key] = row
+        characteristics.append(row)
+        return cid
+
+    def char_rows(card):
+        rows = []
+        for title, value in card.get("characteristics", {}).items():
+            title, value = clean_text(title), clean_text(value)
+            if not title or not value:
+                continue
+            nt = norm(title)
+            if any(x in nt for x in ("остаток", "налич", "поставщик", "источник", "доставка", "магазин")):
+                continue
+            if SOURCE_NAME_RE.search(title) or SOURCE_NAME_RE.search(value):
+                continue
+            cid = ensure_char(title)
+            rows.append({"characteristic_id": cid, "value": value, "values": [value]})
+        return rows
+
+    state = load_state()
+    state_items = state.setdefault("items", {})
+    seen_now = set()
+    price_batch, stock_batch = [], []
+
+    for idx, card in enumerate(cards, start=1):
+        key = card["source_key"]
+        seen_now.add(key)
+        try:
+            cleaned = prechecked.get(key)
+            if cleaned is None:
+                cleaned = clean_product_images(card, report)
+            if not cleaned:
+                report["skipped_no_clean_photo"] += 1
+                old_state = state_items.get(key) or {}
+                vid = s(old_state.get("variant_id"))
+                if vid:
+                    stock_batch.append({"variant_id": vid, "warehouse_id": warehouse_id, "quantity": 0})
+                    report["stock_updates"] += 1
+                continue
+
+            current_price = card.get("customer_price")
+            old_price = card.get("old_price")
+            if current_price is None:
+                report["skipped_no_price"] += 1
+                continue
+            if old_price is None or old_price < current_price:
+                old_price = current_price
+
+            mapping = state_items.get(key) or {}
+            vid = s(mapping.get("variant_id"))
+            variant = None
+            if vid:
+                try:
+                    variant = kit.get_variant(vid)
+                    if s(variant.get("status")).upper() == "ARCHIVED":
+                        variant = None
+                        vid = ""
+                except Exception:
+                    variant = None
+                    vid = ""
+
+            chars = char_rows(card)
+            if variant:
+                patch = {
+                    "name": card["name"],
+                    "description": card["description"],
+                    "characteristics": chars,
+                }
+                if card["manufacturer"]:
+                    patch["brand"] = card["manufacturer"]
+                existing_media = variant.get("media") or []
+                existing_images = [m for m in existing_media if s(m.get("type")).upper() == "IMAGE"]
+                if len(existing_images) != len(cleaned):
+                    fresh_media = upload_media(kit, cleaned, report)
+                    preserved = [m for m in existing_media if s(m.get("type")).upper() != "IMAGE"]
+                    if fresh_media:
+                        patch["media"] = fresh_media + preserved
+                kit.patch_variant(vid, patch)
+                report["updated"] += 1
+            else:
+                product = kit.create_product(category_for(card))
+                product_id = s(product.get("id"))
+                if not product_id:
+                    raise RuntimeError("KIT не вернул product_id")
+                media = upload_media(kit, cleaned, report)
+                if not media:
+                    report["skipped_no_clean_photo"] += 1
+                    continue
+                tmp = hashlib.sha1(key.encode("utf-8")).hexdigest()[:14].upper()
+                body = {
+                    "sku": f"YOU-TMP-{tmp}",
+                    "name": card["name"],
+                    "description": card["description"],
+                    "status": "PUBLISHED",
+                    "product_id": product_id,
+                    "pricing": {
+                        "price": str(old_price),
+                        "manual_discount_price": str(current_price),
+                    },
+                    "stocks": [{"warehouse_id": warehouse_id, "quantity": STOCK_QTY, "reserved": 0}],
+                    "characteristics": chars,
+                    "media": media,
+                }
+                if card["manufacturer"]:
+                    body["brand"] = card["manufacturer"]
+                created = kit.create_variant(body)
+                vid = s(created.get("id"))
+                if not vid:
+                    raise RuntimeError("KIT не вернул variant_id")
+                detail = created if created.get("kit_id") else kit.get_variant(vid)
+                kit_code = s(detail.get("kit_id"))
+                if kit_code:
+                    kit.patch_variant(vid, {"sku": f"{SKU_PREFIX}{kit_code}"})
+                    final_sku = f"{SKU_PREFIX}{kit_code}"
+                else:
+                    final_sku = f"YOU-TMP-{tmp}"
+                    report["warnings"].append({
+                        "source_url": key, "stage": "final_sku",
+                        "message": "KIT не вернул kit_id; временный SKU оставлен до следующего запуска",
+                    })
+                report["created"] += 1
+                state_items[key] = {
+                    "variant_id": vid,
+                    "sku": final_sku,
+                    "created_at": iso_now(),
+                }
+
+            state_items.setdefault(key, {})["variant_id"] = vid
+            state_items[key]["last_seen_at"] = iso_now()
+            state_items[key]["active"] = True
+
+            price_batch.append({
+                "variant_id": vid,
+                "price": str(old_price),
+                "manual_discount_price": str(current_price),
+            })
+            stock_batch.append({"variant_id": vid, "warehouse_id": warehouse_id, "quantity": STOCK_QTY})
+            report["price_updates"] += 1
+            report["stock_updates"] += 1
+
+            if len(price_batch) >= 100:
+                kit.update_prices(price_batch)
+                price_batch.clear()
+            if len(stock_batch) >= 300:
+                kit.update_stocks(stock_batch)
+                stock_batch.clear()
+            if idx % 25 == 0:
+                save_state(state)
+                print(f"YourRoom → KIT: обработано {idx}/{len(cards)}", flush=True)
+
+        except Exception as exc:
+            report["errors"].append({
+                "source_url": key,
+                "name": card.get("name"),
+                "message": str(exc)[:1200],
+            })
+            if len(report["errors"]) >= 250:
+                break
+
+    previous_count = int(state.get("last_sitemap_count") or 0)
+    safe_full_catalog = not max_items and len(urls) >= 500 and (not previous_count or len(urls) >= int(previous_count * 0.70))
