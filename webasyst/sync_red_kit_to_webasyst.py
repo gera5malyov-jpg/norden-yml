@@ -7,6 +7,7 @@ import os
 import re
 import time
 import unicodedata
+import xml.etree.ElementTree as ET
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,6 +22,10 @@ DRY_RUN = str(os.getenv("DRY_RUN", "1")).strip().lower() not in {"0", "false", "
 KIT_DELAY = float(os.getenv("RED_KIT_REQUEST_DELAY", "0.40"))
 WA_DELAY = float(os.getenv("RED_WEBASYST_WRITE_DELAY", "0.55"))
 MAX_PRODUCTS = int(os.getenv("RED_MAX_PRODUCTS", "0") or "0")
+KIT_PUBLIC_YML_URL = os.getenv(
+    "KIT_PUBLIC_YML_URL",
+    "https://yastore-prod-persist.s3.yandex.net/feeds/yml/019a5a60-ce41-7872-aa9d-d7720c268dab.xml",
+).strip()
 
 import sys
 sys.path.insert(0, str(HERE))
@@ -172,6 +177,34 @@ def product_skus(product):
         return [x for x in skus if isinstance(x, dict)]
     return []
 
+def local_tag(tag):
+    return str(tag or "").rsplit("}", 1)[-1]
+
+
+def load_public_yml_images(url):
+    """Return RED SKU -> ordered KIT public image URLs from KIT's own YML feed."""
+    out = {}
+    if not url:
+        return out
+    r = requests.get(url, timeout=240, headers={"User-Agent": "Mozilla/5.0 RED-KIT-Webasyst-Sync"})
+    r.raise_for_status()
+    root = ET.fromstring(r.content)
+    for elem in root.iter():
+        if local_tag(elem.tag) != "offer":
+            continue
+        sku = ""
+        pictures = []
+        for child in list(elem):
+            tag = local_tag(child.tag)
+            value = s(child.text)
+            if tag in {"vendorCode", "sku"} and value and not sku:
+                sku = value
+            elif tag == "picture" and value:
+                pictures.append(value)
+        if sku.upper().startswith(SKU_PREFIX) and pictures:
+            out[sku_key(sku)] = list(dict.fromkeys(pictures))
+    return out
+
 
 def load_wa_products(wa):
     out = []
@@ -266,6 +299,8 @@ def main():
         "variants_without_images": 0,
         "file_urls_resolved": 0,
         "file_urls_reused_from_webasyst": 0,
+        "image_urls_from_public_yml": 0,
+        "public_yml_red_skus": 0,
         "features_created": 0,
         "features_planned_to_create": 0,
         "feature_values_written": 0,
@@ -416,6 +451,8 @@ def main():
         selected_feature_cache[cache_key] = code
         return code
 
+    public_yml_images = load_public_yml_images(KIT_PUBLIC_YML_URL)
+    report["public_yml_red_skus"] = len(public_yml_images)
     file_url_cache = {}
 
     def image_urls(variant, current_summary=""):
@@ -428,6 +465,11 @@ def main():
             key=lambda x: int(x.get("display_sequence") or 0),
         )
         media_ids = [s(row.get("image_id")) for row in media if s(row.get("image_id"))]
+        public_urls = public_yml_images.get(sku_key(variant.get("sku")), [])
+        if public_urls:
+            report["image_urls_from_public_yml"] += len(public_urls)
+            return public_urls
+
         if DRY_RUN:
             # Preflight validates matching/content without spending API calls
             # resolving every KIT image URL. Live mode resolves and writes all URLs.
