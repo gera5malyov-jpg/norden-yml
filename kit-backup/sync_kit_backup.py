@@ -777,8 +777,7 @@ def build_tables(data, enrichment=None):
         *[x[0] for x in COMMON_CHARACTERISTICS],
         "Описание", "SEO-описание", "SEO H1", "SEO-заголовок",
         "Слаг", "Ссылка в KIT", "НДС", "Требует маркировки", "Дата создания (API)",
-        "Цена до скидки", "Цена со скидкой вручную", "Промо-цена", "Итоговая цена", "Цены JSON",
-        "Все характеристики JSON", "Остатки JSON", "Медиа JSON", "Упаковки JSON", "Доп. данные JSON",
+        "Цена до скидки", "Цена со скидкой вручную", "Промо-цена", "Итоговая цена",
     ]
     rows = []
     search_rows = []
@@ -863,12 +862,6 @@ def build_tables(data, enrichment=None):
             safe_cell(v.get("requires_marking")), safe_cell(v.get("created_at")),
             safe_cell(pricing.get("price")), safe_cell(pricing.get("manual_discount_price")),
             safe_cell(pricing.get("promotion_price")), safe_cell(pricing.get("final_price")),
-            safe_cell(json_text(pricing)),
-            safe_cell(json_text(enriched_chars)),
-            safe_cell(json_text(enriched_stocks)),
-            safe_cell(json_text(v.get("media") or [])),
-            safe_cell(json_text(v.get("cargo_boxes") or [])),
-            safe_cell(json_text(extra)),
         ])
 
         search_rows.append([
@@ -906,6 +899,8 @@ def build_tables(data, enrichment=None):
         "Код для сайта", "Артикул поставщика", "Цена закупки", "В наличии",
     ]
 
+    # Тяжелые JSON-поля не дублируем в Google Sheets: полные исходные данные
+    # сохраняются в ежедневном kit_full_backup.json.gz. Это оставляет запас до лимита Sheets.
     tables = {
         "Поиск": (search_headers, search_rows),
         "Товары": (headers, rows),
