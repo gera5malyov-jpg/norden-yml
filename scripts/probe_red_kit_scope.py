@@ -20,3 +20,17 @@ print(json.dumps({
     "max_images": max(media) if media else 0,
     "avg_images": (sum(media)/len(media)) if media else 0,
 }, ensure_ascii=False, indent=2))
+
+print("\nFILES_PROBE")
+for params in ({"page":1,"per_page":3}, {"page":1,"per_page":100}):
+    try:
+        payload = kit.request("GET", "/v1/files", params=params)
+        print(json.dumps({
+            "params": params,
+            "keys": list(payload.keys()) if isinstance(payload, dict) else None,
+            "total_count": payload.get("total_count") if isinstance(payload, dict) else None,
+            "total": payload.get("total") if isinstance(payload, dict) else None,
+            "sample": (payload.get("files") or [])[:3] if isinstance(payload, dict) else None,
+        }, ensure_ascii=False, indent=2))
+    except Exception as exc:
+        print(json.dumps({"params":params,"error":str(exc)},ensure_ascii=False))
