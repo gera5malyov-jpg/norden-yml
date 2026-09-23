@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - '.github/workflows/marketplace-orders-webasyst.yml'
+      - 'webasyst/marketplace_order_sync.py'
   schedule:
     - cron: '7 */3 * * *'
   workflow_dispatch:
