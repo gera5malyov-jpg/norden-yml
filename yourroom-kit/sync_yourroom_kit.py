@@ -643,3 +643,221 @@ def clean_product_images(card, report):
                     })
 
         if chosen is None:
+            report["images_rejected_watermark_or_error"] += 1
+            continue
+        im, used_url = chosen
+        raw, filename, ctype = image_bytes(im, used_url)
+        digest = hashlib.sha1(raw).hexdigest()
+        if digest in seen_hashes:
+            continue
+        seen_hashes.add(digest)
+        accepted.append({"bytes": raw, "filename": filename, "content_type": ctype, "source": used_url, "mode": chosen_mode})
+        report["images_clean_original"] += int(chosen_mode == "clean_original")
+        report["images_clean_alternate"] += int(chosen_mode == "clean_alternate")
+        report["images_watermark_removed"] += int(chosen_mode == "watermark_removed")
+        if len(accepted) >= MAX_IMAGES_PER_CARD:
+            break
+    return accepted
+
+
+class Kit(base.KitClient):
+    def create_category(self, title, parent_id=None):
+        body = {"title": title}
+        if parent_id:
+            body["parent_id"] = parent_id
+        return self.request("POST", "/v1/categories", body=body)
+
+    def create_characteristic(self, title):
+        return self.request(
+            "POST", "/v1/characteristics",
+            body={"title": title, "type": "STRING", "select_mode": "SINGLE"},
+        )
+
+    def create_product(self, category_id):
+        return self.request("POST", "/v1/products", body={"category_ids": [category_id]})
+
+    def create_variant(self, body):
+        return self.request("POST", "/v1/variants", body=body, timeout=180)
+
+    def patch_variant(self, variant_id, body):
+        return self.request("PATCH", f"/v1/variants/{variant_id}", body=body, timeout=180)
+
+    def get_variant(self, variant_id):
+        return self.request("GET", f"/v1/variants/{variant_id}")
+
+    def update_stocks(self, items):
+        for start in range(0, len(items), 3000):
+            self.request(
+                "POST", "/v1/variants/stocks/bulk_update",
+                body={"items": items[start:start + 3000]}, timeout=180,
+            )
+
+    def update_prices(self, items):
+        for start in range(0, len(items), 1000):
+            self.request(
+                "POST", "/v1/variants/prices/bulk_update",
+                body={"items": items[start:start + 1000]}, timeout=180,
+            )
+
+    def upload_bytes(self, content, filename, content_type):
+        endpoint = KIT_API + "/v1/files"
+        headers = {"Authorization": "Bearer " + self.token, "Accept": "application/json"}
+        for attempt in range(8):
+            delay = 0.75 - (time.monotonic() - self.last_request_at)
+            if delay > 0:
+                time.sleep(delay)
+            self.last_request_at = time.monotonic()
+            r = self.session.post(
+                endpoint, headers=headers,
+                files={"file": (filename, content, content_type)}, timeout=180,
+            )
+            if r.status_code == 429 or r.status_code >= 500:
+                if attempt == 7:
+                    r.raise_for_status()
+                time.sleep(float(r.headers.get("Retry-After") or min(15, 2 + attempt * 2)))
+                continue
+            r.raise_for_status()
+            return r.json() if r.content else {}
+        raise RuntimeError("KIT file upload retries exhausted")
+
+
+def exact_title(rows, title, parent_id=None):
+    for row in rows:
+        if norm(row.get("title")) != norm(title):
+            continue
+        if parent_id is not None and s(row.get("parent_id")) != s(parent_id):
+            continue
+        return row
+    return None
+
+
+def upload_media(kit, cleaned_images, report):
+    media = []
+    for img in cleaned_images:
+        try:
+            up = kit.upload_bytes(img["bytes"], img["filename"], img["content_type"])
+            file_id = s(up.get("id"))
+            if not file_id:
+                continue
+            media.append({"type": "IMAGE", "display_sequence": len(media), "image_id": file_id})
+            report["images_uploaded"] += 1
+        except Exception as exc:
+            report["image_upload_errors"] += 1
+            if len(report["warnings"]) < 200:
+                report["warnings"].append({"stage": "kit_image_upload", "message": str(exc)[:400]})
+    return media
+
+
+def crawl_products(urls, max_items, report):
+    cards = []
+    source_keys = set(urls)
+    parse_errors = []
+    target = urls[:max_items] if max_items else urls
+    for idx, url in enumerate(target, start=1):
+        try:
+            r = WEB.get(url, timeout=75)
+            if r.status_code in (404, 410):
+                parse_errors.append({"url": url, "status": r.status_code, "message": "страница отсутствует"})
+                continue
+            r.raise_for_status()
+            card, err = parse_product(r.url, r.text)
+            if card:
+                cards.append(card)
+                source_keys.add(card["source_key"])
+            else:
+                parse_errors.append({"url": url, "status": r.status_code, "message": err})
+        except Exception as exc:
+            parse_errors.append({"url": url, "message": str(exc)[:500]})
+        if idx % 50 == 0:
+            print(f"YourRoom: прочитано {idx}/{len(target)} страниц", flush=True)
+    report["parse_errors"] = parse_errors[:300]
+    report["product_pages_requested"] = len(target)
+    report["product_cards_parsed"] = len(cards)
+    return cards, source_keys
+
+
+def run(dry_run=False, force=False, max_items=0):
+    report = {
+        "status": "ВЫПОЛНЯЕТСЯ",
+        "started_at": iso_now(),
+        "dry_run": bool(dry_run),
+        "source": BASE_URL,
+        "supplier": SUPPLIER,
+        "region": "Санкт-Петербург",
+        "schedule_rule": "раз в 14 дней",
+        "price_rule": {
+            "Цена для покупателя": "актуальная цена со скидкой на yourroom.ru",
+            "Цена до скидки": "зачеркнутая цена yourroom.ru; если ее нет — равна текущей цене",
+        },
+        "stock_rule": f"{WAREHOUSE_NAME} = {STOCK_QTY} шт.",
+        "sku_rule": "YOU-<код KIT>",
+        "modification_rule": "каждая отдельная /products/ страница/модификация — отдельная карточка KIT",
+        "missing_rule": "если URL исчез из полного sitemap — остаток 0",
+        "description_rule": "упоминания ВашаКомната/Вашакомната.РФ/yourroom.ru удаляются",
+        "photo_rule": "используются только изображения без водяного знака; сначала ищется чистый оригинал, затем пробуется программное удаление; без пригодного фото карточка не создается",
+        "sitemap_urls": 0,
+        "product_pages_requested": 0,
+        "product_cards_parsed": 0,
+        "created": 0,
+        "updated": 0,
+        "zeroed_missing": 0,
+        "skipped_no_clean_photo": 0,
+        "skipped_no_price": 0,
+        "price_updates": 0,
+        "stock_updates": 0,
+        "images_clean_original": 0,
+        "images_clean_alternate": 0,
+        "images_watermark_removed": 0,
+        "images_rejected_watermark_or_error": 0,
+        "images_uploaded": 0,
+        "image_upload_errors": 0,
+        "parse_errors": [],
+        "errors": [],
+        "warnings": [],
+        "sample": [],
+        "complete": False,
+    }
+
+    if not dry_run:
+        due, age = due_for_live(force)
+        report["days_since_last_success"] = None if age is None else round(age, 2)
+        if not due:
+            report["status"] = "ПРОПУЩЕНО"
+            report["reason"] = "С последнего успешного обновления прошло менее 14 дней"
+            report["complete"] = True
+            report["finished_at"] = iso_now()
+            write_report(report)
+            return 0
+
+    verify_spb_context()
+    urls = sitemap_product_urls()
+    report["sitemap_urls"] = len(urls)
+    if len(urls) < 500:
+        raise RuntimeError(f"Подозрительно мало товарных URL в sitemap: {len(urls)}")
+
+    cards, source_keys = crawl_products(urls, max_items, report)
+    if not cards:
+        raise RuntimeError("Не удалось разобрать ни одной карточки товара")
+
+    prechecked = {}
+    check_cards = cards if not dry_run else cards[: min(10, len(cards))]
+    for card in check_cards:
+        cleaned = clean_product_images(card, report)
+        prechecked[card["source_key"]] = cleaned
+        report["sample"].append({
+            "source_url": card["source_url"],
+            "name": card["name"],
+            "customer_price": str(card["customer_price"]),
+            "old_price": str(card["old_price"]),
+            "manufacturer": card["manufacturer"],
+            "category_path": card["category_path"],
+            "characteristics": dict(list(card["characteristics"].items())[:20]),
+            "description_preview": card["description"][:500],
+            "source_images": len(card["pictures"]),
+            "clean_images": len(cleaned),
+            "clean_modes": [x["mode"] for x in cleaned],
+        })
+
+    if dry_run:
+        report["status"] = "ПРОВЕРКА УСПЕШНА"
+        report["complete"] = not report["errors"]
