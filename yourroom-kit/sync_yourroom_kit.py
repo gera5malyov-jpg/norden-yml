@@ -54,6 +54,24 @@ CONTROL_TEXT = {
 }
 
 
+def configure_shard_paths(shard_index=0, shard_count=1):
+    global REPORT_PATH, STATE_PATH
+    if shard_count > 1:
+        suffix = f"{shard_index:02d}-of-{shard_count:02d}"
+        REPORT_PATH = HERE / f"last_sync_report-shard-{suffix}.json"
+        STATE_PATH = HERE / f"state-shard-{suffix}.json"
+    else:
+        REPORT_PATH = HERE / "last_sync_report.json"
+        STATE_PATH = HERE / "state.json"
+
+
+def url_shard(url, shard_count):
+    if shard_count <= 1:
+        return 0
+    digest = hashlib.sha1(url.encode("utf-8")).hexdigest()
+    return int(digest[:12], 16) % shard_count
+
+
 def load_base():
     spec = importlib.util.spec_from_file_location("yourroom_kit_base", BASE_PATH)
     if spec is None or spec.loader is None:
@@ -756,7 +774,7 @@ def crawl_products(urls, max_items, report):
     return cards, source_keys
 
 
-def run(dry_run=False, force=False, max_items=0):
+def run(dry_run=False, force=False, max_items=0, shard_index=0, shard_count=1):
     report = {
         "status": "ВЫПОЛНЯЕТСЯ",
         "started_at": iso_now(),
@@ -764,7 +782,11 @@ def run(dry_run=False, force=False, max_items=0):
         "source": BASE_URL,
         "supplier": SUPPLIER,
         "region": "Санкт-Петербург",
-        "schedule_rule": "раз в 14 дней",
+        "schedule_rule": "каждая карточка обновляется примерно раз в 14 дней",
+        "shard_index": shard_index,
+        "shard_count": shard_count,
+        "state_file": STATE_PATH.name,
+        "report_file": REPORT_PATH.name,
         "price_rule": {
             "Цена для покупателя": "актуальная цена со скидкой на yourroom.ru",
             "Цена до скидки": "зачеркнутая цена yourroom.ru; если ее нет — равна текущей цене",
@@ -810,10 +832,20 @@ def run(dry_run=False, force=False, max_items=0):
             return 0
 
     verify_spb_context()
-    urls = sitemap_product_urls()
+    all_urls = sitemap_product_urls()
+    report["sitemap_urls_total"] = len(all_urls)
+    if len(all_urls) < 500:
+        raise RuntimeError(f"Подозрительно мало товарных URL в sitemap: {len(all_urls)}")
+
+    urls = [
+        url for url in all_urls
+        if url_shard(url, shard_count) == shard_index
+    ]
     report["sitemap_urls"] = len(urls)
-    if len(urls) < 500:
-        raise RuntimeError(f"Подозрительно мало товарных URL в sitemap: {len(urls)}")
+    if not urls:
+        raise RuntimeError(
+            f"В шарде {shard_index}/{shard_count} не найдено товарных URL"
+        )
 
     cards, source_keys = crawl_products(urls, max_items, report)
     if not cards:
@@ -1059,7 +1091,12 @@ def run(dry_run=False, force=False, max_items=0):
                 break
 
     previous_count = int(state.get("last_sitemap_count") or 0)
-    safe_full_catalog = not max_items and len(urls) >= 500 and (not previous_count or len(urls) >= int(previous_count * 0.70))
+    min_safe_urls = 500 if shard_count <= 1 else 20
+    safe_full_catalog = (
+        not max_items
+        and len(urls) >= min_safe_urls
+        and (not previous_count or len(urls) >= int(previous_count * 0.70))
+    )
 
     if safe_full_catalog:
         current_sitemap = set(urls)
@@ -1086,6 +1123,8 @@ def run(dry_run=False, force=False, max_items=0):
         kit.update_stocks(stock_batch)
 
     state["last_sitemap_count"] = len(urls)
+    state["shard_index"] = shard_index
+    state["shard_count"] = shard_count
     state["supplier"] = SUPPLIER
     state["region"] = "Санкт-Петербург"
     report["complete"] = not report["errors"]
@@ -1103,14 +1142,32 @@ def main():
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--force", action="store_true")
     p.add_argument("--max-items", type=int, default=0)
+    p.add_argument("--shard-index", type=int, default=0)
+    p.add_argument("--shard-count", type=int, default=1)
     args = p.parse_args()
+
+    shard_count = max(1, args.shard_count)
+    shard_index = args.shard_index
+    if shard_index < 0 or shard_index >= shard_count:
+        raise SystemExit(f"Некорректный shard-index={shard_index} для shard-count={shard_count}")
+
+    configure_shard_paths(shard_index, shard_count)
+
     try:
-        return run(dry_run=args.dry_run, force=args.force, max_items=max(0, args.max_items))
+        return run(
+            dry_run=args.dry_run,
+            force=args.force,
+            max_items=max(0, args.max_items),
+            shard_index=shard_index,
+            shard_count=shard_count,
+        )
     except Exception as exc:
         write_report({
             "status": "ОШИБКА",
             "complete": False,
             "dry_run": bool(args.dry_run),
+            "shard_index": shard_index,
+            "shard_count": shard_count,
             "error": str(exc)[:3000],
             "finished_at": iso_now(),
         })
