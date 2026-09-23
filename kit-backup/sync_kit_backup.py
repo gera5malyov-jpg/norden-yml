@@ -517,6 +517,44 @@ def build_source_enrichment(data):
     except Exception as exc:
         warnings.append(f"Afina Garden: закупочная цена не обновлена: {exc}")
 
+    # Riva: <price> в текущем прайсе Riva является закупочной ценой.
+    # Сопоставляем прежде всего по ID предложения Riva, резервно — по "Код для сайта".
+    riva_by_offer = {}
+    riva_by_code = {}
+    try:
+        cfg = _read_json(REPO_ROOT / "sources" / "yml_sources.json", {})
+        riva_url = clean(((cfg.get("riva") or {}).get("url")))
+        if riva_url:
+            response = requests.get(
+                riva_url,
+                timeout=(20, 180),
+                headers={"User-Agent": "Megapolis-KIT-backup/2.0"},
+            )
+            response.raise_for_status()
+            root = ET.fromstring(response.content)
+            for offer in root.iter():
+                if offer.tag.split("}")[-1].casefold() != "offer":
+                    continue
+                offer_id = clean(offer.attrib.get("id")).strip()
+                purchase = ""
+                code_for_site = ""
+                for child in list(offer):
+                    tag = child.tag.split("}")[-1].casefold()
+                    value = clean(child.text).strip()
+                    if tag == "price" and value:
+                        purchase = value
+                    elif tag == "param":
+                        pname = _norm_title(child.attrib.get("name"))
+                        if pname == _norm_title("Код для сайта") and value:
+                            code_for_site = value
+                if purchase:
+                    if offer_id:
+                        riva_by_offer[offer_id] = purchase
+                    if code_for_site:
+                        riva_by_code[_source_key(code_for_site)] = purchase
+    except Exception as exc:
+        warnings.append(f"Riva: закупочная цена не обновлена: {exc}")
+
     # Остальные источники определяем только по сильным признакам карточки.
     for v in data.get("variants") or []:
         vid = clean(v.get("id"))
@@ -577,7 +615,13 @@ def build_source_enrichment(data):
             or "id предложения riva" in chars
             or "id группы riva" in chars
         ):
-            put(vid, "Riva")
+            riva_offer_id = (chars.get(_norm_title("ID предложения Riva")) or [""])[0]
+            riva_code = (chars.get(_norm_title("Код для сайта")) or [""])[0] or sku
+            purchase = (
+                riva_by_offer.get(clean(riva_offer_id).strip())
+                or riva_by_code.get(_source_key(riva_code))
+            )
+            put(vid, "Riva", purchase)
 
     return result, warnings
 
