@@ -139,7 +139,12 @@ def main():
             except Exception as exc:
                 last_error=exc
         if not service:
-            raise RuntimeError(f"Dalli не вернул КГТ-интервалы для оплаченного подъёма: {last_error}")
+            # Для КГТ Dalli может не публиковать интервалы, но basketcreate принимает дату.
+            # Сохраняем дату Яндекс без самовольного переноса и используем базовый интервал.
+            if not target:
+                raise RuntimeError(f"Dalli не вернул КГТ-интервалы и у Яндекс нет даты доставки: {last_error}")
+            service="30"
+            date,t1,t2,target_matched=target,"10:00","22:00",True
     else:
         service="11"
         date,t1,t2,target_matched=get_interval(addr,service,target)
