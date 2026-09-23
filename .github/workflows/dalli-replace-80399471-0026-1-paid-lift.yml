@@ -1,0 +1,32 @@
+name: Replace Dalli 80399471-0026-1 with paid lift
+on:
+  push:
+    paths:
+      - '.github/workflows/dalli-replace-80399471-0026-1-paid-lift.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - env:
+          TARGET_EXTERNAL_ID: '80399471-0026-1'
+          SAFE_RESULT_PATH: 'dalli/order_80399471-0026-1_paid_climb_replace.json'
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+        run: python scripts/replace_dalli_ozon_with_paid_climb.py
+      - name: Save result
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+          git add dalli/order_80399471-0026-1_paid_climb_replace.json || true
+          git diff --cached --quiet || git commit -m "Store paid lift replacement result 80399471-0026-1"
+          git push
