@@ -28,3 +28,42 @@ jobs:
       - run: pip install --disable-pip-version-check -r kit-backup/requirements.txt
       - name: Проверить синтаксис
         run: python -m py_compile red-kit/sync_red_black_supplier.py red-kit/sync_red_black_webasyst.py kit-backup/sync_kit_backup.py webasyst/client.py
+
+      - name: Проверка Red Black → KIT без записи
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          RED_MIN_FULL_FEED_OFFERS: '1000'
+          RED_MAX_NEW_PRODUCTS: '200'
+        run: python red-kit/sync_red_black_supplier.py --dry-run
+
+      - name: Red Black → KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          RED_MIN_FULL_FEED_OFFERS: '1000'
+          RED_MAX_NEW_PRODUCTS: '200'
+        run: python red-kit/sync_red_black_supplier.py
+
+      - name: Проверка Red Black → Webasyst без записи
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          RED_WEBASYST_WRITE_DELAY: '0.15'
+        run: python red-kit/sync_red_black_webasyst.py --dry-run
+
+      - name: Red Black → Webasyst
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          RED_WEBASYST_WRITE_DELAY: '0.15'
+        run: python red-kit/sync_red_black_webasyst.py
+
+      - name: Приложить отчёты
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: red-black-sync-${{ github.run_id }}
+          path: |
+            red-kit/last_supplier_sync.json
+            webasyst/last_red_black_daily_sync.json
+          if-no-files-found: warn
+          retention-days: 30
