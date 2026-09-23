@@ -431,3 +431,215 @@ def extract_manufacturer(soup, characteristics):
         if "производител" in norm(k) and clean_text(v):
             return clean_text(v)
     meta = soup.find("meta", attrs={"name": "description"})
+    tx = clean_text(meta.get("content") if meta else "")
+    m = re.search(r"Производитель\s+([^.;]{2,100})", tx, flags=re.I)
+    return clean_text(m.group(1)) if m else ""
+
+
+def extract_description(soup, h1):
+    selectors = [
+        "#prod-description-wrapp", "[id*='prod-description']", "[class*='product-description']",
+        "[class*='prod-description']", "[itemprop='description']",
+    ]
+    candidates = []
+    for sel in selectors:
+        for node in soup.select(sel):
+            tx = clean_text(node.get_text(" ", strip=True))
+            if 80 <= len(tx) <= 12000:
+                candidates.append(tx)
+    if not candidates:
+        for p in h1.find_all_next("p", limit=80):
+            tx = clean_text(p.get_text(" ", strip=True))
+            if len(tx) >= 120 and "лучшие предложения" not in norm(tx):
+                candidates.append(tx)
+    if not candidates:
+        return ""
+    best = max(candidates, key=len)
+    return drop_source_mentions(best)
+
+
+def extract_image_urls(soup, h1, page_url):
+    scope = product_scope(soup, h1)
+    urls = []
+    for a in scope.find_all("a", href=True):
+        href = s(a.get("href"))
+        if "/shopfiles/img_products/" in href and re.search(r"\.(?:jpe?g|png|webp)(?:\?|$)", href, re.I):
+            urls.append(urljoin(page_url, href))
+    for img in scope.find_all("img"):
+        for attr in ("data-src", "data-lazy", "data-original", "src"):
+            src = s(img.get(attr))
+            if "/shopfiles/img_products/" in src and re.search(r"\.(?:jpe?g|png|webp)(?:\?|$)", src, re.I):
+                urls.append(urljoin(page_url, src))
+    urls = unique(u.split("#", 1)[0] for u in urls)
+    full = [u for u in urls if "/full_" in u or "/full-" in u]
+    return (full or urls)[:MAX_IMAGES_PER_CARD]
+
+
+def parse_product(url, raw_html):
+    soup = BeautifulSoup(raw_html, "html.parser")
+    h1 = soup.find("h1")
+    if not h1:
+        return None, "нет H1"
+    name = clean_text(h1.get_text(" ", strip=True))
+    if not name:
+        return None, "пустое название"
+
+    canonical = ""
+    can = soup.find("link", rel=lambda x: x and "canonical" in x)
+    if can:
+        canonical = canonical_product_url(can.get("href"))
+    canonical = canonical or canonical_product_url(url)
+
+    customer, old = extract_prices(soup, h1)
+    if customer is None:
+        return None, "не найдена цена"
+
+    chars = extract_characteristics(soup, h1)
+    manufacturer = extract_manufacturer(soup, chars)
+    description = extract_description(soup, h1)
+    pictures = extract_image_urls(soup, h1, canonical)
+    categories = breadcrumb_path(soup, h1)
+
+    return {
+        "source_key": canonical,
+        "source_url": canonical,
+        "name": name,
+        "customer_price": customer,
+        "old_price": old,
+        "manufacturer": manufacturer,
+        "description": description,
+        "characteristics": chars,
+        "pictures": pictures,
+        "category_path": categories,
+    }, ""
+
+
+def candidate_original_urls(url):
+    p = urlparse(url)
+    dirname, basename = os.path.split(p.path)
+    stem, ext = os.path.splitext(basename)
+    names = [basename]
+    if stem.startswith("full_"):
+        core = stem[5:]
+        names.extend([core + ext, "original_" + core + ext, "orig_" + core + ext, "source_" + core + ext])
+    elif stem.startswith("full-"):
+        core = stem[5:]
+        names.extend([core + ext, "original-" + core + ext, "orig-" + core + ext])
+    out = []
+    for n in names:
+        path = dirname.rstrip("/") + "/" + n
+        out.append(urlunparse((p.scheme, p.netloc, path, "", "", "")))
+    return unique(out)
+
+
+def decode_image(content):
+    try:
+        im = Image.open(io.BytesIO(content)).convert("RGB")
+        if im.width < 300 or im.height < 300:
+            return None
+        return im
+    except Exception:
+        return None
+
+
+def watermark_anchor(im):
+    arr = np.array(im)
+    h, w = arr.shape[:2]
+    rgb = arr.astype(np.int16)
+    r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
+    mask = (
+        (r >= 150) & (r <= 255) &
+        (b >= 85) & (b <= 235) &
+        (r - g >= 25) &
+        (b - g >= 5)
+    ).astype(np.uint8) * 255
+    zone = np.zeros_like(mask)
+    zone[int(h * 0.32):int(h * 0.86), int(w * 0.04):int(w * 0.55)] = 255
+    mask = cv2.bitwise_and(mask, zone)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
+    n, labels, stats, _ = cv2.connectedComponentsWithStats(mask, 8)
+    best = None
+    for i in range(1, n):
+        x, y, cw, ch, area = stats[i]
+        if area < max(10, int(w * h * 0.00001)):
+            continue
+        if area > w * h * 0.02:
+            continue
+        if cw > w * 0.14 or ch > h * 0.16:
+            continue
+        score = area - abs((x + cw / 2) - w * 0.20) * 0.02 - abs((y + ch / 2) - h * 0.64) * 0.02
+        if best is None or score > best[-1]:
+            best = (x, y, cw, ch, area, score)
+    return best
+
+
+def remove_source_watermark(im):
+    anchor = watermark_anchor(im)
+    if not anchor:
+        return im, False, True
+    x, y, cw, ch, _, _ = anchor
+    arr = cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGR)
+    h, w = arr.shape[:2]
+    x0 = max(0, int(x - 0.018 * w))
+    y0 = max(0, int(y - 0.045 * h))
+    x1 = min(w, int(max(x + cw + 0.23 * w, x0 + 0.18 * w)))
+    y1 = min(h, int(y + ch + 0.055 * h))
+    mask = np.zeros((h, w), np.uint8)
+    cv2.rectangle(mask, (x0, y0), (x1, y1), 255, thickness=-1)
+    cleaned = cv2.inpaint(arr, mask, 7, cv2.INPAINT_TELEA)
+    out = Image.fromarray(cv2.cvtColor(cleaned, cv2.COLOR_BGR2RGB))
+    ok = watermark_anchor(out) is None
+    return out, True, ok
+
+
+def image_bytes(im, source_url):
+    ext = os.path.splitext(urlparse(source_url).path)[1].casefold()
+    buf = io.BytesIO()
+    if ext == ".png":
+        im.save(buf, format="PNG", optimize=True)
+        ctype = "image/png"
+        filename = "yourroom.png"
+    else:
+        im.save(buf, format="JPEG", quality=92, optimize=True)
+        ctype = "image/jpeg"
+        filename = "yourroom.jpg"
+    return buf.getvalue(), filename, ctype
+
+
+def clean_product_images(card, report):
+    accepted = []
+    seen_hashes = set()
+    for source_url in card.get("pictures") or []:
+        chosen = None
+        chosen_mode = ""
+        for candidate in candidate_original_urls(source_url):
+            try:
+                r = WEB.get(candidate, timeout=120)
+                if r.status_code != 200 or not r.content:
+                    continue
+                ctype = norm(r.headers.get("Content-Type"))
+                if "image" not in ctype and not re.search(r"\.(?:jpe?g|png|webp)$", urlparse(candidate).path, re.I):
+                    continue
+                im = decode_image(r.content)
+                if im is None:
+                    continue
+                anchor = watermark_anchor(im)
+                if anchor is None:
+                    chosen = (im, candidate)
+                    chosen_mode = "clean_original" if candidate == source_url else "clean_alternate"
+                    break
+                cleaned, had_mark, ok = remove_source_watermark(im)
+                if had_mark and ok:
+                    chosen = (cleaned, candidate)
+                    chosen_mode = "watermark_removed"
+                    break
+            except Exception as exc:
+                if len(report["warnings"]) < 200:
+                    report["warnings"].append({
+                        "source_url": card.get("source_url"),
+                        "stage": "image_download",
+                        "image_url": candidate,
+                        "message": str(exc)[:300],
+                    })
+
+        if chosen is None:
