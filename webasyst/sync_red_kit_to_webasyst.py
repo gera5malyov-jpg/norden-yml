@@ -265,6 +265,7 @@ def main():
         "summaries_updated": 0,
         "variants_without_images": 0,
         "file_urls_resolved": 0,
+        "file_urls_reused_from_webasyst": 0,
         "features_created": 0,
         "features_planned_to_create": 0,
         "feature_values_written": 0,
@@ -417,7 +418,7 @@ def main():
 
     file_url_cache = {}
 
-    def image_urls(variant):
+    def image_urls(variant, current_summary=""):
         result = []
         media = sorted(
             [
@@ -426,14 +427,26 @@ def main():
             ],
             key=lambda x: int(x.get("display_sequence") or 0),
         )
+        media_ids = [s(row.get("image_id")) for row in media if s(row.get("image_id"))]
         if DRY_RUN:
             # Preflight validates matching/content without spending API calls
             # resolving every KIT image URL. Live mode resolves and writes all URLs.
-            return [f"kit-file:{s(row.get('image_id'))}" for row in media if s(row.get("image_id"))]
-        for row in media:
-            file_id = s(row.get("image_id"))
-            if not file_id:
-                continue
+            return [f"kit-file:{file_id}" for file_id in media_ids]
+
+        # A previous safe RED run may already have resolved KIT file IDs to
+        # Yandex-hosted URLs in Webasyst. Reuse those URLs when the count
+        # exactly matches KIT media, then only reformat the extimg blocks.
+        existing_urls = re.findall(r"https?://[^\\s\\[\\]<>]+", s(current_summary))
+        existing_urls = list(dict.fromkeys(existing_urls))
+        if (
+            media_ids
+            and len(existing_urls) == len(media_ids)
+            and all("avatars.mds.yandex.net/" in url for url in existing_urls)
+        ):
+            report["file_urls_reused_from_webasyst"] += len(existing_urls)
+            return existing_urls
+
+        for file_id in media_ids:
             if file_id not in file_url_cache:
                 payload = kit.request("GET", f"/v1/files/{file_id}")
                 file_url_cache[file_id] = s(payload.get("url"))
@@ -504,7 +517,7 @@ def main():
                 if code:
                     features[code] = value
 
-            urls = image_urls(variant)
+            urls = image_urls(variant, s(product.get("summary")))
             desired_summary = extimg_summary(urls) if urls else None
             if not urls:
                 report["variants_without_images"] += 1
