@@ -90,7 +90,8 @@ jobs:
           cp /tmp/yourroom-report.json yourroom-kit/last_sync_report.json 2>/dev/null || true
           cp /tmp/yourroom-state.json yourroom-kit/state.json 2>/dev/null || true
 
-          git add yourroom-kit/last_sync_report.json yourroom-kit/state.json 2>/dev/null || true
+          git add yourroom-kit/last_sync_report.json 2>/dev/null || true
+          git add yourroom-kit/state.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m 'Обновить отчёт YourRoom → KIT'
           git push origin HEAD:main || true
