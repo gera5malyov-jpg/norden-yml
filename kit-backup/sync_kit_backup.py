@@ -608,7 +608,7 @@ def build_source_enrichment(data, fallback_url=None):
                 code = clean(offer.attrib.get("code")).strip()
                 article = clean(offer.attrib.get("article")).strip()
                 candidates = []
-                digits = re.sub(r"\\D+", "", article)
+                digits = re.sub(r"\D+", "", article)
                 if digits:
                     candidates.append("RED-00-" + digits.zfill(8))
                 if code:
