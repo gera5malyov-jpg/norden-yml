@@ -258,17 +258,29 @@ def run(dry_run=False):
     resolved = []
 
     for item in offers:
-        candidates = list(dict.fromkeys(
-            [item.get("kit_sku"), item.get("sku")] + list(item.get("sku_candidates") or [])
-        ))
-        matches = {}
-        for candidate in candidates:
-            if not s(candidate):
-                continue
-            for product, sku_row in wa_by_sku.get(sku_key(candidate), []):
-                sid = s(sku_row.get("id"))
-                if sid:
-                    matches[sid] = (product, sku_row)
+        preferred = s(item.get("kit_sku")) or s(item.get("sku"))
+        preferred_rows = wa_by_sku.get(sku_key(preferred), []) if preferred else []
+        if len(preferred_rows) > 1:
+            matches = {
+                s(sku_row.get("id")): (product, sku_row)
+                for product, sku_row in preferred_rows
+                if s(sku_row.get("id"))
+            }
+        elif len(preferred_rows) == 1:
+            product, sku_row = preferred_rows[0]
+            matches = {s(sku_row.get("id")): (product, sku_row)}
+        else:
+            candidates = list(dict.fromkeys(
+                [item.get("sku")] + list(item.get("sku_candidates") or [])
+            ))
+            matches = {}
+            for candidate in candidates:
+                if not s(candidate) or sku_key(candidate) == sku_key(preferred):
+                    continue
+                for product, sku_row in wa_by_sku.get(sku_key(candidate), []):
+                    sid = s(sku_row.get("id"))
+                    if sid:
+                        matches[sid] = (product, sku_row)
 
         if len(matches) > 1:
             report["errors"].append({
