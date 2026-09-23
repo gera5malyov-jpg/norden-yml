@@ -2,9 +2,9 @@ name: YourRoom → KIT — Санкт-Петербург раз в 2 недел�
 
 on:
   schedule:
-    # GitHub cron не умеет "каждые 14 дней".
-    # Проверяем раз в неделю; скрипт выполняет live-обновление только если прошло >= 14 дней.
-    - cron: '40 5 * * 1'
+    # Каталог разбит на 14 стабильных шардов.
+    # Каждый день обновляется один шард; одна и та же карточка попадает в обновление раз в 14 дней.
+    - cron: '40 5 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -62,16 +62,29 @@ jobs:
         run: |
           set -uo pipefail
           args=()
+          report_file="yourroom-kit/last_sync_report.json"
+
           if [[ "${{ github.event_name }}" == "push" ]]; then
             # Любые изменения кода сначала проходят безопасную проверку на 5 карточках.
             args+=(--dry-run --max-items 5)
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            day_number=$(( $(date -u +%s) / 86400 ))
+            shard=$(( day_number % 14 ))
+            args+=(--shard-count 14 --shard-index "$shard")
+            report_file=$(printf 'yourroom-kit/last_sync_report-shard-%02d-of-14.json' "$shard")
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
             if [[ "${{ inputs.force }}" == "true" ]]; then args+=(--force); fi
             if [[ "${{ inputs.max_items }}" != "0" ]]; then args+=(--max-items "${{ inputs.max_items }}"); fi
           fi
+
+          set +e
           python yourroom-kit/sync_yourroom_kit.py "${args[@]}"
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          code=$?
+          set -e
+
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          echo "report_file=$report_file" >> "$GITHUB_OUTPUT"
 
       - name: Сохранить отчёт и состояние
         if: always()
@@ -80,31 +93,34 @@ jobs:
           git config user.name github-actions
           git config user.email actions@github.com
 
-          cp yourroom-kit/last_sync_report.json /tmp/yourroom-report.json 2>/dev/null || true
-          cp yourroom-kit/state.json /tmp/yourroom-state.json 2>/dev/null || true
+          rm -rf /tmp/yourroom-sync
+          mkdir -p /tmp/yourroom-sync
+          cp yourroom-kit/last_sync_report*.json /tmp/yourroom-sync/ 2>/dev/null || true
+          cp yourroom-kit/state*.json /tmp/yourroom-sync/ 2>/dev/null || true
 
           git fetch origin main
           git reset --hard origin/main
 
           mkdir -p yourroom-kit
-          cp /tmp/yourroom-report.json yourroom-kit/last_sync_report.json 2>/dev/null || true
-          cp /tmp/yourroom-state.json yourroom-kit/state.json 2>/dev/null || true
+          cp /tmp/yourroom-sync/* yourroom-kit/ 2>/dev/null || true
 
-          git add yourroom-kit/last_sync_report.json 2>/dev/null || true
-          git add yourroom-kit/state.json 2>/dev/null || true
+          git add yourroom-kit/last_sync_report*.json 2>/dev/null || true
+          git add yourroom-kit/state*.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
-          git commit -m 'Обновить отчёт YourRoom → KIT'
+          git commit -m 'Обновить состояние YourRoom → KIT'
           git push origin HEAD:main || true
 
       - name: Проверить итог
         if: always()
+        env:
+          REPORT_FILE: ${{ steps.yourroomsync.outputs.report_file }}
         run: |
           python - <<'PY'
-          import json
+          import json, os
           from pathlib import Path
-          p = Path('yourroom-kit/last_sync_report.json')
+          p = Path(os.environ.get('REPORT_FILE') or 'yourroom-kit/last_sync_report.json')
           if not p.exists():
-              raise SystemExit('Нет отчёта YourRoom')
+              raise SystemExit(f'Нет отчёта YourRoom: {p}')
           r = json.loads(p.read_text(encoding='utf-8'))
           if r.get('status') not in ('УСПЕШНО', 'ПРОПУЩЕНО', 'ПРОВЕРКА УСПЕШНА'):
               raise SystemExit(1)
