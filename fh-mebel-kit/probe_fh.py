@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 URLS = [
     "https://fh-mebel.ru/shop/krovati/dvuspalnye/adel-krovat-dvuspalnaya/",
-    "https://fh-mebel.ru/shop/shkaf/shkafy-uglovye/tiffani-shkaf-uglovoy-belyy-glyanets/",
+    "https://fh-mebel.ru/shop/shkaf/shkafy-uglovye/shkaf-uglovoy-tiffani/",
     "https://fh-mebel.ru/shop/spalnya/modulnye/adel-spalnya/",
 ]
 
@@ -22,7 +22,9 @@ def main():
     for url in URLS:
         r=s.get(url,timeout=60)
         print("\n=== URL",url,"status",r.status_code,"len",len(r.content),"===")
-        r.raise_for_status()
+        if r.status_code != 200:
+            out.append({"url":url,"status":r.status_code,"error":"HTTP"})
+            continue
         html=r.text
         soup=BeautifulSoup(html,"html.parser")
         page={
