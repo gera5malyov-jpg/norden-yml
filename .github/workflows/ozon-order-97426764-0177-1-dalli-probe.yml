@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   probe:
@@ -25,4 +25,13 @@ jobs:
           TARGET_EXTERNAL_ID: '97426764-0177-1'
           OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
           OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          SAFE_RESULT_PATH: ozon/order_97426764-0177-1_safe_probe.json
         run: python scripts/ozon_order_safe_probe_target.py
+
+      - name: Сохранить безопасный результат проверки
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ozon/order_97426764-0177-1_safe_probe.json
+          git diff --cached --quiet || git commit -m "Store safe Ozon probe 97426764-0177-1"
+          git push
