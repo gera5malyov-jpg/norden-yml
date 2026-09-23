@@ -64,7 +64,7 @@ jobs:
             if git log -1 --pretty=%B | grep -q '\[FH-LIVE\]'; then
               args+=(--force)
             else
-              args+=(--dry-run --force)
+              args+=(--dry-run --force --max-pages 300)
             fi
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
