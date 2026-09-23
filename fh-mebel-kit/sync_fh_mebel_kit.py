@@ -585,9 +585,12 @@ def parse_product(url, html):
     return cards
 
 
-def crawl_catalog(max_pages=0):
-    seeds = sitemap_urls()
-    seeds.add(BASE_URL)
+def crawl_catalog(max_pages=0, include_sitemap=False):
+    # Для регулярной синхронизации идём по актуальным ссылкам каталога.
+    # Sitemap содержит тысячи исторических/дублирующих URL и используется только для отдельного аудита.
+    seeds = {BASE_URL}
+    if include_sitemap:
+        seeds.update(sitemap_urls())
 
     queue = deque(sorted(seeds))
     queued = set(queue)
@@ -843,7 +846,7 @@ def save_report(report):
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
 
-def run(dry_run=False, force=False, max_pages=0, max_items=0):
+def run(dry_run=False, force=False, max_pages=0, max_items=0, include_sitemap=False):
     started = iso_now()
     report = {
         "status": "ВЫПОЛНЯЕТСЯ",
@@ -856,6 +859,7 @@ def run(dry_run=False, force=False, max_pages=0, max_items=0):
         "modification_rule": "Каждая комбинация модификации создаётся отдельной карточкой KIT",
         "sku_rule": "FH-<FH element id>-<FH price id>; fallback: hash параметров",
         "schedule_rule": "Не чаще одного успешного live-запуска за 14 дней",
+        "crawl_mode": "актуальные категории/товарные ссылки" if not include_sitemap else "аудит + sitemap",
         "crawl": {},
         "source_cards": 0,
         "source_base_products": 0,
@@ -886,7 +890,7 @@ def run(dry_run=False, force=False, max_pages=0, max_items=0):
             save_report(report)
             return 0
 
-    cards, crawl = crawl_catalog(max_pages=max_pages)
+    cards, crawl = crawl_catalog(max_pages=max_pages, include_sitemap=include_sitemap)
     report["crawl"] = crawl
     if max_items:
         cards = cards[:max_items]
@@ -1189,12 +1193,14 @@ def main():
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--max-pages", type=int, default=0)
     ap.add_argument("--max-items", type=int, default=0)
+    ap.add_argument("--include-sitemap", action="store_true")
     args = ap.parse_args()
     return run(
         dry_run=args.dry_run,
         force=args.force,
         max_pages=max(0, args.max_pages),
         max_items=max(0, args.max_items),
+        include_sitemap=args.include_sitemap,
     )
 
 
