@@ -660,12 +660,12 @@ def build_tables(data, enrichment=None):
             wh_by_id[wid] = clean(w.get("title") or w.get("name"))
 
     headers = [
-        "ID варианта", "ID KIT", "Артикул KIT", "Название", "Бренд",
-        "Поставщик", "Цена закупки", "Дата создания в KIT",
-        "Штрихкод", "Статус", "ID товара", "ID карточки",
+        "ID KIT", "Артикул KIT", "Название", "Цена закупки", "В наличии",
+        "Поставщик", "Бренд", "Дата создания в KIT", "Последнее изменение карточки в KIT",
+        "ID варианта", "Штрихкод", "Статус", "ID товара", "ID карточки",
         *[x[0] for x in COMMON_CHARACTERISTICS],
         "Описание", "SEO-описание", "SEO H1", "SEO-заголовок",
-        "Слаг", "Ссылка в KIT", "НДС", "Требует маркировки", "Дата создания (API)", "Последнее изменение карточки в KIT",
+        "Слаг", "Ссылка в KIT", "НДС", "Требует маркировки", "Дата создания (API)",
         "Цена до скидки", "Цена со скидкой вручную", "Промо-цена", "Итоговая цена", "Цены JSON",
         "Все характеристики JSON", "Остатки JSON", "Медиа JSON", "Упаковки JSON", "Доп. данные JSON",
     ]
@@ -727,20 +727,27 @@ def build_tables(data, enrichment=None):
                 item["warehouse_title"] = wh_by_id[wid]
             enriched_stocks.append(item)
 
+        in_stock = any(
+            int(float(str(item.get("quantity") or 0).replace(",", "."))) > 0
+            for item in enriched_stocks
+            if isinstance(item, dict)
+        )
+
         extra = {k: val for k, val in v.items() if k not in flattened}
 
         source_info = enrichment.get(clean(v.get("id")), {})
         rows.append([
-            safe_cell(v.get("id")), safe_cell(v.get("kit_id")), sku, safe_cell(v.get("name")),
-            safe_cell(v.get("brand")),
-            safe_cell(source_info.get("supplier")), safe_cell(source_info.get("purchase")), safe_cell(v.get("created_at")),
-            safe_cell(v.get("barcode")), safe_cell(v.get("status")),
+            safe_cell(v.get("kit_id")), sku, safe_cell(v.get("name")),
+            safe_cell(source_info.get("purchase")), "✅" if in_stock else "❌",
+            safe_cell(source_info.get("supplier")), safe_cell(v.get("brand")),
+            safe_cell(v.get("created_at")), safe_cell(v.get("updated_at")),
+            safe_cell(v.get("id")), safe_cell(v.get("barcode")), safe_cell(v.get("status")),
             safe_cell(v.get("product_id")), safe_cell(v.get("product_card_id")),
             *[safe_cell(char_values.get(label, "")) for label, _ in COMMON_CHARACTERISTICS],
             safe_cell(v.get("description")),
             safe_cell(v.get("seo_description")), safe_cell(v.get("seo_h1")), safe_cell(v.get("seo_title")),
             safe_cell(v.get("slug")), safe_cell(v.get("relative_link_url")), safe_cell(v.get("vat")),
-            safe_cell(v.get("requires_marking")), safe_cell(v.get("created_at")), safe_cell(v.get("updated_at")),
+            safe_cell(v.get("requires_marking")), safe_cell(v.get("created_at")),
             safe_cell(pricing.get("price")), safe_cell(pricing.get("manual_discount_price")),
             safe_cell(pricing.get("promotion_price")), safe_cell(pricing.get("final_price")),
             safe_cell(json_text(pricing)),
