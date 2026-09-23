@@ -112,6 +112,8 @@ def parse_feed(raw):
             if not val:
                 continue
             title = attr_value(attrs, "name") or f"Параметр Treez {len(params)+1}"
+            if norm(title) == "остаток":
+                continue
             unit = attr_value(attrs, "unit")
             if unit and unit not in val:
                 val = f"{val} {unit}"
@@ -431,6 +433,8 @@ def main_run(dry_run=False, force=False, skip_video=False):
     param_char_ids = {}
     for item in offers.values():
         for title, _ in item["params"]:
+            if norm(title) == "остаток":
+                continue
             if title not in param_char_ids:
                 param_char_ids[title] = ensure_char(title)
 
@@ -507,14 +511,23 @@ def main_run(dry_run=False, force=False, skip_video=False):
             {"characteristic_id": source_category_char, "value": category_map.get(item["category_id"]) or item["category_id"]},
         ]
         for title, value in item["params"]:
+            if norm(title) == "остаток":
+                continue
             cid = param_char_ids.get(title)
             if cid and value:
                 char_rows.append({"characteristic_id": cid, "value": value})
 
         description = item["description"]
         if item["params"]:
-            extra = "\n".join(f"{title}: {value}" for title, value in item["params"])
-            description = (description + "\n\n" + extra).strip()
+            extra = "\n".join(
+                f"{title}: {value}"
+                for title, value in item["params"]
+                if norm(title) != "остаток"
+            )
+            if extra:
+                description = (description + "\n\n" + extra).strip()
+        description = re.sub(r"(?im)^\s*Остаток\s*:\s*0(?:[.,]0*)?\s*$", "", description)
+        description = re.sub(r"\n{3,}", "\n\n", description).strip()
 
         variant = by_source.get(code)
         if variant:
