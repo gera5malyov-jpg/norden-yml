@@ -1,4 +1,4 @@
-name: Dalli SPB calc Institutskiy 3k2
+name: Dalli SPB calc Institutskiy 3k2 insured 15000
 on:
   push:
     paths:
@@ -23,4 +23,6 @@ jobs:
             --length 100 \
             --width 50 \
             --height 50 \
-            --places 1
+            --places 1 \
+            --order-price 15000 \
+            --insurance-price 15000
