@@ -33,7 +33,7 @@ permissions:
 
 concurrency:
   group: treez-kit-sync
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   sync:
