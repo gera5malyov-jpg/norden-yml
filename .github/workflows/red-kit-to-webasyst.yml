@@ -91,61 +91,59 @@ jobs:
               raw = path.read_bytes()
               r = json.loads(raw.decode('utf-8'))
           except Exception as exc:
-              raw = json.dumps(
-                  {'status': 'ОШИБКА', 'message': f'Не удалось прочитать отчет: {exc}'},
-                  ensure_ascii=False,
-                  indent=2,
-              ).encode('utf-8')
+              raw = json.dumps({'status': 'ОШИБКА', 'message': str(exc)}, ensure_ascii=False, indent=2).encode('utf-8')
               r = {'errors': [{'message': str(exc)}], 'complete': False}
 
           ok = os.getenv('SYNC_OUTCOME') == 'success' and bool(r.get('complete'))
           subject = 'RED KIT → Webasyst — ' + ('УСПЕШНО' if ok else 'С ОШИБКАМИ')
-
-          body = f'''Отчет синхронизации товаров RED-: Яндекс KIT → Webasyst
-
-Результат: {'УСПЕШНО' if ok else 'ЗАВЕРШЕНО С ОШИБКАМИ'}
-
-Артикулов RED- в KIT: {r.get('kit_red_variants', '—')}
-Уникальных артикулов RED- в KIT: {r.get('kit_unique_skus', '—')}
-Найдено совпадений в Webasyst: {r.get('matched', '—')}
-Обработано: {r.get('processed', '—')}
-Обновлено карточек: {r.get('updated', '—')}
-Не найдено в Webasyst: {r.get('missing_in_webasyst', '—')}
-
-Изображения:
-- обновлены в поле «Краткое описание» через [extimg]: {r.get('summaries_updated', '—')}
-- URL изображений получено из KIT: {r.get('file_urls_resolved', '—')}
-- товаров RED- без изображений в KIT: {r.get('variants_without_images', '—')}
-
-Характеристики:
-- значений записано из KIT: {r.get('feature_values_written', '—')}
-- новых характеристик Webasyst создано: {r.get('features_created', '—')}
-
-Контроль:
-- цены НЕ изменялись;
-- остатки НЕ изменялись;
-- вызовов shop.product.skus.update: {((r.get('policy') or {}).get('sku_update_calls', '—'))}.
-
-Дубли SKU в KIT: {r.get('kit_duplicate_skus', '—')}
-Дубли RED-SKU в Webasyst: {r.get('webasyst_duplicate_red_skus', '—')}
-Конфликтов (несколько RED-SKU в одной карточке): {r.get('product_conflicts', '—')}
-Ошибок: {len(r.get('errors') or [])}
-'''
+          p = r.get('policy') or {}
+          lines = [
+              'Отчет синхронизации товаров RED-: Яндекс KIT → Webasyst',
+              '',
+              'Результат: ' + ('УСПЕШНО' if ok else 'ЗАВЕРШЕНО С ОШИБКАМИ'),
+              '',
+              f"Артикулов RED- в KIT: {r.get('kit_red_variants', '—')}",
+              f"Уникальных артикулов RED- в KIT: {r.get('kit_unique_skus', '—')}",
+              f"Найдено совпадений в Webasyst: {r.get('matched', '—')}",
+              f"Обработано: {r.get('processed', '—')}",
+              f"Обновлено карточек: {r.get('updated', '—')}",
+              f"Не найдено в Webasyst: {r.get('missing_in_webasyst', '—')}",
+              '',
+              'Изображения:',
+              f"- обновлены в кратком описании через [extimg]: {r.get('summaries_updated', '—')}",
+              f"- URL изображений получено из KIT: {r.get('file_urls_resolved', '—')}",
+              f"- товаров RED- без изображений в KIT: {r.get('variants_without_images', '—')}",
+              '',
+              'Характеристики:',
+              f"- значений записано из KIT: {r.get('feature_values_written', '—')}",
+              f"- новых характеристик Webasyst создано: {r.get('features_created', '—')}",
+              '',
+              'Контроль:',
+              f"- цены изменялись: {p.get('prices_touched', '—')}",
+              f"- остатки изменялись: {p.get('stocks_touched', '—')}",
+              f"- вызовов shop.product.skus.update: {p.get('sku_update_calls', '—')}",
+              '',
+              f"Дубли SKU в KIT: {r.get('kit_duplicate_skus', '—')}",
+              f"Дубли RED-SKU в Webasyst: {r.get('webasyst_duplicate_red_skus', '—')}",
+              f"Конфликтов (несколько RED-SKU в одной карточке): {r.get('product_conflicts', '—')}",
+              f"Ошибок: {len(r.get('errors') or [])}",
+          ]
 
           missing = r.get('missing_skus_sample') or []
           if missing:
-              body += '\nНе найдено в Webasyst (пример, до 100):\n'
-              body += '\n'.join(f'- {x}' for x in missing[:100]) + '\n'
+              lines += ['', 'Не найдено в Webasyst (пример, до 100):']
+              lines += [f'- {x}' for x in missing[:100]]
 
           errors = r.get('errors') or []
           if errors:
-              body += '\nОшибки (первые 30):\n'
+              lines += ['', 'Ошибки (первые 30):']
               for x in errors[:30]:
                   if isinstance(x, dict):
-                      body += f"- {x.get('sku', '')}: {x.get('message', '')}\n"
+                      lines.append(f"- {x.get('sku', '')}: {x.get('message', '')}")
                   else:
-                      body += f'- {x}\n'
+                      lines.append(f'- {x}')
 
+          body = '\n'.join(lines) + '\n'
           user = os.getenv('SMTP_USER', '').strip()
           password = os.getenv('SMTP_PASSWORD', '').replace(' ', '').strip()
           if not user or not password:
@@ -156,13 +154,7 @@ jobs:
           msg['To'] = os.environ['RECIPIENT']
           msg['Subject'] = subject
           msg.set_content(body)
-          msg.add_attachment(
-              raw,
-              maintype='application',
-              subtype='json',
-              filename='last_red_webasyst_sync.json',
-          )
-
+          msg.add_attachment(raw, maintype='application', subtype='json', filename='last_red_webasyst_sync.json')
           with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=30) as smtp:
               smtp.login(user, password)
               smtp.send_message(msg)
