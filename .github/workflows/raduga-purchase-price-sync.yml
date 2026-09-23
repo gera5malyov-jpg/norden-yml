@@ -1,0 +1,36 @@
+name: Raduga purchase price sync
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'kit-backup/raduga_purchase_prices.json'
+      - 'scripts/raduga_purchase_price_sync.py'
+      - '.github/workflows/raduga-purchase-price-sync.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests gspread google-auth rapidfuzz
+      - name: Update purchase prices in KIT table
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: '1xZUeaWUr-6O3KK0MO-1U7IGBKXXfgcmZ-EJ-w-2wWug'
+        run: python scripts/raduga_purchase_price_sync.py
+      - name: Upload sync report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raduga-purchase-price-sync
+          path: runtime/raduga_purchase_price_sync.json
+          if-no-files-found: warn
+          retention-days: 14
