@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import concurrent.futures
 import json
 import os
 import time
@@ -69,6 +70,7 @@ def main():
 
     report = {
         "status": "running",
+        "gallery_fetch_workers": 12,
         "source_offers": len(offers),
         "source_duplicates": len(duplicates),
         "kit_treez_indexed": len(by_source),
@@ -85,6 +87,24 @@ def main():
         "examples": [],
     }
 
+    gallery_by_code = {}
+    def fetch_gallery(pair):
+        code, item = pair
+        try:
+            return code, m.gallery_images(item), None
+        except Exception as exc:
+            return code, [], str(exc)[:700]
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=12) as ex:
+        for code, gallery, err in ex.map(fetch_gallery, offers.items()):
+            gallery_by_code[code] = gallery
+            if err:
+                report["warnings"].append({
+                    "source_code": code,
+                    "stage": "gallery_fetch",
+                    "message": err,
+                })
+
     for idx, (code, item) in enumerate(offers.items(), start=1):
         variant = by_source.get(code)
         if not variant:
@@ -94,7 +114,7 @@ def main():
         report["checked"] += 1
 
         try:
-            gallery = m.gallery_images(item)
+            gallery = gallery_by_code.get(code) or list(item.get("pictures") or [])
             xml_count = len(item.get("pictures") or [])
             gallery_count = len(gallery)
 
