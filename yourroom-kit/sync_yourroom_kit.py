@@ -352,53 +352,29 @@ def is_probable_label(text):
 
 
 def extract_characteristics(soup, h1):
-    start = soup.find(
-        lambda tag: getattr(tag, "name", None) in ("h2", "h3", "p", "div", "span")
-        and norm(tag.get_text(" ", strip=True)) == "основные характеристики"
-    )
     pairs = {}
 
-    if start:
-        tokens = []
-        for node in start.find_all_next(["p", "h2", "h3"], limit=140):
-            if node is start:
-                continue
-            tx = clean_text(node.get_text(" ", strip=True))
-            if not tx:
-                continue
-            low = norm(tx)
+    # Стабильная структура yourroom.ru:
+    # .options-list__item > .options-list__label + .options-list__value
+    for row in soup.select(".options-list__item"):
+        classes = {norm(x) for x in (row.get("class") or [])}
+        if "char-tag-list" in classes:
+            continue
+        lab = row.select_one(".options-list__label")
+        val = row.select_one(".options-list__value")
+        if not lab or not val:
+            continue
+        label = clean_text(lab.get_text(" ", strip=True)).rstrip(":")
+        value = clean_text(val.get_text(" ", strip=True))
+        if not label or not value:
+            continue
+        pairs.setdefault(label, value)
 
-            if node.name in ("h2", "h3") and "основные характеристики" not in low:
-                break
-            if "лучшие предложения" in low or "товары в наличии" in low:
-                break
-            if len(tx) > 350:
-                # Началось текстовое описание товара.
-                break
-            if low in CONTROL_TEXT or low.startswith("свернуть") or low.startswith("развернуть"):
-                continue
-            if any(x in low for x in (
-                "доставка по городу", "срочная доставка", "самовывоз",
-                "качественная сборка", "подъем на этаж", "оплата наличными",
-            )):
-                continue
-            if tx not in tokens:
-                tokens.append(tx)
-
-        i = 0
-        while i + 1 < len(tokens):
-            label = clean_text(tokens[i]).rstrip(":")
-            value = clean_text(tokens[i + 1])
-            if is_probable_label(label) and value:
-                pairs.setdefault(label, value)
-                i += 2
-            else:
-                i += 1
-
+    # Резервные табличные/definition-list варианты на случай изменения шаблона.
     for tr in soup.find_all("tr"):
         cells = [clean_text(x.get_text(" ", strip=True)) for x in tr.find_all(["th", "td"], recursive=False)]
         if len(cells) >= 2 and is_probable_label(cells[0]) and cells[1]:
-            pairs[cells[0].rstrip(":")] = cells[1]
+            pairs.setdefault(cells[0].rstrip(":"), cells[1])
 
     for dt in soup.find_all("dt"):
         dd = dt.find_next_sibling("dd")
@@ -406,8 +382,9 @@ def extract_characteristics(soup, h1):
             lab = clean_text(dt.get_text(" ", strip=True))
             val = clean_text(dd.get_text(" ", strip=True))
             if is_probable_label(lab) and val:
-                pairs[lab.rstrip(":")] = val
+                pairs.setdefault(lab.rstrip(":"), val)
 
+    # Выбранный цвет является модификацией и обычно находится вне options-list.
     text = clean_text(soup.get_text(" ", strip=True))
     m = re.search(
         r"Выберите\s+цвет\s+(.+?)(?:\s+-\s+(?:В\s+наличии|Привезем|Под\s+заказ)|\s+Перейти\s+в\s+корзину)",
@@ -430,7 +407,8 @@ def extract_characteristics(soup, h1):
 
 def extract_manufacturer(soup, characteristics):
     for k, v in characteristics.items():
-        if "производител" in norm(k) and clean_text(v):
+        nk = norm(k)
+        if nk in ("производитель", "бренд", "фабрика") and clean_text(v):
             return clean_text(v)
     meta = soup.find("meta", attrs={"name": "description"})
     tx = clean_text(meta.get("content") if meta else "")
