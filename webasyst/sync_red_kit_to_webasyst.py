@@ -182,16 +182,18 @@ def local_tag(tag):
 
 
 def load_public_yml_images(url):
-    """Return RED SKU -> ordered KIT public image URLs from KIT's own YML feed."""
-    out = {}
+    """Return KIT public images indexed by offer id (kit_id) and SKU."""
+    by_id = {}
+    by_sku = {}
     if not url:
-        return out
+        return by_id, by_sku
     r = requests.get(url, timeout=240, headers={"User-Agent": "Mozilla/5.0 RED-KIT-Webasyst-Sync"})
     r.raise_for_status()
     root = ET.fromstring(r.content)
     for elem in root.iter():
         if local_tag(elem.tag) != "offer":
             continue
+        offer_id = s(elem.attrib.get("id"))
         sku = ""
         pictures = []
         for child in list(elem):
@@ -201,9 +203,14 @@ def load_public_yml_images(url):
                 sku = value
             elif tag == "picture" and value:
                 pictures.append(value)
-        if sku.upper().startswith(SKU_PREFIX) and pictures:
-            out[sku_key(sku)] = list(dict.fromkeys(pictures))
-    return out
+        pictures = list(dict.fromkeys(pictures))
+        if not pictures:
+            continue
+        if offer_id:
+            by_id[offer_id] = pictures
+        if sku:
+            by_sku[sku_key(sku)] = pictures
+    return by_id, by_sku
 
 
 def load_wa_products(wa):
@@ -300,7 +307,10 @@ def main():
         "file_urls_resolved": 0,
         "file_urls_reused_from_webasyst": 0,
         "image_urls_from_public_yml": 0,
-        "public_yml_red_skus": 0,
+        "public_yml_offer_ids": 0,
+        "public_yml_skus": 0,
+        "public_yml_matches_by_kit_id": 0,
+        "public_yml_matches_by_sku": 0,
         "features_created": 0,
         "features_planned_to_create": 0,
         "feature_values_written": 0,
@@ -451,8 +461,9 @@ def main():
         selected_feature_cache[cache_key] = code
         return code
 
-    public_yml_images = load_public_yml_images(KIT_PUBLIC_YML_URL)
-    report["public_yml_red_skus"] = len(public_yml_images)
+    public_yml_by_id, public_yml_by_sku = load_public_yml_images(KIT_PUBLIC_YML_URL)
+    report["public_yml_offer_ids"] = len(public_yml_by_id)
+    report["public_yml_skus"] = len(public_yml_by_sku)
     file_url_cache = {}
 
     def image_urls(variant, current_summary=""):
@@ -465,8 +476,15 @@ def main():
             key=lambda x: int(x.get("display_sequence") or 0),
         )
         media_ids = [s(row.get("image_id")) for row in media if s(row.get("image_id"))]
-        public_urls = public_yml_images.get(sku_key(variant.get("sku")), [])
+        kit_id = s(variant.get("kit_id"))
+        public_urls = public_yml_by_id.get(kit_id, [])
         if public_urls:
+            report["public_yml_matches_by_kit_id"] += 1
+            report["image_urls_from_public_yml"] += len(public_urls)
+            return public_urls
+        public_urls = public_yml_by_sku.get(sku_key(variant.get("sku")), [])
+        if public_urls:
+            report["public_yml_matches_by_sku"] += 1
             report["image_urls_from_public_yml"] += len(public_urls)
             return public_urls
 
