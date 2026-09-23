@@ -398,7 +398,7 @@ def build_tables(data):
 
     headers = [
         "variant_id", "kit_id", "sku", "name", "brand",
-        "Поставщик", "Цена закупки",
+        "Поставщик", "Цена закупки", "Дата создания в KIT",
         "barcode", "status", "product_id", "product_card_id",
         *[x[0] for x in COMMON_CHARACTERISTICS],
         "description", "seo_description", "seo_h1", "seo_title",
@@ -468,7 +468,7 @@ def build_tables(data):
         rows.append([
             safe_cell(v.get("id")), safe_cell(v.get("kit_id")), sku, safe_cell(v.get("name")),
             safe_cell(v.get("brand")),
-            "", "",
+            "", "", safe_cell(v.get("created_at")),
             safe_cell(v.get("barcode")), safe_cell(v.get("status")),
             safe_cell(v.get("product_id")), safe_cell(v.get("product_card_id")),
             *[safe_cell(char_values.get(label, "")) for label, _ in COMMON_CHARACTERISTICS],
