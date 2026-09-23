@@ -31,6 +31,27 @@ LABEL = {
     "yandex_kit": "Яндекс KIT",
 }
 
+CHAT_AUTOMATION_START = os.getenv("CHAT_AUTOMATION_START", "2026-09-23T19:35:00Z")
+
+WELCOME_MESSAGE = """Здравствуйте! 👋
+
+Спасибо за ваш заказ и за то, что выбрали наш магазин «Мегаполис»! 😊
+
+Мы уже получили заказ и приступили к его обработке. Постараемся всё подготовить и передать в доставку максимально быстро.
+
+Если у вас появятся вопросы по заказу, товару или доставке — напишите нам в чат, мы обязательно поможем.
+
+Желаем приятной покупки!
+С уважением, команда «Мегаполис» ❤️"""
+
+REVIEW_MESSAGE = """Спасибо за ваш заказ! ❤️
+
+Если покупка вам понравилась, будем очень благодарны за оценку **5 звёзд ⭐⭐⭐⭐⭐**.
+
+Для нас это очень важно — ваша высокая оценка помогает нашему магазину развиваться и становиться лучше.
+
+Спасибо, что выбрали «Мегаполис»!"""
+
 # Only Webasyst transitions. This script contains no marketplace write endpoint.
 GRAPH = {
     "new": [("process", "processing"), ("otmenen", "otmenen")],
@@ -156,6 +177,10 @@ report = {
     "status_updated": 0,
     "skipped_unmatched_sku": 0,
     "unmatched": [],
+    "chat_welcome_sent": 0,
+    "chat_review_sent": 0,
+    "chat_blocked": 0,
+    "chat_errors": 0,
     "errors": 0,
 }
 
@@ -163,7 +188,156 @@ def sr(source: str) -> dict:
     return report["sources"].setdefault(source, {
         "read": 0, "eligible": 0, "created": 0, "existing": 0,
         "status_updated": 0, "skipped": 0, "errors": 0,
+        "chat_welcome_sent": 0, "chat_review_sent": 0,
+        "chat_blocked": 0, "chat_errors": 0,
     })
+
+class ChatError(RuntimeError):
+    def __init__(self, message: str, *, permanent: bool = False):
+        super().__init__(message)
+        self.permanent = permanent
+
+def chat_eligible_order(o: dict) -> bool:
+    created = dt(o.get("created_at"))
+    started = dt(CHAT_AUTOMATION_START)
+    return bool(created and started and created >= started)
+
+def get_order_params(order_id: str) -> dict:
+    info = wa.call("shop.order.getInfo", params={"id": order_id})
+    return dict(info.get("params") or {}) if isinstance(info, dict) else {}
+
+def save_order_params(order_id: str, updates: dict):
+    if DRY_RUN or not order_id:
+        return
+    info = wa.call("shop.order.getInfo", params={"id": order_id})
+    params = dict(info.get("params") or {}) if isinstance(info, dict) else {}
+    for k, v in updates.items():
+        params[k] = str(v)
+    wa.call("shop.order.save", http_method="POST", data={"id": order_id, "params": params})
+
+def chat_http(method: str, url: str, *, headers=None, params=None, body=None):
+    r = net.req(method, url, headers=headers, params=params, body=body, tries=4)
+    if r.ok:
+        if not r.content:
+            return {}
+        try:
+            return r.json()
+        except Exception:
+            return {}
+    permanent = r.status_code in {400, 401, 403, 404, 409}
+    raise ChatError(f"HTTP {r.status_code}: {r.text[:400]}", permanent=permanent)
+
+def send_marketplace_chat(o: dict, message: str, chat_id: str = "") -> str:
+    source = s(o.get("source"))
+    ext = s(o.get("external_id"))
+
+    if source == "yandex_market":
+        token = s(os.getenv("YANDEX_MARKET_API_KEY"))
+        business_id = s(o.get("business_id"))
+        if not token or not business_id or not ext:
+            raise ChatError("Yandex Market chat: missing token/businessId/orderId", permanent=True)
+        h = {"Api-Key": token, "Accept": "application/json", "Content-Type": "application/json"}
+        if not chat_id:
+            d = chat_http(
+                "POST",
+                f"https://api.partner.market.yandex.ru/v2/businesses/{business_id}/chats/new",
+                headers=h,
+                body={"context": {"type": "ORDER", "id": int(ext)}},
+            )
+            chat_id = s((d.get("result") or {}).get("chatId")) if isinstance(d, dict) else ""
+            if not chat_id:
+                raise ChatError("Yandex Market chat/new returned no chatId", permanent=True)
+        chat_http(
+            "POST",
+            f"https://api.partner.market.yandex.ru/v2/businesses/{business_id}/chats/message",
+            headers=h,
+            params={"chatId": chat_id},
+            body={"message": message},
+        )
+        return chat_id
+
+    if source == "ozon":
+        cid = s(os.getenv("OZON_CLIENT_ID"))
+        api_key = s(os.getenv("OZON_API_KEY"))
+        if not cid or not api_key or not ext:
+            raise ChatError("Ozon chat: missing Client-Id/Api-Key/posting_number", permanent=True)
+        h = {"Client-Id": cid, "Api-Key": api_key, "Accept": "application/json", "Content-Type": "application/json"}
+        if not chat_id:
+            if s(o.get("ozon_kind")).upper() == "FBO":
+                raise ChatError("Ozon FBO: seller cannot proactively start this order chat", permanent=True)
+            d = chat_http(
+                "POST",
+                "https://api-seller.ozon.ru/v1/chat/start",
+                headers=h,
+                body={"posting_number": ext},
+            )
+            chat_id = s((d.get("result") or {}).get("chat_id")) if isinstance(d, dict) else ""
+            if not chat_id:
+                raise ChatError("Ozon chat/start returned no chat_id", permanent=True)
+        chat_http(
+            "POST",
+            "https://api-seller.ozon.ru/v1/chat/send/message",
+            headers=h,
+            body={"chat_id": chat_id, "text": message},
+        )
+        return chat_id
+
+    if source == "wildberries":
+        raise ChatError(
+            "Wildberries: seller API cannot proactively start a buyer chat; the buyer must start the chat first",
+            permanent=True,
+        )
+
+    raise ChatError(f"Chat is not supported for source {source}", permanent=True)
+
+def maybe_send_marketplace_message(order_id: str, o: dict, message_kind: str):
+    if DRY_RUN or not order_id or o.get("source") not in {"yandex_market", "ozon", "wildberries"}:
+        return
+    if not chat_eligible_order(o):
+        return
+
+    target_state = s(o.get("target_state"))
+    if message_kind == "welcome" and target_state in {"completed", "otmenen", "refunded"}:
+        return
+    if message_kind == "review" and target_state != "completed":
+        return
+
+    sent_key = "mp_chat_welcome_sent_at" if message_kind == "welcome" else "mp_chat_review_sent_at"
+    blocked_key = "mp_chat_welcome_blocked" if message_kind == "welcome" else "mp_chat_review_blocked"
+    message = WELCOME_MESSAGE if message_kind == "welcome" else REVIEW_MESSAGE
+
+    params = get_order_params(order_id)
+    if s(params.get(sent_key)) or s(params.get(blocked_key)):
+        return
+
+    try:
+        chat_id = send_marketplace_chat(o, message, s(params.get("mp_chat_id")))
+        updates = {
+            sent_key: iso(datetime.now(timezone.utc)),
+            "mp_chat_id": chat_id,
+        }
+        save_order_params(order_id, updates)
+        stat = sr(o["source"])
+        counter = "chat_welcome_sent" if message_kind == "welcome" else "chat_review_sent"
+        stat[counter] += 1
+        report[counter] += 1
+        print(f"ЧАТ {LABEL[o['source']]} {o['external_id']}: отправлено сообщение {message_kind}")
+    except ChatError as e:
+        stat = sr(o["source"])
+        if e.permanent:
+            save_order_params(order_id, {blocked_key: str(e)[:500]})
+            stat["chat_blocked"] += 1
+            report["chat_blocked"] += 1
+            print(f"ЧАТ НЕДОСТУПЕН {o['source']}/{o['external_id']}: {str(e)[:500]}", file=sys.stderr)
+        else:
+            stat["chat_errors"] += 1
+            report["chat_errors"] += 1
+            print(f"ОШИБКА ЧАТА {o['source']}/{o['external_id']}: {str(e)[:500]}", file=sys.stderr)
+    except Exception as e:
+        stat = sr(o["source"])
+        stat["chat_errors"] += 1
+        report["chat_errors"] += 1
+        print(f"ОШИБКА ЧАТА {o['source']}/{o['external_id']}: {type(e).__name__}: {str(e)[:500]}", file=sys.stderr)
 
 def wa_sku(code: str) -> Optional[dict]:
     code = s(code)
@@ -466,11 +640,14 @@ def process(o: dict):
             report["created"] += 1
         if oid != "DRY-RUN":
             update_order_details(oid, o)
+            maybe_send_marketplace_message(oid, o, "welcome")
         if oid != "DRY-RUN" and change_state(oid, s(o.get("target_state"))):
             stat["status_updated"] += 1
             report["status_updated"] += 1
         elif oid == "DRY-RUN" and s(o.get("target_state")) not in {"", "new"}:
             stat["status_updated"] += 1
+        if oid != "DRY-RUN":
+            maybe_send_marketplace_message(oid, o, "review")
     except Exception as e:
         stat["errors"] += 1
         report["errors"] += 1
@@ -593,6 +770,7 @@ def load_yandex_market():
 
                 out.append({
                     "source": "yandex_market", "external_id": order_id,
+                    "business_id": s(bid),
                     "created_at": iso(created) if created else s(o.get("creationDate")),
                     "status_raw": status + ("/" + sub if sub else ""),
                     "target_state": yandex_state(status, sub), "items": items,
@@ -888,6 +1066,7 @@ def load_ozon():
                 recipient_name = s(customer.get("name")) if isinstance(customer, dict) else ""
                 out.append({
                     "source": "ozon", "external_id": posting_number,
+                    "ozon_kind": kind,
                     "created_at": iso(created), "status_raw": status + ("/"+sub if sub else ""),
                     "target_state": ozon_state(status), "items": items,
                     "shipping_name": f"Ozon / {kind}", "payment_name": "Ozon",
