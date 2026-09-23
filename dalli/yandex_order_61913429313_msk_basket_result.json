@@ -1,8 +1,29 @@
 {
-  "ok": false,
+  "ok": true,
+  "already_existed": false,
   "order_number": "61913429313",
+  "source": "Яндекс Маркет",
   "account": "МСК",
-  "in_basket": false,
+  "in_basket": true,
   "sent_to_delivery": false,
-  "error": "RuntimeError: Dalli не вернул доступных интервалов для service 30"
+  "barcode": "A16961471",
+  "service": "32",
+  "date": "2026-10-05",
+  "time_min": "10:00",
+  "time_max": "22:00",
+  "yandex_target_date": "2026-10-05",
+  "target_date_matched": true,
+  "payment_type": "PREPAID",
+  "payment_method": "YANDEX",
+  "source_lift_price": 300,
+  "source_lift_type": "ELEVATOR",
+  "source_floor": 3,
+  "climb_present": true,
+  "climb_type": "elevator",
+  "climb_floor": "3",
+  "note_present": false,
+  "vat_values": [
+    "0"
+  ],
+  "errors": []
 }
