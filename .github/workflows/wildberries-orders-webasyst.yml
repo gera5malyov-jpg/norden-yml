@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/wildberries-orders-webasyst.yml'
+      - 'webasyst/marketplace_order_sync.py'
   schedule:
     - cron: '17 */3 * * *'
   workflow_dispatch:
