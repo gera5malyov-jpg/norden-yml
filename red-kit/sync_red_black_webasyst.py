@@ -418,6 +418,13 @@ def run(dry_run=False):
                 "message": "Нельзя создать новую карточку Webasyst без rrc_price",
             })
             continue
+        if not purchase:
+            report["errors"].append({
+                "sku": sku,
+                "stage": "create",
+                "message": "Нельзя создать новую карточку Webasyst без закупочной цены <price>",
+            })
+            continue
 
         features = source_features(item)
         summary = extimg_summary(item.get("pictures") or [])
@@ -449,7 +456,7 @@ def run(dry_run=False):
                 "features": features,
                 "skus": [{
                     "price": sale,
-                    "purchase_price": purchase or "0.00",
+                    "purchase_price": purchase,
                     "stock": {stock_id: str(stock)},
                     "available": 1,
                     "status": 1,
@@ -475,7 +482,7 @@ def run(dry_run=False):
             data={
                 "sku": sku,
                 "price": sale,
-                "purchase_price": purchase or "0.00",
+                "purchase_price": purchase,
                 "stock": {stock_id: str(stock)},
                 "available": 1,
                 "status": 1,
