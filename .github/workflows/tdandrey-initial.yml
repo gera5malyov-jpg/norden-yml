@@ -42,7 +42,7 @@ jobs:
           WEBASYST_BASE_URL: https://profikompany.ru
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
           TDANDREY_WEBASYST_WRITE_DELAY: '0.45'
-        run: python tdandrey-kit/loader.py --mode webasyst-first --max-new 1500 --images
+        run: python tdandrey-kit/loader.py --mode webasyst-first --max-new 300 --images
       - name: Сохранить mapping и отчёт
         if: always()
         shell: bash
@@ -70,7 +70,7 @@ jobs:
           import json, os, urllib.request
           repo=os.environ['GITHUB_REPOSITORY']
           url=f'https://api.github.com/repos/{repo}/actions/workflows/tdandrey-bootstrap.yml/dispatches'
-          body=json.dumps({'ref':'main','inputs':{'batch_size':'600'}}).encode()
+          body=json.dumps({'ref':'main','inputs':{'batch_size':'250'}}).encode()
           req=urllib.request.Request(url,data=body,method='POST',headers={
               'Authorization':'Bearer '+os.environ['GH_TOKEN'],
               'Accept':'application/vnd.github+json',
