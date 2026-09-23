@@ -183,6 +183,27 @@ def customer_note(order):
                 return value.strip()
     return ""
 
+def paid_prr_climb(order):
+    prr = order.get("prr_option") if isinstance(order.get("prr_option"), dict) else {}
+    code = s(prr.get("code")).lower()
+    try:
+        price = float(str(prr.get("price") or "0").replace(",", "."))
+    except Exception:
+        price = 0.0
+    try:
+        floor = int(float(str(prr.get("floor") or "0").replace(",", ".")))
+    except Exception:
+        floor = 0
+    # User rule: add climb only when Ozon has a separate positive lift charge.
+    # delivery_default means floor delivery is included in delivery price -> no Dalli climb.
+    if price <= 0 or code in {"", "none", "delivery_default"}:
+        return None
+    if code == "lift":
+        return {"type": "elevator", "floor": max(1, floor), "source_price": price}
+    if code == "stairs":
+        return {"type": "stairs", "floor": max(1, floor), "source_price": price}
+    return None
+
 def create_basket(order, address, service, date, tmin, tmax):
     customer = order.get("customer") if isinstance(order.get("customer"), dict) else {}
     addressee = order.get("addressee") if isinstance(order.get("addressee"), dict) else {}
@@ -191,6 +212,7 @@ def create_basket(order, address, service, date, tmin, tmax):
     phone_pin = s(addressee.get("pin"))
     phone = base_phone + (f" доб. {phone_pin}" if phone_pin else "")
     note = customer_note(order)
+    climb = paid_prr_climb(order)
     if not person:
         raise RuntimeError("Ozon не вернул ФИО получателя")
     if not phone:
@@ -226,6 +248,12 @@ def create_basket(order, address, service, date, tmin, tmax):
     ET.SubElement(node, "inshprice").text = f"{total:.2f}"
     # Примечание передаём только если его написал покупатель в заказе Ozon.
     ET.SubElement(node, "instruction").text = note
+    if climb:
+        ads = ET.SubElement(node, "ads")
+        ET.SubElement(ads, "climb", {
+            "type": climb["type"],
+            "floor": str(climb["floor"]),
+        })
     items = ET.SubElement(node, "items")
     for p in products:
         qty = max(1, int(p.get("quantity") or 1))
