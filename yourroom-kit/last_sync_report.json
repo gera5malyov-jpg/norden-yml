@@ -1,11 +1,15 @@
 {
   "status": "ПРОВЕРКА УСПЕШНА",
-  "started_at": "2026-09-23T22:21:24+00:00",
+  "started_at": "2026-09-23T22:23:43+00:00",
   "dry_run": true,
   "source": "https://yourroom.ru/",
   "supplier": "ВашаКомната",
   "region": "Санкт-Петербург",
-  "schedule_rule": "раз в 14 дней",
+  "schedule_rule": "каждая карточка обновляется примерно раз в 14 дней",
+  "shard_index": 0,
+  "shard_count": 1,
+  "state_file": "state.json",
+  "report_file": "last_sync_report.json",
   "price_rule": {
     "Цена для покупателя": "актуальная цена со скидкой на yourroom.ru",
     "Цена до скидки": "зачеркнутая цена yourroom.ru; если ее нет — равна текущей цене"
@@ -26,10 +30,10 @@
   "skipped_no_price": 0,
   "price_updates": 0,
   "stock_updates": 0,
-  "images_clean_original": 25,
-  "images_clean_alternate": 5,
-  "images_watermark_removed": 23,
-  "images_rejected_watermark_or_error": 4,
+  "images_clean_original": 26,
+  "images_clean_alternate": 31,
+  "images_watermark_removed": 3,
+  "images_rejected_watermark_or_error": 7,
   "images_uploaded": 0,
   "image_upload_errors": 0,
   "parse_errors": [],
@@ -64,21 +68,22 @@
         "Цвет": "венге/дуб белфорд"
       },
       "description_preview": "Стенка Марта 11 представляет собой отличное дополнение к современному интерьеру. Ее уникальный дизайн и функциональность позволяют легко вписать ее в любую обстановку. Особое внимание уделено деталям, что придает этой стенке особый шарм. На боковых стенках вы найдете ниши, специально оборудованные для размещения небольших предметов декора. Это позволит вам создать теплую и уютную атмосферу в вашем доме. Одним из основных преимуществ стенки Марта 11 является зеркальная вставка во весь рост. Она н",
-      "source_images": 12,
-      "clean_images": 12,
+      "source_images": 14,
+      "clean_images": 13,
       "clean_modes": [
-        "watermark_removed",
-        "watermark_removed",
-        "watermark_removed",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
         "watermark_removed",
         "clean_alternate",
         "clean_original",
         "clean_original",
         "clean_original",
         "clean_original",
-        "watermark_removed",
-        "watermark_removed",
-        "watermark_removed"
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
       ]
     },
     {
@@ -116,15 +121,15 @@
       "source_images": 11,
       "clean_images": 9,
       "clean_modes": [
-        "watermark_removed",
+        "clean_alternate",
         "clean_original",
         "clean_original",
-        "watermark_removed",
+        "clean_alternate",
         "clean_original",
         "clean_original",
         "clean_original",
-        "watermark_removed",
-        "watermark_removed"
+        "clean_alternate",
+        "clean_alternate"
       ]
     },
     {
@@ -155,20 +160,24 @@
         "Цвет": "ясень шимо темный/ясень шимо светлый"
       },
       "description_preview": "Стенка Марта 11 представляет собой отличное дополнение к современному интерьеру. Ее уникальный дизайн и функциональность позволяют легко вписать ее в любую обстановку. Особое внимание уделено деталям, что придает этой стенке особый шарм. На боковых стенках вы найдете ниши, специально оборудованные для размещения небольших предметов декора. Это позволит вам создать теплую и уютную атмосферу в вашем доме. Одним из основных преимуществ стенки Марта 11 является зеркальная вставка во весь рост. Она н",
-      "source_images": 12,
-      "clean_images": 11,
+      "source_images": 16,
+      "clean_images": 15,
       "clean_modes": [
-        "watermark_removed",
-        "watermark_removed",
         "clean_alternate",
         "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "clean_original",
         "watermark_removed",
         "clean_original",
-        "clean_original",
-        "clean_original",
-        "clean_original",
-        "clean_original",
-        "clean_original"
+        "clean_alternate",
+        "clean_alternate"
       ]
     },
     {
@@ -191,18 +200,21 @@
         "Страна-производитель": "Россия"
       },
       "description_preview": "Комод \"Палермо\" состоит из четырех выдвижных ящиков, которые оснащены механизмами для плавного открывания и закрывания. Данный предмет мебели удобно расположить рядом со шкафом, чтобы всегда иметь доступ к мелким вещам. Фрезерованные фасады оригинально сочетаются с общим интерьером спальни. МДФ 16мм. Задняя стенка и дно ящиков выполнены из ЛХДФ 3,2мм. Опоры комода – регулируемые американки. Высота регулировки до 10мм. Высота боковины ящика 106 мм. Глубина ящика - 400 мм. Направляющие – шариковые",
-      "source_images": 12,
-      "clean_images": 11,
+      "source_images": 16,
+      "clean_images": 14,
       "clean_modes": [
         "clean_original",
-        "watermark_removed",
         "clean_original",
         "clean_original",
         "clean_original",
         "clean_original",
         "clean_original",
         "clean_original",
-        "watermark_removed",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
         "clean_alternate",
         "watermark_removed"
       ]
@@ -228,21 +240,21 @@
       },
       "description_preview": "Прикроватная тумба \"Палермо\" небольшая по размерам и просто удобная тумба, идеально гармонирует со спальным местом и с общим дизайном спальни. Имеет два ящика для личных вещей, а свободное пространство сверху можно использовать для дополнительных элементов декора или настольной лампы. Прикроватную тумбу \"Палермо\" удобно расположить с двух сторон кровати и все необходимые аксессуары перед сном будут всегда у вас под рукой. Тумба прикроватная выполнена из ЛДСП 16мм и МДФ 16мм. Задняя стенка и дно ",
       "source_images": 10,
-      "clean_images": 10,
+      "clean_images": 9,
       "clean_modes": [
         "clean_original",
         "clean_alternate",
         "clean_original",
-        "watermark_removed",
         "clean_original",
-        "watermark_removed",
-        "watermark_removed",
-        "watermark_removed",
-        "watermark_removed",
-        "watermark_removed"
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
       ]
     }
   ],
   "complete": true,
-  "finished_at": "2026-09-23T22:23:16+00:00"
+  "sitemap_urls_total": 7877,
+  "finished_at": "2026-09-23T22:26:40+00:00"
 }
