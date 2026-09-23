@@ -2,6 +2,9 @@ name: TREEZ — проверить и дозагрузить фото
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Treez → KIT — каталог раз в 2 недели"]
+    types: [completed]
   push:
     branches: [main]
     paths:
