@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: treez-repair-images
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   repair:
