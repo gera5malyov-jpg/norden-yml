@@ -93,7 +93,7 @@ def money(v):
 def currency_amounts(text):
     text = s(text).replace("\xa0", " ")
     pattern = re.compile(
-        r"(?<!\\d)(\\d{1,3}(?:\\s\\d{3})+(?:[,.]\\d{1,2})?|\\d{2,7}(?:[,.]\\d{1,2})?)\\s*(?:₽|руб(?:\\.|лей|ля)?)",
+        r"(?<!\d)(\d{1,3}(?:\s\d{3})+(?:[,.]\d{1,2})?|\d{2,7}(?:[,.]\d{1,2})?)\s*(?:₽|руб(?:\.|лей|ля)?)",
         re.I,
     )
     out = []
@@ -102,7 +102,6 @@ def currency_amounts(text):
         if d is not None and d >= Decimal("50") and d <= Decimal("100000000"):
             out.append(d)
     return out
-
 
 def ruble(v):
     if v is None:
