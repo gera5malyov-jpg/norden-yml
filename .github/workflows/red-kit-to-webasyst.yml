@@ -112,6 +112,8 @@ jobs:
               'Изображения:',
               f"- обновлены в кратком описании: каждое изображение отдельным [extimg]URL[/extimg]: {r.get('summaries_updated', '—')}",
               f"- URL изображений из публичного YML KIT: {r.get('image_urls_from_public_yml', '—')}",
+              f"- товаров сопоставлено с YML по kit_id: {r.get('public_yml_matches_by_kit_id', '—')}",
+              f"- товаров сопоставлено с YML по SKU: {r.get('public_yml_matches_by_sku', '—')}",
               f"- URL изображений через резервный /v1/files: {r.get('file_urls_resolved', '—')}",
               f"- товаров RED- без изображений в KIT: {r.get('variants_without_images', '—')}",
               '',
