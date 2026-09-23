@@ -1,0 +1,42 @@
+name: Repair Dalli MSK 97426764-0177-1
+
+on:
+  push:
+    paths:
+      - '.github/workflows/dalli-msk-repair-97426764-0177-1.yml'
+      - 'scripts/repair_dalli_msk_97426764_0177_1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dalli-msk-repair-97426764-0177-1
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Исправить заказ в корзине Dalli МСК
+        env:
+          TARGET_EXTERNAL_ID: '97426764-0177-1'
+          SAFE_RESULT_PATH: 'dalli/order_97426764-0177-1_msk_repair_result.json'
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+        run: python scripts/repair_dalli_msk_97426764_0177_1.py
+      - name: Сохранить безопасный результат
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dalli/order_97426764-0177-1_msk_repair_result.json || true
+          git diff --cached --quiet || git commit -m "Store Dalli repair result 97426764-0177-1"
+          git push
