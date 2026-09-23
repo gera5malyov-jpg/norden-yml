@@ -309,7 +309,11 @@ def main():
         return 0
 
     services = list_services()
-    service, service_name = choose_service(address_dict, services)
+    climb = paid_prr_climb(ozon)
+    if climb and "30" in services:
+        service, service_name = "30", services["30"]
+    else:
+        service, service_name = choose_service(address_dict, services)
     dates = get_dates(address, service)
     date, tmin, tmax, interval_type = choose_date_interval(dates)
 
