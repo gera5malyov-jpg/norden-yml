@@ -1,0 +1,42 @@
+name: KIT Google Sheets connection test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-google-write-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check gspread google-auth
+      - name: Test Google Sheets write
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python - <<'PY'
+          import json, os, base64
+          import gspread
+          raw=os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON","").strip()
+          if not raw:
+              raise SystemExit("GOOGLE_SERVICE_ACCOUNT_JSON is missing")
+          if raw.startswith("{"):
+              info=json.loads(raw)
+          else:
+              info=json.loads(base64.b64decode(raw).decode("utf-8"))
+          gc=gspread.service_account_from_dict(info)
+          sh=gc.open_by_key("1xZUeaWUr-6O3KK0MO-1U7IGBKXXfgcmZ-EJ-w-2wWug")
+          try:
+              ws=sh.worksheet("Сводка")
+          except gspread.WorksheetNotFound:
+              ws=sh.add_worksheet(title="Сводка", rows=20, cols=2)
+          ws.update(range_name="A1", values=[["Статус","Google Sheets подключён"],["Проверка","GitHub Actions имеет доступ к таблице"]], value_input_option="RAW")
+          print("GOOGLE_SHEETS_WRITE_OK")
+          PY
