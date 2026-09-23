@@ -231,6 +231,11 @@ def sitemap_urls():
     return found
 
 def closest_group_name(node, main, param_name):
+    fallback = {
+        "param37": "Спальное место",
+        "param40": "Цвет",
+        "param92": "Открывание дверей",
+    }
     for ancestor in node.parents:
         if ancestor is main:
             break
@@ -241,15 +246,12 @@ def closest_group_name(node, main, param_name):
             recursive=True,
         ):
             tx = clean_text(candidate.get_text(" ", strip=True))
-            if 1 <= len(tx) <= 80 and (tx.endswith(":") or "место" in tx.casefold() or "конфигура" in tx.casefold()):
+            if 1 <= len(tx) <= 80 and (tx.endswith(":") or "место" in tx.casefold() or "конфигура" in tx.casefold() or "открыван" in tx.casefold()):
                 labels.append(tx.rstrip(":"))
         if labels:
-            return labels[0]
-    fallback = {
-        "param37": "Спальное место",
-        "param40": "Цвет",
-        "param92": "Открывание дверей",
-    }
+            label = labels[0]
+            if norm(label) != norm(param_name):
+                return label
     return fallback.get(param_name, param_name)
 
 
