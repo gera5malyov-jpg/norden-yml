@@ -34,6 +34,9 @@ jobs:
       - name: Установить зависимости
         run: pip install --disable-pip-version-check -r kit-backup/requirements.txt
 
+      - name: Проверить скрипт
+        run: python -m py_compile kit-backup/sync_kit_backup.py
+
       - name: Выгрузить KIT и синхронизировать Google Таблицу
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
