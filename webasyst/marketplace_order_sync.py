@@ -433,20 +433,29 @@ def change_state(order_id: str, target: str) -> bool:
         changed = True
     return changed
 
+def lift_type_label(value: Any) -> str:
+    raw = s(value)
+    if raw == "NOT_NEEDED":
+        return "Не нужен"
+    return raw
+
 def comment(o: dict) -> str:
     source = LABEL[o["source"]]
     lines = [
         f"Импортировано из {source}.",
         f"Номер заказа источника: {o['external_id']}",
         f"Дата заказа источника: {o.get('created_at','')}",
-        f"Статус источника: {o.get('status_raw','')}",
     ]
+    # Raw Yandex Market statuses are technical API values and are not useful in
+    # the Webasyst order comment.
+    if o.get("source") != "yandex_market" and s(o.get("status_raw")):
+        lines.append(f"Статус источника: {o.get('status_raw','')}")
     if o.get("delivery_price") not in (None, ""):
         lines.append(f"Стоимость доставки: {float(o['delivery_price']):.2f} ₽")
     if o.get("lift_price") not in (None, ""):
         lines.append(f"Стоимость подъема: {float(o['lift_price']):.2f} ₽")
     if s(o.get("lift_type")):
-        lines.append(f"Тип подъема: {s(o.get('lift_type'))}")
+        lines.append(f"Тип подъема: {lift_type_label(o.get('lift_type'))}")
     if s(o.get("recipient_name")):
         lines.append(f"Получатель: {s(o.get('recipient_name'))}")
     if s(o.get("delivery_to") or o.get("delivery_from")):
@@ -467,7 +476,7 @@ def marketplace_order_params(o: dict) -> dict:
     for k in ("delivery_price", "lift_price", "lift_type", "delivery_from", "delivery_to", "delivery_time_from", "delivery_time_to", "recipient_name", "wb_order_id", "wb_rid", "wb_order_uid", "wb_delivery_type"):
         v = o.get(k)
         if v not in (None, ""):
-            params["mp_" + k] = str(v)
+            params["mp_" + k] = lift_type_label(v) if k == "lift_type" else str(v)
     return params
 
 def order_customer(o: dict) -> dict:
@@ -501,8 +510,12 @@ def order_customer(o: dict) -> dict:
         out["middlename"] = middle_name
     if s(buyer.get("phone")):
         out["phone"] = s(buyer.get("phone"))
-    if s(buyer.get("customer_email") or buyer.get("email")):
-        out["email"] = s(buyer.get("customer_email") or buyer.get("email"))
+    email = s(buyer.get("customer_email") or buyer.get("email"))
+    if email and not (
+        o.get("source") == "yandex_market"
+        and email.lower() == "noreply-market@support.yandex.ru"
+    ):
+        out["email"] = email
     return out
 
 def order_shipping_address(o: dict) -> dict:
@@ -705,10 +718,46 @@ def yandex_buyer_info(headers: dict, campaign_id: str, order_id: str, status: st
 def normalize_yandex_address(address: Any) -> dict:
     if not isinstance(address, dict):
         return {}
+
     out = {}
-    for k in ("country", "postcode", "city", "region", "street", "house", "building", "block", "apartment", "floor", "entrance"):
-        if s(address.get(k)):
-            out[k] = s(address.get(k))
+    if s(address.get("country")):
+        out["country"] = s(address.get("country"))
+    if s(address.get("region")):
+        out["region"] = s(address.get("region"))
+    if s(address.get("city")):
+        out["city"] = s(address.get("city"))
+    if s(address.get("postcode")):
+        out["zip"] = s(address.get("postcode"))
+
+    full_address = s(address.get("fullAddress") or address.get("full_address"))
+    if full_address:
+        street_line = full_address
+    else:
+        parts = []
+        if s(address.get("district")):
+            parts.append(s(address.get("district")))
+        if s(address.get("street")):
+            parts.append(s(address.get("street")))
+        if s(address.get("house")):
+            parts.append(f"д. {s(address.get('house'))}")
+        if s(address.get("estate")):
+            parts.append(f"вл. {s(address.get('estate'))}")
+        if s(address.get("block")):
+            parts.append(f"корп. {s(address.get('block'))}")
+        if s(address.get("building")):
+            parts.append(f"стр. {s(address.get('building'))}")
+        if s(address.get("apartment")):
+            parts.append(f"кв./офис {s(address.get('apartment'))}")
+        if s(address.get("entrance")):
+            parts.append(f"подъезд {s(address.get('entrance'))}")
+        if s(address.get("floor")):
+            parts.append(f"этаж {s(address.get('floor'))}")
+        if s(address.get("entryphone")):
+            parts.append(f"домофон {s(address.get('entryphone'))}")
+        street_line = ", ".join(parts)
+
+    if street_line:
+        out["street"] = street_line
     return out
 
 def load_yandex_market():
