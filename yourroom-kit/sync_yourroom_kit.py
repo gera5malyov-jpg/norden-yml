@@ -90,6 +90,20 @@ def money(v):
     return d if d > 0 else None
 
 
+def currency_amounts(text):
+    text = s(text).replace("\xa0", " ")
+    pattern = re.compile(
+        r"(?<!\\d)(\\d{1,3}(?:\\s\\d{3})+(?:[,.]\\d{1,2})?|\\d{2,7}(?:[,.]\\d{1,2})?)\\s*(?:₽|руб(?:\\.|лей|ля)?)",
+        re.I,
+    )
+    out = []
+    for m in pattern.finditer(text):
+        d = money(m.group(1))
+        if d is not None and d >= Decimal("50") and d <= Decimal("100000000"):
+            out.append(d)
+    return out
+
+
 def ruble(v):
     if v is None:
         return None
@@ -260,11 +274,16 @@ def extract_prices(soup, h1):
     current = None
     old = None
     scope = product_scope(soup, h1)
+
+    # Берём только узлы, в которых ровно одна денежная сумма.
+    # Родительские price-контейнеры часто содержат текущую цену, старую цену
+    # и процент скидки одновременно — их нельзя склеивать в одно число.
     for node in scope.find_all(True, class_=re.compile(r"price", re.I)):
-        tx = clean_text(node.get_text(" ", strip=True))
-        d = money(tx) if ("₽" in tx or "руб" in norm(tx)) else None
-        if d is None:
+        tx = node.get_text(" ", strip=True)
+        amounts = currency_amounts(tx)
+        if len(amounts) != 1:
             continue
+        d = amounts[0]
         cls = " ".join(node.get("class", []))
         ncls = norm(cls)
         if any(k in ncls for k in ("old", "base", "original", "without", "cross")):
@@ -277,26 +296,22 @@ def extract_prices(soup, h1):
         soup, h1,
         ["необходима предоплата", "доставка по городу", "основные характеристики"],
     )
-    nums = []
-    for m in re.finditer(r"(\d[\d\s]{0,14}(?:[,.]\d{1,2})?)\s*(?:₽|руб(?:\.|лей|ля)?)", segment, flags=re.I):
-        d = money(m.group(1))
-        if d is not None and d >= 50:
-            nums.append(d)
-    nums = unique(str(x) for x in nums)
-    nums = [Decimal(x) for x in nums]
+    nums = currency_amounts(segment)
+
     if current is None and nums:
         current = nums[0]
-    if old is None:
-        for d in nums[1:4]:
-            if current is not None and d >= current and d <= current * Decimal("4"):
+
+    if current is not None and old is None:
+        for d in nums:
+            if d > current and d <= current * Decimal("4"):
                 old = d
                 break
-    if current is None:
+
+    if current is None or current < Decimal("50") or current > Decimal("100000000"):
         return None, None
-    if old is None or old < current:
+    if old is None or old < current or old > current * Decimal("4"):
         old = current
     return ruble(current), ruble(old)
-
 
 def product_scope(soup, h1):
     for ancestor in h1.parents:
