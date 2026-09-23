@@ -91,6 +91,70 @@
       "length": 6
     }
   },
+  "addressee": {
+    "name": {
+      "type": "str",
+      "present": true,
+      "length": 18
+    },
+    "phone": {
+      "type": "str",
+      "present": true,
+      "length": 11
+    },
+    "pin": {
+      "type": "str",
+      "present": true,
+      "length": 4
+    }
+  },
+  "additional_data": {},
+  "optional": {
+    "products_with_possible_mandatory_mark": {
+      "type": "list",
+      "count": 0
+    }
+  },
+  "external_order": {
+    "is_external": {
+      "type": "bool",
+      "present": true
+    },
+    "platform_name": {
+      "type": "str",
+      "present": false,
+      "length": 0
+    }
+  },
+  "delivery_method": {
+    "id": {
+      "type": "int",
+      "present": true
+    },
+    "name": {
+      "type": "str",
+      "present": true,
+      "length": 6
+    },
+    "tpl_provider": {
+      "type": "str",
+      "present": true,
+      "length": 14
+    },
+    "tpl_provider_id": {
+      "type": "int",
+      "present": true
+    },
+    "warehouse": {
+      "type": "str",
+      "present": true,
+      "length": 3
+    },
+    "warehouse_id": {
+      "type": "int",
+      "present": true
+    }
+  },
   "top_level_keys": [
     "additional_data",
     "addressee",
