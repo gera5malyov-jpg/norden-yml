@@ -218,3 +218,216 @@ def sitemap_product_urls():
     if not urls:
         urls = re.findall(r"https?://yourroom\.ru/products/[^<\s]+", r.text, flags=re.I)
     return unique(canonical_product_url(html.unescape(u)) for u in urls if canonical_product_url(html.unescape(u)))
+
+
+def drop_source_mentions(text):
+    text = clean_text(text)
+    if not text:
+        return ""
+    parts = re.split(r"(?<=[.!?])\s+|\s*[\r\n]+\s*", text)
+    kept = []
+    for part in parts:
+        part = clean_text(part)
+        if not part:
+            continue
+        if SOURCE_NAME_RE.search(part):
+            continue
+        if re.search(r"\b(?:8|\+7)\s*\(?812\)?", part):
+            continue
+        kept.append(part)
+    cleaned = clean_text(" ".join(kept))
+    cleaned = SOURCE_NAME_RE.sub("", cleaned)
+    return clean_text(cleaned)
+
+
+def text_after_h1_until(soup, h1, stop_words):
+    values = []
+    for node in h1.next_elements:
+        if getattr(node, "name", None) in ("script", "style"):
+            continue
+        if isinstance(node, str):
+            tx = clean_text(node)
+            if not tx:
+                continue
+            low = norm(tx)
+            if any(sw in low for sw in stop_words):
+                break
+            values.append(tx)
+    return clean_text(" ".join(values))
+
+
+def extract_prices(soup, h1):
+    current = None
+    old = None
+    scope = product_scope(soup, h1)
+    for node in scope.find_all(True, class_=re.compile(r"price", re.I)):
+        tx = clean_text(node.get_text(" ", strip=True))
+        d = money(tx) if ("₽" in tx or "руб" in norm(tx)) else None
+        if d is None:
+            continue
+        cls = " ".join(node.get("class", []))
+        ncls = norm(cls)
+        if any(k in ncls for k in ("old", "base", "original", "without", "cross")):
+            if old is None or d > old:
+                old = d
+        elif current is None:
+            current = d
+
+    segment = text_after_h1_until(
+        soup, h1,
+        ["необходима предоплата", "доставка по городу", "основные характеристики"],
+    )
+    nums = []
+    for m in re.finditer(r"(\d[\d\s]{0,14}(?:[,.]\d{1,2})?)\s*(?:₽|руб(?:\.|лей|ля)?)", segment, flags=re.I):
+        d = money(m.group(1))
+        if d is not None and d >= 50:
+            nums.append(d)
+    nums = unique(str(x) for x in nums)
+    nums = [Decimal(x) for x in nums]
+    if current is None and nums:
+        current = nums[0]
+    if old is None:
+        for d in nums[1:4]:
+            if current is not None and d >= current and d <= current * Decimal("4"):
+                old = d
+                break
+    if current is None:
+        return None, None
+    if old is None or old < current:
+        old = current
+    return ruble(current), ruble(old)
+
+
+def product_scope(soup, h1):
+    for ancestor in h1.parents:
+        if getattr(ancestor, "name", None) not in ("div", "main", "section", "article", "body"):
+            continue
+        raw = str(ancestor)
+        if "/shopfiles/img_products/" in raw and ("₽" in clean_text(ancestor.get_text(" ", strip=True)) or "руб" in norm(ancestor.get_text(" ", strip=True))):
+            if len(raw) < 2_000_000:
+                return ancestor
+    return soup
+
+
+def breadcrumb_path(soup, h1):
+    candidates = []
+    for selector in (
+        ".breadcrumb", ".breadcrumbs", "[class*='bread']", "[itemtype*='BreadcrumbList']", "nav[aria-label*='breadcrumb' i]",
+    ):
+        for node in soup.select(selector):
+            if h1 in node.descendants:
+                continue
+            texts = [clean_text(x.get_text(" ", strip=True)) for x in node.find_all(["a", "span"])]
+            texts = [x for x in texts if x and norm(x) not in ("главная", "каталог") and x != clean_text(h1.get_text(" ", strip=True))]
+            if texts:
+                candidates = texts
+                break
+        if candidates:
+            break
+    out = []
+    for x in candidates:
+        if x not in out and len(x) <= 100:
+            out.append(x)
+    return out[:5]
+
+
+def is_probable_label(text):
+    text = clean_text(text).rstrip(":")
+    if not text or len(text) > 90:
+        return False
+    low = norm(text)
+    if low in CONTROL_TEXT:
+        return False
+    if SOURCE_NAME_RE.search(text):
+        return False
+    if not re.search(r"[A-Za-zА-Яа-яЁё]", text):
+        return False
+    if re.match(r"^(?:да|нет|россия|беларусь|китай|турция|\d)", low):
+        return False
+    if any(x in low for x in ("доставка", "самовывоз", "оплата", "сборка", "подъем на этаж", "магазин")):
+        return False
+    return True
+
+
+def extract_characteristics(soup, h1):
+    start = soup.find(
+        lambda tag: getattr(tag, "name", None) in ("h2", "h3", "div", "span")
+        and "основные характеристики" in norm(tag.get_text(" ", strip=True))
+    )
+    pairs = {}
+    if start:
+        tokens = []
+        for node in start.next_elements:
+            if getattr(node, "name", None) in ("h2", "h3"):
+                txh = clean_text(node.get_text(" ", strip=True))
+                if txh and "основные характеристики" not in norm(txh):
+                    break
+            if getattr(node, "name", None) not in ("p", "dt", "dd", "td", "span", "div"):
+                continue
+            if getattr(node, "find", None) and node.find(["p", "dt", "dd", "td", "div"], recursive=False):
+                continue
+            tx = clean_text(node.get_text(" ", strip=True))
+            if not tx or len(tx) > 300:
+                continue
+            low = norm(tx)
+            if low in CONTROL_TEXT:
+                continue
+            if low.startswith("свернуть") or low.startswith("развернуть"):
+                continue
+            if tx not in tokens:
+                tokens.append(tx)
+            if len(tokens) > 160:
+                break
+
+        i = 0
+        while i + 1 < len(tokens):
+            label = clean_text(tokens[i]).rstrip(":")
+            value = clean_text(tokens[i + 1])
+            if is_probable_label(label) and value and len(value) <= 250:
+                if norm(value) not in CONTROL_TEXT and not is_probable_label(value):
+                    pairs.setdefault(label, value)
+                    i += 2
+                    continue
+                if not any(k in norm(value) for k in ("характеристик", "развернуть", "свернуть")):
+                    pairs.setdefault(label, value)
+                    i += 2
+                    continue
+            i += 1
+
+    for tr in soup.find_all("tr"):
+        cells = [clean_text(x.get_text(" ", strip=True)) for x in tr.find_all(["th", "td"], recursive=False)]
+        if len(cells) >= 2 and is_probable_label(cells[0]) and cells[1]:
+            pairs[cells[0].rstrip(":")] = cells[1]
+    for dt in soup.find_all("dt"):
+        dd = dt.find_next_sibling("dd")
+        if dd:
+            lab, val = clean_text(dt.get_text(" ", strip=True)), clean_text(dd.get_text(" ", strip=True))
+            if is_probable_label(lab) and val:
+                pairs[lab.rstrip(":")] = val
+
+    text = clean_text(soup.get_text(" ", strip=True))
+    m = re.search(
+        r"Выберите\s+цвет\s+(.+?)(?:\s+-\s+(?:В\s+наличии|Привезем|Под\s+заказ)|\s+Перейти\s+в\s+корзину)",
+        text, flags=re.I,
+    )
+    if m:
+        color = clean_text(m.group(1))
+        if 1 <= len(color) <= 120:
+            pairs.setdefault("Цвет", color)
+
+    cleaned = {}
+    for k, v in pairs.items():
+        nk = norm(k)
+        if any(x in nk for x in ("остаток", "налич", "поставщик", "источник", "доставка", "магазин")):
+            continue
+        if SOURCE_NAME_RE.search(k) or SOURCE_NAME_RE.search(v):
+            continue
+        cleaned[clean_text(k)] = clean_text(v)
+    return cleaned
+
+
+def extract_manufacturer(soup, characteristics):
+    for k, v in characteristics.items():
+        if "производител" in norm(k) and clean_text(v):
+            return clean_text(v)
+    meta = soup.find("meta", attrs={"name": "description"})
