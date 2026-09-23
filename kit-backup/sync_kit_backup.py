@@ -580,6 +580,48 @@ def build_source_enrichment(data, fallback_url=None):
     except Exception as exc:
         warnings.append(f"Afina Garden: закупочная цена не обновлена: {exc}")
 
+    # Red Black: <price> — закупочная цена поставщика.
+    # В KIT закупку не записываем: здесь она используется только для Google-таблицы.
+    red_black_prices = {}
+    try:
+        cfg = _read_json(REPO_ROOT / "sources" / "yml_sources.json", {})
+        red_url = clean(((cfg.get("red_black") or {}).get("url")))
+        if red_url:
+            response = requests.get(
+                red_url,
+                timeout=(20, 180),
+                headers={"User-Agent": "Megapolis-KIT-backup/2.0"},
+            )
+            response.raise_for_status()
+            root = ET.fromstring(response.content)
+            for offer in root.iter():
+                if offer.tag.split("}")[-1].casefold() != "offer":
+                    continue
+                purchase = ""
+                for child in list(offer):
+                    if child.tag.split("}")[-1].casefold() == "price":
+                        purchase = clean(child.text).strip()
+                        break
+                if not purchase:
+                    continue
+
+                code = clean(offer.attrib.get("code")).strip()
+                article = clean(offer.attrib.get("article")).strip()
+                candidates = []
+                digits = re.sub(r"\\D+", "", article)
+                if digits:
+                    candidates.append("RED-00-" + digits.zfill(8))
+                if code:
+                    candidates.append("RED-" + code)
+                    candidates.append(("RED-" + code).replace("_", ""))
+                if article:
+                    candidates.append("RED-" + article)
+
+                for candidate in candidates:
+                    red_black_prices[_source_key(candidate)] = purchase
+    except Exception as exc:
+        warnings.append(f"Red Black: закупочная цена не обновлена: {exc}")
+
     # Riva: <price> в текущем прайсе Riva является закупочной ценой.
     # Сопоставляем прежде всего по ID предложения Riva, резервно — по "Код для сайта".
     riva_by_offer = {}
@@ -657,7 +699,9 @@ def build_source_enrichment(data, fallback_url=None):
         webasyst = (chars.get("webasyst") or [""])[0]
         supplier_article = (chars.get("артикул поставщика") or [""])[0]
 
-        if sku_l.startswith("sams-"):
+        if sku_l.startswith("red-"):
+            put(vid, "Red Black", red_black_prices.get(_source_key(sku)))
+        elif sku_l.startswith("sams-"):
             code = sku[5:]
             put(vid, "Самсон", samson_prices.get(_source_key(code)))
         elif sku_l.startswith("liga-"):
