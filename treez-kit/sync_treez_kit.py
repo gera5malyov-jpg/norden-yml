@@ -425,7 +425,6 @@ def main_run(dry_run=False, force=False, skip_video=False):
         characteristics.append(row)
         return cid
 
-    supplier_char = ensure_char("Поставщик")
     source_code_char = ensure_char("Артикул поставщика")
     model_char = ensure_char("Модель Treez")
     source_category_char = ensure_char("Категория Treez")
@@ -503,7 +502,6 @@ def main_run(dry_run=False, force=False, skip_video=False):
         customer_price = ruble(source_price * Decimal("0.97")) if source_price is not None else None
 
         char_rows = [
-            {"characteristic_id": supplier_char, "value": SUPPLIER},
             {"characteristic_id": source_code_char, "value": code},
             {"characteristic_id": model_char, "value": item["model"]},
             {"characteristic_id": source_category_char, "value": category_map.get(item["category_id"]) or item["category_id"]},
