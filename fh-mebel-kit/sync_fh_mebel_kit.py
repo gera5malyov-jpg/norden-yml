@@ -409,7 +409,16 @@ def product_images(main, url):
             src = s(img.get("data-src") or img.get("src"))
             if src and "/userfiles/shop/" in src:
                 pics.append(urljoin(url, src))
-    return unique(pics)[:20]
+    return unique(pics)
+
+
+def product_composition(soup):
+    rows = []
+    for tr in soup.select('.product_mainComposition_table tr'):
+        tx = clean_text(tr.get_text(' ', strip=True))
+        if tx and tx not in rows:
+            rows.append(tx)
+    return ' | '.join(rows)
 
 
 def breadcrumb_path(soup):
@@ -474,6 +483,7 @@ def parse_product(url, html):
     option_by_param, label_by_param = option_maps(main)
     description = parse_description(soup, main)
     pictures = product_images(main, url)
+    composition = product_composition(soup)
     categories = breadcrumb_path(soup)
 
     manufacturer = (
@@ -573,6 +583,7 @@ def parse_product(url, html):
             "supplier": SUPPLIER,
             "description": description,
             "pictures": pictures,
+            "composition": composition,
             "category_path": categories,
             "characteristics": chars,
             "modifications": {
@@ -1026,9 +1037,14 @@ def run(dry_run=False, force=False, max_pages=0, max_items=0, include_sitemap=Fa
             "FH Price ID": card["source_price_id"],
             "Артикул": card["sku"],
             "Код для сайта": card["sku"],
+            "Состав комплекта": card.get("composition", ""),
         }
         for title, value in card["characteristics"].items():
-            if clean_text(value):
+            if not clean_text(value):
+                continue
+            if norm(title) in {"артикул", "артикул товара", "код товара"}:
+                pairs["Артикул поставщика"] = clean_text(value)
+            else:
                 pairs[clean_text(title)] = clean_text(value)
         for title, value in card["modifications"].items():
             if clean_text(value):
