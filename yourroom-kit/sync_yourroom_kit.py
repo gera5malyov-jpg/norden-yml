@@ -270,45 +270,24 @@ def text_after_h1_until(soup, h1, stop_words):
 
 
 def extract_prices(soup, h1):
-    current = None
-    old = None
-    scope = product_scope(soup, h1)
-
-    # Берём только узлы, в которых ровно одна денежная сумма.
-    # Родительские price-контейнеры часто содержат текущую цену, старую цену
-    # и процент скидки одновременно — их нельзя склеивать в одно число.
-    for node in scope.find_all(True, class_=re.compile(r"price", re.I)):
-        tx = node.get_text(" ", strip=True)
-        amounts = currency_amounts(tx)
-        if len(amounts) != 1:
-            continue
-        d = amounts[0]
-        cls = " ".join(node.get("class", []))
-        ncls = norm(cls)
-        if any(k in ncls for k in ("old", "base", "original", "without", "cross")):
-            if old is None or d > old:
-                old = d
-        elif current is None:
-            current = d
-
     segment = text_after_h1_until(
         soup, h1,
         ["необходима предоплата", "доставка по городу", "основные характеристики"],
     )
     nums = currency_amounts(segment)
-
-    if current is None and nums:
-        current = nums[0]
-
-    if current is not None and old is None:
-        for d in nums:
-            if d > current and d <= current * Decimal("4"):
-                old = d
-                break
-
-    if current is None or current < Decimal("50") or current > Decimal("100000000"):
+    if not nums:
         return None, None
-    if old is None or old < current or old > current * Decimal("4"):
+
+    current = nums[0]
+    old = None
+    for d in nums[1:]:
+        if d >= current and d <= current * Decimal("4"):
+            old = d
+            break
+
+    if current < Decimal("50") or current > Decimal("100000000"):
+        return None, None
+    if old is None:
         old = current
     return ruble(current), ruble(old)
 
@@ -325,6 +304,7 @@ def product_scope(soup, h1):
 
 def breadcrumb_path(soup, h1):
     candidates = []
+    product_name = clean_text(h1.get_text(" ", strip=True))
     for selector in (
         ".breadcrumb", ".breadcrumbs", "[class*='bread']", "[itemtype*='BreadcrumbList']", "nav[aria-label*='breadcrumb' i]",
     ):
@@ -332,18 +312,26 @@ def breadcrumb_path(soup, h1):
             if h1 in node.descendants:
                 continue
             texts = [clean_text(x.get_text(" ", strip=True)) for x in node.find_all(["a", "span"])]
-            texts = [x for x in texts if x and norm(x) not in ("главная", "каталог") and x != clean_text(h1.get_text(" ", strip=True))]
+            texts = [x for x in texts if x and norm(x) not in ("главная", "каталог") and x != product_name]
             if texts:
                 candidates = texts
                 break
         if candidates:
             break
+
     out = []
     for x in candidates:
         if x not in out and len(x) <= 100:
             out.append(x)
-    return out[:5]
 
+    while out:
+        last = norm(out[-1])
+        pname = norm(product_name)
+        if last and (pname.startswith(last) or last.startswith(pname)):
+            out.pop()
+        else:
+            break
+    return out[:5]
 
 def is_probable_label(text):
     text = clean_text(text).rstrip(":")
@@ -369,53 +357,54 @@ def extract_characteristics(soup, h1):
         and "основные характеристики" in norm(tag.get_text(" ", strip=True))
     )
     pairs = {}
+
     if start:
         tokens = []
-        for node in start.next_elements:
-            if getattr(node, "name", None) in ("h2", "h3"):
-                txh = clean_text(node.get_text(" ", strip=True))
-                if txh and "основные характеристики" not in norm(txh):
-                    break
-            if getattr(node, "name", None) not in ("p", "dt", "dd", "td", "span", "div"):
-                continue
-            if getattr(node, "find", None) and node.find(["p", "dt", "dd", "td", "div"], recursive=False):
+        for node in start.find_all_next(["p", "h2", "h3"], limit=140):
+            if node is start:
                 continue
             tx = clean_text(node.get_text(" ", strip=True))
-            if not tx or len(tx) > 300:
+            if not tx:
                 continue
             low = norm(tx)
-            if low in CONTROL_TEXT:
+
+            if node.name in ("h2", "h3") and "основные характеристики" not in low:
+                break
+            if "лучшие предложения" in low or "товары в наличии" in low:
+                break
+            if len(tx) > 350:
+                # Началось текстовое описание товара.
+                break
+            if low in CONTROL_TEXT or low.startswith("свернуть") or low.startswith("развернуть"):
                 continue
-            if low.startswith("свернуть") or low.startswith("развернуть"):
+            if any(x in low for x in (
+                "доставка по городу", "срочная доставка", "самовывоз",
+                "качественная сборка", "подъем на этаж", "оплата наличными",
+            )):
                 continue
             if tx not in tokens:
                 tokens.append(tx)
-            if len(tokens) > 160:
-                break
 
         i = 0
         while i + 1 < len(tokens):
             label = clean_text(tokens[i]).rstrip(":")
             value = clean_text(tokens[i + 1])
-            if is_probable_label(label) and value and len(value) <= 250:
-                if norm(value) not in CONTROL_TEXT and not is_probable_label(value):
-                    pairs.setdefault(label, value)
-                    i += 2
-                    continue
-                if not any(k in norm(value) for k in ("характеристик", "развернуть", "свернуть")):
-                    pairs.setdefault(label, value)
-                    i += 2
-                    continue
-            i += 1
+            if is_probable_label(label) and value:
+                pairs.setdefault(label, value)
+                i += 2
+            else:
+                i += 1
 
     for tr in soup.find_all("tr"):
         cells = [clean_text(x.get_text(" ", strip=True)) for x in tr.find_all(["th", "td"], recursive=False)]
         if len(cells) >= 2 and is_probable_label(cells[0]) and cells[1]:
             pairs[cells[0].rstrip(":")] = cells[1]
+
     for dt in soup.find_all("dt"):
         dd = dt.find_next_sibling("dd")
         if dd:
-            lab, val = clean_text(dt.get_text(" ", strip=True)), clean_text(dd.get_text(" ", strip=True))
+            lab = clean_text(dt.get_text(" ", strip=True))
+            val = clean_text(dd.get_text(" ", strip=True))
             if is_probable_label(lab) and val:
                 pairs[lab.rstrip(":")] = val
 
@@ -438,7 +427,6 @@ def extract_characteristics(soup, h1):
             continue
         cleaned[clean_text(k)] = clean_text(v)
     return cleaned
-
 
 def extract_manufacturer(soup, characteristics):
     for k, v in characteristics.items():
