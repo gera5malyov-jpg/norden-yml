@@ -40,7 +40,7 @@ jobs:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           DRY_RUN: '1'
           RED_KIT_REQUEST_DELAY: '0.40'
-          RED_WEBASYST_WRITE_DELAY: '0.55'
+          RED_WEBASYST_WRITE_DELAY: '0.15'
         run: python webasyst/sync_red_kit_to_webasyst.py
 
       - name: Sync RED content from KIT to Webasyst
@@ -52,7 +52,7 @@ jobs:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           DRY_RUN: '0'
           RED_KIT_REQUEST_DELAY: '0.40'
-          RED_WEBASYST_WRITE_DELAY: '0.55'
+          RED_WEBASYST_WRITE_DELAY: '0.15'
         run: python webasyst/sync_red_kit_to_webasyst.py
 
       - name: Commit RED sync report
