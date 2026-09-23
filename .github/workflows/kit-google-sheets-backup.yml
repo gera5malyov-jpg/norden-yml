@@ -15,12 +15,12 @@ permissions:
 
 concurrency:
   group: kit-google-sheets-backup
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   backup:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 45
 
     steps:
       - name: Получить код
@@ -39,6 +39,8 @@ jobs:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_SHEET_ID: '1xZUeaWUr-6O3KK0MO-1U7IGBKXXfgcmZ-EJ-w-2wWug'
+          KIT_INCLUDE_PRODUCTS: 'false'
+          KIT_COMPACT_SHEETS: 'true'
           YML_FALLBACK_URL: 'https://yastore-prod-persist.s3.yandex.net/feeds/yml/019a5a60-ce41-7872-aa9d-d7720c268dab.xml'
         run: python kit-backup/sync_kit_backup.py
 
