@@ -37,7 +37,7 @@ STOCK_QTY = 100
 SKU_PREFIX = "YOU-"
 MIN_INTERVAL_DAYS = 14
 CRAWL_DELAY_SECONDS = 1.05
-MAX_IMAGES_PER_CARD = 12
+MAX_IMAGES_PER_CARD = 30
 
 UA = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
@@ -607,49 +607,106 @@ def image_bytes(im, source_url):
 def clean_product_images(card, report):
     accepted = []
     seen_hashes = set()
+
+    def fetch_image(url):
+        r = WEB.get(url, timeout=120)
+        if r.status_code != 200 or not r.content:
+            return None
+        ctype = norm(r.headers.get("Content-Type"))
+        if "image" not in ctype and not re.search(r"\.(?:jpe?g|png|webp)$", urlparse(url).path, re.I):
+            return None
+        return decode_image(r.content)
+
     for source_url in card.get("pictures") or []:
         chosen = None
         chosen_mode = ""
-        for candidate in candidate_original_urls(source_url):
-            try:
-                r = WEB.get(candidate, timeout=120)
-                if r.status_code != 200 or not r.content:
-                    continue
-                ctype = norm(r.headers.get("Content-Type"))
-                if "image" not in ctype and not re.search(r"\.(?:jpe?g|png|webp)$", urlparse(candidate).path, re.I):
-                    continue
-                im = decode_image(r.content)
-                if im is None:
-                    continue
-                anchor = watermark_anchor(im)
-                if anchor is None:
-                    chosen = (im, candidate)
-                    chosen_mode = "clean_original" if candidate == source_url else "clean_alternate"
-                    break
-                cleaned, had_mark, ok = remove_source_watermark(im)
-                if had_mark and ok:
-                    chosen = (cleaned, candidate)
-                    chosen_mode = "watermark_removed"
-                    break
-            except Exception as exc:
-                if len(report["warnings"]) < 200:
-                    report["warnings"].append({
-                        "source_url": card.get("source_url"),
-                        "stage": "image_download",
-                        "image_url": candidate,
-                        "message": str(exc)[:300],
-                    })
+
+        try:
+            source_im = fetch_image(source_url)
+        except Exception as exc:
+            source_im = None
+            if len(report["warnings"]) < 200:
+                report["warnings"].append({
+                    "source_url": card.get("source_url"),
+                    "stage": "image_download",
+                    "image_url": source_url,
+                    "message": str(exc)[:300],
+                })
+
+        # 1. Если исходный файл уже чистый — берём его без обработки.
+        if source_im is not None and watermark_anchor(source_im) is None:
+            chosen = (source_im, source_url)
+            chosen_mode = "clean_original"
+
+        # 2. Если на исходнике есть watermark, сначала ищем реальный чистый
+        # оригинал/альтернативный файл. Только после этого применяем inpaint.
+        if chosen is None and source_im is not None:
+            for candidate in candidate_original_urls(source_url)[1:]:
+                try:
+                    alt = fetch_image(candidate)
+                    if alt is not None and watermark_anchor(alt) is None:
+                        chosen = (alt, candidate)
+                        chosen_mode = "clean_alternate"
+                        break
+                except Exception as exc:
+                    if len(report["warnings"]) < 200:
+                        report["warnings"].append({
+                            "source_url": card.get("source_url"),
+                            "stage": "image_download",
+                            "image_url": candidate,
+                            "message": str(exc)[:300],
+                        })
+
+        # 3. Чистого файла нет — пробуем убрать watermark программно.
+        if chosen is None and source_im is not None:
+            cleaned, had_mark, ok = remove_source_watermark(source_im)
+            if had_mark and ok:
+                chosen = (cleaned, source_url)
+                chosen_mode = "watermark_removed"
+
+        # 4. Если основной файл не скачался, пробуем альтернативные URL и,
+        # в крайнем случае, очищаем альтернативу.
+        if chosen is None and source_im is None:
+            for candidate in candidate_original_urls(source_url)[1:]:
+                try:
+                    alt = fetch_image(candidate)
+                    if alt is None:
+                        continue
+                    if watermark_anchor(alt) is None:
+                        chosen = (alt, candidate)
+                        chosen_mode = "clean_alternate"
+                        break
+                    cleaned, had_mark, ok = remove_source_watermark(alt)
+                    if had_mark and ok:
+                        chosen = (cleaned, candidate)
+                        chosen_mode = "watermark_removed"
+                        break
+                except Exception as exc:
+                    if len(report["warnings"]) < 200:
+                        report["warnings"].append({
+                            "source_url": card.get("source_url"),
+                            "stage": "image_download",
+                            "image_url": candidate,
+                            "message": str(exc)[:300],
+                        })
 
         if chosen is None:
             report["images_rejected_watermark_or_error"] += 1
             continue
+
         im, used_url = chosen
         raw, filename, ctype = image_bytes(im, used_url)
         digest = hashlib.sha1(raw).hexdigest()
         if digest in seen_hashes:
             continue
         seen_hashes.add(digest)
-        accepted.append({"bytes": raw, "filename": filename, "content_type": ctype, "source": used_url, "mode": chosen_mode})
+        accepted.append({
+            "bytes": raw,
+            "filename": filename,
+            "content_type": ctype,
+            "source": used_url,
+            "mode": chosen_mode,
+        })
         report["images_clean_original"] += int(chosen_mode == "clean_original")
         report["images_clean_alternate"] += int(chosen_mode == "clean_alternate")
         report["images_watermark_removed"] += int(chosen_mode == "watermark_removed")
