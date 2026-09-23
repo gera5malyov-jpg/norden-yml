@@ -416,6 +416,9 @@ def run(dry_run=False):
                     matches[vid] = variant
 
         if len(matches) > 1:
+            # Конфликтующие существующие варианты считаем присутствующими в выгрузке,
+            # чтобы защитный проход ниже не обнулил их как якобы исчезнувшие.
+            matched_variant_ids.update(matches.keys())
             report["errors"].append({
                 "sku": item["sku"],
                 "stage": "match",
