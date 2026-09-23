@@ -168,10 +168,29 @@ def basket_snapshot(root):
         "errors": errors,
     }
 
+NOTE_KEYS = (
+    "comment", "customer_comment", "delivery_comment", "recipient_comment",
+    "comment_to_delivery", "order_comment", "note", "notes"
+)
+
+def customer_note(order):
+    customer = order.get("customer") if isinstance(order.get("customer"), dict) else {}
+    address = customer.get("address") if isinstance(customer.get("address"), dict) else {}
+    for scope in (order, customer, address):
+        for key in NOTE_KEYS:
+            value = scope.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return ""
+
 def create_basket(order, address, service, date, tmin, tmax):
     customer = order.get("customer") if isinstance(order.get("customer"), dict) else {}
-    person = s(customer.get("name"))
-    phone = s(customer.get("phone"))
+    addressee = order.get("addressee") if isinstance(order.get("addressee"), dict) else {}
+    person = s(addressee.get("name") or customer.get("name"))
+    base_phone = s(addressee.get("phone") or customer.get("phone"))
+    phone_pin = s(addressee.get("pin"))
+    phone = base_phone + (f" доб. {phone_pin}" if phone_pin else "")
+    note = customer_note(order)
     if not person:
         raise RuntimeError("Ozon не вернул ФИО получателя")
     if not phone:
@@ -205,10 +224,8 @@ def create_basket(order, address, service, date, tmin, tmax):
     ET.SubElement(node, "paytype").text = "NO"
     ET.SubElement(node, "price").text = "0"
     ET.SubElement(node, "inshprice").text = f"{total:.2f}"
-    ET.SubElement(node, "instruction").text = (
-        f"Заказ Ozon {ORDER_NO}. Предоплачен. "
-        "Создан только в корзине Dalli, без автоматической отправки в доставку."
-    )
+    # Примечание передаём только если его написал покупатель в заказе Ozon.
+    ET.SubElement(node, "instruction").text = note
     items = ET.SubElement(node, "items")
     for p in products:
         qty = max(1, int(p.get("quantity") or 1))
@@ -218,6 +235,7 @@ def create_basket(order, address, service, date, tmin, tmax):
             "retprice": f"{price:.2f}",
             "inshprice": f"{price:.2f}",
             "article": s(p.get("offer_id"))[:100],
+            "VATrate": "0",
         }
         item = ET.SubElement(items, "item", attrs)
         item.text = s(p.get("name"))[:250] or s(p.get("offer_id")) or "Товар Ozon"
