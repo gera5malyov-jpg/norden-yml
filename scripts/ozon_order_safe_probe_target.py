@@ -48,4 +48,10 @@ safe={
     "delivery_price":o.get("delivery_price"),
     "prr_option":o.get("prr_option"),
 }
-print(json.dumps(safe,ensure_ascii=False,indent=2))
+text=json.dumps(safe,ensure_ascii=False,indent=2)
+print(text)
+out_path=os.environ.get("SAFE_RESULT_PATH","").strip()
+if out_path:
+    os.makedirs(os.path.dirname(out_path),exist_ok=True)
+    with open(out_path,"w",encoding="utf-8") as f:
+        f.write(text+"\n")
