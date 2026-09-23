@@ -125,11 +125,11 @@ def main():
     if cur is None: raise RuntimeError("Исходный заказ не найден в корзине")
     old_barcode=s(cur.findtext("barcode"))
     addr=full_address(o)
-    date,t1,t2=interval(addr,"30")
+    date,t1,t2=interval(addr,"32")
     removed=False
     try:
         removebasket(old_barcode); removed=True
-        create_order(o,"30",date,t1,t2,True)
+        create_order(o,"32",date,t1,t2,True)
     except Exception as primary:
         if removed:
             try:
@@ -154,7 +154,7 @@ def main():
     os.makedirs(os.path.dirname(OUT),exist_ok=True)
     with open(OUT,"w",encoding="utf-8") as f: json.dump(result,f,ensure_ascii=False,indent=2); f.write("\n")
     print(json.dumps(result,ensure_ascii=False,indent=2))
-    if result["service"]!="30" or not result["climb_present"]: raise SystemExit(2)
+    if result["service"] not in {"30","32"} or not result["climb_present"]: raise SystemExit(2)
 
 if __name__=="__main__":
     try: main()
