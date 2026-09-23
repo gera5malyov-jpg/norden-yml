@@ -1,0 +1,33 @@
+name: Repair Dalli paid lift 80399471-0026-1
+on:
+  push:
+    paths:
+      - '.github/workflows/dalli-repair-prr-80399471-0026-1.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Добавить оплаченный подъём
+        env:
+          TARGET_EXTERNAL_ID: '80399471-0026-1'
+          SAFE_RESULT_PATH: 'dalli/order_80399471-0026-1_prr_repair.json'
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+        run: python scripts/repair_dalli_prr_from_ozon.py
+      - name: Сохранить результат
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+          git add dalli/order_80399471-0026-1_prr_repair.json || true
+          git diff --cached --quiet || git commit -m "Store Dalli lift repair result 80399471-0026-1"
+          git push
