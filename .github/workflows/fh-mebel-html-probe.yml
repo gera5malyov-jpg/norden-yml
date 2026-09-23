@@ -1,0 +1,23 @@
+name: FH Mebel HTML Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'fh-mebel-kit/probe_fh.py'
+      - '.github/workflows/fh-mebel-html-probe.yml'
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+      - name: Inspect FH Mebel product HTML
+        run: python fh-mebel-kit/probe_fh.py
