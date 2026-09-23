@@ -29,7 +29,7 @@ permissions:
 
 concurrency:
   group: fh-mebel-kit-sync
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   sync:
