@@ -20,13 +20,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - run: pip install requests
-
+      - name: Проверить payload
+        run: python tdandrey-kit/loader.py --help >/dev/null
       - name: Обновить цены и остатки
         env:
           TDANDREY_EXPORT_URL: ${{ secrets.TDANDREY_EXPORT_URL }}
@@ -34,9 +33,7 @@ jobs:
           WEBASYST_BASE_URL: https://profikompany.ru
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
           TDANDREY_WEBASYST_WRITE_DELAY: '0.45'
-        run: |
-          python tdandrey-kit/runner.py --mode daily --max-new 300
-
+        run: python tdandrey-kit/loader.py --mode daily --max-new 300
       - name: Сохранить mapping и отчёт
         if: always()
         shell: bash
