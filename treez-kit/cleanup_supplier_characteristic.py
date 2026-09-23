@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -47,26 +48,22 @@ def main():
     characteristics = kit.list_all("/v1/characteristics", {"status": "ACTIVE"}, "characteristics")
     titles = {s(x.get("id")): s(x.get("title")) for x in characteristics if s(x.get("id"))}
 
-    supplier_ids = {
+    removable_ids = {
         cid for cid, title in titles.items()
-        if norm(title) == "поставщик"
+        if norm(title) in {"поставщик", "остаток"}
     }
 
     report = {
         "status": "running",
         "brand": BRAND,
-        "supplier_characteristic_ids": sorted(supplier_ids),
+        "removed_characteristic_titles": ["Поставщик", "Остаток"],
+        "removed_characteristic_ids": sorted(removable_ids),
         "checked": 0,
         "cleaned": 0,
+        "description_cleaned": 0,
         "unchanged": 0,
         "errors": [],
     }
-
-    if not supplier_ids:
-        report["status"] = "ok"
-        report["reason"] = "Характеристика «Поставщик» в KIT не найдена"
-        write_report(report)
-        return 0
 
     rows = kit.list_all("/v1/variants", {"name": BRAND}, "variants")
     treez_rows = [
@@ -86,13 +83,30 @@ def main():
             chars = list(detail.get("characteristics") or [])
             filtered = [
                 ch for ch in chars
-                if s(ch.get("characteristic_id")) not in supplier_ids
-                and norm(ch.get("title")) != "поставщик"
+                if s(ch.get("characteristic_id")) not in removable_ids
+                and norm(ch.get("title")) not in {"поставщик", "остаток"}
             ]
-            if filtered == chars:
+
+            description = s(detail.get("description"))
+            cleaned_description = re.sub(
+                r"(?im)^\s*Остаток\s*:\s*0(?:[.,]0*)?\s*$",
+                "",
+                description,
+            )
+            cleaned_description = re.sub(r"\n{3,}", "\n\n", cleaned_description).strip()
+
+            body = {}
+            if filtered != chars:
+                body["characteristics"] = filtered
+            if cleaned_description != description:
+                body["description"] = cleaned_description
+                report["description_cleaned"] += 1
+
+            if not body:
                 report["unchanged"] += 1
                 continue
-            kit.request("PATCH", f"/v1/variants/{vid}", body={"characteristics": filtered}, timeout=180)
+
+            kit.request("PATCH", f"/v1/variants/{vid}", body=body, timeout=180)
             report["cleaned"] += 1
         except Exception as exc:
             report["errors"].append({
