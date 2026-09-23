@@ -52,6 +52,14 @@ REVIEW_MESSAGE = """Спасибо за ваш заказ! ❤️
 
 Спасибо, что выбрали «Мегаполис»!"""
 
+YANDEX_REVIEW_MESSAGE = """Спасибо за ваш заказ! ❤️
+
+Если покупка вам понравилась, будем очень благодарны, если вы оставите оценку или отзыв на Маркете.
+
+Для нас это очень важно — ваша обратная связь помогает нашему магазину развиваться и становиться лучше.
+
+Спасибо, что выбрали «Мегаполис»!"""
+
 # Marketplace statuses flow only into Webasyst. Buyer chat writes are limited to the two approved lifecycle messages below.
 GRAPH = {
     "new": [("process", "processing"), ("otmenen", "otmenen")],
@@ -304,7 +312,12 @@ def maybe_send_marketplace_message(order_id: str, o: dict, message_kind: str):
 
     sent_key = "mp_chat_welcome_sent_at" if message_kind == "welcome" else "mp_chat_review_sent_at"
     blocked_key = "mp_chat_welcome_blocked" if message_kind == "welcome" else "mp_chat_review_blocked"
-    message = WELCOME_MESSAGE if message_kind == "welcome" else REVIEW_MESSAGE
+    if message_kind == "welcome":
+        message = WELCOME_MESSAGE
+    elif o.get("source") == "yandex_market":
+        message = YANDEX_REVIEW_MESSAGE
+    else:
+        message = REVIEW_MESSAGE
 
     params = get_order_params(order_id)
     if s(params.get(sent_key)) or s(params.get(blocked_key)):
