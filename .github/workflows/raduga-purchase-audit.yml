@@ -1,0 +1,38 @@
+name: Raduga purchase prices audit
+
+on:
+  push:
+    paths:
+      - 'scripts/update_raduga_purchase_prices.py'
+      - 'kit-backup/raduga_import_registry.json'
+      - 'kit-backup/raduga_purchase_prices.json'
+      - '.github/workflows/raduga-purchase-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install gspread google-auth rapidfuzz
+      - name: Audit Raduga purchase-price mapping
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: '1xZUeaWUr-6O3KK0MO-1U7IGBKXXfgcmZ-EJ-w-2wWug'
+          APPLY: '0'
+        run: python scripts/update_raduga_purchase_prices.py
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raduga-purchase-audit
+          path: runtime/raduga_purchase_update_report.json
+          if-no-files-found: warn
+          retention-days: 7
