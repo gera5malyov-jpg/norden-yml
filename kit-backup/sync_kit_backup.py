@@ -546,6 +546,8 @@ def build_source_enrichment(data):
             put(vid, "Afina Garden", purchase)
         elif brand_n == _norm_title("Алетан"):
             put(vid, "Алетан")
+        elif brand_n == _norm_title("Levmar"):
+            put(vid, "Levmar")
         elif brand_n == _norm_title("Norden"):
             put(vid, "Norden")
         elif (
