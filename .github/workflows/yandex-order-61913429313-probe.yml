@@ -1,0 +1,30 @@
+name: Probe Yandex order 61913429313
+on:
+  push:
+    paths:
+      - '.github/workflows/yandex-order-61913429313-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Получить заказ Яндекс
+        env:
+          YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+          SAFE_RESULT_PATH: yandex/order_61913429313_safe_probe.json
+        run: python scripts/yandex_order_61913429313_safe_probe.py
+      - name: Сохранить безопасный результат
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+          git add yandex/order_61913429313_safe_probe.json || true
+          git diff --cached --quiet || git commit -m "Store Yandex safe probe 61913429313"
+          git push
