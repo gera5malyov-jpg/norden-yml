@@ -548,6 +548,28 @@ def build_source_enrichment(data):
             put(vid, "Алетан")
         elif brand_n == _norm_title("Levmar"):
             put(vid, "Levmar")
+        elif brand_n in {_norm_title("ТЭКС"), _norm_title("БТС"), _norm_title("Регион 058"), _norm_title("МК Стиль"), _norm_title("Эра"), _norm_title("Элегия")}:
+            put(vid, "ТД Андрей")
+        elif brand_n in {_norm_title("4СИС  (4SIS)"), _norm_title("4SIS")}:
+            put(vid, "4SIS")
+        elif brand_n == _norm_title("Everprof"):
+            put(vid, "Everprof")
+        elif brand_n == _norm_title("DOBRIN"):
+            put(vid, "DOBRIN")
+        elif brand_n == _norm_title("Интерьер-Центр"):
+            put(vid, "Интерьер-Центр")
+        elif brand_n in {_norm_title("LouvreHome"), _norm_title("Louvre home")}:
+            put(vid, "LouvreHome")
+        elif brand_n in {_norm_title("Alavann"), _norm_title("Аlavann")}:
+            put(vid, "Alavann")
+        elif brand_n == _norm_title("Терминал"):
+            put(vid, "Терминал")
+        elif brand_n == _norm_title("Art-Zerkalo"):
+            put(vid, "Арт зеркало")
+        elif brand_n == _norm_title("Tetchair"):
+            put(vid, "Tetchair")
+        elif brand_n == _norm_title("HALMAR"):
+            put(vid, "signal-halmar")
         elif brand_n == _norm_title("Norden"):
             put(vid, "Norden")
         elif (
