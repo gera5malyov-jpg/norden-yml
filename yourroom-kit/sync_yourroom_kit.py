@@ -353,8 +353,8 @@ def is_probable_label(text):
 
 def extract_characteristics(soup, h1):
     start = soup.find(
-        lambda tag: getattr(tag, "name", None) in ("h2", "h3", "div", "span")
-        and "основные характеристики" in norm(tag.get_text(" ", strip=True))
+        lambda tag: getattr(tag, "name", None) in ("h2", "h3", "p", "div", "span")
+        and norm(tag.get_text(" ", strip=True)) == "основные характеристики"
     )
     pairs = {}
 
