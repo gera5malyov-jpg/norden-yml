@@ -1,0 +1,69 @@
+name: Create Dalli MSK baskets from Ozon batch 2026-09-23
+
+on:
+  push:
+    paths:
+      - '.github/workflows/dalli-msk-batch-67081442-37307681-80399471.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dalli-msk-batch-67081442-37307681-80399471
+  cancel-in-progress: false
+
+jobs:
+  create-baskets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests
+
+      - name: Создать заказы только в корзине Dalli МСК
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+        shell: bash
+        run: |
+          set +e
+          failed=0
+          for order in 67081442-0604-1 37307681-0157-1 80399471-0026-1; do
+            echo "=== ORDER $order ==="
+            TARGET_EXTERNAL_ID="$order" \
+            SAFE_RESULT_PATH="dalli/order_${order}_msk_basket_result.json" \
+            python scripts/create_dalli_msk_basket_from_ozon.py
+            rc=$?
+            if [ $rc -ne 0 ]; then
+              failed=1
+            fi
+          done
+          echo "BATCH_FAILED=$failed" >> "$GITHUB_ENV"
+          exit 0
+
+      - name: Сохранить безопасные результаты
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+          git add dalli/order_67081442-0604-1_msk_basket_result.json \
+                  dalli/order_37307681-0157-1_msk_basket_result.json \
+                  dalli/order_80399471-0026-1_msk_basket_result.json || true
+          git diff --cached --quiet || git commit -m "Store Dalli MSK basket batch results"
+          git push
+
+      - name: Проверить итог
+        if: always()
+        run: |
+          if [ "${BATCH_FAILED:-0}" != "0" ]; then
+            echo "Один или несколько заказов Dalli завершились с ошибкой"
+            exit 1
+          fi
