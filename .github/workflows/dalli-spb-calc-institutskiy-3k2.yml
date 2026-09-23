@@ -1,0 +1,26 @@
+name: Dalli SPB calc Institutskiy 3k2
+on:
+  push:
+    paths:
+      - '.github/workflows/dalli-spb-calc-institutskiy-3k2.yml'
+  workflow_dispatch:
+jobs:
+  calc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Рассчитать Dalli СПБ
+        env:
+          DALLI_ACCOUNT: spb
+          DALLI_TOKEN: ${{ secrets.DALLI_TOKEN }}
+        run: |
+          python dalli/dalli_api.py delivery-cost \
+            --to "Санкт-Петербург, Институтский проспект, 3 корпус 2" \
+            --weight 10 \
+            --length 100 \
+            --width 50 \
+            --height 50 \
+            --places 1
