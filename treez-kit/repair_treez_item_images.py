@@ -93,9 +93,11 @@ def main():
 
     fresh_images = m.build_media(kit, dict(item, pictures=gallery), report)
     if len(fresh_images) != len(gallery):
-        raise RuntimeError(
-            f"Загружено {len(fresh_images)} из {len(gallery)} изображений"
-        )
+        report["status"] = "partial"
+        report["complete"] = False
+        report["error"] = f"Загружено {len(fresh_images)} из {len(gallery)} изображений"
+        write_report(report)
+        return 2
 
     preserved = [
         x for x in before_media
