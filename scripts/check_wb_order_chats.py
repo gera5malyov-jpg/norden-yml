@@ -44,6 +44,19 @@ for o in orders:
             "delivery_type":o.get("deliveryType"),
         }
 
+# Also compare chat rid values with the recent Statistics orders used by the Webasyst sync.
+stats_rids=set()
+stats_r=get(
+    "https://statistics-api.wildberries.ru/api/v1/supplier/orders",
+    params={"dateFrom":(now-timedelta(days=60)).strftime("%Y-%m-%dT%H:%M:%S"),"flag":0},
+)
+if stats_r.ok and isinstance(stats_r.json(),list):
+    for row in stats_r.json():
+        if isinstance(row,dict):
+            rid=str(row.get("srid") or "").strip()
+            if rid:
+                stats_rids.add(rid)
+
 # Public Buyers Chat API.
 chat_r=get("https://buyer-chat-api.wildberries.ru/api/v1/seller/chats")
 result={
@@ -53,6 +66,9 @@ result={
     "chat_access":chat_r.ok,
     "chats_total":0,
     "matched_order_chats":[],
+    "statistics_http":stats_r.status_code,
+    "statistics_rids":len(stats_rids),
+    "matched_statistics_chats":0,
 }
 if chat_r.ok:
     data=chat_r.json() if chat_r.content else {}
@@ -72,6 +88,8 @@ if chat_r.ok:
                 "has_replySign":bool(ch.get("replySign")),
                 "has_chatID":bool(ch.get("chatID")),
             })
+        if rid and rid in stats_rids:
+            result["matched_statistics_chats"] += 1
 else:
     result["chat_error"]=chat_r.text[:500]
 
