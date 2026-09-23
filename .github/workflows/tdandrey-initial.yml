@@ -1,0 +1,88 @@
+name: ТД Андрей — первичная сверка Webasyst → KIT
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tdandrey-kit/trigger-initial.txt'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: tdandrey-kit-write
+  cancel-in-progress: false
+
+jobs:
+  initial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: pip install requests
+
+      - name: Проверить секрет выгрузки
+        env:
+          TDANDREY_EXPORT_URL: ${{ secrets.TDANDREY_EXPORT_URL }}
+        run: |
+          test -n "$TDANDREY_EXPORT_URL" || { echo 'Не настроен GitHub Actions secret TDANDREY_EXPORT_URL'; exit 2; }
+
+      - name: Сверить Webasyst и сначала перенести существующие товары в KIT
+        env:
+          TDANDREY_EXPORT_URL: ${{ secrets.TDANDREY_EXPORT_URL }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          TDANDREY_WEBASYST_WRITE_DELAY: '0.45'
+        run: |
+          python tdandrey-kit/runner.py --mode webasyst-first --max-new 1500 --images
+
+      - name: Сохранить mapping и отчёт
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions
+          git config user.email actions@github.com
+          mkdir -p /tmp/tdandrey-state
+          cp tdandrey-kit/kit_mapping.json /tmp/tdandrey-state/kit_mapping.json 2>/dev/null || true
+          cp tdandrey-kit/last_sync_report.json /tmp/tdandrey-state/last_sync_report.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/tdandrey-state/kit_mapping.json tdandrey-kit/kit_mapping.json 2>/dev/null || true
+          cp /tmp/tdandrey-state/last_sync_report.json tdandrey-kit/last_sync_report.json 2>/dev/null || true
+          git add tdandrey-kit/kit_mapping.json tdandrey-kit/last_sync_report.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Обновить первичную сверку ТД Андрей'
+          git push origin HEAD:main
+
+      - name: Запустить пакетную загрузку всего каталога KIT
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          repo=os.environ['GITHUB_REPOSITORY']
+          url=f'https://api.github.com/repos/{repo}/actions/workflows/tdandrey-bootstrap.yml/dispatches'
+          body=json.dumps({'ref':'main','inputs':{'batch_size':'600'}}).encode()
+          req=urllib.request.Request(url,data=body,method='POST',headers={
+              'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+              'Accept':'application/vnd.github+json',
+              'X-GitHub-Api-Version':'2022-11-28',
+              'Content-Type':'application/json',
+          })
+          with urllib.request.urlopen(req,timeout=30) as resp:
+              if resp.status != 204:
+                  raise RuntimeError(resp.status)
+          PY
