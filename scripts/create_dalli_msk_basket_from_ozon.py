@@ -310,11 +310,22 @@ def main():
 
     services = list_services()
     climb = paid_prr_climb(ozon)
-    if climb and "30" in services:
-        service, service_name = "30", services["30"]
+    dates = []
+    if climb:
+        service = ""
+        service_name = ""
+        for candidate in ("30", "32"):
+            if candidate not in services:
+                continue
+            candidate_dates = get_dates(address, candidate)
+            if candidate_dates:
+                service, service_name, dates = candidate, services[candidate], candidate_dates
+                break
+        if not service:
+            raise RuntimeError("Dalli не вернул доступной КГТ-доставки для оплаченного подъёма")
     else:
         service, service_name = choose_service(address_dict, services)
-    dates = get_dates(address, service)
+        dates = get_dates(address, service)
     date, tmin, tmax, interval_type = choose_date_interval(dates)
 
     create_resp, declared_value, _ = create_basket(
