@@ -407,17 +407,24 @@ def run(dry_run=False):
     resolved = []
     matched_variant_ids = set()
     for item in offers:
-        candidates = item["sku_candidates"]
-        matches = {}
-        for candidate in candidates:
-            for variant in kit_by_sku.get(sku_key(candidate), []):
-                vid = s(variant.get("id"))
-                if vid:
-                    matches[vid] = variant
+        # Канонический RED-SKU имеет приоритет. Старые варианты вида RED-00-_...
+        # используются только как fallback, если канонической карточки ещё нет.
+        canonical_rows = kit_by_sku.get(sku_key(item["sku"]), [])
+        if len(canonical_rows) > 1:
+            matches = {s(v.get("id")): v for v in canonical_rows if s(v.get("id"))}
+        elif len(canonical_rows) == 1:
+            matches = {s(canonical_rows[0].get("id")): canonical_rows[0]}
+        else:
+            matches = {}
+            for candidate in item["sku_candidates"]:
+                if sku_key(candidate) == sku_key(item["sku"]):
+                    continue
+                for variant in kit_by_sku.get(sku_key(candidate), []):
+                    vid = s(variant.get("id"))
+                    if vid:
+                        matches[vid] = variant
 
         if len(matches) > 1:
-            # Конфликтующие существующие варианты считаем присутствующими в выгрузке,
-            # чтобы защитный проход ниже не обнулил их как якобы исчезнувшие.
             matched_variant_ids.update(matches.keys())
             report["errors"].append({
                 "sku": item["sku"],
