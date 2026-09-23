@@ -59,6 +59,8 @@ res={
   "campaign_id":campaign_id,
   "status":s(found.get("status")),
   "substatus":s(found.get("substatus")),
+  "payment_type":s(found.get("paymentType")),
+  "payment_method":s(found.get("paymentMethod")),
   "items":items,
   "delivery":{
     "type":s(delivery.get("type")),
