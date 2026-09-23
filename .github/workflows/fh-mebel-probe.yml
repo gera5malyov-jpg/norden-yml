@@ -1,0 +1,52 @@
+name: FH-Mebel probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'fh-mebel-kit/probe_fh.py'
+      - '.github/workflows/fh-mebel-probe.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fh-mebel-probe
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Установить зависимости
+        run: pip install requests beautifulsoup4 lxml
+      - name: Проверить структуру карточек FH-Mebel
+        shell: bash
+        run: |
+          set -o pipefail
+          python fh-mebel-kit/probe_fh.py | tee fh-mebel-kit/probe_output.txt
+      - name: Сохранить результат probe
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          cp fh-mebel-kit/probe_output.txt /tmp/fh-probe.txt 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          if [ -f /tmp/fh-probe.txt ]; then
+            mkdir -p fh-mebel-kit
+            cp /tmp/fh-probe.txt fh-mebel-kit/probe_output.txt
+          fi
+          git add fh-mebel-kit/probe_output.txt 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Обновить probe FH-Mebel'
+          git push origin HEAD:main || true
