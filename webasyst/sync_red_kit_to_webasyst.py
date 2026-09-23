@@ -159,7 +159,9 @@ def extimg_summary(urls):
     urls = [s(x) for x in urls if s(x)]
     if not urls:
         return ""
-    return "[extimg]\n" + "\n".join(urls) + "\n[/extimg]"
+    # Each image must be wrapped in its own extimg block:
+    # [extimg]\nURL\n[/extimg]
+    return "\n".join(f"[extimg]\\n{url}\\n[/extimg]" for url in urls)
 
 
 def product_skus(product):
@@ -244,7 +246,7 @@ def main():
             "prices_touched": False,
             "stocks_touched": False,
             "sku_update_calls": 0,
-            "images_destination": "Краткое описание [extimg]",
+            "images_destination": "Краткое описание: отдельный [extimg]URL[/extimg] для каждого изображения",
             "characteristics_source": "Yandex KIT",
         },
         "kit_variants_scanned": 0,
@@ -453,7 +455,6 @@ def main():
 
         brand = s(variant.get("brand"))
         barcode = s(variant.get("barcode"))
-        vat = variant.get("vat")
         seo_h1 = s(variant.get("seo_h1"))
         seo_title = s(variant.get("seo_title"))
         seo_description = s(variant.get("seo_description"))
@@ -462,8 +463,6 @@ def main():
             out["Бренд"] = brand
         if barcode:
             out["Штрихкод"] = barcode
-        if vat not in (None, ""):
-            out["НДС"] = s(vat)
         if seo_h1:
             out["SEO H1"] = seo_h1
         if seo_title:
