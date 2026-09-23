@@ -125,11 +125,24 @@ def main():
     try: floor=max(1,int(float(str(a.get("floor") or "1").replace(",","."))))
     except: floor=1
     paid_lift=lift_price>0 and lift_type not in {"","NOT_NEEDED","FREE","UNKNOWN"}
-    service="30" if paid_lift else "11"
     climb_type="stairs" if lift_type=="MANUAL" else "elevator"
 
     target=target_date(delivery)
-    date,t1,t2,target_matched=get_interval(addr,service,target)
+    if paid_lift:
+        service=""
+        last_error=None
+        for candidate in ("30","32"):
+            try:
+                date,t1,t2,target_matched=get_interval(addr,candidate,target)
+                service=candidate
+                break
+            except Exception as exc:
+                last_error=exc
+        if not service:
+            raise RuntimeError(f"Dalli не вернул КГТ-интервалы для оплаченного подъёма: {last_error}")
+    else:
+        service="11"
+        date,t1,t2,target_matched=get_interval(addr,service,target)
 
     existing=getbasket().find(".//order")
     if existing is not None:
