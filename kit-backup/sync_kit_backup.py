@@ -3,6 +3,7 @@ import base64
 import gzip
 import hashlib
 import io
+import importlib.util
 import json
 import math
 import os
@@ -18,6 +19,7 @@ import requests
 
 KIT_BASE = "https://api.kit.yandex.net"
 ROOT = Path(__file__).resolve().parent
+REPO_ROOT = ROOT.parent
 RUNTIME = ROOT / "runtime"
 RUNTIME.mkdir(parents=True, exist_ok=True)
 
@@ -363,6 +365,199 @@ def load_from_yml(url: str):
     }
 
 
+def _read_json(path: Path, default=None):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {} if default is None else default
+
+
+def _source_key(value):
+    return " ".join(str(value or "").strip().casefold().split())
+
+
+def _variant_char_map(variant, char_titles):
+    out = {}
+    for row in variant.get("characteristics") or []:
+        if not isinstance(row, dict):
+            continue
+        cid = clean(row.get("characteristic_id") or row.get("id"))
+        title = clean(row.get("title") or char_titles.get(cid) or cid)
+        key = _norm_title(title)
+        vals = []
+        if row.get("value") not in (None, ""):
+            vals.append(clean(row.get("value")))
+        for value in row.get("values") or []:
+            value = clean(value)
+            if value and value not in vals:
+                vals.append(value)
+        if vals:
+            out[key] = vals
+    return out
+
+
+def build_source_enrichment(data):
+    """Определяет поставщика и реальную закупку только из подтвержденных источников."""
+    result = {}
+    warnings = []
+    char_titles = {
+        clean(x.get("id")): clean(x.get("title") or x.get("name"))
+        for x in data.get("characteristics") or []
+        if clean(x.get("id"))
+    }
+
+    def put(variant_id, supplier=None, purchase=None, *, overwrite=False):
+        vid = clean(variant_id)
+        if not vid:
+            return
+        row = result.setdefault(vid, {})
+        if supplier and (overwrite or not row.get("supplier")):
+            row["supplier"] = supplier
+        if purchase not in (None, "") and (overwrite or row.get("purchase") in (None, "")):
+            row["purchase"] = clean(purchase)
+
+    # Б2Б Фабрика: точная связь source article -> variant_id хранится в mapping.json.
+    try:
+        mapping = _read_json(REPO_ROOT / "b2b-335" / "mapping.json", {"variants": {}})
+        prices = _read_json(REPO_ROOT / "b2b-335" / "prices.json", {})
+        prices = {_source_key(k): v for k, v in prices.items()}
+        for source_article, meta in (mapping.get("variants") or {}).items():
+            if not isinstance(meta, dict):
+                continue
+            put(
+                meta.get("variant_id"),
+                "Б2Б Фабрика",
+                prices.get(_source_key(source_article)),
+                overwrite=True,
+            )
+    except Exception as exc:
+        warnings.append(f"Б2Б Фабрика: не удалось получить закупки: {exc}")
+
+    # Norden: используем точное сохраненное сопоставление и текущий API/оптовый XML.
+    try:
+        mapping = _read_json(REPO_ROOT / "norden-kit" / "kit_mapping.json", {"variants": {}})
+        module_path = REPO_ROOT / "norden-kit" / "sync_norden_kit.py"
+        spec = importlib.util.spec_from_file_location("kit_backup_norden_source", module_path)
+        if spec is None or spec.loader is None:
+            raise RuntimeError("не удалось загрузить модуль Norden")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        secret = os.getenv("NORDEN_SECRET", "").strip()
+        if secret:
+            try:
+                source, _, = mod.source_from_api(secret, short=True)
+            except Exception:
+                source, _ = mod.source_from_xml(short=True)
+        else:
+            source, _ = mod.source_from_xml(short=True)
+
+        for article, refs in (mapping.get("variants") or {}).items():
+            refs = refs if isinstance(refs, list) else ([refs] if isinstance(refs, dict) else [])
+            purchase = (source.get(article) or {}).get("purchase")
+            for meta in refs:
+                if isinstance(meta, dict):
+                    put(meta.get("variant_id"), "Norden", purchase, overwrite=True)
+    except Exception as exc:
+        warnings.append(f"Norden: поставщик будет определен по карточке, закупка не обновлена: {exc}")
+
+    # Samson: SKU SAMS-* однозначно определяет источник. Закупку берем из API, если secret доступен.
+    samson_prices = {}
+    samson_secret = os.getenv("SAMSON_API_KEY", "").strip()
+    if samson_secret:
+        try:
+            samson_root = str(REPO_ROOT / "samson-kit")
+            if samson_root not in sys.path:
+                sys.path.insert(0, samson_root)
+            from samson_kit.http import SafeSession
+            from samson_kit.samson_client import SamsonClient
+            from samson_kit.mapper import normalize_sku
+            client = SamsonClient(samson_secret, SafeSession(max_attempts=4))
+            for raw in client.iter_prices():
+                try:
+                    item = normalize_sku(raw)
+                    if item.purchase_price is not None:
+                        samson_prices[_source_key(item.source_code)] = item.purchase_price
+                except Exception:
+                    continue
+        except Exception as exc:
+            warnings.append(f"Самсон: закупочная цена не обновлена: {exc}")
+
+    # Afina Garden: закупка хранится в <opt1mln> исходного YML.
+    afina_prices = {}
+    try:
+        urls = [
+            "https://afinalux.ru/index.php?route=feed/yandex_yml",
+            "http://afinalux.ru/index.php?route=feed/yandex_yml",
+        ]
+        content = None
+        last_error = None
+        for url in urls:
+            try:
+                response = requests.get(url, timeout=(10, 35), headers={"User-Agent": "KIT-backup/2.0"})
+                response.raise_for_status()
+                if response.content:
+                    content = response.content
+                    break
+            except Exception as exc:
+                last_error = exc
+        if content:
+            root = ET.fromstring(content)
+            for offer in root.iter():
+                if offer.tag.split("}")[-1].casefold() != "offer":
+                    continue
+                fields = {}
+                for child in list(offer):
+                    fields[child.tag.split("}")[-1].casefold()] = clean(child.text).strip()
+                code = fields.get("vendorcode", "")
+                purchase = fields.get("opt1mln", "")
+                if code and purchase:
+                    afina_prices[_source_key(code)] = purchase
+        elif last_error:
+            warnings.append(f"Afina Garden: закупочная цена не обновлена: {last_error}")
+    except Exception as exc:
+        warnings.append(f"Afina Garden: закупочная цена не обновлена: {exc}")
+
+    # Остальные источники определяем только по сильным признакам карточки.
+    for v in data.get("variants") or []:
+        vid = clean(v.get("id"))
+        sku = clean(v.get("sku"))
+        sku_l = sku.casefold()
+        brand = clean(v.get("brand"))
+        brand_n = _norm_title(brand)
+        chars = _variant_char_map(v, char_titles)
+        webasyst = (chars.get("webasyst") or [""])[0]
+        supplier_article = (chars.get("артикул поставщика") or [""])[0]
+
+        if sku_l.startswith("sams-"):
+            code = sku[5:]
+            put(vid, "Самсон", samson_prices.get(_source_key(code)))
+        elif sku_l.startswith("liga-"):
+            put(vid, "Лига Диванов")
+        elif sku_l.startswith("deep-") or webasyst == "336":
+            put(vid, "DEEPHOUSE")
+        elif sku_l.startswith("334-") or webasyst == "334":
+            put(vid, "Kenner")
+        elif sku_l.startswith("335-") or webasyst == "335":
+            put(vid, "Б2Б Фабрика")
+        elif webasyst == "333" or brand_n == _norm_title("4 Сезона"):
+            put(vid, "4 Сезона")
+        elif brand_n == _norm_title("Afina Garden"):
+            purchase = afina_prices.get(_source_key(supplier_article or sku))
+            put(vid, "Afina Garden", purchase)
+        elif brand_n == _norm_title("Алетан"):
+            put(vid, "Алетан")
+        elif brand_n == _norm_title("Norden"):
+            put(vid, "Norden")
+        elif (
+            brand_n in {_norm_title("RIVA"), _norm_title("Riva Chair"), _norm_title("RV DESIGN")}
+            or "id предложения riva" in chars
+            or "id группы riva" in chars
+        ):
+            put(vid, "Riva")
+
+    return result, warnings
+
+
 def _norm_title(value):
     return " ".join(str(value or "").replace("ё", "е").replace("Ё", "Е").casefold().split())
 
@@ -383,7 +578,7 @@ COMMON_CHARACTERISTICS = [
 ]
 
 
-def build_tables(data):
+def build_tables(data, enrichment=None):
     chars_by_id = {}
     for c in data.get("characteristics") or []:
         cid = clean(c.get("id"))
@@ -408,6 +603,7 @@ def build_tables(data):
     ]
     rows = []
     all_characteristic_rows = []
+    enrichment = enrichment or {}
 
     flattened = {
         "id", "kit_id", "sku", "name", "brand", "barcode", "status",
@@ -465,10 +661,11 @@ def build_tables(data):
 
         extra = {k: val for k, val in v.items() if k not in flattened}
 
+        source_info = enrichment.get(clean(v.get("id")), {})
         rows.append([
             safe_cell(v.get("id")), safe_cell(v.get("kit_id")), sku, safe_cell(v.get("name")),
             safe_cell(v.get("brand")),
-            "", "", safe_cell(v.get("created_at")),
+            safe_cell(source_info.get("supplier")), safe_cell(source_info.get("purchase")), safe_cell(v.get("created_at")),
             safe_cell(v.get("barcode")), safe_cell(v.get("status")),
             safe_cell(v.get("product_id")), safe_cell(v.get("product_card_id")),
             *[safe_cell(char_values.get(label, "")) for label, _ in COMMON_CHARACTERISTICS],
@@ -661,6 +858,8 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
         ["Категорий", report["counts"]["categories"]],
         ["Складов", report["counts"]["warehouses"]],
         ["Справочник характеристик", report["counts"]["characteristic_definitions"]],
+        ["Поставщик определен", report["counts"].get("supplier_filled", 0)],
+        ["Закупочная цена заполнена", report["counts"].get("purchase_price_filled", 0)],
         ["Продуктов API (глубокий режим)", report["counts"]["products"]],
         ["Время чтения API, сек.", report.get("api_seconds", "")],
         ["YML fallback", report["fallback_url"]],
@@ -746,11 +945,16 @@ def main():
         "google_message": "",
     }
 
+    enrichment, enrichment_warnings = build_source_enrichment(data)
+    report["warnings"].extend(enrichment_warnings)
+    report["counts"]["supplier_filled"] = sum(1 for x in enrichment.values() if x.get("supplier"))
+    report["counts"]["purchase_price_filled"] = sum(1 for x in enrichment.values() if x.get("purchase") not in (None, ""))
+
     backup_path = save_full_backup(data, report)
     report["backup_file"] = str(backup_path.relative_to(ROOT))
     report["backup_bytes"] = backup_path.stat().st_size
 
-    tables = build_tables(data)
+    tables = build_tables(data, enrichment)
     credential_raw = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "")
     try:
         synced, message = sync_google(tables, report, sheet_id, credential_raw)
