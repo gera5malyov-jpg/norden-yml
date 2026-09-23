@@ -23,20 +23,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Установить зависимости
         run: pip install requests
-
+      - name: Проверить payload
+        run: python tdandrey-kit/loader.py --help >/dev/null
       - name: Проверить секрет выгрузки
         env:
           TDANDREY_EXPORT_URL: ${{ secrets.TDANDREY_EXPORT_URL }}
         run: |
           test -n "$TDANDREY_EXPORT_URL" || { echo 'Не настроен GitHub Actions secret TDANDREY_EXPORT_URL'; exit 2; }
-
       - name: Сверить Webasyst и сначала перенести существующие товары в KIT
         env:
           TDANDREY_EXPORT_URL: ${{ secrets.TDANDREY_EXPORT_URL }}
@@ -44,9 +42,7 @@ jobs:
           WEBASYST_BASE_URL: https://profikompany.ru
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
           TDANDREY_WEBASYST_WRITE_DELAY: '0.45'
-        run: |
-          python tdandrey-kit/runner.py --mode webasyst-first --max-new 1500 --images
-
+        run: python tdandrey-kit/loader.py --mode webasyst-first --max-new 1500 --images
       - name: Сохранить mapping и отчёт
         if: always()
         shell: bash
@@ -65,7 +61,6 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m 'Обновить первичную сверку ТД Андрей'
           git push origin HEAD:main
-
       - name: Запустить пакетную загрузку всего каталога KIT
         if: success()
         env:
