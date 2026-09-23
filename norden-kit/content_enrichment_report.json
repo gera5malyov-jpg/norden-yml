@@ -1,26 +1,24 @@
 {
-  "started_at": "2026-09-23T02:29:26.124326+00:00",
+  "started_at": "2026-09-23T03:15:08.066094+00:00",
   "mode": "content-only",
   "source": "api",
   "api_error": null,
   "source_products": 8486,
   "source_duplicate_articles": 15,
   "mapped_targets_total": 6111,
-  "start_index": 2250,
-  "end_index": 2500,
+  "start_index": 2500,
+  "end_index": 2750,
   "processed": 250,
-  "cards_images_filled": 209,
+  "cards_images_filled": 192,
   "cards_images_already_present": 0,
-  "cards_without_source_images": 40,
-  "image_files_uploaded": 223,
-  "image_errors": 1,
-  "characteristics_added": 966,
+  "cards_without_source_images": 58,
+  "image_files_uploaded": 196,
+  "image_errors": 0,
+  "characteristics_added": 972,
   "cards_characteristics_patched": 250,
   "errors": [],
-  "warnings": [
-    "OL-20-12.GN.GN.GN.L: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-  ],
-  "next_index": 2500,
-  "remaining": 3611,
-  "finished_at": "2026-09-23T03:08:02.492046+00:00"
+  "warnings": [],
+  "next_index": 2750,
+  "remaining": 3361,
+  "finished_at": "2026-09-23T03:49:45.555748+00:00"
 }
