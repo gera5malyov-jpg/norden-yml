@@ -25,22 +25,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - run: pip install requests
-
+      - name: Проверить payload
+        run: python tdandrey-kit/loader.py --help >/dev/null
       - name: Создать следующий пакет карточек KIT
         env:
           TDANDREY_EXPORT_URL: ${{ secrets.TDANDREY_EXPORT_URL }}
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           WEBASYST_BASE_URL: https://profikompany.ru
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
-        run: |
-          python tdandrey-kit/runner.py --mode bootstrap --max-new '${{ inputs.batch_size }}'
-
+        run: python tdandrey-kit/loader.py --mode bootstrap --max-new '${{ inputs.batch_size }}'
       - name: Сохранить mapping и отчёт
         if: always()
         shell: bash
@@ -59,7 +56,6 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m 'Обновить состояние загрузки ТД Андрей'
           git push origin HEAD:main
-
       - name: Определить, нужна ли следующая пачка
         id: next
         if: always()
@@ -78,7 +74,6 @@ jobs:
           print('remaining=' + str(remaining))
           print('created=' + str(created))
           PY
-
       - name: Поставить следующую пачку в очередь
         if: steps.next.outputs.continue == 'true'
         env:
