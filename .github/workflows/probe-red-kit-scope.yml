@@ -1,0 +1,22 @@
+name: Probe RED KIT scope
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/probe_red_kit_scope.py'
+      - '.github/workflows/probe-red-kit-scope.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python scripts/probe_red_kit_scope.py
