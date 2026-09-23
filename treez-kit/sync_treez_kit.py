@@ -267,9 +267,52 @@ def find_source_code(variant, titles):
     return ""
 
 
+def gallery_images(item):
+    out = []
+    product_url = s(item.get("url")).split("#", 1)[0]
+    if product_url:
+        try:
+            r = requests.get(
+                product_url,
+                timeout=60,
+                headers={"User-Agent": "Mozilla/5.0 Treez-KIT-Sync"},
+            )
+            r.raise_for_status()
+            page = html.unescape(r.text)
+
+            full = re.findall(
+                r"""https?://[^"'<>\s]+/photos/resize/1600_1800/[^"'<>\s]+""",
+                page,
+                flags=re.I,
+            )
+            if not full:
+                relative = re.findall(
+                    r"""(?:href|src)\s*=\s*["']([^"']+/photos/resize/1600_1800/[^"']+)["']""",
+                    page,
+                    flags=re.I,
+                )
+                full = [urljoin(product_url, x) for x in relative]
+
+            for url in full:
+                url = url.split("?", 1)[0]
+                if url not in out:
+                    out.append(url)
+        except Exception:
+            pass
+
+    for url in item.get("pictures") or []:
+        url = s(url)
+        if url and url not in out:
+            out.append(url)
+
+    return out[:30]
+
+
 def build_media(kit, item, report):
     media = []
-    for url in item["pictures"][:15]:
+    gallery = gallery_images(item)
+    report["gallery_images_found"] = report.get("gallery_images_found", 0) + len(gallery)
+    for url in gallery:
         try:
             uploaded = kit.upload_url(url, "treez-image")
             file_id = s(uploaded.get("id"))
@@ -363,10 +406,12 @@ def main_run(dry_run=False, force=False, skip_video=False):
         "source_offers": 0,
         "created": 0,
         "updated_existing": 0,
+        "existing_media_repaired": 0,
         "price_updates": 0,
         "stock_updates": 0,
         "zeroed_missing": 0,
         "images_uploaded": 0,
+        "gallery_images_found": 0,
         "image_errors": 0,
         "videos_uploaded": 0,
         "video_errors": 0,
@@ -534,12 +579,30 @@ def main_run(dry_run=False, force=False, skip_video=False):
             vid = s(variant.get("id"))
             if not dry_run:
                 try:
-                    kit.patch_variant(vid, {
+                    detail = variant if "media" in variant else kit.get_variant(vid)
+                    patch_body = {
                         "name": item["name"],
                         "description": description,
                         "brand": BRAND,
                         "characteristics": char_rows,
-                    })
+                    }
+
+                    gallery = gallery_images(item)
+                    current_media = list(detail.get("media") or [])
+                    current_image_count = sum(
+                        1 for m in current_media
+                        if s(m.get("type")).upper() == "IMAGE"
+                    )
+                    if len(gallery) > current_image_count:
+                        fresh_images = build_media(kit, dict(item, pictures=gallery), report)
+                        preserved = [
+                            m for m in current_media
+                            if s(m.get("type")).upper() != "IMAGE"
+                        ]
+                        patch_body["media"] = fresh_images + preserved
+                        report["existing_media_repaired"] = report.get("existing_media_repaired", 0) + 1
+
+                    kit.patch_variant(vid, patch_body)
                 except Exception as exc:
                     report["errors"].append({"source_code": code, "stage": "update_content", "message": str(exc)[:500]})
                     continue
