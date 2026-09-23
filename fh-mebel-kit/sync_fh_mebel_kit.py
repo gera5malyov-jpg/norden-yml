@@ -68,6 +68,13 @@ def clean_text(value):
     return " ".join(s(value).replace("\xa0", " ").split())
 
 
+def clean_manufacturer(value):
+    value = clean_text(value).strip(" «»\"")
+    if "," in value:
+        value = value.split(",", 1)[0].strip(" «»\"")
+    return value
+
+
 def unique(values):
     out = []
     seen = set()
@@ -241,6 +248,7 @@ def closest_group_name(node, main, param_name):
     fallback = {
         "param37": "Спальное место",
         "param40": "Цвет",
+        "param92": "Открывание дверей",
     }
     return fallback.get(param_name, param_name)
 
@@ -502,9 +510,14 @@ def parse_product(url, html):
         or base_pairs.get("производитель")
         or ""
     )
-    manufacturer = clean_text(manufacturer)
+    manufacturer = clean_manufacturer(manufacturer)
 
-    price_root = main.select_one(".product_priceWrap") or main.select_one(".product_currentPrice") or main
+    if "товара нет в продаже" in norm(main.get_text(" ", strip=True)):
+        return []
+
+    price_root = main.select_one(".product_priceWrap") or main.select_one(".product_currentPrice")
+    if not price_root:
+        return []
     raw_spans = price_root.select(".js_priceMain[data-price-val]")
     priced = []
     for span in raw_spans:
@@ -527,30 +540,30 @@ def parse_product(url, html):
         if d is not None:
             visible_prices.append(d)
 
-    meaningful = [x for x in priced if x[1] >= Decimal("500")]
-    if meaningful:
-        priced = meaningful
-    elif visible_prices:
-        priced = [(None, visible_prices[0], "", {})]
-
-    if not priced:
-        text = clean_text(price_root.get_text(" ", strip=True))
-        candidates = [
-            money(x)
-            for x in re.findall(r"\d[\d\s,.]*\s*(?:руб\.?|₽)", text, re.I)
-        ]
-        candidates = [x for x in candidates if x is not None]
-        if candidates:
-            priced = [(None, candidates[0], "", {})]
-
-    # Avoid treating an old/current price pair as modifications if neither has variant params.
+    # Variant prices are authoritative only when they are tied to actual modification parameters.
     no_param = [x for x in priced if not x[3]]
     with_param = [x for x in priced if x[3]]
     if with_param:
         priced = with_param
-    elif len(no_param) > 1:
-        # The current price is normally the smallest visible sale price.
-        priced = [min(no_param, key=lambda x: x[1])]
+    else:
+        # FH uses low technical prices (100/600 etc.) inside some modular collection pages.
+        # For a non-variant card the schema.org product price / visible customer price is authoritative.
+        meta = price_root.select_one("meta[itemprop='price']") or main.select_one("meta[itemprop='price']")
+        meta_price = money(meta.get("content")) if meta else None
+        if meta_price is not None:
+            priced = [(None, meta_price, "", {})]
+        elif visible_prices:
+            priced = [(None, visible_prices[0], "", {})]
+        elif no_param:
+            priced = [min(no_param, key=lambda x: x[1])]
+        else:
+            text = clean_text(price_root.get_text(" ", strip=True))
+            candidates = [
+                money(x)
+                for x in re.findall(r"\d[\d\s,.]*\s*(?:руб\.?|₽)", text, re.I)
+            ]
+            candidates = [x for x in candidates if x is not None]
+            priced = [(None, candidates[0], "", {})] if candidates else []
 
     cards = []
     seen_signatures = set()
@@ -575,7 +588,7 @@ def parse_product(url, html):
         if mod_labels:
             display_name += " — " + "; ".join(mod_labels)
 
-        if price_id:
+        if mods and price_id:
             sku = f"{SKU_PREFIX}{element_id}-{price_id}"
         else:
             raw = element_id + "|" + "|".join(f"{k}={v}" for k, v in signature)
