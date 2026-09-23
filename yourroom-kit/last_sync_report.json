@@ -1,7 +1,190 @@
 {
-  "status": "ОШИБКА",
-  "complete": false,
+  "status": "ПРОВЕРКА УСПЕШНА",
+  "started_at": "2026-09-23T22:11:25+00:00",
   "dry_run": true,
-  "error": "Не удалось разобрать ни одной карточки товара",
-  "finished_at": "2026-09-23T22:11:00+00:00"
+  "source": "https://yourroom.ru/",
+  "supplier": "ВашаКомната",
+  "region": "Санкт-Петербург",
+  "schedule_rule": "раз в 14 дней",
+  "price_rule": {
+    "Цена для покупателя": "актуальная цена со скидкой на yourroom.ru",
+    "Цена до скидки": "зачеркнутая цена yourroom.ru; если ее нет — равна текущей цене"
+  },
+  "stock_rule": "СПБ = 100 шт.",
+  "sku_rule": "YOU-<код KIT>",
+  "modification_rule": "каждая отдельная /products/ страница/модификация — отдельная карточка KIT",
+  "missing_rule": "если URL исчез из полного sitemap — остаток 0",
+  "description_rule": "упоминания ВашаКомната/Вашакомната.РФ/yourroom.ru удаляются",
+  "photo_rule": "используются только изображения без водяного знака; сначала ищется чистый оригинал, затем пробуется программное удаление; без пригодного фото карточка не создается",
+  "sitemap_urls": 7877,
+  "product_pages_requested": 5,
+  "product_cards_parsed": 5,
+  "created": 0,
+  "updated": 0,
+  "zeroed_missing": 0,
+  "skipped_no_clean_photo": 0,
+  "skipped_no_price": 0,
+  "price_updates": 0,
+  "stock_updates": 0,
+  "images_clean_original": 25,
+  "images_clean_alternate": 5,
+  "images_watermark_removed": 23,
+  "images_rejected_watermark_or_error": 4,
+  "images_uploaded": 0,
+  "image_upload_errors": 0,
+  "parse_errors": [],
+  "errors": [],
+  "warnings": [],
+  "sample": [
+    {
+      "source_url": "https://yourroom.ru/products/stenka-qmarta-11q",
+      "name": "Стенка в гостиную \"Марта-11\" (Флора) - венге/дуб белфорд",
+      "customer_price": "28095",
+      "old_price": "51080",
+      "manufacturer": "Интерьер-Центр",
+      "category_path": [
+        "Гостиные",
+        "Стенки в гостиную",
+        "Стенка в гостиную \"Марта-11\" (Флора)"
+      ],
+      "characteristics": {
+        "Цвет": "венге/дуб белфорд"
+      },
+      "description_preview": "Стенка Марта 11 представляет собой отличное дополнение к современному интерьеру. Ее уникальный дизайн и функциональность позволяют легко вписать ее в любую обстановку. Особое внимание уделено деталям, что придает этой стенке особый шарм. На боковых стенках вы найдете ниши, специально оборудованные для размещения небольших предметов декора. Это позволит вам создать теплую и уютную атмосферу в вашем доме. Одним из основных преимуществ стенки Марта 11 является зеркальная вставка во весь рост. Она н",
+      "source_images": 12,
+      "clean_images": 12,
+      "clean_modes": [
+        "watermark_removed",
+        "watermark_removed",
+        "watermark_removed",
+        "watermark_removed",
+        "clean_alternate",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "watermark_removed",
+        "watermark_removed",
+        "watermark_removed"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/krovat-2-kh-yarusnaya-mija",
+      "name": "Кровать двухъярусная \"Мийа\" 0,8*2,0 м - Венге / Дуб молочный",
+      "customer_price": "23820",
+      "old_price": "34030",
+      "manufacturer": "МК Стиль",
+      "category_path": [
+        "Кровати и тахты",
+        "Двухъярусные кровати",
+        "Кровать двухъярусная \"Мийа\" 0,8*2,0 м"
+      ],
+      "characteristics": {
+        "Цвет": "Венге / Дуб молочный"
+      },
+      "description_preview": "Двухъярусная кровать Мийа с двумя вместительными ящиками сочетает в себе удобство и функциональность. Она украсит интерьер и обязательно понравится детям. Кровать обладает универсальным цветом, поэтому понравится как девочкам, так и мальчикам. Удобная лестница и перегородка на верхнем спальном месте обеспечит безопасность и комфорт. Каркас кровати собирается как на левую, так и на правую стороны. У кровати 2 спальных места размером 800*2000 мм . Роль оснований спального места выполняют щиты из Л",
+      "source_images": 11,
+      "clean_images": 9,
+      "clean_modes": [
+        "watermark_removed",
+        "clean_original",
+        "clean_original",
+        "watermark_removed",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "watermark_removed",
+        "watermark_removed"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/stenka-qmarta-11q160518154126",
+      "name": "Стенка в гостиную \"Марта-11\" (Флора) - ясень шимо темный/ясень шимо светлый",
+      "customer_price": "28012",
+      "old_price": "51080",
+      "manufacturer": "Интерьер-Центр",
+      "category_path": [
+        "Гостиные",
+        "Стенки в гостиную",
+        "Стенка в гостиную \"Марта-11\" (Флора)"
+      ],
+      "characteristics": {
+        "Цвет": "ясень шимо темный/ясень шимо светлый"
+      },
+      "description_preview": "Стенка Марта 11 представляет собой отличное дополнение к современному интерьеру. Ее уникальный дизайн и функциональность позволяют легко вписать ее в любую обстановку. Особое внимание уделено деталям, что придает этой стенке особый шарм. На боковых стенках вы найдете ниши, специально оборудованные для размещения небольших предметов декора. Это позволит вам создать теплую и уютную атмосферу в вашем доме. Одним из основных преимуществ стенки Марта 11 является зеркальная вставка во весь рост. Она н",
+      "source_images": 12,
+      "clean_images": 11,
+      "clean_modes": [
+        "watermark_removed",
+        "watermark_removed",
+        "clean_alternate",
+        "clean_alternate",
+        "watermark_removed",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "clean_original"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/komod-900x1010x430m-element-spalni-qpalermoq",
+      "name": "Комод \"Палермо-3\" КМ-022 - Ясень шимо светлый / Белый глянец",
+      "customer_price": "10976",
+      "old_price": "43090",
+      "manufacturer": "МК Стиль",
+      "category_path": [
+        "Комоды",
+        "Комод \"Палермо-3\" КМ-022"
+      ],
+      "characteristics": {},
+      "description_preview": "Комод \"Палермо\" состоит из четырех выдвижных ящиков, которые оснащены механизмами для плавного открывания и закрывания. Данный предмет мебели удобно расположить рядом со шкафом, чтобы всегда иметь доступ к мелким вещам. Фрезерованные фасады оригинально сочетаются с общим интерьером спальни. МДФ 16мм. Задняя стенка и дно ящиков выполнены из ЛХДФ 3,2мм. Опоры комода – регулируемые американки. Высота регулировки до 10мм. Высота боковины ящика 106 мм. Глубина ящика - 400 мм. Направляющие – шариковые",
+      "source_images": 12,
+      "clean_images": 11,
+      "clean_modes": [
+        "clean_original",
+        "watermark_removed",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "clean_original",
+        "watermark_removed",
+        "clean_alternate",
+        "watermark_removed"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/tumba-prikrovatnaya-500kh410kh350mm-element-spalni-qpalermoq",
+      "name": "Тумба прикроватная \"Палермо-3\" ТМ-023 - Ясень шимо светлый / Белый глянец",
+      "customer_price": "3805",
+      "old_price": "3805",
+      "manufacturer": "МК Стиль",
+      "category_path": [
+        "Спальни",
+        "Тумбы прикроватные",
+        "Тумба прикроватная \"Палермо-3\" ТМ-023"
+      ],
+      "characteristics": {},
+      "description_preview": "Прикроватная тумба \"Палермо\" небольшая по размерам и просто удобная тумба, идеально гармонирует со спальным местом и с общим дизайном спальни. Имеет два ящика для личных вещей, а свободное пространство сверху можно использовать для дополнительных элементов декора или настольной лампы. Прикроватную тумбу \"Палермо\" удобно расположить с двух сторон кровати и все необходимые аксессуары перед сном будут всегда у вас под рукой. Тумба прикроватная выполнена из ЛДСП 16мм и МДФ 16мм. Задняя стенка и дно ",
+      "source_images": 10,
+      "clean_images": 10,
+      "clean_modes": [
+        "clean_original",
+        "clean_alternate",
+        "clean_original",
+        "watermark_removed",
+        "clean_original",
+        "watermark_removed",
+        "watermark_removed",
+        "watermark_removed",
+        "watermark_removed",
+        "watermark_removed"
+      ]
+    }
+  ],
+  "complete": true,
+  "finished_at": "2026-09-23T22:13:07+00:00"
 }
