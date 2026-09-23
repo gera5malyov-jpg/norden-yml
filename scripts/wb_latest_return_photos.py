@@ -2,6 +2,7 @@
 import json
 import os
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
@@ -17,19 +18,30 @@ OUT.mkdir(parents=True, exist_ok=True)
 headers={"Authorization":TOKEN,"Accept":"application/json"}
 
 def fetch_claims(is_archive: bool):
-    r=requests.get(
-        "https://returns-api.wildberries.ru/api/v1/claims",
-        headers=headers,
-        params={"is_archive":"true" if is_archive else "false","limit":100,"offset":0},
-        timeout=60,
-    )
-    if not r.ok:
+    for attempt in range(6):
+        r=requests.get(
+            "https://returns-api.wildberries.ru/api/v1/claims",
+            headers=headers,
+            params={"is_archive":"true" if is_archive else "false","limit":100,"offset":0},
+            timeout=60,
+        )
+        if r.ok:
+            d=r.json() if r.content else {}
+            rows=d.get("claims") or []
+            return [x for x in rows if isinstance(x,dict)]
+        if r.status_code == 429 and attempt < 5:
+            raw=r.headers.get("X-RateLimit-Retry") or r.headers.get("Retry-After") or "65"
+            try:
+                wait=max(1.0,float(raw))
+            except Exception:
+                wait=65.0
+            time.sleep(min(180.0,wait+2.0))
+            continue
         raise RuntimeError(f"claims archive={is_archive} HTTP {r.status_code}: {r.text[:500]}")
-    d=r.json() if r.content else {}
-    rows=d.get("claims") or []
-    return [x for x in rows if isinstance(x,dict)]
+    return []
 
 active=fetch_claims(False)
+time.sleep(5)
 archived=fetch_claims(True)
 all_claims=[]
 for source, rows in (("active",active),("archive",archived)):
