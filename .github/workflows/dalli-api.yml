@@ -1,8 +1,16 @@
-name: Dalli API
+name: Dalli API — СПБ и МСК
 
 on:
   workflow_dispatch:
     inputs:
+      account:
+        description: Аккаунт / склад отправки
+        required: true
+        default: spb
+        type: choice
+        options:
+          - spb
+          - msk
       action:
         description: Действие
         required: true
@@ -14,7 +22,7 @@ on:
       to_address:
         description: Полный адрес получателя
         required: false
-        default: 'Санкт-Петербург, Невский проспект, 1'
+        default: ''
         type: string
       weight_kg:
         description: Вес одного места, кг
@@ -64,8 +72,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      DALLI_TOKEN: ${{ secrets.DALLI_TOKEN }}
-      DALLI_API_BASE_URL: https://spbapi.dalli-service.com/v1
+      # Первый аккаунт: отправка со складов СПБ.
+      DALLI_TOKEN_SPB: ${{ secrets.DALLI_TOKEN }}
+      # Второй аккаунт: отправка со складов МСК.
+      DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+      DALLI_ACCOUNT: ${{ inputs.account }}
     steps:
       - uses: actions/checkout@v4
 
