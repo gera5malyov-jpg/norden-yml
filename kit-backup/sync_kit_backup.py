@@ -363,6 +363,26 @@ def load_from_yml(url: str):
     }
 
 
+def _norm_title(value):
+    return " ".join(str(value or "").replace("ё", "е").replace("Ё", "Е").casefold().split())
+
+
+COMMON_CHARACTERISTICS = [
+    ("Размер", ["размер"]),
+    ("Вес, кг", ["вес, кг", "вес кг", "вес"]),
+    ("Артикул", ["артикул"]),
+    ("Артикул поставщика", ["артикул поставщика"]),
+    ("Количество мест (упаковок)", ["количество мест (упаковок)", "количество мест", "кол-во мест", "количество упаковок"]),
+    ("Цвет изделия", ["цвет изделия", "цвет"]),
+    ("Код для сайта", ["код для сайта"]),
+    ("Объем, м³", ["объем, м³", "объем м3", "объем, м3", "объем"]),
+    ("Материал", ["материал"]),
+    ("Материал каркаса", ["материал каркаса"]),
+    ("Материал обивки", ["материал обивки"]),
+    ("Страна производства", ["страна производства", "страна"]),
+]
+
+
 def build_tables(data):
     chars_by_id = {}
     for c in data.get("characteristics") or []:
@@ -377,13 +397,17 @@ def build_tables(data):
             wh_by_id[wid] = clean(w.get("title") or w.get("name"))
 
     headers = [
-        "variant_id", "kit_id", "sku", "name", "brand", "barcode", "status",
-        "product_id", "product_card_id", "description", "seo_description", "seo_h1", "seo_title",
+        "variant_id", "kit_id", "sku", "name", "brand",
+        "Поставщик", "Цена закупки",
+        "barcode", "status", "product_id", "product_card_id",
+        *[x[0] for x in COMMON_CHARACTERISTICS],
+        "description", "seo_description", "seo_h1", "seo_title",
         "slug", "relative_link_url", "vat", "requires_marking", "created_at", "updated_at",
         "price", "manual_discount_price", "promotion_price", "final_price", "pricing_json",
         "characteristics_json", "stocks_json", "media_json", "cargo_boxes_json", "extra_json",
     ]
     rows = []
+    all_characteristic_rows = []
 
     flattened = {
         "id", "kit_id", "sku", "name", "brand", "barcode", "status",
@@ -394,13 +418,41 @@ def build_tables(data):
 
     for v in data.get("variants") or []:
         pricing = v.get("pricing") if isinstance(v.get("pricing"), dict) else {}
+        sku = safe_cell(v.get("sku"))
 
         enriched_chars = []
+        char_values = {}
         for c in v.get("characteristics") or []:
             item = dict(c) if isinstance(c, dict) else {"value": c}
             cid = clean(item.get("characteristic_id") or item.get("id") or item.get("title"))
             if not item.get("title") and chars_by_id.get(cid):
                 item["title"] = chars_by_id[cid]
+
+            title = clean(item.get("title") or chars_by_id.get(cid) or cid)
+            values = []
+            if item.get("value") not in (None, ""):
+                values.append(clean(item.get("value")))
+            for value in item.get("values") or []:
+                value = clean(value)
+                if value and value not in values:
+                    values.append(value)
+            display_value = " | ".join(values)
+
+            norm = _norm_title(title)
+            if display_value:
+                all_characteristic_rows.append([
+                    sku,
+                    safe_cell(title),
+                    safe_cell(display_value),
+                ])
+
+                for label, aliases in COMMON_CHARACTERISTICS:
+                    if label in char_values:
+                        continue
+                    alias_norms = {_norm_title(x) for x in aliases}
+                    if norm in alias_norms:
+                        char_values[label] = display_value
+
             enriched_chars.append(item)
 
         enriched_stocks = []
@@ -414,9 +466,13 @@ def build_tables(data):
         extra = {k: val for k, val in v.items() if k not in flattened}
 
         rows.append([
-            safe_cell(v.get("id")), safe_cell(v.get("kit_id")), safe_cell(v.get("sku")), safe_cell(v.get("name")),
-            safe_cell(v.get("brand")), safe_cell(v.get("barcode")), safe_cell(v.get("status")),
-            safe_cell(v.get("product_id")), safe_cell(v.get("product_card_id")), safe_cell(v.get("description")),
+            safe_cell(v.get("id")), safe_cell(v.get("kit_id")), sku, safe_cell(v.get("name")),
+            safe_cell(v.get("brand")),
+            "", "",
+            safe_cell(v.get("barcode")), safe_cell(v.get("status")),
+            safe_cell(v.get("product_id")), safe_cell(v.get("product_card_id")),
+            *[safe_cell(char_values.get(label, "")) for label, _ in COMMON_CHARACTERISTICS],
+            safe_cell(v.get("description")),
             safe_cell(v.get("seo_description")), safe_cell(v.get("seo_h1")), safe_cell(v.get("seo_title")),
             safe_cell(v.get("slug")), safe_cell(v.get("relative_link_url")), safe_cell(v.get("vat")),
             safe_cell(v.get("requires_marking")), safe_cell(v.get("created_at")), safe_cell(v.get("updated_at")),
@@ -450,6 +506,7 @@ def build_tables(data):
 
     tables = {
         "Товары": (headers, rows),
+        "Все характеристики": (["sku", "Характеристика", "Значение"], all_characteristic_rows),
         "Справочник характеристик": (characteristic_headers, characteristic_rows),
         "Категории": (category_headers, category_rows),
         "Склады": (warehouse_headers, warehouse_rows),
