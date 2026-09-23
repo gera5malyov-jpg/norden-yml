@@ -52,7 +52,7 @@ REVIEW_MESSAGE = """Спасибо за ваш заказ! ❤️
 
 Спасибо, что выбрали «Мегаполис»!"""
 
-# Only Webasyst transitions. This script contains no marketplace write endpoint.
+# Marketplace statuses flow only into Webasyst. Buyer chat writes are limited to the two approved lifecycle messages below.
 GRAPH = {
     "new": [("process", "processing"), ("otmenen", "otmenen")],
     "processing": [
