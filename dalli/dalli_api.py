@@ -13,20 +13,41 @@ class DalliApiError(RuntimeError):
 
 
 class DalliClient:
-    """Minimal Dalli API v1 client for the Saint Petersburg account."""
+    """Dalli API v1 client with separate Saint Petersburg and Moscow accounts."""
 
-    def __init__(self, token: str, base_url: str = "https://spbapi.dalli-service.com/v1"):
+    ENDPOINTS = {
+        "spb": "https://spbapi.dalli-service.com/v1",
+        "msk": "https://api.dalli-service.com/v1",
+    }
+
+    def __init__(self, token: str, base_url: str = "", account: str = "spb"):
+        account = (account or "spb").strip().lower()
+        if account not in self.ENDPOINTS:
+            raise DalliApiError("DALLI_ACCOUNT должен быть spb или msk")
+
         token = (token or "").strip()
         if not token:
-            raise DalliApiError("DALLI_TOKEN не задан")
+            secret_name = "DALLI_TOKEN_MSK" if account == "msk" else "DALLI_TOKEN (СПБ)"
+            raise DalliApiError(f"{secret_name} не задан")
+
         self.token = token
-        self.base_url = base_url.rstrip("/")
+        self.account = account
+        self.account_label = "МСК" if account == "msk" else "СПБ"
+        self.base_url = (base_url or self.ENDPOINTS[account]).rstrip("/")
 
     @classmethod
     def from_env(cls) -> "DalliClient":
+        account = (os.environ.get("DALLI_ACCOUNT", "spb") or "spb").strip().lower()
+        if account == "msk":
+            token = os.environ.get("DALLI_TOKEN_MSK", "")
+        else:
+            # Первый существующий аккаунт сохраняем на старом имени секрета DALLI_TOKEN.
+            token = os.environ.get("DALLI_TOKEN_SPB", "") or os.environ.get("DALLI_TOKEN", "")
+
         return cls(
-            os.environ.get("DALLI_TOKEN", ""),
-            os.environ.get("DALLI_API_BASE_URL", "https://spbapi.dalli-service.com/v1"),
+            token,
+            os.environ.get("DALLI_API_BASE_URL", ""),
+            account,
         )
 
     def _post_xml(self, path: str, root: ET.Element) -> ET.Element:
@@ -150,11 +171,11 @@ class DalliClient:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Dalli API v1 utility (Saint Petersburg)")
+    parser = argparse.ArgumentParser(description="Dalli API v1 utility (СПБ/МСК)")
     sub = parser.add_subparsers(dest="command", required=True)
 
     auth = sub.add_parser("auth-check", help="Проверить токен через расчет доставки")
-    auth.add_argument("--to", default="Санкт-Петербург, Невский проспект, 1")
+    auth.add_argument("--to", default="")
 
     calc = sub.add_parser("delivery-cost", help="Рассчитать стоимость доставки")
     calc.add_argument("--to", required=True, help="Полный адрес получателя")
@@ -176,12 +197,23 @@ def main() -> int:
     try:
         client = DalliClient.from_env()
         if args.command == "auth-check":
+            to_address = args.to or (
+                "Москва, Тверская улица, 1"
+                if client.account == "msk"
+                else "Санкт-Петербург, Невский проспект, 1"
+            )
             result = client.delivery_cost(
-                args.to,
+                to_address,
                 [{"weight_kg": 1, "length_cm": 10, "width_cm": 10, "height_cm": 10}],
                 output_x2=True,
             )
-            result = {"status": "УСПЕШНО", "message": "Токен Dalli принят API", "response": result}
+            result = {
+                "status": "УСПЕШНО",
+                "account": client.account_label,
+                "endpoint": client.base_url,
+                "message": "Токен Dalli принят API",
+                "response": result,
+            }
         else:
             if args.places < 1:
                 raise DalliApiError("Количество мест должно быть не меньше 1")
