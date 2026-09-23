@@ -65,8 +65,13 @@ jobs:
           report_file="yourroom-kit/last_sync_report.json"
 
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            # Любые изменения кода сначала проходят безопасную проверку на 5 карточках.
-            args+=(--dry-run --max-items 5)
+            # Специальный commit-marker запускает первичную полную загрузку.
+            # Все обычные изменения кода проходят безопасную проверку на 5 карточках.
+            if [[ "${{ github.event.head_commit.message }}" == *"[YOURROOM-LIVE]"* ]]; then
+              args+=(--force)
+            else
+              args+=(--dry-run --max-items 5)
+            fi
           elif [[ "${{ github.event_name }}" == "schedule" ]]; then
             day_number=$(( $(date -u +%s) / 86400 ))
             shard=$(( day_number % 14 ))
