@@ -34,3 +34,40 @@ for params in ({"page":1,"per_page":3}, {"page":1,"per_page":100}):
         }, ensure_ascii=False, indent=2))
     except Exception as exc:
         print(json.dumps({"params":params,"error":str(exc)},ensure_ascii=False))
+
+print("\nPUBLIC_KIT_YML_PROBE")
+try:
+    import requests
+    import xml.etree.ElementTree as ET
+    yml_url="https://yastore-prod-persist.s3.yandex.net/feeds/yml/019a5a60-ce41-7872-aa9d-d7720c268dab.xml"
+    tmp=Path("/tmp/kit_public_red_probe.xml")
+    with requests.get(yml_url,stream=True,timeout=(20,300),headers={"User-Agent":"Megapolis-RED-probe/1.0"}) as resp:
+        resp.raise_for_status()
+        with tmp.open("wb") as fh:
+            for chunk in resp.iter_content(1024*1024):
+                if chunk: fh.write(chunk)
+    red_offers=0
+    red_pictures=0
+    red_without=0
+    samples=[]
+    for _,elem in ET.iterparse(tmp,events=("end",)):
+        if elem.tag.split("}")[-1]!="offer":
+            continue
+        sku=""
+        pics=[]
+        for child in list(elem):
+            tag=child.tag.split("}")[-1]
+            val=(child.text or "").strip()
+            if tag in ("vendorCode","sku") and val and not sku:
+                sku=val
+            elif tag=="picture" and val:
+                pics.append(val)
+        if sku.upper().startswith("RED-"):
+            red_offers+=1
+            red_pictures+=len(pics)
+            if not pics: red_without+=1
+            if len(samples)<3: samples.append({"sku":sku,"pictures":pics[:3]})
+        elem.clear()
+    print(json.dumps({"red_offers":red_offers,"red_pictures":red_pictures,"red_without":red_without,"samples":samples},ensure_ascii=False,indent=2))
+except Exception as exc:
+    print(json.dumps({"yml_error":str(exc)},ensure_ascii=False))
