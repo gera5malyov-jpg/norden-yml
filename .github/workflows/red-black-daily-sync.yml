@@ -1,0 +1,30 @@
+name: Red Black daily KIT + Webasyst
+
+on:
+  schedule:
+    - cron: '20 23 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'red-kit/trigger-daily.txt'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: red-black-daily-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check -r kit-backup/requirements.txt
+      - name: Проверить синтаксис
+        run: python -m py_compile red-kit/sync_red_black_supplier.py red-kit/sync_red_black_webasyst.py kit-backup/sync_kit_backup.py webasyst/client.py
