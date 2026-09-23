@@ -397,14 +397,14 @@ def build_tables(data):
             wh_by_id[wid] = clean(w.get("title") or w.get("name"))
 
     headers = [
-        "variant_id", "kit_id", "sku", "name", "brand",
+        "ID варианта", "ID KIT", "Артикул KIT", "Название", "Бренд",
         "Поставщик", "Цена закупки", "Дата создания в KIT",
-        "barcode", "status", "product_id", "product_card_id",
+        "Штрихкод", "Статус", "ID товара", "ID карточки",
         *[x[0] for x in COMMON_CHARACTERISTICS],
-        "description", "seo_description", "seo_h1", "seo_title",
-        "slug", "relative_link_url", "vat", "requires_marking", "created_at", "updated_at",
-        "price", "manual_discount_price", "promotion_price", "final_price", "pricing_json",
-        "characteristics_json", "stocks_json", "media_json", "cargo_boxes_json", "extra_json",
+        "Описание", "SEO-описание", "SEO H1", "SEO-заголовок",
+        "Слаг", "Ссылка в KIT", "НДС", "Требует маркировки", "Дата создания (API)", "Дата обновления",
+        "Цена до скидки", "Цена со скидкой вручную", "Промо-цена", "Итоговая цена", "Цены JSON",
+        "Все характеристики JSON", "Остатки JSON", "Медиа JSON", "Упаковки JSON", "Доп. данные JSON",
     ]
     rows = []
     all_characteristic_rows = []
@@ -486,19 +486,19 @@ def build_tables(data):
             safe_cell(json_text(extra)),
         ])
 
-    characteristic_headers = ["id", "title", "type", "select_mode", "status", "raw_json"]
+    characteristic_headers = ["ID", "Название", "Тип", "Режим выбора", "Статус", "Исходные данные JSON"]
     characteristic_rows = [[
         safe_cell(x.get("id")), safe_cell(x.get("title")), safe_cell(x.get("type")),
         safe_cell(x.get("select_mode")), safe_cell(x.get("status")), safe_cell(json_text(x))
     ] for x in data.get("characteristics") or []]
 
-    category_headers = ["id", "title", "parent_id", "status", "raw_json"]
+    category_headers = ["ID", "Название", "ID родительской категории", "Статус", "Исходные данные JSON"]
     category_rows = [[
         safe_cell(x.get("id")), safe_cell(x.get("title") or x.get("name")),
         safe_cell(x.get("parent_id")), safe_cell(x.get("status")), safe_cell(json_text(x))
     ] for x in data.get("categories") or []]
 
-    warehouse_headers = ["id", "title", "status", "raw_json"]
+    warehouse_headers = ["ID", "Название", "Статус", "Исходные данные JSON"]
     warehouse_rows = [[
         safe_cell(x.get("id")), safe_cell(x.get("title") or x.get("name")),
         safe_cell(x.get("status")), safe_cell(json_text(x))
@@ -506,14 +506,14 @@ def build_tables(data):
 
     tables = {
         "Товары": (headers, rows),
-        "Все характеристики": (["sku", "Характеристика", "Значение"], all_characteristic_rows),
+        "Все характеристики": (["Артикул KIT", "Характеристика", "Значение"], all_characteristic_rows),
         "Справочник характеристик": (characteristic_headers, characteristic_rows),
         "Категории": (category_headers, category_rows),
         "Склады": (warehouse_headers, warehouse_rows),
     }
 
     if data.get("products"):
-        p_headers = ["id", "category_ids_json", "created_at", "updated_at", "raw_json_1", "raw_json_2", "raw_json_3"]
+        p_headers = ["ID", "Категории JSON", "Дата создания", "Дата обновления", "Исходные данные JSON 1", "Исходные данные JSON 2", "Исходные данные JSON 3"]
         p_rows = []
         for x in data.get("products") or []:
             chunks = chunk_text(json_text(x), parts=3)
@@ -675,7 +675,7 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
     except gspread.WorksheetNotFound:
         history = sh.add_worksheet(title="История", rows=1000, cols=10)
         history.append_row(
-            ["timestamp_utc", "source", "mode", "variants", "characteristic_values", "stocks", "media", "categories", "api_seconds", "warnings"],
+            ["Время UTC", "Источник", "Режим", "Товаров", "Значений характеристик", "Остатков", "Медиа", "Категорий", "Время API, сек.", "Предупреждения"],
             value_input_option="RAW",
         )
     history.append_row([
