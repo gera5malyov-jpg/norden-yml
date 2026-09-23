@@ -178,9 +178,10 @@ def load_wa_products(wa):
         payload = wa.call(
             "shop.product.search",
             params={
+                "hash": "search/query=RED-",
                 "offset": offset,
                 "limit": 1000,
-                "fields": "*,skus,features",
+                "fields": "id,name,type_id,summary,skus",
             },
         )
         batch = listify(payload, ("products", "items"))
