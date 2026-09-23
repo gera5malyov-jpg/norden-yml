@@ -750,6 +750,7 @@ def build_tables(data, enrichment=None):
         "Все характеристики JSON", "Остатки JSON", "Медиа JSON", "Упаковки JSON", "Доп. данные JSON",
     ]
     rows = []
+    search_rows = []
     all_characteristic_rows = []
     enrichment = enrichment or {}
 
@@ -839,6 +840,18 @@ def build_tables(data, enrichment=None):
             safe_cell(json_text(extra)),
         ])
 
+        search_rows.append([
+            safe_cell(v.get("kit_id")),
+            sku,
+            safe_cell(v.get("name")),
+            safe_cell(source_info.get("supplier")),
+            safe_cell(v.get("brand")),
+            safe_cell(char_values.get("Код для сайта", "")),
+            safe_cell(char_values.get("Артикул поставщика", "")),
+            safe_cell(source_info.get("purchase")),
+            "✅" if in_stock else "❌",
+        ])
+
     characteristic_headers = ["ID", "Название", "Тип", "Режим выбора", "Статус", "Исходные данные JSON"]
     characteristic_rows = [[
         safe_cell(x.get("id")), safe_cell(x.get("title")), safe_cell(x.get("type")),
@@ -857,7 +870,13 @@ def build_tables(data, enrichment=None):
         safe_cell(x.get("status")), safe_cell(json_text(x))
     ] for x in data.get("warehouses") or []]
 
+    search_headers = [
+        "ID KIT", "Артикул KIT", "Название", "Поставщик", "Бренд",
+        "Код для сайта", "Артикул поставщика", "Цена закупки", "В наличии",
+    ]
+
     tables = {
+        "Поиск": (search_headers, search_rows),
         "Товары": (headers, rows),
         "Все характеристики": (["Артикул KIT", "Характеристика", "Значение"], all_characteristic_rows),
         "Справочник характеристик": (characteristic_headers, characteristic_rows),
@@ -1068,8 +1087,67 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
         except Exception:
             pass
 
+        if title == "Поиск":
+            try:
+                sh.batch_update({
+                    "requests": [
+                        {
+                            "setBasicFilter": {
+                                "filter": {
+                                    "range": {
+                                        "sheetId": sheet.id,
+                                        "startRowIndex": 0,
+                                        "endRowIndex": max(2, len(rows) + 1),
+                                        "startColumnIndex": 0,
+                                        "endColumnIndex": len(headers),
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "updateDimensionProperties": {
+                                "range": {
+                                    "sheetId": sheet.id,
+                                    "dimension": "COLUMNS",
+                                    "startIndex": 2,
+                                    "endIndex": 3,
+                                },
+                                "properties": {"pixelSize": 420},
+                                "fields": "pixelSize",
+                            }
+                        },
+                        {
+                            "updateDimensionProperties": {
+                                "range": {
+                                    "sheetId": sheet.id,
+                                    "dimension": "COLUMNS",
+                                    "startIndex": 3,
+                                    "endIndex": 5,
+                                },
+                                "properties": {"pixelSize": 150},
+                                "fields": "pixelSize",
+                            }
+                        },
+                    ]
+                })
+            except Exception as exc:
+                report["warnings"].append(f"Не удалось настроить быстрый лист Поиск: {exc}")
+
     for title, (headers, rows) in tables.items():
         write_table(title, headers, rows)
+
+    try:
+        search_sheet = sh.worksheet("Поиск")
+        sh.batch_update({
+            "requests": [{
+                "updateSheetProperties": {
+                    "properties": {"sheetId": search_sheet.id, "index": 1},
+                    "fields": "index",
+                }
+            }]
+        })
+    except Exception as exc:
+        report["warnings"].append(f"Не удалось переместить лист Поиск: {exc}")
 
     for obsolete in ("Sheet1", "Характеристики", "Остатки", "Медиа", "Продукты API"):
         if obsolete in tables:
@@ -1096,6 +1174,7 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
         ["Поставщик определен", report["counts"].get("supplier_filled", 0)],
         ["Закупочная цена заполнена", report["counts"].get("purchase_price_filled", 0)],
         ["Первое фото найдено", report["counts"].get("image_url_filled", 0)],
+        ["Строк в быстром поиске", report["counts"]["variants"]],
         ["Продуктов API (глубокий режим)", report["counts"]["products"]],
         ["Время чтения API, сек.", report.get("api_seconds", "")],
         ["YML fallback", report["fallback_url"]],
