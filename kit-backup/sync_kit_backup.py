@@ -4,10 +4,12 @@ import gzip
 import hashlib
 import io
 import json
+import math
 import os
 import sys
 import time
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -21,10 +23,18 @@ RUNTIME.mkdir(parents=True, exist_ok=True)
 
 DEFAULT_SHEET_ID = "1xZUeaWUr-6O3KK0MO-1U7IGBKXXfgcmZ-EJ-w-2wWug"
 DEFAULT_FALLBACK_URL = "https://yastore-prod-persist.s3.yandex.net/feeds/yml/019a5a60-ce41-7872-aa9d-d7720c268dab.xml"
+MAX_CELL_CHARS = 48000
 
 
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
+
+
+def env_bool(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def clean(value: Any) -> str:
@@ -41,12 +51,22 @@ def json_text(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
 
 
+def safe_cell(value: Any, limit: int = MAX_CELL_CHARS) -> str:
+    text = clean(value)
+    if len(text) <= limit:
+        return text
+    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    suffix = f"...[TRUNCATED sha256={digest}]"
+    return text[: max(0, limit - len(suffix))] + suffix
+
+
 def chunk_text(text: str, size: int = 40000, parts: int = 5):
     text = text or ""
     out = [text[i * size:(i + 1) * size] for i in range(parts)]
     if len(text) > size * parts:
         digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
-        out[-1] += f"[TRUNCATED sha256={digest}]"
+        suffix = f"[TRUNCATED sha256={digest}]"
+        out[-1] = (out[-1][: max(0, size - len(suffix))] + suffix)
     return out
 
 
@@ -59,32 +79,32 @@ class HttpError(RuntimeError):
 
 
 class KitClient:
-    def __init__(self, token: str):
+    def __init__(self, token: str, workers: int = 6):
         token = (token or "").strip()
         if not token:
             raise RuntimeError("YANDEX_KIT_TOKEN is empty")
-        self.session = requests.Session()
         self.headers = {
             "Authorization": f"Bearer {token}",
             "Accept": "application/json",
-            "User-Agent": "megapolis-kit-backup/1.0",
+            "User-Agent": "megapolis-kit-backup/2.0",
         }
-        self.last_request = 0.0
-        self.min_interval = 0.42
+        self.workers = max(1, min(8, int(workers or 1)))
 
     def request(self, method: str, path: str, *, params=None, timeout=120):
         url = KIT_BASE + path
-        for attempt in range(12):
-            delay = self.min_interval - (time.monotonic() - self.last_request)
-            if delay > 0:
-                time.sleep(delay)
-            self.last_request = time.monotonic()
-            r = self.session.request(method, url, params=params, headers=self.headers, timeout=timeout)
+        session = requests.Session()
+        for attempt in range(14):
+            try:
+                r = session.request(method, url, params=params, headers=self.headers, timeout=timeout)
+            except requests.RequestException:
+                time.sleep(min(20, 1 + attempt * 2))
+                continue
             if r.status_code == 429:
-                time.sleep(float(r.headers.get("Retry-After") or min(45, 3 * (attempt + 1))))
+                wait = float(r.headers.get("Retry-After") or min(45, 2 + attempt * 3))
+                time.sleep(wait)
                 continue
             if r.status_code >= 500:
-                time.sleep(min(30, 2 ** attempt))
+                time.sleep(min(30, 2 ** min(attempt, 5)))
                 continue
             if r.status_code >= 400:
                 raise HttpError(r.status_code, r.url, r.text)
@@ -121,24 +141,73 @@ class KitClient:
                     return meta[key]
         return None
 
-    def collection(self, path: str):
-        page = 1
+    def collection(self, path: str, params=None, parallel=True):
+        q = dict(params or {})
+        q.update({"page": 1, "per_page": 100})
+        first = self.request("GET", path, params=q)
+        first_rows = [x for x in self.items(first) if isinstance(x, dict)]
+        total = self.total(first)
+        print(f"{path}: page=1, received={len(first_rows)}, total={total}", flush=True)
+
+        if not first_rows:
+            return []
+        if total is None:
+            out = list(first_rows)
+            page = 2
+            while True:
+                q2 = dict(params or {})
+                q2.update({"page": page, "per_page": 100})
+                payload = self.request("GET", path, params=q2)
+                rows = [x for x in self.items(payload) if isinstance(x, dict)]
+                out.extend(rows)
+                if page % 25 == 0 or len(rows) < 100:
+                    print(f"{path}: page={page}, total_collected={len(out)}", flush=True)
+                if not rows or len(rows) < 100:
+                    break
+                page += 1
+            return out
+
+        pages = max(1, math.ceil(total / 100))
+        if pages == 1:
+            return first_rows
+
+        if not parallel or self.workers == 1:
+            out = list(first_rows)
+            for page in range(2, pages + 1):
+                q2 = dict(params or {})
+                q2.update({"page": page, "per_page": 100})
+                payload = self.request("GET", path, params=q2)
+                out.extend([x for x in self.items(payload) if isinstance(x, dict)])
+                if page % 25 == 0 or page == pages:
+                    print(f"{path}: {page}/{pages} pages", flush=True)
+            return out
+
+        def fetch_page(page):
+            q2 = dict(params or {})
+            q2.update({"page": page, "per_page": 100})
+            payload = self.request("GET", path, params=q2)
+            return page, [x for x in self.items(payload) if isinstance(x, dict)]
+
+        by_page = {1: first_rows}
+        with ThreadPoolExecutor(max_workers=self.workers) as pool:
+            futures = [pool.submit(fetch_page, p) for p in range(2, pages + 1)]
+            done = 1
+            for fut in as_completed(futures):
+                page, rows = fut.result()
+                by_page[page] = rows
+                done += 1
+                if done % 25 == 0 or done == pages:
+                    print(f"{path}: {done}/{pages} pages", flush=True)
+
         out = []
-        while True:
-            payload = self.request("GET", path, params={"page": page, "per_page": 100})
-            rows = [x for x in self.items(payload) if isinstance(x, dict)]
-            out.extend(rows)
-            total = self.total(payload)
-            print(f"{path}: page={page}, received={len(rows)}, total_collected={len(out)}, total={total}", flush=True)
-            if not rows or (total is not None and len(out) >= total) or (total is None and len(rows) < 100):
-                break
-            page += 1
+        for page in range(1, pages + 1):
+            out.extend(by_page.get(page, []))
         return out
 
 
-def try_collection(client: KitClient, path: str, warnings: list[str]):
+def try_collection(client: KitClient, path: str, warnings: list[str], params=None, parallel=True):
     try:
-        return client.collection(path)
+        return client.collection(path, params=params, parallel=parallel)
     except Exception as exc:
         warnings.append(f"{path}: {exc}")
         return []
@@ -146,22 +215,39 @@ def try_collection(client: KitClient, path: str, warnings: list[str]):
 
 def load_from_api(token: str):
     warnings = []
-    client = KitClient(token)
-    variants = client.collection("/v1/variants")
+    workers = int(os.getenv("KIT_API_WORKERS", "6") or 6)
+    client = KitClient(token, workers=workers)
+
+    t0 = time.monotonic()
+    variants = client.collection("/v1/variants", parallel=True)
     if not variants:
         raise RuntimeError("KIT API returned zero variants")
-    characteristics = try_collection(client, "/v1/characteristics", warnings)
-    categories = try_collection(client, "/v1/categories", warnings)
-    warehouses = try_collection(client, "/v1/warehouses", warnings)
-    products = try_collection(client, "/v1/products", warnings)
+
+    characteristics = try_collection(
+        client, "/v1/characteristics", warnings, params={"status": "ACTIVE"}, parallel=True
+    )
+    categories = try_collection(
+        client, "/v1/categories", warnings, params={"status": "ACTIVE"}, parallel=True
+    )
+    warehouses = try_collection(
+        client, "/v1/warehouses", warnings, params={"status": "ACTIVE"}, parallel=True
+    )
+
+    include_products = env_bool("KIT_INCLUDE_PRODUCTS", False)
+    products = []
+    if include_products:
+        products = try_collection(client, "/v1/products", warnings, parallel=False)
+
     return {
         "source": "KIT_API",
+        "mode": "DEEP" if include_products else "FAST",
         "variants": variants,
         "characteristics": characteristics,
         "categories": categories,
         "warehouses": warehouses,
         "products": products,
         "warnings": warnings,
+        "api_seconds": round(time.monotonic() - t0, 2),
     }
 
 
@@ -170,12 +256,13 @@ def local_tag(tag: str) -> str:
 
 
 def load_from_yml(url: str):
+    t0 = time.monotonic()
     r = requests.get(url, timeout=240, headers={"User-Agent": "Mozilla/5.0"})
     r.raise_for_status()
     payload = r.content
     variants = []
     categories = []
-    for event, elem in ET.iterparse(io.BytesIO(payload), events=("end",)):
+    for _, elem in ET.iterparse(io.BytesIO(payload), events=("end",)):
         tag = local_tag(elem.tag)
         if tag == "category":
             categories.append({
@@ -264,6 +351,7 @@ def load_from_yml(url: str):
             elem.clear()
     return {
         "source": "YML_FALLBACK",
+        "mode": "FAST",
         "variants": variants,
         "characteristics": [],
         "categories": categories,
@@ -271,6 +359,7 @@ def load_from_yml(url: str):
         "products": [],
         "warnings": ["KIT API unavailable; backup created from the public YML fallback."],
         "yml_bytes": len(payload),
+        "api_seconds": round(time.monotonic() - t0, 2),
     }
 
 
@@ -287,95 +376,97 @@ def build_tables(data):
         if wid:
             wh_by_id[wid] = clean(w.get("title") or w.get("name"))
 
-    product_headers = [
+    headers = [
         "variant_id", "kit_id", "sku", "name", "brand", "barcode", "status",
         "product_id", "product_card_id", "description", "seo_description", "seo_h1", "seo_title",
         "slug", "relative_link_url", "vat", "requires_marking", "created_at", "updated_at",
         "price", "manual_discount_price", "promotion_price", "final_price",
         "stocks_count", "media_count", "characteristics_count",
-        "cargo_boxes_json", "pricing_json", "stocks_json", "media_json", "characteristics_json",
+        "characteristics_named_json", "characteristics_raw_json",
+        "stocks_named_json", "stocks_raw_json", "media_json", "cargo_boxes_json", "pricing_json",
         "raw_json_1", "raw_json_2", "raw_json_3", "raw_json_4", "raw_json_5",
     ]
-    product_rows = []
-    characteristic_rows = []
-    stock_rows = []
-    media_rows = []
+    rows = []
 
     for v in data.get("variants") or []:
         pricing = v.get("pricing") if isinstance(v.get("pricing"), dict) else {}
-        raw_parts = chunk_text(json_text(v))
-        product_rows.append([
-            clean(v.get("id")), clean(v.get("kit_id")), clean(v.get("sku")), clean(v.get("name")),
-            clean(v.get("brand")), clean(v.get("barcode")), clean(v.get("status")),
-            clean(v.get("product_id")), clean(v.get("product_card_id")), clean(v.get("description")),
-            clean(v.get("seo_description")), clean(v.get("seo_h1")), clean(v.get("seo_title")),
-            clean(v.get("slug")), clean(v.get("relative_link_url")), clean(v.get("vat")),
-            clean(v.get("requires_marking")), clean(v.get("created_at")), clean(v.get("updated_at")),
-            clean(pricing.get("price")), clean(pricing.get("manual_discount_price")),
-            clean(pricing.get("promotion_price")), clean(pricing.get("final_price")),
-            len(v.get("stocks") or []), len(v.get("media") or []), len(v.get("characteristics") or []),
-            json_text(v.get("cargo_boxes") or []), json_text(pricing),
-            json_text(v.get("stocks") or []), json_text(v.get("media") or []),
-            json_text(v.get("characteristics") or []),
-            *raw_parts,
-        ])
+        named_chars = []
         for c in v.get("characteristics") or []:
             cid = clean(c.get("characteristic_id") or c.get("id") or c.get("title"))
-            characteristic_rows.append([
-                clean(v.get("id")), clean(v.get("kit_id")), clean(v.get("sku")),
-                cid, clean(c.get("title") or chars_by_id.get(cid)), clean(c.get("unit")),
-                clean(c.get("value")), json_text(c.get("values") or []), json_text(c),
-            ])
+            named_chars.append({
+                "id": cid,
+                "title": clean(c.get("title") or chars_by_id.get(cid)),
+                "unit": clean(c.get("unit")),
+                "value": c.get("value"),
+                "values": c.get("values") or [],
+            })
+        named_stocks = []
         for st in v.get("stocks") or []:
             wid = clean(st.get("warehouse_id"))
-            stock_rows.append([
-                clean(v.get("id")), clean(v.get("kit_id")), clean(v.get("sku")),
-                wid, wh_by_id.get(wid, ""), clean(st.get("quantity")), clean(st.get("reserved")),
-                clean(st.get("available_quantity")), json_text(st),
-            ])
-        for m in v.get("media") or []:
-            media_rows.append([
-                clean(v.get("id")), clean(v.get("kit_id")), clean(v.get("sku")),
-                clean(m.get("image_id")), clean(m.get("url")), clean(m.get("type")),
-                clean(m.get("display_sequence")), json_text(m),
-            ])
+            named_stocks.append({
+                "warehouse_id": wid,
+                "warehouse": wh_by_id.get(wid, ""),
+                "quantity": st.get("quantity"),
+                "reserved": st.get("reserved"),
+                "available_quantity": st.get("available_quantity"),
+            })
 
-    characteristic_dict_headers = ["id", "title", "type", "select_mode", "status", "raw_json"]
-    characteristic_dict_rows = [[
-        clean(x.get("id")), clean(x.get("title")), clean(x.get("type")),
-        clean(x.get("select_mode")), clean(x.get("status")), json_text(x)
+        raw_parts = chunk_text(json_text(v))
+        rows.append([
+            safe_cell(v.get("id")), safe_cell(v.get("kit_id")), safe_cell(v.get("sku")), safe_cell(v.get("name")),
+            safe_cell(v.get("brand")), safe_cell(v.get("barcode")), safe_cell(v.get("status")),
+            safe_cell(v.get("product_id")), safe_cell(v.get("product_card_id")), safe_cell(v.get("description")),
+            safe_cell(v.get("seo_description")), safe_cell(v.get("seo_h1")), safe_cell(v.get("seo_title")),
+            safe_cell(v.get("slug")), safe_cell(v.get("relative_link_url")), safe_cell(v.get("vat")),
+            safe_cell(v.get("requires_marking")), safe_cell(v.get("created_at")), safe_cell(v.get("updated_at")),
+            safe_cell(pricing.get("price")), safe_cell(pricing.get("manual_discount_price")),
+            safe_cell(pricing.get("promotion_price")), safe_cell(pricing.get("final_price")),
+            len(v.get("stocks") or []), len(v.get("media") or []), len(v.get("characteristics") or []),
+            safe_cell(json_text(named_chars)), safe_cell(json_text(v.get("characteristics") or [])),
+            safe_cell(json_text(named_stocks)), safe_cell(json_text(v.get("stocks") or [])),
+            safe_cell(json_text(v.get("media") or [])), safe_cell(json_text(v.get("cargo_boxes") or [])),
+            safe_cell(json_text(pricing)),
+            *[safe_cell(x) for x in raw_parts],
+        ])
+
+    characteristic_headers = ["id", "title", "type", "select_mode", "status", "raw_json"]
+    characteristic_rows = [[
+        safe_cell(x.get("id")), safe_cell(x.get("title")), safe_cell(x.get("type")),
+        safe_cell(x.get("select_mode")), safe_cell(x.get("status")), safe_cell(json_text(x))
     ] for x in data.get("characteristics") or []]
 
     category_headers = ["id", "title", "parent_id", "status", "raw_json"]
     category_rows = [[
-        clean(x.get("id")), clean(x.get("title") or x.get("name")),
-        clean(x.get("parent_id")), clean(x.get("status")), json_text(x)
+        safe_cell(x.get("id")), safe_cell(x.get("title") or x.get("name")),
+        safe_cell(x.get("parent_id")), safe_cell(x.get("status")), safe_cell(json_text(x))
     ] for x in data.get("categories") or []]
 
     warehouse_headers = ["id", "title", "status", "raw_json"]
     warehouse_rows = [[
-        clean(x.get("id")), clean(x.get("title") or x.get("name")), clean(x.get("status")), json_text(x)
+        safe_cell(x.get("id")), safe_cell(x.get("title") or x.get("name")),
+        safe_cell(x.get("status")), safe_cell(json_text(x))
     ] for x in data.get("warehouses") or []]
 
-    api_product_headers = ["id", "category_ids_json", "created_at", "updated_at", "raw_json_1", "raw_json_2", "raw_json_3"]
-    api_product_rows = []
-    for x in data.get("products") or []:
-        chunks = chunk_text(json_text(x), parts=3)
-        api_product_rows.append([
-            clean(x.get("id")), json_text(x.get("category_ids") or []),
-            clean(x.get("created_at")), clean(x.get("updated_at")), *chunks[:3]
-        ])
-
-    return {
-        "Товары": (product_headers, product_rows),
-        "Характеристики": (["variant_id", "kit_id", "sku", "characteristic_id", "characteristic_title", "unit", "value", "values_json", "raw_json"], characteristic_rows),
-        "Остатки": (["variant_id", "kit_id", "sku", "warehouse_id", "warehouse_title", "quantity", "reserved", "available_quantity", "raw_json"], stock_rows),
-        "Медиа": (["variant_id", "kit_id", "sku", "image_id", "url", "type", "display_sequence", "raw_json"], media_rows),
-        "Справочник характеристик": (characteristic_dict_headers, characteristic_dict_rows),
+    tables = {
+        "Товары": (headers, rows),
+        "Справочник характеристик": (characteristic_headers, characteristic_rows),
         "Категории": (category_headers, category_rows),
         "Склады": (warehouse_headers, warehouse_rows),
-        "Продукты API": (api_product_headers, api_product_rows),
     }
+
+    if data.get("products"):
+        p_headers = ["id", "category_ids_json", "created_at", "updated_at", "raw_json_1", "raw_json_2", "raw_json_3"]
+        p_rows = []
+        for x in data.get("products") or []:
+            chunks = chunk_text(json_text(x), parts=3)
+            p_rows.append([
+                safe_cell(x.get("id")), safe_cell(json_text(x.get("category_ids") or [])),
+                safe_cell(x.get("created_at")), safe_cell(x.get("updated_at")),
+                *[safe_cell(v) for v in chunks[:3]]
+            ])
+        tables["Продукты API"] = (p_headers, p_rows)
+
+    return tables
 
 
 def service_account_info(raw: str):
@@ -390,6 +481,21 @@ def service_account_info(raw: str):
         raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON must be raw JSON or base64 JSON") from exc
 
 
+def iter_write_blocks(rows, max_rows=500, max_chars=2_500_000):
+    block = []
+    chars = 0
+    for row in rows:
+        row_chars = sum(len(str(v)) for v in row)
+        if block and (len(block) >= max_rows or chars + row_chars > max_chars):
+            yield block
+            block = []
+            chars = 0
+        block.append(row)
+        chars += row_chars
+    if block:
+        yield block
+
+
 def sync_google(tables, report, sheet_id: str, credential_raw: str):
     import gspread
 
@@ -400,84 +506,103 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
     gc = gspread.service_account_from_dict(info)
     sh = gc.open_by_key(sheet_id)
 
-    total_cells = 0
-
-    def write_partitioned(base_title, headers, rows, max_data_rows=100000):
-        nonlocal total_cells
-        if not headers:
-            return
-        parts = max(1, (len(rows) + max_data_rows - 1) // max_data_rows)
-        for idx in range(parts):
-            title = base_title if idx == 0 else f"{base_title}_{idx + 1}"
-            subset = rows[idx * max_data_rows:(idx + 1) * max_data_rows]
-            rcount = max(2, len(subset) + 1)
-            ccount = max(1, len(headers))
-            total_cells += rcount * ccount
-            try:
-                ws = sh.worksheet(title)
-                ws.clear()
-                ws.resize(rows=rcount, cols=ccount)
-            except gspread.WorksheetNotFound:
-                ws = sh.add_worksheet(title=title, rows=rcount, cols=ccount)
-            ws.update(range_name="A1", values=[headers], value_input_option="RAW")
-            for start in range(0, len(subset), 2000):
-                block = subset[start:start + 2000]
-                row_start = start + 2
-                ws.update(range_name=f"A{row_start}", values=block, value_input_option="RAW")
-            try:
-                ws.freeze(rows=1)
-            except Exception:
-                pass
-
-        for ws in list(sh.worksheets()):
-            t = ws.title
-            if t.startswith(base_title + "_"):
-                suffix = t[len(base_title) + 1:]
-                if suffix.isdigit() and int(suffix) > parts:
-                    sh.del_worksheet(ws)
-
-    for title, (headers, rows) in tables.items():
-        if title == "Характеристики":
-            write_partitioned(title, headers, rows, max_data_rows=80000)
-        else:
-            write_partitioned(title, headers, rows, max_data_rows=100000)
-
-    if total_cells > 9_500_000:
-        raise RuntimeError(f"Estimated sheet size is too large: {total_cells} cells")
-
-    meta = [
+    # Show progress immediately in the spreadsheet.
+    progress = [
         ["Параметр", "Значение"],
-        ["Последняя синхронизация UTC", report["finished_at"]],
+        ["Статус", "СИНХРОНИЗАЦИЯ ВЫПОЛНЯЕТСЯ"],
+        ["Запуск UTC", report["started_at"]],
         ["Источник", report["source"]],
-        ["Товаров / вариантов", report["counts"]["variants"]],
-        ["Характеристик (значений)", report["counts"]["characteristic_values"]],
-        ["Остатков (строк)", report["counts"]["stocks"]],
-        ["Медиа (строк)", report["counts"]["media"]],
-        ["Категорий", report["counts"]["categories"]],
-        ["Складов", report["counts"]["warehouses"]],
-        ["Справочник характеристик", report["counts"]["characteristic_definitions"]],
-        ["Продуктов API", report["counts"]["products"]],
-        ["YML fallback", report["fallback_url"]],
-        ["Предупреждения", " | ".join(report.get("warnings") or [])],
+        ["Режим", report["mode"]],
+        ["Товаров / вариантов получено", report["counts"]["variants"]],
     ]
     try:
         ws = sh.worksheet("Сводка")
-        ws.clear()
-        ws.resize(rows=max(20, len(meta) + 2), cols=2)
     except gspread.WorksheetNotFound:
-        ws = sh.add_worksheet(title="Сводка", rows=max(20, len(meta) + 2), cols=2)
+        ws = sh.add_worksheet(title="Сводка", rows=30, cols=2)
+    ws.clear()
+    ws.resize(rows=30, cols=2)
+    ws.update(range_name="A1", values=progress, value_input_option="RAW")
+
+    estimated_cells = 0
+    for _, (headers, rows) in tables.items():
+        estimated_cells += max(2, len(rows) + 1) * max(1, len(headers))
+    if estimated_cells > 9_500_000:
+        raise RuntimeError(f"Estimated Google Sheets size is too large: {estimated_cells} cells")
+
+    def write_table(title, headers, rows):
+        try:
+            sheet = sh.worksheet(title)
+            sheet.clear()
+            sheet.resize(rows=max(2, len(rows) + 1), cols=max(1, len(headers)))
+        except gspread.WorksheetNotFound:
+            sheet = sh.add_worksheet(
+                title=title,
+                rows=max(2, len(rows) + 1),
+                cols=max(1, len(headers)),
+            )
+
+        sheet.update(range_name="A1", values=[headers], value_input_option="RAW")
+        row_start = 2
+        written = 0
+        for block in iter_write_blocks(rows):
+            sheet.update(range_name=f"A{row_start}", values=block, value_input_option="RAW")
+            row_start += len(block)
+            written += len(block)
+            if written % 5000 < len(block) or written == len(rows):
+                print(f"Google Sheets {title}: {written}/{len(rows)} rows", flush=True)
+        try:
+            sheet.freeze(rows=1)
+        except Exception:
+            pass
+
+    for title, (headers, rows) in tables.items():
+        write_table(title, headers, rows)
+
+    # Remove old normalized sheets from v1 backup; their data is now inside each Товары row.
+    for obsolete in ("Характеристики", "Остатки", "Медиа"):
+        try:
+            old = sh.worksheet(obsolete)
+            sh.del_worksheet(old)
+        except gspread.WorksheetNotFound:
+            pass
+
+    meta = [
+        ["Параметр", "Значение"],
+        ["Статус", "УСПЕШНО"],
+        ["Последняя синхронизация UTC", report["finished_at"]],
+        ["Источник", report["source"]],
+        ["Режим", report["mode"]],
+        ["Товаров / вариантов", report["counts"]["variants"]],
+        ["Характеристик (значений)", report["counts"]["characteristic_values"]],
+        ["Остатков (записей)", report["counts"]["stocks"]],
+        ["Медиа (записей)", report["counts"]["media"]],
+        ["Категорий", report["counts"]["categories"]],
+        ["Складов", report["counts"]["warehouses"]],
+        ["Справочник характеристик", report["counts"]["characteristic_definitions"]],
+        ["Продуктов API (глубокий режим)", report["counts"]["products"]],
+        ["Время чтения API, сек.", report.get("api_seconds", "")],
+        ["YML fallback", report["fallback_url"]],
+        ["Предупреждения", " | ".join(report.get("warnings") or [])],
+    ]
+    ws.clear()
+    ws.resize(rows=max(30, len(meta) + 2), cols=2)
     ws.update(range_name="A1", values=meta, value_input_option="RAW")
+
     try:
         history = sh.worksheet("История")
     except gspread.WorksheetNotFound:
-        history = sh.add_worksheet(title="История", rows=1000, cols=8)
-        history.append_row(["timestamp_utc", "source", "variants", "characteristic_values", "stocks", "media", "categories", "warnings"], value_input_option="RAW")
+        history = sh.add_worksheet(title="История", rows=1000, cols=10)
+        history.append_row(
+            ["timestamp_utc", "source", "mode", "variants", "characteristic_values", "stocks", "media", "categories", "api_seconds", "warnings"],
+            value_input_option="RAW",
+        )
     history.append_row([
-        report["finished_at"], report["source"], report["counts"]["variants"],
-        report["counts"]["characteristic_values"], report["counts"]["stocks"],
-        report["counts"]["media"], report["counts"]["categories"],
+        report["finished_at"], report["source"], report["mode"], report["counts"]["variants"],
+        report["counts"]["characteristic_values"], report["counts"]["stocks"], report["counts"]["media"],
+        report["counts"]["categories"], report.get("api_seconds", ""),
         " | ".join(report.get("warnings") or []),
     ], value_input_option="RAW")
+
     return True, f"Google Sheet updated: {sh.url}"
 
 
@@ -497,6 +622,7 @@ def save_full_backup(data, report):
 
 
 def main():
+    started_monotonic = time.monotonic()
     started = now_iso()
     token = os.getenv("YANDEX_KIT_TOKEN", "").strip()
     fallback_url = os.getenv("YML_FALLBACK_URL", DEFAULT_FALLBACK_URL).strip()
@@ -512,7 +638,6 @@ def main():
         print(f"KIT API failed; switching to YML fallback: {api_error}", file=sys.stderr, flush=True)
         data = load_from_yml(fallback_url)
 
-    tables = build_tables(data)
     counts = {
         "variants": len(data.get("variants") or []),
         "characteristic_values": sum(len(x.get("characteristics") or []) for x in data.get("variants") or []),
@@ -528,11 +653,13 @@ def main():
         "started_at": started,
         "finished_at": now_iso(),
         "source": data.get("source"),
+        "mode": data.get("mode", "FAST"),
         "fallback_url": fallback_url,
         "google_sheet_id": sheet_id,
         "api_error": api_error,
         "warnings": data.get("warnings") or [],
         "counts": counts,
+        "api_seconds": data.get("api_seconds"),
         "google_synced": False,
         "google_message": "",
     }
@@ -541,6 +668,7 @@ def main():
     report["backup_file"] = str(backup_path.relative_to(ROOT))
     report["backup_bytes"] = backup_path.stat().st_size
 
+    tables = build_tables(data)
     credential_raw = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "")
     try:
         synced, message = sync_google(tables, report, sheet_id, credential_raw)
@@ -553,14 +681,12 @@ def main():
         report["warnings"].append(report["google_message"])
 
     report["finished_at"] = now_iso()
+    report["total_seconds"] = round(time.monotonic() - started_monotonic, 2)
     report_path = RUNTIME / "last_report.json"
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(json.dumps(report, ensure_ascii=False, indent=2), flush=True)
-
-    if counts["variants"] == 0:
-        return 2
-    return 0
+    return 0 if counts["variants"] > 0 else 2
 
 
 if __name__ == "__main__":
