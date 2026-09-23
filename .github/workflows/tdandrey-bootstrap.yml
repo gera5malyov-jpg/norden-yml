@@ -6,7 +6,7 @@ on:
       batch_size:
         description: 'Сколько новых карточек создать за запуск'
         required: true
-        default: '600'
+        default: '250'
         type: string
 
 permissions:
@@ -37,7 +37,7 @@ jobs:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           WEBASYST_BASE_URL: https://profikompany.ru
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
-        run: python tdandrey-kit/loader.py --mode bootstrap --max-new '${{ inputs.batch_size }}'
+        run: python tdandrey-kit/loader.py --mode bootstrap --max-new '${{ inputs.batch_size }}' --images
       - name: Сохранить mapping и отчёт
         if: always()
         shell: bash
