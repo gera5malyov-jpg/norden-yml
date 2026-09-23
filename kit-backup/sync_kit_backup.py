@@ -639,7 +639,7 @@ def build_source_enrichment(data, fallback_url=None):
             if key in raduga_prices:
                 return raduga_prices[key]
             # Для цветовых/вариантных SKU берем базовый артикул поставщика в начале строки.
-            match = re.match(r"(?iu)^((?:NR|DV|PP|PR|P|S)\d{3}[А-ЯA-Z]?)", value)
+            match = re.match(r"(?iu)^(?:RDG[-_ ]*)?((?:NR|DV|PP|PR|P|S)\d{3}[А-ЯA-Z]?)", value)
             if match:
                 base_key = _source_key(match.group(1))
                 if base_key in raduga_prices:
