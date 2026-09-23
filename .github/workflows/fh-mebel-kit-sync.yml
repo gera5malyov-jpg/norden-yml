@@ -1,0 +1,102 @@
+name: FH мебель → KIT — раз в 2 недели
+
+on:
+  schedule:
+    # GitHub cron не умеет "каждые 14 дней".
+    # Проверяем каждую среду; live-запуск проходит только если
+    # с последнего успешного обновления прошло >= 14 дней.
+    - cron: '25 5 * * 3'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Только проверка без записи в KIT'
+        required: true
+        default: true
+        type: boolean
+      force:
+        description: 'Игнорировать 14-дневный интервал'
+        required: true
+        default: false
+        type: boolean
+  push:
+    branches: [main]
+    paths:
+      - 'fh-mebel-kit/sync_fh_mebel_kit.py'
+      - '.github/workflows/fh-mebel-kit-sync.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fh-mebel-kit-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+
+      - name: Проверить код
+        run: python -m py_compile fh-mebel-kit/sync_fh_mebel_kit.py
+
+      - name: Спарсить FH мебель и синхронизировать с KIT
+        id: sync
+        continue-on-error: true
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            if git log -1 --pretty=%B | grep -q '\[FH-LIVE\]'; then
+              args+=(--force)
+            else
+              args+=(--dry-run --force)
+            fi
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
+            if [[ "${{ inputs.force }}" == "true" ]]; then args+=(--force); fi
+          fi
+
+          python fh-mebel-kit/sync_fh_mebel_kit.py "${args[@]}"
+
+      - name: Сохранить отчёт и состояние
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+
+          cp fh-mebel-kit/last_sync_report.json /tmp/fh-report.json 2>/dev/null || true
+          cp fh-mebel-kit/state.json /tmp/fh-state.json 2>/dev/null || true
+
+          git fetch origin main
+          git reset --hard origin/main
+
+          mkdir -p fh-mebel-kit
+          cp /tmp/fh-report.json fh-mebel-kit/last_sync_report.json 2>/dev/null || true
+          cp /tmp/fh-state.json fh-mebel-kit/state.json 2>/dev/null || true
+
+          git add fh-mebel-kit/last_sync_report.json fh-mebel-kit/state.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Обновить отчёт FH мебель'
+          git push origin HEAD:main || true
+
+      - name: Завершить с ошибкой при проблемах
+        if: always()
+        env:
+          SYNC_OUTCOME: ${{ steps.sync.outcome }}
+        run: test "$SYNC_OUTCOME" = "success"
