@@ -169,6 +169,8 @@ def sitemap_urls():
     candidates = [
         urljoin(BASE_URL, "sitemap.xml"),
         urljoin(BASE_URL, "sitemap_index.xml"),
+        urljoin(BASE_URL, "map/sitemap/1/"),
+        urljoin(BASE_URL, "map/sitemap/2/"),
     ]
     try:
         r = ses.get(urljoin(BASE_URL, "robots.txt"), timeout=30)
@@ -182,35 +184,44 @@ def sitemap_urls():
     found = set()
     checked = set()
     queue = deque(unique(candidates))
-    while queue and len(checked) < 30:
+    while queue and len(checked) < 40:
         url = queue.popleft()
         if url in checked:
             continue
         checked.add(url)
         try:
-            r = ses.get(url, timeout=45)
-            if not r.ok or "<" not in r.text[:200]:
+            r = ses.get(url, timeout=60)
+            if not r.ok:
                 continue
-            root = ET.fromstring(r.content)
-            tag = root.tag.split("}")[-1].casefold()
-            locs = [
-                clean_text(node.text)
-                for node in root.iter()
-                if node.tag.split("}")[-1].casefold() == "loc" and clean_text(node.text)
-            ]
-            if tag == "sitemapindex":
-                for loc in locs:
-                    if loc not in checked:
-                        queue.append(loc)
-            else:
-                for loc in locs:
-                    cu = canonical_url(loc)
-                    if cu and is_catalog_url(cu):
-                        found.add(cu)
+            text = r.text
+
+            discovered = set(re.findall(
+                r"https?://(?:www\\.)?fh-mebel\\.ru/[^<\\s\"']+",
+                text,
+                re.I,
+            ))
+
+            try:
+                root = ET.fromstring(r.content)
+                for node in root.iter():
+                    if node.tag.split("}")[-1].casefold() == "loc" and clean_text(node.text):
+                        discovered.add(clean_text(node.text))
+            except Exception:
+                pass
+
+            for loc in discovered:
+                clean = loc.split("#", 1)[0]
+                low = clean.casefold()
+                if "/map/sitemap/" in low or low.endswith(".xml") or low.endswith(".xml/"):
+                    if clean not in checked:
+                        queue.append(clean)
+                    continue
+                cu = canonical_url(clean)
+                if cu and is_catalog_url(cu):
+                    found.add(cu)
         except Exception:
             continue
     return found
-
 
 def closest_group_name(node, main, param_name):
     for ancestor in node.parents:
