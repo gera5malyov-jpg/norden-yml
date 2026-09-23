@@ -1,0 +1,55 @@
+name: Verify Dalli MSK Ozon batch 2026-09-23
+
+on:
+  push:
+    paths:
+      - '.github/workflows/dalli-msk-verify-67081442-37307681-80399471.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Проверить три заказа
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+        shell: bash
+        run: |
+          set +e
+          failed=0
+          for order in 67081442-0604-1 37307681-0157-1 80399471-0026-1; do
+            TARGET_EXTERNAL_ID="$order" \
+            SAFE_RESULT_PATH="dalli/order_${order}_msk_verify.json" \
+            python scripts/verify_dalli_msk_ozon_basket.py
+            rc=$?
+            if [ $rc -ne 0 ]; then failed=1; fi
+          done
+          echo "VERIFY_FAILED=$failed" >> "$GITHUB_ENV"
+          exit 0
+      - name: Сохранить результаты проверки
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+          git add dalli/order_*_msk_verify.json || true
+          git diff --cached --quiet || git commit -m "Store Dalli MSK verification results"
+          git push
+      - name: Итог
+        if: always()
+        run: |
+          if [ "${VERIFY_FAILED:-0}" != "0" ]; then
+            echo "Проверка одного или нескольких заказов не пройдена"
+            exit 1
+          fi
