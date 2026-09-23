@@ -30,6 +30,25 @@ def getbasket():
     root=ET.Element("getbasket"); ET.SubElement(root,"number").text=ORDER
     return dalli(root)
 
+def get_interval(addr, service="30"):
+    root=ET.Element("intervals")
+    ET.SubElement(root,"address").text=addr
+    ET.SubElement(root,"service").text=service
+    ET.SubElement(root,"strict").text="T"
+    ET.SubElement(root,"output").text="dates"
+    ET.SubElement(root,"format").text="minutes"
+    x=dalli(root)
+    dates=[]
+    for d in x.findall(".//date"):
+        val=s(d.get("value"))
+        for iv in d.findall("./intervals/interval"):
+            t1=s(iv.findtext("time_min")); t2=s(iv.findtext("time_max")); typ=s(iv.get("type"))
+            if val and t1 and t2: dates.append((val,t1,t2,typ))
+    if not dates: raise RuntimeError("Dalli не вернул интервал для service 30")
+    dates.sort(key=lambda x:x[0])
+    basics=[x for x in dates if x[3].lower()=="basic"] or dates
+    return basics[0][0],basics[0][1],basics[0][2]
+
 NOTE_KEYS=("comment","customer_comment","delivery_comment","recipient_comment","comment_to_delivery","order_comment","note","notes")
 def note(o):
     c=o.get("customer") if isinstance(o.get("customer"),dict) else {}
@@ -73,15 +92,18 @@ def main():
     pin=s(ad.get("pin"))
     if pin: phone += f" доб. {pin}"
 
+    full_addr=address(o)
+    delivery_date,time_min,time_max=get_interval(full_addr,"30")
+
     root=ET.Element("editbasket")
     n=ET.SubElement(root,"order",{"number":ORDER})
     add(n,"barcode",barcode)
     recv=ET.SubElement(n,"receiver")
-    add(recv,"address",address(o)); add(recv,"person",person); add(recv,"phone",phone)
-    add(recv,"date",s(cur.findtext("./receiver/date"))[:10])
-    add(recv,"time_min",s(cur.findtext("./receiver/time_min"))[:5])
-    add(recv,"time_max",s(cur.findtext("./receiver/time_max"))[:5])
-    add(n,"service",cur.findtext("service"))
+    add(recv,"address",full_addr); add(recv,"person",person); add(recv,"phone",phone)
+    add(recv,"date",delivery_date)
+    add(recv,"time_min",time_min)
+    add(recv,"time_max",time_max)
+    add(n,"service","30")
     if s(cur.findtext("weight")): add(n,"weight",cur.findtext("weight"))
     add(n,"quantity",cur.findtext("quantity") or "1")
     add(n,"paytype",cur.findtext("paytype") or "NO")
@@ -113,6 +135,10 @@ def main():
         "source_prr_code":code,"source_prr_price":price,"source_prr_floor":floor,
         "dalli_climb_present":cl is not None,
         "dalli_climb_type":s(cl.get("type")) if cl is not None else "",
+        "dalli_service":s(v.findtext("service")),
+        "dalli_delivery_date":s(v.findtext("./receiver/date")),
+        "dalli_time_min":s(v.findtext("./receiver/time_min")),
+        "dalli_time_max":s(v.findtext("./receiver/time_max")),
         "dalli_climb_floor":s(cl.get("floor")) if cl is not None else "",
         "vat_values":[s(x.get("VATrate")) for x in v.findall("./items/item")],
         "errors":[]
