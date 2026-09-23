@@ -71,7 +71,7 @@ jobs:
             if [[ "${{ inputs.force }}" == "true" ]]; then args+=(--force); fi
           fi
 
-          python fh-mebel-kit/sync_fh_mebel_kit.py "${args[@]}"
+          python fh-mebel-kit/sync_fh_mebel_kit.py --include-sitemap "${args[@]}"
 
       - name: Сохранить отчёт и состояние
         if: always()
