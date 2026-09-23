@@ -34,6 +34,11 @@ res={
     "order_number":order_no,
     "customer":shape(c),
     "address":shape(a),
+    "addressee":shape(o.get("addressee") if isinstance(o.get("addressee"),dict) else {}),
+    "additional_data":shape(o.get("additional_data") if isinstance(o.get("additional_data"),dict) else {}),
+    "optional":shape(o.get("optional") if isinstance(o.get("optional"),dict) else {}),
+    "external_order":shape(o.get("external_order") if isinstance(o.get("external_order"),dict) else {}),
+    "delivery_method":shape(o.get("delivery_method") if isinstance(o.get("delivery_method"),dict) else {}),
     "top_level_keys":sorted(o.keys()),
 }
 os.makedirs(os.path.dirname(out),exist_ok=True)
