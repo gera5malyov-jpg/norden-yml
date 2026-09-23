@@ -1,0 +1,150 @@
+{
+  "order_number": "97426764-0177-1",
+  "customer": {
+    "address": {
+      "type": "dict",
+      "keys": [
+        "address_tail",
+        "city",
+        "comment",
+        "country",
+        "district",
+        "latitude",
+        "longitude",
+        "provider_pvz_code",
+        "pvz_code",
+        "region",
+        "zip_code"
+      ]
+    },
+    "customer_email": {
+      "type": "str",
+      "present": false,
+      "length": 0
+    },
+    "customer_id": {
+      "type": "int",
+      "present": true
+    },
+    "name": {
+      "type": "str",
+      "present": true,
+      "length": 18
+    },
+    "phone": {
+      "type": "str",
+      "present": true,
+      "length": 11
+    }
+  },
+  "address": {
+    "address_tail": {
+      "type": "str",
+      "present": true,
+      "length": 104
+    },
+    "city": {
+      "type": "str",
+      "present": true,
+      "length": 15
+    },
+    "comment": {
+      "type": "str",
+      "present": true,
+      "length": 34
+    },
+    "country": {
+      "type": "str",
+      "present": true,
+      "length": 6
+    },
+    "district": {
+      "type": "str",
+      "present": false,
+      "length": 0
+    },
+    "latitude": {
+      "type": "float",
+      "present": true
+    },
+    "longitude": {
+      "type": "float",
+      "present": true
+    },
+    "provider_pvz_code": {
+      "type": "str",
+      "present": false,
+      "length": 0
+    },
+    "pvz_code": {
+      "type": "int",
+      "present": true
+    },
+    "region": {
+      "type": "str",
+      "present": true,
+      "length": 15
+    },
+    "zip_code": {
+      "type": "str",
+      "present": true,
+      "length": 6
+    }
+  },
+  "top_level_keys": [
+    "additional_data",
+    "addressee",
+    "analytics_data",
+    "available_actions",
+    "barcodes",
+    "cancellation",
+    "container",
+    "container_sort_type",
+    "courier",
+    "customer",
+    "delivering_date",
+    "delivery_method",
+    "delivery_price",
+    "destination_place_id",
+    "destination_place_name",
+    "external_order",
+    "fact_delivery_date",
+    "financial_data",
+    "in_process_at",
+    "integration_type_flow",
+    "is_click_and_collect",
+    "is_express",
+    "is_multibox",
+    "is_presortable",
+    "legal_info",
+    "multi_box_qty",
+    "optional",
+    "order_id",
+    "order_number",
+    "parent_posting_number",
+    "pickup_code_verified_at",
+    "posting_number",
+    "previous_substatus",
+    "product_exemplars",
+    "products",
+    "provider_status",
+    "prr_option",
+    "received_at_sorting_center",
+    "related_postings",
+    "related_weight_postings",
+    "require_blr_traceable_attrs",
+    "requirements",
+    "scanit",
+    "shipment_date",
+    "shipment_date_without_delay",
+    "sla_discount",
+    "sorting_center",
+    "status",
+    "substatus",
+    "tariffication",
+    "tariffication_fact",
+    "tariffication_steps",
+    "tpl_integration_type",
+    "tracking_number"
+  ]
+}
