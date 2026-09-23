@@ -1,0 +1,191 @@
+name: Treez → KIT — каталог раз в 2 недели
+
+on:
+  schedule:
+    # GitHub cron не поддерживает шаг ровно 14 дней.
+    # Проверяем раз в неделю; скрипт запускает запись только после >= 14 дней.
+    - cron: '25 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Только проверка, без записи в KIT'
+        required: true
+        default: false
+        type: boolean
+      force:
+        description: 'Игнорировать 14-дневный интервал'
+        required: true
+        default: false
+        type: boolean
+      skip_video:
+        description: 'Не пробовать переносить видео'
+        required: true
+        default: false
+        type: boolean
+  push:
+    branches: [main]
+    paths:
+      - 'treez-kit/sync_treez_kit.py'
+      - '.github/workflows/treez-kit-sync.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: treez-kit-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: python -m pip install --disable-pip-version-check requests openpyxl playwright
+
+      - name: Загрузить Treez в KIT
+        id: treezsync
+        continue-on-error: true
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          args=()
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
+            if [[ "${{ inputs.force }}" == "true" ]]; then args+=(--force); fi
+            if [[ "${{ inputs.skip_video }}" == "true" ]]; then args+=(--skip-video); fi
+          fi
+          python treez-kit/sync_treez_kit.py "${args[@]}"
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Сохранить отчёт и дату последнего успешного запуска
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+
+          cp treez-kit/last_sync_report.json /tmp/treez-report.json 2>/dev/null || true
+          cp treez-kit/state.json /tmp/treez-state.json 2>/dev/null || true
+
+          git fetch origin main
+          git reset --hard origin/main
+
+          cp /tmp/treez-report.json treez-kit/last_sync_report.json 2>/dev/null || true
+          cp /tmp/treez-state.json treez-kit/state.json 2>/dev/null || true
+
+          git add treez-kit/last_sync_report.json treez-kit/state.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Обновить отчёт Treez → KIT'
+          git push origin HEAD:main || true
+
+      - name: Отправить отчёт на shop@office-mag.com
+        if: always()
+        env:
+          GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import json, os, smtplib, ssl
+          from email.message import EmailMessage
+          from pathlib import Path
+
+          path = Path('treez-kit/last_sync_report.json')
+          if not path.exists():
+              raise SystemExit('Нет отчёта Treez')
+
+          r = json.loads(path.read_text(encoding='utf-8'))
+          status = str(r.get('status') or 'unknown')
+          status_ru = {
+              'ok': 'УСПЕШНО',
+              'partial': 'ЗАВЕРШЕНО С ОШИБКАМИ',
+              'error': 'ОШИБКА',
+              'skipped': 'ПРОПУЩЕНО — 14 дней ещё не прошло',
+              'dry_run': 'ПРОВЕРКА БЕЗ ЗАПИСИ',
+          }.get(status, status)
+
+          lines = [
+              'Автоматический отчёт GitHub: Treez → Яндекс KIT',
+              '',
+              f'Результат: {status_ru}',
+              f'Позиций/модификаций в источнике: {int(r.get("source_offers") or 0)}',
+              f'Создано: {int(r.get("created") or 0)}',
+              f'Обновлено существующих: {int(r.get("updated_existing") or 0)}',
+              f'Обнулено исчезнувших: {int(r.get("zeroed_missing") or 0)}',
+              f'Обновлений цен: {int(r.get("price_updates") or 0)}',
+              f'Обновлений остатков: {int(r.get("stock_updates") or 0)}',
+              f'Загружено изображений: {int(r.get("images_uploaded") or 0)}',
+              f'Ошибок изображений: {int(r.get("image_errors") or 0)}',
+              f'Загружено видео: {int(r.get("videos_uploaded") or 0)}',
+              f'Ошибок видео: {int(r.get("video_errors") or 0)}',
+              f'Ошибок загрузки: {len(r.get("errors") or [])}',
+              '',
+              'Поставщик: treez',
+              'Бренд: TREEZ',
+              'Цена для покупателя: цена Treez минус 3%',
+              'Остаток: МСК 100 / СПБ привозной 100',
+              'Артикул: TREEZ-<код KIT>',
+              f'GitHub run: {os.getenv("RUN_URL","")}',
+          ]
+
+          if r.get('reason'):
+              lines.extend(['', 'Комментарий: ' + str(r['reason'])])
+          if r.get('error'):
+              lines.extend(['', 'Ошибка: ' + str(r['error'])[:1500]])
+          if r.get('errors'):
+              lines.append('')
+              lines.append('Первые ошибки:')
+              for row in r['errors'][:20]:
+                  lines.append('- ' + json.dumps(row, ensure_ascii=False))
+
+          user = (os.getenv('GMAIL_SMTP_USER') or '').strip()
+          password = ''.join((os.getenv('GMAIL_APP_PASSWORD') or '').split())
+          recipient = (os.getenv('RECIPIENT') or '').strip()
+          if not user or not password:
+              raise SystemExit('Не настроены GMAIL_SMTP_USER/GMAIL_APP_PASSWORD')
+
+          msg = EmailMessage()
+          msg['From'] = user
+          msg['To'] = recipient
+          msg['Subject'] = f'[Treez → Яндекс KIT] {status_ru}'
+          msg.set_content('\n'.join(lines))
+
+          context = ssl.create_default_context()
+          try:
+              with smtplib.SMTP('smtp.gmail.com', 587, timeout=60) as smtp:
+                  smtp.ehlo()
+                  smtp.starttls(context=context)
+                  smtp.ehlo()
+                  smtp.login(user, password)
+                  smtp.send_message(msg)
+          except Exception:
+              with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context, timeout=60) as smtp:
+                  smtp.login(user, password)
+                  smtp.send_message(msg)
+          PY
+
+      - name: Проверить итог
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('treez-kit/last_sync_report.json')
+          if not p.exists():
+              raise SystemExit(1)
+          r = json.loads(p.read_text(encoding='utf-8'))
+          if r.get('status') not in ('ok', 'skipped', 'dry_run'):
+              raise SystemExit(1)
+          PY
