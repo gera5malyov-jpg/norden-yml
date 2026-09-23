@@ -380,38 +380,39 @@ def build_tables(data):
         "variant_id", "kit_id", "sku", "name", "brand", "barcode", "status",
         "product_id", "product_card_id", "description", "seo_description", "seo_h1", "seo_title",
         "slug", "relative_link_url", "vat", "requires_marking", "created_at", "updated_at",
-        "price", "manual_discount_price", "promotion_price", "final_price",
-        "stocks_count", "media_count", "characteristics_count",
-        "characteristics_named_json", "characteristics_raw_json",
-        "stocks_named_json", "stocks_raw_json", "media_json", "cargo_boxes_json", "pricing_json",
-        "raw_json_1", "raw_json_2", "raw_json_3", "raw_json_4", "raw_json_5",
+        "price", "manual_discount_price", "promotion_price", "final_price", "pricing_json",
+        "characteristics_json", "stocks_json", "media_json", "cargo_boxes_json", "extra_json",
     ]
     rows = []
 
+    flattened = {
+        "id", "kit_id", "sku", "name", "brand", "barcode", "status",
+        "product_id", "product_card_id", "description", "seo_description", "seo_h1", "seo_title",
+        "slug", "relative_link_url", "vat", "requires_marking", "created_at", "updated_at",
+        "pricing", "characteristics", "stocks", "media", "cargo_boxes",
+    }
+
     for v in data.get("variants") or []:
         pricing = v.get("pricing") if isinstance(v.get("pricing"), dict) else {}
-        named_chars = []
-        for c in v.get("characteristics") or []:
-            cid = clean(c.get("characteristic_id") or c.get("id") or c.get("title"))
-            named_chars.append({
-                "id": cid,
-                "title": clean(c.get("title") or chars_by_id.get(cid)),
-                "unit": clean(c.get("unit")),
-                "value": c.get("value"),
-                "values": c.get("values") or [],
-            })
-        named_stocks = []
-        for st in v.get("stocks") or []:
-            wid = clean(st.get("warehouse_id"))
-            named_stocks.append({
-                "warehouse_id": wid,
-                "warehouse": wh_by_id.get(wid, ""),
-                "quantity": st.get("quantity"),
-                "reserved": st.get("reserved"),
-                "available_quantity": st.get("available_quantity"),
-            })
 
-        raw_parts = chunk_text(json_text(v))
+        enriched_chars = []
+        for c in v.get("characteristics") or []:
+            item = dict(c) if isinstance(c, dict) else {"value": c}
+            cid = clean(item.get("characteristic_id") or item.get("id") or item.get("title"))
+            if not item.get("title") and chars_by_id.get(cid):
+                item["title"] = chars_by_id[cid]
+            enriched_chars.append(item)
+
+        enriched_stocks = []
+        for st in v.get("stocks") or []:
+            item = dict(st) if isinstance(st, dict) else {"value": st}
+            wid = clean(item.get("warehouse_id"))
+            if wid and wh_by_id.get(wid):
+                item["warehouse_title"] = wh_by_id[wid]
+            enriched_stocks.append(item)
+
+        extra = {k: val for k, val in v.items() if k not in flattened}
+
         rows.append([
             safe_cell(v.get("id")), safe_cell(v.get("kit_id")), safe_cell(v.get("sku")), safe_cell(v.get("name")),
             safe_cell(v.get("brand")), safe_cell(v.get("barcode")), safe_cell(v.get("status")),
@@ -421,12 +422,12 @@ def build_tables(data):
             safe_cell(v.get("requires_marking")), safe_cell(v.get("created_at")), safe_cell(v.get("updated_at")),
             safe_cell(pricing.get("price")), safe_cell(pricing.get("manual_discount_price")),
             safe_cell(pricing.get("promotion_price")), safe_cell(pricing.get("final_price")),
-            len(v.get("stocks") or []), len(v.get("media") or []), len(v.get("characteristics") or []),
-            safe_cell(json_text(named_chars)), safe_cell(json_text(v.get("characteristics") or [])),
-            safe_cell(json_text(named_stocks)), safe_cell(json_text(v.get("stocks") or [])),
-            safe_cell(json_text(v.get("media") or [])), safe_cell(json_text(v.get("cargo_boxes") or [])),
             safe_cell(json_text(pricing)),
-            *[safe_cell(x) for x in raw_parts],
+            safe_cell(json_text(enriched_chars)),
+            safe_cell(json_text(enriched_stocks)),
+            safe_cell(json_text(v.get("media") or [])),
+            safe_cell(json_text(v.get("cargo_boxes") or [])),
+            safe_cell(json_text(extra)),
         ])
 
     characteristic_headers = ["id", "title", "type", "select_mode", "status", "raw_json"]
@@ -481,19 +482,19 @@ def service_account_info(raw: str):
         raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON must be raw JSON or base64 JSON") from exc
 
 
-def iter_write_blocks(rows, max_rows=500, max_chars=2_500_000):
+def iter_write_blocks(rows, max_rows=1200, max_chars=900_000):
     block = []
     chars = 0
     for row in rows:
         row_chars = sum(len(str(v)) for v in row)
         if block and (len(block) >= max_rows or chars + row_chars > max_chars):
-            yield block
+            yield block, chars
             block = []
             chars = 0
         block.append(row)
         chars += row_chars
     if block:
-        yield block
+        yield block, chars
 
 
 def sync_google(tables, report, sheet_id: str, credential_raw: str):
@@ -506,7 +507,6 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
     gc = gspread.service_account_from_dict(info)
     sh = gc.open_by_key(sheet_id)
 
-    # Show progress immediately in the spreadsheet.
     progress = [
         ["Параметр", "Значение"],
         ["Статус", "СИНХРОНИЗАЦИЯ ВЫПОЛНЯЕТСЯ"],
@@ -529,6 +529,15 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
     if estimated_cells > 9_500_000:
         raise RuntimeError(f"Estimated Google Sheets size is too large: {estimated_cells} cells")
 
+    def flush_batch(pending, title, written, total):
+        if not pending:
+            return
+        sh.values_batch_update({
+            "valueInputOption": "RAW",
+            "data": pending,
+        })
+        print(f"Google Sheets {title}: {written}/{total} rows", flush=True)
+
     def write_table(title, headers, rows):
         try:
             sheet = sh.worksheet(title)
@@ -541,15 +550,30 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
                 cols=max(1, len(headers)),
             )
 
+        a1_title = title.replace("'", "''")
         sheet.update(range_name="A1", values=[headers], value_input_option="RAW")
+
+        pending = []
+        pending_chars = 0
         row_start = 2
         written = 0
-        for block in iter_write_blocks(rows):
-            sheet.update(range_name=f"A{row_start}", values=block, value_input_option="RAW")
+
+        for block, block_chars in iter_write_blocks(rows):
+            pending.append({
+                "range": f"'{a1_title}'!A{row_start}",
+                "majorDimension": "ROWS",
+                "values": block,
+            })
             row_start += len(block)
             written += len(block)
-            if written % 5000 < len(block) or written == len(rows):
-                print(f"Google Sheets {title}: {written}/{len(rows)} rows", flush=True)
+            pending_chars += block_chars
+
+            if pending_chars >= 5_500_000 or len(pending) >= 10:
+                flush_batch(pending, title, written, len(rows))
+                pending = []
+                pending_chars = 0
+
+        flush_batch(pending, title, written, len(rows))
         try:
             sheet.freeze(rows=1)
         except Exception:
@@ -558,8 +582,9 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
     for title, (headers, rows) in tables.items():
         write_table(title, headers, rows)
 
-    # Remove old normalized sheets from v1 backup; their data is now inside each Товары row.
-    for obsolete in ("Характеристики", "Остатки", "Медиа"):
+    for obsolete in ("Характеристики", "Остатки", "Медиа", "Продукты API"):
+        if obsolete in tables:
+            continue
         try:
             old = sh.worksheet(obsolete)
             sh.del_worksheet(old)
@@ -569,7 +594,7 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
     meta = [
         ["Параметр", "Значение"],
         ["Статус", "УСПЕШНО"],
-        ["Последняя синхронизация UTC", report["finished_at"]],
+        ["Последняя синхронизация UTC", now_iso()],
         ["Источник", report["source"]],
         ["Режим", report["mode"]],
         ["Товаров / вариантов", report["counts"]["variants"]],
@@ -597,7 +622,7 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
             value_input_option="RAW",
         )
     history.append_row([
-        report["finished_at"], report["source"], report["mode"], report["counts"]["variants"],
+        now_iso(), report["source"], report["mode"], report["counts"]["variants"],
         report["counts"]["characteristic_values"], report["counts"]["stocks"], report["counts"]["media"],
         report["counts"]["categories"], report.get("api_seconds", ""),
         " | ".join(report.get("warnings") or []),
