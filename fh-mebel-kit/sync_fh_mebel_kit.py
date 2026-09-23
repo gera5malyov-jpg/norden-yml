@@ -608,6 +608,58 @@ def parse_product(url, html):
 
 
 def crawl_catalog(max_pages=0, include_sitemap=False):
+    if include_sitemap:
+        urls = sorted(sitemap_urls())
+        total_urls = len(urls)
+        if max_pages:
+            urls = urls[:max_pages]
+
+        cards_by_sku = {}
+        http_errors = []
+        product_pages = 0
+
+        with ThreadPoolExecutor(max_workers=12) as pool:
+            futures = {pool.submit(fetch_url, url): url for url in urls}
+            done = 0
+            for fut in as_completed(futures):
+                url = futures[fut]
+                done += 1
+                try:
+                    _, status, html, final = fut.result()
+                except Exception as exc:
+                    status, html, final = 0, "", str(exc)
+
+                if status != 200 or not html:
+                    if len(http_errors) < 200:
+                        http_errors.append({
+                            "url": url,
+                            "status": status,
+                            "detail": clean_text(final)[:300],
+                        })
+                    continue
+
+                soup = BeautifulSoup(html, "html.parser")
+                main = soup.select_one("div.product_info.js_product_item[data-element-id]")
+                if main:
+                    product_pages += 1
+                    for card in parse_product(url, html):
+                        cards_by_sku[card["sku"]] = card
+
+                if done % 100 == 0:
+                    print(
+                        f"Sitemap: проверено {done}/{len(urls)}; "
+                        f"товарных страниц {product_pages}; карточек {len(cards_by_sku)}"
+                    )
+
+        return list(cards_by_sku.values()), {
+            "pages_fetched": len(urls),
+            "product_pages": product_pages,
+            "sitemap_seed_count": total_urls,
+            "http_errors": http_errors,
+            "remaining_queue": max(0, total_urls - len(urls)),
+            "page_limit_hit": bool(max_pages and total_urls > len(urls)),
+        }
+
     # Для регулярной синхронизации идём по актуальным ссылкам каталога.
     # Sitemap содержит тысячи исторических/дублирующих URL и используется только для отдельного аудита.
     seeds = {BASE_URL}
