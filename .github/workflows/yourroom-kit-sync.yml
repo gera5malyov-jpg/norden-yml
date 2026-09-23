@@ -1,0 +1,110 @@
+name: YourRoom → KIT — Санкт-Петербург раз в 2 недели
+
+on:
+  schedule:
+    # GitHub cron не умеет "каждые 14 дней".
+    # Проверяем раз в неделю; скрипт выполняет live-обновление только если прошло >= 14 дней.
+    - cron: '40 5 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Только проверка, без записи в KIT'
+        required: true
+        default: false
+        type: boolean
+      force:
+        description: 'Игнорировать 14-дневный интервал'
+        required: true
+        default: false
+        type: boolean
+      max_items:
+        description: 'Ограничить число карточек (0 = весь каталог)'
+        required: true
+        default: '0'
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - 'yourroom-kit/sync_yourroom_kit.py'
+      - '.github/workflows/yourroom-kit-sync.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: yourroom-kit-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: |
+          python -m pip install --disable-pip-version-check \
+            requests beautifulsoup4 pillow numpy opencv-python-headless openpyxl
+
+      - name: Проверить / синхронизировать YourRoom с KIT
+        id: yourroomsync
+        continue-on-error: true
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          args=()
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            # Любые изменения кода сначала проходят безопасную проверку на 5 карточках.
+            args+=(--dry-run --max-items 5)
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
+            if [[ "${{ inputs.force }}" == "true" ]]; then args+=(--force); fi
+            if [[ "${{ inputs.max_items }}" != "0" ]]; then args+=(--max-items "${{ inputs.max_items }}"); fi
+          fi
+          python yourroom-kit/sync_yourroom_kit.py "${args[@]}"
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Сохранить отчёт и состояние
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+
+          cp yourroom-kit/last_sync_report.json /tmp/yourroom-report.json 2>/dev/null || true
+          cp yourroom-kit/state.json /tmp/yourroom-state.json 2>/dev/null || true
+
+          git fetch origin main
+          git reset --hard origin/main
+
+          mkdir -p yourroom-kit
+          cp /tmp/yourroom-report.json yourroom-kit/last_sync_report.json 2>/dev/null || true
+          cp /tmp/yourroom-state.json yourroom-kit/state.json 2>/dev/null || true
+
+          git add yourroom-kit/last_sync_report.json yourroom-kit/state.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Обновить отчёт YourRoom → KIT'
+          git push origin HEAD:main || true
+
+      - name: Проверить итог
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('yourroom-kit/last_sync_report.json')
+          if not p.exists():
+              raise SystemExit('Нет отчёта YourRoom')
+          r = json.loads(p.read_text(encoding='utf-8'))
+          if r.get('status') not in ('УСПЕШНО', 'ПРОПУЩЕНО', 'ПРОВЕРКА УСПЕШНА'):
+              raise SystemExit(1)
+          PY
