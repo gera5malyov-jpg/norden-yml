@@ -396,7 +396,69 @@ def _variant_char_map(variant, char_titles):
     return out
 
 
-def build_source_enrichment(data):
+def load_public_first_images(url):
+    """Читает публичный YML KIT и возвращает первое фото по offer id / SKU."""
+    by_id = {}
+    by_sku = {}
+    warnings = []
+    if not url:
+        return by_id, by_sku, warnings
+
+    tmp = RUNTIME / "kit_public_images.xml"
+    try:
+        with requests.get(
+            url,
+            timeout=(20, 300),
+            stream=True,
+            headers={"User-Agent": "Megapolis-KIT-backup/2.0"},
+        ) as response:
+            response.raise_for_status()
+            with tmp.open("wb") as fh:
+                for chunk in response.iter_content(chunk_size=1024 * 1024):
+                    if chunk:
+                        fh.write(chunk)
+
+        for _, elem in ET.iterparse(tmp, events=("end",)):
+            if local_tag(elem.tag) != "offer":
+                continue
+
+            offer_id = clean(elem.attrib.get("id")).strip()
+            sku = ""
+            first_picture = ""
+            code_for_site = ""
+
+            for child in list(elem):
+                tag = local_tag(child.tag)
+                value = clean(child.text).strip()
+                if tag in ("vendorCode", "sku") and value and not sku:
+                    sku = value
+                elif tag == "picture" and value and not first_picture:
+                    first_picture = value
+                elif tag == "param":
+                    if _norm_title(child.attrib.get("name")) == _norm_title("Код для сайта") and value:
+                        code_for_site = value
+
+            if first_picture:
+                if offer_id:
+                    by_id[offer_id] = first_picture
+                if sku:
+                    by_sku[_source_key(sku)] = first_picture
+                if code_for_site:
+                    by_sku[_source_key(code_for_site)] = first_picture
+            elem.clear()
+
+    except Exception as exc:
+        warnings.append(f"Фото из публичного YML KIT не обновлены: {exc}")
+    finally:
+        try:
+            tmp.unlink(missing_ok=True)
+        except Exception:
+            pass
+
+    return by_id, by_sku, warnings
+
+
+def build_source_enrichment(data, fallback_url=None):
     """Определяет поставщика и реальную закупку только из подтвержденных источников."""
     result = {}
     warnings = []
@@ -623,6 +685,24 @@ def build_source_enrichment(data):
             )
             put(vid, "Riva", purchase)
 
+    # Универсальное первое фото: берем из публичного YML KIT.
+    # Это позволяет показывать фото даже когда API варианта возвращает только image_id.
+    by_image_id, by_image_sku, image_warnings = load_public_first_images(fallback_url)
+    warnings.extend(image_warnings)
+    for v in data.get("variants") or []:
+        vid = clean(v.get("id"))
+        if not vid:
+            continue
+        kit_id = clean(v.get("kit_id")).strip()
+        sku = clean(v.get("sku")).strip()
+        image_url = (
+            by_image_id.get(kit_id)
+            or by_image_id.get(vid)
+            or by_image_sku.get(_source_key(sku))
+        )
+        if image_url:
+            result.setdefault(vid, {})["image_url"] = image_url
+
     return result, warnings
 
 
@@ -660,7 +740,7 @@ def build_tables(data, enrichment=None):
             wh_by_id[wid] = clean(w.get("title") or w.get("name"))
 
     headers = [
-        "ID KIT", "Артикул KIT", "Название", "Цена закупки", "В наличии",
+        "ID KIT", "Артикул KIT", "Название", "Фото", "Цена закупки", "В наличии",
         "Поставщик", "Бренд", "Дата создания в KIT", "Последнее изменение карточки в KIT",
         "ID варианта", "Штрихкод", "Статус", "ID товара", "ID карточки",
         *[x[0] for x in COMMON_CHARACTERISTICS],
@@ -738,6 +818,7 @@ def build_tables(data, enrichment=None):
         source_info = enrichment.get(clean(v.get("id")), {})
         rows.append([
             safe_cell(v.get("kit_id")), sku, safe_cell(v.get("name")),
+            safe_cell(source_info.get("image_url")),
             safe_cell(source_info.get("purchase")), "✅" if in_stock else "❌",
             safe_cell(source_info.get("supplier")), safe_cell(v.get("brand")),
             safe_cell(v.get("created_at")), safe_cell(v.get("updated_at")),
@@ -858,11 +939,11 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
     if estimated_cells > 9_500_000:
         raise RuntimeError(f"Estimated Google Sheets size is too large: {estimated_cells} cells")
 
-    def flush_batch(pending, title, written, total):
+    def flush_batch(pending, title, written, total, value_input_option="RAW"):
         if not pending:
             return
         sh.values_batch_update({
-            "valueInputOption": "RAW",
+            "valueInputOption": value_input_option,
             "data": pending,
         })
         print(f"Google Sheets {title}: {written}/{total} rows", flush=True)
@@ -903,6 +984,85 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
                 pending_chars = 0
 
         flush_batch(pending, title, written, len(rows))
+
+        if title == "Товары" and "Фото" in headers:
+            photo_col_index = headers.index("Фото")
+            photo_col_a1 = chr(ord("A") + photo_col_index)
+            formula_pending = []
+            formula_chars = 0
+            formula_start = 2
+            formula_written = 0
+
+            def image_formula(value):
+                url = clean(value).strip()
+                if not url:
+                    return ""
+                escaped = url.replace('"', '""')
+                return f'=IMAGE("{escaped}")'
+
+            formula_rows = [[image_formula(row[photo_col_index])] for row in rows]
+            for block, block_chars in iter_write_blocks(
+                formula_rows, max_rows=5000, max_chars=1_500_000
+            ):
+                formula_pending.append({
+                    "range": f"'{a1_title}'!{photo_col_a1}{formula_start}",
+                    "majorDimension": "ROWS",
+                    "values": block,
+                })
+                formula_start += len(block)
+                formula_written += len(block)
+                formula_chars += block_chars
+                if formula_chars >= 4_500_000 or len(formula_pending) >= 10:
+                    flush_batch(
+                        formula_pending,
+                        title + " / фото",
+                        formula_written,
+                        len(rows),
+                        value_input_option="USER_ENTERED",
+                    )
+                    formula_pending = []
+                    formula_chars = 0
+
+            flush_batch(
+                formula_pending,
+                title + " / фото",
+                formula_written,
+                len(rows),
+                value_input_option="USER_ENTERED",
+            )
+
+            try:
+                sh.batch_update({
+                    "requests": [
+                        {
+                            "updateDimensionProperties": {
+                                "range": {
+                                    "sheetId": sheet.id,
+                                    "dimension": "COLUMNS",
+                                    "startIndex": photo_col_index,
+                                    "endIndex": photo_col_index + 1,
+                                },
+                                "properties": {"pixelSize": 90},
+                                "fields": "pixelSize",
+                            }
+                        },
+                        {
+                            "updateDimensionProperties": {
+                                "range": {
+                                    "sheetId": sheet.id,
+                                    "dimension": "ROWS",
+                                    "startIndex": 1,
+                                    "endIndex": max(2, len(rows) + 1),
+                                },
+                                "properties": {"pixelSize": 60},
+                                "fields": "pixelSize",
+                            }
+                        },
+                    ]
+                })
+            except Exception as exc:
+                report["warnings"].append(f"Не удалось настроить размер ячеек для фото: {exc}")
+
         try:
             sheet.freeze(rows=1)
         except Exception:
@@ -935,6 +1095,7 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
         ["Справочник характеристик", report["counts"]["characteristic_definitions"]],
         ["Поставщик определен", report["counts"].get("supplier_filled", 0)],
         ["Закупочная цена заполнена", report["counts"].get("purchase_price_filled", 0)],
+        ["Первое фото найдено", report["counts"].get("image_url_filled", 0)],
         ["Продуктов API (глубокий режим)", report["counts"]["products"]],
         ["Время чтения API, сек.", report.get("api_seconds", "")],
         ["YML fallback", report["fallback_url"]],
@@ -1020,10 +1181,11 @@ def main():
         "google_message": "",
     }
 
-    enrichment, enrichment_warnings = build_source_enrichment(data)
+    enrichment, enrichment_warnings = build_source_enrichment(data, fallback_url=fallback_url)
     report["warnings"].extend(enrichment_warnings)
     report["counts"]["supplier_filled"] = sum(1 for x in enrichment.values() if x.get("supplier"))
     report["counts"]["purchase_price_filled"] = sum(1 for x in enrichment.values() if x.get("purchase") not in (None, ""))
+    report["counts"]["image_url_filled"] = sum(1 for x in enrichment.values() if x.get("image_url"))
 
     backup_path = save_full_backup(data, report)
     report["backup_file"] = str(backup_path.relative_to(ROOT))
