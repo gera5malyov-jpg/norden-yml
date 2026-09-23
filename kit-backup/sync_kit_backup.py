@@ -639,7 +639,7 @@ def sync_google(tables, report, sheet_id: str, credential_raw: str):
     for title, (headers, rows) in tables.items():
         write_table(title, headers, rows)
 
-    for obsolete in ("Характеристики", "Остатки", "Медиа", "Продукты API"):
+    for obsolete in ("Sheet1", "Характеристики", "Остатки", "Медиа", "Продукты API"):
         if obsolete in tables:
             continue
         try:
