@@ -110,7 +110,7 @@ jobs:
               f"Не найдено в Webasyst: {r.get('missing_in_webasyst', '—')}",
               '',
               'Изображения:',
-              f"- обновлены в кратком описании через [extimg]: {r.get('summaries_updated', '—')}",
+              f"- обновлены в кратком описании: каждое изображение отдельным [extimg]URL[/extimg]: {r.get('summaries_updated', '—')}",
               f"- URL изображений получено из KIT: {r.get('file_urls_resolved', '—')}",
               f"- товаров RED- без изображений в KIT: {r.get('variants_without_images', '—')}",
               '',
