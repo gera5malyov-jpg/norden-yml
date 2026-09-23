@@ -291,10 +291,64 @@ def send_marketplace_chat(o: dict, message: str, chat_id: str = "") -> str:
         return chat_id
 
     if source == "wildberries":
-        raise ChatError(
-            "Wildberries: seller API cannot proactively start a buyer chat; the buyer must start the chat first",
-            permanent=True,
+        token = s(os.getenv("WB_API_TOKEN"))
+        rid = s(o.get("wb_rid"))
+        if not token or not rid:
+            raise ChatError("Wildberries chat: missing WB_API_TOKEN or order rid", permanent=True)
+
+        h = {"Authorization": token, "Accept": "application/json"}
+        r = net.req(
+            "GET",
+            "https://buyer-chat-api.wildberries.ru/api/v1/seller/chats",
+            headers=h,
+            tries=4,
         )
+        if not r.ok:
+            raise ChatError(
+                f"Wildberries chats HTTP {r.status_code}: {r.text[:400]}",
+                permanent=r.status_code in {400, 401, 403},
+            )
+
+        data = r.json() if r.content else {}
+        chats = data.get("result") or []
+        if not isinstance(chats, list):
+            chats = []
+
+        matched = None
+        for ch in chats:
+            if not isinstance(ch, dict):
+                continue
+            good = ch.get("goodCard") if isinstance(ch.get("goodCard"), dict) else {}
+            if s(good.get("rid")) == rid:
+                matched = ch
+                break
+
+        if not matched:
+            raise ChatError(
+                "Wildberries: chat for this order is not visible in the public Buyers Chat API yet",
+                permanent=False,
+            )
+
+        reply_sign = s(matched.get("replySign"))
+        if not reply_sign:
+            raise ChatError(
+                "Wildberries: matched chat has no replySign",
+                permanent=False,
+            )
+
+        rr = net.req(
+            "POST",
+            "https://buyer-chat-api.wildberries.ru/api/v1/seller/message",
+            headers={"Authorization": token},
+            data={"replySign": reply_sign, "message": message},
+            tries=4,
+        )
+        if not rr.ok:
+            raise ChatError(
+                f"Wildberries send HTTP {rr.status_code}: {rr.text[:400]}",
+                permanent=rr.status_code in {400, 401, 403, 404},
+            )
+        return s(matched.get("chatID"))
 
     raise ChatError(f"Chat is not supported for source {source}", permanent=True)
 
