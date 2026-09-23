@@ -1,0 +1,18 @@
+name: Verify Dalli Yandex 61913429313
+on:
+  push:
+    paths:
+      - '.github/workflows/verify-dalli-yandex-61913429313.yml'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - env:
+          YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+          DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+        run: python scripts/verify_dalli_yandex_61913429313.py
