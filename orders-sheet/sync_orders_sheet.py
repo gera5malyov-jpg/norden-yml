@@ -233,10 +233,14 @@ def customer_comment(raw: Any) -> str:
     buyer = raw.get("buyer") if isinstance(raw.get("buyer"), dict) else {}
     customer = raw.get("customer") if isinstance(raw.get("customer"), dict) else {}
     address = raw.get("shipping_address") if isinstance(raw.get("shipping_address"), dict) else {}
+    buyer_address = buyer.get("address") if isinstance(buyer.get("address"), dict) else {}
+    customer_address = customer.get("address") if isinstance(customer.get("address"), dict) else {}
     candidates += [
         buyer.get("comment"), buyer.get("notes"),
         customer.get("comment"), customer.get("notes"),
         address.get("comment"), address.get("notes"),
+        buyer_address.get("comment"), buyer_address.get("notes"),
+        customer_address.get("comment"), customer_address.get("notes"),
     ]
     for value in candidates:
         text = s(value)
@@ -441,6 +445,46 @@ def direct_marketplace_rows(sku_names: dict[str, str]) -> tuple[dict[str, dict],
     return rows, terminal_keys, warnings
 
 
+def direct_ozon_rows(sku_names: dict[str, str]) -> tuple[dict[str, dict], set[str], list[str]]:
+    rows: dict[str, dict] = {}
+    terminal_keys: set[str] = set()
+    warnings: list[str] = []
+    try:
+        orders = mp.load_ozon()
+    except Exception as exc:
+        return rows, terminal_keys, [f"ozon: {type(exc).__name__}: {str(exc)[:300]}"]
+
+    for o in orders:
+        if not isinstance(o, dict):
+            continue
+        ext = s(o.get("external_id"))
+        if not ext:
+            continue
+        k = order_key("ozon", ext)
+        target = s(o.get("target_state"))
+        if target in TERMINAL_TARGETS:
+            terminal_keys.add(k)
+            continue
+
+        products, qty = item_text(o.get("items"), sku_names)
+        buyer = o.get("buyer") if isinstance(o.get("buyer"), dict) else {}
+        rows[k] = {
+            "source": "ozon",
+            "code": "OZ",
+            "order_no": ext,
+            "deadline": normalize_date(o.get("delivery_to") or o.get("delivery_from")),
+            "items": products,
+            "quantity": qty,
+            "phone": phone_text(buyer),
+            "fio": s(o.get("recipient_name")) or person_name(buyer),
+            "address": address_text(o.get("shipping_address")),
+            "lift": lift_text(o.get("lift_type"), o.get("lift_price")),
+            "comment": customer_comment(o),
+            "created_at": s(o.get("created_at")),
+        }
+    return rows, terminal_keys, warnings
+
+
 def merge_rows(base: dict[str, dict], fresh: dict[str, dict], terminal: set[str]) -> list[dict]:
     for k in terminal:
         base.pop(k, None)
@@ -586,11 +630,14 @@ def main():
     started = datetime.now(timezone.utc).isoformat()
     wa = WebasystClient(min_request_interval=0.20)
     direct_refresh = s(os.getenv("DIRECT_MARKETPLACE_REFRESH")).lower() in {"1", "true", "yes", "on"}
-    sku_names = build_sku_names(wa) if direct_refresh else {}
+    direct_ozon = s(os.getenv("DIRECT_OZON_REFRESH", "1")).lower() in {"1", "true", "yes", "on"}
+    sku_names = build_sku_names(wa) if (direct_refresh or direct_ozon) else {}
 
     base = webasyst_active_rows(wa, sku_names)
     if direct_refresh:
         fresh, terminal, warnings = direct_marketplace_rows(sku_names)
+    elif direct_ozon:
+        fresh, terminal, warnings = direct_ozon_rows(sku_names)
     else:
         fresh, terminal, warnings = {}, set(), []
     rows = merge_rows(base, fresh, terminal)
