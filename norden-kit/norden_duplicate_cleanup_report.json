@@ -1,0 +1,5216 @@
+{
+  "started_at": "2026-09-24T16:10:34.774897+00:00",
+  "source": "api",
+  "source_api_error": null,
+  "kit_variants_scanned": 96583,
+  "norden_variants_seen": 8430,
+  "identity_conflicts_skipped": 40,
+  "duplicate_groups_found": 1017,
+  "duplicate_groups_cleaned": 1017,
+  "duplicate_groups_skipped": 0,
+  "canonical_rule": "legacy/non-100 first; then PUBLISHED; then lowest KIT ID",
+  "duplicates_zeroed_planned": 1402,
+  "stock_zero_rows": 4206,
+  "duplicates_hidden": 1401,
+  "hide_errors": [],
+  "stock_zero_errors": [],
+  "conflict_sample": [
+    {
+      "sku": "100-1594484",
+      "kit_id": 1594484,
+      "name": "Тумба сервисная 700х478х525",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "RF.201.DA,DA": [
+          {
+            "field": "Код продавца",
+            "value": "RF.201.DA.DA"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "RF.201.DA.DA"
+          }
+        ],
+        "RF.201.DA.DA": [
+          {
+            "field": "Код продавца",
+            "value": "RF.201.DA.DA"
+          },
+          {
+            "field": "Код Norden",
+            "value": "00-00021070"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "RF.201.DA.DA"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1594483",
+      "kit_id": 1594483,
+      "name": "Тумба сервисная 700х478х525",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "RF.201.DA,DA": [
+          {
+            "field": "Код продавца",
+            "value": "RF.201.DA,DA"
+          },
+          {
+            "field": "Код Norden",
+            "value": "00-00018546"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "RF.201.DA,DA"
+          }
+        ],
+        "RF.201.DA.DA": [
+          {
+            "field": "Код продавца",
+            "value": "RF.201.DA,DA"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "RF.201.DA,DA"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1594482",
+      "kit_id": 1594482,
+      "name": "Тумба к переговорному столу Атлас универсальная, ЛДСП 18 мм",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "NZ-811.GS.GR*": [
+          {
+            "field": "Код продавца",
+            "value": "NZ-811.GS.GR"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "NZ-811.GS.GR"
+          }
+        ],
+        "NZ-811.GS.GR": [
+          {
+            "field": "Код продавца",
+            "value": "NZ-811.GS.GR"
+          },
+          {
+            "field": "Код Norden",
+            "value": "00-00009195"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "NZ-811.GS.GR"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1594481",
+      "kit_id": 1594481,
+      "name": "Тумба к переговорному столу Атлас (арт.104), ЛДСП 18 мм",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "NZ-811.GS.GR*": [
+          {
+            "field": "Код продавца",
+            "value": "NZ-811.GS.GR*"
+          },
+          {
+            "field": "Код Norden",
+            "value": "00-00008364"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "NZ-811.GS.GR*"
+          }
+        ],
+        "NZ-811.GS.GR": [
+          {
+            "field": "Код продавца",
+            "value": "NZ-811.GS.GR*"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "NZ-811.GS.GR*"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1594480",
+      "kit_id": 1594480,
+      "name": "Стол левый 2200x1996x840",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СФ-531201": [
+          {
+            "field": "Код продавца",
+            "value": "СФ-531201"
+          },
+          {
+            "field": "Код Norden",
+            "value": "00-00004042"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531201"
+          }
+        ],
+        "СФ-531201*": [
+          {
+            "field": "Код продавца",
+            "value": "СФ-531201"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531201"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1594479",
+      "kit_id": 1594479,
+      "name": "Стол левый 2200x1996x840",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СФ-531201": [
+          {
+            "field": "Код продавца",
+            "value": "СФ-531201*"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531201*"
+          }
+        ],
+        "СФ-531201*": [
+          {
+            "field": "Код продавца",
+            "value": "СФ-531201*"
+          },
+          {
+            "field": "Код Norden",
+            "value": "11-00000389"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531201*"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1594478",
+      "kit_id": 1594478,
+      "name": "Стол левый 1800х1798х840",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СФ-531221*": [
+          {
+            "field": "Код продавца",
+            "value": "СФ-531221"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531221"
+          }
+        ],
+        "СФ-531221": [
+          {
+            "field": "Код продавца",
+            "value": "СФ-531221"
+          },
+          {
+            "field": "Код Norden",
+            "value": "00-00004046"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531221"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1594477",
+      "kit_id": 1594477,
+      "name": "Стол левый 1800х1798х840",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СФ-531221*": [
+          {
+            "field": "Код продавца",
+            "value": "СФ-531221*"
+          },
+          {
+            "field": "Код Norden",
+            "value": "11-00001927"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531221*"
+          }
+        ],
+        "СФ-531221": [
+          {
+            "field": "Код продавца",
+            "value": "СФ-531221*"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531221*"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1594454",
+      "kit_id": 1594454,
+      "name": "Держатель бокового экрана стола штырьевой (к-т из 2х штук)",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "МК.ДЭС.008.BL": [
+          {
+            "field": "Код продавца",
+            "value": "МК.ДЭС.008.BL*"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL*"
+          }
+        ],
+        "МК.ДЭС.008.BL*": [
+          {
+            "field": "Код продавца",
+            "value": "МК.ДЭС.008.BL*"
+          },
+          {
+            "field": "Код Norden",
+            "value": "00-00020861"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL*"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1594453",
+      "kit_id": 1594453,
+      "name": "Держатель бокового экрана стола штырьевой (к-т из 2х штук)",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "МК.ДЭС.008.BL": [
+          {
+            "field": "Код продавца",
+            "value": "МК.ДЭС.008.BL"
+          },
+          {
+            "field": "Код Norden",
+            "value": "00-00014975"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL"
+          }
+        ],
+        "МК.ДЭС.008.BL*": [
+          {
+            "field": "Код продавца",
+            "value": "МК.ДЭС.008.BL"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1593446",
+      "kit_id": 1593446,
+      "name": "Шкаф 5 ур. 800х400х1833, 4-х дверный",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "AG.220.WH.WH.AN": [
+          {
+            "field": "Код Norden",
+            "value": "00-00004668"
+          }
+        ],
+        "AG.220.WH.WH.AN_нест 1": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.220.WH.WH.AN_нест 1"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1593418",
+      "kit_id": 1593418,
+      "name": "Шкаф 5 ур. 800х400х1833 полуоткрытый",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "AG.220.WH.WH.AN": [
+          {
+            "field": "Код Norden",
+            "value": "00-00004668"
+          }
+        ],
+        "AG.220.WH.WH.AN_нест": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.220.WH.WH.AN_нест"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1593405",
+      "kit_id": 1593405,
+      "name": "Шкаф 5 ур. 800 с нишей",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "AG.220.AN.AN.AR": [
+          {
+            "field": "Код Norden",
+            "value": "00-00013916"
+          }
+        ],
+        "AG.220.AN.AN.AR.AN": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.220.AN.AN.AR.AN"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1573690",
+      "kit_id": 1573690,
+      "name": "Тумба сервисная 700х478х525",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "RF.201.DA,DA": [
+          {
+            "field": "Код для сайта",
+            "value": "RF.201.DA.DA"
+          }
+        ],
+        "RF.201.DA.DA": [
+          {
+            "field": "Код для сайта",
+            "value": "RF.201.DA.DA"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1573687",
+      "kit_id": 1573687,
+      "name": "Тумба сервисная 700х478х525",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "RF.201.DA,DA": [
+          {
+            "field": "Код для сайта",
+            "value": "RF.201.DA,DA"
+          }
+        ],
+        "RF.201.DA.DA": [
+          {
+            "field": "Код для сайта",
+            "value": "RF.201.DA,DA"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572667",
+      "kit_id": 1572667,
+      "name": "Тумба к переговорному столу Атлас универсальная, ЛДСП 18 мм",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "NZ-811.GS.GR*": [
+          {
+            "field": "Код для сайта",
+            "value": "NZ-811.GS.GR"
+          }
+        ],
+        "NZ-811.GS.GR": [
+          {
+            "field": "Код для сайта",
+            "value": "NZ-811.GS.GR"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572666",
+      "kit_id": 1572666,
+      "name": "Тумба к переговорному столу Атлас (арт.104), ЛДСП 18 мм",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "NZ-811.GS.GR*": [
+          {
+            "field": "Код для сайта",
+            "value": "NZ-811.GS.GR*"
+          }
+        ],
+        "NZ-811.GS.GR": [
+          {
+            "field": "Код для сайта",
+            "value": "NZ-811.GS.GR*"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572584",
+      "kit_id": 1572584,
+      "name": "Столешница ДСП ЭРГОНОМ 2400*1200*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СЭВ-2400-1200-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СЭВ-2400-1200-18"
+          }
+        ],
+        "СДВ-2400-1200-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СЭВ-2400-1200-18"
+          }
+        ],
+        "СВ-2400-1200-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СЭВ-2400-1200-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572582",
+      "kit_id": 1572582,
+      "name": "Столешница ДСП 900*900*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СДВ-900-900-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-900-900-18"
+          }
+        ],
+        "СВ-900-900-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-900-900-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572581",
+      "kit_id": 1572581,
+      "name": "Столешница ДСП 900*900*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СДВ-900-900-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-900-900-18"
+          }
+        ],
+        "СВ-900-900-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-900-900-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572579",
+      "kit_id": 1572579,
+      "name": "Столешница ДСП 2400*1200*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СЭВ-2400-1200-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-2400-1200-18"
+          }
+        ],
+        "СДВ-2400-1200-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-2400-1200-18"
+          }
+        ],
+        "СВ-2400-1200-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-2400-1200-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572577",
+      "kit_id": 1572577,
+      "name": "Столешница ДСП 2400*1200*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СЭВ-2400-1200-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-2400-1200-18"
+          }
+        ],
+        "СДВ-2400-1200-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-2400-1200-18"
+          }
+        ],
+        "СВ-2400-1200-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-2400-1200-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572576",
+      "kit_id": 1572576,
+      "name": "Столешница ДСП 1600*600*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СВ-1600-600-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-1600-600-18"
+          }
+        ],
+        "СДВ-1600-600-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-1600-600-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572572",
+      "kit_id": 1572572,
+      "name": "Столешница ДСП 1600*600*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СВ-1600-600-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-1600-600-18"
+          }
+        ],
+        "СДВ-1600-600-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-1600-600-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572571",
+      "kit_id": 1572571,
+      "name": "Столешница ДСП 1400*700*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СВ-1400-700-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-1400-700-18"
+          }
+        ],
+        "СДВ-1400-700-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-1400-700-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572568",
+      "kit_id": 1572568,
+      "name": "Столешница ДСП 1400*700*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СВ-1400-700-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-1400-700-18"
+          }
+        ],
+        "СДВ-1400-700-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-1400-700-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572564",
+      "kit_id": 1572564,
+      "name": "Столешница ДСП 1400*400*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СДВ-1400-400-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-1400-400-18"
+          }
+        ],
+        "СВ-1400-400-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-1400-400-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572562",
+      "kit_id": 1572562,
+      "name": "Столешница ДСП 1400*400*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СДВ-1400-400-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-1400-400-18"
+          }
+        ],
+        "СВ-1400-400-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-1400-400-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572560",
+      "kit_id": 1572560,
+      "name": "Столешница ДСП 1400*1400*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СДВ-1400-1400-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-1400-1400-18"
+          }
+        ],
+        "СВ-1400-1400-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СДВ-1400-1400-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1572558",
+      "kit_id": 1572558,
+      "name": "Столешница ДСП 1400*1400*18",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СДВ-1400-1400-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-1400-1400-18"
+          }
+        ],
+        "СВ-1400-1400-18": [
+          {
+            "field": "Код для сайта",
+            "value": "СВ-1400-1400-18"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1571322",
+      "kit_id": 1571322,
+      "name": "Стол левый 2200x1996x840",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СФ-531201": [
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531201"
+          }
+        ],
+        "СФ-531201*": [
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531201"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1571320",
+      "kit_id": 1571320,
+      "name": "Стол левый 2200x1996x840",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СФ-531201": [
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531201*"
+          }
+        ],
+        "СФ-531201*": [
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531201*"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1571315",
+      "kit_id": 1571315,
+      "name": "Стол левый 1800х1798х840",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СФ-531221*": [
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531221"
+          }
+        ],
+        "СФ-531221": [
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531221"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1571314",
+      "kit_id": 1571314,
+      "name": "Стол левый 1800х1798х840",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "СФ-531221*": [
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531221*"
+          }
+        ],
+        "СФ-531221": [
+          {
+            "field": "Код для сайта",
+            "value": "СФ-531221*"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1561683",
+      "kit_id": 1561683,
+      "name": "Держатель бокового экрана стола штырьевой (к-т из 2х штук)",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "МК.ДЭС.008.BL": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL*"
+          }
+        ],
+        "МК.ДЭС.008.BL*": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL*"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1561682",
+      "kit_id": 1561682,
+      "name": "Держатель бокового экрана стола штырьевой (к-т из 2х штук)",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "МК.ДЭС.008.BL": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL"
+          }
+        ],
+        "МК.ДЭС.008.BL*": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1543988",
+      "kit_id": 1543988,
+      "name": "Держатель бокового экрана стола штырьевой (к-т из 2х штук)",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "МК.ДЭС.008.BL": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL*"
+          }
+        ],
+        "МК.ДЭС.008.BL*": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL*"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1543980",
+      "kit_id": 1543980,
+      "name": "Держатель бокового экрана стола штырьевой (к-т из 2х штук)",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "МК.ДЭС.008.BL": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL"
+          }
+        ],
+        "МК.ДЭС.008.BL*": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1542039",
+      "kit_id": 1542039,
+      "name": "Держатель бокового экрана стола штырьевой (к-т из 2х штук)",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "МК.ДЭС.008.BL": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL*"
+          }
+        ],
+        "МК.ДЭС.008.BL*": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL*"
+          }
+        ]
+      }
+    },
+    {
+      "sku": "100-1542037",
+      "kit_id": 1542037,
+      "name": "Держатель бокового экрана стола штырьевой (к-т из 2х штук)",
+      "status": "PUBLISHED",
+      "identity_conflict": {
+        "МК.ДЭС.008.BL": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL"
+          }
+        ],
+        "МК.ДЭС.008.BL*": [
+          {
+            "field": "Код для сайта",
+            "value": "МК.ДЭС.008.BL"
+          }
+        ]
+      }
+    }
+  ],
+  "skipped_sample": [],
+  "cleaned_sample": [
+    {
+      "article": "165A-B-BB",
+      "kept": {
+        "variant_id": "019a5a80-b1bd-70f7-9cd5-187e804f6293",
+        "kit_id": 104937,
+        "sku": "AF-30981647",
+        "name": "Кресло для персонала Asper 165A-B-BB",
+        "status": "PUBLISHED",
+        "created_at": "2025-11-06T21:55:21.555797+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код продавца",
+            "value": "165A-B-BB"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "165A-B-BB"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3ac-5e83-7cc3-87b4-1276aeae4389",
+          "kit_id": 1594439,
+          "sku": "100-1594439",
+          "name": "Аспер / Asper",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-24T16:48:04.116936+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код продавца",
+              "value": "165A-B-BB"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00006311"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "165A-B-BB"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "165A-B-GG",
+      "kept": {
+        "variant_id": "019a5a80-b1b0-73e8-9638-a0736d3922a4",
+        "kit_id": 104936,
+        "sku": "AF-31002789",
+        "name": "Кресло для персонала Asper 165A-B-GG",
+        "status": "PUBLISHED",
+        "created_at": "2025-11-06T21:55:20.998039+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код продавца",
+            "value": "165A-B-GG"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "165A-B-GG"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3ad-4e85-7b3c-ba59-de108fe405c5",
+          "kit_id": 1594440,
+          "sku": "100-1594440",
+          "name": "Аспер / Asper",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-24T16:49:05.556916+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код продавца",
+              "value": "165A-B-GG"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00006772"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "165A-B-GG"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "165B",
+      "kept": {
+        "variant_id": "019a84f8-2c0f-7c32-a1bd-daf7cac5d12e",
+        "kit_id": 110166,
+        "sku": "AF-31133916",
+        "name": "Кресло для персонала Asper LB 165B",
+        "status": "PUBLISHED",
+        "created_at": "2025-11-15T03:45:09.5164+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код продавца",
+            "value": "165B"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "165B"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3ad-e55b-734b-b517-3d4233692473",
+          "kit_id": 1594441,
+          "sku": "100-1594441",
+          "name": "Аспер LB / Asper LB",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-24T16:49:44.167921+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код продавца",
+              "value": "165B"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00006763"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "165B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "216A-Chrome-2D-B-BB",
+      "kept": {
+        "variant_id": "019a5a86-7299-7b07-8c05-7548ff986bf9",
+        "kit_id": 105081,
+        "sku": "AF-31396763",
+        "name": "Кресло для персонала Tema Chrome 2D 216A-Chrome-2D-B-BB",
+        "status": "PUBLISHED",
+        "created_at": "2025-11-06T21:56:27.755195+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код продавца",
+            "value": "216A-Chrome-2D-B-BB"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "216A-Chrome-2D-B-BB"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a097b7-dc8f-71e9-822f-493a2a6dc0d5",
+          "kit_id": 1500029,
+          "sku": "AF-31072383",
+          "name": "Кресло для персонала Tema Сhrome 2D 216A-Сhrome-2D-B-BB",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-13T01:24:08.514087+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код продавца",
+              "value": "216A-Сhrome-2D-B-BB"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "216A-Сhrome-2D-B-BB"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "216B-Chrome-2D-B-BB",
+      "kept": {
+        "variant_id": "019a5a80-b182-78e2-a033-e42787a17ed8",
+        "kit_id": 104631,
+        "sku": "AF-31225517",
+        "name": "Кресло для персонала / Tema Сhrome 2D LB 216B-Сhrome-2D-B-BB",
+        "status": "PUBLISHED",
+        "created_at": "2025-11-06T21:53:31.34482+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код продавца",
+            "value": "216B-Сhrome-2D-B-BB"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "216B-Сhrome-2D-B-BB"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "019a5a80-b1b6-7a43-99fa-d61a8cb9b711",
+          "kit_id": 104634,
+          "sku": "AF-31395937",
+          "name": "Кресло Tema Chrome 2D LB 216B-Chrome-2D-B-BB база хром / черный пластик / черная сетка / черная ткань",
+          "status": "PUBLISHED",
+          "created_at": "2025-11-06T21:53:32.154931+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код продавца",
+              "value": "216B-Chrome-2D-B-BB"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "216B-Chrome-2D-B-BB"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "6227A",
+      "kept": {
+        "variant_id": "01a0bfed-0ff0-7276-9bb7-f7fb67f688b4",
+        "kit_id": 1537326,
+        "sku": "100-1537326",
+        "name": "Гарда Люкс / Garda Lux",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:46:19.594842+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "6227A"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0b5-b298-7d25-bb64-bf30d613df70",
+          "kit_id": 1540509,
+          "sku": "100-1540509",
+          "name": "Гарда Люкс / Garda Lux",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:25:28.429006+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "6227A"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5df-cce2-784b-9ba7-85f8533c6525",
+          "kit_id": 1554664,
+          "sku": "100-1554664",
+          "name": "Гарда Люкс / Garda Lux",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:29:33.764558+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "6227A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "6227A-HS",
+      "kept": {
+        "variant_id": "01a0bfed-2e6d-793f-bad0-4b36a9e20966",
+        "kit_id": 1537329,
+        "sku": "100-1537329",
+        "name": "Гарда Люкс / Garda Lux",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:46:27.402907+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "6227A-HS"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0b7-2638-7787-bd29-7a380a4259f5",
+          "kit_id": 1540534,
+          "sku": "100-1540534",
+          "name": "Гарда Люкс / Garda Lux",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:27:03.554468+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "6227A-HS"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5e1-5e7d-755f-ac06-6b35c3f043da",
+          "kit_id": 1554681,
+          "sku": "100-1554681",
+          "name": "Гарда Люкс / Garda Lux",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:31:16.610871+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "6227A-HS"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "850",
+      "kept": {
+        "variant_id": "019a5a80-b375-76ae-a249-3983e2610348",
+        "kit_id": 104246,
+        "sku": "AF-30834861",
+        "name": "Кресло офисное Авалон CF хром черная экокожа",
+        "status": "PUBLISHED",
+        "created_at": "2025-11-06T21:51:10.779435+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код продавца",
+            "value": "850"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "850"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a2-ca34-7741-b883-8cc6005b4808",
+          "kit_id": 1594421,
+          "sku": "100-1594421",
+          "name": "Авалон CF",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-24T16:37:36.397416+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код продавца",
+              "value": "850"
+            },
+            {
+              "field": "Код Norden",
+              "value": "11-00000882"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "850"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "A2067 black leather",
+      "kept": {
+        "variant_id": "019a5a80-b21e-73d9-942c-4c6e9bd44550",
+        "kit_id": 104598,
+        "sku": "AF-31395933",
+        "name": "Кресло офисное / Вагнер черная кожа натуральное дерево",
+        "status": "PUBLISHED",
+        "created_at": "2025-11-06T21:53:20.308894+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код продавца",
+            "value": "A2067 black leather"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "A2067 black leather"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a097b7-dc8f-736f-bc90-496402b84725",
+          "kit_id": 1500022,
+          "sku": "AF-30882700",
+          "name": "Кресло офисное / Вагнер черная кожа натуральное дерево",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-13T01:23:55.627466+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код продавца",
+              "value": "А2067 black leather"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "А2067 black leather"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "A321.300.W",
+      "kept": {
+        "variant_id": "01a0bfd4-5161-7d27-965c-ff65d313a291",
+        "kit_id": 1536921,
+        "sku": "100-1536921",
+        "name": "Блок установки розеток",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:19:17.935942+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "A321.300.W"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c03a-4a25-74b6-a864-93f23fb395b7",
+          "kit_id": 1538545,
+          "sku": "100-1538545",
+          "name": "Блок установки розеток",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-20T22:10:40.692807+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "A321.300.W"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c0a2-9a4d-715b-9593-3dd337b3591d",
+          "kit_id": 1540171,
+          "sku": "100-1540171",
+          "name": "Блок установки розеток",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:04:36.957812+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "A321.300.W"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5c0-725d-7705-bc12-4bd6bbaeb4ff",
+          "kit_id": 1554297,
+          "sku": "100-1554297",
+          "name": "Блок установки розеток",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T23:55:18.984102+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "A321.300.W"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "A9008-407109",
+      "kept": {
+        "variant_id": "01a0c10c-c597-778e-b993-15f8003372f4",
+        "kit_id": 1541857,
+        "sku": "100-1541857",
+        "name": "ГЕНУЯ",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T02:00:34.899047+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "A9008-407109"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c7f5-7be4-70b3-9b46-e98b2a6871fa",
+          "kit_id": 1561627,
+          "sku": "100-1561627",
+          "name": "ГЕНУЯ",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:12:29.252242+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "A9008-407109"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AF-01AC black- FL06 black fabric",
+      "kept": {
+        "variant_id": "01a0c1a4-3f97-7bb6-a22e-ab766af67ac0",
+        "kit_id": 1544138,
+        "sku": "100-1544138",
+        "name": "Лайк блэк / Like black",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:46:02.059994+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AF-01AC black- FL06 black fabric"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-1c8d-73a1-8d1b-553d1d7bf9a2",
+          "kit_id": 1561977,
+          "sku": "100-1561977",
+          "name": "Лайк блэк / Like black",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:27:22.317094+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AF-01AC black- FL06 black fabric"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AF-T-BK",
+      "kept": {
+        "variant_id": "01a0c1a4-e8e4-7524-93d4-a3d0208dccdd",
+        "kit_id": 1544149,
+        "sku": "100-1544149",
+        "name": "Лайк пюпитр / Like worktop",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:46:45.359122+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AF-T-BK"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-26aa-7f23-a5ae-f6b70037837e",
+          "kit_id": 1561978,
+          "sku": "100-1561978",
+          "name": "Лайк пюпитр / Like worktop",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:27:24.90282+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AF-T-BK"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.010.AN.AN",
+      "kept": {
+        "variant_id": "01a0c42c-2d18-794d-b752-26716941a620",
+        "kit_id": 1551323,
+        "sku": "100-1551323",
+        "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T16:33:44.668242+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.010.AN.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c82e-2cbc-7313-936e-04ed0723a5d8",
+          "kit_id": 1562817,
+          "sku": "100-1562817",
+          "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T11:14:24.522712+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.010.AN.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.010.AN.WH",
+      "kept": {
+        "variant_id": "01a0c42c-cdf5-76a9-8ca9-ba34a700fe2c",
+        "kit_id": 1551329,
+        "sku": "100-1551329",
+        "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T16:34:25.855563+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.010.AN.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c82e-7bb2-77c0-887e-519cb25e5620",
+          "kit_id": 1562824,
+          "sku": "100-1562824",
+          "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T11:14:44.783074+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.010.AN.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.010.AR.AN",
+      "kept": {
+        "variant_id": "01a0c42d-dd1b-75fe-9ef9-e367e1216580",
+        "kit_id": 1551336,
+        "sku": "100-1551336",
+        "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T16:35:35.281057+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.010.AR.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c82e-cdfa-76e5-a597-206d73b336d3",
+          "kit_id": 1562832,
+          "sku": "100-1562832",
+          "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T11:15:05.738411+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.010.AR.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.010.AR.WH",
+      "kept": {
+        "variant_id": "01a0c42d-980a-7cd9-9612-fb15adac7d0b",
+        "kit_id": 1551334,
+        "sku": "100-1551334",
+        "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T16:35:17.53276+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.010.AR.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c82e-a01a-7544-aa16-d3312fb8521c",
+          "kit_id": 1562828,
+          "sku": "100-1562828",
+          "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T11:14:53.993635+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.010.AR.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.010.WH.AN",
+      "kept": {
+        "variant_id": "01a0c42d-3ea7-789c-846a-8a595084ebb3",
+        "kit_id": 1551332,
+        "sku": "100-1551332",
+        "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T16:34:54.651995+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.010.WH.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c82e-9919-7207-b9a8-465a5b660048",
+          "kit_id": 1562826,
+          "sku": "100-1562826",
+          "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T11:14:52.308305+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.010.WH.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.010.WH.WH",
+      "kept": {
+        "variant_id": "01a0c42c-747b-76c4-90ec-b092a28f7181",
+        "kit_id": 1551326,
+        "sku": "100-1551326",
+        "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T16:34:02.94496+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.010.WH.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c82e-5dbe-73fa-a9c3-ef0e763d5aed",
+          "kit_id": 1562821,
+          "sku": "100-1562821",
+          "name": "Передняя панель 1510x350x18 мм для стола 1800 на опорной тумбе с комплектом креплений",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T11:14:37.135854+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.010.WH.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.110.AN.72.AN",
+      "kept": {
+        "variant_id": "01a0bfd8-10c3-7862-8f98-ed4e1edf3876",
+        "kit_id": 1536974,
+        "sku": "100-1536974",
+        "name": "Брифинг-приставка 800х600х750",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:23:23.616528+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.110.AN.72.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0ac-4308-7790-b58c-299981adec9e",
+          "kit_id": 1540349,
+          "sku": "100-1540349",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:15:10.063571+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.AN.72.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5ce-33a3-7a93-b0a1-f3052192de4c",
+          "kit_id": 1554513,
+          "sku": "100-1554513",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:10:20.577124+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.AN.72.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.110.AN.72.WH",
+      "kept": {
+        "variant_id": "01a0bfd8-1810-74db-ada1-8ab299608269",
+        "kit_id": 1536976,
+        "sku": "100-1536976",
+        "name": "Брифинг-приставка 800х600х750",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:23:25.415835+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.110.AN.72.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0ac-f1b0-7dc7-9a8e-fb1b2e626703",
+          "kit_id": 1540361,
+          "sku": "100-1540361",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:15:54.845321+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.AN.72.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5ce-7e8b-72aa-9d6b-82424d5d43f3",
+          "kit_id": 1554517,
+          "sku": "100-1554517",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:10:39.519798+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.AN.72.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.110.AR.72.AN",
+      "kept": {
+        "variant_id": "01a0bfd5-f7e7-7865-8eea-e79859cb6f4f",
+        "kit_id": 1536934,
+        "sku": "100-1536934",
+        "name": "Брифинг-приставка 800х600х750",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:21:06.087929+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.110.AR.72.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c03e-0d7a-7e3d-aaf8-a8f9cf217799",
+          "kit_id": 1538612,
+          "sku": "100-1538612",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-20T22:14:47.46103+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.AR.72.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c0a7-0959-7bb2-837e-3bc42f01469d",
+          "kit_id": 1540256,
+          "sku": "100-1540256",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:09:27.62086+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.AR.72.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5c6-7bb7-7a9b-add7-c849cfd83f82",
+          "kit_id": 1554398,
+          "sku": "100-1554398",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:01:54.593128+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.AR.72.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.110.AR.72.WH",
+      "kept": {
+        "variant_id": "01a0bfd6-4604-7c70-ae5d-9d9e113240ef",
+        "kit_id": 1536938,
+        "sku": "100-1536938",
+        "name": "Брифинг-приставка 800х600х750",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:21:26.093831+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.110.AR.72.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c03f-4b5a-73e3-b07f-384562928b65",
+          "kit_id": 1538633,
+          "sku": "100-1538633",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-20T22:16:08.828233+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.AR.72.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c0a7-bf33-7204-b94e-32e560bbfd01",
+          "kit_id": 1540268,
+          "sku": "100-1540268",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:10:14.177611+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.AR.72.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5c7-5011-7a03-9cfa-0c3dee1425a2",
+          "kit_id": 1554409,
+          "sku": "100-1554409",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:02:48.86937+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.AR.72.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.110.WH.72.AN",
+      "kept": {
+        "variant_id": "01a0bfd5-9e65-722a-9601-5843907d54ac",
+        "kit_id": 1536932,
+        "sku": "100-1536932",
+        "name": "Брифинг-приставка 800х600х750",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:20:43.167322+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.110.WH.72.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c03d-57a7-7c30-a12a-4b66f307388b",
+          "kit_id": 1538599,
+          "sku": "100-1538599",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-20T22:14:00.761211+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.WH.72.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c0a6-8d0b-7325-9f3c-5c312a419817",
+          "kit_id": 1540247,
+          "sku": "100-1540247",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:08:55.709605+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.WH.72.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5c6-0382-75c1-9acf-6871d2298ac0",
+          "kit_id": 1554391,
+          "sku": "100-1554391",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:01:23.843192+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.WH.72.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.110.WH.72.WH",
+      "kept": {
+        "variant_id": "01a0bfd6-3cc5-72bc-b8d5-76710fc343c1",
+        "kit_id": 1536936,
+        "sku": "100-1536936",
+        "name": "Брифинг-приставка 800х600х750",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:21:23.766003+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.110.WH.72.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c03e-b05a-743f-9cea-aedfdde45464",
+          "kit_id": 1538622,
+          "sku": "100-1538622",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-20T22:15:29.003988+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.WH.72.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c0a7-8a9a-79bc-b744-4aa3987e63f5",
+          "kit_id": 1540265,
+          "sku": "100-1540265",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:10:00.700843+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.WH.72.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5c6-f308-7b39-a3f4-c6cb7d6674ea",
+          "kit_id": 1554404,
+          "sku": "100-1554404",
+          "name": "Брифинг-приставка 800х600х750",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:02:25.143896+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.110.WH.72.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.191.AN.AN",
+      "kept": {
+        "variant_id": "01a0c433-e7a6-797d-a2cf-881da3b7df8d",
+        "kit_id": 1551373,
+        "sku": "100-1551373",
+        "name": "Подвес под системный блок, 308(246)х480х540",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T16:42:11.186438+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.191.AN.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c830-45d3-72e4-a0ef-d29b95e5cd37",
+          "kit_id": 1562868,
+          "sku": "100-1562868",
+          "name": "Подвес под системный блок, 308(246)х480х540",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T11:16:42.063756+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.191.AN.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.191.AR.AN",
+      "kept": {
+        "variant_id": "01a0c433-b55b-7643-8c4a-9fb2a9538702",
+        "kit_id": 1551371,
+        "sku": "100-1551371",
+        "name": "Подвес под системный блок, 308(246)х480х540",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T16:41:58.316616+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.191.AR.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c830-28d1-7cd4-80d8-b0b144dde815",
+          "kit_id": 1562865,
+          "sku": "100-1562865",
+          "name": "Подвес под системный блок, 308(246)х480х540",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T11:16:34.653877+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.191.AR.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.191.AR.WH",
+      "kept": {
+        "variant_id": "01a0c432-b7d7-712a-8ad4-d251778abecc",
+        "kit_id": 1551364,
+        "sku": "100-1551364",
+        "name": "Подвес под системный блок, 308(246)х480х540",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T16:40:53.426157+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.191.AR.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c82f-fd60-7bc0-9abf-57b2d6d9cd0e",
+          "kit_id": 1562860,
+          "sku": "100-1562860",
+          "name": "Подвес под системный блок, 308(246)х480х540",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T11:16:23.503879+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.191.AR.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.191.WH.AN",
+      "kept": {
+        "variant_id": "01a0c433-82d8-7b95-8f7d-5207b282a152",
+        "kit_id": 1551369,
+        "sku": "100-1551369",
+        "name": "Подвес под системный блок, 308(246)х480х540",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T16:41:45.435019+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.191.WH.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c830-1f54-7884-a5e7-cc705473fd91",
+          "kit_id": 1562864,
+          "sku": "100-1562864",
+          "name": "Подвес под системный блок, 308(246)х480х540",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T11:16:32.219154+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.191.WH.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.191.WH.WH",
+      "kept": {
+        "variant_id": "01a0c433-3c5c-70a6-a265-bdcfe214c8d9",
+        "kit_id": 1551366,
+        "sku": "100-1551366",
+        "name": "Подвес под системный блок, 308(246)х480х540",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T16:41:27.271883+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.191.WH.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c830-1a4f-730a-8056-fc74cdd62963",
+          "kit_id": 1562863,
+          "sku": "100-1562863",
+          "name": "Подвес под системный блок, 308(246)х480х540",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T11:16:30.820942+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.191.WH.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.221.AN.AN.AN",
+      "kept": {
+        "variant_id": "01a0c049-671c-738e-a84a-fd7f3c7426e6",
+        "kit_id": 1538818,
+        "sku": "100-1538818",
+        "name": "Гардероб 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T22:27:11.150077+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.221.AN.AN.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0e3-1d28-72f0-9049-dd4dea0832a8",
+          "kit_id": 1541133,
+          "sku": "100-1541133",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T01:15:04.88608+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AN.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c178-7165-79f9-853a-11ddc33b9746",
+          "kit_id": 1543482,
+          "sku": "100-1543482",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:58:11.189963+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AN.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7ec-74af-79d6-a66c-6aa1885f40a2",
+          "kit_id": 1561404,
+          "sku": "100-1561404",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:02:37.502505+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AN.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.221.AN.AN.AR",
+      "kept": {
+        "variant_id": "01a0c047-5e86-7be3-8ea2-cadc32a973ff",
+        "kit_id": 1538778,
+        "sku": "100-1538778",
+        "name": "Гардероб 800х400",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T22:24:57.919445+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.221.AN.AN.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0df-d9ef-7e93-ba76-d3a588aaa5bb",
+          "kit_id": 1541078,
+          "sku": "100-1541078",
+          "name": "Гардероб 800х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T01:11:30.996887+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AN.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c176-8eba-741d-8aee-85f1f5193d81",
+          "kit_id": 1543447,
+          "sku": "100-1543447",
+          "name": "Гардероб 800х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:56:07.624896+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AN.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7eb-d540-79bd-b721-705091242744",
+          "kit_id": 1561389,
+          "sku": "100-1561389",
+          "name": "Гардероб 800х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:01:56.808989+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AN.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.221.AN.AN.WH",
+      "kept": {
+        "variant_id": "01a0c049-e315-77a7-ae27-804b52c0756c",
+        "kit_id": 1538829,
+        "sku": "100-1538829",
+        "name": "Гардероб 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T22:27:43.014421+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.221.AN.AN.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0e3-e029-772e-87ff-d01f5c8738a3",
+          "kit_id": 1541145,
+          "sku": "100-1541145",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T01:15:54.679825+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AN.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c179-5d91-7b12-baba-b9a0a43035e1",
+          "kit_id": 1543498,
+          "sku": "100-1543498",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:59:11.649527+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AN.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7ec-b025-78ae-9493-d06cded923a2",
+          "kit_id": 1561410,
+          "sku": "100-1561410",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:02:52.724778+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AN.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.221.AN.AR.AN",
+      "kept": {
+        "variant_id": "01a0c047-a6df-7e6a-b2ab-f1892b3b39e2",
+        "kit_id": 1538783,
+        "sku": "100-1538783",
+        "name": "Гардероб 800х400",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T22:25:16.538569+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.221.AN.AR.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0e0-da6a-7a05-ab1d-9e9ac3ecc07c",
+          "kit_id": 1541094,
+          "sku": "100-1541094",
+          "name": "Гардероб 800х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T01:12:36.698219+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AR.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c176-dcb1-7339-8bf6-2590169f1550",
+          "kit_id": 1543454,
+          "sku": "100-1543454",
+          "name": "Гардероб 800х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:56:27.707196+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AR.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7eb-f2fb-74a7-bf77-d78a9a6feb63",
+          "kit_id": 1561392,
+          "sku": "100-1561392",
+          "name": "Гардероб 800х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:02:04.301397+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AR.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.221.AN.AR.AR",
+      "kept": {
+        "variant_id": "01a0c049-a6db-72c2-8ca8-cf65a363b880",
+        "kit_id": 1538824,
+        "sku": "100-1538824",
+        "name": "Гардероб 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T22:27:27.466279+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.221.AN.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0e3-711f-7423-b56f-83ec29b043f3",
+          "kit_id": 1541138,
+          "sku": "100-1541138",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T01:15:26.384814+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AR.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c179-02af-773a-a2b9-4ee96e2d707e",
+          "kit_id": 1543492,
+          "sku": "100-1543492",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:58:48.460125+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AR.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7ec-9240-74e8-989a-e930e7729587",
+          "kit_id": 1561407,
+          "sku": "100-1561407",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:02:45.161155+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.AN.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.221.WH.AR.AR",
+      "kept": {
+        "variant_id": "01a0c048-f37f-7ad4-a8d8-7d0b0b7b23ea",
+        "kit_id": 1538808,
+        "sku": "100-1538808",
+        "name": "Гардероб 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T22:26:41.659284+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.221.WH.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0e2-958e-7a8d-9d89-920420c3823e",
+          "kit_id": 1541126,
+          "sku": "100-1541126",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T01:14:30.116581+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.AR.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c178-274b-7349-b8b2-6e944b48842d",
+          "kit_id": 1543476,
+          "sku": "100-1543476",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:57:52.220241+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.AR.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7ec-677b-7ae8-8c13-0760a9875321",
+          "kit_id": 1561403,
+          "sku": "100-1561403",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:02:34.272832+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.221.WH.AR.WH",
+      "kept": {
+        "variant_id": "01a0c048-ab3b-7554-bb25-a9dde04fd7b5",
+        "kit_id": 1538802,
+        "sku": "100-1538802",
+        "name": "Гардероб 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T22:26:23.049965+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.221.WH.AR.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0e2-3769-7643-ab8c-c01912dffa33",
+          "kit_id": 1541119,
+          "sku": "100-1541119",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T01:14:06.008887+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.AR.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c177-da26-734a-ba2d-b0f44f47af33",
+          "kit_id": 1543472,
+          "sku": "100-1543472",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:57:32.478368+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.AR.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7ec-492e-764d-a8a6-714c9b3fac8b",
+          "kit_id": 1561400,
+          "sku": "100-1561400",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:02:26.522913+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.AR.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.221.WH.WH.AN",
+      "kept": {
+        "variant_id": "01a0c04a-6fa3-7bb5-a0b7-dbd232c0a3b6",
+        "kit_id": 1538839,
+        "sku": "100-1538839",
+        "name": "Гардероб 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T22:28:18.924672+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.221.WH.WH.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0e4-865d-7647-9832-08e3ee75e1ce",
+          "kit_id": 1541154,
+          "sku": "100-1541154",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T01:16:37.23313+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.WH.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c179-dd5c-74a1-b95f-dabd8b82e630",
+          "kit_id": 1543507,
+          "sku": "100-1543507",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:59:44.509384+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.WH.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7ec-cba8-7f3d-882a-3f4fef9e4548",
+          "kit_id": 1561413,
+          "sku": "100-1561413",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:02:59.865544+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.WH.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.221.WH.WH.AR",
+      "kept": {
+        "variant_id": "01a0c048-2850-71d9-bef6-bdd54396720d",
+        "kit_id": 1538793,
+        "sku": "100-1538793",
+        "name": "Гардероб 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T22:25:49.535078+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.221.WH.WH.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0e1-aee7-7c4a-9d9d-0649767bdf29",
+          "kit_id": 1541110,
+          "sku": "100-1541110",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T01:13:31.001637+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.WH.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c177-8bfc-755f-847e-021de3711e73",
+          "kit_id": 1543466,
+          "sku": "100-1543466",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:57:12.556446+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.WH.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7ec-4085-75c2-96d2-4591e9f57f74",
+          "kit_id": 1561399,
+          "sku": "100-1561399",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:02:24.149441+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.WH.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.221.WH.WH.WH",
+      "kept": {
+        "variant_id": "01a0c047-c8e6-7c83-99be-fb33b4f2cd83",
+        "kit_id": 1538787,
+        "sku": "100-1538787",
+        "name": "Гардероб 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T22:25:25.180749+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.221.WH.WH.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0e1-53c5-72f4-8741-bef73951b8f6",
+          "kit_id": 1541103,
+          "sku": "100-1541103",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T01:13:07.667794+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.WH.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c177-41b4-78f4-bd0e-324bc2890fbd",
+          "kit_id": 1543461,
+          "sku": "100-1543461",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:56:53.518201+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.WH.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7ec-227a-7e34-9f2f-67c8ccdadfa8",
+          "kit_id": 1561395,
+          "sku": "100-1561395",
+          "name": "Гардероб 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:02:16.461674+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.221.WH.WH.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.222.AN.AN.AN",
+      "kept": {
+        "variant_id": "01a0c0fa-4520-7e0c-8bbf-02d40cb740f8",
+        "kit_id": 1541521,
+        "sku": "100-1541521",
+        "name": "Гардероб 800х600х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T01:40:22.436091+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.222.AN.AN.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c188-df0f-72a1-885f-76cbdcf907e8",
+          "kit_id": 1543694,
+          "sku": "100-1543694",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T04:16:07.837623+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.AN.AN.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7f1-5200-74e2-92b8-e8cb433103f1",
+          "kit_id": 1561520,
+          "sku": "100-1561520",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:07:56.308147+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.AN.AN.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.222.AN.AN.AR",
+      "kept": {
+        "variant_id": "01a0c0f6-61ab-7d3c-9e2b-d9d69be696c1",
+        "kit_id": 1541455,
+        "sku": "100-1541455",
+        "name": "Гардероб 800х600",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T01:36:07.47769+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.222.AN.AN.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c185-7980-7731-9617-df1420515432",
+          "kit_id": 1543655,
+          "sku": "100-1543655",
+          "name": "Гардероб 800х600",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T04:12:25.290535+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.AN.AN.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7f0-3479-70f1-b29d-e67bf0a26a2b",
+          "kit_id": 1561496,
+          "sku": "100-1561496",
+          "name": "Гардероб 800х600",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:06:43.21046+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.AN.AN.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.222.AN.AN.WH",
+      "kept": {
+        "variant_id": "01a0c0f9-d9ae-721b-8cbe-951243f8769b",
+        "kit_id": 1541515,
+        "sku": "100-1541515",
+        "name": "Гардероб 800х600х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T01:39:54.870823+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.222.AN.AN.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c188-5c6b-78b3-9249-89e06aa23f1e",
+          "kit_id": 1543687,
+          "sku": "100-1543687",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T04:15:34.470866+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.AN.AN.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7f1-460a-7bab-af02-30fb07dc54dd",
+          "kit_id": 1561518,
+          "sku": "100-1561518",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:07:53.322962+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.AN.AN.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.222.AN.AR.AN",
+      "kept": {
+        "variant_id": "01a0c0f6-fb67-701c-98b3-4fd6098340d8",
+        "kit_id": 1541464,
+        "sku": "100-1541464",
+        "name": "Гардероб 800х600",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T01:36:46.882811+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.222.AN.AR.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c185-dc0b-79d7-a644-8150d2f3e3f9",
+          "kit_id": 1543659,
+          "sku": "100-1543659",
+          "name": "Гардероб 800х600",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T04:12:50.574672+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.AN.AR.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7f0-7828-7680-85fc-83f9a061cd31",
+          "kit_id": 1561501,
+          "sku": "100-1561501",
+          "name": "Гардероб 800х600",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:07:00.53904+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.AN.AR.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.222.AN.AR.AR",
+      "kept": {
+        "variant_id": "01a0c0f7-6e0d-7bea-948e-660d78a7f382",
+        "kit_id": 1541472,
+        "sku": "100-1541472",
+        "name": "Гардероб 800х600",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T01:37:16.243741+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.222.AN.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c186-2d77-75a2-9acb-5af70d29466a",
+          "kit_id": 1543662,
+          "sku": "100-1543662",
+          "name": "Гардероб 800х600",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T04:13:11.360622+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.AN.AR.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7f0-976c-7df5-a7ab-8987a24fd157",
+          "kit_id": 1561504,
+          "sku": "100-1561504",
+          "name": "Гардероб 800х600",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:07:08.66664+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.AN.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.222.WH.AR.AR",
+      "kept": {
+        "variant_id": "01a0c0f9-14ab-7a33-8503-726b813926f9",
+        "kit_id": 1541501,
+        "sku": "100-1541501",
+        "name": "Гардероб 800х600х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T01:39:04.380593+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.222.WH.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c187-ffab-7585-a2da-905503dd4bb4",
+          "kit_id": 1543682,
+          "sku": "100-1543682",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T04:15:10.727675+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.WH.AR.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7f1-0196-71a8-aec2-1a8ff0d6700d",
+          "kit_id": 1561512,
+          "sku": "100-1561512",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:07:35.718488+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.WH.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.222.WH.AR.WH",
+      "kept": {
+        "variant_id": "01a0c0f8-8c5f-70ff-b3c6-1a769a46ea38",
+        "kit_id": 1541491,
+        "sku": "100-1541491",
+        "name": "Гардероб 800х600х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T01:38:29.600403+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.222.WH.AR.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c187-9f71-771c-9d9a-aeb4e4a016c8",
+          "kit_id": 1543678,
+          "sku": "100-1543678",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T04:14:46.017503+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.WH.AR.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7f0-f332-7e66-83e2-7cfb622d3b3d",
+          "kit_id": 1561511,
+          "sku": "100-1561511",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:07:32.16993+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.WH.AR.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.222.WH.WH.AN",
+      "kept": {
+        "variant_id": "01a0c0fa-9e1a-7ca3-9095-fb3f5164c84d",
+        "kit_id": 1541528,
+        "sku": "100-1541528",
+        "name": "Гардероб 800х600х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T01:40:45.103891+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.222.WH.WH.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c189-1fbe-77fa-8f3a-2924284dac28",
+          "kit_id": 1543696,
+          "sku": "100-1543696",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T04:16:24.468111+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.WH.WH.AN"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7f1-5bc6-77dc-8a2e-c0550bfdf534",
+          "kit_id": 1561521,
+          "sku": "100-1561521",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:07:58.804992+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.WH.WH.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.222.WH.WH.AR",
+      "kept": {
+        "variant_id": "01a0c0f8-2d18-77c8-9f6b-fe1ae6f1f47a",
+        "kit_id": 1541484,
+        "sku": "100-1541484",
+        "name": "Гардероб 800х600х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T01:38:05.092612+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.222.WH.WH.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c187-14f8-7e99-a001-9a54d91d3981",
+          "kit_id": 1543672,
+          "sku": "100-1543672",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T04:14:10.631625+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.WH.WH.AR"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7f0-d746-79b0-a15d-78f5b2929f67",
+          "kit_id": 1561509,
+          "sku": "100-1561509",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:07:24.893146+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.WH.WH.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.222.WH.WH.WH",
+      "kept": {
+        "variant_id": "01a0c0f7-f649-78af-a8e9-17ba46460aac",
+        "kit_id": 1541481,
+        "sku": "100-1541481",
+        "name": "Гардероб 800х600х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T01:37:51.061116+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.222.WH.WH.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c186-a0c7-7608-add0-014773dd9460",
+          "kit_id": 1543667,
+          "sku": "100-1543667",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T04:13:40.887109+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.WH.WH.WH"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7f0-b928-7d37-8c74-2ab131c7ec09",
+          "kit_id": 1561506,
+          "sku": "100-1561506",
+          "name": "Гардероб 800х600х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:07:17.227375+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.222.WH.WH.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.AN.AN.AN.L",
+      "kept": {
+        "variant_id": "01a0bfed-a877-75c5-824f-0cc88a7a442e",
+        "kit_id": 1537337,
+        "sku": "100-1537337",
+        "name": "Гардероб 600х400",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:46:58.64378+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.AN.AN.AN.L"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0b8-92c8-72be-ad17-a6a21e24494a",
+          "kit_id": 1540557,
+          "sku": "100-1540557",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:28:36.9423+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AN.AN.L"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5e2-cddb-7723-93e4-e1496392bcf3",
+          "kit_id": 1554699,
+          "sku": "100-1554699",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:32:50.669508+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AN.AN.L"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.AN.AN.AN.R",
+      "kept": {
+        "variant_id": "01a0bfed-ef32-77ec-9d8c-0efa097a25fb",
+        "kit_id": 1537343,
+        "sku": "100-1537343",
+        "name": "Гардероб 600х400",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:47:16.670711+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.AN.AN.AN.R"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0b8-dd73-7c5c-95f1-f8a3d520dcee",
+          "kit_id": 1540563,
+          "sku": "100-1540563",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:28:55.953926+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AN.AN.R"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5e4-507f-7426-bd50-ff1910bff7ab",
+          "kit_id": 1554720,
+          "sku": "100-1554720",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:34:29.517995+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AN.AN.R"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.AN.AN.AR.L",
+      "kept": {
+        "variant_id": "01a0bfee-34c3-7515-9275-939b911f3e3e",
+        "kit_id": 1537347,
+        "sku": "100-1537347",
+        "name": "Гардероб 600х400",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:47:34.480804+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.AN.AN.AR.L"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0b9-b263-71e6-9098-a6bd410bd471",
+          "kit_id": 1540577,
+          "sku": "100-1540577",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:29:50.516691+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AN.AR.L"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5e4-8374-7630-8ca0-e5f8501b9a34",
+          "kit_id": 1554724,
+          "sku": "100-1554724",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:34:42.567136+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AN.AR.L"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.AN.AN.AR.R",
+      "kept": {
+        "variant_id": "01a0bfee-63e7-7a18-9d45-db66a0ea9c14",
+        "kit_id": 1537351,
+        "sku": "100-1537351",
+        "name": "Гардероб 600х400",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:47:46.546837+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.AN.AN.AR.R"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0ba-15e7-7d67-ba0c-f76036364fee",
+          "kit_id": 1540584,
+          "sku": "100-1540584",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T00:30:15.927608+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AN.AR.R"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5e5-072c-7e9c-9d24-3048adcd57ca",
+          "kit_id": 1554731,
+          "sku": "100-1554731",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T00:35:16.285877+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AN.AR.R"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.AN.AN.WH.R",
+      "kept": {
+        "variant_id": "01a0bff0-483d-7e69-bebd-275913abdf05",
+        "kit_id": 1537385,
+        "sku": "100-1537385",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:49:50.539165+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.AN.AN.WH.R"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c159-51d6-77e4-98ef-78685cb9f27c",
+          "kit_id": 1543027,
+          "sku": "100-1543027",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:24:11.564803+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AN.WH.R"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e6-568d-7750-bcef-992e46bbbe5c",
+          "kit_id": 1561241,
+          "sku": "100-1561241",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:55:56.704449+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AN.WH.R"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.AN.AR.AN.L",
+      "kept": {
+        "variant_id": "01a0bfee-8246-7477-b4e0-3e8515fd8b6a",
+        "kit_id": 1537354,
+        "sku": "100-1537354",
+        "name": "Гардероб 600х400",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:47:54.435319+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.AN.AR.AN.L"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c154-4ae2-79b9-be1d-c312207ad660",
+          "kit_id": 1542981,
+          "sku": "100-1542981",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:18:42.161053+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AR.AN.L"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e5-170e-7706-9cfb-96ca30ebcf11",
+          "kit_id": 1561211,
+          "sku": "100-1561211",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:54:35.567853+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AR.AN.L"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.AN.AR.AN.R",
+      "kept": {
+        "variant_id": "01a0bfee-8e22-7c2e-95a1-37ae397914d1",
+        "kit_id": 1537356,
+        "sku": "100-1537356",
+        "name": "Гардероб 600х400",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:47:57.358953+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.AN.AR.AN.R"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c154-aae1-7b47-922b-aa2a031849bd",
+          "kit_id": 1542983,
+          "sku": "100-1542983",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:19:06.726256+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AR.AN.R"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e5-3a92-7d79-9ea0-5cb3771da76c",
+          "kit_id": 1561214,
+          "sku": "100-1561214",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:54:44.021737+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AR.AN.R"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.AN.AR.AR.L",
+      "kept": {
+        "variant_id": "01a0bff0-17de-7391-8a42-e98b20149e20",
+        "kit_id": 1537383,
+        "sku": "100-1537383",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:49:38.162272+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.AN.AR.AR.L"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c158-ccb1-780a-8ed6-22bd045ced1f",
+          "kit_id": 1543023,
+          "sku": "100-1543023",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:23:37.556373+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AR.AR.L"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e6-3544-7ae8-b673-0ea2872975ef",
+          "kit_id": 1561237,
+          "sku": "100-1561237",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:55:48.21607+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AR.AR.L"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.AN.AR.AR.R",
+      "kept": {
+        "variant_id": "01a0bfee-d159-7aad-8699-4c5b774115f8",
+        "kit_id": 1537360,
+        "sku": "100-1537360",
+        "name": "Гардероб 600х400",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:48:14.644007+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.AN.AR.AR.R"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c155-3b16-7b7c-a590-54c3b89408d9",
+          "kit_id": 1542988,
+          "sku": "100-1542988",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:19:43.597475+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AR.AR.R"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e5-4642-748b-bd95-c44f7bedaf98",
+          "kit_id": 1561215,
+          "sku": "100-1561215",
+          "name": "Гардероб 600х400",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:54:47.009093+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.AN.AR.AR.R"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.WH.AR.AR.L",
+      "kept": {
+        "variant_id": "01a0bfef-c747-7b72-960c-1a21ede2db24",
+        "kit_id": 1537379,
+        "sku": "100-1537379",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:49:17.670564+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.WH.AR.AR.L"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c157-a95a-7d16-9e3d-3821232f2289",
+          "kit_id": 1543013,
+          "sku": "100-1543013",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:22:22.893116+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.AR.AR.L"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e6-0e55-782d-9e9f-1bf5a9a9e4f7",
+          "kit_id": 1561233,
+          "sku": "100-1561233",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:55:38.08631+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.AR.AR.L"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.WH.AR.AR.R",
+      "kept": {
+        "variant_id": "01a0bfef-e685-7bed-ac9d-eec21e47ff96",
+        "kit_id": 1537381,
+        "sku": "100-1537381",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:49:25.637711+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.WH.AR.AR.R"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c158-0b17-7ae1-8556-4e10d66ec454",
+          "kit_id": 1543017,
+          "sku": "100-1543017",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:22:47.849227+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.AR.AR.R"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e6-177d-7771-937b-c228c9125c89",
+          "kit_id": 1561234,
+          "sku": "100-1561234",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:55:40.43635+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.AR.AR.R"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.WH.AR.WH.L",
+      "kept": {
+        "variant_id": "01a0bfef-a0f3-75f8-a66a-53829db7c051",
+        "kit_id": 1537376,
+        "sku": "100-1537376",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:49:07.82809+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.WH.AR.WH.L"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c156-f9e1-7388-866a-ceca90483818",
+          "kit_id": 1543006,
+          "sku": "100-1543006",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:21:37.981148+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.AR.WH.L"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e5-af9f-7ac3-b208-65511126f540",
+          "kit_id": 1561226,
+          "sku": "100-1561226",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:55:13.844485+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.AR.WH.L"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.WH.AR.WH.R",
+      "kept": {
+        "variant_id": "01a0bfef-ac0b-73b6-add2-497ddaade998",
+        "kit_id": 1537377,
+        "sku": "100-1537377",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:49:10.552673+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.WH.AR.WH.R"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c157-5a16-77c9-b0f8-d3832ed26948",
+          "kit_id": 1543010,
+          "sku": "100-1543010",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:22:02.622762+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.AR.WH.R"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e5-deb9-73ac-972d-d8b02aaa50a3",
+          "kit_id": 1561229,
+          "sku": "100-1561229",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:55:25.907285+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.AR.WH.R"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.WH.WH.AN.L",
+      "kept": {
+        "variant_id": "01a0bff0-8de1-726f-b1e4-d9e04ee2e32f",
+        "kit_id": 1537388,
+        "sku": "100-1537388",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:50:08.550332+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.WH.WH.AN.L"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c159-a808-7267-b99d-663d054619cd",
+          "kit_id": 1543029,
+          "sku": "100-1543029",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:24:33.688698+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.AN.L"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e6-626b-7c28-8a51-f7628fd25cba",
+          "kit_id": 1561242,
+          "sku": "100-1561242",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:55:59.7438+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.AN.L"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.WH.WH.AN.R",
+      "kept": {
+        "variant_id": "01a0bff0-ac2e-7301-8eae-463800b35f99",
+        "kit_id": 1537390,
+        "sku": "100-1537390",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:50:16.308163+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.WH.WH.AN.R"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c15a-07c4-7ba3-a39a-38a969f65ba1",
+          "kit_id": 1543034,
+          "sku": "100-1543034",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:24:58.077276+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.AN.R"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e6-81a6-7b33-b47f-7ceab54b8299",
+          "kit_id": 1561245,
+          "sku": "100-1561245",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:56:07.608302+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.AN.R"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.WH.WH.AR.L",
+      "kept": {
+        "variant_id": "01a0bfef-3e7d-7c70-b86c-f4d1112f3bbc",
+        "kit_id": 1537369,
+        "sku": "100-1537369",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:48:42.507395+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.WH.WH.AR.L"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c156-5fc7-7850-9f09-ec9a66586323",
+          "kit_id": 1543000,
+          "sku": "100-1543000",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:20:58.583652+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.AR.L"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e5-5ef5-7d27-926e-58b182269624",
+          "kit_id": 1561219,
+          "sku": "100-1561219",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:54:53.337495+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.AR.L"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.WH.WH.AR.R",
+      "kept": {
+        "variant_id": "01a0bfef-6f72-74ee-a6fb-82e86afeb898",
+        "kit_id": 1537373,
+        "sku": "100-1537373",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:48:55.039098+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.WH.WH.AR.R"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c156-c0e7-70e7-9238-22d2e407265e",
+          "kit_id": 1543004,
+          "sku": "100-1543004",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:21:23.317715+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.AR.R"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e5-6970-7d93-b696-2ea2bc9763df",
+          "kit_id": 1561220,
+          "sku": "100-1561220",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:54:56.054695+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.AR.R"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.WH.WH.WH.L",
+      "kept": {
+        "variant_id": "01a0bfee-ef70-7370-b005-f6dab5e96564",
+        "kit_id": 1537363,
+        "sku": "100-1537363",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:48:22.269547+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.WH.WH.WH.L"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c155-8c3f-7aa4-88a5-a22c9cf0a46f",
+          "kit_id": 1542991,
+          "sku": "100-1542991",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:20:04.301814+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.WH.L"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e5-4f28-786c-986e-4b78718101af",
+          "kit_id": 1561217,
+          "sku": "100-1561217",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:54:49.144277+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.WH.L"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.223.WH.WH.WH.R",
+      "kept": {
+        "variant_id": "01a0bfef-0bd0-77bb-9770-e970b0e47a80",
+        "kit_id": 1537365,
+        "sku": "100-1537365",
+        "name": "Гардероб 600х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-20T20:48:29.531125+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.223.WH.WH.WH.R"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c155-ec27-74ee-8be8-c6fa51319650",
+          "kit_id": 1542995,
+          "sku": "100-1542995",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-21T03:20:29.000535+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.WH.R"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c7e5-55cb-7d0d-991d-12cb89a22691",
+          "kit_id": 1561218,
+          "sku": "100-1561218",
+          "name": "Гардероб 600х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T09:54:51.03185+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.223.WH.WH.WH.R"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.231.AN.AN.AN",
+      "kept": {
+        "variant_id": "01a0c1a7-31c9-70aa-a0ea-7be54db9dfd9",
+        "kit_id": 1544188,
+        "sku": "100-1544188",
+        "name": "Локер 4 яч.400х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:49:15.154148+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.231.AN.AN.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-9823-7ccb-9129-bb15682ea304",
+          "kit_id": 1561989,
+          "sku": "100-1561989",
+          "name": "Локер 4 яч.400х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:27:53.928984+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.231.AN.AN.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.231.AN.AN.AR",
+      "kept": {
+        "variant_id": "01a0c1a7-7dca-7d09-8f92-8e7e2c605eb6",
+        "kit_id": 1544193,
+        "sku": "100-1544193",
+        "name": "Локер 4 яч.400х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:49:34.668446+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.231.AN.AN.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-b669-792e-b7fe-047015d41090",
+          "kit_id": 1561991,
+          "sku": "100-1561991",
+          "name": "Локер 4 яч.400х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:01.787667+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.231.AN.AN.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.231.AN.AR.AN",
+      "kept": {
+        "variant_id": "01a0c1a7-e114-70c6-b44f-312d612474cf",
+        "kit_id": 1544200,
+        "sku": "100-1544200",
+        "name": "Локер 4 яч.400х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:50:00.045547+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.231.AN.AR.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-c287-76a8-9889-9262f6310c64",
+          "kit_id": 1561994,
+          "sku": "100-1561994",
+          "name": "Локер 4 яч.400х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:04.763553+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.231.AN.AR.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.231.AN.AR.AR",
+      "kept": {
+        "variant_id": "01a0c1a8-3df0-7628-969b-509a7c10c095",
+        "kit_id": 1544207,
+        "sku": "100-1544207",
+        "name": "Локер 4 яч.400х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:50:23.807641+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.231.AN.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-de4e-7177-aa01-f9fcf16ac594",
+          "kit_id": 1561996,
+          "sku": "100-1561996",
+          "name": "Локер 4 яч.400х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:11.873597+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.231.AN.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.231.WH.AR.AR",
+      "kept": {
+        "variant_id": "01a0c1a6-df3a-78da-9fe4-5bf8f008d344",
+        "kit_id": 1544183,
+        "sku": "100-1544183",
+        "name": "Локер 4 яч.400х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:48:54.026621+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.231.WH.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-8b89-704b-82f0-5db13998f2d4",
+          "kit_id": 1561987,
+          "sku": "100-1561987",
+          "name": "Локер 4 яч.400х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:27:50.802221+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.231.WH.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.231.WH.AR.WH",
+      "kept": {
+        "variant_id": "01a0c1a6-795a-7b5a-adb0-78ae08ff74f8",
+        "kit_id": 1544176,
+        "sku": "100-1544176",
+        "name": "Локер 4 яч.400х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:48:27.977392+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.231.WH.AR.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-7f65-7ceb-9f71-d9c5abcf338c",
+          "kit_id": 1561985,
+          "sku": "100-1561985",
+          "name": "Локер 4 яч.400х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:27:47.735156+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.231.WH.AR.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.231.WH.WH.AR",
+      "kept": {
+        "variant_id": "01a0c1a6-0141-795f-80aa-e08d45682c77",
+        "kit_id": 1544168,
+        "sku": "100-1544168",
+        "name": "Локер 4 яч.400х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:47:57.183986+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.231.WH.WH.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-63a2-7d0e-8dd4-18499d45b85e",
+          "kit_id": 1561983,
+          "sku": "100-1561983",
+          "name": "Локер 4 яч.400х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:27:40.495677+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.231.WH.WH.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.231.WH.WH.WH",
+      "kept": {
+        "variant_id": "01a0c1a5-ca26-73a2-8a3a-21e0206e1dcf",
+        "kit_id": 1544164,
+        "sku": "100-1544164",
+        "name": "Локер 4 яч.400х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:47:43.098932+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.231.WH.WH.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-31ae-7a16-9366-7a03224cea3c",
+          "kit_id": 1561980,
+          "sku": "100-1561980",
+          "name": "Локер 4 яч.400х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:27:27.677456+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.231.WH.WH.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.232.AN.AN.AN",
+      "kept": {
+        "variant_id": "01a0c1aa-ba39-74ac-b77d-3e3b505f04bd",
+        "kit_id": 1544253,
+        "sku": "100-1544253",
+        "name": "Локер 5 яч.400х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:53:06.745204+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.232.AN.AN.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-4fa0-7a75-9dcf-14ea27f395d8",
+          "kit_id": 1562009,
+          "sku": "100-1562009",
+          "name": "Локер 5 яч.400х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:41.058137+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.232.AN.AN.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.232.AN.AN.AR",
+      "kept": {
+        "variant_id": "01a0c1ab-0ad2-7593-a527-95d9d97a27a5",
+        "kit_id": 1544258,
+        "sku": "100-1544258",
+        "name": "Локер 5 яч.400х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:53:27.332496+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.232.AN.AN.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-5be5-74ea-97b8-9d211d6f47b0",
+          "kit_id": 1562010,
+          "sku": "100-1562010",
+          "name": "Локер 5 яч.400х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:44.138783+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.232.AN.AN.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.232.AN.AN.WH",
+      "kept": {
+        "variant_id": "01a0c1aa-6ae2-789b-b09f-2c6aa98f65aa",
+        "kit_id": 1544247,
+        "sku": "100-1544247",
+        "name": "Локер 5 яч.400х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:52:46.386602+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.232.AN.AN.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-4864-7a79-9ecc-421385893a7e",
+          "kit_id": 1562007,
+          "sku": "100-1562007",
+          "name": "Локер 5 яч.400х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:39.026589+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.232.AN.AN.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.232.AN.AR.AN",
+      "kept": {
+        "variant_id": "01a0c1ab-5cf8-7097-9aa3-5fc211566303",
+        "kit_id": 1544265,
+        "sku": "100-1544265",
+        "name": "Локер 5 яч.400х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:53:48.361488+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.232.AN.AR.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-8ddf-7bea-98a3-1310e9daf673",
+          "kit_id": 1562014,
+          "sku": "100-1562014",
+          "name": "Локер 5 яч.400х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:56.933283+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.232.AN.AR.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.232.AN.AR.AR",
+      "kept": {
+        "variant_id": "01a0c1ab-819a-7e13-a085-62452e732530",
+        "kit_id": 1544266,
+        "sku": "100-1544266",
+        "name": "Локер 5 яч.400х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:53:57.739356+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.232.AN.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-99bf-7446-b54f-549b31c25a23",
+          "kit_id": 1562015,
+          "sku": "100-1562015",
+          "name": "Локер 5 яч.400х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:59.85567+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.232.AN.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.232.WH.AR.AR",
+      "kept": {
+        "variant_id": "01a0c1aa-194a-71f6-bfb6-cc6e4c6c8d60",
+        "kit_id": 1544241,
+        "sku": "100-1544241",
+        "name": "Локер 5 яч.400х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:52:25.487682+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.232.WH.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-2cc5-7737-9041-9a243918824e",
+          "kit_id": 1562004,
+          "sku": "100-1562004",
+          "name": "Локер 5 яч.400х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:31.955777+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.232.WH.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.232.WH.AR.WH",
+      "kept": {
+        "variant_id": "01a0c1a9-7c21-766a-9abc-154631a11e07",
+        "kit_id": 1544230,
+        "sku": "100-1544230",
+        "name": "Локер 5 яч.400х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:51:45.201037+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.232.WH.AR.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-22ee-759c-9c8b-2bdd65858777",
+          "kit_id": 1562003,
+          "sku": "100-1562003",
+          "name": "Локер 5 яч.400х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:29.436204+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.232.WH.AR.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.232.WH.WH.AR",
+      "kept": {
+        "variant_id": "01a0c1a8-edf4-7d6b-960c-7883d8918497",
+        "kit_id": 1544220,
+        "sku": "100-1544220",
+        "name": "Локер 5 яч.400х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:51:08.801513+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.232.WH.WH.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-0555-7da2-9664-d19300b16177",
+          "kit_id": 1562000,
+          "sku": "100-1562000",
+          "name": "Локер 5 яч.400х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:21.988615+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.232.WH.WH.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.232.WH.WH.WH",
+      "kept": {
+        "variant_id": "01a0c1a8-8b38-78f4-9a84-ac5e1fd5e406",
+        "kit_id": 1544213,
+        "sku": "100-1544213",
+        "name": "Локер 5 яч.400х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:50:43.596639+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.232.WH.WH.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-f9b1-7a7a-b3e7-4453c5f0e5af",
+          "kit_id": 1561999,
+          "sku": "100-1561999",
+          "name": "Локер 5 яч.400х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:28:19.000008+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.232.WH.WH.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.233.AN.AN.AN",
+      "kept": {
+        "variant_id": "01a0c1ad-285f-7778-b5ac-da40417c1bfc",
+        "kit_id": 1544273,
+        "sku": "100-1544273",
+        "name": "Локер 8 яч.800х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:55:45.972671+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.233.AN.AN.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-cbea-7429-a542-9917e2028306",
+          "kit_id": 1562023,
+          "sku": "100-1562023",
+          "name": "Локер 8 яч.800х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:12.821535+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.233.AN.AN.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.233.AN.AN.AR",
+      "kept": {
+        "variant_id": "01a0c1ad-c3f1-77cc-b5e2-e1798fc8d514",
+        "kit_id": 1544275,
+        "sku": "100-1544275",
+        "name": "Локер 8 яч.800х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:56:25.79356+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.233.AN.AN.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-e97a-79bf-b3ef-29b445241a81",
+          "kit_id": 1562026,
+          "sku": "100-1562026",
+          "name": "Локер 8 яч.800х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:20.411215+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.233.AN.AN.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.233.AN.AR.AN",
+      "kept": {
+        "variant_id": "01a0c1ae-9f62-726b-be7c-6215cbe71674",
+        "kit_id": 1544278,
+        "sku": "100-1544278",
+        "name": "Локер 8 яч.800х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:57:22.027447+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.233.AN.AR.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-f453-70a1-be45-a447a3847da7",
+          "kit_id": 1562028,
+          "sku": "100-1562028",
+          "name": "Локер 8 яч.800х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:23.181068+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.233.AN.AR.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.233.AN.AR.AR",
+      "kept": {
+        "variant_id": "01a0c1af-3b85-79a9-a021-4eca716d017f",
+        "kit_id": 1544282,
+        "sku": "100-1544282",
+        "name": "Локер 8 яч.800х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:58:02.015373+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.233.AN.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c805-1469-744c-bdb6-f59370329d0c",
+          "kit_id": 1562030,
+          "sku": "100-1562030",
+          "name": "Локер 8 яч.800х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:31.42298+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.233.AN.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.233.WH.AR.AR",
+      "kept": {
+        "variant_id": "01a0c1ac-87ee-757c-92c4-f3658b02b9dc",
+        "kit_id": 1544271,
+        "sku": "100-1544271",
+        "name": "Локер 8 яч.800х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:55:04.949308+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.233.WH.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-c25d-7ada-8b1a-46ecdc5421c3",
+          "kit_id": 1562021,
+          "sku": "100-1562021",
+          "name": "Локер 8 яч.800х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:10.251119+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.233.WH.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.233.WH.AR.WH",
+      "kept": {
+        "variant_id": "01a0c1ac-3aea-7601-9b6a-ffcbe051a3d8",
+        "kit_id": 1544270,
+        "sku": "100-1544270",
+        "name": "Локер 8 яч.800х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:54:45.206923+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.233.WH.AR.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-b7e3-79a0-8e6d-8130a27fa8f8",
+          "kit_id": 1562020,
+          "sku": "100-1562020",
+          "name": "Локер 8 яч.800х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:07.569197+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.233.WH.AR.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.233.WH.WH.AR",
+      "kept": {
+        "variant_id": "01a0c1ab-f14d-7665-8a4f-52e579844975",
+        "kit_id": 1544269,
+        "sku": "100-1544269",
+        "name": "Локер 8 яч.800х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:54:26.264916+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.233.WH.WH.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-ae41-73b4-923d-5d43b10e4622",
+          "kit_id": 1562018,
+          "sku": "100-1562018",
+          "name": "Локер 8 яч.800х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:05.171564+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.233.WH.WH.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.233.WH.WH.WH",
+      "kept": {
+        "variant_id": "01a0c1ab-b8fa-77d5-ac3c-f9e9e392096d",
+        "kit_id": 1544267,
+        "sku": "100-1544267",
+        "name": "Локер 8 яч.800х400х1472",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:54:11.919485+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.233.WH.WH.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c804-a29e-74ba-a723-e4d2d941cbc5",
+          "kit_id": 1562017,
+          "sku": "100-1562017",
+          "name": "Локер 8 яч.800х400х1472",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:02.253118+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.233.WH.WH.WH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.234.AN.AN.AN",
+      "kept": {
+        "variant_id": "01a0c1b1-baf4-796f-b30e-d848cdd3784b",
+        "kit_id": 1544323,
+        "sku": "100-1544323",
+        "name": "Локер 10 яч. 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T05:00:45.569832+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.234.AN.AN.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c805-6128-7dd7-8b4b-e3f609240807",
+          "kit_id": 1562041,
+          "sku": "100-1562041",
+          "name": "Локер 10 яч. 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:51.019505+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.234.AN.AN.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.234.AN.AN.AR",
+      "kept": {
+        "variant_id": "01a0c1b0-5f91-7505-9a27-00680e9f2d39",
+        "kit_id": 1544299,
+        "sku": "100-1544299",
+        "name": "Локер 10 яч 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:59:16.639565+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.234.AN.AN.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c805-3d00-7764-b7c4-70c75f0cb347",
+          "kit_id": 1562036,
+          "sku": "100-1562036",
+          "name": "Локер 10 яч 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:41.769049+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.234.AN.AN.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.234.AN.AR.AN",
+      "kept": {
+        "variant_id": "01a0c1b0-f9f8-7d94-9d07-1af633b251da",
+        "kit_id": 1544309,
+        "sku": "100-1544309",
+        "name": "Локер 10 яч 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:59:56.271973+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.234.AN.AR.AN"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c805-48e9-7343-a6d3-f05824e1d6fd",
+          "kit_id": 1562038,
+          "sku": "100-1562038",
+          "name": "Локер 10 яч 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:44.806081+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.234.AN.AR.AN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.234.AN.AR.AR",
+      "kept": {
+        "variant_id": "01a0c1b1-703d-767c-b0fc-4fce6918e353",
+        "kit_id": 1544318,
+        "sku": "100-1544318",
+        "name": "Локер 10 яч 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T05:00:26.557816+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.234.AN.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c805-556e-713a-96d0-94eece82871b",
+          "kit_id": 1562039,
+          "sku": "100-1562039",
+          "name": "Локер 10 яч 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:48.033335+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.234.AN.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.234.WH.AR.AR",
+      "kept": {
+        "variant_id": "01a0c1af-c09d-7ae7-bca0-fd890f5ce853",
+        "kit_id": 1544291,
+        "sku": "100-1544291",
+        "name": "Локер 10 яч 800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:58:35.995735+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.234.WH.AR.AR"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c805-3561-72b0-b5e3-6d247d660f4e",
+          "kit_id": 1562035,
+          "sku": "100-1562035",
+          "name": "Локер 10 яч 800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:39.694392+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.234.WH.AR.AR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AG.234.WH.AR.WH",
+      "kept": {
+        "variant_id": "01a0c1af-8595-79fe-b7eb-d829c67cfbd8",
+        "kit_id": 1544287,
+        "sku": "100-1544287",
+        "name": "Локер 10 яч .800х400х1833",
+        "status": "PUBLISHED",
+        "created_at": "2026-09-21T04:58:20.873155+03:00",
+        "matched_identifiers": [
+          {
+            "field": "Код для сайта",
+            "value": "AG.234.WH.AR.WH"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c805-27c2-7418-9a3b-7f5125079097",
+          "kit_id": 1562033,
+          "sku": "100-1562033",
+          "name": "Локер 10 яч .800х400х1833",
+          "status": "PUBLISHED",
+          "created_at": "2026-09-22T10:29:36.319862+03:00",
+          "matched_identifiers": [
+            {
+              "field": "Код для сайта",
+              "value": "AG.234.WH.AR.WH"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "finished_at": "2026-09-24T16:10:34.776025+00:00",
+  "complete": true
+}
