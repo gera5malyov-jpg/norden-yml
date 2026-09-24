@@ -1,0 +1,93 @@
+name: Resume Norden KIT to Webasyst
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-resume.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-kit-webasyst-daily
+  cancel-in-progress: false
+
+jobs:
+  resume:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests
+
+      - name: Continue Norden supplier -> KIT
+        id: kit
+        continue-on-error: true
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: |
+          python norden-kit/sync_norden_kit.py             --mode scheduled             --max-new 250             --time-budget-seconds 17000
+
+      - name: Continue KIT -> existing NORDEN-100 Webasyst
+        id: wa
+        if: steps.kit.outcome == 'success'
+        continue-on-error: true
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+          NORDEN_WEBASYST_WRITE_DELAY: '0.60'
+        run: python webasyst/sync_norden_to_webasyst.py
+
+      - name: Commit reports
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          mkdir -p /tmp/norden-resume
+          cp norden-kit/kit_mapping.json /tmp/norden-resume/kit_mapping.json 2>/dev/null || true
+          cp norden-kit/last_sync_report.json /tmp/norden-resume/kit.json 2>/dev/null || true
+          cp webasyst/last_norden_webasyst_sync.json /tmp/norden-resume/wa.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/norden-resume/kit_mapping.json norden-kit/kit_mapping.json 2>/dev/null || true
+          cp /tmp/norden-resume/kit.json norden-kit/last_sync_report.json 2>/dev/null || true
+          cp /tmp/norden-resume/wa.json webasyst/last_norden_webasyst_sync.json 2>/dev/null || true
+          git add norden-kit/kit_mapping.json norden-kit/last_sync_report.json webasyst/last_norden_webasyst_sync.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save resumed Norden KIT Webasyst state"
+            git push origin HEAD:main || true
+          fi
+
+      - name: Send completion report
+        if: always()
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          PHASE: daily
+          KIT_OUTCOME: ${{ steps.kit.outcome }}
+          WA_OUTCOME: ${{ steps.wa.outcome }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python webasyst/send_norden_chain_report.py
+
+      - name: Fail if resume failed
+        if: always()
+        env:
+          KIT_OUTCOME: ${{ steps.kit.outcome }}
+          WA_OUTCOME: ${{ steps.wa.outcome }}
+        run: |
+          test "$KIT_OUTCOME" = "success"
+          test "$WA_OUTCOME" = "success"
