@@ -8,13 +8,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   probe:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - uses: actions/checkout@v4
       - name: Probe Samson API for SKU 641933
         env:
           SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
@@ -110,4 +111,37 @@ jobs:
           print("RESULT_JSON_BEGIN")
           print(json.dumps(keep,ensure_ascii=False,indent=2))
           print("RESULT_JSON_END")
+          outdir="tmp/samson-cert-641933"
+          os.makedirs(outdir,exist_ok=True)
+          certs=found.get("certificate_extended_list") or []
+          n=0
+          for cert in certs:
+              if not isinstance(cert,dict):
+                  continue
+              if "сертификат соответствия" not in str(cert.get("name","")).casefold():
+                  continue
+              for url in cert.get("url_list") or []:
+                  if not isinstance(url,str) or not url.startswith(("http://","https://")):
+                      continue
+                  n+=1
+                  ext=os.path.splitext(urllib.parse.urlparse(url).path)[1] or ".jpg"
+                  dest=os.path.join(outdir,f"page-{n}{ext.lower()}")
+                  req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0"})
+                  with urllib.request.urlopen(req,timeout=45) as src, open(dest,"wb") as dst:
+                      dst.write(src.read())
+                  print("saved",dest,os.path.getsize(dest))
+          if not n:
+              raise SystemExit("No conformity certificate images found")
           PY
+      - name: Commit certificate pages for inspection
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tmp/samson-cert-641933/
+          if git diff --cached --quiet; then
+            echo "No certificate image changes"
+          else
+            git commit -m "Add Samson 641933 certificate pages for verification"
+            git push
+          fi
