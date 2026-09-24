@@ -154,6 +154,11 @@ def parse_stock(value):
         return None
 
 
+def is_moscow_only_product(item):
+    name = s((item or {}).get("name")).casefold()
+    return "только" in name and ("москва" in name or "москве" in name)
+
+
 class HttpError(RuntimeError):
     def __init__(self, status, url, body):
         super().__init__(f"HTTP {status} {url}: {body[:600]}")
@@ -1123,6 +1128,20 @@ def main():
     source, duplicates, source_kind, api_error = load_source(secret, short=short)
     report["source"] = source_kind
     report["api_error"] = api_error
+
+    # User rule: Norden items explicitly marked as available only in Moscow
+    # must not be published or recreated in KIT.
+    excluded_moscow_only = []
+    if not short:
+        excluded_moscow_only = [
+            article for article, item in source.items()
+            if is_moscow_only_product(item)
+        ]
+        for article in excluded_moscow_only:
+            source.pop(article, None)
+    report["excluded_moscow_only_products"] = len(excluded_moscow_only)
+    report["excluded_moscow_only_articles"] = excluded_moscow_only[:200]
+
     report["source_products"] = len(source)
     report["source_duplicate_articles"] = len(set(duplicates))
 
