@@ -212,6 +212,9 @@ class HttpError(RuntimeError):
 
 class KitClient:
     def __init__(self, token):
+        stop_file = ROOT / "STOP_ALL_NORDEN"
+        if stop_file.exists():
+            raise RuntimeError("NORDEN_STOPPED: all Norden operations are disabled by user")
         token = s(token)
         if not token:
             raise RuntimeError("YANDEX_KIT_TOKEN is not configured")
