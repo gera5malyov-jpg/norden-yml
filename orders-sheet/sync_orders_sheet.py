@@ -623,6 +623,9 @@ def direct_ozon_rows(sku_names: dict[str, str]) -> tuple[dict[str, dict], set[st
             continue
         k = order_key("ozon", ext)
         target = s(o.get("target_state"))
+        raw_status = s(o.get("status_raw")).lower()
+        if source == "ozon" and any(f"/{sub}" in raw_status for sub in OZON_COMPLETED_SUBSTATUSES):
+            target = "completed"
         if target in TERMINAL_TARGETS:
             terminal_keys.add(k)
             continue
@@ -691,6 +694,55 @@ def open_or_create_sheet():
     return sh, created
 
 
+def _rgb_is_white(color: Any) -> bool:
+    if not isinstance(color, dict):
+        return True
+    r = float(color.get("red", 1) or 0)
+    g = float(color.get("green", 1) or 0)
+    b = float(color.get("blue", 1) or 0)
+    return r >= 0.97 and g >= 0.97 and b >= 0.97
+
+
+def read_row_colors(sh, ws) -> dict[tuple[str, str], dict]:
+    """Preserve manual whole-row background colors by marketplace+order number."""
+    try:
+        existing = ws.get("A2:B500", value_render_option="FORMATTED_VALUE")
+        if not existing:
+            return {}
+        meta = sh.fetch_sheet_metadata(params={
+            "includeGridData": "true",
+            "ranges": [f"'{TAB_TITLE}'!A2:J{len(existing) + 1}"],
+        })
+        sheets = meta.get("sheets") or []
+        if not sheets:
+            return {}
+        data = (sheets[0].get("data") or [])
+        row_data = (data[0].get("rowData") or []) if data else []
+        out: dict[tuple[str, str], dict] = {}
+        for idx, vals in enumerate(existing):
+            code = s(vals[0] if len(vals) > 0 else "")
+            order_no = s(vals[1] if len(vals) > 1 else "")
+            if not code or not order_no or idx >= len(row_data):
+                continue
+            cells = row_data[idx].get("values") or []
+            chosen = None
+            for cell in cells[:10]:
+                fmt = cell.get("userEnteredFormat") or {}
+                color = fmt.get("backgroundColor")
+                if not color:
+                    style = fmt.get("backgroundColorStyle") or {}
+                    color = style.get("rgbColor")
+                if color and not _rgb_is_white(color):
+                    chosen = color
+                    break
+            if chosen:
+                out[(code, order_no)] = chosen
+        return out
+    except Exception as exc:
+        print(f"WARNING: could not preserve row colors: {type(exc).__name__}: {exc}")
+        return {}
+
+
 def write_sheet(sh, rows: list[dict]):
     try:
         ws = sh.worksheet(TAB_TITLE)
@@ -700,6 +752,8 @@ def write_sheet(sh, rows: list[dict]):
             ws.update_title(TAB_TITLE)
         else:
             ws = sh.add_worksheet(title=TAB_TITLE, rows=max(100, len(rows) + 20), cols=10)
+
+    saved_colors = read_row_colors(sh, ws)
 
     headers = [
         "Маркетплейс",
@@ -776,6 +830,33 @@ def write_sheet(sh, rows: list[dict]):
             }
         },
     ]
+    # Clear stale row fills first; then restore manual colors by order key.
+    requests.append({
+        "repeatCell": {
+            "range": {"sheetId": sheet_id, "startRowIndex": 1, "endRowIndex": max(nrows, 100), "startColumnIndex": 0, "endColumnIndex": 10},
+            "cell": {"userEnteredFormat": {"backgroundColor": {"red": 1, "green": 1, "blue": 1}}},
+            "fields": "userEnteredFormat.backgroundColor",
+        }
+    })
+
+    for row_idx, row in enumerate(rows, start=1):
+        color = saved_colors.get((s(row.get("code")), s(row.get("order_no"))))
+        if not color:
+            continue
+        requests.append({
+            "repeatCell": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "startRowIndex": row_idx,
+                    "endRowIndex": row_idx + 1,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": 10,
+                },
+                "cell": {"userEnteredFormat": {"backgroundColor": color}},
+                "fields": "userEnteredFormat.backgroundColor",
+            }
+        })
+
     widths = [90, 155, 150, 360, 95, 190, 210, 380, 130, 320]
     for idx, px in enumerate(widths):
         requests.append({
