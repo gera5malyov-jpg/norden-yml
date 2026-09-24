@@ -1,9 +1,9 @@
-name: PEK verify hard packing 789970098158
+name: PEK verify hard packing 789979048884
 
 on:
   push:
     paths:
-      - '.github/workflows/pek-verify-hardpacking-789970098158.yml'
+      - '.github/workflows/pek-verify-hardpacking-789979048884.yml'
   workflow_dispatch:
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
           curl -sS --basic --user "$PEK_LOGIN:$PEK_API_KEY" \
             -H 'Content-Type: application/json; charset=utf-8' \
             -X POST \
-            -d '{"cargoCodes":["789970098158"]}' \
+            -d '{"cargoCodes":["789979048884"]}' \
             'https://kabinet.pecom.ru/api/v1/cargos/status/' > /tmp/pek-status.json
           python3 - <<'PY'
           import json
@@ -33,7 +33,7 @@ jobs:
               services=c.get('services') or {}
               items=services.get('items') or []
               out={
-                'cargoCode': ((c.get('cargo') or {}).get('code') or '789970098158'),
+                'cargoCode': ((c.get('cargo') or {}).get('code') or '789979048884'),
                 'status': ((c.get('info') or {}).get('cargoStatus')),
                 'hardPack': services.get('hardPack'),
                 'insurance': services.get('insurance'),
