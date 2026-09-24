@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: wb-chat-return-monitor
+  group: wb-chat-return-monitor-v2
   cancel-in-progress: true
 
 permissions:
