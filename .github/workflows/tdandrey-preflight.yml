@@ -1,0 +1,45 @@
+name: ТД Андрей — предпроверка перед записью
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tdandrey-preflight.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Проверить Webasyst склады и тип
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+          wa=WebasystClient(min_request_interval=0.2)
+          stocks=wa.call('shop.stock.getList')
+          types=wa.call('shop.type.getList')
+          print('WEBASYST_STOCKS=', [(str(x.get('id')), x.get('name') or x.get('title')) for x in (stocks if isinstance(stocks,list) else stocks.values()) if isinstance(x,dict)])
+          rows=types if isinstance(types,list) else list(types.values())
+          print('TYPE_MATCH=', [(str(x.get('id')), x.get('name') or x.get('title')) for x in rows if isinstance(x,dict) and (x.get('name') or x.get('title'))=='ТД Андрей автовыгрузка'])
+          PY
+      - name: Сухая сверка без записи
+        env:
+          TDANDREY_EXPORT_URL: ${{ secrets.TDANDREY_EXPORT_URL }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          TDANDREY_WEBASYST_WRITE_DELAY: '0.2'
+        run: python tdandrey-kit/loader.py --mode webasyst-first --max-new 20 --dry-run
