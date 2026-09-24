@@ -28,9 +28,9 @@ def main():
 
     mod = load_sync()
     kit = mod.KitClient(os.environ.get("YANDEX_KIT_TOKEN",""))
-    source, _, source_kind, api_error = mod.load_source(
-        os.environ.get("NORDEN_SECRET",""), short=False
-    )
+    source, source_dups = mod.source_from_xml(short=False)
+    source_kind = "xml-full+price"
+    api_error = None
     source_index = mod.build_source_identity_index(source)
     identity_char_ids = mod.resolve_identity_characteristic_ids(kit.characteristics())
 
