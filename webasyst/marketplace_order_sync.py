@@ -1166,11 +1166,17 @@ def load_ozon():
                 src = detail or o
                 items = [{
                     "sku": s(x.get("offer_id")),
+                    "name": s(x.get("name")),
                     "quantity": max(1, int(num(x.get("quantity"), 1))),
                     "price": num(x.get("price")) if x.get("price") not in (None, "") else None,
                 } for x in (src.get("products") or o.get("products") or []) if isinstance(x, dict)]
                 status, sub = s(src.get("status") or o.get("status")), s(src.get("substatus") or o.get("substatus"))
-                customer = src.get("customer") if isinstance(src.get("customer"), dict) else {}
+                customer = dict(src.get("customer") or {}) if isinstance(src.get("customer"), dict) else {}
+                addressee = src.get("addressee") if isinstance(src.get("addressee"), dict) else {}
+                if not s(customer.get("name")) and s(addressee.get("name")):
+                    customer["name"] = s(addressee.get("name"))
+                if not s(customer.get("phone")) and s(addressee.get("phone")):
+                    customer["phone"] = s(addressee.get("phone"))
                 address = normalize_ozon_address(customer.get("address") if isinstance(customer, dict) else {})
                 delivery_price = num(src.get("delivery_price")) if src.get("delivery_price") not in (None, "") else None
                 prr = src.get("prr_option") if isinstance(src.get("prr_option"), dict) else {}
