@@ -5,6 +5,9 @@ on:
     paths:
       - '.github/workflows/catalog-ozon-norden-export.yml'
   workflow_dispatch:
+  push:
+    paths:
+      - 'catalog/sheet_run_trigger.txt'
   issues:
     types: [opened]
 
@@ -38,6 +41,7 @@ jobs:
           CATALOG_OWNER_EMAIL: 'gera5malyov@gmail.com'
           CATALOG_TITLE: 'Каталог'
           CATALOG_SHEET: 'Норден'
+          CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
         shell: bash
         run: |
           set +e
