@@ -1,0 +1,126 @@
+name: Ozon retry suitable actions with compensation limits
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-retry-suitable-actions-compensation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - run: python -m pip install requests
+      - name: Retry disabled suitable-actions with Ozon compensation limits
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os, json, re, requests, time
+          BASE="https://api-seller.ozon.ru"
+          S=requests.Session()
+          S.headers.update({
+            "Client-Id":os.environ["OZON_CLIENT_ID"],
+            "Api-Key":os.environ["OZON_API_KEY"],
+            "Content-Type":"application/json"
+          })
+
+          def call(path, body):
+            for i in range(15):
+              r=S.post(BASE+path,json=body,timeout=180)
+              if r.status_code==429:
+                time.sleep(float(r.headers.get("Retry-After") or min(20,i+1))); continue
+              if r.status_code>=500:
+                time.sleep(min(20,i+1)); continue
+              try: d=r.json() if r.content else {}
+              except: d={"raw":r.text}
+              return d,r
+            return None,None
+
+          def load():
+            out=[]; seen=set(); cur=""
+            while True:
+              d,r=call("/v5/product/info/prices",{"cursor":cur,"filter":{"visibility":"ALL"},"limit":1000})
+              if not d or (r and r.status_code>=400):
+                raise SystemExit("cannot load products")
+              rows=d.get("items") or []
+              for x in rows:
+                pid=x.get("product_id")
+                if pid is not None and int(pid) not in seen:
+                  seen.add(int(pid)); out.append(x)
+              nxt=d.get("cursor") or ""
+              if not rows or not nxt or nxt==cur: break
+              cur=nxt
+            return out
+
+          before=load()
+          disabled=[x for x in before if not (x.get("price") or {}).get("auto_action_enabled")]
+          report={"disabled_before":len(disabled),"phase1_limits_found":0,"retry_updated":0,"failed":[]}
+
+          # Probe each disabled product with its current price as declared_price solely to obtain
+          # Ozon's individual compensation ceiling. Then retry with ceiling - 1 RUB.
+          for x in disabled:
+            oid=str(x.get("offer_id") or "")
+            p=x.get("price") or {}
+            current=p.get("price")
+            if not oid or not current or float(current)<=0:
+              report["failed"].append({"offer_id":oid,"reason":"no_current_price"})
+              continue
+
+            d,r=call("/v1/product/import/prices",{"prices":[{
+              "offer_id":oid,
+              "declared_price":str(current),
+              "auto_action_enabled":"ENABLED",
+              "auto_add_to_ozon_actions_list_enabled":"ENABLED",
+              "min_price_for_auto_actions_enabled":True
+            }]})
+            res=(d or {}).get("result") or []
+            rr=res[0] if res else {}
+            if rr.get("updated") is True:
+              report["retry_updated"] += 1
+              continue
+
+            errors=rr.get("errors") or []
+            ceiling=None
+            for e in errors:
+              if e.get("code")=="declared_price_too_big":
+                m=re.search(r"(\d[\d\s]*)\s*₽", str(e.get("message") or ""))
+                if m:
+                  ceiling=int(m.group(1).replace(" ",""))
+                  break
+            if not ceiling or ceiling<=1:
+              report["failed"].append({"offer_id":oid,"errors":errors})
+              continue
+
+            report["phase1_limits_found"] += 1
+            declared=ceiling-1
+            d2,r2=call("/v1/product/import/prices",{"prices":[{
+              "offer_id":oid,
+              "declared_price":str(declared),
+              "auto_action_enabled":"ENABLED",
+              "auto_add_to_ozon_actions_list_enabled":"ENABLED",
+              "min_price_for_auto_actions_enabled":True
+            }]})
+            res2=(d2 or {}).get("result") or []
+            rr2=res2[0] if res2 else {}
+            if rr2.get("updated") is True:
+              report["retry_updated"] += 1
+            else:
+              report["failed"].append({"offer_id":oid,"declared_price":declared,"errors":rr2.get("errors") if rr2 else d2})
+
+          time.sleep(8)
+          after=load()
+          remain=[x for x in after if not (x.get("price") or {}).get("auto_action_enabled")]
+          report["disabled_after"]=len(remain)
+          report["target_after"]=next((x for x in after if str(x.get("offer_id"))=="AF-31200740"),None)
+          report["remaining_sample"]=[{"offer_id":x.get("offer_id"),"price":x.get("price")} for x in remain[:30]]
+          print("FINAL_REPORT_JSON",json.dumps(report,ensure_ascii=False,sort_keys=True),flush=True)
+          if remain:
+            raise SystemExit(2)
+          PY
