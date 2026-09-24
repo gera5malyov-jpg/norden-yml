@@ -69,6 +69,8 @@ def main():
             f"отсутствовало перед переносом: {bootstrap.get('missing_before', '—')}",
             f"создано в KIT: {bootstrap.get('created_in_kit', '—')}",
             f"пропущено «только Москва»: {bootstrap.get('moscow_only_skipped', '—')}",
+            f"пропущено без закупочной цены Norden: {bootstrap.get('missing_price_skipped', '—')}",
+            f"пропущено без изображения Norden: {bootstrap.get('missing_images_skipped', '—')}",
             f"ошибок: {len(bootstrap.get('errors') or [])}",
             "",
         ]
@@ -81,6 +83,8 @@ def main():
         f"обновлено остатков: {kit.get('stock_updates', '—')}",
         f"создано новых карточек: {kit.get('new_products_created', '—')}",
         f"исключено «только Москва»: {kit.get('excluded_moscow_only_products', '—')}",
+        f"исключено без изображения: {kit.get('excluded_without_images', '—')}",
+        f"исключено без закупочной цены: {kit.get('excluded_without_purchase_price', '—')}",
         f"ошибок: {len(kit.get('errors') or [])}",
         "",
         f"{'4' if phase == 'initial' else '2'}. KIT → Webasyst (только существующие NORDEN-100)",
