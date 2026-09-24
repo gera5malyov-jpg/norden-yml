@@ -28,6 +28,7 @@ PRICE_XML_URL = "https://norden.group/index.php?dispatch=sw_user_prices.get_file
 ROOT = Path(__file__).resolve().parent
 MAPPING_PATH = ROOT / "kit_mapping.json"
 REPORT_PATH = ROOT / "last_sync_report.json"
+CATEGORY_POLICY_PATH = ROOT / "category_policy.json"
 EXISTING_SKUS_PATH = ROOT / "existing_norden_skus.txt"
 EXISTING_CODES_SEED_PATH = ROOT / "existing_norden_codes_seed.txt"
 
@@ -109,6 +110,39 @@ def now_iso():
 
 def s(value):
     return str(value or "").strip()
+
+
+_CATEGORY_POLICY_CACHE = None
+
+
+def load_category_policy():
+    global _CATEGORY_POLICY_CACHE
+    if _CATEGORY_POLICY_CACHE is None:
+        if not CATEGORY_POLICY_PATH.exists():
+            raise RuntimeError("Norden category policy file is missing")
+        _CATEGORY_POLICY_CACHE = json.loads(CATEGORY_POLICY_PATH.read_text(encoding="utf-8"))
+    return _CATEGORY_POLICY_CACHE
+
+
+def approved_category_path(source_path):
+    parts = [s(x) for x in (source_path or []) if s(x)]
+    if not parts:
+        return None
+    source = " > ".join(parts)
+    key = hashlib.sha256(source.encode("utf-8")).hexdigest()[:20]
+    policy = load_category_policy()
+    rule = (policy.get("rules") or {}).get(key)
+    if not rule:
+        return None
+    destinations = policy.get("destinations") or []
+    try:
+        target = destinations[int(rule[0])]
+    except (IndexError, ValueError, TypeError):
+        raise RuntimeError(f"Invalid Norden category rule for {source!r}")
+    result = [s(x) for x in str(target).split(">") if s(x)]
+    if not result:
+        raise RuntimeError(f"Empty Norden target category for {source!r}")
+    return result
 
 
 def norm_title(value):
@@ -1022,7 +1056,7 @@ def ensure_category_path(kit, cache_rows, path):
     parent = ""
     path = [s(x) for x in path if s(x)]
     if not path:
-        path = ["Norden"]
+        raise RuntimeError("Category path is required; automatic Norden fallback is disabled")
     for title in path:
         matches = [
             x for x in cache_rows
@@ -1204,7 +1238,10 @@ def fill_existing_content(kit, item, variant_id, all_chars, chars_by_title, code
 
 
 def create_new_product(kit, item, categories, all_chars, chars_by_title, code_site_id, article_id, warehouses, report):
-    category_id = ensure_category_path(kit, categories, item.get("category_path") or ["Norden"])
+    category_path = item.get("category_path") or []
+    if not category_path:
+        raise RuntimeError("Approved category path is required for Norden product creation")
+    category_id = ensure_category_path(kit, categories, category_path)
     product = kit.create_product(category_id)
     product_id = s(product.get("id"))
     if not product_id:
@@ -1550,6 +1587,16 @@ def main():
             report["warnings"].append("Time budget reached; remaining new products will continue on a later full/scheduled run.")
             break
         item = source[article]
+        approved_path = approved_category_path(item.get("category_path"))
+        if not approved_path:
+            report.setdefault("category_review_required", []).append({
+                "article": article,
+                "source_category_path": " > ".join(item.get("category_path") or []),
+                "reason": "NO_APPROVED_HIGH_CONFIDENCE_CATEGORY_RULE",
+            })
+            continue
+        item = dict(item)
+        item["category_path"] = approved_path
         try:
             new = create_new_product(
                 kit, item, categories, all_chars, chars_by_title, code_site_id, article_id, warehouses, report
