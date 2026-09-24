@@ -1,0 +1,36 @@
+name: Ozon diagnose 9710020036663 promo state
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-diagnose-9710020036663.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - run: python -m pip install requests
+      - name: Diagnose target promo state
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,json,requests
+          S=requests.Session()
+          S.headers.update({"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"})
+          B="https://api-seller.ozon.ru"
+          def p(path,body):
+            r=S.post(B+path,json=body,timeout=120)
+            try:d=r.json()
+            except:d={"raw":r.text}
+            print(path,r.status_code,json.dumps(d,ensure_ascii=False,sort_keys=True),flush=True)
+          p("/v1/product/action/timer/status",{"product_ids":["6229462541"]})
+          p("/v1/pricing-strategy/strategy-ids-by-product-ids",{"product_id":["6229462541"]})
+          p("/v1/product/action/timer/update",{"product_ids":["6229462541"]})
+          p("/v1/product/action/timer/status",{"product_ids":["6229462541"]})
+          PY
