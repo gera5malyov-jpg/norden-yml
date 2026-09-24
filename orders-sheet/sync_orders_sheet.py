@@ -133,9 +133,31 @@ def person_name(data: Any) -> str:
     ) if x).strip()
 
 
+def format_phone(value: Any) -> str:
+    text = s(value)
+    if not text:
+        return ""
+    ext = ""
+    m = re.search(r"(?:доб\\.?|ext\\.?|x)\\s*(\\d+)", text, re.I)
+    if m:
+        ext = m.group(1)
+        base = text[:m.start()]
+    else:
+        base = text
+    digits = re.sub(r"\\D", "", base)
+    if len(digits) == 11 and digits[0] in {"7", "8"}:
+        digits = "7" + digits[1:]
+        text = f"+7 {digits[1:4]} {digits[4:7]}-{digits[7:9]}-{digits[9:11]}"
+    else:
+        text = s(base)
+    if ext:
+        text += f" доб. {ext}"
+    return text
+
+
 def phone_text(data: Any) -> str:
     if not isinstance(data, dict):
-        return s(data)
+        return format_phone(data)
     phone = first_scalar(
         data.get("phone")
         or data.get("telephone")
@@ -143,9 +165,27 @@ def phone_text(data: Any) -> str:
         or data.get("replacementPhone")
     )
     ext = s(data.get("phoneCode") or data.get("extension") or data.get("ext"))
-    if phone and ext and ext not in phone:
-        phone = f"{phone} доб. {ext}"
+    phone = format_phone(phone)
+    if phone and ext and f"доб. {ext}" not in phone:
+        phone += f" доб. {ext}"
     return phone
+
+
+def address_from_params(params: Any) -> str:
+    if not isinstance(params, dict):
+        return ""
+    parts = []
+    for key in (
+        "shipping_address.zip",
+        "shipping_address.country",
+        "shipping_address.region",
+        "shipping_address.city",
+        "shipping_address.street",
+    ):
+        value = s(params.get(key))
+        if value and value not in parts:
+            parts.append(value)
+    return ", ".join(parts)
 
 
 def customer_comment(raw: Any) -> str:
@@ -178,7 +218,7 @@ def lift_text(lift_type: Any, lift_price: Any) -> str:
         price = float(str(lift_price).replace(" ", "").replace(",", ".")) if lift_price not in (None, "") else None
     except Exception:
         price = None
-    if lt.upper() == "NOT_NEEDED" or (price is not None and price <= 0 and not lt):
+    if lt.upper() == "NOT_NEEDED" or lt.lower() in {"none", "no", "not needed", "не нужен", "нет"} or (price is not None and price <= 0 and not lt):
         return "Нет"
     if price is not None and price > 0:
         return f"Да, {price:g} ₽"
@@ -285,7 +325,7 @@ def webasyst_active_rows(wa: WebasystClient, sku_names: dict[str, str]) -> dict[
                 contact = info.get("contact") if isinstance(info.get("contact"), dict) else {}
                 phone = phone_text(contact)
                 fio = person_name(contact)
-                addr = address_text(info.get("shipping_address"))
+                addr = address_text(info.get("shipping_address")) or address_from_params(params)
 
                 deadline = (
                     s(params.get("mp_delivery_to"))
