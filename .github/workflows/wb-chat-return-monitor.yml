@@ -36,23 +36,19 @@ jobs:
       - name: Проверить новые чаты и возвраты Wildberries
         env:
           WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
-          SMTP_HOST: smtp.yandex.ru
-          SMTP_PORT: '465'
-          SMTP_USER: shop@office-mag.com
-          SMTP_PASSWORD: ${{ secrets.YANDEX_SMTP_APP_PASSWORD }}
-          ALERT_EMAIL_TO: shop@office-mag.com
           INITIAL_LOOKBACK_HOURS: '24'
           STATE_FILE: state/wb_chat_return_monitor.json
+          OUTBOX_FILE: state/wb_chat_return_outbox.json
         run: python scripts/wb_chat_return_monitor.py
 
-      - name: Сохранить курсор и уже обработанные события
+      - name: Сохранить состояние и очередь уведомлений
         if: success()
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add state/wb_chat_return_monitor.json
+          git add state/wb_chat_return_monitor.json state/wb_chat_return_outbox.json
           if git diff --cached --quiet; then
             echo "STATE_CHANGED=0"
             exit 0
