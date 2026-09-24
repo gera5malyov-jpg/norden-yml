@@ -1,0 +1,55 @@
+name: ТД Андрей — проверить категории выгрузки
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tdandrey-category-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Проверить структуру категорий
+        env:
+          TDANDREY_EXPORT_URL: ${{ secrets.TDANDREY_EXPORT_URL }}
+        run: |
+          python - <<'PY'
+          import os, requests, json
+          url=os.environ['TDANDREY_EXPORT_URL']
+          r=requests.get(url, params={'page':1,'limit':20}, timeout=60)
+          r.raise_for_status()
+          data=r.json()
+          print('ROOT_TYPE=', type(data).__name__)
+          if isinstance(data,dict):
+              print('ROOT_KEYS=', sorted(data.keys()))
+              cand=None
+              for k in ('items','products','data','result'):
+                  if isinstance(data.get(k),list):
+                      cand=data[k]; break
+                  if isinstance(data.get(k),dict):
+                      for kk in ('items','products','data'):
+                          if isinstance(data[k].get(kk),list):
+                              cand=data[k][kk]; break
+                  if cand is not None: break
+          elif isinstance(data,list):
+              cand=data
+          else:
+              cand=[]
+          print('ITEM_COUNT=', len(cand or []))
+          for i,item in enumerate((cand or [])[:5]):
+              if not isinstance(item,dict): continue
+              keys=sorted(item.keys())
+              print('ITEM',i,'KEYS=',keys)
+              cat={k:v for k,v in item.items() if 'cat' in k.lower() or 'group' in k.lower() or 'section' in k.lower() or 'razdel' in k.lower()}
+              print('ITEM',i,'CATEGORY_FIELDS=',json.dumps(cat,ensure_ascii=False)[:4000])
+          PY
