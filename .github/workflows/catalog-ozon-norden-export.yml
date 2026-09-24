@@ -27,6 +27,7 @@ jobs:
         run: pip install --disable-pip-version-check "gspread>=6.1,<7" "google-auth>=2.35,<3"
 
       - name: Выгрузить Norden из Ozon в Каталог
+        id: export
         env:
           OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
           OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
@@ -34,19 +35,28 @@ jobs:
           CATALOG_OWNER_EMAIL: 'gera5malyov@gmail.com'
           CATALOG_TITLE: 'Каталог'
           CATALOG_SHEET: 'Норден'
-        run: python catalog/export_ozon_norden_to_sheets.py
+        shell: bash
+        run: |
+          set +e
+          mkdir -p catalog
+          python catalog/export_ozon_norden_to_sheets.py 2>&1 | tee catalog/run.log
+          rc=${PIPESTATUS[0]}
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
 
-      - name: Сохранить отчёт выполнения
+      - name: Сохранить журнал и отчёт
         if: always()
         run: |
-          if [ -f catalog/last_run.json ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add catalog/last_run.json
-            if ! git diff --cached --quiet; then
-              git commit -m "Обновить отчёт выгрузки каталога Norden"
-              git push
-            fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog/run.log catalog/last_run.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Обновить журнал выгрузки каталога Norden"
+            git push
           fi
 
-# run-request-2026-09-24-2042
+      - name: Проверить результат
+        if: always()
+        shell: bash
+        run: |
+          test "${{ steps.export.outputs.exit_code }}" = "0"
