@@ -251,7 +251,9 @@ def main():
         m=by.get(k,[])
         if len(m)==1:
             matched.add(k); rep["sheet"]["matched"]+=1; r=m[0]
-            changes += [(r["_row"],"Закупка",ms(i["purchase"]),False),(r["_row"],"РРЦ поставщика",ms(i["rrp"]),False),(r["_row"],"Остаток",i["total"],False)]
+            if i.get("purchase") is not None: changes.append((r["_row"],"Закупка",ms(i["purchase"]),False))
+            if i.get("rrp") is not None: changes.append((r["_row"],"РРЦ поставщика",ms(i["rrp"]),False))
+            changes.append((r["_row"],"Остаток",i["total"],False))
         elif len(m)>1:
             rep["sheet"]["ambiguous_yml"]+=1
     for r in rows:
