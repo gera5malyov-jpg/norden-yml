@@ -1,4 +1,5 @@
 name: Norden pair read-only check
+# reported-pair-100-1594432
 
 on:
   push:
@@ -20,4 +21,5 @@ jobs:
       - name: Compare reported duplicate pair
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          TARGET_SKUS: "100-1594432,AF-31213918"
         run: python norden-kit/inspect_norden_pair.py
