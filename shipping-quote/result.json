@@ -1,99 +1,42 @@
 {
-  "generated_at": "2026-09-22T18:12:27.288025+00:00",
+  "generated_at": "2026-09-24T15:39:36.745936+00:00",
   "request": {
-    "from_address": "Россия, Москва, Варшавское шоссе, 42",
-    "to_address": "Россия, Москва, Тверская улица, 1",
-    "from_city": "Москва",
-    "to_city": "Москва",
+    "from_address": "Россия, Санкт-Петербург",
+    "to_address": "Россия, Санкт-Петербург",
+    "from_city": "Санкт-Петербург",
+    "to_city": "Санкт-Петербург",
     "places": 1,
-    "length_cm": 100,
-    "width_cm": 50,
-    "height_cm": 50,
-    "weight_kg": 25,
-    "declared_value_rub": 0,
+    "length_cm": 173,
+    "width_cm": 77,
+    "height_cm": 70,
+    "weight_kg": 45,
+    "declared_value_rub": 40000,
     "e_bulky_pickup_fixed_rub": 600,
     "e_bulky_mandatory_service_rub": 300
   },
   "carriers": {
     "e_bulky": {
-      "status": "УСПЕШНО",
-      "api_delivery_rub": 1315.0,
-      "pickup_rub": 600.0,
-      "mandatory_service_included_rub": 300.0,
-      "mandatory_service_extra_rub": 0.0,
-      "total_rub": 1915.0,
-      "raw_response": {
-        "detail": {
-          "base": "1015",
-          "option_buyback": "0",
-          "option_call": "0",
-          "option_equipment": "0",
-          "option_fitting": "0",
-          "option_opening": "0",
-          "option_packaging": "0",
-          "option_returned_doc": "0",
-          "option_skid_kgt": "300",
-          "option_sms": "0",
-          "option_card": "0",
-          "option_cash": "0",
-          "option_os": "0",
-          "option_return": "0",
-          "option_redelivery": "0",
-          "option_extra_places": "0",
-          "option_places_overweight": "0",
-          "option_installation_service": "0",
-          "option_canceled_with_delivery_attempts": "0",
-          "option_pickup_point_shipment": "0",
-          "pickup_point_storage_overdue": "0",
-          "option_vip_delivery_shipment": "0",
-          "option_underground_parking": "0"
-        },
-        "info": {
-          "behind_mkad": 0,
-          "mkad_distance": null,
-          "overweight": false,
-          "invalid_regional_agreement": false,
-          "delivery_delta": null,
-          "delivery_date": null,
-          "address_flat": null,
-          "address_cleared": "Россия, Москва, Тверская улица, 1",
-          "address_original": "Россия, Москва, Тверская улица, 1",
-          "region_code": "77",
-          "weight_original": "25",
-          "volume_weight_original": 50,
-          "billing_identical_recipients_weight": null,
-          "weight_for_kgt": 50,
-          "weight_for_calculation": 50,
-          "hub_destination_id": 1,
-          "zone_id": 3815,
-          "zone_group_id": 8,
-          "is_mo_plus": false,
-          "is_intermediary": false,
-          "hub_origin_id": 1,
-          "bring_kgt_to_elevator": true,
-          "not_an_installation_service_goods": 0
-        },
-        "total": "1315"
-      }
+      "status": "ОШИБКА",
+      "error": "HTTP Error 402: Payment Required"
     },
     "cdek": {
       "status": "УСПЕШНО",
-      "from_code": 44,
-      "to_code": 44,
+      "from_code": 137,
+      "to_code": 137,
       "best_door_to_door_or_lowest": {
-        "tariff_code": 139,
-        "tariff_name": "Посылка дверь-дверь",
+        "tariff_code": 748,
+        "tariff_name": "Сборный груз дверь-дверь",
         "delivery_mode": 1,
-        "delivery_sum": 2495.0,
+        "delivery_sum": 3944.0,
         "period_min": 1,
-        "period_max": 2
+        "period_max": 1
       },
       "tariffs": [
         {
           "tariff_code": 357,
           "tariff_name": "Фулфилмент. Выдача склад-дверь",
           "delivery_mode": 3,
-          "delivery_sum": 800.0,
+          "delivery_sum": 1896.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -101,7 +44,7 @@
           "tariff_code": 358,
           "tariff_name": "Фулфилмент. Выдача склад-склад",
           "delivery_mode": 4,
-          "delivery_sum": 100.0,
+          "delivery_sum": 237.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -109,55 +52,7 @@
           "tariff_code": 158,
           "tariff_name": "Забор груза дверь-склад",
           "delivery_mode": 2,
-          "delivery_sum": 650.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 139,
-          "tariff_name": "Посылка дверь-дверь",
-          "delivery_mode": 1,
-          "delivery_sum": 2495.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 138,
-          "tariff_name": "Посылка дверь-склад",
-          "delivery_mode": 2,
-          "delivery_sum": 2065.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 137,
-          "tariff_name": "Посылка склад-дверь",
-          "delivery_mode": 3,
-          "delivery_sum": 2065.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 136,
-          "tariff_name": "Посылка склад-склад",
-          "delivery_mode": 4,
-          "delivery_sum": 1635.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 366,
-          "tariff_name": "Посылка дверь-постамат",
-          "delivery_mode": 6,
-          "delivery_sum": 2065.0,
-          "period_min": 1,
-          "period_max": 2
-        },
-        {
-          "tariff_code": 368,
-          "tariff_name": "Посылка склад-постамат",
-          "delivery_mode": 7,
-          "delivery_sum": 1635.0,
+          "delivery_sum": 2190.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -165,55 +60,55 @@
           "tariff_code": 121,
           "tariff_name": "Магистральный экспресс дверь-дверь",
           "delivery_mode": 1,
-          "delivery_sum": 2770.0,
-          "period_min": 1,
-          "period_max": 2
+          "delivery_sum": 8661.0,
+          "period_min": 2,
+          "period_max": 3
         },
         {
           "tariff_code": 123,
           "tariff_name": "Магистральный экспресс дверь-склад",
           "delivery_mode": 2,
-          "delivery_sum": 2060.0,
-          "period_min": 1,
-          "period_max": 2
+          "delivery_sum": 6855.0,
+          "period_min": 2,
+          "period_max": 3
         },
         {
           "tariff_code": 122,
           "tariff_name": "Магистральный экспресс склад-дверь",
           "delivery_mode": 3,
-          "delivery_sum": 2060.0,
-          "period_min": 1,
-          "period_max": 2
+          "delivery_sum": 6855.0,
+          "period_min": 2,
+          "period_max": 3
         },
         {
           "tariff_code": 62,
           "tariff_name": "Магистральный экспресс склад-склад",
           "delivery_mode": 4,
-          "delivery_sum": 1350.0,
-          "period_min": 1,
-          "period_max": 2
+          "delivery_sum": 5049.0,
+          "period_min": 2,
+          "period_max": 3
         },
         {
           "tariff_code": 522,
           "tariff_name": "Магистральный экспресс дверь-постамат",
           "delivery_mode": 6,
-          "delivery_sum": 2060.0,
-          "period_min": 1,
-          "period_max": 2
+          "delivery_sum": 6855.0,
+          "period_min": 2,
+          "period_max": 3
         },
         {
           "tariff_code": 523,
           "tariff_name": "Магистральный экспресс склад-постамат",
           "delivery_mode": 7,
-          "delivery_sum": 1350.0,
-          "period_min": 1,
-          "period_max": 2
+          "delivery_sum": 5049.0,
+          "period_min": 2,
+          "period_max": 3
         },
         {
           "tariff_code": 480,
           "tariff_name": "Экспресс дверь-дверь",
           "delivery_mode": 1,
-          "delivery_sum": 3090.0,
+          "delivery_sum": 9255.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -221,7 +116,7 @@
           "tariff_code": 481,
           "tariff_name": "Экспресс дверь-склад",
           "delivery_mode": 2,
-          "delivery_sum": 2880.0,
+          "delivery_sum": 9045.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -229,7 +124,7 @@
           "tariff_code": 482,
           "tariff_name": "Экспресс склад-дверь",
           "delivery_mode": 3,
-          "delivery_sum": 2880.0,
+          "delivery_sum": 9045.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -237,7 +132,7 @@
           "tariff_code": 483,
           "tariff_name": "Экспресс склад-склад",
           "delivery_mode": 4,
-          "delivery_sum": 2670.0,
+          "delivery_sum": 8835.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -245,7 +140,7 @@
           "tariff_code": 485,
           "tariff_name": "Экспресс дверь-постамат",
           "delivery_mode": 6,
-          "delivery_sum": 2880.0,
+          "delivery_sum": 9045.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -253,7 +148,7 @@
           "tariff_code": 486,
           "tariff_name": "Экспресс склад-постамат",
           "delivery_mode": 7,
-          "delivery_sum": 2670.0,
+          "delivery_sum": 8835.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -261,7 +156,7 @@
           "tariff_code": 605,
           "tariff_name": "Экспресс постамат-дверь",
           "delivery_mode": 8,
-          "delivery_sum": 2880.0,
+          "delivery_sum": 9045.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -269,7 +164,7 @@
           "tariff_code": 606,
           "tariff_name": "Экспресс постамат-склад",
           "delivery_mode": 9,
-          "delivery_sum": 2670.0,
+          "delivery_sum": 8835.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -277,7 +172,7 @@
           "tariff_code": 607,
           "tariff_name": "Экспресс постамат-постамат",
           "delivery_mode": 10,
-          "delivery_sum": 2670.0,
+          "delivery_sum": 8835.0,
           "period_min": 1,
           "period_max": 2
         },
@@ -285,62 +180,84 @@
           "tariff_code": 748,
           "tariff_name": "Сборный груз дверь-дверь",
           "delivery_mode": 1,
-          "delivery_sum": 2700.0,
+          "delivery_sum": 3944.0,
           "period_min": 1,
-          "period_max": 2
+          "period_max": 1
         },
         {
           "tariff_code": 749,
           "tariff_name": "Сборный груз дверь-склад",
           "delivery_mode": 2,
-          "delivery_sum": 1800.0,
+          "delivery_sum": 2656.0,
           "period_min": 1,
-          "period_max": 2
+          "period_max": 1
         },
         {
           "tariff_code": 750,
           "tariff_name": "Сборный груз склад-дверь",
           "delivery_mode": 3,
-          "delivery_sum": 1800.0,
+          "delivery_sum": 2656.0,
           "period_min": 1,
-          "period_max": 2
+          "period_max": 1
         }
       ]
     },
     "dalli": {
-      "status": "НЕ_ПРИМЕНИМО",
-      "reason": "Подключен Санкт-Петербургский аккаунт Dalli; расчет выполняется для отправлений из Санкт-Петербурга."
+      "status": "УСПЕШНО",
+      "source": "Dalli SPB API v1",
+      "best_courier_or_lowest": {
+        "service": "30",
+        "typedelivery": "KUR",
+        "price": 4751.0,
+        "delivery_period": 1,
+        "msg": "Доставка на следующий день после передачи заказа в курьерскую службу. Стоимость включает 7% НДС",
+        "zone": "0",
+        "VATrate": "7"
+      },
+      "total_rub": 4751.0,
+      "tariffs": [
+        {
+          "service": "30",
+          "typedelivery": "KUR",
+          "price": 4751.0,
+          "delivery_period": 1,
+          "msg": "Доставка на следующий день после передачи заказа в курьерскую службу. Стоимость включает 7% НДС",
+          "zone": "0",
+          "VATrate": "7"
+        }
+      ],
+      "sender_code_used": null
     },
     "pek": {
       "status": "УСПЕШНО",
       "source": "public_calculator_fallback",
-      "pickup_rub": 1850.0,
-      "linehaul_rub": 500.0,
-      "delivery_rub": 1850.0,
+      "pickup_rub": 1750.0,
+      "linehaul_rub": 940.0,
+      "delivery_rub": 1750.0,
       "additional_rub": 0.0,
-      "total_rub": 4200.0,
+      "total_rub": 4440.0,
       "est_delivery_time_days": null,
       "services": [],
-      "branch_sender": "Москва Восток",
-      "branch_receiver": "Москва Восток"
+      "branch_sender": "Санкт-Петербург",
+      "branch_receiver": "Санкт-Петербург"
     }
   },
   "comparison": [
     {
-      "carrier": "e-bulky",
-      "total_rub": 1915.0
-    },
-    {
       "carrier": "CDEK",
-      "total_rub": 2495.0
+      "total_rub": 3944.0
     },
     {
       "carrier": "PEK",
-      "total_rub": 4200.0
+      "total_rub": 4440.0
+    },
+    {
+      "carrier": "Dalli",
+      "total_rub": 4751.0
     }
   ],
   "cheapest": {
-    "carrier": "e-bulky",
-    "total_rub": 1915.0
+    "carrier": "CDEK",
+    "total_rub": 3944.0
   }
 }
