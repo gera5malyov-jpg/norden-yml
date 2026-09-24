@@ -616,6 +616,7 @@ def direct_ozon_rows(sku_names: dict[str, str]) -> tuple[dict[str, dict], set[st
             "lift": lift_text(o.get("lift_type"), o.get("lift_price")),
             "comment": customer_comment(o),
             "created_at": s(o.get("created_at")),
+            "_status_raw": s(o.get("status_raw")),
         }
     return rows, terminal_keys, warnings
 
@@ -781,8 +782,12 @@ def main():
     write_sheet(sh, rows)
 
     counts = {}
+    ozon_status_counts = {}
     for row in rows:
         counts[row["code"]] = counts.get(row["code"], 0) + 1
+        if row.get("code") == "OZ":
+            status_raw = s(row.get("_status_raw"))
+            ozon_status_counts[status_raw] = ozon_status_counts.get(status_raw, 0) + 1
 
     report = {
         "started_at": started,
@@ -792,6 +797,7 @@ def main():
         "created": created,
         "orders_total": len(rows),
         "counts_by_source": counts,
+        "ozon_status_counts": ozon_status_counts,
         "warnings": warnings,
     }
     REPORT_FILE.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
