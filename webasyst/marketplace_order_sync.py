@@ -531,6 +531,10 @@ def marketplace_order_params(o: dict) -> dict:
         v = o.get(k)
         if v not in (None, ""):
             params["mp_" + k] = lift_type_label(v) if k == "lift_type" else str(v)
+    buyer = o.get("buyer") if isinstance(o.get("buyer"), dict) else {}
+    phone_extension = s(buyer.get("extension") or buyer.get("phoneCode") or buyer.get("ext"))
+    if phone_extension:
+        params["mp_phone_extension"] = phone_extension
     return params
 
 def order_customer(o: dict) -> dict:
@@ -991,13 +995,16 @@ def wb_buyer_from_client(client: dict) -> dict:
         ) if x).strip()
     replacement = s(client.get("replacementPhone"))
     phone = replacement or s(client.get("phone"))
-    if phone and not replacement and s(client.get("phoneCode")):
-        phone = phone + " доб. " + s(client.get("phoneCode"))
+    phone_code = s(client.get("phoneCode"))
+    if phone and phone_code and "доб." not in phone.lower():
+        phone = phone + " доб. " + phone_code
     out = {}
     if name:
         out["name"] = name
     if phone:
         out["phone"] = phone
+    if phone_code:
+        out["extension"] = phone_code
     return out
 
 def load_wb():
@@ -1177,6 +1184,8 @@ def load_ozon():
                     customer["name"] = s(addressee.get("name"))
                 if not s(customer.get("phone")) and s(addressee.get("phone")):
                     customer["phone"] = s(addressee.get("phone"))
+                if s(addressee.get("pin")):
+                    customer["extension"] = s(addressee.get("pin"))
                 address = normalize_ozon_address(customer.get("address") if isinstance(customer, dict) else {})
                 delivery_price = num(src.get("delivery_price")) if src.get("delivery_price") not in (None, "") else None
                 prr = src.get("prr_option") if isinstance(src.get("prr_option"), dict) else {}
