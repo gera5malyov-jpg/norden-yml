@@ -43,6 +43,10 @@ jobs:
           GOOGLE_ORDERS_OWNER_EMAIL: 'gera5malyov@gmail.com'
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
           WEBASYST_BASE_URL: 'https://profikompany.ru'
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          OZON_ORDER_IMPORT_CUTOFF: '2026-08-25T00:00:00Z'
+          DIRECT_OZON_REFRESH: '1'
           DRY_RUN: '1'
         run: python orders-sheet/sync_orders_sheet.py
 
