@@ -24,14 +24,45 @@ spec = importlib.util.spec_from_file_location("norden_sync_source", SRC_PATH)
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 
-source, duplicates, source_mode, api_error = mod.load_source(NORDEN_SECRET, short=False)
+source = {}
+duplicates = []
+source_mode = ""
+api_error = None
 
-by_article = {}
-for article, item in source.items():
-    k = key(article)
-    if not k:
-        continue
-    by_article[k] = s((item or {}).get("norden_code"))
+# Fast path: use the checked-in Norden XML/YML snapshot already in the repository.
+local_feed = ROOT / "norden.yml"
+try:
+    import xml.etree.ElementTree as ET
+    by_article = {}
+    seen = set()
+    dup = set()
+    for event, elem in ET.iterparse(local_feed, events=("end",)):
+        if elem.tag == "Номенклатура":
+            article = s(elem.findtext("Артикул"))
+            code = s(elem.findtext("Код"))
+            if article:
+                k = key(article)
+                if k in seen:
+                    dup.add(article)
+                seen.add(k)
+                by_article[k] = code
+            elem.clear()
+    if by_article:
+        source_mode = "repo-norden.yml"
+        duplicates = sorted(dup)
+    else:
+        raise RuntimeError("local norden.yml contained no nomenclature rows")
+except Exception as exc:
+    api_error = f"local-feed-fallback: {exc}"
+    source, duplicates, source_mode, api_error2 = mod.load_source(NORDEN_SECRET, short=False)
+    if api_error2:
+        api_error = (api_error + "; " + api_error2) if api_error else api_error2
+    by_article = {}
+    for article, item in source.items():
+        k = key(article)
+        if not k:
+            continue
+        by_article[k] = s((item or {}).get("norden_code"))
 
 creds = json.loads(SA_JSON)
 gc = gspread.authorize(Credentials.from_service_account_info(
@@ -87,7 +118,7 @@ report = {
     "ok": True,
     "source_mode": source_mode,
     "api_error": api_error,
-    "source_products": len(source),
+    "source_products": len(by_article),
     "source_duplicate_articles": len(duplicates),
     "catalog_rows_with_article": sum(1 for r in values[1:] if article_col < len(r) and s(r[article_col])),
     "matched_yml_id": matched,
