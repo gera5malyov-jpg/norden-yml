@@ -185,3 +185,5 @@ print(json.dumps({
     "latest_last_message_ms":latest_last_message_ms,
     "latest_last_message_iso":latest_last_message_iso,
 },ensure_ascii=False,indent=2))
+
+# diagnostic refresh trigger 2026-09-24
