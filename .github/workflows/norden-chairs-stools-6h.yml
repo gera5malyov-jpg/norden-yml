@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: norden-chairs-stools-6h
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   sync:
