@@ -39,8 +39,15 @@ jobs:
               raise SystemExit('No PDF payload')
           open('/tmp/order.pdf','wb').write(base64.b64decode(b64))
           PY
-          pdftotext -layout /tmp/order.pdf /tmp/order.txt
-          echo '--- PEK PRINT FORM ---'
-          grep -A8 -B3 -Ei 'Дополнительные услуги|упаков|обреш|защитн' /tmp/order.txt || true
-          echo '--- FULL TEXT ---'
-          cat /tmp/order.txt
+          python3 -m pip install -q pypdf
+          python3 - <<'PY'
+          from pypdf import PdfReader
+          text="\n".join((p.extract_text() or "") for p in PdfReader('/tmp/order.pdf').pages)
+          print('--- FULL TEXT ---')
+          print(text)
+          print('--- MATCHES ---')
+          for line in text.splitlines():
+              low=line.lower()
+              if any(x in low for x in ['дополнительные услуги','упаков','обреш','защитн']):
+                  print(line)
+          PY
