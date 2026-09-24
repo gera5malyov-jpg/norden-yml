@@ -19,12 +19,12 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import subprocess, os, re
+          import subprocess, os, re, textwrap
           src=Path('.github/workflows/pek-spb-tolyatti-prereg-2026-09-25.yml').read_text(encoding='utf-8')
           m=re.search(r"python3 - <<'PY'\n(.*?)\n\s*PY", src, re.S)
           if not m:
               raise SystemExit('embedded preregistration script not found')
-          code=m.group(1)
+          code=textwrap.dedent(m.group(1))
           marker='"hardPacking": {'
           i=code.find(marker)
           if i<0:
