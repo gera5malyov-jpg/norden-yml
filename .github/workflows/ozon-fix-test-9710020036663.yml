@@ -1,0 +1,65 @@
+name: Ozon fix test 9710020036663 full price payload
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-fix-test-9710020036663.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - run: python -m pip install requests
+      - name: Full payload update and verify
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,json,requests,time
+          BASE="https://api-seller.ozon.ru"
+          S=requests.Session()
+          S.headers.update({"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"})
+          def post(path,body):
+            r=S.post(BASE+path,json=body,timeout=120)
+            try:d=r.json()
+            except:d={"raw":r.text}
+            print("RESP",path,r.status_code,json.dumps(d,ensure_ascii=False),flush=True)
+            return d,r
+          def get_target():
+            cur=""
+            while True:
+              d,r=post("/v5/product/info/prices",{"cursor":cur,"filter":{"visibility":"ALL"},"limit":1000})
+              rows=d.get("items") or []
+              for x in rows:
+                if str(x.get("offer_id"))=="9710020036663": return x
+              nxt=d.get("cursor") or ""
+              if not rows or not nxt or nxt==cur:return None
+              cur=nxt
+          x=get_target()
+          print("BEFORE",json.dumps(x,ensure_ascii=False,sort_keys=True),flush=True)
+          p=x["price"]
+          payload={"prices":[{
+            "offer_id":"9710020036663",
+            "price":str(p["price"]),
+            "old_price":str(p["old_price"]),
+            "min_price":str(p["min_price"]),
+            "currency_code":p.get("currency_code") or "RUB",
+            "vat":str(p.get("vat") or 0),
+            "declared_price":str((p.get("declared_price") or {}).get("amount") or 156),
+            "auto_action_enabled":"ENABLED",
+            "auto_add_to_ozon_actions_list_enabled":"ENABLED",
+            "min_price_for_auto_actions_enabled":True,
+            "price_strategy_enabled":"DISABLED"
+          }]}
+          post("/v1/product/import/prices",payload)
+          time.sleep(10)
+          y=get_target()
+          print("AFTER",json.dumps(y,ensure_ascii=False,sort_keys=True),flush=True)
+          if not (y.get("price") or {}).get("auto_action_enabled"):
+            raise SystemExit(2)
+          PY
