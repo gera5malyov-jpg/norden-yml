@@ -1,4 +1,4 @@
-name: Cancel current Norden chairs update once
+name: Cancel slow Norden chairs audit once
 
 on:
   push:
@@ -19,4 +19,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api --method POST repos/${{ github.repository }}/actions/runs/36027177112/cancel || true
+          gh api --method POST repos/${{ github.repository }}/actions/runs/36028957415/cancel || true
