@@ -1,6 +1,11 @@
 name: Norden duplicate audit after sync
 
 on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-duplicate-audit.yml'
   workflow_run:
     workflows:
       - "Norden initial Webasyst bridge"
@@ -18,7 +23,7 @@ concurrency:
 
 jobs:
   audit:
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
@@ -55,6 +60,6 @@ jobs:
           SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           RECIPIENT: shop@office-mag.com
-          SOURCE_WORKFLOW: ${{ github.event.workflow_run.name }}
+          SOURCE_WORKFLOW: ${{ github.event.workflow_run.name || 'ручной полный аудит Norden' }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: python webasyst/send_norden_duplicate_report.py
