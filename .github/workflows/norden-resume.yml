@@ -1,5 +1,5 @@
 name: Resume Norden KIT to Webasyst
-# duplicate-guard-v4-quarantine
+# duplicate-guard-v5-multi-id-no-name
 
 on:
   push:
@@ -30,6 +30,9 @@ jobs:
           python-version: '3.12'
 
       - run: pip install requests
+
+      - name: Validate Norden sync code
+        run: python -m py_compile norden-kit/sync_norden_kit.py norden-kit/inspect_norden_pair.py
 
       - name: Inspect reported duplicate pair
         env:
