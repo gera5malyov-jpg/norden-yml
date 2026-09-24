@@ -1,0 +1,51 @@
+name: Norden chairs stools duplicate audit now
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-chairs-stools-duplicate-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-chairs-stools-duplicate-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests
+
+      - name: Validate read-only chairs stools audit
+        run: python -m py_compile norden-kit/sync_norden_kit.py norden-kit/audit_norden_chairs_stools_duplicates.py
+
+      - name: Audit Norden chairs and stools duplicates read-only
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: python norden-kit/audit_norden_chairs_stools_duplicates.py
+
+      - name: Save chairs stools duplicate audit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/norden_chairs_stools_duplicate_audit.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Norden chairs stools duplicate audit"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
