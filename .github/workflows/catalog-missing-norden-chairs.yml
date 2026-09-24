@@ -1,0 +1,26 @@
+name: Каталог — отсутствующие кресла Norden
+on:
+  push:
+    paths:
+      - 'catalog/missing_chairs_trigger.txt'
+permissions:
+  contents: write
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
+      - name: Сформировать отчёт
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
+        run: python catalog/report_missing_instock_chairs.py
+      - name: Сохранить отчёт
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add catalog/norden_instock_chairs_missing_from_catalog.json
+          git diff --cached --quiet || (git commit -m "Обновить список отсутствующих кресел Norden" && git push)
