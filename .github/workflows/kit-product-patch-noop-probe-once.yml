@@ -1,0 +1,75 @@
+name: KIT product PATCH no-op probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-product-patch-noop-probe-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: PATCH same category_ids and verify
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, requests, time
+          from pathlib import Path
+          base='https://api.kit.yandex.net'
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          product_id='01a0d41a-1e45-7065-a1ab-5c2ecdd67ef7'
+          def req(method,path,headers=None,**kwargs):
+              hh=dict(h)
+              if headers: hh.update(headers)
+              for attempt in range(8):
+                  r=requests.request(method,base+path,headers=hh,timeout=60,**kwargs)
+                  if r.status_code==429:
+                      time.sleep(3*(attempt+1)); continue
+                  return r
+              return r
+          before=req('GET',f'/v1/products/{product_id}')
+          before.raise_for_status()
+          bj=before.json()
+          cats=bj.get('category_ids') or []
+          result={'product_id':product_id,'before':bj,'category_ids_sent':cats}
+          r=req('PATCH',f'/v1/products/{product_id}',
+                headers={'Content-Type':'application/merge-patch+json'},
+                json={'category_ids':cats})
+          result['patch_status']=r.status_code
+          result['patch_text']=r.text[:4000]
+          after=req('GET',f'/v1/products/{product_id}')
+          result['after_status']=after.status_code
+          try: result['after']=after.json()
+          except Exception: result['after_text']=after.text[:4000]
+          result['unchanged']=result.get('after',{}).get('category_ids')==cats
+          Path('category-audit/kit_product_patch_noop_probe.json').write_text(
+              json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+          if r.status_code >= 400 or not result['unchanged']:
+              raise SystemExit(1)
+          PY
+      - name: Commit result
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add category-audit/kit_product_patch_noop_probe.json 2>/dev/null || true
+          git commit -m "Probe KIT product category PATCH" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
