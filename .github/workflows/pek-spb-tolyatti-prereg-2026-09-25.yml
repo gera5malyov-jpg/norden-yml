@@ -1,0 +1,190 @@
+name: PEK prereg SPB to Tolyatti 2026-09-25
+
+on:
+  push:
+    paths:
+      - '.github/workflows/pek-spb-tolyatti-prereg-2026-09-25.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prereg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Submit PEK preregistration
+        env:
+          PEK_LOGIN: ${{ secrets.PEK_LOGIN }}
+          PEK_API_KEY: ${{ secrets.PEK_API_KEY }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.error, base64
+
+          login = os.environ["PEK_LOGIN"]
+          key = os.environ["PEK_API_KEY"]
+          auth = "Basic " + base64.b64encode(f"{login}:{key}".encode()).decode()
+          base = "https://kabinet.pecom.ru/api/v1"
+
+          def post(path, body):
+              data = json.dumps(body, ensure_ascii=False).encode("utf-8")
+              req = urllib.request.Request(
+                  base + path,
+                  data=data,
+                  method="POST",
+                  headers={
+                      "Authorization": auth,
+                      "Content-Type": "application/json; charset=utf-8",
+                      "User-Agent": "Mozilla/5.0"
+                  }
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      raw = r.read().decode("utf-8", "replace")
+                      try:
+                          payload = json.loads(raw)
+                      except Exception:
+                          payload = {"raw": raw}
+                      return {"http": r.status, "data": payload}
+              except urllib.error.HTTPError as e:
+                  raw = e.read().decode("utf-8", "replace")
+                  try:
+                      payload = json.loads(raw)
+                  except Exception:
+                      payload = {"raw": raw}
+                  return {"http": e.code, "data": payload}
+
+          sender_zone = post(
+              "/branches/findzonebyaddress/",
+              {"address": "Россия, Санкт-Петербург"}
+          )
+
+          def deep_find(obj, wanted):
+              if isinstance(obj, dict):
+                  for k, v in obj.items():
+                      if k.lower() == wanted.lower() and v:
+                          return v
+                      r = deep_find(v, wanted)
+                      if r:
+                          return r
+              elif isinstance(obj, list):
+                  for v in obj:
+                      r = deep_find(v, wanted)
+                      if r:
+                          return r
+              return None
+
+          sender_warehouse = deep_find(sender_zone.get("data"), "mainWarehouseId")
+          if not sender_warehouse:
+              result = {
+                  "status": "NOT_SUBMITTED",
+                  "reason": "Could not resolve Saint Petersburg PEK warehouse",
+                  "senderZone": sender_zone
+              }
+          else:
+              payload = {
+                  "common": {
+                      "docflowType": "COURIER",
+                      "orderType": 0,
+                      "plannedDate": "2026-09-25"
+                  },
+                  "sender": {
+                      "warehouseId": sender_warehouse,
+                      "countryOfRegistrationCode": "643",
+                      "legalForm": 1,
+                      "inn": "7838104843",
+                      "kpp": "783801001",
+                      "fs": "ООО",
+                      "title": "ООО «МЕГАПОЛИС»",
+                      "personPhones": [
+                          {"phone": "+79117676322"}
+                      ],
+                      "person": "Малёв Георгий Павлович"
+                  },
+                  "cargos": [
+                      {
+                          "common": {
+                              "type": 3,
+                              "weight": 150.0,
+                              "volume": 1.0,
+                              "width": 0.5,
+                              "length": 1.0,
+                              "height": 0.5,
+                              "positionsCount": 1,
+                              "description": "Стулья, 30 шт.",
+                              "paymentForm": 1
+                          },
+                          "receiver": {
+                              "addressStock": "Россия, Самарская область, Тольятти, Комсомольская улица, 101",
+                              "countryOfRegistrationCode": "643",
+                              "legalForm": 1,
+                              "inn": "6321230712",
+                              "title": "Местная Религиозная Организация Церковь Христиан Веры Евангельской «Жатва Веры» Г. Тольятти и Ставропольского Р-на Самарской области",
+                              "personPhones": [
+                                  {"phone": "+79397005655"}
+                              ],
+                              "person": "Сергей Бабич"
+                          },
+                          "services": {
+                              "transporting": {
+                                  "payer": {"type": 2}
+                              },
+                              "hardPacking": {
+                                  "enabled": True,
+                                  "payer": {"type": 2}
+                              },
+                              "insurance": {
+                                  "enabled": True,
+                                  "cost": 75000,
+                                  "payer": {"type": 2}
+                              },
+                              "delivery": {
+                                  "enabled": True,
+                                  "payer": {"type": 2},
+                                  "isLoading": False
+                              }
+                          }
+                      }
+                  ]
+              }
+              submit = post("/preregistration/submit/", payload)
+              result = {
+                  "status": "SUBMIT_ATTEMPTED",
+                  "senderWarehouseId": sender_warehouse,
+                  "senderZone": sender_zone,
+                  "requestSummary": {
+                      "plannedDate": "2026-09-25",
+                      "route": "Санкт-Петербург -> Тольятти, ул. Комсомольская, 101",
+                      "description": "Стулья, 30 шт.",
+                      "positionsCount": 1,
+                      "weightKg": 150.0,
+                      "volumeM3": 1.0,
+                      "maxDimensionsM": [1.0, 0.5, 0.5],
+                      "declaredValueRub": 75000,
+                      "hardPacking": True,
+                      "payer": "receiver"
+                  },
+                  "response": submit
+              }
+
+          with open("pek-prereg-spb-tolyatti-2026-09-25-result.json", "w", encoding="utf-8") as f:
+              json.dump(result, f, ensure_ascii=False, indent=2)
+
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Save PEK preregistration result
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pek-prereg-spb-tolyatti-2026-09-25-result.json
+          if git diff --cached --quiet; then
+            echo "No result changes"
+          else
+            git commit -m "Save PEK preregistration result SPB-Tolyatti"
+            git push
+          fi
