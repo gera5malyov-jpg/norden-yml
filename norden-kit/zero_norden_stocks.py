@@ -35,6 +35,7 @@ def main():
         "brand": "Norden",
         "variants_scanned": 0,
         "active_norden_variants": 0,
+        "duplicate_variant_rows_collapsed": 0,
         "warehouses": [],
         "stock_rows_zeroed": 0,
         "errors": [],
@@ -84,19 +85,32 @@ def main():
         if page % 50 == 0:
             print(f"Scanned {report['variants_scanned']} KIT variants; Norden found {len(norden)}", flush=True)
 
+    # KIT listing can return the same variant on more than one page while the
+    # catalog is changing. Collapse by immutable variant id before bulk update,
+    # otherwise KIT rejects the whole request as DUPLICATE_ITEM.
+    unique_norden = {}
+    for row in norden:
+        vid = s(row.get("id"))
+        if vid:
+            unique_norden[vid] = row
+    report["duplicate_variant_rows_collapsed"] = len(norden) - len(unique_norden)
+    norden = list(unique_norden.values())
+
     report["active_norden_variants"] = len(norden)
     if len(norden) < 100:
         raise RuntimeError(f"Safety stop: only {len(norden)} active Norden variants found")
 
-    stock_rows = []
+    stock_by_pair = {}
     for row in norden:
         vid = s(row.get("id"))
         for wh in warehouses:
-            stock_rows.append({
+            wid = s(wh.get("id"))
+            stock_by_pair[(vid, wid)] = {
                 "variant_id": vid,
-                "warehouse_id": s(wh.get("id")),
+                "warehouse_id": wid,
                 "quantity": 0,
-            })
+            }
+    stock_rows = list(stock_by_pair.values())
 
     try:
         kit.bulk_stocks(stock_rows)
