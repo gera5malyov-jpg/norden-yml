@@ -1,0 +1,202 @@
+{
+  "started_at": "2026-09-24T20:25:58.897301+00:00",
+  "scope": "Norden: only actual chairs and stools; accessories excluded",
+  "rules": {
+    "table_match": "Norden supplier article ↔ Google Sheet YML ID, normalized",
+    "table_missing": "managed chair/stool missing from complete supplier catalog => stock 0; prices unchanged",
+    "webasyst": "type NORDEN-100; match by Article; stock Main; purchase=Opt; sale=purchase*1.23; compare=purchase*1.65",
+    "kit": "match by Article; MСК and СПБ привозной; sale=purchase*1.26; compare=purchase*1.65; minimum price unchanged",
+    "new": "table first -> Webasyst -> Webasyst-generated Article -> KIT; no KIT creation without approved category",
+    "old_norden_stop": "STOP_ALL_NORDEN remains active for legacy Norden workflows"
+  },
+  "supplier": {
+    "full_count": 8363,
+    "target_count": 365,
+    "price_count": 8238,
+    "full_duplicates": 13,
+    "price_duplicates": 16,
+    "target_key_conflicts": [],
+    "source_kind": "xml-full-category-fallback+api",
+    "api_error": null,
+    "category_xml_fallback": true
+  },
+  "table": {
+    "rows_before": 1048,
+    "matched": 320,
+    "new_rows": 23,
+    "zeroed_missing": 250,
+    "duplicate_yml_ids": 10,
+    "price_updates": 0,
+    "stock_updates": 16
+  },
+  "webasyst": {
+    "duplicate_articles": 0,
+    "updated": 219,
+    "unchanged": 411
+  },
+  "kit": {
+    "variants_scanned": 96634,
+    "duplicate_articles": 4667,
+    "missing_existing": 113,
+    "category_review_required": 16,
+    "skipped_no_article": 23,
+    "stock_updates": 1006
+  },
+  "errors": [
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 44,
+      "article": "AF-31223180",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 410,
+      "article": "алюминиевая база / серая ткань CF",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1050,
+      "yml_id": "HD-2212-2 L black",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1051,
+      "yml_id": "CK38F",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1052,
+      "yml_id": "6227B-HS",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1053,
+      "yml_id": "6227B",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1054,
+      "yml_id": "2198568",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1055,
+      "yml_id": "2198555",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1056,
+      "yml_id": "2198556",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1057,
+      "yml_id": "2198557",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1058,
+      "yml_id": "2198558",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1059,
+      "yml_id": "2198559",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1060,
+      "yml_id": "2198552",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1061,
+      "yml_id": "2198553",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1062,
+      "yml_id": "2198539",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1063,
+      "yml_id": "2198571",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1064,
+      "yml_id": "2198574",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1065,
+      "yml_id": "2198570",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1066,
+      "yml_id": "2198572",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1067,
+      "yml_id": "2198569",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1068,
+      "yml_id": "2198575",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1069,
+      "yml_id": "2198577",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1070,
+      "yml_id": "842-253",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1071,
+      "yml_id": "M6256 chrome black",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1072,
+      "yml_id": "FK 0005-A beige leather",
+      "message": "Нет положительной закупочной цены Norden"
+    }
+  ],
+  "warnings": [],
+  "complete": false,
+  "identity_review": 14,
+  "category_review": 16,
+  "finished_at": "2026-09-24T20:43:22.915361+00:00"
+}
