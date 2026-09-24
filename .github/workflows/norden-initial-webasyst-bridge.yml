@@ -1,5 +1,5 @@
 name: Norden initial Webasyst bridge
-# Final bootstrap uses required image + purchase-price gate for new KIT cards.
+# Final bootstrap uses required image + purchase-price gate for new KIT cards.\n# Restarted after deduplicating KIT stock-reset rows.
 
 on:
   workflow_dispatch:
