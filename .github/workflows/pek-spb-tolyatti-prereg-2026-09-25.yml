@@ -141,6 +141,15 @@ jobs:
                                   "cost": 75000,
                                   "payer": {"type": 2}
                               },
+                              "sealing": {
+                                  "enabled": False
+                              },
+                              "strapping": {
+                                  "enabled": False
+                              },
+                              "documentsReturning": {
+                                  "enabled": False
+                              },
                               "delivery": {
                                   "enabled": True,
                                   "payer": {"type": 2},
