@@ -8,6 +8,7 @@ on:
     paths:
       - ".github/workflows/marketplace-api-smoke-test.yml"
       - "scripts/probe_sams_641933_certificate.py"
+      - "scripts/apply_sams_641933_certificate.py"
 
 permissions:
   contents: read
@@ -84,6 +85,10 @@ jobs:
         env:
           YANDEX_MARKET_BUSINESS_ID: "117585391"
         run: python scripts/probe_sams_641933_certificate.py
+
+      - name: Apply SAMS-641933 compliance documents
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'Apply SAMS-641933 compliance documents')
+        run: python scripts/apply_sams_641933_certificate.py
 
       - name: Wildberries API read-only check
         id: wb
