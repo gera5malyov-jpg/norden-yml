@@ -1,0 +1,41 @@
+name: Каталог — определить Google service account
+
+on:
+  push:
+    paths:
+      - 'catalog/google_sa_trigger.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Получить email сервисного аккаунта
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          d=json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
+          p=Path("catalog/google_service_account_email.txt")
+          p.parent.mkdir(parents=True, exist_ok=True)
+          p.write_text(str(d.get("client_email","")).strip()+"\n", encoding="utf-8")
+          print(str(d.get("client_email","")).strip())
+          PY
+      - name: Сохранить email
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog/google_service_account_email.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Сохранить email Google service account"
+            git push
+          fi
