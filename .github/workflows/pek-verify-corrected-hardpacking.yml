@@ -1,0 +1,48 @@
+name: Verify corrected PEK cargo hard packing
+
+on:
+  push:
+    paths:
+      - '.github/workflows/pek-verify-corrected-hardpacking.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check corrected PEK cargo
+        env:
+          PEK_LOGIN: ${{ secrets.PEK_LOGIN }}
+          PEK_API_KEY: ${{ secrets.PEK_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sS --basic --user "$PEK_LOGIN:$PEK_API_KEY" \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            -X POST \
+            -d '{"cargoCodes":["789979048884"]}' \
+            'https://kabinet.pecom.ru/api/v1/cargos/status/' > /tmp/status.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/status.json',encoding='utf-8'))
+          cargos=(d.get('cargos') or d.get('сargos') or []) if isinstance(d,dict) else []
+          if not cargos:
+              print(json.dumps(d,ensure_ascii=False,indent=2))
+              raise SystemExit(2)
+          c=cargos[0]
+          services=c.get('services') or {}
+          items=services.get('items') or []
+          print(json.dumps({
+            'cargoCode':((c.get('cargo') or {}).get('code')),
+            'status':((c.get('info') or {}).get('cargoStatus')),
+            'hardPack':services.get('hardPack'),
+            'insurance':services.get('insurance'),
+            'services':[{
+              'description':x.get('description'),
+              'payerType':x.get('payerType'),
+              'paid':x.get('paid')
+            } for x in items if isinstance(x,dict)]
+          },ensure_ascii=False,indent=2))
+          if services.get('hardPack') is not True:
+              raise SystemExit('HARD_PACK_NOT_CONFIRMED')
+          PY
