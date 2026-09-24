@@ -1,0 +1,54 @@
+name: Move Ozon 34598568-0351-1 to Dalli SPB basket
+
+on:
+  push:
+    paths:
+      - '.github/workflows/dalli-spb-basket-34598568-0351-1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dalli-spb-basket-34598568-0351-1
+  cancel-in-progress: false
+
+jobs:
+  move-to-spb:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests
+
+      - name: Удалить ошибочный заказ из корзины Dalli МСК
+        env:
+          TARGET_EXTERNAL_ID: '34598568-0351-1'
+          DALLI_BARCODE: 'A16971354'
+          SAFE_RESULT_PATH: 'dalli/order_34598568-0351-1_msk_remove_result.json'
+          DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+        run: python scripts/remove_dalli_msk_basket_order.py
+
+      - name: Создать заказ только в корзине Dalli СПБ
+        env:
+          TARGET_EXTERNAL_ID: '34598568-0351-1'
+          SAFE_RESULT_PATH: 'dalli/order_34598568-0351-1_spb_basket_result.json'
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          DALLI_TOKEN: ${{ secrets.DALLI_TOKEN }}
+        run: python scripts/create_dalli_spb_basket_from_ozon.py
+
+      - name: Сохранить безопасные результаты
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+          git add dalli/order_34598568-0351-1_msk_remove_result.json                   dalli/order_34598568-0351-1_spb_basket_result.json || true
+          git diff --cached --quiet || git commit -m "Move Ozon 34598568-0351-1 to Dalli SPB basket"
+          git push
