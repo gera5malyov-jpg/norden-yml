@@ -1,4 +1,4 @@
-name: Cancel slow Norden chairs audit once
+name: Cancel superseded fast Norden audit once
 
 on:
   push:
@@ -19,4 +19,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api --method POST repos/${{ github.repository }}/actions/runs/36028957415/cancel || true
+          gh api --method POST repos/${{ github.repository }}/actions/runs/36030806548/cancel || true
