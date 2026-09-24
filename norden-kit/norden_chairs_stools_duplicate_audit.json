@@ -1,0 +1,2891 @@
+{
+  "started_at": "2026-09-24T16:59:56.732808+00:00",
+  "source": "xml-full+price",
+  "source_duplicate_articles": 13,
+  "scope": "Norden chairs/stools only",
+  "strategy": "fresh Norden-only duplicate index + supplier XML category filter; no full KIT scan",
+  "full_catalog_scan": false,
+  "brand_scope": "Norden only",
+  "base_norden_variants": 8502,
+  "base_audit_started_at": "2026-09-24T16:27:30.381311+00:00",
+  "source_target_products": 406,
+  "candidate_variant_ids": 104,
+  "live_variant_reads": 0,
+  "duplicate_groups": 50,
+  "duplicate_variant_ids_total": 54,
+  "identity_conflicts_total": 0,
+  "name_matching_used": false,
+  "write_actions": false,
+  "live_recheck_required_before_archive": true,
+  "canonical_rule": "legacy/non-100 first; then PUBLISHED; then lowest KIT ID",
+  "groups": [
+    {
+      "article": "Nova FJ03 orange fabric",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0bfc6-e72b-781d-8151-2a388de2e9ba",
+        "kit_id": 1536664,
+        "sku": "100-1536664",
+        "status": "PUBLISHED",
+        "name": "Nova сменный чехол",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1536664"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1536664"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "Nova FJ03 orange fabric"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c2b9-6d3b-7b48-a545-eb4ef691e0d7",
+          "kit_id": 1548161,
+          "sku": "100-1548161",
+          "status": "PUBLISHED",
+          "name": "Нова сменный чехол / Nova сменный чехол",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1548161"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1548161"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "Nova FJ03 orange fabric"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c824-357f-7c03-b40a-ef182a98de4c",
+          "kit_id": 1562578,
+          "sku": "100-1562578",
+          "status": "PUBLISHED",
+          "name": "Нова сменный чехол / Nova сменный чехол",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1562578"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1562578"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "Nova FJ03 orange fabric"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0d323-f66b-7df4-acaa-cc1d1ea09b3a",
+          "kit_id": 1593588,
+          "sku": "100-1593588",
+          "status": "PUBLISHED",
+          "name": "Nova сменный чехол",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1593588"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1593588"
+            },
+            {
+              "field": "Код продавца",
+              "value": "Nova FJ03 orange fabric"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00017938"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "Nova FJ03 orange fabric"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "6227A",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0bfed-0ff0-7276-9bb7-f7fb67f688b4",
+        "kit_id": 1537326,
+        "sku": "100-1537326",
+        "status": "PUBLISHED",
+        "name": "Гарда Люкс / Garda Lux",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1537326"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1537326"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "6227A"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0b5-b298-7d25-bb64-bf30d613df70",
+          "kit_id": 1540509,
+          "sku": "100-1540509",
+          "status": "PUBLISHED",
+          "name": "Гарда Люкс / Garda Lux",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1540509"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1540509"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "6227A"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5df-cce2-784b-9ba7-85f8533c6525",
+          "kit_id": 1554664,
+          "sku": "100-1554664",
+          "status": "PUBLISHED",
+          "name": "Гарда Люкс / Garda Lux",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1554664"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1554664"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "6227A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "6227A-HS",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0bfed-2e6d-793f-bad0-4b36a9e20966",
+        "kit_id": 1537329,
+        "sku": "100-1537329",
+        "status": "PUBLISHED",
+        "name": "Гарда Люкс / Garda Lux",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1537329"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1537329"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "6227A-HS"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c0b7-2638-7787-bd29-7a380a4259f5",
+          "kit_id": 1540534,
+          "sku": "100-1540534",
+          "status": "PUBLISHED",
+          "name": "Гарда Люкс / Garda Lux",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1540534"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1540534"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "6227A-HS"
+            }
+          ]
+        },
+        {
+          "variant_id": "01a0c5e1-5e7d-755f-ac06-6b35c3f043da",
+          "kit_id": 1554681,
+          "sku": "100-1554681",
+          "status": "PUBLISHED",
+          "name": "Гарда Люкс / Garda Lux",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1554681"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1554681"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "6227A-HS"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "165A-B-BB",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b1bd-70f7-9cd5-187e804f6293",
+        "kit_id": 104937,
+        "sku": "AF-30981647",
+        "status": "PUBLISHED",
+        "name": "Кресло для персонала Asper 165A-B-BB",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30981647"
+          },
+          {
+            "field": "Код продавца",
+            "value": "165A-B-BB"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "165A-B-BB"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3ac-5e83-7cc3-87b4-1276aeae4389",
+          "kit_id": 1594439,
+          "sku": "100-1594439",
+          "status": "PUBLISHED",
+          "name": "Аспер / Asper",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594439"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594439"
+            },
+            {
+              "field": "Код продавца",
+              "value": "165A-B-BB"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00006311"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "165A-B-BB"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "165A-B-GG",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b1b0-73e8-9638-a0736d3922a4",
+        "kit_id": 104936,
+        "sku": "AF-31002789",
+        "status": "PUBLISHED",
+        "name": "Кресло для персонала Asper 165A-B-GG",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31002789"
+          },
+          {
+            "field": "Код продавца",
+            "value": "165A-B-GG"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "165A-B-GG"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3ad-4e85-7b3c-ba59-de108fe405c5",
+          "kit_id": 1594440,
+          "sku": "100-1594440",
+          "status": "PUBLISHED",
+          "name": "Аспер / Asper",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594440"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594440"
+            },
+            {
+              "field": "Код продавца",
+              "value": "165A-B-GG"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00006772"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "165A-B-GG"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "165B",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a84f8-2c0f-7c32-a1bd-daf7cac5d12e",
+        "kit_id": 110166,
+        "sku": "AF-31133916",
+        "status": "PUBLISHED",
+        "name": "Кресло для персонала Asper LB 165B",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31133916"
+          },
+          {
+            "field": "Код продавца",
+            "value": "165B"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "165B"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3ad-e55b-734b-b517-3d4233692473",
+          "kit_id": 1594441,
+          "sku": "100-1594441",
+          "status": "PUBLISHED",
+          "name": "Аспер LB / Asper LB",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594441"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594441"
+            },
+            {
+              "field": "Код продавца",
+              "value": "165B"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00006763"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "165B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "216A-Chrome-2D-B-BB",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a86-7299-7b07-8c05-7548ff986bf9",
+        "kit_id": 105081,
+        "sku": "AF-31396763",
+        "status": "PUBLISHED",
+        "name": "Кресло для персонала Tema Chrome 2D 216A-Chrome-2D-B-BB",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31396763"
+          },
+          {
+            "field": "Код продавца",
+            "value": "216A-Chrome-2D-B-BB"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "216A-Chrome-2D-B-BB"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a097b7-dc8f-71e9-822f-493a2a6dc0d5",
+          "kit_id": 1500029,
+          "sku": "AF-31072383",
+          "status": "PUBLISHED",
+          "name": "Кресло для персонала Tema Сhrome 2D 216A-Сhrome-2D-B-BB",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "AF-31072383"
+            },
+            {
+              "field": "Код продавца",
+              "value": "216A-Сhrome-2D-B-BB"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "216A-Сhrome-2D-B-BB"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "216B-Chrome-2D-B-BB",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b182-78e2-a033-e42787a17ed8",
+        "kit_id": 104631,
+        "sku": "AF-31225517",
+        "status": "PUBLISHED",
+        "name": "Кресло для персонала / Tema Сhrome 2D LB 216B-Сhrome-2D-B-BB",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31225517"
+          },
+          {
+            "field": "Код продавца",
+            "value": "216B-Сhrome-2D-B-BB"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "216B-Сhrome-2D-B-BB"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "019a5a80-b1b6-7a43-99fa-d61a8cb9b711",
+          "kit_id": 104634,
+          "sku": "AF-31395937",
+          "status": "PUBLISHED",
+          "name": "Кресло Tema Chrome 2D LB 216B-Chrome-2D-B-BB база хром / черный пластик / черная сетка / черная ткань",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "AF-31395937"
+            },
+            {
+              "field": "Код продавца",
+              "value": "216B-Chrome-2D-B-BB"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "216B-Chrome-2D-B-BB"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "850",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b375-76ae-a249-3983e2610348",
+        "kit_id": 104246,
+        "sku": "AF-30834861",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное Авалон CF хром черная экокожа",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30834861"
+          },
+          {
+            "field": "Код продавца",
+            "value": "850"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "850"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a2-ca34-7741-b883-8cc6005b4808",
+          "kit_id": 1594421,
+          "sku": "100-1594421",
+          "status": "PUBLISHED",
+          "name": "Авалон CF",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594421"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594421"
+            },
+            {
+              "field": "Код продавца",
+              "value": "850"
+            },
+            {
+              "field": "Код Norden",
+              "value": "11-00000882"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "850"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "A2067 black leather",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b21e-73d9-942c-4c6e9bd44550",
+        "kit_id": 104598,
+        "sku": "AF-31395933",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное / Вагнер черная кожа натуральное дерево",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31395933"
+          },
+          {
+            "field": "Код продавца",
+            "value": "A2067 black leather"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "A2067 black leather"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a097b7-dc8f-736f-bc90-496402b84725",
+          "kit_id": 1500022,
+          "sku": "AF-30882700",
+          "status": "PUBLISHED",
+          "name": "Кресло офисное / Вагнер черная кожа натуральное дерево",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "AF-30882700"
+            },
+            {
+              "field": "Код продавца",
+              "value": "А2067 black leather"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "А2067 black leather"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AF-01AC black- FL06 black fabric",
+      "category_path": [
+        "Norden",
+        "Стул"
+      ],
+      "kept": {
+        "variant_id": "01a0c1a4-3f97-7bb6-a22e-ab766af67ac0",
+        "kit_id": 1544138,
+        "sku": "100-1544138",
+        "status": "PUBLISHED",
+        "name": "Лайк блэк / Like black",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1544138"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1544138"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "AF-01AC black- FL06 black fabric"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-1c8d-73a1-8d1b-553d1d7bf9a2",
+          "kit_id": 1561977,
+          "sku": "100-1561977",
+          "status": "PUBLISHED",
+          "name": "Лайк блэк / Like black",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1561977"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1561977"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "AF-01AC black- FL06 black fabric"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "AF-T-BK",
+      "category_path": [
+        "Norden",
+        "Стул"
+      ],
+      "kept": {
+        "variant_id": "01a0c1a4-e8e4-7524-93d4-a3d0208dccdd",
+        "kit_id": 1544149,
+        "sku": "100-1544149",
+        "status": "PUBLISHED",
+        "name": "Лайк пюпитр / Like worktop",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1544149"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1544149"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "AF-T-BK"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c803-26aa-7f23-a5ae-f6b70037837e",
+          "kit_id": 1561978,
+          "sku": "100-1561978",
+          "status": "PUBLISHED",
+          "name": "Лайк пюпитр / Like worktop",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1561978"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1561978"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "AF-T-BK"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "C2067 black leather",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b14e-7986-ad90-9185d2d7fc94",
+        "kit_id": 104597,
+        "sku": "AF-31637168",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное/Вагнер CF черная кожа/ натуральное дерево С2067 black leather",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31637168"
+          },
+          {
+            "field": "Код продавца",
+            "value": "C2067 black leather"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "C2067 black leather"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a097b7-dc8f-721f-b0d1-629cf956b477",
+          "kit_id": 1500021,
+          "sku": "AF-31314229",
+          "status": "PUBLISHED",
+          "name": "Кресло офисное/Вагнер CF черная кожа/ натуральное дерево С2067 black leather",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "AF-31314229"
+            },
+            {
+              "field": "Код продавца",
+              "value": "С2067 black leather"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "С2067 black leather"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CH-202A-OA2000-OS800",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a86-7f18-73c8-b97b-b36112e1ffbe",
+        "kit_id": 105328,
+        "sku": "AF-30539719",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное Партнер aluminium черный (мультиблок) CH-202A-OA2000*OS800",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539719"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CH-202A-OA2000*OS800"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CH-202A-OA2000*OS800"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "019a5a9f-2b18-7243-9468-29a8a06ba3e9",
+          "kit_id": 109303,
+          "sku": "AF-31394926",
+          "status": "PUBLISHED",
+          "name": "Кресло Партнер aluminium CH-202A-OA2000-OS800",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "AF-31394926"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CH-202A-OA2000-OS800"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CH-202A-OA2000-OS800"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CH-223B-HS G-BB",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a91ce-ae71-738c-98df-5c7a85105811",
+        "kit_id": 110451,
+        "sku": "AF-31223615",
+        "status": "PUBLISHED",
+        "name": "Кресло для персонала Betta CH-223B-HS G-BB",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31223615"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CH-223B-HS G-BB"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CH-223B-HS G-BB"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3b1-699c-78be-9658-0ca91f91c3f1",
+          "kit_id": 1594447,
+          "sku": "100-1594447",
+          "status": "PUBLISHED",
+          "name": "Бетта / Betta",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594447"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594447"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CH-223B-HS G-BB"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00008335"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CH-223B-HS G-BB"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CH-226C-OA2016-OS800",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a8c-4431-79c6-a23c-9308d5df953f",
+        "kit_id": 106401,
+        "sku": "AF-31395059",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное Сильвия gray CF CH-226C-OA2016-OS800",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31395059"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CH-226C-OA2016-OS800"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CH-226C-OA2016-OS800"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a097b7-dc8f-721a-8eec-d0a1a9e1830c",
+          "kit_id": 1500031,
+          "sku": "AF-30539747",
+          "status": "PUBLISHED",
+          "name": "Кресло офисное Сильвия gray CF CH-226C-OA2016*OS800",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "AF-30539747"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CH-226C-OA2016*OS800"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CH-226C-OA2016*OS800"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CH-233A-LP",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a8f47-b82a-75d6-bc3e-32b391c29318",
+        "kit_id": 110298,
+        "sku": "AF-30882682",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное Baker черный пластик сетка ткань",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30882682"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CH-233A-LP"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CH-233A-LP"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3b0-d95f-7655-97ed-6b6c61c66a85",
+          "kit_id": 1594446,
+          "sku": "100-1594446",
+          "status": "PUBLISHED",
+          "name": "Бейкер / Baker",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594446"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594446"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CH-233A-LP"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00004314"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CH-233A-LP"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CH-336B",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0c12d-06b1-7483-8efd-d53c0732f987",
+        "kit_id": 1542388,
+        "sku": "100-1542388",
+        "status": "PUBLISHED",
+        "name": "Йорк LB / York LB",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1542388"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1542388"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CH-336B"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c7fc-e633-7d0f-81ad-4ddc42ae4e81",
+          "kit_id": 1561813,
+          "sku": "100-1561813",
+          "status": "PUBLISHED",
+          "name": "Йорк LB / York LB",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1561813"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1561813"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CH-336B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CK-2518A-P",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0c2b7-6b1b-7cd8-88c7-321d465e1216",
+        "kit_id": 1548126,
+        "sku": "100-1548126",
+        "status": "PUBLISHED",
+        "name": "Некст блэк / Next black",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1548126"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1548126"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CK-2518A-P"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c823-e514-74a2-aa91-949345a571f6",
+          "kit_id": 1562571,
+          "sku": "100-1562571",
+          "status": "PUBLISHED",
+          "name": "Некст блэк / Next black",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1562571"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1562571"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CK-2518A-P"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CK38F",
+      "category_path": [
+        "Norden",
+        "Стул"
+      ],
+      "kept": {
+        "variant_id": "01a0c431-9363-7862-af30-36bb65c14ce9",
+        "kit_id": 1551358,
+        "sku": "100-1551358",
+        "status": "PUBLISHED",
+        "name": "Пинин смарт Нью",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1551358"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1551358"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CK38F"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c82f-e1c1-7c08-a9b0-22d1261f52d8",
+          "kit_id": 1562858,
+          "sku": "100-1562858",
+          "status": "PUBLISHED",
+          "name": "Пинин смарт Нью",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1562858"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1562858"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CK38F"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CX0898H-0-215",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b37b-7d15-9690-6ed393b426f6",
+        "kit_id": 104767,
+        "sku": "AF-30539619",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное IQ (White plastic green) белый пластик зеленая ткань",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539619"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CX0898H-0-215"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CX0898H-0-215"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a6-2898-7464-814b-d0e467013c6c",
+          "kit_id": 1594429,
+          "sku": "100-1594429",
+          "status": "PUBLISHED",
+          "name": "Айкью / IQ",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594429"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594429"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CX0898H-0-215"
+            },
+            {
+              "field": "Код Norden",
+              "value": "11-00000052"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CX0898H-0-215"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CX0898H-0-223",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b382-75aa-8140-41277d657abf",
+        "kit_id": 104768,
+        "sku": "AF-30539623",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное IQ белый пластик темно-синяя ткань",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539623"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CX0898H-0-223"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CX0898H-0-223"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a7-188c-761b-9c82-a2b2f594ddcf",
+          "kit_id": 1594431,
+          "sku": "100-1594431",
+          "status": "PUBLISHED",
+          "name": "Айкью / IQ",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594431"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594431"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CX0898H-0-223"
+            },
+            {
+              "field": "Код Norden",
+              "value": "11-00000133"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CX0898H-0-223"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CX0898H-0-53",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b3b5-7b5d-b9fe-7d820ec3c5a8",
+        "kit_id": 104775,
+        "sku": "AF-30539627",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное IQ (white+grey) белый пластик серая ткань",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539627"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CX0898H-0-53"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CX0898H-0-53"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a4-10df-7b74-bd59-19893f6dd485",
+          "kit_id": 1594424,
+          "sku": "100-1594424",
+          "status": "PUBLISHED",
+          "name": "Айкью / IQ",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594424"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594424"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CX0898H-0-53"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00000013"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CX0898H-0-53"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CX0898H-0-54",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b3af-7451-90e4-1a9c6941dd2f",
+        "kit_id": 104774,
+        "sku": "AF-30539626",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное IQ (white+black) белый пластик черная ткань",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539626"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CX0898H-0-54"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CX0898H-0-54"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a3-d28a-7077-b121-4a4b773207ad",
+          "kit_id": 1594423,
+          "sku": "100-1594423",
+          "status": "PUBLISHED",
+          "name": "Айкью / IQ",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594423"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594423"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CX0898H-0-54"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00000012"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CX0898H-0-54"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CX0898H-0-56",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b39c-7136-8902-0df04cb307c3",
+        "kit_id": 104771,
+        "sku": "AF-30539618",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное IQ (White plastic blue) белый пластик голубая ткань",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539618"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CX0898H-0-56"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CX0898H-0-56"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a5-8cc9-776d-b4e6-49b91b2478ba",
+          "kit_id": 1594428,
+          "sku": "100-1594428",
+          "status": "PUBLISHED",
+          "name": "Айкью / IQ",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594428"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594428"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CX0898H-0-56"
+            },
+            {
+              "field": "Код Norden",
+              "value": "11-00000039"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CX0898H-0-56"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CX0898H-0-59",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b38f-73fd-ad5c-2aff5615ea89",
+        "kit_id": 104217,
+        "sku": "AF-30539617",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное IQ (White plastic orange) белый пластик оранжевая ткань",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539617"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CX0898H-0-59"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CX0898H-0-59"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a5-30e7-79fa-b162-62706c723926",
+          "kit_id": 1594427,
+          "sku": "100-1594427",
+          "status": "PUBLISHED",
+          "name": "Айкью / IQ",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594427"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594427"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CX0898H-0-59"
+            },
+            {
+              "field": "Код Norden",
+              "value": "11-00000035"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CX0898H-0-59"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CX0898H-1-53",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b3a8-7c57-a57b-21dbd1f1825e",
+        "kit_id": 104773,
+        "sku": "AF-30539625",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное IQ black+grey) черный пластик серая ткань",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539625"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CX0898H-1-53"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CX0898H-1-53"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a3-4421-7e5e-b83e-47c0b1282b18",
+          "kit_id": 1594422,
+          "sku": "100-1594422",
+          "status": "PUBLISHED",
+          "name": "Айкью / IQ",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594422"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594422"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CX0898H-1-53"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00000081"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CX0898H-1-53"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CX0898H-1-54",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b395-7987-8f5c-c6ddcaea3fca",
+        "kit_id": 104770,
+        "sku": "AF-30539629",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное IQ (full black) черный пластик ткань",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539629"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CX0898H-1-54"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CX0898H-1-54"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a4-ede4-71c8-bf78-76bf1d64cf88",
+          "kit_id": 1594426,
+          "sku": "100-1594426",
+          "status": "PUBLISHED",
+          "name": "Айкью / IQ",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594426"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594426"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CX0898H-1-54"
+            },
+            {
+              "field": "Код Norden",
+              "value": "C8-00000001"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CX0898H-1-54"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CX0898H-1-56",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b388-7ce0-a48e-3e7b3fb63f6e",
+        "kit_id": 104769,
+        "sku": "AF-30539628",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное IQ (Black plastic blue) черный пластик голубая ткань",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539628"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CX0898H-1-56"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CX0898H-1-56"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a4-5ece-7028-b7ec-f15c8e0cb5cf",
+          "kit_id": 1594425,
+          "sku": "100-1594425",
+          "status": "PUBLISHED",
+          "name": "Айкью / IQ",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594425"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594425"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CX0898H-1-56"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00000020"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CX0898H-1-56"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "CX0898H-1-60",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a80-b3a2-766e-9b88-17abd671c3c6",
+        "kit_id": 104772,
+        "sku": "AF-30539620",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное IQ (Black plastic, dark grey) черный пластик темно-серая ткань",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539620"
+          },
+          {
+            "field": "Код продавца",
+            "value": "CX0898H-1-60"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "CX0898H-1-60"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a6-b01d-7428-baf3-0b2915d38d21",
+          "kit_id": 1594430,
+          "sku": "100-1594430",
+          "status": "PUBLISHED",
+          "name": "Айкью / IQ",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594430"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594430"
+            },
+            {
+              "field": "Код продавца",
+              "value": "CX0898H-1-60"
+            },
+            {
+              "field": "Код Norden",
+              "value": "11-00000053"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "CX0898H-1-60"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "EQ-5179H black",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a8f47-b802-7ad9-97dc-7cc0f0e5f56e",
+        "kit_id": 110367,
+        "sku": "AF-31289045",
+        "status": "PUBLISHED",
+        "name": "Кресло для руководителя Atlant EQ-5179H black",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31289045"
+          },
+          {
+            "field": "Код продавца",
+            "value": "EQ-5179H black"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "EQ-5179H black"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3ae-7c16-7461-9bd7-ec231a0785b4",
+          "kit_id": 1594442,
+          "sku": "100-1594442",
+          "status": "PUBLISHED",
+          "name": "Атлант / Atlant",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594442"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594442"
+            },
+            {
+              "field": "Код продавца",
+              "value": "EQ-5179H black"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00009790"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "EQ-5179H black"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "EQ-5179H-1 ivory",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a91ce-aeae-7209-853b-3b2bc04cd979",
+        "kit_id": 110470,
+        "sku": "AF-31226380",
+        "status": "PUBLISHED",
+        "name": "Кресло для руководителя Atlant EQ-5179H-1 ivory",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31226380"
+          },
+          {
+            "field": "Код продавца",
+            "value": "EQ-5179H-1 ivory"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "EQ-5179H-1 ivory"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3af-12f7-7991-bd62-dbb396c47106",
+          "kit_id": 1594443,
+          "sku": "100-1594443",
+          "status": "PUBLISHED",
+          "name": "Атлант / Atlant",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594443"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594443"
+            },
+            {
+              "field": "Код продавца",
+              "value": "EQ-5179H-1 ivory"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00010420"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "EQ-5179H-1 ivory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "EQ-5183H black",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a91ce-ae88-713c-aef0-3a68b787dfe0",
+        "kit_id": 110482,
+        "sku": "AF-31306840",
+        "status": "PUBLISHED",
+        "name": "Кресло для руководителя / Atlas EQ-5183H black",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31306840"
+          },
+          {
+            "field": "Код продавца",
+            "value": "EQ-5183H black"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "EQ-5183H black"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3af-a99c-7949-9c31-ac413d58a687",
+          "kit_id": 1594444,
+          "sku": "100-1594444",
+          "status": "PUBLISHED",
+          "name": "Атлас / Atlas",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594444"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594444"
+            },
+            {
+              "field": "Код продавца",
+              "value": "EQ-5183H black"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00010441"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "EQ-5183H black"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "EQ-5183H grey",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a91ce-ae89-79bd-ad5f-4cba7a160e32",
+        "kit_id": 110483,
+        "sku": "AF-31306841",
+        "status": "PUBLISHED",
+        "name": "Кресло для руководителя / Atlas EQ-5183H grey",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31306841"
+          },
+          {
+            "field": "Код продавца",
+            "value": "EQ-5183H grey"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "EQ-5183H grey"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3b0-4397-763f-9604-7bc79fce7e29",
+          "kit_id": 1594445,
+          "sku": "100-1594445",
+          "status": "PUBLISHED",
+          "name": "Атлас / Atlas",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594445"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594445"
+            },
+            {
+              "field": "Код продавца",
+              "value": "EQ-5183H grey"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00010442"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "EQ-5183H grey"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "EQ-9930-BLACK-L",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a7d3e-ae7d-768a-bd28-cf5dd5254e79",
+        "kit_id": 110007,
+        "sku": "AF-31353352",
+        "status": "PUBLISHED",
+        "name": "Кресло для персонала Altai SL EQ-9930-BLACK-L",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31353352"
+          },
+          {
+            "field": "Код продавца",
+            "value": "EQ-9930-BLACK-L"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "EQ-9930-BLACK-L"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a8-0733-750d-9583-52573d12a121",
+          "kit_id": 1594434,
+          "sku": "100-1594434",
+          "status": "PUBLISHED",
+          "name": "Алтай / Altai",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594434"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594434"
+            },
+            {
+              "field": "Код продавца",
+              "value": "EQ-9930-BLACK-L"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00011236"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "EQ-9930-BLACK-L"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "EQ-9930-GRAY-H",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a7d3e-ae76-7d93-8ca7-5fa1423f0261",
+        "kit_id": 110006,
+        "sku": "AF-31353353",
+        "status": "PUBLISHED",
+        "name": "Кресло для персонала Altai SL 6D EQ-9930-GRAY-H",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31353353"
+          },
+          {
+            "field": "Код продавца",
+            "value": "EQ-9930-GRAY-H"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "EQ-9930-GRAY-H"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a8-eeb4-7d3b-9fe2-b258a743ec4f",
+          "kit_id": 1594435,
+          "sku": "100-1594435",
+          "status": "PUBLISHED",
+          "name": "Алтай / Altai",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594435"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594435"
+            },
+            {
+              "field": "Код продавца",
+              "value": "EQ-9930-GRAY-H"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00011237"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "EQ-9930-GRAY-H"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "H-051 black frame",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a8f47-b845-70d4-8763-4110516e8f94",
+        "kit_id": 110359,
+        "sku": "AF-30756477",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное 007 NEW full black черный пластик ткань сетка",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30756477"
+          },
+          {
+            "field": "Код продавца",
+            "value": "H-051 black frame"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "H-051 black frame"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a2-2872-79f1-bf74-4db39f08c50f",
+          "kit_id": 1594420,
+          "sku": "100-1594420",
+          "status": "PUBLISHED",
+          "name": "007 Нью / 007 NEW",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594420"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594420"
+            },
+            {
+              "field": "Код продавца",
+              "value": "H-051 black frame"
+            },
+            {
+              "field": "Код Norden",
+              "value": "11-00002123"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "H-051 black frame"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "H-051 white frame",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a8f47-b83e-7484-9279-d0fba9fdbe60",
+        "kit_id": 110313,
+        "sku": "AF-30756476",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное 007 NEW (black (white plastic) белый пластик черная ткань черная сетка",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30756476"
+          },
+          {
+            "field": "Код продавца",
+            "value": "H-051 white frame"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "H-051 white frame"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a1-ad8f-73eb-a0a0-279b9a427b4b",
+          "kit_id": 1594419,
+          "sku": "100-1594419",
+          "status": "PUBLISHED",
+          "name": "007 Нью / 007 NEW",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594419"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594419"
+            },
+            {
+              "field": "Код продавца",
+              "value": "H-051 white frame"
+            },
+            {
+              "field": "Код Norden",
+              "value": "11-00002122"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "H-051 white frame"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "H-3021-35",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a8f47-b959-7942-b4b8-fed32c4f63e0",
+        "kit_id": 110382,
+        "sku": "AF-30539631",
+        "status": "PUBLISHED",
+        "name": "Кресло офисное / Алекс / (black) черная экокожа",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-30539631"
+          },
+          {
+            "field": "Код продавца",
+            "value": "H-3021-35"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "H-3021-35"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3a7-b418-776e-af34-0a403322aca5",
+          "kit_id": 1594433,
+          "sku": "100-1594433",
+          "status": "PUBLISHED",
+          "name": "Алекс",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594433"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594433"
+            },
+            {
+              "field": "Код продавца",
+              "value": "H-3021-35"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00000071"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "H-3021-35"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "H5017 grey",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a8f47-b81c-7508-9fc2-85bf0f04cc23",
+        "kit_id": 110370,
+        "sku": "AF-31210550",
+        "status": "PUBLISHED",
+        "name": "Кресло компьютерное Arco H5017 grey",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31210550"
+          },
+          {
+            "field": "Код продавца",
+            "value": "H5017 grey"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "H5017 grey"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3ab-b0f0-7baf-8b23-09083b3404db",
+          "kit_id": 1594438,
+          "sku": "100-1594438",
+          "status": "PUBLISHED",
+          "name": "Арко грэй / Arco grey",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594438"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594438"
+            },
+            {
+              "field": "Код продавца",
+              "value": "H5017 grey"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00008224"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "H5017 grey"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "H6301 HEADREST black",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0c44c-467a-717a-9912-35107233a6af",
+        "kit_id": 1551579,
+        "sku": "100-1551579",
+        "status": "PUBLISHED",
+        "name": "Подголовник Комо блэк / Como black",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1551579"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1551579"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "H6301 HEADREST black"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c839-1977-70d7-875c-0ec3d4877365",
+          "kit_id": 1563079,
+          "sku": "100-1563079",
+          "status": "PUBLISHED",
+          "name": "Подголовник Комо блэк / Como black",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1563079"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1563079"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "H6301 HEADREST black"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "H6301-1 HEADREST grey",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0c44c-d120-7e17-bcd4-51c7a09a5b5b",
+        "kit_id": 1551581,
+        "sku": "100-1551581",
+        "status": "PUBLISHED",
+        "name": "Подголовник Комо грэй / Como grey",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1551581"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1551581"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "H6301-1 HEADREST grey"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c839-360b-77bb-80c0-4a404d6645f0",
+          "kit_id": 1563082,
+          "sku": "100-1563082",
+          "status": "PUBLISHED",
+          "name": "Подголовник Комо грэй / Como grey",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1563082"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1563082"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "H6301-1 HEADREST grey"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "HD-2218-3 L LB brown",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0c2bc-3cfa-70f5-a5e5-745dd57944b9",
+        "kit_id": 1548210,
+        "sku": "100-1548210",
+        "status": "PUBLISHED",
+        "name": "Нэо LB / Neo LB",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1548210"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1548210"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "HD-2218-3 L LB brown"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c824-f3c1-7966-a63b-62ae7f3989ac",
+          "kit_id": 1562596,
+          "sku": "100-1562596",
+          "status": "PUBLISHED",
+          "name": "Нэо LB / Neo LB",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1562596"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1562596"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "HD-2218-3 L LB brown"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "HLC-3669FX-1",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a5a99-3d81-7a1d-bcc7-93fa9dbca58e",
+        "kit_id": 108985,
+        "sku": "AF-31391144",
+        "status": "PUBLISHED",
+        "name": "Кресло Alpina HLC-3669FX-1 серая сетка/серая ткань/металлическая база",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31391144"
+          },
+          {
+            "field": "Код продавца",
+            "value": "HLC-3669FX-1"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "HLC-3669FX-1"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3aa-596e-7726-8a6d-b1a9d73d4a66",
+          "kit_id": 1594436,
+          "sku": "100-1594436",
+          "status": "PUBLISHED",
+          "name": "Альпина / Alpina",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594436"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594436"
+            },
+            {
+              "field": "Код продавца",
+              "value": "HLC-3669FX-1"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00016698"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "HLC-3669FX-1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "Nova  FJ-43 red fabric",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0c2bb-5c38-7414-974f-dc6f577d0501",
+        "kit_id": 1548194,
+        "sku": "100-1548194",
+        "status": "PUBLISHED",
+        "name": "Нова сменный чехол / Nova сменный чехол",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1548194"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1548194"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "Nova  FJ-43 red fabric"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c824-b55a-7abe-b9ed-6e52428f2f91",
+          "kit_id": 1562590,
+          "sku": "100-1562590",
+          "status": "PUBLISHED",
+          "name": "Нова сменный чехол / Nova сменный чехол",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1562590"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1562590"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "Nova  FJ-43 red fabric"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "Nova FJ09 light grey fabric",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0c2ba-2044-7d04-ad55-425e64db9b6d",
+        "kit_id": 1548173,
+        "sku": "100-1548173",
+        "status": "PUBLISHED",
+        "name": "Нова сменный чехол / Nova сменный чехол",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1548173"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1548173"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "Nova FJ09 light grey fabric"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c824-76c6-7e33-ac8d-8c646540dca6",
+          "kit_id": 1562583,
+          "sku": "100-1562583",
+          "status": "PUBLISHED",
+          "name": "Нова сменный чехол / Nova сменный чехол",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1562583"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1562583"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "Nova FJ09 light grey fabric"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "Nova FJ16 black fabric",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0c2bb-b167-7da1-a80a-8c1edbdc9002",
+        "kit_id": 1548200,
+        "sku": "100-1548200",
+        "status": "PUBLISHED",
+        "name": "Нова сменный чехол / Nova сменный чехол",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1548200"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1548200"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "Nova FJ16 black fabric"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c824-bbb5-71bb-88bb-b82da401a4a8",
+          "kit_id": 1562591,
+          "sku": "100-1562591",
+          "status": "PUBLISHED",
+          "name": "Нова сменный чехол / Nova сменный чехол",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1562591"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1562591"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "Nova FJ16 black fabric"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "Nova FL05 blue grey fabric",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0c2bb-1eb1-7f23-8c99-0b3a5ad93105",
+        "kit_id": 1548190,
+        "sku": "100-1548190",
+        "status": "PUBLISHED",
+        "name": "Нова сменный чехол / Nova сменный чехол",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1548190"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1548190"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "Nova FL05 blue grey fabric"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c824-9b09-739d-88b4-727633e15bec",
+          "kit_id": 1562587,
+          "sku": "100-1562587",
+          "status": "PUBLISHED",
+          "name": "Нова сменный чехол / Nova сменный чехол",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1562587"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1562587"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "Nova FL05 blue grey fabric"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "NovaFJ22 blue fabric",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "01a0c2ba-6d17-7288-b7d3-e2612b8c950a",
+        "kit_id": 1548177,
+        "sku": "100-1548177",
+        "status": "PUBLISHED",
+        "name": "Нова сменный чехол / Nova сменный чехол",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "100-1548177"
+          },
+          {
+            "field": "Артикул",
+            "value": "100-1548177"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "NovaFJ22 blue fabric"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0c824-927f-7d36-ab3c-b921108a7187",
+          "kit_id": 1562585,
+          "sku": "100-1562585",
+          "status": "PUBLISHED",
+          "name": "Нова сменный чехол / Nova сменный чехол",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1562585"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1562585"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "NovaFJ22 blue fabric"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "article": "V5017 grey",
+      "category_path": [
+        "Norden",
+        "Кресло офисное"
+      ],
+      "kept": {
+        "variant_id": "019a91ce-ae4e-7937-a77f-7adbef084bd1",
+        "kit_id": 110444,
+        "sku": "AF-31165062",
+        "status": "PUBLISHED",
+        "name": "Конференц-кресло / Arco CF grey V5017 grey",
+        "matched_identifiers": [
+          {
+            "field": "SKU",
+            "value": "AF-31165062"
+          },
+          {
+            "field": "Код продавца",
+            "value": "V5017 grey"
+          },
+          {
+            "field": "Код для сайта",
+            "value": "V5017 grey"
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "variant_id": "01a0d3ab-22c3-7dee-aa4a-945431af82c9",
+          "kit_id": 1594437,
+          "sku": "100-1594437",
+          "status": "PUBLISHED",
+          "name": "Арко CF грэй / Arco CF grey",
+          "matched_identifiers": [
+            {
+              "field": "SKU",
+              "value": "100-1594437"
+            },
+            {
+              "field": "Артикул",
+              "value": "100-1594437"
+            },
+            {
+              "field": "Код продавца",
+              "value": "V5017 grey"
+            },
+            {
+              "field": "Код Norden",
+              "value": "00-00008255"
+            },
+            {
+              "field": "Код для сайта",
+              "value": "V5017 grey"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "conflicts": [],
+  "finished_at": "2026-09-24T16:59:56.732834+00:00"
+}
