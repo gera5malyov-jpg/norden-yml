@@ -79,28 +79,14 @@ print("YANDEX_CAMPAIGNS_STATUS",st)
 print("YANDEX_CAMPAIGNS",json.dumps(camps,ensure_ascii=False)[:30000])
 
 bid="20806099"
-token=None
-found=None
-for _ in range(100):
-    qs={"limit":100}
-    if token: qs["pageToken"]=token
-    url=f"{YANDEX}/v2/businesses/{bid}/offer-mappings?"+urllib.parse.urlencode(qs)
-    st,res=call("POST",url,ya_headers,{})
-    if st != 200:
-        print("YANDEX_OFFER_STATUS",st)
-        print("YANDEX_OFFER_ERROR",json.dumps(res,ensure_ascii=False)[:8000])
-        break
-    result=res.get("result") or {}
-    for row in result.get("offerMappings") or []:
-        off=row.get("offer") or {}
-        if str(off.get("offerId") or "")==OFFER:
-            found=row
-            break
-    if found: break
-    nt=str(((result.get("paging") or {}).get("nextPageToken")) or "")
-    if not nt or nt==token: break
-    token=nt
-
+st,res=call("POST",f"{YANDEX}/v2/businesses/{bid}/offer-mappings",ya_headers,{"offerIds":[OFFER]})
+print("YANDEX_OFFER_STATUS",st)
+if st != 200:
+    print("YANDEX_OFFER_ERROR",json.dumps(res,ensure_ascii=False)[:8000])
+    found=None
+else:
+    rows=((res.get("result") or {}).get("offerMappings") or [])
+    found=rows[0] if rows else None
 print("YANDEX_TARGET",json.dumps(found,ensure_ascii=False)[:15000])
 if not found:
     print("YANDEX_TARGET_NOT_FOUND")
