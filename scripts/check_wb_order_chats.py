@@ -187,3 +187,15 @@ print(json.dumps({
 },ensure_ascii=False,indent=2))
 
 # diagnostic refresh trigger 2026-09-24
+
+# Schema-only diagnostic for seller/chats; no customer data.
+if chat_r.ok:
+    _d=chat_r.json() if chat_r.content else {}
+    _chs=_d.get("result") or []
+    _first=_chs[0] if isinstance(_chs,list) and _chs and isinstance(_chs[0],dict) else {}
+    print("\nCHAT_SCHEMA_DIAGNOSTIC")
+    print(json.dumps({
+        "chat_keys": sorted(_first.keys()),
+        "dict_subkeys": {k: sorted(v.keys()) for k,v in _first.items() if isinstance(v,dict)},
+        "list_fields": {k: len(v) for k,v in _first.items() if isinstance(v,list)},
+    },ensure_ascii=False,indent=2))
