@@ -2,9 +2,9 @@
   "status": "ok",
   "feed_url_requested": "http://deephouse.pro/upload/cutcat.xml",
   "feed_url_effective": "http://deephouse.pro/upload/cutcat.xml",
-  "source_products": 1006,
+  "source_products": 979,
   "source_categories": 7,
-  "stock_exact_products": 1006,
+  "stock_exact_products": 979,
   "stock_boolean_products": 0,
   "stock_missing_products": 0,
   "price_missing_products": 0,
@@ -59,7 +59,7 @@
       "sku": "DEEP-64202+60217",
       "name": "Стул Мартин бежево-коричневая ткань ножки черные",
       "price": "21990",
-      "stock": 27,
+      "stock": 24,
       "stock_source": "stock",
       "stock_is_exact": true,
       "category_id": "28",
@@ -145,19 +145,17 @@
       "pictures_count": 11
     }
   ],
-  "processed": 1006,
-  "created": 439,
-  "updated_existing": 567,
+  "processed": 979,
+  "created": 15,
+  "updated_existing": 964,
   "duplicate_variants_archived": 0,
-  "images_uploaded": 4080,
-  "image_errors": 3,
-  "price_updates": 567,
-  "stock_updates": 1134,
+  "images_uploaded": 171,
+  "image_errors": 1,
+  "price_updates": 964,
+  "stock_updates": 1928,
   "errors": [],
   "warnings": [
-    "DEEP-56318: image failed https://deephouse.pro/upload/iblock/f24/3wxpq04gw6e7qz39jh9xv3r9gzxk85iv/0197.jpg: ('Connection broken: IncompleteRead(3014040 bytes read, 889160 more expected)', IncompleteRead(3014040 bytes read, 889160 more expected))",
-    "DEEP-56844: image failed https://deephouse.pro/upload/iblock/2fa/uhetvrumhriae03s753xrdypinjc29ry/0197.jpg: ('Connection broken: IncompleteRead(3014040 bytes read, 889160 more expected)', IncompleteRead(3014040 bytes read, 889160 more expected))",
-    "DEEP-61003+63629: image failed https://deephouse.pro/upload/iblock/7c1/ntdf5zwxt80makxbx09ryzrud6zxhii0.png: ('Connection broken: IncompleteRead(1768857 bytes read, 508074 more expected)', IncompleteRead(1768857 bytes read, 508074 more expected))"
+    "DEEP-59180: image failed https://deephouse.pro/upload/iblock/39f/5x5p30sh7okwazayjz38fqp9pm2xftye/IMG_7515.jpg: ('Connection broken: IncompleteRead(1113496 bytes read, 1069950 more expected)', IncompleteRead(1113496 bytes read, 1069950 more expected))"
   ],
   "complete": true
 }
