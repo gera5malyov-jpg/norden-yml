@@ -1,0 +1,45 @@
+name: Patch PEK hard packing positions count
+
+on:
+  push:
+    paths:
+      - '.github/workflows/pek-patch-hardpacking.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch hardPacking positionsCount
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/pek-spb-tolyatti-prereg-2026-09-25.yml')
+          s=p.read_text(encoding='utf-8')
+          marker='"hardPacking": {'
+          i=s.find(marker)
+          if i<0:
+              raise SystemExit('hardPacking block not found')
+          j=s.find('"enabled": True,', i)
+          if j<0:
+              raise SystemExit('hardPacking enabled flag not found')
+          insert_at=j+len('"enabled": True,')
+          if '"positionsCount": 1' not in s[i:s.find('},', j)+2]:
+              s=s[:insert_at]+'\n                                  "positionsCount": 1,'+s[insert_at:]
+              p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/pek-spb-tolyatti-prereg-2026-09-25.yml
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Fix PEK hard packing positions count"
+            git pull --rebase origin main
+            git push
+          fi
