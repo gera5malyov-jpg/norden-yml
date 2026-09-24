@@ -7,8 +7,6 @@ on:
   push:
     paths:
       - ".github/workflows/marketplace-api-smoke-test.yml"
-      - "scripts/probe_sams_641933_certificate.py"
-      - "scripts/apply_sams_641933_certificate.py"
 
 permissions:
   contents: read
@@ -26,8 +24,6 @@ jobs:
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
       - name: Check secret presence
         id: secrets
         continue-on-error: true
@@ -78,17 +74,6 @@ jobs:
             exit 1
           fi
           echo "Yandex Market API: OK"
-
-      - name: Probe SAMS-641933 certificate targets
-        if: github.event_name == 'push'
-        continue-on-error: true
-        env:
-          YANDEX_MARKET_BUSINESS_ID: "117585391"
-        run: python scripts/probe_sams_641933_certificate.py
-
-      - name: Apply SAMS-641933 compliance documents
-        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'Apply SAMS-641933 compliance documents')
-        run: python scripts/apply_sams_641933_certificate.py
 
       - name: Wildberries API read-only check
         id: wb
