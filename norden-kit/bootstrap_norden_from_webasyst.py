@@ -295,9 +295,35 @@ def main():
 
                 report["missing_before"] += 1
 
+                # User rule: never create a new Norden card in KIT unless
+                # the supplier source confirms both a positive purchase price
+                # and at least one supplier image.
+                if not source_article or not item:
+                    report["skipped"].append({
+                        "sku": sku, "name": name,
+                        "reason": "нет сопоставления с товаром Norden — нельзя проверить закупочную цену и фото",
+                    })
+                    continue
+                purchase = dec(item.get("purchase"))
+                if purchase is None or purchase <= 0:
+                    report["missing_price_skipped"] += 1
+                    report["skipped"].append({
+                        "sku": sku, "name": name,
+                        "reason": "нет положительной закупочной цены Norden",
+                    })
+                    continue
+                if not (item.get("images") or []):
+                    report.setdefault("missing_images_skipped", 0)
+                    report["missing_images_skipped"] += 1
+                    report["skipped"].append({
+                        "sku": sku, "name": name,
+                        "reason": "нет изображения Norden",
+                    })
+                    continue
+
                 sale = dec(sku_row.get("price"))
                 compare = dec(sku_row.get("compare_price"))
-                kit_prices = mod.price_set(item.get("purchase")) if item else None
+                kit_prices = mod.price_set(item.get("purchase"))
                 if kit_prices:
                     old_price = Decimal(str(kit_prices["old"]))
                     sale_price = Decimal(str(kit_prices["sale"]))
