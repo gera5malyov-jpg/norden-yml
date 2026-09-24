@@ -1,0 +1,41 @@
+{
+  "started_at": "2026-09-24T19:12:20.849689+00:00",
+  "policy": {
+    "match": "exact normalized article/SKU only",
+    "allowed_webasyst_write": [
+      "yml_id"
+    ],
+    "creates": false,
+    "prices": false,
+    "stocks": false,
+    "names": false,
+    "features": false,
+    "type": false,
+    "status": false,
+    "skus": false
+  },
+  "catalog_pairs": 1048,
+  "webasyst_type": "NORDEN-100",
+  "webasyst_type_id": "142",
+  "webasyst_products": 1046,
+  "webasyst_duplicate_skus": {},
+  "matched": 1046,
+  "updated": 0,
+  "unchanged": 1046,
+  "missing_in_webasyst": 2,
+  "errors": [],
+  "sample_updates": [],
+  "sample_missing": [
+    {
+      "article_key": "af31223180",
+      "yml_id": "HA-101-322"
+    },
+    {
+      "article_key": "алюминиеваябазасераятканьcf",
+      "yml_id": "L347LCA-1-CF-grey fabric n"
+    }
+  ],
+  "verification_mismatches": [],
+  "finished_at": "2026-09-24T19:12:20.851031+00:00",
+  "complete": true
+}
