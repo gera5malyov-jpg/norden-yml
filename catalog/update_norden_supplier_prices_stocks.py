@@ -13,7 +13,7 @@ SHEET_NAME = os.environ.get("CATALOG_SHEET","Норден").strip()
 SA_JSON = os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]
 REPORT = Path("catalog/norden_supplier_price_stock_report.json")
 
-COLS = ["Закупка","РРЦ поставщика","Остаток МСК","Остаток СПБ","Остаток всего"]
+COLS = ["Закупка","РРЦ поставщика","Остаток"]
 
 def s(v): return str(v or "").strip()
 def norm(v): return unicodedata.normalize("NFKC",s(v)).casefold()
@@ -111,8 +111,6 @@ for rowno,row in enumerate(values[1:],start=2):
         vals=[
             src["opt"] if src["opt"] is not None else "",
             src["rrp"] if src["rrp"] is not None else "",
-            src["msk"] if src["msk"] is not None else "",
-            src["spb"] if src["spb"] is not None else "",
             src["total"] if src["total"] is not None else "",
         ]
         for c,v in zip(COLS,vals):
@@ -146,9 +144,7 @@ report={
     "rules":{
         "Закупка":"Цена ВидЦен=Опт",
         "РРЦ поставщика":"Цена ВидЦен=РРЦ",
-        "Остаток МСК":"СвободныйОстаток, Склад=Основной склад",
-        "Остаток СПБ":"СвободныйОстаток, Склад=Питер Основной склад",
-        "Остаток всего":"Остаток МСК + Остаток СПБ"
+        "Остаток":"Сумма всех СвободныйОстаток поставщика по складам"
     },
     "new_rows_created":0
 }
