@@ -1,5 +1,5 @@
 name: Resume Norden KIT to Webasyst
-# duplicate-guard-v6-multi-id-audit
+# duplicate-guard-v7-no-create
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
       - run: pip install requests
 
       - name: Validate Norden sync code
-        run: python -m py_compile norden-kit/sync_norden_kit.py norden-kit/inspect_norden_pair.py norden-kit/audit_norden_duplicates.py webasyst/send_norden_duplicate_report.py
+        run: python -m py_compile norden-kit/sync_norden_kit.py norden-kit/inspect_norden_pair.py norden-kit/audit_norden_duplicates.py norden-kit/cleanup_norden_duplicates.py webasyst/send_norden_duplicate_report.py
 
       - name: Inspect reported duplicate pair
         env:
@@ -46,7 +46,7 @@ jobs:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
         run: |
-          python norden-kit/sync_norden_kit.py             --mode scheduled             --max-new 250             --time-budget-seconds 17000
+          python norden-kit/sync_norden_kit.py             --mode scheduled             --no-create             --time-budget-seconds 17000
 
       - name: Continue KIT -> existing NORDEN-100 Webasyst
         id: wa
