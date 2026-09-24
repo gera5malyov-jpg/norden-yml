@@ -24,6 +24,8 @@ jobs:
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Check secret presence
         id: secrets
         continue-on-error: true
