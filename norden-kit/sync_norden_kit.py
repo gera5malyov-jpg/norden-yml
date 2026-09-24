@@ -1305,6 +1305,7 @@ def main():
     ap.add_argument("--mode", choices=("full", "price-stock", "scheduled", "preflight"), default="full")
     ap.add_argument("--rebuild-map", action="store_true")
     ap.add_argument("--max-new", type=int, default=0)
+    ap.add_argument("--no-create", action="store_true", help="Update/reconcile existing Norden cards only; never create new KIT products")
     ap.add_argument("--time-budget-seconds", type=int, default=17000)
     args = ap.parse_args()
 
@@ -1320,6 +1321,7 @@ def main():
         "mapped_existing_articles": 0,
         "planned_new_products": 0,
         "new_products_created": 0,
+        "new_product_creation_enabled": not args.no_create,
         "existing_products_patched": 0,
         "empty_characteristics_filled": 0,
         "existing_products_images_filled": 0,
@@ -1494,6 +1496,7 @@ def main():
     missing = [a for a in missing_all if a not in creation_blocked]
     report["planned_new_products"] = len(missing)
     report["new_products_blocked_by_required_fields"] = len(missing_all) - len(missing)
+    report["new_products_suppressed_by_no_create"] = len(missing) if args.no_create else 0
     if args.mode == "preflight":
         report["initial_complete"] = len(missing) == 0
         report["finished_at"] = now_iso()
@@ -1514,6 +1517,22 @@ def main():
     if stock_rows:
         kit.bulk_stocks(stock_rows)
         report["stock_updates"] += len(stock_rows)
+
+    # During duplicate-cleanup windows creation can be hard-disabled.
+    if args.no_create:
+        report["warnings"].append(
+            "Создание новых Norden временно отключено (--no-create); обновлены только существующие карточки."
+        )
+        remaining_all = [a for a in source if a not in mapping.get("variants", {})]
+        remaining = [a for a in remaining_all if a not in creation_blocked]
+        report["remaining_new_products"] = len(remaining)
+        report["remaining_blocked_by_required_fields"] = len(remaining_all) - len(remaining)
+        report["initial_complete"] = bool(mapping.get("initial_complete"))
+        report["finished_at"] = now_iso()
+        save_mapping(mapping)
+        REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return
 
     # Create missing Norden products first so new cards appear in KIT immediately.
     categories = kit.categories()
