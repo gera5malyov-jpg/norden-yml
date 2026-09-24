@@ -112,11 +112,23 @@ def address_text(address: Any) -> str:
     full = s(address.get("fullAddress") or address.get("full_address"))
     if full:
         return full
+
+    zip_code = s(address.get("zip") or address.get("postcode"))
+    country = s(address.get("country"))
+    region = s(address.get("region"))
+    city = s(address.get("city"))
+    street = s(address.get("street"))
+
+    street_low = street.lower()
+    markers = [x for x in (zip_code, country, region, city) if x]
+    if street and sum(1 for x in markers if x.lower() in street_low) >= 2:
+        return street
+
     parts = []
-    for key in ("zip", "postcode", "country", "region", "city", "street"):
-        val = s(address.get(key))
-        if val and val not in parts:
-            parts.append(val)
+    for value in (zip_code, country, region, city, street):
+        value = s(value)
+        if value and not any(value.lower() == old.lower() for old in parts):
+            parts.append(value)
     return ", ".join(parts)
 
 
@@ -256,12 +268,18 @@ def lift_text(lift_type: Any, lift_price: Any) -> str:
         price = float(str(lift_price).replace(" ", "").replace(",", ".")) if lift_price not in (None, "") else None
     except Exception:
         price = None
-    if lt.upper() == "NOT_NEEDED" or lt.lower() in {"none", "no", "not needed", "не нужен", "нет"} or (price is not None and price <= 0 and not lt):
+    low = lt.lower()
+    if lt.upper() == "NOT_NEEDED" or low in {"none", "no", "not needed", "не нужен", "нет"} or (price is not None and price <= 0 and not lt):
         return "Нет"
+    if low == "delivery_default":
+        return "Да (включён в доставку)"
+    if low == "lift":
+        return f"Да, лифт{f' — {price:g} ₽' if price is not None and price > 0 else ''}"
+    if low == "stairs":
+        return f"Да, по лестнице{f' — {price:g} ₽' if price is not None and price > 0 else ''}"
     if price is not None and price > 0:
         return f"Да, {price:g} ₽"
     if lt:
-        low = lt.lower()
         if low in {"не нужен", "нет", "false", "0"}:
             return "Нет"
         return "Да" if low in {"yes", "true", "needed", "required"} else lt
