@@ -36,7 +36,7 @@ jobs:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         run: python norden-kit/inspect_norden_pair.py
 
-      - name: Continue Norden supplier -> KIT
+      - name: Continue Norden supplier -> KIT with full duplicate guard
         id: kit
         continue-on-error: true
         env:
