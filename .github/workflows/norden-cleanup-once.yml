@@ -1,0 +1,207 @@
+name: Norden cleanup duplicates and Moscow-only once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-cleanup-once.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-kit-price-stock-daily
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Fix old card and archive requested Norden cards
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import importlib.util, json, os, pathlib, time
+          from datetime import datetime, timezone
+
+          p=pathlib.Path('norden-kit/sync_norden_kit.py')
+          spec=importlib.util.spec_from_file_location('norden_sync',p)
+          mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+
+          kit=mod.KitClient(os.environ['YANDEX_KIT_TOKEN'])
+          all_chars, chars_by_title, code_site_id, article_id = mod.resolve_special_characteristics(kit)
+
+          OLD_SKU='AF-30895666'
+          CORRECT_CODE='C1918 CF brown leather'
+          DUPLICATES=['100-1538550','100-1536923']
+          MOSCOW_SKUS=["100-1573878","100-1573876","100-1573875","100-1573872","100-1573870","100-1573868","100-1573867","100-1573865","100-1573864","100-1573863","100-1573862","100-1573860","100-1572588","100-1572586"]
+
+          report={
+              'started_at': datetime.now(timezone.utc).isoformat(),
+              'old_sku': OLD_SKU,
+              'correct_code': CORRECT_CODE,
+              'old_card_fixed': False,
+              'duplicates_archived': [],
+              'moscow_only_archived': [],
+              'already_archived': [],
+              'errors': [],
+          }
+
+          def query_exact_sku(sku):
+              payload=kit.request('GET','/v1/variants',params={'name':sku,'page':1,'per_page':100})
+              rows=kit.items(payload)
+              return [
+                  x for x in rows
+                  if mod.s(x.get('sku'))==sku
+                  and mod.s(x.get('brand')).casefold()=='norden'
+              ]
+
+          def get_single(sku):
+              rows=query_exact_sku(sku)
+              if len(rows)!=1:
+                  raise RuntimeError(f'{sku}: expected exactly one Norden card, found {len(rows)}')
+              return kit.get_variant(mod.s(rows[0].get('id')))
+
+          def code_value(row):
+              return mod.current_char_value(row, code_site_id)
+
+          # 1) Keep the old card and correct only "Код для сайта".
+          old=get_single(OLD_SKU)
+          existing=list(old.get('characteristics') or [])
+          replaced=False
+          new_chars=[]
+          for ch in existing:
+              if mod.s(ch.get('characteristic_id'))==code_site_id:
+                  x=dict(ch)
+                  x['value']=CORRECT_CODE
+                  x['values']=[CORRECT_CODE]
+                  new_chars.append(x)
+                  replaced=True
+              else:
+                  new_chars.append(ch)
+          if not replaced:
+              new_chars.append({
+                  'characteristic_id':code_site_id,
+                  'value':CORRECT_CODE,
+                  'values':[CORRECT_CODE],
+              })
+          kit.patch_variant(mod.s(old.get('id')), {'characteristics':new_chars})
+          old_after=kit.get_variant(mod.s(old.get('id')))
+          if code_value(old_after)!=CORRECT_CODE:
+              raise RuntimeError(f'Old card code verification failed: {code_value(old_after)!r}')
+          report['old_card_fixed']=True
+          report['old_card']={
+              'id':old_after.get('id'),'kit_id':old_after.get('kit_id'),
+              'sku':old_after.get('sku'),'name':old_after.get('name'),
+              'code_for_site':code_value(old_after),'status':old_after.get('status'),
+          }
+
+          def archive_sku(sku, bucket):
+              row=get_single(sku)
+              vid=mod.s(row.get('id'))
+              status=mod.s(row.get('status')).upper()
+              if status=='ARCHIVED':
+                  report['already_archived'].append(sku)
+                  return row
+              kit.request('POST',f'/v1/variants/{vid}/archive')
+              time.sleep(0.5)
+              after=kit.get_variant(vid)
+              if mod.s(after.get('status')).upper()!='ARCHIVED':
+                  raise RuntimeError(f'{sku}: KIT did not confirm ARCHIVED')
+              bucket.append({
+                  'sku':sku,'kit_id':after.get('kit_id'),'name':after.get('name'),
+                  'code_for_site':code_value(after),'status':after.get('status'),
+              })
+              return after
+
+          # 2) Archive the two newer duplicates.
+          for sku in DUPLICATES:
+              try:
+                  archive_sku(sku, report['duplicates_archived'])
+              except Exception as exc:
+                  report['errors'].append({'sku':sku,'stage':'duplicate_archive','message':str(exc)[:700]})
+
+          # 3) Archive all current Norden cards whose names were identified as "только Москва/Москве".
+          for sku in MOSCOW_SKUS:
+              try:
+                  row=get_single(sku)
+                  name=mod.s(row.get('name'))
+                  folded=name.casefold()
+                  if not ('только' in folded and ('москва' in folded or 'москве' in folded)):
+                      raise RuntimeError(f'safety check failed for name: {name!r}')
+                  archive_sku(sku, report['moscow_only_archived'])
+              except Exception as exc:
+                  report['errors'].append({'sku':sku,'stage':'moscow_archive','message':str(exc)[:700]})
+
+          # 4) Make the persistent Norden mapping point C1918 only to the old card.
+          mapping=mod.load_mapping()
+          old_after=kit.get_variant(mod.s(old.get('id')))
+          for article, variants in list((mapping.get('variants') or {}).items()):
+              mapping['variants'][article]=[
+                  v for v in (variants or [])
+                  if mod.s(v.get('sku')) not in set(DUPLICATES+[OLD_SKU])
+              ]
+              if not mapping['variants'][article]:
+                  mapping['variants'].pop(article,None)
+          mapping.setdefault('variants',{})[CORRECT_CODE]=[{
+              'variant_id':mod.s(old_after.get('id')),
+              'kit_id':old_after.get('kit_id'),
+              'sku':OLD_SKU,
+          }]
+          mod.save_mapping(mapping)
+
+          # 5) Verify targeted cards.
+          verify={}
+          for sku in [OLD_SKU]+DUPLICATES+MOSCOW_SKUS:
+              try:
+                  row=get_single(sku)
+                  verify[sku]={
+                      'status':row.get('status'),
+                      'name':row.get('name'),
+                      'code_for_site':code_value(row),
+                      'kit_id':row.get('kit_id'),
+                  }
+              except Exception as exc:
+                  verify[sku]={'query_error':str(exc)}
+          report['verification']=verify
+          report['finished_at']=datetime.now(timezone.utc).isoformat()
+
+          out=pathlib.Path('norden-kit/cleanup_2026-09-24.json')
+          out.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({
+              'old_card_fixed':report['old_card_fixed'],
+              'duplicates_archived':len(report['duplicates_archived']),
+              'moscow_only_archived':len(report['moscow_only_archived']),
+              'already_archived':len(report['already_archived']),
+              'errors':len(report['errors']),
+          },ensure_ascii=False,indent=2))
+
+          if report['errors']:
+              raise SystemExit(2)
+          PY
+      - name: Commit cleanup report and mapping
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          mkdir -p /tmp/norden-cleanup
+          cp norden-kit/kit_mapping.json /tmp/norden-cleanup/kit_mapping.json 2>/dev/null || true
+          cp norden-kit/cleanup_2026-09-24.json /tmp/norden-cleanup/cleanup.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/norden-cleanup/kit_mapping.json norden-kit/kit_mapping.json 2>/dev/null || true
+          cp /tmp/norden-cleanup/cleanup.json norden-kit/cleanup_2026-09-24.json 2>/dev/null || true
+          git add norden-kit/kit_mapping.json norden-kit/cleanup_2026-09-24.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Cleanup Norden duplicates and Moscow-only cards'
+          git pull --rebase origin main
+          git push
