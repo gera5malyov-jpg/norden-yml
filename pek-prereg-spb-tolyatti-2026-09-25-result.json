@@ -1,0 +1,94 @@
+{
+  "status": "SUBMIT_ATTEMPTED",
+  "senderWarehouseId": "36cf9b60-a415-11dc-a911-000a5e19ccb4",
+  "senderZone": {
+    "http": 200,
+    "data": {
+      "zoneId": "485a244d-92a2-11e5-94cc-00155d668909",
+      "zoneName": "Санкт-Петербург город",
+      "branchUID": "64adbe2c-a185-11dc-a911-000a5e19ccb4",
+      "bitrixId": "463",
+      "branchCode": "СП",
+      "branchTitle": "Санкт-Петербург",
+      "mainWarehouseId": "36cf9b60-a415-11dc-a911-000a5e19ccb4",
+      "warehousePoint": {
+        "latitude": 59.942818,
+        "longitude": 30.440896
+      },
+      "GeoData": {
+        "precision": "bad",
+        "kind": "locality",
+        "Address": {
+          "country_code": "RU",
+          "formatted": "Россия, Санкт-Петербург",
+          "postal_code": null,
+          "Components": [
+            {
+              "kind": "country",
+              "name": "Россия"
+            },
+            {
+              "kind": "province",
+              "name": "Северо-Западный федеральный округ"
+            },
+            {
+              "kind": "province",
+              "name": "Санкт-Петербург"
+            },
+            {
+              "kind": "locality",
+              "name": "Санкт-Петербург"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "requestSummary": {
+    "plannedDate": "2026-09-25",
+    "route": "Санкт-Петербург -> Тольятти, ул. Комсомольская, 101",
+    "description": "Стулья, 30 шт.",
+    "positionsCount": 1,
+    "weightKg": 150.0,
+    "volumeM3": 1.0,
+    "maxDimensionsM": [
+      1.0,
+      0.5,
+      0.5
+    ],
+    "declaredValueRub": 75000,
+    "hardPacking": true,
+    "payer": "receiver"
+  },
+  "response": {
+    "http": 200,
+    "data": {
+      "error": {
+        "fields": [
+          {
+            "Key": "cargos[0].services.sealing",
+            "Value": [
+              "Пожалуйста, заполните поле"
+            ]
+          },
+          {
+            "Key": "cargos[0].services.strapping",
+            "Value": [
+              "Пожалуйста, заполните поле"
+            ]
+          },
+          {
+            "Key": "cargos[0].services.documentsReturning",
+            "Value": [
+              "Пожалуйста, заполните поле"
+            ]
+          }
+        ],
+        "title": "Ошибка валидации",
+        "message": "Детальные сообщения об ошибках приведены отдельно для каждого поля",
+        "error": null,
+        "status": 400
+      }
+    }
+  }
+}
