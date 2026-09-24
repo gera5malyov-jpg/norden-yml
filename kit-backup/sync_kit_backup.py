@@ -672,6 +672,19 @@ def build_source_enrichment(data, fallback_url=None):
     except Exception as exc:
         warnings.append(f"Радуга: закупочная цена не обновлена: {exc}")
 
+    raduga_sku_articles = {}
+    try:
+        raduga_map_payload = _read_json(
+            REPO_ROOT / "kit-backup" / "raduga_kit_sku_article_map.json", {}
+        )
+        raduga_sku_articles = {
+            _source_key(k): clean(v).strip()
+            for k, v in (raduga_map_payload.get("mappings") or {}).items()
+            if clean(k) and clean(v)
+        }
+    except Exception as exc:
+        warnings.append(f"Радуга: карта SKU не загружена: {exc}")
+
     def raduga_purchase(*candidates):
         for raw in candidates:
             value = clean(raw).strip()
@@ -698,6 +711,8 @@ def build_source_enrichment(data, fallback_url=None):
         chars = _variant_char_map(v, char_titles)
         webasyst = (chars.get("webasyst") or [""])[0]
         supplier_article = (chars.get("артикул поставщика") or [""])[0]
+        raduga_article = raduga_sku_articles.get(_source_key(sku), "")
+        raduga_price = raduga_purchase(raduga_article, supplier_article, sku)
 
         if sku_l.startswith("red-"):
             put(vid, "Red Black", red_black_prices.get(_source_key(sku)))
@@ -714,8 +729,8 @@ def build_source_enrichment(data, fallback_url=None):
             put(vid, "Б2Б Фабрика")
         elif webasyst == "333" or brand_n == _norm_title("4 Сезона"):
             put(vid, "4 Сезона")
-        elif raduga_purchase(supplier_article, sku) not in (None, ""):
-            put(vid, "Радуга", raduga_purchase(supplier_article, sku))
+        elif raduga_price not in (None, ""):
+            put(vid, "Радуга", raduga_price)
         elif brand_n == _norm_title("Afina Garden"):
             purchase = afina_prices.get(_source_key(supplier_article or sku))
             put(vid, "Afina Garden", purchase)
