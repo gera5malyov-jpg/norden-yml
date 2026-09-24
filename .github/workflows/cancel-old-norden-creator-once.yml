@@ -1,4 +1,4 @@
-name: Cancel superseded Norden archive once
+name: Emergency stop Norden archive
 
 on:
   push:
@@ -19,4 +19,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api --method POST repos/${{ github.repository }}/actions/runs/36031574061/cancel || true
+          gh api --method POST repos/${{ github.repository }}/actions/runs/36031957938/cancel || true
