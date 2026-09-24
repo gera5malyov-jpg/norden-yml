@@ -1,0 +1,5256 @@
+{
+  "started_at": "2026-09-24T09:12:36.043673+00:00",
+  "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
+  "mode": "daily",
+  "dry_run": false,
+  "rules": {
+    "kit_sku": "AND- + sku поставщика, например AND-070168",
+    "kit_customer_price": "закупка × 1.26",
+    "kit_compare_price": "закупка × 1.80",
+    "kit_minimum_price": "не изменять",
+    "kit_stock_msk": "stock.msk.value -> KIT МСК",
+    "kit_stock_spb": "stock.spb.value -> KIT СПБ",
+    "kit_creation": "создавать независимо от текущего остатка, но только при положительной закупочной цене",
+    "webasyst_creation": "запрещено: только существующие товары типа 'ТД Андрей автовыгрузка'",
+    "webasyst_purchase": "valueOpt выбранного склада -> purchase_price",
+    "webasyst_sale": "закупка × 1.25",
+    "webasyst_compare": "закупка × 1.80",
+    "purchase_selection": "максимальная valueOpt среди МСК/СПб с остатком >0; если оба остатка 0 — максимальная положительная valueOpt МСК/СПб",
+    "missing": "если ранее сопоставленный товар исчез из выгрузки -> остатки 0; цены сохраняются"
+  },
+  "warnings": [],
+  "errors": [
+    {
+      "sku": "000001",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000002",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000006",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000010",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000041",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000057",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000081",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000082",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000083",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000088",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000089",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000093",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000097",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000106",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000113",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000114",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000116",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000118",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000125",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000126",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000128",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000129",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000133",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000134",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000135",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000136",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000137",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000138",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000139",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000164",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000165",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000166",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000167",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000169",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000170",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    }
+  ],
+  "images_uploaded": 1,
+  "image_errors": 0,
+  "source_count_total": 69203,
+  "source_unique_sku": 69058,
+  "source_pages": 14,
+  "source_duplicates": [
+    "343536",
+    "339483",
+    "339484",
+    "339485",
+    "339486",
+    "339487",
+    "343538",
+    "343539",
+    "343540",
+    "343541",
+    "343542",
+    "373510"
+  ],
+  "webasyst": {
+    "type_id": "126",
+    "products_in_type": 10821,
+    "matched": 5763,
+    "price_updates": 5763,
+    "missing_zeroed": 2377,
+    "errors": [
+      {
+        "sku": "388455",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384640",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "387133",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "387147",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384682",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384678",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "385158",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "385302",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384671",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384672",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384673",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384657",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384683",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384647",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384689",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384688",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384645",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384669",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384638",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384677",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384680",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384681",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384687",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384686",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384653",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "384670",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365311",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365312",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365314",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365135",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365141",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365142",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365148",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365149",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365150",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365151",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365152",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365153",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365155",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365156",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365157",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365158",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365159",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365166",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365168",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365171",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365178",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365180",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365182",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "364641",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "364659",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "364660",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "364661",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "364662",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "364646",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "364647",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365395",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "365397",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "364807",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "339795",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150281",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344250",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344251",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344257",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344258",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344259",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344266",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344267",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344273",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344286",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344287",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344288",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "346189",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030715",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030717",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130115",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "339002",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050710",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160590",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170006",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000134",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000135",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220713",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160542",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090154",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120325",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120326",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260911",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260912",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "020934",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "020935",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230074",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230683",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080527",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250316",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "326307",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "326310",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345874",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "291968",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "291974",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "291975",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292462",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292463",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "291581",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292644",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290668",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290669",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292006",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292846",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290659",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290660",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344427",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344429",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344467",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344643",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344698",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344719",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344742",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344768",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344807",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344814",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344943",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344971",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345020",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345072",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345091",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345101",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345117",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345131",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345177",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345191",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345207",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345217",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345252",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345266",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345302",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345306",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345336",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345338",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345346",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345348",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345414",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "345441",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "291372",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000661",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040411",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270850",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090537",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344089",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344090",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344091",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344092",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344103",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344111",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344112",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344117",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344118",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344120",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344133",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344134",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344138",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344140",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344141",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344152",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344153",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344154",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344155",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344159",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344160",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344161",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040347",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "326561",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "326563",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "326564",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140340",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "322617",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "322618",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "322619",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "322620",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "322622",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "324239",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "338937",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "338938",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "324240",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "324241",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "343537",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "339486",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "339487",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "343538",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "343540",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344302",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344303",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344308",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344309",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344311",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344321",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344323",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344315",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344316",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344317",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344326",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344329",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344331",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344332",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344337",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344338",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344352",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344357",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344358",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344359",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344360",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344361",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344364",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344365",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344366",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344377",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344378",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344380",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344391",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344392",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344393",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344384",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344385",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344386",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344387",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344394",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344398",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344399",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344400",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344401",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344405",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344406",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344407",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344408",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344413",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344414",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344415",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030247",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030248",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030250",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100768",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100769",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100770",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100067",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100362",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100363",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100367",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100370",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250535",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250536",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250540",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060601",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110493",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110494",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "312025",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290535",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090414",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090417",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030105",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060190",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070080",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110918",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190787",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130838",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270945",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030791",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130718",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130719",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060064",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060065",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060066",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060067",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "333387",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "333388",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "333799",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "333849",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210157",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210173",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210177",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "333922",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "333937",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "333950",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "333957",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "334028",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "334037",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "334058",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "334082",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "334087",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "334150",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "334176",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "334317",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "334426",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110757",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "334673",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "334835",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290197",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292497",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292331",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292332",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180062",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130510",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200815",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230023",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130554",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210340",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240759",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040818",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120713",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270817",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060211",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344166",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344168",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344169",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344173",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344174",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344175",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344176",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344178",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344180",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344182",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344208",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344209",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344210",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344211",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344239",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344243",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "344244",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210389",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260714",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190965",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090207",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280048",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250943",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110886",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050698",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120614",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200092",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060233",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090902",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270153",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090845",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "120275",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220316",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280294",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220683",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220684",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220685",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220686",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270536",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270538",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030308",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "190487",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "040925",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "200631",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "200632",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "200636",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030555",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030558",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030559",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040928",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "040929",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150370",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "150374",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210306",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "110632",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "210311",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220158",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "220160",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "130446",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "130451",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230028",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230029",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180211",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "180212",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "140303",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230033",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "180216",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200371",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "200376",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060285",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060290",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180450",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180452",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150228",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "110357",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "110361",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "150232",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "270313",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "270317",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "180098",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230773",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "150285",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "150286",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230778",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230797",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230799",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230801",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "290199",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "290203",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "040557",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "180159",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "180163",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "040561",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030992",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030995",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170334",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "170339",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "080060",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "260631",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "260632",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "260635",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "260636",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "050674",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "050679",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030736",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "110578",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "090340",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090341",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130682",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "280999",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "240605",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "160747",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "160749",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "130684",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130685",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030014",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "060855",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "050613",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "050616",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "160921",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "180459",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230448",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "160557",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160558",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100830",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "100831",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "090427",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "090428",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "080719",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "090754",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "090755",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "160738",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "250695",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250696",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "293005",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "050937",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130779",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100131",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100136",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "200004",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "200005",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200006",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200385",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "200386",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200388",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "020905",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "260220",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030512",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030513",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030516",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110450",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "200448",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030885",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050704",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "180484",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "070703",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "070704",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070706",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "260080",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "070148",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "070149",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "070153",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "060415",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "060420",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "260774",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "260775",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "220200",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "220205",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "280282",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "260778",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220866",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220870",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220871",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "020730",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120657",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190482",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130531",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030306",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030307",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "140757",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050194",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170934",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "220219",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220220",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110831",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110832",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "110833",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "120605",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "190601",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "190602",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "210637",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230378",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230380",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "080732",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "080733",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "080734",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170345",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170346",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "170347",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150008",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150009",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050065",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150882",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "150883",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "190303",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "190304",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "190305",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "110464",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "170709",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230520",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230521",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "180628",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "180629",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "050553",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "100916",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "100917",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "140842",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "140843",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "090574",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "090575",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "090576",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "130004",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "130005",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "240318",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "240319",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "040687",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040688",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050554",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "050555",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "200106",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "200107",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "200108",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030182",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030183",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290119",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "070669",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "100688",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "120235",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "220650",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "280594",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "180299",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "230733",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "070842",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040211",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "070157",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "260363",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030295",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "110564",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210883",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "090676",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090677",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220572",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030289",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030290",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "050736",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080225",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "080226",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060036",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "130349",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "220587",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220588",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150175",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230676",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210844",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210845",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280682",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150176",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "020803",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "020804",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040105",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040106",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200665",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110585",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110586",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170465",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170466",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040198",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040199",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120490",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120491",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230035",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140901",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140902",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150417",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150418",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150419",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190537",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140339",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090495",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130537",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130538",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230717",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170036",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170037",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150196",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150197",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120387",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120388",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230718",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050274",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050981",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050982",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100313",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030928",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170329",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "170330",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "210997",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "210998",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200942",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "110467",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "030313",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "250842",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "140285",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "140286",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "140287",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "140756",
+        "message": "Неоднозначный SKU в Webasyst: 3 карточек"
+      },
+      {
+        "sku": "240418",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240419",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180503",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000372",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000373",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000374",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000379",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000380",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240751",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240754",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240755",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260974",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260975",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260980",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260982",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160243",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270301",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200168",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200169",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200170",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210693",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210694",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160245",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160831",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270977",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270978",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060711",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060712",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060713",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080763",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080765",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070584",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250710",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250711",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250712",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200902",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180118",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230720",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230721",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230722",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100442",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100444",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200904",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070895",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180119",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090307",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270509",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270510",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280301",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280303",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240537",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240539",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030224",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030225",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180298",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040679",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040681",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170122",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170124",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000416",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110565",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110566",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140714",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140717",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140718",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100618",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100620",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100621",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100625",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130879",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180710",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100054",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100055",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100056",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100057",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100059",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100061",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100062",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040263",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040264",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260470",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260472",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260476",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260477",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260478",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030135",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030136",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030141",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030142",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070196",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070197",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070199",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070201",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070202",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070204",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230930",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230932",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230934",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140034",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140039",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140040",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060896",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060898",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060900",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090029",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090030",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090032",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090033",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090036",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090037",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120709",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120711",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120712",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260088",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260090",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260094",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260095",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090773",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090775",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060340",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060341",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060344",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060347",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200620",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200627",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200628",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150870",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150875",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150877",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240411",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240413",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090509",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090510",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030811",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030815",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030817",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130655",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130656",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130661",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130662",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110344",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110345",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110347",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060622",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090042",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090043",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090045",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090046",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090050",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040388",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040393",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040395",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240264",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240265",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240268",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240271",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130034",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130036",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130041",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130042",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160797",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160799",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250025",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190913",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290036",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290037",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290038",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290040",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290042",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290043",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290044",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210695",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210696",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210697",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210703",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120116",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120118",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120122",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150057",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150058",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150059",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230581",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230583",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170437",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170438",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170440",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030872",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030874",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030875",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030878",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030880",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140711",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140713",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120271",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120272",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170014",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170015",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170017",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170019",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170020",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170021",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170022",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270371",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270373",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270374",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200135",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200138",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250238",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250240",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090502",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090503",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090505",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050285",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090840",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040180",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070155",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070733",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220169",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100405",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220898",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090534",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090536",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130758",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130760",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270955",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270013",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060075",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060552",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060734",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170958",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170960",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170962",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060739",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160247",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160248",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280178",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280179",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280180",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280182",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280183",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220455",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160251",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150141",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150142",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150144",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150145",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240902",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150205",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150206",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260001",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260003",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260004",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030720",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030721",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030722",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260005",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050839",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050840",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070069",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080269",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080271",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080273",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080274",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000402",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210547",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210548",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230409",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230411",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230412",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160581",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160585",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210552",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130644",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130648",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240680",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240681",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "020846",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "020847",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200779",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100172",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200783",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070174",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260412",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260417",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270008",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250830",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250831",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240893",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240895",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040682",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180203",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180204",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040595",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040597",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090170",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090172",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090173",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000411",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000412",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000413",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230874",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230875",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230876",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180620",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160721",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160021",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160022",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260531",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180173",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180410",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270020",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210261",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210262",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210263",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240969",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240971",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "291279",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130138",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280673",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280674",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030429",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030431",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100406",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260311",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260313",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030941",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030942",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080176",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080177",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080178",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180702",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180704",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270466",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270467",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270472",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "291706",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150455",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150458",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150459",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280113",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292070",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200126",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200127",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140148",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140149",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "291194",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120581",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290571",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100239",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100242",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290789",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290790",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160687",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120217",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230225",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250465",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090066",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140762",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140706",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220908",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290240",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170604",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170605",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110316",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220235",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090121",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060236",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160861",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060527",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090937",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060974",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060983",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080821",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080831",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342351",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342353",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100423",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120977",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342444",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342472",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050901",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342488",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342515",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250407",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342561",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342568",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342585",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292900",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220303",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220305",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342625",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110457",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342643",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342650",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342674",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250793",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342752",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100836",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260461",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260464",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260465",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260466",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342829",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342858",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342872",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160764",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160770",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160771",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342896",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200711",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260592",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260594",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260595",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260598",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260601",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160425",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100211",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100217",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100943",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100945",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140045",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140051",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342955",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342962",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342967",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342968",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "342974",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "020668",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "020669",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030973",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030975",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030979",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230434",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150913",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "343139",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "343140",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060169",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "343226",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160848",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090115",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090117",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090156",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140467",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140468",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180675",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180676",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "240608",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170393",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250558",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250581",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250604",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210513",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210514",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210534",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120841",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120851",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120859",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130860",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070433",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070459",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070463",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070475",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070491",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070492",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220820",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170553",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170554",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230471",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230472",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230473",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080395",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140731",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "140733",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070291",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070292",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070294",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130308",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130309",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040265",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040266",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040267",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040268",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060874",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060875",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210804",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210805",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090970",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090972",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200937",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200939",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080401",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080402",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080404",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120532",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120534",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230767",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230769",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100867",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100870",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200415",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200416",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200417",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200418",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110441",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110442",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110443",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110444",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180471",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180472",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180474",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050471",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050474",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190587",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190588",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190590",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050125",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050126",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050127",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220909",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220910",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100437",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270499",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170428",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170429",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150159",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150160",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150161",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190610",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190612",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110953",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070826",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070827",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260853",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "260854",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200865",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200868",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080387",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080388",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080389",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080390",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280135",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280136",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280137",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220196",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220197",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220198",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "220199",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060311",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160633",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160634",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160635",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "160636",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030986",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030987",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "030988",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190422",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190424",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130785",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130787",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270025",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "270026",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170910",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170552",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170032",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "170035",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290604",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290605",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292867",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090162",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090163",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090166",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "130752",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "291179",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210822",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190500",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090863",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280249",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "280250",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090735",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090736",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "090737",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000002",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000006",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "000010",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230024",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230027",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "230417",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110059",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110060",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080200",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190356",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190357",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190358",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "190793",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "210607",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290303",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200264",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "200265",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "180890",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100322",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "100324",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040111",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040113",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "080136",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "337350",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "070302",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "290452",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110412",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "110413",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "040723",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150613",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150347",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "150351",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "050122",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "328981",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "329149",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "329188",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "329210",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "329216",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "250038",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "329228",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292439",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292352",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "292353",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "060399",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120784",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "120785",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "330448",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      },
+      {
+        "sku": "329766",
+        "message": "Неоднозначный SKU в Webasyst: 2 карточек"
+      }
+    ]
+  },
+  "kit_updates": {
+    "price_updates": 0,
+    "stock_updates": 0,
+    "missing_zeroed": 0,
+    "mapped_without_price": 0
+  },
+  "daily_new_created": 100,
+  "mapped_total": 102,
+  "finished_at": "2026-09-24T10:22:34.822787+00:00"
+}
