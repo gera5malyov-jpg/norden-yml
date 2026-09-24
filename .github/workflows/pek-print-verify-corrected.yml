@@ -1,0 +1,46 @@
+name: Verify corrected PEK print form
+
+on:
+  push:
+    paths:
+      - '.github/workflows/pek-print-verify-corrected.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch and inspect PEK PDF
+        env:
+          PEK_LOGIN: ${{ secrets.PEK_LOGIN }}
+          PEK_API_KEY: ${{ secrets.PEK_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sS --basic --user "$PEK_LOGIN:$PEK_API_KEY" \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            -X POST \
+            -d '{"cargoIndex":"789979048884","type":"big"}' \
+            'https://kabinet.pecom.ru/api/v1/order/print/' > /tmp/print.json
+          python3 - <<'PY'
+          import json,base64
+          d=json.load(open('/tmp/print.json',encoding='utf-8'))
+          if isinstance(d,dict) and d.get('error'):
+              print(json.dumps(d,ensure_ascii=False,indent=2))
+              raise SystemExit(2)
+          if isinstance(d,str):
+              b64=d
+          elif isinstance(d,dict):
+              b64=d.get('data') or d.get('file') or d.get('content')
+          else:
+              b64=None
+          if not b64:
+              print(json.dumps(d,ensure_ascii=False,indent=2))
+              raise SystemExit('No PDF payload')
+          open('/tmp/order.pdf','wb').write(base64.b64decode(b64))
+          PY
+          pdftotext -layout /tmp/order.pdf /tmp/order.txt
+          echo '--- PEK PRINT FORM ---'
+          grep -A8 -B3 -Ei 'Дополнительные услуги|упаков|обреш|защитн' /tmp/order.txt || true
+          echo '--- FULL TEXT ---'
+          cat /tmp/order.txt
