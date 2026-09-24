@@ -35,7 +35,7 @@ jobs:
       - name: Подготовить и проверить скрипт
         run: |
           gzip -dc catalog/sync_norden_chairs_pipeline.py.gz > catalog/sync_norden_chairs_pipeline.py
-          echo "45fe78e854fcc37d644b91f9ca8f52d11a687021403f39131ce2e35fdc52a48d  catalog/sync_norden_chairs_pipeline.py" | sha256sum -c -
+          echo "ce5d42062a3385d30a57bda05474527a53a288f26bc1feb15580174f35bf2c7f  catalog/sync_norden_chairs_pipeline.py" | sha256sum -c -
           python -m py_compile             catalog/sync_norden_chairs_pipeline.py             norden-kit/sync_norden_kit.py             norden-kit/webasyst_n100_to_kit_once.py             webasyst/client.py
 
       - name: Синхронизировать каталог, Webasyst и KIT
