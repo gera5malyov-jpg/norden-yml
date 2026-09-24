@@ -523,12 +523,20 @@ def load_active_ozon_for_sheet() -> list[dict]:
                 if not isinstance(listed, dict):
                     continue
 
+                posting_number = s(listed.get("posting_number"))
                 listed_status = s(listed.get("status"))
                 listed_substatus = s(listed.get("substatus")).lower()
-                if mp.ozon_state(listed_status) in TERMINAL_TARGETS or listed_substatus in OZON_COMPLETED_SUBSTATUSES:
+                listed_target = mp.ozon_state(listed_status)
+                if listed_target in TERMINAL_TARGETS or listed_substatus in OZON_COMPLETED_SUBSTATUSES:
+                    if posting_number:
+                        out.append({
+                            "source": "ozon",
+                            "external_id": posting_number,
+                            "status_raw": listed_status + ("/" + listed_substatus if listed_substatus else ""),
+                            "target_state": "completed" if listed_substatus in OZON_COMPLETED_SUBSTATUSES else listed_target,
+                        })
                     continue
 
-                posting_number = s(listed.get("posting_number"))
                 detail = mp.ozon_posting_detail(headers, posting_number) if kind == "FBS" and posting_number else {}
                 src = detail or listed
 
@@ -536,6 +544,13 @@ def load_active_ozon_for_sheet() -> list[dict]:
                 sub = s(src.get("substatus") or listed.get("substatus"))
                 target_state = mp.ozon_state(status)
                 if target_state in TERMINAL_TARGETS or sub.lower() in OZON_COMPLETED_SUBSTATUSES:
+                    if posting_number:
+                        out.append({
+                            "source": "ozon",
+                            "external_id": posting_number,
+                            "status_raw": status + ("/" + sub if sub else ""),
+                            "target_state": "completed" if sub.lower() in OZON_COMPLETED_SUBSTATUSES else target_state,
+                        })
                     continue
 
                 products = []
