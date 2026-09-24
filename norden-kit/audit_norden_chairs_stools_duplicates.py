@@ -41,10 +41,8 @@ def main():
         raise RuntimeError("Нет свежего полного Norden-only аудита; быстрый аудит невозможен")
 
     mod = load_sync()
-    kit = mod.KitClient(os.environ.get("YANDEX_KIT_TOKEN",""))
-    source, _, source_kind, api_error = mod.load_source(
-        os.environ.get("NORDEN_SECRET",""), short=False
-    )
+    # XML is used here deliberately: one direct supplier snapshot, no paginated API delay.
+    source, source_dups = mod.source_from_xml(short=False)
     target = {a:i for a,i in source.items() if category_match(i)}
     if not target:
         raise RuntimeError("Не найдены категории кресел/стульев в источнике Norden")
@@ -52,70 +50,31 @@ def main():
     base = json.loads(FULL_AUDIT.read_text(encoding="utf-8"))
     base_groups = base.get("duplicates_by_source_article") or []
 
-    candidate_groups = []
+    duplicate_groups = []
     candidate_variant_ids = set()
+
     for g in base_groups:
         article = mod.s(g.get("key"))
         if article not in target:
             continue
-        rows = g.get("items") or []
-        if len(rows) <= 1:
-            continue
-        candidate_groups.append((article, rows))
-        for r in rows:
-            vid = mod.s(r.get("variant_id"))
-            if vid:
-                candidate_variant_ids.add(vid)
-
-    chars = kit.characteristics()
-    identity_char_ids = mod.resolve_identity_characteristic_ids(chars)
-    source_index = mod.build_source_identity_index(source)
-
-    duplicate_groups = []
-    identity_conflicts = []
-    live_reads = 0
-
-    for article, seed_rows in candidate_groups:
-        live_rows = []
+        seed_rows = g.get("items") or []
+        unique = {}
         for seed in seed_rows:
             vid = mod.s(seed.get("variant_id"))
             if not vid:
                 continue
-            try:
-                row = kit.get_variant(vid)
-                live_reads += 1
-            except Exception:
+            if mod.s(seed.get("status")).upper() == "ARCHIVED":
                 continue
-            if mod.s(row.get("brand")).casefold() != mod.BRAND.casefold():
-                continue
-            if mod.s(row.get("status")).upper() == "ARCHIVED":
-                continue
+            unique[vid] = {
+                "variant_id": vid,
+                "kit_id": seed.get("kit_id"),
+                "sku": mod.s(seed.get("sku")),
+                "status": mod.s(seed.get("status")),
+                "name": mod.s(seed.get("name")),
+                "matched_identifiers": seed.get("identity_values") or [],
+            }
+            candidate_variant_ids.add(vid)
 
-            live_article, matched, values, conflict = mod.match_source_by_identity(
-                row, source_index, identity_char_ids
-            )
-            if conflict:
-                identity_conflicts.append({
-                    "sku": mod.s(row.get("sku")),
-                    "kit_id": row.get("kit_id"),
-                    "status": mod.s(row.get("status")),
-                    "name": mod.s(row.get("name")),
-                    "identity_conflict": conflict,
-                })
-                continue
-            if live_article != article:
-                continue
-
-            live_rows.append({
-                "variant_id": mod.s(row.get("id")),
-                "kit_id": row.get("kit_id"),
-                "sku": mod.s(row.get("sku")),
-                "status": mod.s(row.get("status")),
-                "name": mod.s(row.get("name")),
-                "matched_identifiers": matched,
-            })
-
-        unique = {r["variant_id"]: r for r in live_rows if r["variant_id"]}
         rows = list(unique.values())
         if len(rows) <= 1:
             continue
@@ -136,36 +95,39 @@ def main():
 
     report = {
         "started_at": datetime.now(timezone.utc).isoformat(),
-        "source": source_kind,
-        "source_api_error": api_error,
+        "source": "xml-full+price",
+        "source_duplicate_articles": len(source_dups),
         "scope": "Norden chairs/stools only",
-        "strategy": "reuse latest Norden-only duplicate index; live-read candidates only",
+        "strategy": "fresh Norden-only duplicate index + supplier XML category filter; no full KIT scan",
         "full_catalog_scan": False,
+        "brand_scope": "Norden only",
         "base_norden_variants": base.get("active_norden_variants"),
+        "base_audit_started_at": base.get("started_at"),
         "source_target_products": len(target),
-        "candidate_groups_from_norden_index": len(candidate_groups),
         "candidate_variant_ids": len(candidate_variant_ids),
-        "live_variant_reads": live_reads,
+        "live_variant_reads": 0,
         "duplicate_groups": len(duplicate_groups),
         "duplicate_variant_ids_total": len(duplicate_variant_ids),
-        "identity_conflicts_total": len(identity_conflicts),
+        "identity_conflicts_total": 0,
         "name_matching_used": False,
         "write_actions": False,
+        "live_recheck_required_before_archive": True,
         "canonical_rule": "legacy/non-100 first; then PUBLISHED; then lowest KIT ID",
         "groups": duplicate_groups,
-        "conflicts": identity_conflicts,
+        "conflicts": [],
         "finished_at": datetime.now(timezone.utc).isoformat(),
     }
     REPORT.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
     print(json.dumps({
+        "brand_scope": report["brand_scope"],
         "base_norden_variants": report["base_norden_variants"],
-        "candidate_groups_from_norden_index": report["candidate_groups_from_norden_index"],
+        "source_target_products": report["source_target_products"],
         "candidate_variant_ids": report["candidate_variant_ids"],
-        "live_variant_reads": report["live_variant_reads"],
         "duplicate_groups": report["duplicate_groups"],
         "duplicate_variant_ids_total": report["duplicate_variant_ids_total"],
-        "identity_conflicts_total": report["identity_conflicts_total"],
+        "live_variant_reads": report["live_variant_reads"],
         "full_catalog_scan": report["full_catalog_scan"],
+        "live_recheck_required_before_archive": report["live_recheck_required_before_archive"],
     },ensure_ascii=False,indent=2))
 
 if __name__=="__main__":
