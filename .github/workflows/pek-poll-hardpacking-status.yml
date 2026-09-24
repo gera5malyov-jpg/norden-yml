@@ -1,0 +1,59 @@
+name: Poll corrected PEK hard packing status
+
+on:
+  push:
+    paths:
+      - '.github/workflows/pek-poll-hardpacking-status.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Poll PEK cargo until visible
+        env:
+          PEK_LOGIN: ${{ secrets.PEK_LOGIN }}
+          PEK_API_KEY: ${{ secrets.PEK_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 12); do
+            curl -sS --basic --user "$PEK_LOGIN:$PEK_API_KEY" \
+              -H 'Content-Type: application/json; charset=utf-8' \
+              -X POST \
+              -d '{"cargoCodes":["789979048884"]}' \
+              'https://kabinet.pecom.ru/api/v1/cargos/status/' > /tmp/status.json
+            python3 - <<'PY' && exit 0 || rc=$?
+          import json,sys
+          d=json.load(open('/tmp/status.json',encoding='utf-8'))
+          cargos=(d.get('cargos') or d.get('сargos') or []) if isinstance(d,dict) else []
+          if not cargos:
+              print("NOT_VISIBLE")
+              sys.exit(3)
+          c=cargos[0]
+          s=c.get('services') or {}
+          print(json.dumps({
+            'cargoCode':((c.get('cargo') or {}).get('code')),
+            'status':((c.get('info') or {}).get('cargoStatus')),
+            'hardPack':s.get('hardPack'),
+            'insurance':s.get('insurance'),
+            'services':[
+              {
+                'description':x.get('description'),
+                'payerType':x.get('payerType'),
+                'paid':x.get('paid')
+              } for x in (s.get('items') or []) if isinstance(x,dict)
+            ]
+          },ensure_ascii=False,indent=2))
+          if s.get('hardPack') is True:
+              sys.exit(0)
+          sys.exit(4)
+          PY
+            if [ "${rc:-0}" -eq 4 ]; then
+              echo "Cargo visible but hardPack is false"
+              exit 4
+            fi
+            sleep 10
+          done
+          echo "Cargo still not visible after polling"
+          exit 3
