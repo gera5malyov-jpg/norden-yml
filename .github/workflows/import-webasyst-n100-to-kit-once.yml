@@ -1,0 +1,48 @@
+name: Import Webasyst N100 to KIT once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-webasyst-n100-to-kit-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests
+
+      - name: Validate isolated importer
+        run: python -m py_compile norden-kit/webasyst_n100_to_kit_once.py
+
+      - name: Import missing N100 articles from Webasyst to KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: ${{ secrets.WEBASYST_BASE_URL }}
+        run: python norden-kit/webasyst_n100_to_kit_once.py
+
+      - name: Save import report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/webasyst_n100_to_kit_import_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Webasyst N100 to KIT import report"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
