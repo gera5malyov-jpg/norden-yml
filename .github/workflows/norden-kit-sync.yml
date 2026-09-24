@@ -1,4 +1,4 @@
-name: Norden KIT sync
+name: Norden KIT -> Webasyst daily sync
 
 on:
   schedule:
@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'Sync mode'
+        description: 'KIT sync mode'
         required: false
-        default: 'full'
+        default: 'scheduled'
         type: choice
         options:
-          - full
           - scheduled
+          - full
           - price-stock
           - preflight
       rebuild_map:
@@ -20,27 +20,23 @@ on:
         required: false
         default: false
         type: boolean
-  push:
-    branches: [main]
-    paths:
-      - 'norden-kit/sync_norden_kit.py'
-      - '.github/workflows/norden-kit-sync.yml'
 
 permissions:
   contents: write
 
 concurrency:
-  group: norden-kit-price-stock-daily
+  group: norden-kit-webasyst-daily
   cancel-in-progress: false
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 420
 
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
@@ -50,202 +46,88 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run full Norden sync after workflow changes
-        if: github.event_name == 'push'
+      - name: Update Norden in Yandex KIT
+        id: kit
+        continue-on-error: true
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
           NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
         run: |
-          python norden-kit/sync_norden_kit.py \
-            --mode full \
-            --rebuild-map \
-            --max-new 100 \
-            --time-budget-seconds 17000
-
-      - name: Daily Norden sync
-        if: github.event_name == 'schedule'
-        env:
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
-        run: |
-          python norden-kit/sync_norden_kit.py \
-            --mode scheduled \
-            --max-new 250 \
-            --time-budget-seconds 17000
-
-      - name: Run manual sync
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
-        run: |
-          ARGS="--mode ${{ inputs.mode }} --time-budget-seconds 17000"
-          if [ "${{ inputs.rebuild_map }}" = "true" ]; then
-            ARGS="$ARGS --rebuild-map"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            python norden-kit/sync_norden_kit.py \
+              --mode scheduled \
+              --max-new 250 \
+              --time-budget-seconds 17000
+          else
+            ARGS="--mode ${{ inputs.mode }} --time-budget-seconds 17000"
+            if [ "${{ inputs.rebuild_map }}" = "true" ]; then
+              ARGS="$ARGS --rebuild-map"
+            fi
+            python norden-kit/sync_norden_kit.py $ARGS
           fi
-          python norden-kit/sync_norden_kit.py $ARGS
 
-      - name: Commit mapping and sync report
+      - name: Update existing NORDEN-100 in Webasyst from KIT
+        id: webasyst
+        if: steps.kit.outcome == 'success' && (github.event_name == 'schedule' || inputs.mode != 'preflight')
+        continue-on-error: true
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+          NORDEN_WEBASYST_WRITE_DELAY: '0.60'
+        run: python webasyst/sync_norden_to_webasyst.py
+
+      - name: Commit Norden state and reports
         if: always()
         run: |
           git config user.name github-actions
           git config user.email actions@github.com
 
-          mkdir -p /tmp/norden-sync-state
-          cp norden-kit/kit_mapping.json /tmp/norden-sync-state/kit_mapping.json 2>/dev/null || true
-          cp norden-kit/last_sync_report.json /tmp/norden-sync-state/last_sync_report.json 2>/dev/null || true
+          mkdir -p /tmp/norden-chain-state
+          cp norden-kit/kit_mapping.json /tmp/norden-chain-state/kit_mapping.json 2>/dev/null || true
+          cp norden-kit/last_sync_report.json /tmp/norden-chain-state/kit_report.json 2>/dev/null || true
+          cp webasyst/last_norden_webasyst_sync.json /tmp/norden-chain-state/wa_report.json 2>/dev/null || true
 
-          # Generated state files may change while a long sync is running.
-          # Rebase by resetting to current main, then restore only this run's state.
           git fetch origin main
           git reset --hard origin/main
-          cp /tmp/norden-sync-state/kit_mapping.json norden-kit/kit_mapping.json 2>/dev/null || true
-          cp /tmp/norden-sync-state/last_sync_report.json norden-kit/last_sync_report.json 2>/dev/null || true
 
-          git add norden-kit/kit_mapping.json norden-kit/last_sync_report.json 2>/dev/null || true
-          if git diff --cached --quiet; then
-            exit 0
+          cp /tmp/norden-chain-state/kit_mapping.json norden-kit/kit_mapping.json 2>/dev/null || true
+          cp /tmp/norden-chain-state/kit_report.json norden-kit/last_sync_report.json 2>/dev/null || true
+          cp /tmp/norden-chain-state/wa_report.json webasyst/last_norden_webasyst_sync.json 2>/dev/null || true
+
+          git add norden-kit/kit_mapping.json norden-kit/last_sync_report.json webasyst/last_norden_webasyst_sync.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Update Norden KIT and Webasyst sync state"
+            for i in 1 2 3 4 5; do
+              git push origin HEAD:main && break
+              git fetch origin main
+              git rebase origin/main || git rebase --abort
+              sleep $((i * 5))
+            done
           fi
-          git commit -m "Update Norden KIT sync state"
-          for i in 1 2 3 4 5; do
-            git push origin HEAD:main && exit 0
-            git fetch origin main
-            git reset --hard origin/main
-            cp /tmp/norden-sync-state/kit_mapping.json norden-kit/kit_mapping.json 2>/dev/null || true
-            cp /tmp/norden-sync-state/last_sync_report.json norden-kit/last_sync_report.json 2>/dev/null || true
-            git add norden-kit/kit_mapping.json norden-kit/last_sync_report.json 2>/dev/null || true
-            git commit -m "Update Norden KIT sync state" || true
-            sleep $((i * 5))
-          done
-          exit 1
 
-      - name: Send Norden report by email
-        if: always()
+      - name: Send combined Norden report
+        if: always() && (github.event_name == 'schedule' || inputs.mode != 'preflight')
         env:
           SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           RECIPIENT: shop@office-mag.com
-          RUN_STATUS: ${{ job.status }}
-          RUN_ID: ${{ github.run_id }}
+          PHASE: daily
+          KIT_OUTCOME: ${{ steps.kit.outcome }}
+          WA_OUTCOME: ${{ steps.webasyst.outcome }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python webasyst/send_norden_chain_report.py
+
+      - name: Fail if daily chain failed
+        if: always()
+        env:
           EVENT_NAME: ${{ github.event_name }}
+          MODE: ${{ inputs.mode }}
+          KIT_OUTCOME: ${{ steps.kit.outcome }}
+          WA_OUTCOME: ${{ steps.webasyst.outcome }}
         run: |
-          python - <<'PY'
-          import json
-          import os
-          import smtplib
-          import ssl
-          from datetime import datetime, timezone
-          from email.message import EmailMessage
-          from pathlib import Path
-
-          def load_report():
-              p = Path("norden-kit/last_sync_report.json")
-              if not p.exists():
-                  return {}
-              try:
-                  return json.loads(p.read_text(encoding="utf-8"))
-              except Exception:
-                  return {}
-
-          report = load_report()
-          raw_status = (os.getenv("RUN_STATUS") or "unknown").strip().lower()
-          status = {
-              "success": "УСПЕШНО",
-              "failure": "ЗАВЕРШЕНО С ОШИБКАМИ",
-              "cancelled": "ОТМЕНЕНО",
-              "skipped": "ПРОПУЩЕНО",
-          }.get(raw_status, raw_status.upper() or "НЕИЗВЕСТНО")
-
-          errors = report.get("errors") or []
-          warnings = report.get("warnings") or []
-          subject = f"[Norden → KIT] Ежедневное обновление — {status}"
-
-          lines = [
-              "Автоматический отчёт по каталогу Norden → Яндекс KIT",
-              "",
-              f"Результат: {status}",
-              f"Номер запуска GitHub: {os.getenv('RUN_ID','—')}",
-              f"Причина запуска: {os.getenv('EVENT_NAME','—')}",
-              "",
-              "Режим: обновление каталога Norden — цены, наличие и добавление новых товаров.",
-              "Существующие карточки обновляются, новые товары Norden добавляются автоматически.",
-              "",
-              f"Товаров в источнике Norden: {report.get('source_products','—')}",
-              f"Сопоставлено существующих артикулов: {report.get('mapped_existing_articles','—')}",
-              f"Артикулов источника, найденных для обновления: {report.get('mapped_source_articles_for_updates','—')}",
-              f"Обновлено цен: {report.get('price_updates','—')}",
-              f"Обновлено остатков по складам: {report.get('stock_updates','—')}",
-              f"Создано новых карточек: {report.get('new_products_created','—')}",
-              f"Осталось новых товаров для последующих запусков: {report.get('remaining_new_products','—')}",
-              f"Несопоставленных артикулов источника: {report.get('unmapped_source_articles','—')}",
-              f"Ошибок в отчёте: {len(errors)}",
-              f"Предупреждений: {len(warnings)}",
-              "",
-              "Склады наличия: МСК и СПБ привозной.",
-              f"Источник данных: {report.get('source','—')}",
-              f"Начало данных отчёта: {report.get('started_at','—')}",
-              f"Окончание данных отчёта: {report.get('finished_at','—')}",
-          ]
-
-          if errors:
-              lines += ["", "Первые ошибки:"]
-              for e in errors[:10]:
-                  if isinstance(e, dict):
-                      article = e.get("article") or e.get("sku") or ""
-                      stage = e.get("stage") or ""
-                      msg = e.get("message") or str(e)
-                      lines.append(f"- {article} {stage}: {msg}".strip())
-                  else:
-                      lines.append(f"- {e}")
-
-          if warnings:
-              lines += ["", "Первые предупреждения:"]
-              for w in warnings[:10]:
-                  lines.append(f"- {w}")
-
-          run_url = os.getenv("RUN_URL","").strip()
-          if run_url:
-              lines += ["", f"GitHub Actions: {run_url}"]
-
-          lines += ["", f"Время отправки UTC: {datetime.now(timezone.utc).isoformat(timespec='seconds')}"]
-
-          user = (os.getenv("SMTP_USER") or "").strip()
-          password = "".join((os.getenv("SMTP_PASSWORD") or "").split())
-          recipient = (os.getenv("RECIPIENT") or "").strip()
-          if not user or not password:
-              raise SystemExit("Не настроены GMAIL_SMTP_USER и/или GMAIL_APP_PASSWORD.")
-
-          msg = EmailMessage()
-          msg["From"] = user
-          msg["To"] = recipient
-          msg["Subject"] = subject
-          msg.set_content("\n".join(lines))
-
-          ctx = ssl.create_default_context()
-          sent = False
-          failures = []
-          try:
-              with smtplib.SMTP("smtp.gmail.com", 587, timeout=60) as smtp:
-                  smtp.ehlo()
-                  smtp.starttls(context=ctx)
-                  smtp.ehlo()
-                  smtp.login(user, password)
-                  smtp.send_message(msg)
-              sent = True
-          except Exception as exc:
-              failures.append(f"587/STARTTLS: {type(exc).__name__}: {exc}")
-
-          if not sent:
-              try:
-                  with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ctx, timeout=60) as smtp:
-                      smtp.login(user, password)
-                      smtp.send_message(msg)
-                  sent = True
-              except Exception as exc:
-                  failures.append(f"465/SSL: {type(exc).__name__}: {exc}")
-
-          if not sent:
-              raise SystemExit("Не удалось отправить письмо. " + " | ".join(failures))
-          print(f"Письмо отправлено на {recipient}: {subject}")
-          PY
+          test "$KIT_OUTCOME" = "success"
+          if [ "$EVENT_NAME" = "schedule" ] || [ "$MODE" != "preflight" ]; then
+            test "$WA_OUTCOME" = "success"
+          fi
