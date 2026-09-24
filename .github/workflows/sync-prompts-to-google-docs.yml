@@ -1,0 +1,39 @@
+name: Sync prompts to Google Docs
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'prompts-library/**'
+      - 'scripts/sync_prompts_to_google_docs.py'
+      - '.github/workflows/sync-prompts-to-google-docs.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-prompts-to-google-docs
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests google-auth
+
+      - name: Sync prompt tabs
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_PROMPTS_DOC_ID: '1AeE82VTQ60EC6k99uwHNyMb72k2w6mAZke4W1HVm2As'
+        run: python scripts/sync_prompts_to_google_docs.py
