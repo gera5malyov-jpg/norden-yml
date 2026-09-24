@@ -1,12 +1,10 @@
 name: Каталог — Ozon Norden → Google Sheets
 
 on:
-  push:
-    paths:
-      - '.github/workflows/catalog-ozon-norden-export.yml'
   workflow_dispatch:
   push:
     paths:
+      - '.github/workflows/catalog-ozon-norden-export.yml'
       - 'catalog/sheet_run_trigger.txt'
   issues:
     types: [opened]
