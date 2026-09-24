@@ -1,0 +1,31 @@
+name: ТД Андрей — проверить обработку категорий
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tdandrey-category-code-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Показать функцию категорий
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64,gzip
+          root=Path('tdandrey-kit')
+          data=''.join((root/f'payload.{i:02d}').read_text().strip() for i in range(1,5))
+          src=gzip.decompress(base64.b64decode(data)).decode()
+          lines=src.splitlines()
+          for i,line in enumerate(lines):
+              if line.startswith('def category_path'):
+                  for j in range(i,min(len(lines),i+35)):
+                      print(f'{j+1:04d}: {lines[j]}')
+                  break
+          PY
