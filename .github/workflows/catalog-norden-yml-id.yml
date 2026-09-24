@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   fill:
@@ -20,9 +21,21 @@ jobs:
           python-version: '3.12'
       - name: Установить зависимости
         run: pip install --disable-pip-version-check requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
+      - name: Остановить старые запуски YML ID
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for run_id in 36040491927 36040803380; do
+            curl -sS -X POST \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/runs/$run_id/cancel" || true
+          done
+
       - name: Заполнить YML ID
         env:
-          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
           CATALOG_SHEET: 'Норден'
