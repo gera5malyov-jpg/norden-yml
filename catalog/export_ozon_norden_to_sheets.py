@@ -13,6 +13,7 @@ SA_JSON = os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]
 OWNER_EMAIL = os.environ.get("CATALOG_OWNER_EMAIL", "gera5malyov@gmail.com").strip()
 TITLE = os.environ.get("CATALOG_TITLE", "Каталог").strip()
 SHEET = os.environ.get("CATALOG_SHEET", "Норден").strip()
+SPREADSHEET_ID = os.environ.get("CATALOG_SPREADSHEET_ID", "").strip()
 REPORT = Path("catalog/last_run.json")
 BRAND_ATTR_ID = 85
 
@@ -242,15 +243,18 @@ def main():
     scopes = ["https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive"]
     gc = gspread.authorize(Credentials.from_service_account_info(creds_info, scopes=scopes))
 
-    matches = gc.openall(TITLE)
-    if matches:
-        sh = matches[0]
+    if SPREADSHEET_ID:
+        sh = gc.open_by_key(SPREADSHEET_ID)
     else:
-        sh = gc.create(TITLE)
-        try:
-            sh.share(OWNER_EMAIL, perm_type="user", role="writer", notify=False)
-        except Exception:
-            pass
+        matches = gc.openall(TITLE)
+        if matches:
+            sh = matches[0]
+        else:
+            sh = gc.create(TITLE)
+            try:
+                sh.share(OWNER_EMAIL, perm_type="user", role="writer", notify=False)
+            except Exception:
+                pass
 
     try:
         ws = sh.worksheet(SHEET)
