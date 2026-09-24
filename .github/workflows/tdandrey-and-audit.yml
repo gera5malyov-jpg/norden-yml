@@ -29,8 +29,9 @@ jobs:
           root=Path('tdandrey-kit')
           data=''.join((root/f'payload.{i:02d}').read_text().strip() for i in range(1,5))
           src=gzip.decompress(base64.b64decode(data)).decode()
-          for i,line in enumerate(src.splitlines()):
-              if line.startswith('class ') or line.startswith('def '):
-                  if any(x in line.lower() for x in ('kit','variant','product','category')):
-                      print(f'{i+1:04d}: {line}')
+          lines=src.splitlines()
+          for a,b in ((194,313),(328,347),(478,559)):
+              print(f'--- {a+1}-{b+1} ---')
+              for i in range(a,min(len(lines),b+1)):
+                  print(f'{i+1:04d}: {lines[i]}')
           PY
