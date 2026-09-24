@@ -1,0 +1,57 @@
+name: STOP supplier automation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/stop-supplier-all-now.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  stop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel and disable supplier workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          gh api --paginate "repos/$REPO/actions/workflows?per_page=100"             --jq '.workflows[] | select(((.name // "") + " " + (.path // "")) | ascii_downcase | contains("norden")) | [.id,.name,.path,.state] | @tsv'             > /tmp/targets.tsv
+
+          echo "TARGET_WORKFLOWS=$(wc -l < /tmp/targets.tsv)"
+          cat /tmp/targets.tsv || true
+          cut -f1 /tmp/targets.tsv | sort -u > /tmp/ids.txt
+
+          gh api --paginate "repos/$REPO/actions/runs?per_page=100"             --jq '.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="requested" or .status=="pending") | [.id,.workflow_id,.name,.status] | @tsv'             > /tmp/active.tsv
+
+          cancelled=0
+          while IFS=$'\t' read -r run_id workflow_id run_name run_status; do
+            [ -z "${run_id:-}" ] && continue
+            [ "$run_id" = "$CURRENT_RUN_ID" ] && continue
+            if grep -qx "$workflow_id" /tmp/ids.txt; then
+              echo "FORCE_CANCEL $run_id | $run_name | $run_status"
+              gh api --method POST "repos/$REPO/actions/runs/$run_id/force-cancel" || true
+              cancelled=$((cancelled+1))
+            fi
+          done < /tmp/active.tsv
+          echo "CANCEL_REQUESTS=$cancelled"
+
+          disabled=0
+          while IFS=$'\t' read -r workflow_id workflow_name workflow_path workflow_state; do
+            [ -z "${workflow_id:-}" ] && continue
+            echo "DISABLE $workflow_id | $workflow_name | $workflow_path | $workflow_state"
+            gh api --method PUT "repos/$REPO/actions/workflows/$workflow_id/disable"
+            disabled=$((disabled+1))
+          done < /tmp/targets.tsv
+          echo "DISABLE_REQUESTS=$disabled"
+
+          left="$(gh api --paginate "repos/$REPO/actions/workflows?per_page=100"             --jq '[.workflows[] | select((((.name // "") + " " + (.path // "")) | ascii_downcase | contains("norden")) and .state=="active")] | length')"          
+          echo "ACTIVE_NORDEN_WORKFLOWS_AFTER=$left"
+          test "$left" = "0"
