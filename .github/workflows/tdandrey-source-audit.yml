@@ -23,6 +23,9 @@ jobs:
           data=''.join((root/f'payload.{i:02d}').read_text().strip() for i in range(1,5))
           src=gzip.decompress(base64.b64decode(data)).decode()
           lines=src.splitlines()
+          print('=== WEBASYST BLOCK 400-480 ===')
+          for j in range(399, min(len(lines),480)):
+              print(f'{j+1:04d}: {lines[j]}')
           keys=('patch_variant(', 'bulk_prices(', 'bulk_stocks(', 'update_prices(', 'update_stocks(', 'shop.product.update', 'shop.product.skus.update', 'create_variant(', 'create_product(')
           for i,line in enumerate(lines):
               if any(k in line for k in keys):
