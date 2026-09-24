@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: norden-kit-price-stock-daily
+  group: norden-cleanup-once
   cancel-in-progress: false
 
 jobs:
