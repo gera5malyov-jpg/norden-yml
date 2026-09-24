@@ -1,0 +1,36 @@
+name: ТД Андрей — аудит AND карточек KIT
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tdandrey-and-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Показать доступные методы KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64,gzip,re
+          root=Path('tdandrey-kit')
+          data=''.join((root/f'payload.{i:02d}').read_text().strip() for i in range(1,5))
+          src=gzip.decompress(base64.b64decode(data)).decode()
+          for i,line in enumerate(src.splitlines()):
+              if line.startswith('class ') or line.startswith('def '):
+                  if any(x in line.lower() for x in ('kit','variant','product','category')):
+                      print(f'{i+1:04d}: {line}')
+          PY
