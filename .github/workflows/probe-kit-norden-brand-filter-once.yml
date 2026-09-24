@@ -1,0 +1,64 @@
+name: Probe KIT Norden brand filter once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-kit-norden-brand-filter-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Probe brand filters
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json,os,requests,time
+          from pathlib import Path
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          base='https://api.kit.yandex.net/v1/variants'
+          tests=[
+            ('brand',{'brand':'Norden'}),
+            ('brands',{'brands':'Norden'}),
+            ('brand_name',{'brand_name':'Norden'}),
+          ]
+          out={}
+          for name,extra in tests:
+              p={'page':1,'per_page':100,**extra}
+              r=requests.get(base,headers=h,params=p,timeout=60)
+              try:j=r.json()
+              except Exception:j={}
+              rows=j.get('variants') or j.get('items') or j.get('data') or []
+              if isinstance(rows,dict): rows=rows.get('items') or []
+              brands=[str(x.get('brand') or '') for x in rows if isinstance(x,dict)]
+              total=j.get('total') or j.get('total_count') or (j.get('meta') or {}).get('total')
+              out[name]={
+                'status':r.status_code,
+                'total':total,
+                'count':len(rows),
+                'all_norden':bool(rows) and all(b.casefold()=='norden' for b in brands),
+                'sample_skus':[x.get('sku') for x in rows[:10] if isinstance(x,dict)],
+                'sample_brands':brands[:10],
+              }
+          Path('norden-kit/kit_norden_brand_filter_probe.json').write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Save probe
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/kit_norden_brand_filter_probe.json
+          git commit -m "Probe KIT Norden brand filter" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
