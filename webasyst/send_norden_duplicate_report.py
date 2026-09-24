@@ -14,13 +14,13 @@ def main():
     workflow = (os.getenv("SOURCE_WORKFLOW") or "").strip()
     daily = workflow == "Norden KIT -> Webasyst daily sync"
 
-    groups_article = int(data.get("duplicate_groups_by_norden_article") or 0)
-    groups_code = int(data.get("duplicate_groups_by_code_for_site") or 0)
-    groups_sku = int(data.get("duplicate_groups_by_exact_sku") or 0)
     dup_variants = int(data.get("duplicate_variant_ids_total") or 0)
+    by_field_counts = data.get("duplicate_groups_by_field") or {}
+    source_groups = int(data.get("duplicate_groups_by_source_article") or 0)
+    total_groups = source_groups + sum(int(v or 0) for v in by_field_counts.values())
 
     # Daily runs stay quiet if everything is clean. Initial/resume runs always send a result.
-    if daily and dup_variants == 0 and groups_article == 0 and groups_code == 0 and groups_sku == 0:
+    if daily and dup_variants == 0 and total_groups == 0:
         print("Дубли Norden не найдены; отдельное ежедневное письмо не требуется.")
         return 0
 
@@ -32,33 +32,51 @@ def main():
         f"Результат: {status}",
         f"Исходный процесс: {workflow or '—'}",
         f"Активных карточек Norden в KIT: {data.get('active_norden_variants', '—')}",
-        f"Групп дублей по артикулу Norden: {groups_article}",
-        f"Групп дублей по «Код для сайта»: {groups_code}",
-        f"Групп дублей по точному SKU: {groups_sku}",
+        f"Групп дублей по сопоставленному товару Norden: {source_groups}",
         f"Карточек, попавших хотя бы в одну группу дублей: {dup_variants}",
+        f"Конфликтов идентификаторов: {data.get('identity_conflicts', '—')}",
         f"Активных Norden без уверенного сопоставления с источником: {data.get('unresolved_active_norden', '—')}",
+        f"Сопоставление по названию: {data.get('name_matching_policy', 'NO')}",
         "",
-        "Автоматическое удаление/архивация не выполнялись.",
+        "Группы дублей по полям:",
+    ]
+    if by_field_counts:
+        for field, count in sorted(by_field_counts.items()):
+            lines.append(f"- {field}: {count}")
+    else:
+        lines.append("- нет")
+
+    lines += [
+        "",
+        "Автоматическое удаление не выполнялось. Неканонические дубли должны оставаться с остатком 0 и быть скрыты/архивированы, если KIT это позволяет.",
         f"GitHub Actions: {os.getenv('RUN_URL', '—')}",
     ]
 
     if dup_variants:
         lines += ["", "Первые найденные группы:"]
         shown = 0
-        for title, key in (
-            ("Артикул Norden", "duplicates_by_norden_article"),
-            ("Код для сайта", "duplicates_by_code_for_site"),
-            ("SKU", "duplicates_by_exact_sku"),
-        ):
-            for group in data.get(key) or []:
+
+        for group in data.get("duplicates_by_source_article") or []:
+            if shown >= 15:
+                break
+            items = group.get("items") or []
+            details = "; ".join(
+                f"{x.get('sku') or 'без SKU'} / KIT {x.get('kit_id') or '—'} / {x.get('status') or '—'}"
+                for x in items[:6]
+            )
+            lines.append(f"Товар Norden: {group.get('key')} — {details}")
+            shown += 1
+
+        for field, groups in (data.get("duplicates_by_field") or {}).items():
+            for group in groups or []:
                 if shown >= 15:
                     break
                 items = group.get("items") or []
                 details = "; ".join(
-                    f"{x.get('sku') or 'без SKU'} / KIT {x.get('kit_id') or '—'}"
+                    f"{x.get('sku') or 'без SKU'} / KIT {x.get('kit_id') or '—'} / {x.get('status') or '—'}"
                     for x in items[:6]
                 )
-                lines.append(f"{title}: {group.get('key')} — {details}")
+                lines.append(f"{field}: {group.get('key')} — {details}")
                 shown += 1
             if shown >= 15:
                 break
