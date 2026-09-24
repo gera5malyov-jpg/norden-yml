@@ -1,0 +1,1239 @@
+{
+  "status": "ok",
+  "dry_run": false,
+  "source": "https://s3.q-parser.ru/automata/612af8f7ec414c/treez.ru.xml",
+  "supplier": "treez",
+  "brand": "TREEZ",
+  "interval_days": 14,
+  "sku_rule": "TREEZ-<код KIT>",
+  "customer_price_rule": "цена Treez × 0.97",
+  "old_price_rule": "цена Treez",
+  "stock_rule": {
+    "МСК": 100,
+    "СПБ привозной": 100
+  },
+  "missing_from_source_rule": "остаток 0",
+  "source_offers": 1405,
+  "created": 1226,
+  "updated_existing": 179,
+  "existing_media_repaired": 49,
+  "price_updates": 1405,
+  "stock_updates": 2810,
+  "zeroed_missing": 0,
+  "images_uploaded": 5854,
+  "gallery_images_found": 5882,
+  "image_errors": 28,
+  "videos_uploaded": 0,
+  "video_errors": 266,
+  "duplicate_source_codes": [],
+  "errors": [],
+  "warnings": [
+    {
+      "source_code": "10.36805N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.36804N-6.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.36806N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.36804N.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.44105N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.44104N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d056-49da-75c3-9d63-2f1f995fe1a2"
+    },
+    {
+      "source_code": "10.44106N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.44104N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d056-7030-73a0-9ea2-7d3f0c914549"
+    },
+    {
+      "source_code": "10.31805N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.31805N.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.31805N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.31805N.mp4",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.31806N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.31805N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d05a-69bb-7430-a11d-d07ca9135c7a"
+    },
+    {
+      "source_code": "10.31807N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.31805N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d05a-a750-76b8-a463-19a1ce6e5b13"
+    },
+    {
+      "source_code": "10.31808N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.31805N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d05a-e840-7afc-82af-4ae48e691414"
+    },
+    {
+      "source_code": "10.51809N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.51809N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d062-77b7-73a0-877f-2707515a12af"
+    },
+    {
+      "source_code": "10.47902N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.47902N.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.47902N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.47902N-1.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.56104N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.56103N-8.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.56104N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1500_1900/10.56103N-10.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.56105N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.56103N-8.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.56105N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.56103N-9.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.56106N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.56103N-1.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.56106N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.56103N-6.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.44703N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.44702N.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.445XXL",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.445XXL.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d06b-fa78-7e57-a492-b30f561eec70"
+    },
+    {
+      "source_code": "10.44540N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1500_1900/10.44540_50_60_70_80N-2.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.44540N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.44540_50_60_70_80N.mp4",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.44550N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1500_1900/10.44540_50_60_70_80N-2.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.44550N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.44540_50_60_70_80N.mp4",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.44560N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1500_1900/10.44540_50_60_70_80N-2.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.44560N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.44540_50_60_70_80N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d06e-73c8-7051-ac03-ff9b62a3ecdd"
+    },
+    {
+      "source_code": "10.44570N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.44540_50_60_70_80N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d06e-dfc2-7963-8cbc-ada7d5426596"
+    },
+    {
+      "source_code": "10.44580N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1500_1900/10.44540_50_60_70_80N-3.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.44580N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.44540_50_60_70_80N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d06f-6ebb-700d-b43d-f2919df82724"
+    },
+    {
+      "source_code": "10.0224073/3N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224073.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d06f-e6bc-76c7-a6b8-4bad2d64171b"
+    },
+    {
+      "source_code": "10.0224073/4N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224073.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d070-563a-7b67-b35b-39f2f2dbb0fd"
+    },
+    {
+      "source_code": "10.0224073/5N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224073.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d071-069f-79cf-8932-5e091281ddae"
+    },
+    {
+      "source_code": "10.0224073/6N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224073.mp4",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.0224073/7N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224073.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d072-2273-7f02-b0c0-281e72f2ff9a"
+    },
+    {
+      "source_code": "10.0224074/1N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.0224074-2.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.0224074/1N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224074.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d072-bb66-714c-b747-dd84f1444357"
+    },
+    {
+      "source_code": "10.0224074/2N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.0224074-4.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.0224074/2N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224074.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d073-41c1-74aa-997d-26729ea5e5a7"
+    },
+    {
+      "source_code": "10.0224074/3N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224074.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d073-e254-7a38-a8cb-1e7c0337159f"
+    },
+    {
+      "source_code": "10.338-1434UV",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.338-1434_35_36UV.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d074-a8d1-7bf7-9866-6dc6aec054df"
+    },
+    {
+      "source_code": "10.338-1435UV",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.338-1434_35_36UV.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d075-1cde-7bc9-8879-f8bc3a6b2114"
+    },
+    {
+      "source_code": "10.338-1436UV",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.338-1434_35_36UV.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d075-87d7-7dfa-916d-2cd0d7cce8ab"
+    },
+    {
+      "source_code": "10.091831N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1063_1200/10.091829_30_31N-1.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "10.0624238N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0624238N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d078-2589-7e27-87bc-dd5e4bc2b47d"
+    },
+    {
+      "source_code": "10.0624239N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0624239N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d078-91fc-7664-ac18-8d181ab7606c"
+    },
+    {
+      "source_code": "10.0624237N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0624237N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d078-d868-742f-b3fe-41b2c1f21b9c"
+    },
+    {
+      "source_code": "10.48107N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.48107N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d079-19e4-71d7-bf07-7cc7f67435aa"
+    },
+    {
+      "source_code": "20.1250R-UV",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.1250R-UV.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d079-5d78-716c-bd34-a362051694ee"
+    },
+    {
+      "source_code": "20.1250CR-UV",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.1250CR-UV.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d079-8b2a-7ba2-9e88-a0d7d97580a7"
+    },
+    {
+      "source_code": "20.5933N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.5933N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d079-ff62-734b-a799-fe2b124cd079"
+    },
+    {
+      "source_code": "20.091404N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.091404N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d07b-a627-7d57-a272-0bd394c25f46"
+    },
+    {
+      "source_code": "20.5938N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.5938N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d07c-50d5-7a09-9f0b-2e18ca93b577"
+    },
+    {
+      "source_code": "20.0224072WH-S",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.0224072WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d07d-3e3d-7823-b10f-d5a3bb1290d6"
+    },
+    {
+      "source_code": "20.0224072WH-M",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.0224072WH.mp4",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "20.0224072WH-L",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.0224072WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d07e-0bfb-7a28-9a89-78522814b146"
+    },
+    {
+      "source_code": "20.0224070N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.0224070N.mp4",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "20.0224071N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.0224071N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d07f-7612-7367-b8f1-8275cb203175"
+    },
+    {
+      "source_code": "20.0224070GG",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.0224070GG.mp4",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "20.0624240N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.0624240N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d080-0209-7589-b7ba-7fb5bc6f6244"
+    },
+    {
+      "source_code": "20.6280N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.6280N_20.6282N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d080-7446-771e-81cf-070cb40e844f"
+    },
+    {
+      "source_code": "20.6282N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.6280N_20.6282N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d080-998d-7903-abe2-6ef7936aad7e"
+    },
+    {
+      "source_code": "20.0224080",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.0224080-1.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d081-f5fc-7807-b173-2df349c4fa1e"
+    },
+    {
+      "source_code": "10.0224076/2N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224076N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d082-410f-762d-9540-9cc1501a292c"
+    },
+    {
+      "source_code": "10.0224076/3N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224076N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d082-8923-7889-aa7c-dc089a4b5a55"
+    },
+    {
+      "source_code": "10.0224075/2GG",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224075GG.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d082-e152-715b-beb1-ad3efb138ea1"
+    },
+    {
+      "source_code": "10.0224075/3GG",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.0224075GG.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d083-2a53-73e8-b863-15aa0e89f696"
+    },
+    {
+      "source_code": "20.0224078N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.0224078N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d088-0a8a-7aea-a492-2b2d068f6beb"
+    },
+    {
+      "source_code": "30.0610036",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/30.0610036.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d088-fee5-7b1d-8177-0e72c9d76af6"
+    },
+    {
+      "source_code": "20.0624241N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.0624241N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d08a-8e03-7154-8372-8496470a1c8d"
+    },
+    {
+      "source_code": "20.071611",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.071611_12.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d08b-380f-7cd0-b37d-9ed0d7217d51"
+    },
+    {
+      "source_code": "20.071612",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.071611_12.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d08b-c3ff-7309-aa55-cab1e784af55"
+    },
+    {
+      "source_code": "10.46302N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/10.46302N-1.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "20.1010XL",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/20.1010-1.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "20.1014N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/20.1014-2.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "20.1014XL",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/20.1014-1.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "20.0619233WH",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/20.0619233WH-5.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "20.0619233WH",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.0619233WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d090-90c4-7589-9950-23fdc2d61cc2"
+    },
+    {
+      "source_code": "20.1016N",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1500_1900/20.1016N-2.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "20.1016N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.1016N.mp4",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "20.1040N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.1040N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d093-cb6a-76db-add3-a8aa82d14739"
+    },
+    {
+      "source_code": "20.1040L-090",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.1040L.mp4",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "20.1040L-120",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.1040L.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d094-e1d0-7411-8763-b4efd6cf2c0e"
+    },
+    {
+      "source_code": "20.53004N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.53004N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d095-2f98-79a6-997d-1e2cb731804d"
+    },
+    {
+      "source_code": "10.51103N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.51103N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d095-8d40-79a3-9107-9bb14dc84db7"
+    },
+    {
+      "source_code": "10.51002N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.51002N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d095-bef6-797b-8db4-22e9c164ed70"
+    },
+    {
+      "source_code": "10.51004N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/10.51004N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d096-33b6-70c5-8f49-1f5099f0e462"
+    },
+    {
+      "source_code": "20.1156N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.1156N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d096-951d-7798-9900-99cd02c8028c"
+    },
+    {
+      "source_code": "20.1157N",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.1157N.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d096-bf3a-77c2-9dfd-4fb2e5d274e0"
+    },
+    {
+      "source_code": "20.1252R-UV",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.1252R-UV.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0a7-43ab-72f3-8671-7c0fd46c90e5"
+    },
+    {
+      "source_code": "20.1252CR-UV",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/20.1252CR-UV.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0a7-80b8-7b75-8f88-57a9129534b9"
+    },
+    {
+      "source_code": "41.3320-02-028-LG-31",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3320-02-028-LG.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0b1-f557-7450-b5b9-dfc6394eb9de"
+    },
+    {
+      "source_code": "41.3320-02-028-LG-41",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3320-02-028-LG.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0b2-33bc-7e0e-9918-1cd8bd0c775b"
+    },
+    {
+      "source_code": "41.3320-02-028-LG-53",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3320-02-028-LG.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0b2-71b5-7997-bde7-c4cc5e7fa005"
+    },
+    {
+      "source_code": "41.3319-02-020-BE-61",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3319-02-020-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0b3-48b7-7bed-8dbb-1faaa21d69fd"
+    },
+    {
+      "source_code": "41.3319-02-020-BE-90",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3319-02-020-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0b3-a521-70e0-b1eb-0677abe2e777"
+    },
+    {
+      "source_code": "41.3317-02-010-BE-60",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-02-010-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0b5-9409-74dc-9b7b-4a1cdddc93aa"
+    },
+    {
+      "source_code": "41.3317-02-010-BE-75",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-02-010-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0b5-dbc2-7ccf-b753-65ea5823c5d7"
+    },
+    {
+      "source_code": "41.3317-02-010-BE-97",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-02-010-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0b6-21cf-77d2-bc43-d6503d8855ac"
+    },
+    {
+      "source_code": "41.3321-08-048-BLCK-075",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-08-048-BLCK.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0be-8827-7f14-b2b5-d4408d5108ec"
+    },
+    {
+      "source_code": "41.3321-08-048-BLCK-097",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-08-048-BLCK.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0be-f7ac-7458-aaa2-01b927b698dc"
+    },
+    {
+      "source_code": "41.3321-05-132-WH-32",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-05-132-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0bf-d1cd-7e52-8692-7281a9014ddb"
+    },
+    {
+      "source_code": "41.3321-05-132-WH-49",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-05-132-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0c0-2eb7-74c5-ab4c-d639a658889a"
+    },
+    {
+      "source_code": "41.3320-05-036-WH-075",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3320-05-036-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0c1-8800-7e60-ae71-8524e7fbdf00"
+    },
+    {
+      "source_code": "41.3320-05-036-WH-097",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3320-05-036-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0c1-fe22-7465-839e-31af76bda861"
+    },
+    {
+      "source_code": "41.3320-05-036-WH-117",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3320-05-036-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0c2-66bc-7355-9821-c19e5b4c5bf7"
+    },
+    {
+      "source_code": "41.33-04-24-131-LCGD-51",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-04-24-131-LCGD.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0c6-ee11-771d-a94d-f042bf5002d9"
+    },
+    {
+      "source_code": "41.33-04-24-131-LCGD-68",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-04-24-131-LCGD.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0c7-5dda-7378-a497-da1fe5d5d81b"
+    },
+    {
+      "source_code": "41.33-04-24-131-LCSV-51",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-04-24-131-LCSV.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0c7-d56e-7bf0-968e-e67c7cb949ce"
+    },
+    {
+      "source_code": "41.33-04-24-131-LCSV-68",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-04-24-131-LCSV.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0c8-4abd-7c41-be6a-578c829f1861"
+    },
+    {
+      "source_code": "41.3317-04-014-BRS-72",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-04-014-BRS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0cb-c780-7881-b03f-06ed54b1f79d"
+    },
+    {
+      "source_code": "41.3317-04-014-BRS-95",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-04-014-BRS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0cc-4c68-702a-ac50-7874ffe1dc46"
+    },
+    {
+      "source_code": "41.3319-04-021-BRS-120",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3319-04-021-BRS-120.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0cf-c09f-71e7-865b-c9e24e7156e9"
+    },
+    {
+      "source_code": "41.3320-04-031-BRS-30",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3320-04-031-BRS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0d1-bd6d-7630-a8a6-74710404f975"
+    },
+    {
+      "source_code": "41.3320-04-031-BRS-40",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3320-04-031-BRS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0d2-03e8-7ee5-b556-56e8645c24a1"
+    },
+    {
+      "source_code": "41.3320-04-031-BRS-50",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3320-04-031-BRS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0d2-4a77-7bbd-baa2-01c99f9a81cc"
+    },
+    {
+      "source_code": "41.3321-07-047-GRP-075",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-07-047-GRP.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0d6-558c-7350-a3fc-006fba751e78"
+    },
+    {
+      "source_code": "41.3321-07-047-GRP-097",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-07-047-GRP.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0d6-cef7-7426-9959-64d54c8f7a94"
+    },
+    {
+      "source_code": "41.33-10-21-062-CS-72",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-10-21-062-CS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0d9-d944-740f-a0ea-152eb42dd5b5"
+    },
+    {
+      "source_code": "41.33-10-21-062-CS-95",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-10-21-062-CS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0da-42cd-7d15-a0be-4a783870f402"
+    },
+    {
+      "source_code": "41.33-10-21-061-CS-30",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-10-21-061-CS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0da-a4b6-768f-8568-b36cbc5d7507"
+    },
+    {
+      "source_code": "41.33-10-21-061-CS-40",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-10-21-061-CS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0da-ff1a-7108-b6c0-5b80a698f103"
+    },
+    {
+      "source_code": "41.33-10-21-061-CS-50",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-10-21-061-CS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0db-53ad-748d-bc3f-977544ab8df2"
+    },
+    {
+      "source_code": "41.3317-01-003-GR-30",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-01-003-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0dd-d42d-7cb0-8cc2-df5d244a4232"
+    },
+    {
+      "source_code": "41.3317-01-003-GR-40",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-01-003-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0de-1ea7-774a-aeb8-e67cede8624a"
+    },
+    {
+      "source_code": "41.3317-01-003-GR-49",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-01-003-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0de-6446-799f-9619-a9c45d461b17"
+    },
+    {
+      "source_code": "41.3321-11-067-LBR-40",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-11-067-LBR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e0-6c26-7d1c-a67f-ad358578cb5d"
+    },
+    {
+      "source_code": "41.3321-11-067-LBR-56",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-11-067-LBR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e0-b7f8-7096-b9d7-08eceee0c4cd"
+    },
+    {
+      "source_code": "41.3317-03-011-WB-65",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-03-011-WB.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e1-0916-7a43-9d0c-9f4b789928c2"
+    },
+    {
+      "source_code": "41.3317-03-011-WB-80",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-03-011-WB.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e1-59b2-75d7-bfb2-4fc55f1c605d"
+    },
+    {
+      "source_code": "41.3317-03-012-WB-22",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-03-012-WB.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e2-1be2-70be-8bde-3834993367d5"
+    },
+    {
+      "source_code": "41.3317-03-012-WB-30",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-03-012-WB.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e2-53db-73fb-b66c-f5df3c787ff5"
+    },
+    {
+      "source_code": "41.3317-03-012-WB-40",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-03-012-WB.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e2-97e3-722d-b3e3-85b1b6668110"
+    },
+    {
+      "source_code": "41.3317-03-012-WB-49",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-03-012-WB.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e2-d81f-75d7-b11c-4a9d00785e34"
+    },
+    {
+      "source_code": "41.3320-06-044-BB-49",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3320-06-044-BB.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e3-3d1b-7c18-8a99-4ede3022a9d9"
+    },
+    {
+      "source_code": "41.3321-06-049-BB-075",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-06-049-BB.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e4-97d4-7740-8a4c-99f1cd32520d"
+    },
+    {
+      "source_code": "41.3321-06-049-BB-097",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-06-049-BB.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e5-0b55-7875-af02-ea124d937251"
+    },
+    {
+      "source_code": "41.3321-06-049-BB-117",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-06-049-BB.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e5-77c7-7209-a8bc-dfb6f1c594b6"
+    },
+    {
+      "source_code": "41.33-08-24-134-BLCK-37",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-08-24-134-BLCK.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e6-cdbe-71d6-b1b1-1b96a6025870"
+    },
+    {
+      "source_code": "41.33-08-24-134-BLCK-60",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-08-24-134-BLCK.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e7-3519-76fd-a642-377e4ac799d7"
+    },
+    {
+      "source_code": "41.33-24-24-135-WH-067",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-24-24-135-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e8-6bd3-7d73-8d43-2065892f03ce"
+    },
+    {
+      "source_code": "41.33-24-24-135-WH-100",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-24-24-135-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e8-edaf-7d2e-9745-84f0650150f7"
+    },
+    {
+      "source_code": "41.33-24-24-135-WH-135",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-24-24-135-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0e9-68c1-7220-8ea0-abdf1dbf1e4a"
+    },
+    {
+      "source_code": "41.33-24-24-135-GRN-067",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-24-24-135-GRN.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0ea-2c9f-79f7-b14c-81fec906c405"
+    },
+    {
+      "source_code": "41.33-24-24-135-GRN-100",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-24-24-135-GRN.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0ea-e88e-794a-869c-a524735ca595"
+    },
+    {
+      "source_code": "41.33-24-24-135-GRN-135",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-24-24-135-GRN.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0eb-b7f0-7899-9002-d3202fe5240b"
+    },
+    {
+      "source_code": "41.33-24-24-147-WH-38",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-24-24-147-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0ec-37af-7f35-af7b-5bb2ba0d13ed"
+    },
+    {
+      "source_code": "41.33-24-24-147-WH-58",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-24-24-147-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0ec-a5fc-7ee9-bd4e-51bc3aa685ee"
+    },
+    {
+      "source_code": "41.33-24-24-147-GRN-38",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-24-24-147-GRN.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0ed-1b9d-7ddd-a31c-a3113ff6c4d2"
+    },
+    {
+      "source_code": "41.33-24-24-147-GRN-58",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-24-24-147-GRN.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0ed-88f8-7843-a0be-05fd875e3081"
+    },
+    {
+      "source_code": "41.33-25-24-141-NT-33",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-25-24-141-NT.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0ee-b6a7-712e-9238-de125d7f1586"
+    },
+    {
+      "source_code": "41.33-25-24-141-NT-50",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-25-24-141-NT.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0ef-3952-7520-9e05-f90d74786cf9"
+    },
+    {
+      "source_code": "41.33-25-24-145-NT-48",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-25-24-145-NT.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0f0-6db1-79f0-a958-1435b7629bfe"
+    },
+    {
+      "source_code": "41.33-25-24-145-NT-80",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-25-24-145-NT.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0f0-d846-79b8-9c1d-fbe3e9cc2b5c"
+    },
+    {
+      "source_code": "41.3317-02-006-BE-50",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-02-006-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0f4-0bd4-77f7-934e-f054c20325cd"
+    },
+    {
+      "source_code": "41.3317-02-006-BE-62",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-02-006-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0f4-7e3d-72be-b4b7-01f2ce44d9c6"
+    },
+    {
+      "source_code": "41.3317-02-006-BE-74",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3317-02-006-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0f4-f3f3-7e0a-9a84-40fc80bc1b78"
+    },
+    {
+      "source_code": "41.3319-02-019-BE-040",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3319-02-019-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0f8-2d4b-7c14-9a9f-5085972efffe"
+    },
+    {
+      "source_code": "41.3319-02-019-BE-060",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3319-02-019-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0f8-8178-71cb-bc1a-aa4a2273c273"
+    },
+    {
+      "source_code": "41.3319-02-019-BE-080",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3319-02-019-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0f8-d117-75ff-9ad0-3fdddafe35a5"
+    },
+    {
+      "source_code": "41.3319-02-019-BE-100",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3319-02-019-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0f9-1f65-7af2-8f29-87d7c75ee82a"
+    },
+    {
+      "source_code": "41.33-02-22-075-BE-20",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-02-22-075-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0fa-38af-7ae0-9951-db88109c565e"
+    },
+    {
+      "source_code": "41.33-02-22-075-BE-24",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-02-22-075-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0fa-a0ab-72c1-b407-6d257a9f1795"
+    },
+    {
+      "source_code": "41.33-02-22-075-GR-20",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-02-22-075-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0fa-e2ec-7c8a-8808-4d34b1a3e678"
+    },
+    {
+      "source_code": "41.33-02-22-075-GR-24",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-02-22-075-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0fb-2fd4-7014-8aa5-188a805d8613"
+    },
+    {
+      "source_code": "41.3321-05-066-WH-51",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-05-066-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0fe-14d2-7789-9999-d95d6d157e8d"
+    },
+    {
+      "source_code": "41.3321-05-066-WH-68",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-05-066-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0fe-659c-7a42-b158-57cae2f77bf3"
+    },
+    {
+      "source_code": "41.3321-05-067-WH-34",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-05-067-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0fe-ed19-7861-981e-297a2ef5b321"
+    },
+    {
+      "source_code": "41.3321-05-067-WH-49",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-05-067-WH.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d0ff-34b3-7b2b-9cac-3dc6c0dd592f"
+    },
+    {
+      "source_code": "41.3319-04-027-BRS-46",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3319-04-027-BRS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d101-7503-7cc5-86c8-d2a8917acbb7"
+    },
+    {
+      "source_code": "41.3319-04-027-BRS-60",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3319-04-027-BRS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d101-b229-7ad2-b0b9-1fdea860bf45"
+    },
+    {
+      "source_code": "41.3321-04-054-GLD-20/37",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.3321-04-054-GLD-20_37-2.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "41.33-10-21-060-CS-41",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-10-21-060-CS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d107-e352-70b7-8aa5-a4f612fa10fc"
+    },
+    {
+      "source_code": "41.33-10-21-060-CS-53",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-10-21-060-CS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d108-2fdc-74c0-b741-d6fb609a5844"
+    },
+    {
+      "source_code": "41.3321-11-066-LBR-75",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-11-066-LBR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d10c-4459-7a8a-8ae7-9515ae75fc95"
+    },
+    {
+      "source_code": "41.3321-11-066-LBR-97",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.3321-11-066-LBR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d10c-b123-7ce5-8b64-23cf1bd0dd02"
+    },
+    {
+      "source_code": "41.1020-0041-GR-47",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.1020-0041-GR-1",
+      "message": "404 Client Error: Not Found for url: https://treez.ru/photos/resize/1000_1286/41.1020-0041-GR-1"
+    },
+    {
+      "source_code": "41.1020-0041-GR-55",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.1020-0041-GR-1",
+      "message": "404 Client Error: Not Found for url: https://treez.ru/photos/resize/1000_1286/41.1020-0041-GR-1"
+    },
+    {
+      "source_code": "41.1020-0040-GR-30",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.1020-0040-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d113-7c12-74a0-b01b-8ff515d70b05"
+    },
+    {
+      "source_code": "41.1020-0040-GR-37",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.1020-0040-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d113-d19f-7504-ae5d-2281cbfeb695"
+    },
+    {
+      "source_code": "41.1020-0040-GR-45",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.1020-0040-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d114-2144-784b-9dca-eac6156caeba"
+    },
+    {
+      "source_code": "41.33-02-23-108-BE-54",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-02-23-108-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d115-1ce1-73ff-8fd4-7b968c47c77c"
+    },
+    {
+      "source_code": "41.33-02-23-108-BE-70",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-02-23-108-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d115-99aa-7d51-8857-8e4a19aa28bb"
+    },
+    {
+      "source_code": "41.33-02-23-108-BE-90",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-02-23-108-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d116-2278-7a68-a034-661234078c81"
+    },
+    {
+      "source_code": "41.33-15-23-100-GR-58",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-100-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d117-27fe-77cd-986a-5b51edefe44d"
+    },
+    {
+      "source_code": "41.33-15-23-100-GR-90",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-100-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d117-8df2-7afb-a112-a5c9b99bc26b"
+    },
+    {
+      "source_code": "41.33-15-23-100-BLCK-58",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-100-BLCK.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d117-f167-75fa-bea4-b05597cf2789"
+    },
+    {
+      "source_code": "41.33-15-23-100-BLCK-90",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-100-BLCK.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d118-47e2-7ab5-928d-228af5de37e1"
+    },
+    {
+      "source_code": "41.33-15-23-099-BE-39",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-099-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d118-e77f-7d2f-981a-09e6f778b14f"
+    },
+    {
+      "source_code": "41.33-15-23-099-BE-56",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-099-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d119-5533-7493-83f5-e636bda93e18"
+    },
+    {
+      "source_code": "41.33-15-23-099-GR-39",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-099-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d119-cb11-719e-9d2b-020c1ddceff3"
+    },
+    {
+      "source_code": "41.33-15-23-099-GR-56",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-099-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d11a-3b81-7c78-aa30-8feac370106f"
+    },
+    {
+      "source_code": "41.33-15-23-098-BE-39",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-098-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d11b-0d74-7bb1-9c02-5dcc5b121223"
+    },
+    {
+      "source_code": "41.33-15-23-098-BE-59",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-098-BE.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d11b-7b14-7e2c-a36b-2092ba4d1ec3"
+    },
+    {
+      "source_code": "41.33-15-23-098-GR-39",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-098-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d11b-cf5d-7cd4-86f2-91a12b19fcb4"
+    },
+    {
+      "source_code": "41.33-15-23-098-GR-59",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-15-23-098-GR.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d11c-1dac-7817-a235-791214ff6ff9"
+    },
+    {
+      "source_code": "41.33-17-23-104-BEG-48",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-17-23-104-BEG.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d11d-61ed-735d-9564-5ed5a44cc7ab"
+    },
+    {
+      "source_code": "41.33-17-23-104-BEG-68",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-17-23-104-BEG.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d11d-aa69-7282-b0dc-8890048caa94"
+    },
+    {
+      "source_code": "41.33-17-23-103-BLS-61",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-17-23-103-BLS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d11f-2d82-7179-b635-30cec07d1642"
+    },
+    {
+      "source_code": "41.33-17-23-103-BLS-74",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-17-23-103-BLS.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d11f-6971-77be-94b1-b2b80957f31a"
+    },
+    {
+      "source_code": "41.33-17-23-106-BEG-36",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-17-23-106-BEG.mp4",
+      "message": "404 Client Error: Not Found for url: https://api.kit.yandex.net/v1/variants/01a0d11f-bcdd-7242-9e90-4c6b2625f8cc"
+    }
+  ],
+  "days_since_last_success": null,
+  "source_categories": 40,
+  "warehouses": {
+    "МСК": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
+    "СПБ привозной": "01a0a0e3-a119-72a1-b4cb-da76a3bfd74c"
+  },
+  "complete": true
+}
