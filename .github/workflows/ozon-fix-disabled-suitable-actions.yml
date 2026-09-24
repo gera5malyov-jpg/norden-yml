@@ -1,0 +1,126 @@
+name: Ozon fix disabled suitable actions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-fix-disabled-suitable-actions.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - run: python -m pip install requests
+      - name: Fix disabled suitable-actions flag and verify all
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os, json, requests, time
+          BASE="https://api-seller.ozon.ru"
+          S=requests.Session()
+          S.headers.update({
+            "Client-Id":os.environ["OZON_CLIENT_ID"],
+            "Api-Key":os.environ["OZON_API_KEY"],
+            "Content-Type":"application/json"
+          })
+
+          def call(path, body, allow=False):
+            for i in range(15):
+              r=S.post(BASE+path,json=body,timeout=180)
+              if r.status_code==429:
+                time.sleep(float(r.headers.get("Retry-After") or min(20,i+1))); continue
+              if r.status_code>=500:
+                time.sleep(min(20,i+1)); continue
+              try: d=r.json() if r.content else {}
+              except: d={"raw":r.text}
+              if r.status_code>=400 and not allow:
+                print("HTTP_ERROR",path,r.status_code,json.dumps(d,ensure_ascii=False)[:3000],flush=True)
+              return d,r
+            return None,None
+
+          def load():
+            out=[]; seen=set(); cur=""
+            while True:
+              d,r=call("/v5/product/info/prices",{"cursor":cur,"filter":{"visibility":"ALL"},"limit":1000})
+              if not d: raise SystemExit("cannot load products")
+              rows=d.get("items") or []
+              for x in rows:
+                pid=x.get("product_id")
+                if pid is not None and int(pid) not in seen:
+                  seen.add(int(pid)); out.append(x)
+              nxt=d.get("cursor") or ""
+              if not rows or not nxt or nxt==cur: break
+              cur=nxt
+            return out
+
+          def chunks(xs,n):
+            for i in range(0,len(xs),n): yield xs[i:i+n]
+
+          before=load()
+          disabled=[x for x in before if not (x.get("price") or {}).get("auto_action_enabled")]
+          target_before=next((x for x in before if str(x.get("offer_id"))=="AF-31200740"),None)
+
+          report={
+            "products_total":len(before),
+            "disabled_before":len(disabled),
+            "requested":0,
+            "updated":0,
+            "failed":[],
+            "disabled_after":None,
+            "target_before":target_before,
+            "target_after":None
+          }
+
+          for batch in chunks(disabled,500):
+            prices=[]
+            for x in batch:
+              p=x.get("price") or {}
+              current=p.get("price")
+              if not x.get("offer_id") or not current or float(current)<=0:
+                report["failed"].append({"offer_id":x.get("offer_id"),"reason":"no_current_price"})
+                continue
+              prices.append({
+                "offer_id":str(x["offer_id"]),
+                "declared_price":str(current),
+                "auto_action_enabled":"ENABLED",
+                "auto_add_to_ozon_actions_list_enabled":"ENABLED",
+                "min_price_for_auto_actions_enabled":True
+              })
+            if not prices: continue
+            d,r=call("/v1/product/import/prices",{"prices":prices},allow=True)
+            report["requested"] += len(prices)
+            if not d or (r and r.status_code>=400):
+              report["failed"].extend({"offer_id":z["offer_id"],"reason":"request_failed"} for z in prices)
+              continue
+            result=d.get("result") or []
+            by={str(z.get("offer_id")):z for z in result if z.get("offer_id") is not None}
+            for z in prices:
+              rr=by.get(z["offer_id"])
+              if rr and rr.get("updated") is True:
+                report["updated"] += 1
+              else:
+                report["failed"].append({
+                  "offer_id":z["offer_id"],
+                  "errors":(rr or {}).get("errors") if rr else "no_result"
+                })
+
+          time.sleep(8)
+          after=load()
+          remain=[x for x in after if not (x.get("price") or {}).get("auto_action_enabled")]
+          report["disabled_after"]=len(remain)
+          report["remaining_sample"]=[
+            {"offer_id":x.get("offer_id"),"product_id":x.get("product_id"),"price":x.get("price")}
+            for x in remain[:50]
+          ]
+          report["target_after"]=next((x for x in after if str(x.get("offer_id"))=="AF-31200740"),None)
+          print("FINAL_REPORT_JSON",json.dumps(report,ensure_ascii=False,sort_keys=True),flush=True)
+          if remain:
+            raise SystemExit(2)
+          PY
