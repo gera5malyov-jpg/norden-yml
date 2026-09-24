@@ -45,7 +45,7 @@ jobs:
               page+=1
               if page>20:
                   break
-          cats=kit.list_all('/v1/categories')
+          cats=kit.list_all('/v1/categories', {'status':'ACTIVE'})
           byid={s(x.get('id')):x for x in cats}
           def path_for(cid):
               out=[]; seen=set()
