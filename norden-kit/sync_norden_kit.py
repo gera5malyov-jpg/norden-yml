@@ -787,6 +787,8 @@ def rebuild_mapping(kit, source, code_site_id, report):
         scanned += 1
         if s(row.get("brand")).casefold() != BRAND.casefold():
             continue
+        if s(row.get("status")).upper() == "ARCHIVED":
+            continue
         norden_rows += 1
         code = current_char_value(row, code_site_id)
         article = match_source_article(code, articles)
@@ -1238,6 +1240,25 @@ def main():
         repair_recent = merge_recent_norden_mapping(
             kit, source, code_site_id, mapping, report, pages=10
         )
+
+        # HARD DUPLICATE GUARD.
+        # Before creating even one new Norden card, rescan the ENTIRE active Norden
+        # catalog in KIT and rebuild mapping from live cards by "Код для сайта".
+        # The previous 10-page recent scan was insufficient and could miss old AF-* cards.
+        tentative_missing = [a for a in source if a not in mapping.get("variants", {})]
+        if tentative_missing:
+            report["precreation_full_reconciliation_requested"] = len(tentative_missing)
+            mapping = rebuild_mapping(kit, source, code_site_id, report)
+            report["precreation_full_reconciliation_done"] = True
+            duplicate_articles = {
+                article: rows for article, rows in mapping.get("variants", {}).items()
+                if len({s(x.get("variant_id")) for x in (rows or []) if s(x.get("variant_id"))}) > 1
+            }
+            report["existing_duplicate_norden_articles"] = len(duplicate_articles)
+            report["existing_duplicate_norden_articles_sample"] = {
+                article: rows[:10] for article, rows in list(duplicate_articles.items())[:100]
+            }
+            save_mapping(mapping)
 
     price_rows, stock_rows, mapped_articles = planned_updates(mapping, source, warehouses)
     report["mapped_source_articles_for_updates"] = mapped_articles
