@@ -1,0 +1,60 @@
+name: Norden duplicate audit after sync
+
+on:
+  workflow_run:
+    workflows:
+      - "Norden initial Webasyst bridge"
+      - "Resume Norden KIT to Webasyst"
+      - "Norden KIT -> Webasyst daily sync"
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-duplicate-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests
+
+      - name: Audit Norden duplicates in KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: python norden-kit/audit_norden_duplicates.py
+
+      - name: Save audit report
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/norden_duplicate_audit_report.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Norden duplicate audit report"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Send duplicate audit report
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          SOURCE_WORKFLOW: ${{ github.event.workflow_run.name }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python webasyst/send_norden_duplicate_report.py
