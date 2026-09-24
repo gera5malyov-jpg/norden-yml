@@ -1,0 +1,22 @@
+name: Cancel old Norden creator once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-old-norden-creator-once.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel old Norden run that can still create products
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method POST repos/${{ github.repository }}/actions/runs/36012016617/cancel || true
