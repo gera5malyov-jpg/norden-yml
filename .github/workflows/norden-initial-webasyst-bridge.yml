@@ -1,0 +1,129 @@
+name: Norden initial Webasyst bridge
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-kit-webasyst-daily
+  cancel-in-progress: false
+
+jobs:
+  initial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 420
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Zero all active Norden stock in KIT
+        id: zero
+        continue-on-error: true
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python norden-kit/zero_norden_stocks.py
+
+      - name: Reconcile NORDEN-100 from Webasyst to KIT
+        id: bootstrap
+        if: steps.zero.outcome == 'success'
+        continue-on-error: true
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: python norden-kit/bootstrap_norden_from_webasyst.py
+
+      - name: Update Norden in KIT from supplier
+        id: kit
+        if: steps.zero.outcome == 'success' && steps.bootstrap.outcome == 'success'
+        continue-on-error: true
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: |
+          python norden-kit/sync_norden_kit.py \
+            --mode scheduled \
+            --max-new 250 \
+            --time-budget-seconds 17000
+
+      - name: Update existing NORDEN-100 in Webasyst
+        id: webasyst
+        if: steps.kit.outcome == 'success'
+        continue-on-error: true
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+          NORDEN_WEBASYST_WRITE_DELAY: '0.60'
+        run: python webasyst/sync_norden_to_webasyst.py
+
+      - name: Commit initial state and reports
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          mkdir -p /tmp/norden-initial
+          cp norden-kit/kit_mapping.json /tmp/norden-initial/kit_mapping.json 2>/dev/null || true
+          cp norden-kit/zero_norden_stocks_report.json /tmp/norden-initial/zero.json 2>/dev/null || true
+          cp norden-kit/webasyst_bootstrap_report.json /tmp/norden-initial/bootstrap.json 2>/dev/null || true
+          cp norden-kit/last_sync_report.json /tmp/norden-initial/kit.json 2>/dev/null || true
+          cp webasyst/last_norden_webasyst_sync.json /tmp/norden-initial/wa.json 2>/dev/null || true
+
+          git fetch origin main
+          git reset --hard origin/main
+
+          cp /tmp/norden-initial/kit_mapping.json norden-kit/kit_mapping.json 2>/dev/null || true
+          cp /tmp/norden-initial/zero.json norden-kit/zero_norden_stocks_report.json 2>/dev/null || true
+          cp /tmp/norden-initial/bootstrap.json norden-kit/webasyst_bootstrap_report.json 2>/dev/null || true
+          cp /tmp/norden-initial/kit.json norden-kit/last_sync_report.json 2>/dev/null || true
+          cp /tmp/norden-initial/wa.json webasyst/last_norden_webasyst_sync.json 2>/dev/null || true
+
+          git add norden-kit/kit_mapping.json \
+                  norden-kit/zero_norden_stocks_report.json \
+                  norden-kit/webasyst_bootstrap_report.json \
+                  norden-kit/last_sync_report.json \
+                  webasyst/last_norden_webasyst_sync.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save initial Norden KIT Webasyst bridge state"
+            git push origin HEAD:main || true
+          fi
+
+      - name: Send initial combined report
+        if: always()
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          PHASE: initial
+          ZERO_OUTCOME: ${{ steps.zero.outcome }}
+          BOOTSTRAP_OUTCOME: ${{ steps.bootstrap.outcome }}
+          KIT_OUTCOME: ${{ steps.kit.outcome }}
+          WA_OUTCOME: ${{ steps.webasyst.outcome }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python webasyst/send_norden_chain_report.py
+
+      - name: Fail if initial chain failed
+        if: always()
+        env:
+          ZERO_OUTCOME: ${{ steps.zero.outcome }}
+          BOOTSTRAP_OUTCOME: ${{ steps.bootstrap.outcome }}
+          KIT_OUTCOME: ${{ steps.kit.outcome }}
+          WA_OUTCOME: ${{ steps.webasyst.outcome }}
+        run: |
+          test "$ZERO_OUTCOME" = "success"
+          test "$BOOTSTRAP_OUTCOME" = "success"
+          test "$KIT_OUTCOME" = "success"
+          test "$WA_OUTCOME" = "success"
