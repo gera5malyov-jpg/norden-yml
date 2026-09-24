@@ -94,3 +94,62 @@ else:
     result["chat_error"]=chat_r.text[:500]
 
 print(json.dumps(result,ensure_ascii=False,indent=2))
+
+
+# Recent chat events diagnostic (privacy-safe: no message text or customer names).
+recent_start_ms=int((now-timedelta(hours=1)).timestamp()*1000)
+events_r=get(
+    "https://buyer-chat-api.wildberries.ru/api/v1/seller/events",
+    params={"next": recent_start_ms},
+)
+result["events_http"]=events_r.status_code
+result["recent_events_total"]=0
+result["recent_message_events"]=0
+result["recent_seller_messages"]=0
+result["recent_client_messages"]=0
+result["latest_seller_message_time"]=None
+result["latest_client_message_time"]=None
+
+if events_r.ok:
+    data=events_r.json() if events_r.content else {}
+    root=data.get("result") if isinstance(data,dict) and isinstance(data.get("result"),dict) else data
+    events=root.get("events") if isinstance(root,dict) else []
+    if not isinstance(events,list):
+        events=[]
+    result["recent_events_total"]=len(events)
+    seller_times=[]
+    client_times=[]
+    for ev in events:
+        if not isinstance(ev,dict):
+            continue
+        kind=str(ev.get("eventType") or ev.get("type") or "").strip().lower()
+        if kind not in ("","message"):
+            continue
+        result["recent_message_events"] += 1
+        sender=str(ev.get("sender") or "").strip().lower()
+        when=str(ev.get("addTime") or "").strip() or None
+        if sender=="seller":
+            result["recent_seller_messages"] += 1
+            if when:
+                seller_times.append(when)
+        elif sender=="client":
+            result["recent_client_messages"] += 1
+            if when:
+                client_times.append(when)
+    if seller_times:
+        result["latest_seller_message_time"]=max(seller_times)
+    if client_times:
+        result["latest_client_message_time"]=max(client_times)
+else:
+    result["events_error"]=events_r.text[:500]
+
+print("\nCHAT_EVENT_DIAGNOSTIC")
+print(json.dumps({
+    "events_http":result.get("events_http"),
+    "recent_events_total":result.get("recent_events_total"),
+    "recent_message_events":result.get("recent_message_events"),
+    "recent_seller_messages":result.get("recent_seller_messages"),
+    "recent_client_messages":result.get("recent_client_messages"),
+    "latest_seller_message_time":result.get("latest_seller_message_time"),
+    "latest_client_message_time":result.get("latest_client_message_time"),
+},ensure_ascii=False,indent=2))
