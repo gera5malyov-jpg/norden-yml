@@ -783,6 +783,16 @@ def rebuild_mapping(kit, source, code_site_id, report):
     scanned = 0
     norden_rows = 0
     unresolved = []
+
+    # Safe fallback for old AF-* cards: exact normalized product name may be the
+    # only reliable link when "Код для сайта" was never filled or used another format.
+    # Only unique source names are accepted; ambiguous names are never auto-matched.
+    source_names = defaultdict(list)
+    for article, item in source.items():
+        key = norm_title(item.get("name"))
+        if key:
+            source_names[key].append(article)
+
     for row in kit.variants_parallel(workers=6):
         scanned += 1
         if s(row.get("brand")).casefold() != BRAND.casefold():
@@ -792,6 +802,15 @@ def rebuild_mapping(kit, source, code_site_id, report):
         norden_rows += 1
         code = current_char_value(row, code_site_id)
         article = match_source_article(code, articles)
+        match_method = "code_for_site" if article else ""
+        if not article:
+            name_key = norm_title(row.get("name"))
+            by_name = source_names.get(name_key, [])
+            if len(by_name) == 1:
+                article = by_name[0]
+                match_method = "exact_name"
+                report.setdefault("mapped_existing_by_exact_name", 0)
+                report["mapped_existing_by_exact_name"] += 1
         if not article:
             if len(unresolved) < 200:
                 unresolved.append({"sku": row.get("sku"), "kit_id": row.get("kit_id"), "code_for_site": code, "name": row.get("name")})
@@ -800,6 +819,7 @@ def rebuild_mapping(kit, source, code_site_id, report):
             "variant_id": s(row.get("id")),
             "kit_id": row.get("kit_id"),
             "sku": s(row.get("sku")),
+            "match_method": match_method,
         })
     report["kit_variants_scanned"] = scanned
     report["kit_brand_norden_seen"] = norden_rows
