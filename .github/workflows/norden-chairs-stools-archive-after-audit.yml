@@ -2,6 +2,10 @@ name: Archive Norden chair stool duplicates after audit
 # fast-xml-archive-v2
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-chairs-stools-archive-after-audit.yml'
   workflow_run:
     workflows:
       - Norden chairs stools duplicate audit now
@@ -18,7 +22,7 @@ concurrency:
 
 jobs:
   archive:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 240
     steps:
