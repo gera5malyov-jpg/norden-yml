@@ -1,0 +1,20 @@
+name: Cancel active supplier run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-active-supplier-run.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel run 36028169359
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST repos/${{ github.repository }}/actions/runs/36028169359/cancel || true
