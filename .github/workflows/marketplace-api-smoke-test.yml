@@ -7,6 +7,7 @@ on:
   push:
     paths:
       - ".github/workflows/marketplace-api-smoke-test.yml"
+      - "scripts/probe_sams_641933_certificate.py"
 
 permissions:
   contents: read
