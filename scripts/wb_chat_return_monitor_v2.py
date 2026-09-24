@@ -13,7 +13,7 @@ from pathlib import Path
 import requests
 
 WB_TOKEN = (os.getenv("WB_API_TOKEN") or "").strip()
-GMAIL_USER = (os.getenv("GMAIL_USER") or "gera5malyov@gmail.com").strip()
+GMAIL_USER = (os.getenv("GMAIL_SMTP_USER") or os.getenv("GMAIL_USER") or "gera5malyov@gmail.com").strip()
 GMAIL_APP_PASSWORD = (os.getenv("GMAIL_APP_PASSWORD") or "").strip()
 MAIL_TO = (os.getenv("MAIL_TO") or "shop@office-mag.com").strip()
 STATE_FILE = Path(os.getenv("STATE_FILE") or "state/wb_chat_return_monitor_v2.json")
@@ -56,10 +56,23 @@ def write_json(path: Path, data):
 
 
 def wb_get(url: str, params: dict):
-    r = requests.get(url, headers=HEADERS, params=params, timeout=90)
-    if not r.ok:
-        raise RuntimeError(f"WB HTTP {r.status_code}: {r.text[:400]}")
-    return r.json() if r.content else {}
+    import time
+    last = None
+    for attempt in range(4):
+        r = requests.get(url, headers=HEADERS, params=params, timeout=90)
+        last = r
+        if r.status_code == 429 and attempt < 3:
+            raw = r.headers.get("X-RateLimit-Retry") or r.headers.get("Retry-After") or "65"
+            try:
+                wait = float(raw)
+            except (TypeError, ValueError):
+                wait = 65.0
+            time.sleep(min(180.0, max(12.0, wait + 2.0)))
+            continue
+        if not r.ok:
+            raise RuntimeError(f"WB HTTP {r.status_code}: {r.text[:400]}")
+        return r.json() if r.content else {}
+    raise RuntimeError(f"WB HTTP {last.status_code}: {last.text[:400]}")
 
 
 def get_root(payload):
