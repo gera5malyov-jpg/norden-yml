@@ -401,7 +401,10 @@ def main():
                 report["characteristics_written"] += len(dedup)
 
                 media = []
-                for url in image_urls(info):
+                candidate_images = image_urls(info)
+                if not candidate_images and item:
+                    candidate_images = [s(x) for x in (item.get("images") or []) if s(x)]
+                for url in candidate_images:
                     try:
                         uploaded = kit.upload_image_url(url)
                         fid = s(uploaded.get("id"))
