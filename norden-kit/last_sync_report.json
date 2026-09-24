@@ -1,760 +1,2107 @@
 {
-  "started_at": "2026-09-24T08:25:27.441645+00:00",
-  "mode": "scheduled",
-  "source": "api",
+  "started_at": "2026-09-24T10:32:00.311777+00:00",
+  "mode": "full",
+  "source": "xml-full+price",
   "catalog_source": "API Norden; fallback Norden.xml",
   "price_stock_source": "API Norden; fallback Norden.group -K8%.xml",
-  "api_error": null,
-  "source_products": 8486,
-  "source_duplicate_articles": 15,
-  "mapped_existing_articles": 6501,
-  "planned_new_products": 1985,
-  "new_products_created": 250,
-  "existing_products_patched": 250,
-  "empty_characteristics_filled": 992,
-  "existing_products_images_filled": 243,
-  "image_errors": 4,
-  "price_updates": 6361,
-  "stock_updates": 12722,
-  "minimum_price_field": "minimum_price",
-  "minimum_price_supported": true,
+  "api_error": "HTTP 503 https://norden.group/api-products/?page=18: <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>503 Service Unavailable</title>\n</head><body>\n<h1>Service Unavailable</h1>\n<p>The server is temporarily unable to service your\nrequest due to maintenance downtime or capacity\nproblems. Please try again later.</p>\n<hr>\n<address>Apache/2.4.63 (Unix) Server at norden.group Port 80</address>\n</body></html>\n",
+  "source_products": 8351,
+  "source_duplicate_articles": 13,
+  "mapped_existing_articles": 345,
+  "planned_new_products": 7760,
+  "new_products_created": 14,
+  "existing_products_patched": 263,
+  "empty_characteristics_filled": 339,
+  "existing_products_images_filled": 19,
+  "image_errors": 1,
+  "price_updates": 14,
+  "stock_updates": 1282,
+  "minimum_price_field": null,
+  "minimum_price_supported": false,
   "warnings": [
-    "AG.220.AN.AN.AR: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
-    "AG.220.AN.AN.AR.AR: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
-    "AG.220.AN.AR.AN.AN: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
-    "AG.220.WH.AR.AR.AR: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    "Existing Norden seed mapped only 345 of 528 codes.",
+    "Nova FJ03 orange fabric: image failed: HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))",
+    "Error limit reached; stopping product creation."
   ],
   "errors": [
     {
-      "article": "PR.110.WH.P59.WH",
+      "article": "SG.816.OL.OL.L",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3a78793d46017f16e75e0081b03808d5\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1cb3707c6544a0844abf5bffed142f78\"}"
     },
     {
-      "article": "PR.110.WH.P59.BL",
+      "article": "SG.811.WH.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1832c08ee33eeb99dbc04ca199f876d9\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"66b81083b684c10c8dbdbc644b5eb213\"}"
     },
     {
-      "article": "PR.110.WH.O59.WH",
+      "article": "SG.721.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c6fa8d4230d12ce68b8a906acf374c63\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b70fde39aa10caf2dcad9257a4b681b0\"}"
     },
     {
-      "article": "PR.110.WH.O59.BL",
+      "article": "SG.721.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"556602a1b0dcd518a8604d37d3421e94\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3310e09a9c9c5b95d81e26a16bb6b64e\"}"
     },
     {
-      "article": "PR.110.DM.P59.WH",
+      "article": "SG.722.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b7957cd54c4208673f6864b62ea033a4\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0e30d97a6a467725d36c09f7aeb397db\"}"
     },
     {
-      "article": "PR.110.DM.P59.BL",
+      "article": "SG.722.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"873af8982a3f05aaac60e5106a0c2ab3\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b9dfb4578a1d481e977fe8e79799db88\"}"
     },
     {
-      "article": "PR.110.DM.O59.WH",
+      "article": "SG.723.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2a5874229c4c902bb0346b2de7a1529f\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a34230a5b62961cf7a2dbb617f15d758\"}"
     },
     {
-      "article": "PR.110.DM.O59.BL",
+      "article": "SG.723.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"91c601c3f9c7fb140326d35876df9634\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"86c76608d434b58840e1abec3ea74f21\"}"
     },
     {
-      "article": "PR.110.OD.P59.WH",
+      "article": "SG.901.WH.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"890d158b4f64a3b9ea8d54e5f1eb67d4\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"fe7781b17b73b25423a9d20247cfeca3\"}"
     },
     {
-      "article": "PR.110.OD.P59.BL",
+      "article": "SG.901.WH.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7c1bbf04364a7722a089ec1d58730015\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b0bdb3c8eaa3a29866d835bb5611ac47\"}"
     },
     {
-      "article": "PR.110.OD.O59.WH",
+      "article": "SG.901.OL.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"bd562f2acc8572306fe40c1bf9c14e43\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1cf7c36ac0269c2d65a4417c84cfd5e4\"}"
     },
     {
-      "article": "PR.110.OD.O59.BL",
+      "article": "SG.901.OL.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"bfef5600a808bd29da3f6dbfb7e5940a\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2fbd098d0bca7b49dbeae5d796b87aaf\"}"
     },
     {
-      "article": "PR.110.SH.P59.WH",
+      "article": "SG.903.WH.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"511b88e31ea3ea57a225458aa5a596b4\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7dd455c5f0108381f2b205ea3e4c541c\"}"
     },
     {
-      "article": "PR.110.SH.P59.BL",
+      "article": "SG.903.WH.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"716c5e7901ac31de879429506dce4f90\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5af98b90e701bfc8fc9dae4ccbc662fb\"}"
     },
     {
-      "article": "PR.110.SH.O59.WH",
+      "article": "SG.903.OL.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7eaaa963632e0653a275feccaa5015c3\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"354331b0f31f165c4b84389123ec6bbd\"}"
     },
     {
-      "article": "PR.110.SH.O59.BL",
+      "article": "SG.903.OL.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1e162c1e6ad355189407d1c21921ad38\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e430f545a6ee410e908fa49a75da3518\"}"
     },
     {
-      "article": "6227B-HS",
+      "article": "SG.911.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3d5e6404a2c2e9d2332e74b22900743b\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0cb6249bd411b1a7e9de8142dc1e2da6\"}"
     },
     {
-      "article": "6227B",
+      "article": "SG.911.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cfc173ab6ae3583646ab9bdbb857e247\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"31f36eff33bd0c9f8d8903e8a1239f39\"}"
     },
     {
-      "article": "CB273B",
+      "article": "SG.912.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3f42148bf989cc0567c97492b9007a68\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5b60ca1c1898fbf49fc1cd2cf04e7167\"}"
     },
     {
-      "article": "OL-060-20-18.GN",
+      "article": "SG.912.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"723e9825b4ebfb54f60a70594701b5d2\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"69de305592409aced860cc22ac8938df\"}"
     },
     {
-      "article": "MT-4-1",
+      "article": "SG.913.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"26ab97e9283c8dca961ac7c93d50cfd3\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"019c1c3413d2ec262595445995207d13\"}"
     },
     {
-      "article": "PJ-2",
+      "article": "SG.913.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a9f82a2f10efcf6b70e3a5d119502117\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"03b23c293e872a2424f7d531c7cad880\"}"
     },
     {
-      "article": "PJ-3",
+      "article": "SG.921.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"390f779455b725f2d7c486ad4a753757\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8a7a87d1e27b275be00218b3e9248a91\"}"
     },
     {
-      "article": "2198568",
+      "article": "SG.921.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2a1a44ed490067b21eef16c2298fdb1b\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0228d01540e565a32d469fde55b57437\"}"
     },
     {
-      "article": "2198559",
+      "article": "SG.922.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2ea632aa47019a8fcd08272ca4e8bdbe\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"634c9a96940dc4e4e2c1fd220ecd3431\"}"
     },
     {
-      "article": "2198555",
+      "article": "SG.922.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4dae59381b8c765061cae053ea24b238\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"671f7615ea83fbb892a052fb1c78b4d7\"}"
     },
     {
-      "article": "2198558",
+      "article": "SG.923.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e526c60b8c42fe0aa95371148845a119\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c4245b3780780c32732f759e11381e48\"}"
     },
     {
-      "article": "2198557",
+      "article": "SG.923.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0360ee0b5b796c8b66b4df0fe5d3a1d8\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e0402c2b026661389ea2bde70acfe59c\"}"
     },
     {
-      "article": "2198556",
+      "article": "SG.401.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"dc5836f63a367c88a84e6261d4c89874\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cf347a81957a85deb2c43a5528e2b067\"}"
     },
     {
-      "article": "2198553",
+      "article": "SG.401.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"096bafef9bb994f77a2a68969875b4ed\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ab6d3eb6b5ca3cbfbcc1695fc5a9f1fe\"}"
     },
     {
-      "article": "2198552",
+      "article": "SG.402.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"97ec307c6cafb3054f94818b18f4dffc\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"64af13cd7e602966d029ff1443b56aa5\"}"
     },
     {
-      "article": "2198539",
+      "article": "SG.402.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5309a9f79afe20c947c8bcd1164553e8\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e88839bc297bc904529e3b550ea2c399\"}"
     },
     {
-      "article": "2198572",
+      "article": "SG.403.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"30f75ab316550bfdc18ce57b5e71eddf\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e87bd227763b7636e03058b544548b3f\"}"
     },
     {
-      "article": "2198569",
+      "article": "SG.403.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7a67432607395c0742b8e3a7339398f3\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"256e7d23ce6cdfbb3729e0f064070348\"}"
     },
     {
-      "article": "2198575",
+      "article": "SG.404.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"19b541463853addf95ae042678ae91fd\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"19104a3e274c5d37025ae25bb41df1cb\"}"
     },
     {
-      "article": "2198577",
+      "article": "SG.404.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c10633b9c659b22302c20c4556215c6b\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"82173bb8ea0efc67e729f77516bc8f0f\"}"
     },
     {
-      "article": "2198574",
+      "article": "SG.407.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"019800043c12a1059b98fbc0896edb7f\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ab96f8a5393db5cc55d98f11e1797cf6\"}"
     },
     {
-      "article": "2198571",
+      "article": "SG.407.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"28eca668513ce570248effdd0bbeb411\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7d27fd6800a57a9ac9e235bdd4b96527\"}"
     },
     {
-      "article": "2198570",
+      "article": "SG.408.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4c4e77a112ece1a6f17e4d9376b31fcf\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b01cf48b03b0ce0d0c41b40197a81574\"}"
     },
     {
-      "article": "842-253",
+      "article": "SG.408.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"93a65515dd6be44dd22ff1def089f349\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"34501b88520247ccf24908f912fd53a8\"}"
     },
     {
-      "article": "SL-PJY2-WH",
+      "article": "SG.409.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3b0a0de322fd5fd0bfce5e114b48c34c\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"35dda938b7e9721c668c0f90d3180de0\"}"
     },
     {
-      "article": "SL-PJY2-GR",
+      "article": "SG.409.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5aef414c261c4254db8eeabe930af06c\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"277ea5ecb82a21c1657fe8f7b8a3792e\"}"
     },
     {
-      "article": "SL-PJY3-WH",
+      "article": "SG.421.WH.L",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1c83e7d457a81655364a1b653c4c2e11\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c1452a7e4949142ed1c92671bd0563b2\"}"
     },
     {
-      "article": "SL-PJY3-GR",
+      "article": "SG.421.WH.R",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b018b34f05fd574436ab67300b6e1eaa\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"f6baedbe718deb3919f5e23908d0627c\"}"
     },
     {
-      "article": "HD-2216-4 H brown",
+      "article": "SG.421.OL.L",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"62419964e6c5807dcfa9ae61d1b752f3\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cf45e8bbb03c57d00689a939affcd121\"}"
     },
     {
-      "article": "HD-2216-4 L LB brown",
+      "article": "SG.421.OL.R",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4e2c82d1350a2384a951a472c019f75f\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8d36554a63bcdf2df433a261431183d1\"}"
     },
     {
-      "article": "M6256 chrome black",
+      "article": "SG.321.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"170db9ef5a721bfd94759fdfb2b213be\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cb4c99be16f5cf218a732790715dee0a\"}"
     },
     {
-      "article": "SG.531.WH.SH",
+      "article": "SG.321.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1285f64893df658a7cadee57b329b8a4\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"385ab518e6dee7db9b09e29d3d8dcb1b\"}"
     },
     {
-      "article": "SG.531.OL.SH",
+      "article": "SG.322.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1104b872d13e07875010877344cb5578\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e3c38d9728ce8abaa39cec8cd5ae70ff\"}"
     },
     {
-      "article": "SG.531.OD.SH",
+      "article": "SG.322.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"bc98d28a892e57290e572bf6a45f2dc4\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1b8acf1b2ff38c23c02aa19b810a3010\"}"
     },
     {
-      "article": "SG.532.WH.SH",
+      "article": "SG.323.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2ecc7c96a8bab1a7abb6324ea6fabe80\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"6d17a05c79213fe74c4e54a11db706a4\"}"
     },
     {
-      "article": "SG.532.OD.SH",
+      "article": "SG.323.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0b55aecdbe2f322faa5d2b0d60b17495\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5b23e1bd4662c873feb6fc2d7b8e304b\"}"
     },
     {
-      "article": "SG.532.OL.SH",
+      "article": "SG.331.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ead09dc9121396b7c6bcb0952ab8483d\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9b61c6b19bd2b8a29920c4dac709a4b7\"}"
     },
     {
-      "article": "SG.533.WH.SH",
+      "article": "SG.331.GR",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"fafe6f22d27e7b7c0573eda43996892e\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"eefaa0332c7f1d6104488e43d43a0cec\"}"
     },
     {
-      "article": "SG.533.OL.SH",
+      "article": "SG.331.GRN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4b0de427179cf7ba3ea37fb173f94ffd\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"57ef2fb86f6e324a1b236571dd4031b1\"}"
     },
     {
-      "article": "SG.533.OD.SH",
+      "article": "SG.332.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7b2a1db6513ba49e58796c625415319c\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"6ac77427ce0d80e6e212003de4768030\"}"
     },
     {
-      "article": "SG.536.WH.SH",
+      "article": "SG.332.GR",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e2bd228d0aae8cfcf3081dc1a3cdc008\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0df63f48b67f5a0ba41eae92492ed92a\"}"
     },
     {
-      "article": "SG.536.OL.SH",
+      "article": "SG.332.GRN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b1a8d0193823a675e5e399d14365d213\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"bd1390b129d1b0f2c7f90e8ec90c82a8\"}"
     },
     {
-      "article": "SG.537.WH.SH",
+      "article": "SG.333.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4a86007b454a755a2526cf8b0579bbc7\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c802727eebbc7440b3614482cdf78da9\"}"
     },
     {
-      "article": "SG.537.OL.SH",
+      "article": "SG.333.GR",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"6550398f1f40f646512ff8b693a26ec8\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"37c06afece01a324c70d2402cb60b619\"}"
     },
     {
-      "article": "SG.538.WH.SH",
+      "article": "SG.333.GRN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"56a37723679f5d6f2acf83e96e9f8c3c\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"00600821fcfcb312e91296cc1427e2cf\"}"
     },
     {
-      "article": "SG.538.OD.SH",
+      "article": "SG.593.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2b2becaf3770ccd2c12971ae44e9f16a\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b9cda5db6fdb001a543eb309752ec3de\"}"
     },
     {
-      "article": "SG.538.OL.SH",
+      "article": "SG.593.OL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"f561bd02c905b844f2bc2735b8291174\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a28f6cb7f5c40f31907a7f8a787ed4e1\"}"
     },
     {
-      "article": "Z1-811Z_2396_1196",
+      "article": "SG.594.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1a3dae8e8181f09fd5d3e83f43f33ad2\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cd4532f4c414f8c201cd0680f7c6b572\"}"
+    },
+    {
+      "article": "SG.594.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4260bada2a62268925746e8169493d62\"}"
+    },
+    {
+      "article": "SG.804.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8c7f084903dc98d9c766b68fc47bc679\"}"
+    },
+    {
+      "article": "SG.804.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4f0db89d5393b46aaa5af88720cdbe0a\"}"
+    },
+    {
+      "article": "SG.806.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0238032be3e122a2d7add83d1128658a\"}"
+    },
+    {
+      "article": "SG.806.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cb1cb8c05b08a5ecae2f1b4d68663d7b\"}"
+    },
+    {
+      "article": "SG.431.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"33c4e25b018f7e9228e57f1ada9bb0e3\"}"
+    },
+    {
+      "article": "SG.431.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d100216a33d34cde8d666cdf58cd6cb4\"}"
+    },
+    {
+      "article": "SG.432.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"519ba0bdabcfca5287754f9200e87d3e\"}"
+    },
+    {
+      "article": "SG.432.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"187d3d56555bd410e2ea8108f2492394\"}"
+    },
+    {
+      "article": "SG.433.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ff7a85566feca3e9ba9ce91cb894d173\"}"
+    },
+    {
+      "article": "SG.433.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"99ba096a3d42f1aefc779caa19ffab49\"}"
+    },
+    {
+      "article": "SG.434.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"abf996270bf8ef91e04c64a9ec09ea33\"}"
+    },
+    {
+      "article": "SG.434.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"180952e534dd9f4a276c70d8215ca2e0\"}"
+    },
+    {
+      "article": "SG.435.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"43b5686981d66ad55fa3da7c45fb214a\"}"
+    },
+    {
+      "article": "SG.435.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"bc33c99997b39c4f4f1282f4cb787c85\"}"
+    },
+    {
+      "article": "SG.436.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2a11c7aa829aa3e13985ed0814c3c94d\"}"
+    },
+    {
+      "article": "SG.436.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"764db5b774335999e153ecc68caf10df\"}"
+    },
+    {
+      "article": "SG.441.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2e22d850f1a4bd256cd63dbd244dee45\"}"
+    },
+    {
+      "article": "SG.441.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a2512cca56cffa3487058f4eeaf8f6e3\"}"
+    },
+    {
+      "article": "SG.443.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"bd809009678563f59f95179425f63b04\"}"
+    },
+    {
+      "article": "SG.443.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"28a3b8a96ca14aa5dea0620fa689d284\"}"
+    },
+    {
+      "article": "SG.444.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"525351f7bb39f87f3d75505b2bf64906\"}"
+    },
+    {
+      "article": "SG.444.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4e3167a31ffeb5cb299896fd3818a397\"}"
+    },
+    {
+      "article": "SG.445.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"47222f6d457f84904da3dbd60246b456\"}"
+    },
+    {
+      "article": "SG.445.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"f6116db490c1a5dce07d2f0d7c81d3ec\"}"
+    },
+    {
+      "article": "SG.446.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"392778c00c2ac3f32a400610cdae151e\"}"
+    },
+    {
+      "article": "SG.446.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"772bd8e8663f90262b1e040b62426aa3\"}"
+    },
+    {
+      "article": "SG.451.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a2dcab6d7cdf120a7aee5c95b1d6a7b9\"}"
+    },
+    {
+      "article": "SG.451.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"999f39f52b83d7df34b29018f358af6c\"}"
+    },
+    {
+      "article": "SG.453.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d99738708af3455c740b5e3c96d3f08f\"}"
+    },
+    {
+      "article": "SG.453.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2e529f73b97bb2e0ce565304941b951f\"}"
+    },
+    {
+      "article": "SG.454.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c4b6a9129d2b9a150c287b4586443c40\"}"
+    },
+    {
+      "article": "SG.454.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"fc614595d8f5bca24685423528e240cd\"}"
+    },
+    {
+      "article": "SG.455.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"59dc96887f762f6356a623ace07af348\"}"
+    },
+    {
+      "article": "SG.455.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"29398fd6d6807fa2b766049f04df903a\"}"
+    },
+    {
+      "article": "SG.456.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"089dbe77a7da228a860275e22bb657ed\"}"
+    },
+    {
+      "article": "SG.456.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"06b4c86fa507d6a5a079b661565f8909\"}"
+    },
+    {
+      "article": "SG.461.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7f45c38a2e044cdccfb961adb7f35d25\"}"
+    },
+    {
+      "article": "SG.461.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4eef6d1daa14d7afba30c0dd6a114677\"}"
+    },
+    {
+      "article": "SG.462.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0f55ba4787a949f7163c95edd4f857e0\"}"
+    },
+    {
+      "article": "SG.462.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"676f5cee186627c35b22c9275fcf8695\"}"
+    },
+    {
+      "article": "SG.463.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4d7cae3dc099b4e8692350d1079f0aa0\"}"
+    },
+    {
+      "article": "SG.463.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"41963e2d7119ef304bb87ba0ac287d17\"}"
+    },
+    {
+      "article": "SG.814.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"350e23b5bdd62bb9566e9391ae821bc9\"}"
+    },
+    {
+      "article": "SG.814.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"58c7d9aa7a387f178e75e2a118332507\"}"
+    },
+    {
+      "article": "SG.816.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7fe5afbbaac139486b91251c1f2242d8\"}"
+    },
+    {
+      "article": "SG.816.OL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d8e120c49d48d45d3ca4655dba3607e5\"}"
+    },
+    {
+      "article": "SG.802.WH.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9eb5b4f8160e196b1b259f040a6b8c6c\"}"
+    },
+    {
+      "article": "SG.802.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"90c77cc28147e9ecbdb005f2cd5d1d7e\"}"
+    },
+    {
+      "article": "SG.802.OL.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a36efb483f75730d95df643c2f469ec7\"}"
+    },
+    {
+      "article": "SG.802.WH.WH.GL.L",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1bbb5f26cd40c017aee783b244b8e9fa\"}"
+    },
+    {
+      "article": "SG.802.WH.OL.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"72271ae4dec53e8b842142f0a315c08c\"}"
+    },
+    {
+      "article": "SG.802.WH.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3ada58750fb751ef109c9363e16fbc70\"}"
+    },
+    {
+      "article": "SG.802.OL.OL.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"258b09b3f97bad687eee33ecb3ad6bfa\"}"
+    },
+    {
+      "article": "SG.802.OL.OL.GL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ebecaf33f95974160913b340cae295bd\"}"
+    },
+    {
+      "article": "SG.802.OL.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2bed1bd0ebe58ac566a19c3dd0b82df3\"}"
+    },
+    {
+      "article": "SG.802.OL.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"317509b8ac25107e6bf1ff1a71340a3d\"}"
+    },
+    {
+      "article": "SG.802.OL.WH.GL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b0f4ec0a34e5ce7e88c1beb56f86e93a\"}"
+    },
+    {
+      "article": "SG.802.WH.OL.GL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"06d2161668b8c31fc4b04b648d80f86d\"}"
+    },
+    {
+      "article": "SG.804.OL.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"864f2a524c92666990efc793a98a4f1d\"}"
+    },
+    {
+      "article": "SG.804.OL.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"6aec56c1db84f022cbb69838238e78ec\"}"
+    },
+    {
+      "article": "SG.804.WH.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0293291682adf24c6bf2e92e73fa4819\"}"
+    },
+    {
+      "article": "SG.806.OL.OL.L",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cf897edcbfb100d496bbfdecf29b2b24\"}"
+    },
+    {
+      "article": "SG.806.OL.WH.L",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e20b9c3ff81edb6934eea30ddf5c8a71\"}"
+    },
+    {
+      "article": "SG.806.WH.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ef6d48a9498c2ce58c83f8c740182f43\"}"
+    },
+    {
+      "article": "SG.804.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b7167330f87db24968ecebe2b91c3d4d\"}"
+    },
+    {
+      "article": "SG.816.OL.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4cba1fb0029615111db8dae2be98f27a\"}"
+    },
+    {
+      "article": "SG.816.OL.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"995137ed227e212d0b833331b8a753c0\"}"
+    },
+    {
+      "article": "SG.816.WH.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3cceb357f59ea0438ef19441dbc2cf45\"}"
+    },
+    {
+      "article": "SG.816.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3d1e77ca23a8043bb9ab8914c8a98950\"}"
+    },
+    {
+      "article": "SG.814.OL.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"554705feda1e5f645dae1e3ee49a5fe7\"}"
+    },
+    {
+      "article": "SG.814.OL.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a1d9eaf2da2bce5abfd0da93cce475c9\"}"
+    },
+    {
+      "article": "SG.814.WH.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"6915001ffb81731d3b12940ecd86ae73\"}"
+    },
+    {
+      "article": "SG.814.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e5b0e89c54920b6f9531dd12f1c766ba\"}"
+    },
+    {
+      "article": "SG.812.OL.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2cd09af66760f33fd8a93b06670c72f6\"}"
+    },
+    {
+      "article": "SG.812.OL.OL.GL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"dfb37e34bf1aab93537baecea7a23b6a\"}"
+    },
+    {
+      "article": "SG.812.OL.OL.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"991ab1b5884d827d1c7dac72bc920002\"}"
+    },
+    {
+      "article": "SG.812.OL.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"242b20baf5273e56609518e93fbf0448\"}"
+    },
+    {
+      "article": "SG.812.OL.WH.GL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"74026013cf219620c7e3fd938e245be2\"}"
+    },
+    {
+      "article": "SG.812.OL.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"becbcdcb0059087b7e472f1ced59da73\"}"
+    },
+    {
+      "article": "SG.812.WH.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"37fa6b3fca59acc2d03fd2b4dae7d6ef\"}"
+    },
+    {
+      "article": "SG.812.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"81a780c9805d48f9647decc8e562d2d2\"}"
+    },
+    {
+      "article": "SG.812.WH.WH.GL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c8b5a62d37728126ceaf12f4a33dd23a\"}"
+    },
+    {
+      "article": "SG.812.WH.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"75365213bfb021483836883cbe1d3b51\"}"
+    },
+    {
+      "article": "SG.806.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5cc1d27226870fcad68b16746bb4ad63\"}"
+    },
+    {
+      "article": "SG.812.WH.OL.GL.L",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9cc42e37d816bd912e26d2a2874e9933\"}"
+    },
+    {
+      "article": "SG.812.WH.OL.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c735fb1dae8632c681be023c2bd01fe4\"}"
+    },
+    {
+      "article": "СФ-531221*",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c2d954cc757170877ae11daabcec4743\"}"
+    },
+    {
+      "article": "СФ-537103",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1e3e8fe54c62f0e5b08a7a122aa31add\"}"
+    },
+    {
+      "article": "SG.244.WH.63.AN",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2c1d352e8d89537b54b68dadf65a110d\"}"
+    },
+    {
+      "article": "SG.244.WH.63.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"32634524d9d4145c624ce1f2bc325475\"}"
+    },
+    {
+      "article": "SG.244.OL.63.AN",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e650075d519df2801b36f5119130f27a\"}"
+    },
+    {
+      "article": "SG.244.OL.63.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"584bb954694403bb2230e4134ed8766a\"}"
+    },
+    {
+      "article": "SG.511.WH.WH",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"48a1934f04d5a701e1d768ea0f0c0c64\"}"
+    },
+    {
+      "article": "SG.826.OL.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2a11e7ddc430c485ac019d8d49a205c7\"}"
+    },
+    {
+      "article": "SG.826.OL.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2f522e696ad8581eefba96ccb6bf7b8f\"}"
+    },
+    {
+      "article": "SG.826.WH.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b74b2529cdf275239e8d71a79dc25d82\"}"
+    },
+    {
+      "article": "SG.826.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4dbe611e972eb68fcf42ee6592bb3174\"}"
+    },
+    {
+      "article": "SG.823.OL.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0d3b64a207dafee92ef0a6cfe4df2b7d\"}"
+    },
+    {
+      "article": "SG.823.OL.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cb0cb9cfce8db2e5fa26d86b8b6f5d2e\"}"
+    },
+    {
+      "article": "SG.823.WH.OL.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4d86444164753df8c69413fd9647668a\"}"
+    },
+    {
+      "article": "SG.823.WH.WH.R",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"996b7f608a4f042bbab07d4ee9d1aa8b\"}"
+    },
+    {
+      "article": "NZ-0323.GS.YN",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"fa65eab94061c8df7ff5e31682bf753a\"}"
+    },
+    {
+      "article": "NZ-0333.GS.GS",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"62a2f215d4145672afa9b759e7300166\"}"
+    },
+    {
+      "article": "NZ-0106.YN.AL",
+      "stage": "create",
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"067245f6d335044c0237307171f66769\"}"
     },
     {
       "article": "HAD-SP-1400-1800-GR",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e20bd1cb7e4c821784737b145f3d4ca0\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7283bd371054e9354fc6d6ca001161ec\"}"
     },
     {
-      "article": "РЕКЛ.SG.1001.OL.WH",
+      "article": "SG.811.SH.SH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"baefb513a33cc8437b08de1f65b71c0f\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e470ef463dd4306bc5af5eec5ff10ace\"}"
     },
     {
-      "article": "AG.253.110.673.AN",
+      "article": "SG.280.DM.GR",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8a48ced87ccb42f6aa64c6f7e105ae4d\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3370c2479f59e0cfadb9b51647aa4a64\"}"
     },
     {
-      "article": "MX.304.WH",
+      "article": "SG.863.DM.DM",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b704f6c0d2fac5877a8a38e14257aba3\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"f94b1abee6bcd9cff38047997231b3cb\"}"
     },
     {
-      "article": "SG.805.SH",
+      "article": "AG.241.WH.AN.AN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7e231683580b734240fb76584b16a0c4\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"bc216f8f876506244095d891c752447c\"}"
     },
     {
-      "article": "СФ-531102*1пр",
+      "article": "SG.332.BN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a2e1e66647dd78e00642972e9ad3f351\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3766e58e28141fce2e69291cabaff909\"}"
     },
     {
-      "article": "PR.201.OD.P59.BL",
+      "article": "SG.333.BN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1824f206bda331d6b4eaf009ec84ae4f\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"dde4f47546944cfa99737aea347bc95b\"}"
     },
     {
-      "article": "PR.201.OD.O59.BL",
+      "article": "AG.204.WH.WH.AN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"50dbb9b61c0d3ac01f2ef3f49d9353e1\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"77da5164700cb7b3ae17b829c2a340fd\"}"
     },
     {
-      "article": "PR.204.OD.P59.WH",
+      "article": "SR.104.DN.PL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7c524f027c07b00b67bcf46db09d0993\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8068a87b456debce4369f7616a29c8f1\"}"
     },
     {
-      "article": "PR.204.OD.P59.BL",
+      "article": "SG.611.DM.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e23da174a64fe820507dd7ad673f76da\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"17d163fd48a8b24d2405d9bfe1c270fd\"}"
     },
     {
-      "article": "PR.204.OD.O59.WH",
+      "article": "SG.631.DM.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9d10fc4ef247bd8630bff86713972eca\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3f0084c7bc08dab99bab4b83d09137d4\"}"
     },
     {
-      "article": "PR.207.OD.P59.BL",
+      "article": "SG.803.DM.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b2dc5ad28acb83b8f113774f98e29801\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3b6641c93177c15cb92c7eb287235849\"}"
     },
     {
-      "article": "PR.207.OD.O59.BL",
+      "article": "SG.110.OL.63.BL",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"fdb0f645eeeff4ab07bee7f69b27c49b\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b75fbf4822b60096156d0518a6649d88\"}"
     },
     {
-      "article": "PR.202.OD.P59.BL",
+      "article": "SG.232.OL.63.BL.L",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1d3df80c895ed38161b7d52dc6465b65\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ecdc82baaae1a79019f44fd11dad9e73\"}"
     },
     {
-      "article": "PR.202.OD.O59.BL",
+      "article": "SG.232.OL.63.BL.R",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"044e5032f50dc45dcbbe36d598b05625\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"dc50d5c0d0547329bda1c612ca32a445\"}"
     },
     {
-      "article": "PR.205.OD.P59.WH",
+      "article": "SR.101.DN.WF.L",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"73a40f0b5d43d913f45bceebdeb196fd\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"88ccaae86a90afb5e5b114351e1be1ab\"}"
     },
     {
-      "article": "PR.205.OD.O59.WH",
+      "article": "SR.101.DN.WF.R",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7b7cc349947a92ed51c20a1d30dfe45c\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5b1d67f298c4a9496d67d7ec71a7d110\"}"
     },
     {
-      "article": "PR.208.OD.P59.BL",
+      "article": "SR.102.DN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c2822024205a083adcc14f6cac618e46\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"45b61d235861e66cec4596c55dd06c84\"}"
     },
     {
-      "article": "PR.208.OD.O59.BL",
+      "article": "SR.301.WF.WH.DN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"935b4eadc3f331cab0b81c74da6d9c85\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8615029e635e9b8db23abe07a414e8ea\"}"
     },
     {
-      "article": "AG.103.AN.V.72.BL",
+      "article": "SR.302.WF.DN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"205bd0151c3316760b4a4777274f9ebb\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a7cdf734590ec4ee268c67b62b77fa2d\"}"
     },
     {
-      "article": "PR.203.OD.P59.BL",
+      "article": "SR.302.WF.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3fa93f408e7341c9ed50982f4d491804\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"3bd16aaf152afffcf777e6ac1750fb56\"}"
     },
     {
-      "article": "PR.203.OD.O59.BL",
+      "article": "SR.322.WF.GLB",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8ebfe05a475a356f7870edee51bffbf5\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"02bb785ae8ecbf7b530ba7bb75d4c175\"}"
     },
     {
-      "article": "PR.206.OD.P59.BL",
+      "article": "SR.303.WF.DN.DN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"05d6e39e6c6b0c82c945167de4282fcd\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"d553f4664f62872a89fc239508b9bf06\"}"
     },
     {
-      "article": "PR.206.OD.O59.BL",
+      "article": "SR.303.WF.WH.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b4a96dbabc38029cf18532f98fba838c\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cf550371036da1eddf9710005376162c\"}"
     },
     {
-      "article": "PR.209.OD.P59.BL",
+      "article": "SR.323.WF.WF.GLB",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"dfd4ef0858df3b2ffce8bb786fc36578\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cd99881fb037a2645c3808313de22e3c\"}"
     },
     {
-      "article": "PR.209.OD.O59.BL",
+      "article": "SR.304.WF.DN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ff9cb9ee20505e80ba3953b739799b59\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b9cd1c3e2c6c0feabe6a0ddf59e4ba4d\"}"
     },
     {
-      "article": "K-Z1-1801Z HPL 0260 1400-600-12",
+      "article": "SR.314.WF.DN.GLB",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"44fd8fbfed9a91d79a8459d926d6815a\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4fa936ffc9098a33c8b8f2459d4f67d9\"}"
     },
     {
-      "article": "K-Z1-1801Z HPL0794 1400-600-12",
+      "article": "SR.314.WF.WH.GLB",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"fe710f39546a277aa692326f78c0f8af\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"35b2b09868b998f96888d49e018fa54d\"}"
     },
     {
-      "article": "K-Z1-1801Z СЕВВ-1400-600-18 V",
+      "article": "SR.305.WF.DN.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"412d786b8c39b1ee3b47d6a99bad4ce6\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2c512e998b84a01fd2ed3f9614cd5623\"}"
     },
     {
-      "article": "K-Z1-1801Z Egger1400-605 V",
+      "article": "SR.306.WF.DN",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"24f3ec44ac0aef8b65fc33df065acc70\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7363910a5e97253afa9debf92f27c0c3\"}"
     },
     {
-      "article": "K-Z1-1801Z Egger1605-705V",
+      "article": "SR.306.WF.WH",
       "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ba3099cf5bfdc76d95b247a8edfd015f\"}"
-    },
-    {
-      "article": "K-Z1-1801Z Egger1400-605D",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"14cdda2a1c6183f6b9654ffda481824d\"}"
-    },
-    {
-      "article": "K-Z1-1801Z Egger1605-705-12DS",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1a9b1c96a56ec7f510e1376a93d5b8ec\"}"
-    },
-    {
-      "article": "K-Z1-901Z HPL0048 900-900-12",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"005a28f9dd603a1d407214be4609cdea\"}"
-    },
-    {
-      "article": "K-Z1-901Z HPL0179 900-900-12 L",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"a8021c399f6233a20f6fca9213e68af1\"}"
-    },
-    {
-      "article": "K-Z1-901Z Egger-905-905V",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7804df329b5896b12a257d8a0ef4b7ac\"}"
-    },
-    {
-      "article": "K-Z1-901Z Egger-905-905D",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c7f07ca976e9f129124dae18ac85ae0a\"}"
-    },
-    {
-      "article": "K-Z2-2152 HPL0048 1800-820-12C",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ba964ed95e527156c73045751d0af6a6\"}"
-    },
-    {
-      "article": "K-Z2-2152 Egger 1800-820",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9f6dc8269fa7c11202ac567b2ffde205\"}"
-    },
-    {
-      "article": "K-Z2-2152 Egger 1800-905",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"5b5e804d8791f242b59f172a5c5c8212\"}"
-    },
-    {
-      "article": "K-Z2-2152 Egger1800-820D",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7a580bd78ac86d46e2e0acdf9ed365a0\"}"
-    },
-    {
-      "article": "K-Z2-2152 Egger 1800-905D",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7cad1d414ed16ab7b2f2b2b1a2b3bfcb\"}"
-    },
-    {
-      "article": "K-Z5-1005ZEgger1005-1005",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"52be6e0babb4e48c87fd111cdd2f932d\"}"
-    },
-    {
-      "article": "K-Z5-1005ZEgger1005-1005DS",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cd9ae1f4f3b5788926a406846dbfc014\"}"
-    },
-    {
-      "article": "K-Стол Z5-1805Z Egger1605-605V",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7b02b1d7b9069bf465364e9d37d3b395\"}"
-    },
-    {
-      "article": "K-Z5-205Z 1400-1400-18 V",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"59f63f93f891a456bf97364d63c1963b\"}"
-    },
-    {
-      "article": "K-Z5-205Z 1400-1400-18 DV",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"578c8c9faac2119f49827ec4ca78c992\"}"
-    },
-    {
-      "article": "K-Z5-405Z 2400-1200-18 V",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8862b757b6881b19ce58fd991cef388a\"}"
-    },
-    {
-      "article": "K-Z6-2006Z 1600-600-732 V",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"9920e07eac53f6e811092b9e6197703c\"}"
-    },
-    {
-      "article": "K-Z6-2006Z 1600-600-732 D",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"6e8a96ecd5c4d8c2ab28e53a0e78018e\"}"
-    },
-    {
-      "article": "K-Z6-2006Z 1600-600-732 DV",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ed6811b8c3a3e5245b5b4d672ab951d7\"}"
-    },
-    {
-      "article": "K-Z6-406Z-2 HPL0794 2400-1200-732 PB",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b103a269cd1704e9f6da3be45afd875d\"}"
-    },
-    {
-      "article": "K-Z7-407Z-1 Egger2400-1200V",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"40bc79661f34e676187013d83e2525bc\"}"
-    },
-    {
-      "article": "K-Z9-409Z HPL0260 2400*1200*12 V",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"6b44e4cf19c06d607e6ce7f4b5e49915\"}"
-    },
-    {
-      "article": "K-Z9-409Z 2400*1200*18 V",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"b9ae1f3b0ede8bc2a188d7b40ae5e625\"}"
-    },
-    {
-      "article": "PR.231.OD.P59.BL.L",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"44f910810aa80093d77d33255f9a5906\"}"
-    },
-    {
-      "article": "PR.231.OD.O59.BL.L",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"6ad48e33219039d60bd950d807a2a1ec\"}"
-    },
-    {
-      "article": "PR.231.OD.P59.BL.R",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"75b1a47f1c2524d1836b58b808400156\"}"
-    },
-    {
-      "article": "PR.231.OD.O59.BL.R",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8b4bb0d8737485689b8c2f046e07b4c5\"}"
-    },
-    {
-      "article": "РЕКЛ.SG.422.OL.L_нест 1",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"2f2b09a6c4e3104328fdb491bef15fb7\"}"
-    },
-    {
-      "article": "РЕКЛ.SG.422.OL.R_нест 2",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"59f1db734c04cd2dce5157a86519feda\"}"
-    },
-    {
-      "article": "N-SG.806.SH_нест",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"e3cf3d75b5b9fec921975a140dd5439e\"}"
-    },
-    {
-      "article": "AG.381.DM",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8d810bfc09638421bf4f37c52aad7107\"}"
-    },
-    {
-      "article": "SG.591.DM",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1b0dcab5c95ec39794dd1c7ee9921a46\"}"
-    },
-    {
-      "article": "HD-2212-1 H black",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"44649019a6fd6519f376074aa0c1b7ad\"}"
-    },
-    {
-      "article": "HD-2212-2 H black",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"eee3318192d6dc177fb83f5cc04b9ae6\"}"
-    },
-    {
-      "article": "HD-2212-2 L black",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"aa6ca477efad2bec7da806b45850a4cf\"}"
-    },
-    {
-      "article": "HD-2212-1 L black",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4587492a8b52612faa7e1be7d0a76cc2\"}"
-    },
-    {
-      "article": "SG.610.WH.SH",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"56bc6fc1702bfde17462c86cfa41d472\"}"
-    },
-    {
-      "article": "SG.901.OL.SH",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"4c8b5a675e76d73e1d146ff7ffa07d7a\"}"
-    },
-    {
-      "article": "SG.901.OD.SH",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"cd90714e6c399dd6351403919416d55c\"}"
-    },
-    {
-      "article": "SG.901.WH.DM",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"19aef5172a92f877037ba0fe00392a15\"}"
-    },
-    {
-      "article": "SG.902.OD.SH",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"80fd2e2e6ac597e8e2152c2b19937f2d\"}"
-    },
-    {
-      "article": "SG.902.OL.SH",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"f8e530546f67cbb97617824ca5d9079e\"}"
-    },
-    {
-      "article": "SG.902.WH.DM",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"8c3652aecfd7fdf36668e989fde97591\"}"
-    },
-    {
-      "article": "SG.903.OD.SH",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"1d4eaabd20ec6a1fa7bcfc9811e6eeb4\"}"
-    },
-    {
-      "article": "SG.903.OL.SH",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"739ce3adcb3dd04a89fc87e116f02191\"}"
-    },
-    {
-      "article": "SG.903.SH.SH",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"0ee3df42866431b5cbefee6dfa23797e\"}"
-    },
-    {
-      "article": "SG.903.WH.DM",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"7bf45880696f89fd851d1b715fbe1873\"}"
-    },
-    {
-      "article": "AG.205.WH.WH.GALM",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"ab94062e84ca174be5dec8a868c17228\"}"
-    },
-    {
-      "article": "AG.205.AN.AN.GALM",
-      "stage": "create",
-      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"93ff9b90a49c9999ba502ef88706c754\"}"
+      "message": "HTTP 400 https://api.kit.yandex.net/v1/variants: {\"code\":\"VALIDATION_ERROR\",\"message\":\"Перед публикацией товара необходимо заполнить цену до скидки\",\"trace_id\":\"c6f782216c574cfaf1461dbc5445a376\"}"
     }
   ],
   "initial_complete": false,
-  "recent_norden_mapping_merged": 0,
-  "recent_norden_repair_candidates": 0,
-  "mapped_source_articles_for_updates": 6501,
-  "remaining_new_products": 1735,
-  "finished_at": "2026-09-24T09:59:42.377306+00:00"
+  "excluded_moscow_only_products": 12,
+  "excluded_moscow_only_articles": [
+    "BR-H-102-1",
+    "BR-HB-101-35",
+    "BR-HB-102-04",
+    "BR-HA-102-04",
+    "BR-HA-102-01",
+    "BR-HA-102-1",
+    "BR-HB-102-1",
+    "BR-H-102-04",
+    "BR-HB-101-70-5",
+    "BR-HA-100",
+    "BR-HA-100-45",
+    "BR-H-102-01"
+  ],
+  "kit_mapping_method": "targeted_current_norden_skus",
+  "kit_seed_codes": 528,
+  "unresolved_existing_count": 150,
+  "unresolved_existing_sample": [
+    {
+      "sku": "AF-30965424",
+      "kit_id": 1502695,
+      "code_for_site": "FK004-C12(2D mechani",
+      "name": "Кресло для руководителя Лилль CF FK004-C12(2D mechanism) M",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30834843",
+      "kit_id": 607071,
+      "code_for_site": "RF-8106B PU",
+      "name": "Кресло офисное / Lotus EVO / черно - белая экокожа/ пластиковая крестовина",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31094457",
+      "kit_id": 607013,
+      "code_for_site": "216B-Сhrome-B-BB",
+      "name": "Кресло для персонала / Tema Сhrome LB 2D",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31390740",
+      "kit_id": 607016,
+      "code_for_site": "HD-2216L grey",
+      "name": "Кресло Parker LB grey HD-2216L grey",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31390738",
+      "kit_id": 607083,
+      "code_for_site": "HD-2216H grey",
+      "name": "Кресло Parker grey HD-2216H grey",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31390737",
+      "kit_id": 607081,
+      "code_for_site": "HD-2216H-1 Fabric",
+      "name": "Кресло Parker Fabric HD-2216H-1 Fabric",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31390739",
+      "kit_id": 607082,
+      "code_for_site": "HD-2216L",
+      "name": "Кресло Parker LB HD-2216L",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31390736",
+      "kit_id": 607014,
+      "code_for_site": "HD-2216H",
+      "name": "Кресло Parker HD-2216H",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31394811",
+      "kit_id": 110702,
+      "code_for_site": "F181-F black pu",
+      "name": "Кресло Porsche F181-F black pu черная экокожа / алюминий крестовина",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31213918",
+      "kit_id": 110703,
+      "code_for_site": "CX0898R-1-130",
+      "name": "Кресло персонала IQ CX0898R-1-130 (black plastic blue) черный пластик / небесно-голубая ткань",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31155790",
+      "kit_id": 110457,
+      "code_for_site": "L317HCA-ivory",
+      "name": "Кресло для руководителя / Harvard ivory L317HCA-ivory",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30945287",
+      "kit_id": 110436,
+      "code_for_site": "A3-M-LB(black)",
+      "name": "Кресло для персонала Wave T LB черное A3-M-LB(black)",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31303720",
+      "kit_id": 110456,
+      "code_for_site": "L317HCA-brown",
+      "name": "Кресло для руководителя / Harvard brown L317HCA-brown",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31156831",
+      "kit_id": 110412,
+      "code_for_site": "L326MCA-LB-Grey",
+      "name": "Кресло для руководителя / Capital LB-Grey L326MCA-LB-Grey",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30944498",
+      "kit_id": 110462,
+      "code_for_site": "8002C-2KSB gray HY60",
+      "name": "Кресло для персонала Некст Серый 8002C-2KSB gray HY60200",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31165847",
+      "kit_id": 110422,
+      "code_for_site": "P2338B-L02 leather",
+      "name": "Конференц-кресло / Боттичелли CF P2338B-L02 leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31165848",
+      "kit_id": 110421,
+      "code_for_site": "P2338B-L0828 leather",
+      "name": "Конференц-кресло Боттичелли CF P2338B-L0828 leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30941340",
+      "kit_id": 110348,
+      "code_for_site": "A33",
+      "name": "Кресло руководителя ERGO M черный",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30834856",
+      "kit_id": 110182,
+      "code_for_site": "RF-9117B",
+      "name": "Кресло офисное Lotus PRO carbon черно - белая экокожа стальная крестовина",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30834926",
+      "kit_id": 110183,
+      "code_for_site": "D065F",
+      "name": "Кресло офисное Пинин смарт черная сетка черная ткань",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31362499",
+      "kit_id": 109931,
+      "code_for_site": "F181 brown PU",
+      "name": "Кресло для руководителя Porsche F181 brown PU",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31166344",
+      "kit_id": 109962,
+      "code_for_site": "2311 ivory",
+      "name": "Кресло для руководителя Bern ivory 2311 ivory",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31364293",
+      "kit_id": 109708,
+      "code_for_site": "HY-850B",
+      "name": "Конференц-кресло Cult HY-850B",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31366817",
+      "kit_id": 109591,
+      "code_for_site": "FG-1813A",
+      "name": "Кресло офисное Bilbao FG-1813A",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31366818",
+      "kit_id": 109595,
+      "code_for_site": "FG-8631A",
+      "name": "Кресло для руководителя Sirio FG-8631A",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31366820",
+      "kit_id": 109622,
+      "code_for_site": "LF2448",
+      "name": "Кресло офисное Vector LF2448",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31392153",
+      "kit_id": 109226,
+      "code_for_site": "HD-2220-2 L LB grey",
+      "name": "Кресло West LB HD-2220-2 L LB grey",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31329800",
+      "kit_id": 110038,
+      "code_for_site": "RF-8106A Fabric",
+      "name": "Геймерское кресло Lotus EVO RF-8106A Fabric",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31385532",
+      "kit_id": 108610,
+      "code_for_site": "U-059B-BS",
+      "name": "Кресло Light LB grey U-059B-BS",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30965426",
+      "kit_id": 108479,
+      "code_for_site": "CH-330B-BS-W-GG",
+      "name": "Кресло для персонала Baden CH-330B-BS-W-GG",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31381182",
+      "kit_id": 107118,
+      "code_for_site": "U-059A-HS",
+      "name": "Кресло для персонала Light gray U-059A-HS",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31136633",
+      "kit_id": 107680,
+      "code_for_site": "P3158-L02 Leather",
+      "name": "Кресло для руководителя / Консул кожа P3158-L02 Leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "алюминиевая база / серая ткань CF",
+      "kit_id": 106686,
+      "code_for_site": "",
+      "name": "Конференц-кресло Liverpool New CF grey fabric L347LCA-1-CF-grey fabric n",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31381183",
+      "kit_id": 107117,
+      "code_for_site": "U-059B-HS",
+      "name": "Кресло офисное Light LB gray U-059B-HS",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31366023",
+      "kit_id": 106722,
+      "code_for_site": "HY-839C W",
+      "name": "Конференц-кресло Swift HY-839C W",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31364580",
+      "kit_id": 106684,
+      "code_for_site": "BLS-002A-YS",
+      "name": "Кресло для руководителя Steph gray BLS-002A-YS",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31367113",
+      "kit_id": 106379,
+      "code_for_site": "FG-1822A-2",
+      "name": "Кресло для руководителя Titanium FG-1822A-2",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31366819",
+      "kit_id": 106269,
+      "code_for_site": "FG-1822A-1",
+      "name": "Кресло офисное Titanium FG-1822A-1",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31208408",
+      "kit_id": 105045,
+      "code_for_site": "AM 6007A",
+      "name": "Кресло офисное Lion AM 6007A",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31208325",
+      "kit_id": 105097,
+      "code_for_site": "AM 13-09A",
+      "name": "Кресло офисное Zion AM 13-09A",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31202498",
+      "kit_id": 106982,
+      "code_for_site": "K-1190-10-1 white",
+      "name": "Cтул /Нексус вуд K-1190-10-1 WHITE",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30675188",
+      "kit_id": 106975,
+      "code_for_site": "H-100F-35",
+      "name": "Кресло офисное Техно хром / черная экокожа мультиблок",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31165053",
+      "kit_id": 105657,
+      "code_for_site": "2311 black",
+      "name": "Кресло для руководителя / Bern black 2311 black",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31213688",
+      "kit_id": 105656,
+      "code_for_site": "2311 CF black",
+      "name": "Конференц-кресло / Bern CF black 2311 CF black",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31215050",
+      "kit_id": 105649,
+      "code_for_site": "F181-F black leather",
+      "name": "Кресло для руководителя Porsche F181-F black leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31336214",
+      "kit_id": 105320,
+      "code_for_site": "824 grey",
+      "name": "Стул офисный Five grey 824 grey",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31347600",
+      "kit_id": 105949,
+      "code_for_site": "P3124-02",
+      "name": "Кресло для руководителя Магистр P3124-02",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30974647",
+      "kit_id": 105495,
+      "code_for_site": "A1811-1 black leathe",
+      "name": "Кресло для руководителя Сиена M A1811-1 black leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30941338",
+      "kit_id": 105826,
+      "code_for_site": "919A",
+      "name": "Офисное кресло TENDER Черный",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31234426",
+      "kit_id": 104646,
+      "code_for_site": "831 yellow",
+      "name": "Офисный стул Eleven yellow 831 yellow",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31225144",
+      "kit_id": 104758,
+      "code_for_site": "823/824 grey",
+      "name": "Офисный стул /Eight grey 823/824 grey",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31156834",
+      "kit_id": 104892,
+      "code_for_site": "L347HCA-grey fabric",
+      "name": "Кресло офисное / Liverpool grey fabric L347HCA-grey fabric",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31155794",
+      "kit_id": 105857,
+      "code_for_site": "RF-8107A",
+      "name": "Геймерское кресло / Lotus ONERF-8107A",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30834842",
+      "kit_id": 105775,
+      "code_for_site": "RF-8106A PU",
+      "name": "Кресло офисное Lotus EVO черно - красная экокожа пластиковая крестовина",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31208415",
+      "kit_id": 104376,
+      "code_for_site": "AM 128B PU",
+      "name": "Кресло офисное Arctic LB экокожа AM 128B PU",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31163131",
+      "kit_id": 105149,
+      "code_for_site": "TS2301-10-2",
+      "name": "Кресла для руководителя / Стартрек TS2301-10-2",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31166345",
+      "kit_id": 105658,
+      "code_for_site": "2311 CF ivory",
+      "name": "Конференц-кресло Bern CF ivory 2311 CF ivory",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31208409",
+      "kit_id": 104585,
+      "code_for_site": "AM 1716A",
+      "name": "Кресло офисное Sorbonne AM 1716A",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30675194",
+      "kit_id": 104499,
+      "code_for_site": "H-102-5",
+      "name": "Кресло офисное Хельмут (white) сталь + хром белая сетка",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30882779",
+      "kit_id": 104497,
+      "code_for_site": "HA-102-05",
+      "name": "Кресло офисное Хельмут LB белая сетка",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31210784",
+      "kit_id": 104471,
+      "code_for_site": "829 grey",
+      "name": "Офисный стул Nine 829 grey",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30539766",
+      "kit_id": 104779,
+      "code_for_site": "CH-240C-OA2000*OS800",
+      "name": "Кресло офисное Стайл 1 CF хром черная сетка черная ткань",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30539763",
+      "kit_id": 104992,
+      "code_for_site": "CH-193B-К304D-1*N207",
+      "name": "Кресло офисное Спэйс LB черный пластик черная сетка оранжевая ткань",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30895662",
+      "kit_id": 104244,
+      "code_for_site": "CX0398H01 grey+silve",
+      "name": "Кресло офисное Тесла серебристый пластик серая спинка черная сидушка",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30898996",
+      "kit_id": 104523,
+      "code_for_site": "CH-329A",
+      "name": "Кресло офисное Ронин черная экокожа",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31208411",
+      "kit_id": 104584,
+      "code_for_site": "AM 1716B",
+      "name": "Кресло офисное Sorbonne LB AM 1716B",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30893903",
+      "kit_id": 104243,
+      "code_for_site": "CX0398H01 black",
+      "name": "Кресло офисное Тесла CX0398H01 black",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30899017",
+      "kit_id": 104512,
+      "code_for_site": "U-020C-OA2000*OS-01",
+      "name": "Кресло офисное Стронг CF U-020C-OA2000*OS-01",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30834950",
+      "kit_id": 104162,
+      "code_for_site": "CH-226B-OA2000*OS800",
+      "name": "Кресло офисное Сильвия LB CH-226B-OA2000*OS800",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30756512",
+      "kit_id": 104528,
+      "code_for_site": "NG-28PL",
+      "name": "Кресло офисное Реал хром сетка (черная)крестовина хром",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30882751",
+      "kit_id": 104527,
+      "code_for_site": "CH-317A",
+      "name": "Кресло офисное Рейн CH-317A черный",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30675160",
+      "kit_id": 104852,
+      "code_for_site": "WH001-blackleather",
+      "name": "Кресло офисное Патио черная кожа алюминиевая крестовина",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30899006",
+      "kit_id": 104366,
+      "code_for_site": "JZR1008 -BL005-DWB10",
+      "name": "Кресло офисное Лондон офис LB черный пластик сетка ткань",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30910707",
+      "kit_id": 104916,
+      "code_for_site": "909R-1-1",
+      "name": "Кресло офисное Лорри (black plastic black) черный пластик черная сетка",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30899013",
+      "kit_id": 104088,
+      "code_for_site": "CX1168M01 gray - bla",
+      "name": "Кресло офисное Стиль черный пластик серая спинка черная сидушка",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30834907",
+      "kit_id": 104917,
+      "code_for_site": "A1802 black",
+      "name": "Кресло офисное Лорд черная экокожа алюминий крестовина",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30539672",
+      "kit_id": 104742,
+      "code_for_site": "H-103-35",
+      "name": "Кресло офисное / Зуум / (black) черная экокожа",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30756505",
+      "kit_id": 104798,
+      "code_for_site": "H-1182-70-5",
+      "name": "Кресло офисное Мэдисон (ivory) серый пластик слоновая кость",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30834900",
+      "kit_id": 104190,
+      "code_for_site": "FK004-A13 beige",
+      "name": "Кресло офисное Лилль мокко экокожа алюминий крестовина",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30898988",
+      "kit_id": 104365,
+      "code_for_site": "JZR1008H-BL005-DWB10",
+      "name": "Кресло офисное Лондон офис JZR1008H-BL005-DWB104 white plastic",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30756498",
+      "kit_id": 104234,
+      "code_for_site": "8005A blue",
+      "name": "Кресло офисное Денвер черная сетка синяя ткань черный пластик",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30834887",
+      "kit_id": 105001,
+      "code_for_site": "H-1113-35",
+      "name": "Кресло офисное / Даллас / (black) черная экокожа",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30895645",
+      "kit_id": 104754,
+      "code_for_site": "CH-180A-OA2000*АК30-",
+      "name": "Кресло офисное Интер / база хром черный пластик сетка ткань",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30986053",
+      "kit_id": 104281,
+      "code_for_site": "CH-203A-B-BB",
+      "name": "Кресло для руководителя Vogue aluminium CH-203A-B-BB",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30986224",
+      "kit_id": 104280,
+      "code_for_site": "CH-203B-B-BB",
+      "name": "Кресло для руководителя Vogue aluminium LB CH-203B-B-BB",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31072381",
+      "kit_id": 104777,
+      "code_for_site": "216A-2D-B-BB",
+      "name": "Кресло для персонала Tema 2D 216A-2D-B-BB",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30967251",
+      "kit_id": 104776,
+      "code_for_site": "P039A-M02-04",
+      "name": "Кресло для персонала Techo P039A-M02-04",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30967252",
+      "kit_id": 104097,
+      "code_for_site": "P039B-M02-05",
+      "name": "Кресло для персонала Techo LB P039B-M02-05",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30756500",
+      "kit_id": 104233,
+      "code_for_site": "8005A-2 gray",
+      "name": "Кресло офисное Денвер серая сетка ткань пластик",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30965427",
+      "kit_id": 104778,
+      "code_for_site": "P039A-M02-05",
+      "name": "Кресло для персонала Techo P039A-M02-05",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30834901",
+      "kit_id": 104191,
+      "code_for_site": "FK004-A13 black",
+      "name": "Кресло офисное Лилль черная экокожа алюминий крестовина",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30923354",
+      "kit_id": 104278,
+      "code_for_site": "C1918 CF ivory leath",
+      "name": "Кресло офисное Бордо CF слоновая кость кожа алюминий крестовина",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30899005",
+      "kit_id": 104752,
+      "code_for_site": "CH-180B-OA2016*АК30-",
+      "name": "Кресло офисное / Интер LB черный пластик серая сетка зеленая ткань",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30539646",
+      "kit_id": 104441,
+      "code_for_site": "H-2029-35",
+      "name": "Кресло офисное Бонд / (black) сталь + хром черная экокожа",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30756499",
+      "kit_id": 104232,
+      "code_for_site": "8005A-2 cian",
+      "name": "Кресло офисное Денвер серая сетка морская волна ткань серый пластик",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30941342",
+      "kit_id": 104561,
+      "code_for_site": "A13-B-BB",
+      "name": "Кресло оператора TERRA LB A13-B-BB",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31223614",
+      "kit_id": 104197,
+      "code_for_site": "P2346-L09 leather",
+      "name": "Кресло для руководителя Честер P2346-L09 leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31300982",
+      "kit_id": 104930,
+      "code_for_site": "AM 188A-3",
+      "name": "Кресло для руководителя Grand ivory AM 188A-3",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31300980",
+      "kit_id": 104927,
+      "code_for_site": "AM 188A",
+      "name": "Кресло для руководителя Grand black AM 188A",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31201780",
+      "kit_id": 104719,
+      "code_for_site": "CH-359A black",
+      "name": "Кресло офисное / Cosmo black CH-359A black",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30946966",
+      "kit_id": 104636,
+      "code_for_site": "AM3-H(white)",
+      "name": "Кресло для руководителя Wave white AM3-H(white)",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30994777",
+      "kit_id": 104214,
+      "code_for_site": "8001A-2 grey",
+      "name": "Кресло для руководителя Бостон SL 8001A-2 grey",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31221523",
+      "kit_id": 104261,
+      "code_for_site": "H-2021-86 leather",
+      "name": "Кресло для руководителя Парламент H-2021-86 leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31221520",
+      "kit_id": 104260,
+      "code_for_site": "H-2021-70-8",
+      "name": "Кресло для руководителя Парламент H-2021-70-8",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31223178",
+      "kit_id": 104788,
+      "code_for_site": "H-1133-70-8",
+      "name": "Кресло для руководителя Президент H-1133-70-8",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31221521",
+      "kit_id": 104259,
+      "code_for_site": "H-2021-86",
+      "name": "Кресло для руководителя Парламент H-2021-86",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31221522",
+      "kit_id": 104257,
+      "code_for_site": "H-2021-70-30",
+      "name": "Кресло для руководителя Парламент H-2021-70-30",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31223179",
+      "kit_id": 104786,
+      "code_for_site": "H-1133-320",
+      "name": "Кресло для руководителя Президент H-1133-320",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31298153",
+      "kit_id": 104163,
+      "code_for_site": "HA-900-70",
+      "name": "Кресло для руководителя Модена HA-900-70",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31298151",
+      "kit_id": 104256,
+      "code_for_site": "H-1178-70",
+      "name": "Кресло для руководителя Джек H-1178-70",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31221516",
+      "kit_id": 104440,
+      "code_for_site": "H-2029",
+      "name": "Кресло для руководителя Бонд H-2029",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30995525",
+      "kit_id": 104797,
+      "code_for_site": "EVA-004B",
+      "name": "Кресло для руководителя Monro EVA-004B",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31211973",
+      "kit_id": 104750,
+      "code_for_site": "CH-366A-wb",
+      "name": "Кресло для руководителя Fredo CH-366A-wb",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30756516",
+      "kit_id": 104540,
+      "code_for_site": "YS1505A-black",
+      "name": "Кресло офисное / Трон / черная кожа",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31211107",
+      "kit_id": 105000,
+      "code_for_site": "P2338-L09 leather",
+      "name": "Кресло для руководителя Боттичелли P2338-L09 leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30834877",
+      "kit_id": 104277,
+      "code_for_site": "A1918 brown leather",
+      "name": "Кресло офисное Бордо темно коричневая кожа алюминий крестовина",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31221519",
+      "kit_id": 104364,
+      "code_for_site": "ZR8637H black leathe",
+      "name": "Кресло для руководителя Лондон ЛЮКС ZR8637H black leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31183680",
+      "kit_id": 104637,
+      "code_for_site": "CH-312A-W-RR",
+      "name": "Кресло для руководителя Ruby CH-312A-W-RR",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30945267",
+      "kit_id": 104643,
+      "code_for_site": "EIT-001A",
+      "name": "Кресло для руководителя Malmo EIT-001A черное",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31201781",
+      "kit_id": 104216,
+      "code_for_site": "CH-359A grey",
+      "name": "Кресло офисное / Cosmo grey CH-359A grey",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30756517",
+      "kit_id": 104538,
+      "code_for_site": "YS1505A-brown",
+      "name": "Кресло офисное / Трон / коричневая кожа",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30882720",
+      "kit_id": 104851,
+      "code_for_site": "9132 white leather",
+      "name": "Кресло офисное / Моцарт ivоry кожа алюминий крестовина золотого цвета",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30756518",
+      "kit_id": 104539,
+      "code_for_site": "YS1505A-ivory",
+      "name": "Кресло офисное / Трон / слоновая кость кожа",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31165845",
+      "kit_id": 104999,
+      "code_for_site": "P2338-L0828 leather",
+      "name": "Кресло для руководителя / Боттичелли P2338-L0828 leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31138347",
+      "kit_id": 104785,
+      "code_for_site": "H-1133-321",
+      "name": "Кресло для руководителя / Президент H-1133-321",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30994779",
+      "kit_id": 104253,
+      "code_for_site": "8002C-2SNH-HY-60200",
+      "name": "Кресло для персонала Некст 8002C-2SNH-HY-60200",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31221517",
+      "kit_id": 104231,
+      "code_for_site": "8005A black",
+      "name": "Кресло для персонала Денвер 8005A black",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30945272",
+      "kit_id": 104276,
+      "code_for_site": "A1918 black leather",
+      "name": "Кресло для руководителя Бордо A1918 black leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31165844",
+      "kit_id": 104998,
+      "code_for_site": "P2338-L02 leather",
+      "name": "Кресло для руководителя / Боттичелли P2338-L02 leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30966570",
+      "kit_id": 104560,
+      "code_for_site": "A13-B-GB",
+      "name": "Кресло для персонала Terra LB A13-B-GB",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31298152",
+      "kit_id": 104741,
+      "code_for_site": "H-103-322",
+      "name": "Кресло для руководителя Зуум H-103-322",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31155792",
+      "kit_id": 104796,
+      "code_for_site": "CH-193B-К304D-1*N204",
+      "name": "Кресло для персонала / Спэйс LBCH-193B-К304D-1*N204",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31072382",
+      "kit_id": 104632,
+      "code_for_site": "216B",
+      "name": "Кресло для персонала Tema LB 216B",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30985934",
+      "kit_id": 104624,
+      "code_for_site": "A3-M(black)",
+      "name": "Кресло для персонала Wave T A3-M(black)",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30945286",
+      "kit_id": 104635,
+      "code_for_site": "AM3-H(black)",
+      "name": "Кресло для персонала Wave черное AM3-H(black)",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31213917",
+      "kit_id": 104766,
+      "code_for_site": "CX0898H-1-171",
+      "name": "Кресло для персонала IQ CX0898H-1-171",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31223180",
+      "kit_id": 104972,
+      "code_for_site": "",
+      "name": "Кресло для персонала Харман LB HA-101-322",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31301349",
+      "kit_id": 104242,
+      "code_for_site": "CX0398H01 grey+black",
+      "name": "Кресло для персонала/Тесла CX0398H01 grey+black",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31317077",
+      "kit_id": 104339,
+      "code_for_site": "EAC-001A grey",
+      "name": "Кресло офисное/Nobel grey EAC-001A grey",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31072384",
+      "kit_id": 104633,
+      "code_for_site": "216B-Сhrome-B-GG",
+      "name": "Кресло для персонала Tema Сhrome LB 2D 216B-Сhrome-B-GG",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31211975",
+      "kit_id": 104496,
+      "code_for_site": "HB-102-05",
+      "name": "Конференц-кресло Хельмут CF HB-102-05",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31002788",
+      "kit_id": 104814,
+      "code_for_site": "B 1811 black leather",
+      "name": "Кресло для руководителя Сиена LB B 1811 black leather",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31223181",
+      "kit_id": 104572,
+      "code_for_site": "HB-101-322",
+      "name": "Конференц-кресло Харман CF HB-101-322",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31156830",
+      "kit_id": 104273,
+      "code_for_site": "L326MCA-LB-Black",
+      "name": "Конференц-кресло /Capital LB-Black L326MCA-LB-Black",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30939652",
+      "kit_id": 104559,
+      "code_for_site": "CH-219B-HS-К304D-14*",
+      "name": "Кресло для персонала Практик grey LB",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30939651",
+      "kit_id": 104991,
+      "code_for_site": "CH-193A-1-К304D-14*N",
+      "name": "Кресло для персонала Спэйс gray",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31221643",
+      "kit_id": 104677,
+      "code_for_site": "CH-178A",
+      "name": "Кресло для персонала Scanno CH-178A",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31301348",
+      "kit_id": 104241,
+      "code_for_site": "CX0398H01 white+blac",
+      "name": "Кресло для персонала/Тесла CX0398H01 white+black",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-31136638",
+      "kit_id": 104606,
+      "code_for_site": "336G-LB",
+      "name": "Компьютерное кресло Play LB grey336G-LB",
+      "reason": "Code for site not found in Norden source"
+    },
+    {
+      "sku": "AF-30895667",
+      "kit_id": 104275,
+      "code_for_site": "C1918 CF black leath",
+      "name": "Конференц-кресло Бордо CF Черный",
+      "reason": "Code for site not found in Norden source"
+    }
+  ],
+  "kit_target_skus": 528,
+  "kit_brand_norden_seen": 528,
+  "recent_norden_mapping_merged": 249,
+  "recent_norden_repair_candidates": 249,
+  "mapped_source_articles_for_updates": 591,
+  "bare_cards_repaired": 249,
+  "remaining_new_products": 7746,
+  "finished_at": "2026-09-24T11:22:21.471606+00:00"
 }
