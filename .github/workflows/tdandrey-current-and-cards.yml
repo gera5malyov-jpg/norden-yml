@@ -1,0 +1,68 @@
+name: ТД Андрей — проверить созданные AND карточки
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tdandrey-current-and-cards.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Найти AND карточки и их категории
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64,gzip,os
+          root=Path('tdandrey-kit')
+          data=''.join((root/f'payload.{i:02d}').read_text().strip() for i in range(1,5))
+          src=gzip.decompress(base64.b64decode(data)).decode()
+          ns={'__name__':'tdandrey_audit','__file__':'tdandrey-kit/sync_tdandrey.py'}
+          exec(compile(src,'sync_tdandrey.py','exec'),ns)
+          kit=ns['KitClient'](os.environ['YANDEX_KIT_TOKEN'])
+          s=ns['s']; norm=ns['norm']
+          variants=[]
+          page=1
+          while True:
+              payload=kit.request('GET','/v1/variants',params={'name':'AND-','page':page,'per_page':100})
+              rows=kit.rows(payload)
+              matches=[x for x in rows if s(x.get('sku')).upper().startswith('AND-') and s(x.get('status')).upper()!='ARCHIVED']
+              variants.extend(matches)
+              if len(rows)<100:
+                  break
+              page+=1
+              if page>20:
+                  break
+          cats=kit.list_all('/v1/categories')
+          byid={s(x.get('id')):x for x in cats}
+          def path_for(cid):
+              out=[]; seen=set()
+              while cid and cid not in seen and cid in byid:
+                  seen.add(cid)
+                  row=byid[cid]
+                  out.append(s(row.get('title') or row.get('name')))
+                  cid=s(row.get('parent_id'))
+              return list(reversed([x for x in out if x]))
+          print('AND_COUNT=',len(variants))
+          for v in variants[:500]:
+              pid=s(v.get('product_id'))
+              try:
+                  p=kit.request('GET',f'/v1/products/{pid}') if pid else {}
+              except Exception as e:
+                  p={}
+              cids=p.get('category_ids') or []
+              paths=[path_for(s(cid)) for cid in cids]
+              print('AND_CARD=',{'variant_id':s(v.get('id')),'sku':s(v.get('sku')),'product_id':pid,'category_paths':paths})
+          PY
