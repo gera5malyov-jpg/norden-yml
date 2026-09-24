@@ -34,16 +34,23 @@ def main():
     identity_char_ids = mod.resolve_identity_characteristic_ids(chars)
 
     by_id = {}
+    hidden_by_id = {}
     scanned = 0
     duplicate_listing_rows = 0
     for row in kit.variants_parallel(workers=6):
         scanned += 1
         if mod.s(row.get("brand")).casefold() != mod.BRAND.casefold():
             continue
-        if mod.s(row.get("status")).upper() == "ARCHIVED":
+        status = mod.s(row.get("status")).upper()
+        if status == "ARCHIVED":
             continue
         vid = mod.s(row.get("id"))
         if not vid:
+            continue
+        if status == "HIDDEN":
+            hidden_by_id[vid] = row
+            continue
+        if status != "PUBLISHED":
             continue
         if vid in by_id:
             duplicate_listing_rows += 1
@@ -130,6 +137,8 @@ def main():
         "source_products": len(source),
         "source_duplicate_articles": sorted(set(source_dups)),
         "kit_variants_scanned": scanned,
+        "published_norden_variants": len(by_id),
+        "hidden_norden_variants": len(hidden_by_id),
         "active_norden_variants": len(by_id),
         "duplicate_listing_rows_collapsed": duplicate_listing_rows,
         "name_matching_policy": "NO",
@@ -153,6 +162,8 @@ def main():
     summary = {
         "source_products": report["source_products"],
         "kit_variants_scanned": report["kit_variants_scanned"],
+        "published_norden_variants": report["published_norden_variants"],
+        "hidden_norden_variants": report["hidden_norden_variants"],
         "active_norden_variants": report["active_norden_variants"],
         "duplicate_listing_rows_collapsed": report["duplicate_listing_rows_collapsed"],
         "duplicate_groups_by_source_article": report["duplicate_groups_by_source_article"],
