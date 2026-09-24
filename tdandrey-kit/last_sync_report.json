@@ -1,7 +1,7 @@
 {
-  "started_at": "2026-09-24T09:12:36.043673+00:00",
+  "started_at": "2026-09-24T10:22:49.778037+00:00",
   "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
-  "mode": "daily",
+  "mode": "webasyst-first",
   "dry_run": false,
   "rules": {
     "kit_sku": "AND- + sku поставщика, например AND-070168",
@@ -21,182 +21,982 @@
   "warnings": [],
   "errors": [
     {
-      "sku": "000001",
-      "stage": "daily_new",
+      "sku": "406745",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000002",
-      "stage": "daily_new",
+      "sku": "407600",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000006",
-      "stage": "daily_new",
+      "sku": "406456",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000010",
-      "stage": "daily_new",
+      "sku": "406713",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000041",
-      "stage": "daily_new",
+      "sku": "406731",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000057",
-      "stage": "daily_new",
+      "sku": "406730",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000081",
-      "stage": "daily_new",
+      "sku": "406734",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000082",
-      "stage": "daily_new",
+      "sku": "406451",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000083",
-      "stage": "daily_new",
+      "sku": "394854",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000088",
-      "stage": "daily_new",
+      "sku": "394856",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000089",
-      "stage": "daily_new",
+      "sku": "387690",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000093",
-      "stage": "daily_new",
+      "sku": "387774",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000097",
-      "stage": "daily_new",
+      "sku": "387793",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000106",
-      "stage": "daily_new",
+      "sku": "384849",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000113",
-      "stage": "daily_new",
+      "sku": "385650",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000114",
-      "stage": "daily_new",
+      "sku": "385651",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000116",
-      "stage": "daily_new",
+      "sku": "387655",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000118",
-      "stage": "daily_new",
+      "sku": "387660",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000125",
-      "stage": "daily_new",
+      "sku": "387665",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000126",
-      "stage": "daily_new",
+      "sku": "387184",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000128",
-      "stage": "daily_new",
+      "sku": "387196",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000129",
-      "stage": "daily_new",
+      "sku": "387152",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000133",
-      "stage": "daily_new",
+      "sku": "387154",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000134",
-      "stage": "daily_new",
+      "sku": "387158",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000135",
-      "stage": "daily_new",
+      "sku": "387181",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000136",
-      "stage": "daily_new",
+      "sku": "387183",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000137",
-      "stage": "daily_new",
+      "sku": "384113",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000138",
-      "stage": "daily_new",
+      "sku": "383849",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000139",
-      "stage": "daily_new",
+      "sku": "384111",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "384068",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "384056",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "384057",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "384016",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383925",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383369",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383798",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383347",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383405",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383301",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383543",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383584",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383711",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383713",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383507",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382686",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382682",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383048",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383111",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382683",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382680",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382928",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383441",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383632",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383612",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383345",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383346",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382674",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382868",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382866",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383106",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382998",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383088",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382676",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382688",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382690",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382677",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382664",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382670",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382749",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382671",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382613",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382614",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "383009",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382233",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "381882",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382241",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382237",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382238",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "382235",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "378016",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "378015",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "379209",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "379211",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "379210",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "379212",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "379701",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "379998",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365941",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365928",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365985",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "367088",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "339127",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "366096",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "326734",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365039",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "220190",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "130666",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "230533",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "140443",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Высота, см'"
+    },
+    {
+      "sku": "290228",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Высота, см'"
+    },
+    {
+      "sku": "280397",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Высота, см'"
+    },
+    {
+      "sku": "030866",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000359",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Высота, см'"
+    },
+    {
+      "sku": "060764",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Высота, см'"
+    },
+    {
+      "sku": "190362",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Высота, см'"
+    },
+    {
+      "sku": "150548",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "280108",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Вес, кг'"
+    },
+    {
+      "sku": "110941",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "240756",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "050289",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "120301",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "200438",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "100959",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "110368",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "100876",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "140259",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "240804",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "230008",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "150402",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "000286",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "200285",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "120945",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "040120",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "270928",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "250236",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "270823",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365315",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365316",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365317",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365322",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365324",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365183",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365185",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365187",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365188",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365190",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365310",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "364665",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "346861",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365127",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365128",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365134",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "364649",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365390",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365392",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365014",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365387",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "365388",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "291084",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "280668",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "140214",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090732",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "291080",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "291081",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "050768",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "220714",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "250496",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "030421",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "230673",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "291106",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "100079",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090999",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "190427",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "170872",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "290692",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Вес, кг'"
+    },
+    {
+      "sku": "291105",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "230166",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "230168",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "240687",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "190323",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "190332",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "230905",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "230907",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "160492",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "040276",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "170402",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "170403",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "100110",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "100112",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "291125",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "291126",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "291221",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "291222",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "240251",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "200025",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "200683",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "210118",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "210119",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "210120",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "210121",
+      "stage": "webasyst_first_to_kit",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "170400",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
       "sku": "000164",
-      "stage": "daily_new",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
       "sku": "000165",
-      "stage": "daily_new",
-      "message": "В KIT несколько характеристик 'Ширина, см'"
-    },
-    {
-      "sku": "000166",
-      "stage": "daily_new",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
       "sku": "000167",
-      "stage": "daily_new",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     },
     {
-      "sku": "000169",
-      "stage": "daily_new",
-      "message": "В KIT несколько характеристик 'Ширина, см'"
-    },
-    {
-      "sku": "000170",
-      "stage": "daily_new",
+      "sku": "200682",
+      "stage": "webasyst_first_to_kit",
       "message": "В KIT несколько характеристик 'Ширина, см'"
     }
   ],
-  "images_uploaded": 1,
+  "images_uploaded": 16,
   "image_errors": 0,
   "source_count_total": 69203,
   "source_unique_sku": 69058,
@@ -5244,13 +6044,11 @@
       }
     ]
   },
-  "kit_updates": {
-    "price_updates": 0,
-    "stock_updates": 0,
-    "missing_zeroed": 0,
-    "mapped_without_price": 0
+  "kit_webasyst_first": {
+    "candidate_existing_webasyst": 5763,
+    "created": 300,
+    "reused": 0
   },
-  "daily_new_created": 100,
-  "mapped_total": 102,
-  "finished_at": "2026-09-24T10:22:34.822787+00:00"
+  "mapped_total": 300,
+  "finished_at": "2026-09-24T11:50:29.319091+00:00"
 }
