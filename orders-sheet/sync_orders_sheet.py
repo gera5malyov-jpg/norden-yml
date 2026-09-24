@@ -155,16 +155,35 @@ def format_phone(value: Any) -> str:
     return text
 
 
+def find_extension(value: Any) -> str:
+    if isinstance(value, dict):
+        for key in ("phoneCode", "extension", "ext"):
+            ext = s(value.get(key))
+            if ext:
+                return ext
+        for item in value.values():
+            ext = find_extension(item)
+            if ext:
+                return ext
+    elif isinstance(value, list):
+        for item in value:
+            ext = find_extension(item)
+            if ext:
+                return ext
+    return ""
+
+
 def phone_text(data: Any) -> str:
     if not isinstance(data, dict):
         return format_phone(data)
-    phone = first_scalar(
+    raw_phone = (
         data.get("phone")
         or data.get("telephone")
         or data.get("mobile")
         or data.get("replacementPhone")
     )
-    ext = s(data.get("phoneCode") or data.get("extension") or data.get("ext"))
+    phone = first_scalar(raw_phone)
+    ext = s(data.get("phoneCode") or data.get("extension") or data.get("ext")) or find_extension(raw_phone)
     phone = format_phone(phone)
     if phone and ext and f"доб. {ext}" not in phone:
         phone += f" доб. {ext}"
@@ -174,17 +193,32 @@ def phone_text(data: Any) -> str:
 def address_from_params(params: Any) -> str:
     if not isinstance(params, dict):
         return ""
+    zip_code = s(params.get("shipping_address.zip"))
+    country = s(params.get("shipping_address.country"))
+    region = s(params.get("shipping_address.region"))
+    city = s(params.get("shipping_address.city"))
+    street = s(params.get("shipping_address.street"))
+
+    # Some marketplace integrations store a complete address in street.
+    # Do not prepend the same index/country/city a second time.
+    street_low = street.lower()
+    markers = [x for x in (zip_code, country, region, city) if x]
+    if street and sum(1 for x in markers if x.lower() in street_low) >= 2:
+        return street
+
+    if country.lower() in {"rus", "ru", "russia"}:
+        country = ""
+    if region.isdigit():
+        region = ""
+
     parts = []
-    for key in (
-        "shipping_address.zip",
-        "shipping_address.country",
-        "shipping_address.region",
-        "shipping_address.city",
-        "shipping_address.street",
-    ):
-        value = s(params.get(key))
-        if value and value not in parts:
-            parts.append(value)
+    for value in (zip_code, country, region, city, street):
+        value = s(value)
+        if not value:
+            continue
+        if any(value.lower() == old.lower() for old in parts):
+            continue
+        parts.append(value)
     return ", ".join(parts)
 
 
