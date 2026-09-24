@@ -1,0 +1,300 @@
+name: Migrate KIT high-confidence categories
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-category-migrate-high-confidence-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kit-category-migrate-high-confidence
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Validate Norden sync code
+        run: python -m py_compile norden-kit/sync_norden_kit.py
+      - name: Apply exact approved category mappings
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, threading, time
+          from collections import Counter, defaultdict
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from datetime import datetime, timezone
+          from pathlib import Path
+          import requests
+
+          BASE='https://api.kit.yandex.net'
+          TOKEN=os.environ['YANDEX_KIT_TOKEN']
+          H={'Authorization':'Bearer '+TOKEN,'Accept':'application/json'}
+          POLICY=Path('norden-kit/category_policy.json')
+          REPORT=Path('category-audit/high_confidence_migration_report_2026-09-24.json')
+          policy=json.loads(POLICY.read_text(encoding='utf-8'))
+          rules=policy.get('rules') or {}
+          destinations=policy.get('destinations') or []
+          if policy.get('policy')!='exact_high_confidence_only':
+              raise SystemExit('Unexpected category policy mode')
+          if len(rules)!=98:
+              raise SystemExit(f'Expected exactly 98 approved rules, got {len(rules)}')
+
+          def now():
+              return datetime.now(timezone.utc).isoformat()
+
+          def get(path, params=None):
+              for attempt in range(20):
+                  r=requests.get(BASE+path,headers=H,params=params,timeout=90)
+                  if r.status_code==429:
+                      time.sleep(min(30,1.5+attempt*1.5)); continue
+                  if r.status_code>=500:
+                      time.sleep(min(20,2+attempt)); continue
+                  r.raise_for_status()
+                  return r.json()
+              raise RuntimeError('GET retries exhausted '+path)
+
+          def post(path, body):
+              hh={**H,'Content-Type':'application/json'}
+              for attempt in range(20):
+                  r=requests.post(BASE+path,headers=hh,json=body,timeout=90)
+                  if r.status_code==429:
+                      time.sleep(min(30,1.5+attempt*1.5)); continue
+                  if r.status_code>=500:
+                      time.sleep(min(20,2+attempt)); continue
+                  r.raise_for_status()
+                  return r.json() if r.content else {}
+              raise RuntimeError('POST retries exhausted '+path)
+
+          def patch_product(pid,target_id):
+              hh={**H,'Content-Type':'application/merge-patch+json'}
+              for attempt in range(30):
+                  try:
+                      r=requests.patch(BASE+f'/v1/products/{pid}',headers=hh,
+                                       json={'category_ids':[target_id]},timeout=90)
+                  except requests.RequestException:
+                      time.sleep(min(20,1+attempt)); continue
+                  if r.status_code==429:
+                      time.sleep(min(30,1.0+attempt*1.2)); continue
+                  if r.status_code>=500:
+                      time.sleep(min(20,1+attempt)); continue
+                  if r.status_code>=400:
+                      return False, f'HTTP {r.status_code}: {r.text[:500]}'
+                  try:j=r.json()
+                  except Exception:j={}
+                  if j.get('category_ids')==[target_id]:
+                      return True, None
+                  return False, f'Unexpected response category_ids={j.get("category_ids")}'
+              return False,'PATCH retries exhausted'
+
+          # 1. Read all live categories.
+          cats=[]
+          page=1
+          while True:
+              data=get('/v1/categories',{'page':page,'per_page':100,'status':['ACTIVE']})
+              rows=data.get('categories') or data.get('items') or data.get('results') or data.get('data') or []
+              if isinstance(rows,dict): rows=rows.get('items') or []
+              rows=[x for x in rows if isinstance(x,dict)]
+              cats.extend(rows)
+              if not rows or len(rows)<100: break
+              page+=1
+
+          by_id={str(x.get('id')):x for x in cats if x.get('id')}
+          path_cache={}
+          def cat_path_by_id(cid):
+              cid=str(cid or '')
+              if cid in path_cache:return path_cache[cid]
+              out=[]; seen=set(); cur=by_id.get(cid)
+              while cur and str(cur.get('id') or '') not in seen:
+                  seen.add(str(cur.get('id') or ''))
+                  title=str(cur.get('title') or '').strip()
+                  if title: out.append(title)
+                  pid=str(cur.get('parent_id') or '')
+                  cur=by_id.get(pid) if pid else None
+              out.reverse()
+              p=' > '.join(out)
+              path_cache[cid]=p
+              return p
+
+          # 2. Resolve exact source category IDs from approved path hashes.
+          source={}
+          for cid in list(by_id):
+              p=cat_path_by_id(cid)
+              key=hashlib.sha256(p.encode('utf-8')).hexdigest()[:20]
+              rule=rules.get(key)
+              if rule:
+                  idx=int(rule[0]); expected=int(rule[1])
+                  source[cid]={'hash':key,'source_path':p,'target_path':destinations[idx],'expected':expected}
+
+          # The policy may include a route that no longer exists, but never invent source matches.
+          if not source:
+              raise SystemExit('No approved source categories found in live KIT tree')
+
+          # 3. Ensure only the 11 pre-approved destination paths exist.
+          def reload_categories():
+              rows=[]; p=1
+              while True:
+                  data=get('/v1/categories',{'page':p,'per_page':100,'status':['ACTIVE']})
+                  rr=data.get('categories') or data.get('items') or data.get('results') or data.get('data') or []
+                  if isinstance(rr,dict): rr=rr.get('items') or []
+                  rr=[x for x in rr if isinstance(x,dict)]
+                  rows.extend(rr)
+                  if not rr or len(rr)<100: break
+                  p+=1
+              return rows
+
+          def rebuild(rows):
+              bid={str(x.get('id')):x for x in rows if x.get('id')}
+              cache={}
+              def path_for(cid):
+                  cid=str(cid or '')
+                  if cid in cache:return cache[cid]
+                  out=[]; seen=set(); cur=bid.get(cid)
+                  while cur and str(cur.get('id') or '') not in seen:
+                      seen.add(str(cur.get('id') or ''))
+                      title=str(cur.get('title') or '').strip()
+                      if title:out.append(title)
+                      pid=str(cur.get('parent_id') or '')
+                      cur=bid.get(pid) if pid else None
+                  out.reverse(); val=' > '.join(out); cache[cid]=val; return val
+              return bid,{path_for(cid):cid for cid in bid}
+
+          by_id,path_to_id=rebuild(cats)
+          created_categories=[]
+          for target in sorted(set(x['target_path'] for x in source.values())):
+              parts=[x.strip() for x in target.split('>') if x.strip()]
+              parent=''
+              built=[]
+              for title in parts:
+                  built.append(title)
+                  full=' > '.join(built)
+                  cid=path_to_id.get(full)
+                  if cid:
+                      parent=cid; continue
+                  body={'title':title}
+                  if parent: body['parent_id']=parent
+                  new=post('/v1/categories',body)
+                  cid=str(new.get('id') or '')
+                  if not cid:
+                      raise RuntimeError(f'KIT did not return category id for {full}')
+                  created_categories.append({'path':full,'id':cid})
+                  # Re-read to avoid assumptions about response fields.
+                  cats=reload_categories()
+                  by_id,path_to_id=rebuild(cats)
+                  cid=path_to_id.get(full)
+                  if not cid: raise RuntimeError(f'Created category not found after reread: {full}')
+                  parent=cid
+
+          target_ids={p:path_to_id[p] for p in sorted(set(x['target_path'] for x in source.values()))}
+          source_to_target={cid:target_ids[info['target_path']] for cid,info in source.items()}
+
+          # 4. Scan products. Only a product with exactly one current category may be changed.
+          planned=[]
+          scanned=0
+          skipped_multi=[]
+          current_counts=Counter()
+          p=1
+          while True:
+              data=get('/v1/products',{'page':p,'per_page':100})
+              rows=data.get('products') or data.get('items') or data.get('results') or []
+              rows=[x for x in rows if isinstance(x,dict)]
+              if not rows: break
+              scanned+=len(rows)
+              for prod in rows:
+                  cats_now=[str(x) for x in (prod.get('category_ids') or []) if x]
+                  matches=[cid for cid in cats_now if cid in source_to_target]
+                  for cid in matches: current_counts[cid]+=1
+                  if not matches: continue
+                  if len(cats_now)!=1 or len(matches)!=1:
+                      if len(skipped_multi)<200:
+                          skipped_multi.append({'product_id':prod.get('id'),'category_ids':cats_now})
+                      continue
+                  src=matches[0]; target=source_to_target[src]
+                  if src==target: continue
+                  planned.append((str(prod.get('id')),src,target))
+              if len(rows)<100: break
+              p+=1
+              if p%100==0:
+                  print(f'scanned products: {scanned}; planned: {len(planned)}',flush=True)
+                  time.sleep(0.4)
+
+          # 5. Apply category-only PATCHes in bounded parallelism.
+          updated=Counter()
+          errors=[]
+          lock=threading.Lock()
+          def worker(item):
+              pid,src,target=item
+              ok,err=patch_product(pid,target)
+              return pid,src,target,ok,err
+
+          with ThreadPoolExecutor(max_workers=6) as pool:
+              futs=[pool.submit(worker,x) for x in planned]
+              done=0
+              for fut in as_completed(futs):
+                  pid,src,target,ok,err=fut.result()
+                  done+=1
+                  if ok: updated[src]+=1
+                  else:
+                      with lock:
+                          if len(errors)<300:
+                              errors.append({'product_id':pid,'source_category_id':src,'target_category_id':target,'error':err})
+                  if done%250==0 or done==len(futs):
+                      print(f'patched {done}/{len(futs)}; ok={sum(updated.values())}; errors={len(errors)}',flush=True)
+
+          by_source=[]
+          for cid,info in sorted(source.items(), key=lambda kv:kv[1]['source_path']):
+              by_source.append({
+                  'source_category_id':cid,
+                  'source_path':info['source_path'],
+                  'target_path':info['target_path'],
+                  'expected_from_approval_file':info['expected'],
+                  'found_before_migration':current_counts[cid],
+                  'updated':updated[cid],
+              })
+
+          report={
+              'started_from_policy_version':policy.get('version'),
+              'finished_at':now(),
+              'rule_count':len(rules),
+              'live_source_categories_matched':len(source),
+              'expected_products_from_approval_file':sum(int(x[1]) for x in rules.values()),
+              'products_scanned':scanned,
+              'planned_updates':len(planned),
+              'updated':sum(updated.values()),
+              'errors_count':len(errors),
+              'skipped_multi_category_count':len(skipped_multi),
+              'created_destination_categories':created_categories,
+              'by_source':by_source,
+              'errors':errors,
+              'skipped_multi_category_examples':skipped_multi,
+              'safety':'Only category_ids changed; exact approved source category path hashes only.',
+          }
+          REPORT.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({k:v for k,v in report.items() if k not in ('by_source','errors','skipped_multi_category_examples')},ensure_ascii=False,indent=2))
+          if errors:
+              raise SystemExit(f'Category migration completed with {len(errors)} recorded errors')
+          PY
+      - name: Commit migration report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add category-audit/high_confidence_migration_report_2026-09-24.json 2>/dev/null || true
+          git commit -m "Record high-confidence KIT category migration" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
