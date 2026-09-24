@@ -34,6 +34,15 @@ EXISTING_CODES_SEED_PATH = ROOT / "existing_norden_codes_seed.txt"
 CODE_SITE_TITLE = "Код для сайта"
 ARTICLE_TITLE = "Артикул"
 NORDEN_CODE_TITLE = "Код Norden"
+SELLER_CODE_TITLE = "Код продавца"
+EXTERNAL_ID_TITLES = ("Внешний ID", "Внешний идентификатор", "External ID")
+IDENTITY_CHARACTERISTIC_TITLES = (
+    ARTICLE_TITLE,
+    SELLER_CODE_TITLE,
+    NORDEN_CODE_TITLE,
+    *EXTERNAL_ID_TITLES,
+    CODE_SITE_TITLE,
+)
 BRAND = "Norden"
 WAREHOUSES = ("МСК", "СПБ привозной")
 
@@ -646,6 +655,63 @@ def current_char_value(row, char_id):
     return ""
 
 
+def resolve_identity_characteristic_ids(rows):
+    """Resolve existing KIT identity characteristics without creating new ones."""
+    by_title = defaultdict(list)
+    for row in rows or []:
+        cid = s(row.get("id"))
+        title = s(row.get("title"))
+        if cid and title:
+            by_title[norm_title(title)].append(cid)
+
+    result = {}
+    for title in IDENTITY_CHARACTERISTIC_TITLES:
+        ids = list(dict.fromkeys(by_title.get(norm_title(title), [])))
+        if ids:
+            result[title] = ids
+    return result
+
+
+def build_source_identity_index(source):
+    """Index only hard supplier identifiers. Product name is intentionally excluded."""
+    index = defaultdict(set)
+    for article, item in source.items():
+        for value in (article, (item or {}).get("norden_code")):
+            key = norm_code(value)
+            if key:
+                index[key].add(article)
+    return index
+
+
+def match_source_by_identity(row, source_index, identity_char_ids):
+    """Match KIT row to one Norden source item by SKU/Article/Code/External ID/Site code."""
+    values = []
+    sku = s(row.get("sku"))
+    if sku:
+        values.append(("SKU", sku))
+
+    for title, ids in (identity_char_ids or {}).items():
+        for cid in ids:
+            value = current_char_value(row, cid)
+            if value:
+                values.append((title, value))
+
+    candidates = defaultdict(list)
+    for field, value in values:
+        key = norm_code(value)
+        if not key:
+            continue
+        for article in source_index.get(key, set()):
+            candidates[article].append({"field": field, "value": value})
+
+    if len(candidates) == 1:
+        article = next(iter(candidates))
+        return article, candidates[article], values, None
+    if len(candidates) > 1:
+        return None, [], values, dict(candidates)
+    return None, [], values, None
+
+
 def resolve_special_characteristics(kit):
     rows = kit.characteristics()
     by_title = defaultdict(list)
@@ -709,9 +775,9 @@ def seed_mapping_from_existing_codes(source, report):
     return mapping
 
 
-def rebuild_mapping_from_sku_list(kit, source, code_site_id, report):
-    articles = list(source)
+def rebuild_mapping_from_sku_list(kit, source, identity_char_ids, report):
     mapping = {"version": 1, "updated_at": None, "initial_complete": False, "variants": {}}
+    source_index = build_source_identity_index(source)
     skus = []
     if EXISTING_SKUS_PATH.exists():
         skus = [s(x) for x in EXISTING_SKUS_PATH.read_text(encoding="utf-8").splitlines() if s(x)]
@@ -720,6 +786,7 @@ def rebuild_mapping_from_sku_list(kit, source, code_site_id, report):
 
     unresolved = []
     found_rows = []
+
     def fetch_one(sku):
         payload = kit.request("GET", "/v1/variants", params={"name": sku, "page": 1, "per_page": 100})
         rows = kit.items(payload)
@@ -744,30 +811,43 @@ def rebuild_mapping_from_sku_list(kit, source, code_site_id, report):
                 continue
             found_rows.append(row)
 
+    match_field_counts = defaultdict(int)
+    identity_conflicts = 0
     for row in found_rows:
-        code = current_char_value(row, code_site_id)
-        article = match_source_article(code, articles)
+        article, matched, values, conflict = match_source_by_identity(
+            row, source_index, identity_char_ids
+        )
         if not article:
+            if conflict:
+                identity_conflicts += 1
             if len(unresolved) < 200:
                 unresolved.append({
-                    "sku": row.get("sku"), "kit_id": row.get("kit_id"),
-                    "code_for_site": code, "name": row.get("name"),
-                    "reason": "Code for site not found in Norden source",
+                    "sku": row.get("sku"),
+                    "kit_id": row.get("kit_id"),
+                    "name": row.get("name"),
+                    "identity_values": [{"field": a, "value": b} for a, b in values],
+                    "identity_conflict": conflict,
+                    "reason": "No unique hard-identifier match in Norden source",
                 })
             continue
+        for hit in matched:
+            match_field_counts[hit["field"]] += 1
         mapping["variants"].setdefault(article, []).append({
             "variant_id": s(row.get("id")),
             "kit_id": row.get("kit_id"),
             "sku": s(row.get("sku")),
+            "match_method": "hard_identifiers",
+            "matched_identifiers": matched,
         })
 
-    report["kit_mapping_method"] = "targeted_current_norden_skus"
+    report["kit_mapping_method"] = "targeted_current_norden_skus_multi_id"
     report["kit_target_skus"] = len(skus)
     report["kit_brand_norden_seen"] = len(found_rows)
     report["mapped_existing_articles"] = len(mapping["variants"])
+    report["identity_match_field_counts"] = dict(match_field_counts)
+    report["identity_conflicts"] = identity_conflicts
     report["unresolved_existing_count"] = len(unresolved)
     report["unresolved_existing_sample"] = unresolved
-    # Safety: the current export should resolve almost all existing Norden cards.
     if len(found_rows) < 500:
         report["warnings"].append(
             f"Targeted Norden lookup found only {len(found_rows)} of {len(skus)} cards; falling back to full scan."
@@ -776,22 +856,14 @@ def rebuild_mapping_from_sku_list(kit, source, code_site_id, report):
     save_mapping(mapping)
     return mapping
 
-
-def rebuild_mapping(kit, source, code_site_id, report):
-    articles = list(source)
+def rebuild_mapping(kit, source, identity_char_ids, report):
     mapping = {"version": 1, "updated_at": None, "initial_complete": False, "variants": {}}
+    source_index = build_source_identity_index(source)
     scanned = 0
     norden_rows = 0
     unresolved = []
-
-    # Safe fallback for old AF-* cards: exact normalized product name may be the
-    # only reliable link when "Код для сайта" was never filled or used another format.
-    # Only unique source names are accepted; ambiguous names are never auto-matched.
-    source_names = defaultdict(list)
-    for article, item in source.items():
-        key = norm_title(item.get("name"))
-        if key:
-            source_names[key].append(article)
+    identity_conflicts = 0
+    match_field_counts = defaultdict(int)
 
     for row in kit.variants_parallel(workers=6):
         scanned += 1
@@ -800,35 +872,44 @@ def rebuild_mapping(kit, source, code_site_id, report):
         if s(row.get("status")).upper() == "ARCHIVED":
             continue
         norden_rows += 1
-        code = current_char_value(row, code_site_id)
-        article = match_source_article(code, articles)
-        match_method = "code_for_site" if article else ""
+
+        article, matched, values, conflict = match_source_by_identity(
+            row, source_index, identity_char_ids
+        )
         if not article:
-            name_key = norm_title(row.get("name"))
-            by_name = source_names.get(name_key, [])
-            if len(by_name) == 1:
-                article = by_name[0]
-                match_method = "exact_name"
-                report.setdefault("mapped_existing_by_exact_name", 0)
-                report["mapped_existing_by_exact_name"] += 1
-        if not article:
+            if conflict:
+                identity_conflicts += 1
             if len(unresolved) < 200:
-                unresolved.append({"sku": row.get("sku"), "kit_id": row.get("kit_id"), "code_for_site": code, "name": row.get("name")})
+                unresolved.append({
+                    "sku": row.get("sku"),
+                    "kit_id": row.get("kit_id"),
+                    "name": row.get("name"),
+                    "identity_values": [{"field": a, "value": b} for a, b in values],
+                    "identity_conflict": conflict,
+                    "reason": "No unique hard-identifier match; name matching disabled for Norden",
+                })
             continue
+
+        for hit in matched:
+            match_field_counts[hit["field"]] += 1
         mapping["variants"].setdefault(article, []).append({
             "variant_id": s(row.get("id")),
             "kit_id": row.get("kit_id"),
             "sku": s(row.get("sku")),
-            "match_method": match_method,
+            "match_method": "hard_identifiers",
+            "matched_identifiers": matched,
         })
+
     report["kit_variants_scanned"] = scanned
     report["kit_brand_norden_seen"] = norden_rows
     report["mapped_existing_articles"] = len(mapping["variants"])
+    report["identity_match_field_counts"] = dict(match_field_counts)
+    report["identity_conflicts"] = identity_conflicts
+    report["name_matching_policy"] = "NO"
     report["unresolved_existing_count"] = len(unresolved)
     report["unresolved_existing_sample"] = unresolved
     save_mapping(mapping)
     return mapping
-
 
 def canonicalize_duplicate_mapping(kit, mapping, warehouses, report):
     """Keep one canonical live card per Norden article and quarantine duplicates."""
@@ -984,6 +1065,22 @@ def characteristic_id(kit, all_rows, by_title, title):
 
 def build_source_characteristics(item, kit, all_rows, by_title, code_site_id, article_id=None, new_article=None):
     out = [{"characteristic_id": code_site_id, "value": item["article"], "values": [item["article"]]}]
+
+    # Persist supplier identity fields so future duplicate checks do not depend on names.
+    seller_code_id = characteristic_id(kit, all_rows, by_title, SELLER_CODE_TITLE)
+    out.append({
+        "characteristic_id": seller_code_id,
+        "value": item["article"],
+        "values": [item["article"]],
+    })
+    if s(item.get("norden_code")):
+        norden_code_id = characteristic_id(kit, all_rows, by_title, NORDEN_CODE_TITLE)
+        out.append({
+            "characteristic_id": norden_code_id,
+            "value": s(item["norden_code"]),
+            "values": [s(item["norden_code"])],
+        })
+
     for title, value in item.get("characteristics") or []:
         if not s(title) or not s(value):
             continue
@@ -1285,6 +1382,11 @@ def main():
         raise RuntimeError(f"Safety stop: unexpectedly small Norden source ({len(source)} products)")
 
     all_chars, chars_by_title, code_site_id, article_id = resolve_special_characteristics(kit)
+    identity_char_ids = resolve_identity_characteristic_ids(all_chars)
+    report["identity_fields_checked"] = {
+        title: ids for title, ids in identity_char_ids.items()
+    }
+    report["name_matching_policy"] = "NO"
     mapping = load_mapping()
 
     if args.rebuild_map or not mapping.get("variants"):
@@ -1293,15 +1395,15 @@ def main():
             full_source, _, _, _ = load_source(secret, short=False)
             mapping = seed_mapping_from_existing_codes(full_source, report) if args.mode in ("preflight", "full") else None
             if mapping is None:
-                mapping = rebuild_mapping_from_sku_list(kit, full_source, code_site_id, report)
+                mapping = rebuild_mapping_from_sku_list(kit, full_source, identity_char_ids, report)
             if mapping is None:
-                mapping = rebuild_mapping(kit, full_source, code_site_id, report)
+                mapping = rebuild_mapping(kit, full_source, identity_char_ids, report)
         else:
             mapping = seed_mapping_from_existing_codes(source, report) if args.mode in ("preflight", "full") else None
             if mapping is None:
-                mapping = rebuild_mapping_from_sku_list(kit, source, code_site_id, report)
+                mapping = rebuild_mapping_from_sku_list(kit, source, identity_char_ids, report)
             if mapping is None:
-                mapping = rebuild_mapping(kit, source, code_site_id, report)
+                mapping = rebuild_mapping(kit, source, identity_char_ids, report)
     else:
         report["mapped_existing_articles"] = len(mapping.get("variants", {}))
 
@@ -1315,12 +1417,13 @@ def main():
 
         # HARD DUPLICATE GUARD.
         # Before creating even one new Norden card, rescan the ENTIRE active Norden
-        # catalog in KIT and rebuild mapping from live cards by "Код для сайта".
-        # The previous 10-page recent scan was insufficient and could miss old AF-* cards.
+        # catalog in KIT and rebuild mapping from all hard identifiers:
+        # SKU / Артикул / Код продавца / Код Norden / External ID / Код для сайта.
+        # Product name is explicitly disabled for Norden.
         tentative_missing = [a for a in source if a not in mapping.get("variants", {})]
         if tentative_missing:
             report["precreation_full_reconciliation_requested"] = len(tentative_missing)
-            mapping = rebuild_mapping(kit, source, code_site_id, report)
+            mapping = rebuild_mapping(kit, source, identity_char_ids, report)
             report["precreation_full_reconciliation_done"] = True
             duplicate_articles = {
                 article: rows for article, rows in mapping.get("variants", {}).items()
