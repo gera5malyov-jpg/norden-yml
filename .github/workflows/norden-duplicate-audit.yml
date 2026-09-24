@@ -38,6 +38,12 @@ jobs:
 
       - run: pip install requests
 
+      - name: Cleanup unambiguous Norden duplicates
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: python norden-kit/cleanup_norden_duplicates.py
+
       - name: Audit Norden duplicates in KIT
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
@@ -48,7 +54,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email actions@github.com
-          git add norden-kit/norden_duplicate_audit_report.json
+          git add norden-kit/norden_duplicate_audit_report.json norden-kit/norden_duplicate_cleanup_report.json
           if ! git diff --cached --quiet; then
             git commit -m "Save Norden duplicate audit report"
             git pull --rebase origin main
