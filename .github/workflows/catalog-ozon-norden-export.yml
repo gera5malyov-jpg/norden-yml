@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/catalog-ozon-norden-export.yml'
   workflow_dispatch:
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
@@ -15,6 +17,7 @@ concurrency:
 
 jobs:
   export:
+    if: github.event_name != 'issues' || github.event.issue.title == '[CATALOG-EXPORT] Ozon Norden'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
