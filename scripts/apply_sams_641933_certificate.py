@@ -83,19 +83,6 @@ def ozon_apply():
         raise RuntimeError(f"Ozon certificate info failed: HTTP {st} {json.dumps(info, ensure_ascii=False)}")
 
     if not cert_id:
-        st, accordance = call("GET", OZON + "/v2/product/certificate/accordance-types/list", oz_headers)
-        if st != 200:
-            raise RuntimeError(f"Ozon accordance types failed: HTTP {st} {json.dumps(accordance, ensure_ascii=False)}")
-        codes = {
-            str(x.get("code") or "")
-            for group in ((accordance.get("result") or {}).values())
-            if isinstance(group, list)
-            for x in group
-            if isinstance(x, dict)
-        }
-        if "technical_regulations_cu" not in codes:
-            raise RuntimeError("Ozon accordance type technical_regulations_cu is not available")
-
         files = []
         for idx, url in enumerate(CERT_URLS, 1):
             files.append({
@@ -105,7 +92,7 @@ def ozon_apply():
 
         create_body = {
             "params": {
-                "accordance_type": "technical_regulations_cu",
+                "accordance_type": "EAEU",
                 "certificate_country": "RU",
                 "certificate_type": "DECLARATION",
                 "expired_date": {"date": {"day": 28, "month": 7, "year": 2031}},
@@ -189,43 +176,45 @@ def yandex_apply():
     existing = [str(x) for x in (offer.get("certificates") or []) if str(x).strip()]
     print("YANDEX_EXISTING_CERTIFICATES", json.dumps(existing, ensure_ascii=False))
 
-    # Create document metadata. Already existing is acceptable.
-    st, created = call(
-        "POST",
-        f"{YANDEX}/v1/businesses/{YANDEX_BUSINESS_ID}/offers/documents/create",
-        ya_headers,
-        {
-            "documents": [{
-                "number": DOC,
-                "type": "CONFORMITY_DECLARATION",
-                "activeFromDate": ISSUE_DATE,
-                "activeToDate": EXPIRE_DATE,
-            }]
-        },
-    )
-    print("YANDEX_CREATE_STATUS", st)
-    print("YANDEX_CREATE_RESPONSE", json.dumps(created, ensure_ascii=False)[:8000])
-    if st != 200:
-        raise RuntimeError("Yandex document create failed")
-    errors = ((created.get("result") or {}).get("errors") or [])
-    bad = [e for e in errors if str(e.get("code") or "") != "DOCUMENT_ALREADY_EXISTS"]
-    if bad:
-        raise RuntimeError("Yandex document validation failed: " + json.dumps(bad, ensure_ascii=False))
+    if DOC not in existing:
+        st, created = call(
+            "POST",
+            f"{YANDEX}/v1/businesses/{YANDEX_BUSINESS_ID}/offers/documents/create",
+            ya_headers,
+            {
+                "documents": [{
+                    "number": DOC,
+                    "type": "CONFORMITY_DECLARATION",
+                    "activeFromDate": ISSUE_DATE,
+                    "activeToDate": EXPIRE_DATE,
+                }]
+            },
+        )
+        print("YANDEX_CREATE_STATUS", st)
+        print("YANDEX_CREATE_RESPONSE", json.dumps(created, ensure_ascii=False)[:8000])
+        if st != 200:
+            raise RuntimeError("Yandex document create failed")
+        errors = ((created.get("result") or {}).get("errors") or [])
+        bad = [e for e in errors if str(e.get("code") or "") != "DOCUMENT_ALREADY_EXISTS"]
+        if bad:
+            raise RuntimeError("Yandex document validation failed: " + json.dumps(bad, ensure_ascii=False))
 
-    certs = list(dict.fromkeys(existing + [DOC]))
-    if len(certs) > 6:
-        raise RuntimeError("Yandex offer already has 6 documents; refusing to overwrite any existing document")
+        certs = list(dict.fromkeys(existing + [DOC]))
+        if len(certs) > 6:
+            raise RuntimeError("Yandex offer already has 6 documents; refusing to overwrite any existing document")
 
-    st, upd = call(
-        "POST",
-        f"{YANDEX}/v2/businesses/{YANDEX_BUSINESS_ID}/offer-mappings/update",
-        ya_headers,
-        {"offerMappings": [{"offer": {"offerId": OFFER, "certificates": certs}}]},
-    )
-    print("YANDEX_UPDATE_STATUS", st)
-    print("YANDEX_UPDATE_RESPONSE", json.dumps(upd, ensure_ascii=False)[:10000])
-    if st != 200 or str(upd.get("status") or "OK") not in ("OK", ""):
-        raise RuntimeError("Yandex certificate binding update failed")
+        st, upd = call(
+            "POST",
+            f"{YANDEX}/v2/businesses/{YANDEX_BUSINESS_ID}/offer-mappings/update",
+            ya_headers,
+            {"offerMappings": [{"offer": {"offerId": OFFER, "certificates": certs}}]},
+        )
+        print("YANDEX_UPDATE_STATUS", st)
+        print("YANDEX_UPDATE_RESPONSE", json.dumps(upd, ensure_ascii=False)[:10000])
+        if st != 200 or str(upd.get("status") or "OK") not in ("OK", ""):
+            raise RuntimeError("Yandex certificate binding update failed")
+    else:
+        print("YANDEX_ALREADY_ATTACHED", DOC)
 
     st, verify = call(
         "POST",
@@ -234,7 +223,6 @@ def yandex_apply():
         {"offerIds": [OFFER]},
     )
     print("YANDEX_VERIFY_STATUS", st)
-    print("YANDEX_VERIFY", json.dumps(verify, ensure_ascii=False)[:12000])
     rows = ((verify.get("result") or {}).get("offerMappings") or []) if st == 200 else []
     vcerts = ((rows[0].get("offer") or {}).get("certificates") or []) if rows else []
     if DOC not in [str(x) for x in vcerts]:
