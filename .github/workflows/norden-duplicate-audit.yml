@@ -18,7 +18,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: norden-duplicate-audit
+  group: norden-kit-webasyst-daily
   cancel-in-progress: false
 
 jobs:
