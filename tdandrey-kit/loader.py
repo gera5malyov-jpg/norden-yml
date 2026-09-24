@@ -65,6 +65,32 @@ if old_category not in source:
     raise SystemExit("Не найден блок категорий ТД Андрей для безопасного патча")
 source = source.replace(old_category, new_category, 1)
 
+old_product_category = '''    category_id = ensure_category_path(kit, categories, category_path(item))
+    product = kit.create_product(category_id)
+'''
+new_product_category = '''    supplier_paths = []
+    for raw_path in (item.get("categoryes") or []):
+        if not isinstance(raw_path, list):
+            continue
+        titles = [s(x.get("name")) for x in raw_path if isinstance(x, dict) and s(x.get("name"))]
+        if titles:
+            supplier_paths.append(titles)
+
+    if supplier_paths:
+        category_ids = []
+        for supplier_path in supplier_paths:
+            cid = ensure_category_path(kit, categories, supplier_path)
+            if cid and cid not in category_ids:
+                category_ids.append(cid)
+        product = kit.request("POST", "/v1/products", body={"category_ids": category_ids})
+    else:
+        category_id = ensure_category_path(kit, categories, category_path(item))
+        product = kit.create_product(category_id)
+'''
+if old_product_category not in source:
+    raise SystemExit("Не найден блок привязки категорий KIT для безопасного патча")
+source = source.replace(old_product_category, new_product_category, 1)
+
 exec(
     compile(source, "sync_tdandrey.py", "exec"),
     {"__name__": "__main__", "__file__": str(ROOT / "sync_tdandrey.py")},
