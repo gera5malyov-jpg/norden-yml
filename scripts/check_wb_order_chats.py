@@ -153,3 +153,35 @@ print(json.dumps({
     "latest_seller_message_time":result.get("latest_seller_message_time"),
     "latest_client_message_time":result.get("latest_client_message_time"),
 },ensure_ascii=False,indent=2))
+
+
+# Check recent lastMessage timestamps from seller/chats without calling seller/events.
+recent_last_messages=0
+latest_last_message_ms=0
+latest_last_message_iso=None
+if chat_r.ok:
+    data=chat_r.json() if chat_r.content else {}
+    chats_for_last=data.get("result") or []
+    if isinstance(chats_for_last,list):
+        cutoff_ms=int((now-timedelta(hours=1)).timestamp()*1000)
+        for ch in chats_for_last:
+            if not isinstance(ch,dict):
+                continue
+            lm=ch.get("lastMessage") if isinstance(ch.get("lastMessage"),dict) else {}
+            try:
+                ts=int(lm.get("addTimestamp") or 0)
+            except (TypeError,ValueError):
+                ts=0
+            if ts>=cutoff_ms:
+                recent_last_messages += 1
+            if ts>latest_last_message_ms:
+                latest_last_message_ms=ts
+        if latest_last_message_ms>0:
+            latest_last_message_iso=datetime.fromtimestamp(latest_last_message_ms/1000,timezone.utc).isoformat()
+
+print("\nCHAT_LAST_MESSAGE_DIAGNOSTIC")
+print(json.dumps({
+    "recent_last_messages_1h":recent_last_messages,
+    "latest_last_message_ms":latest_last_message_ms,
+    "latest_last_message_iso":latest_last_message_iso,
+},ensure_ascii=False,indent=2))
