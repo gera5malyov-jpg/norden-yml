@@ -48,7 +48,8 @@ for label,path,body in [
     ("OPTIONS_EMPTY","/v2/product/certification/options",{}),
     ("PARAMS_TYPE_ONLY","/v2/product/certification/params",{"params":{
         "certificate_type":"DECLARATION",
-        "certificate_country":"RU"
+        "certificate_country":"RU",
+        "accordance_type":"EAEU"
     }}),
     ("PARAMS_CORE","/v2/product/certification/params",{"params":{
         "name":"Декларация о соответствии",
