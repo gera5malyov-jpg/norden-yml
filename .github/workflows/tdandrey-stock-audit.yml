@@ -1,0 +1,33 @@
+name: ТД Андрей — Webasyst склады
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tdandrey-stock-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  stocks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+          wa=WebasystClient(min_request_interval=0.1)
+          stocks=wa.call('shop.stock.getList')
+          rows=stocks if isinstance(stocks,list) else list(stocks.values())
+          print([(str(x.get('id')), x.get('name') or x.get('title')) for x in rows if isinstance(x,dict)])
+          PY
