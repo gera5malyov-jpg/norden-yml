@@ -1,0 +1,49 @@
+name: Validate Norden category policy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-category-policy-validate-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Validate
+        shell: bash
+        run: |
+          mkdir -p norden-kit
+          if python -m py_compile norden-kit/sync_norden_kit.py; then
+            python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('norden-kit/category_policy.json').read_text(encoding='utf-8'))
+          assert p['policy']=='exact_high_confidence_only'
+          assert len(p['rules'])==98
+          assert len(p['destinations'])==11
+          Path('norden-kit/category_policy_validation.json').write_text(
+              json.dumps({'status':'OK','rules':98,'destinations':11,'python_compile':True},ensure_ascii=False,indent=2),
+              encoding='utf-8')
+          PY
+          else
+            printf '{"status":"ERROR","python_compile":false}\n' > norden-kit/category_policy_validation.json
+            exit 1
+          fi
+      - name: Commit validation
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/category_policy_validation.json
+          git commit -m "Validate Norden category policy" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
