@@ -63,32 +63,40 @@
   "response": {
     "http": 200,
     "data": {
-      "error": {
-        "fields": [
-          {
-            "Key": "cargos[0].services.sealing",
-            "Value": [
-              "Пожалуйста, заполните поле"
-            ]
-          },
-          {
-            "Key": "cargos[0].services.strapping",
-            "Value": [
-              "Пожалуйста, заполните поле"
-            ]
-          },
-          {
-            "Key": "cargos[0].services.documentsReturning",
-            "Value": [
-              "Пожалуйста, заполните поле"
-            ]
+      "sender": {
+        "warehouseId": "36cf9b60-a415-11dc-a911-000a5e19ccb4",
+        "addressNormal": "Россия, Санкт-Петербург, улица Якорная, 17, литер Ш",
+        "coordinates": {
+          "latitude": 59.942818,
+          "longitude": 30.440896
+        }
+      },
+      "cargos": [
+        {
+          "orderNumber": null,
+          "barcode": "789975030115",
+          "cargoCode": "789975030115",
+          "stockTitle": "Санкт-Петербург 01",
+          "positions": [
+            {
+              "barcode": "7899750301150001"
+            }
+          ],
+          "customerCorrelation": null,
+          "clientPositionsBarcode": null,
+          "receiver": {
+            "warehouseId": null,
+            "addressNormal": "Россия, Самарская область, Тольятти, Комсомольская улица, 101",
+            "coordinates": {
+              "latitude": 53.516928,
+              "longitude": 49.409919
+            }
           }
-        ],
-        "title": "Ошибка валидации",
-        "message": "Детальные сообщения об ошибках приведены отдельно для каждого поля",
-        "error": null,
-        "status": 400
-      }
+        }
+      ],
+      "documentId": 9844444,
+      "notifications": [],
+      "ediTemplateUrls": []
     }
   }
 }
