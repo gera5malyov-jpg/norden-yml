@@ -35,3 +35,5 @@ jobs:
           DIRECT_OZON_REFRESH: '1'
           DRY_RUN: '1'
         run: python orders-sheet/sync_orders_sheet.py
+
+# refresh-clean-labels
