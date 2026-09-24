@@ -40,6 +40,11 @@ TERMINAL_STATE_IDS = {
     "completed", "complete", "refunded", "refund", "otmenen",
     "cancelled", "canceled", "deleted",
 }
+OZON_COMPLETED_SUBSTATUSES = {
+    "posting_conditionally_delivered",
+    "posting_delivered",
+    "posting_received",
+}
 
 
 def s(v: Any) -> str:
@@ -516,7 +521,8 @@ def load_active_ozon_for_sheet() -> list[dict]:
                     continue
 
                 listed_status = s(listed.get("status"))
-                if mp.ozon_state(listed_status) in TERMINAL_TARGETS:
+                listed_substatus = s(listed.get("substatus")).lower()
+                if mp.ozon_state(listed_status) in TERMINAL_TARGETS or listed_substatus in OZON_COMPLETED_SUBSTATUSES:
                     continue
 
                 posting_number = s(listed.get("posting_number"))
@@ -526,7 +532,7 @@ def load_active_ozon_for_sheet() -> list[dict]:
                 status = s(src.get("status") or listed.get("status"))
                 sub = s(src.get("substatus") or listed.get("substatus"))
                 target_state = mp.ozon_state(status)
-                if target_state in TERMINAL_TARGETS:
+                if target_state in TERMINAL_TARGETS or sub.lower() in OZON_COMPLETED_SUBSTATUSES:
                     continue
 
                 products = []
