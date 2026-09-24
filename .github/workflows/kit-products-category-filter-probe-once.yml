@@ -1,0 +1,67 @@
+name: KIT products category filter probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-products-category-filter-probe-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Test category filters
+        run: |
+          python - <<'PY'
+          import json,os,requests,time
+          from pathlib import Path
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          base='https://api.kit.yandex.net/v1/products'
+          cid='01a0d40e-8236-723e-b7e6-cbe0e0be4760'
+          tests=[
+            ('category_id',{'category_id':cid}),
+            ('category_ids_scalar',{'category_ids':cid}),
+            ('category_ids_array',{'category_ids[]':cid}),
+          ]
+          out={}
+          for name,extra in tests:
+              params={'page':1,'per_page':20,**extra}
+              for i in range(10):
+                  r=requests.get(base,headers=h,params=params,timeout=60)
+                  if r.status_code==429:
+                      time.sleep(2+i*2); continue
+                  break
+              try:j=r.json()
+              except Exception:j={}
+              rows=j.get('products') or j.get('items') or []
+              out[name]={
+                'status':r.status_code,
+                'count':len(rows),
+                'all_match':bool(rows) and all(cid in (x.get('category_ids') or []) for x in rows),
+                'ids':[x.get('id') for x in rows[:5]],
+                'category_ids':[x.get('category_ids') for x in rows[:5]],
+                'text':r.text[:3000],
+              }
+              time.sleep(1)
+          Path('category-audit/kit_products_category_filter_probe.json').write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add category-audit/kit_products_category_filter_probe.json
+          git commit -m "Probe KIT products category filtering" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
