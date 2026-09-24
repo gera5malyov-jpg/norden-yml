@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "finished_at": "2026-09-24T18:13:34.972459+00:00",
+  "webasyst_type": "NORDEN-100",
+  "webasyst_type_id": "142",
+  "webasyst_products": 1046,
+  "webasyst_unique_articles": 1046,
+  "existing_articles_before": 534,
+  "skipped_existing_article": 532,
+  "duplicate_articles_in_webasyst": 0,
+  "new_articles_added": 514,
+  "ozon_rows_blue": 534,
+  "webasyst_only_rows_light_blue": 514,
+  "errors": [],
+  "rule": "If article exists on Ozon => row blue. Webasyst-only => light blue. Webasyst upload type always NORDEN-100.",
+  "main_photo_rule": "Column Основное фото displays IMAGE(). Raw URLs remain in JSON/source data."
+}
