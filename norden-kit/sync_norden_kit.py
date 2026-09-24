@@ -830,6 +830,58 @@ def rebuild_mapping(kit, source, code_site_id, report):
     return mapping
 
 
+def canonicalize_duplicate_mapping(kit, mapping, warehouses, report):
+    """Keep one canonical live card per Norden article and quarantine duplicates."""
+    duplicate_groups = []
+    quarantine_rows = []
+    for article, rows in list(mapping.get("variants", {}).items()):
+        unique = {}
+        for row in rows or []:
+            vid = s(row.get("variant_id"))
+            if vid:
+                unique[vid] = row
+        rows = list(unique.values())
+        if len(rows) <= 1:
+            mapping["variants"][article] = rows
+            continue
+
+        def key(row):
+            sku = s(row.get("sku"))
+            kit_id = row.get("kit_id")
+            try:
+                kid = int(kit_id)
+            except Exception:
+                kid = 10**18
+            # Prefer legacy/original SKU (AF-*, supplier-era cards) over auto-created 100-*.
+            return (1 if sku.startswith("100-") else 0, kid, sku)
+
+        rows.sort(key=key)
+        keep = rows[0]
+        drop = rows[1:]
+        mapping["variants"][article] = [keep]
+        duplicate_groups.append({
+            "article": article,
+            "kept": keep,
+            "quarantined": drop,
+        })
+        for row in drop:
+            vid = s(row.get("variant_id"))
+            for wid in warehouses.values():
+                quarantine_rows.append({
+                    "variant_id": vid,
+                    "warehouse_id": wid,
+                    "quantity": 0,
+                })
+
+    if quarantine_rows:
+        stale = kit.bulk_stocks(quarantine_rows)
+        report["quarantine_stale_variant_ids"] = stale
+    report["duplicate_groups_quarantined"] = len(duplicate_groups)
+    report["duplicate_variants_quarantined"] = sum(len(x["quarantined"]) for x in duplicate_groups)
+    report["duplicate_groups_sample"] = duplicate_groups[:100]
+    return duplicate_groups
+
+
 def merge_recent_norden_mapping(kit, source, code_site_id, mapping, report, pages=10):
     """Merge recently created Norden cards into mapping so interrupted runs never duplicate them."""
     merged = 0
@@ -1278,6 +1330,11 @@ def main():
             report["existing_duplicate_norden_articles_sample"] = {
                 article: rows[:10] for article, rows in list(duplicate_articles.items())[:100]
             }
+
+            # Keep only one canonical card per supplier article. Legacy AF-* cards
+            # win over newly auto-created 100-* cards. All non-canonical duplicates
+            # are forced to zero stock and excluded from further price/stock updates.
+            canonicalize_duplicate_mapping(kit, mapping, warehouses, report)
             save_mapping(mapping)
 
     price_rows, stock_rows, mapped_articles = planned_updates(mapping, source, warehouses)
