@@ -35,10 +35,13 @@ jobs:
               out={
                 'cargoCode': ((c.get('cargo') or {}).get('code') or '789970098158'),
                 'status': ((c.get('info') or {}).get('cargoStatus')),
+                'hardPack': services.get('hardPack'),
+                'insurance': services.get('insurance'),
                 'serviceItems': [
                   {
-                    'name': x.get('serviceType') or x.get('name') or x.get('title') or x.get('serviceName'),
-                    'cost': x.get('cost') or x.get('sum'),
+                    'description': x.get('description'),
+                    'price': x.get('price'),
+                    'payerType': x.get('payerType'),
                     'paid': x.get('paid')
                   } for x in items if isinstance(x,dict)
                 ]
