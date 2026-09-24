@@ -1,0 +1,37 @@
+name: Каталог — записать сохранённый Norden в Google Sheets
+
+on:
+  push:
+    paths:
+      - 'catalog/write_sheet_trigger.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check "gspread>=6.1,<7" "google-auth>=2.35,<3"
+      - name: Записать сохранённую выгрузку
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
+          CATALOG_SHEET: 'Норден'
+        run: python catalog/write_norden_export_to_sheets.py
+      - name: Сохранить отчёт
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog/sheet_write_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Обновить отчёт записи каталога Norden"
+            git push
+          fi
