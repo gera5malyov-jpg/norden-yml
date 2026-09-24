@@ -248,7 +248,7 @@ def webasyst_active_rows(wa: WebasystClient, sku_names: dict[str, str]) -> dict[
     for st in states:
         sid = s(st.get("id"))
         name = s(st.get("name")).lower()
-        terminal_by_name = bool(re.search(r"выполн|достав|отмен|возврат|refund|cancel|complete", name))
+        terminal_by_name = bool(re.search(r"выполн|доставлен|получен|отмен|возврат|refund|cancel|complete", name))
         if sid and sid.lower() not in TERMINAL_STATE_IDS and not terminal_by_name:
             active_states.append(sid)
 
@@ -510,11 +510,15 @@ def write_sheet(sh, rows: list[dict]):
 
 def main():
     started = datetime.now(timezone.utc).isoformat()
-    wa = WebasystClient(min_request_interval=0.25)
-    sku_names = build_sku_names(wa)
+    wa = WebasystClient(min_request_interval=0.20)
+    direct_refresh = s(os.getenv("DIRECT_MARKETPLACE_REFRESH")).lower() in {"1", "true", "yes", "on"}
+    sku_names = build_sku_names(wa) if direct_refresh else {}
 
     base = webasyst_active_rows(wa, sku_names)
-    fresh, terminal, warnings = direct_marketplace_rows(sku_names)
+    if direct_refresh:
+        fresh, terminal, warnings = direct_marketplace_rows(sku_names)
+    else:
+        fresh, terminal, warnings = {}, set(), []
     rows = merge_rows(base, fresh, terminal)
 
     sh, created = open_or_create_sheet()
