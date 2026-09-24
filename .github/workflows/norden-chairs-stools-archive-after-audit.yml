@@ -1,5 +1,6 @@
 name: Archive Norden chair stool duplicates after audit
 # fast-xml-archive-v2
+# force-fast-archive-v3
 
 on:
   push:
@@ -18,7 +19,7 @@ permissions:
 
 concurrency:
   group: norden-chairs-stools-archive
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   archive:
