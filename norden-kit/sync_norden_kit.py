@@ -1132,15 +1132,31 @@ def main():
     # User rule: Norden items explicitly marked as available only in Moscow
     # must not be published or recreated in KIT.
     excluded_moscow_only = []
+    excluded_without_images = []
+    excluded_without_purchase_price = []
     if not short:
         excluded_moscow_only = [
             article for article, item in source.items()
             if is_moscow_only_product(item)
         ]
-        for article in excluded_moscow_only:
+        excluded_without_images = [
+            article for article, item in source.items()
+            if article not in excluded_moscow_only and not (item.get("images") or [])
+        ]
+        excluded_without_purchase_price = [
+            article for article, item in source.items()
+            if article not in excluded_moscow_only
+            and article not in excluded_without_images
+            and (dec(item.get("purchase")) is None or dec(item.get("purchase")) <= 0)
+        ]
+        for article in set(excluded_moscow_only + excluded_without_images + excluded_without_purchase_price):
             source.pop(article, None)
     report["excluded_moscow_only_products"] = len(excluded_moscow_only)
     report["excluded_moscow_only_articles"] = excluded_moscow_only[:200]
+    report["excluded_without_images"] = len(excluded_without_images)
+    report["excluded_without_images_articles"] = excluded_without_images[:200]
+    report["excluded_without_purchase_price"] = len(excluded_without_purchase_price)
+    report["excluded_without_purchase_price_articles"] = excluded_without_purchase_price[:200]
 
     report["source_products"] = len(source)
     report["source_duplicate_articles"] = len(set(duplicates))
