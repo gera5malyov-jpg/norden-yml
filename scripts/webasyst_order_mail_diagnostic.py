@@ -139,3 +139,28 @@ for oid in [41037, 41028, 40923]:
         out(f"WA_ORDER_{oid}_STOREFRONT_MATCH", int(storefront == "profikompany.ru"))
     except Exception as e:
         out(f"WA_ORDER_{oid}_INFO_ERROR", type(e).__name__)
+
+
+print("WA_CRM_EMAIL_SOURCE_DIAGNOSTIC_BEGIN=1")
+try:
+    conv = client.call("crm.conversation.list", params={"transport":"EMAIL","limit":20}) or {}
+    rows = conv.get("data") if isinstance(conv,dict) else []
+    if not isinstance(rows,list):
+        rows=[]
+    providers=[]
+    source_names=[]
+    for row in rows:
+        if not isinstance(row,dict):
+            continue
+        src=row.get("source") if isinstance(row.get("source"),dict) else {}
+        provider=str(src.get("provider") or "").strip()
+        name=str(src.get("name") or "").strip()
+        if provider:
+            providers.append(provider)
+        if name:
+            source_names.append(name)
+    out("WA_CRM_EMAIL_CONVERSATIONS",len(rows))
+    out("WA_CRM_EMAIL_SOURCE_PROVIDERS",",".join(sorted(set(providers))))
+    out("WA_CRM_EMAIL_SOURCE_NAMES",",".join(sorted(set(source_names))))
+except Exception as e:
+    out("WA_CRM_EMAIL_SOURCE_ERROR",type(e).__name__)
