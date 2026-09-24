@@ -1,0 +1,37 @@
+name: Заказы Google Sheets — обновить сейчас
+
+on:
+  push:
+    paths:
+      - '.github/workflows/orders-google-sheet-now.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orders-google-sheet-now
+  cancel-in-progress: true
+
+jobs:
+  sync-now:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
+      - run: python -m py_compile orders-sheet/sync_orders_sheet.py
+      - name: Обновить таблицу
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_ORDERS_OWNER_EMAIL: 'gera5malyov@gmail.com'
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: 'https://profikompany.ru'
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          DIRECT_OZON_REFRESH: '1'
+          DRY_RUN: '1'
+        run: python orders-sheet/sync_orders_sheet.py
