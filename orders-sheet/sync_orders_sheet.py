@@ -6,7 +6,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -445,12 +445,129 @@ def direct_marketplace_rows(sku_names: dict[str, str]) -> tuple[dict[str, dict],
     return rows, terminal_keys, warnings
 
 
+def load_active_ozon_for_sheet() -> list[dict]:
+    cid = s(os.getenv("OZON_CLIENT_ID"))
+    secret = s(os.getenv("OZON_API_KEY"))
+    if not cid or not secret:
+        return []
+
+    headers = {
+        "Client-Id": cid,
+        "Api-Key": secret,
+        "Content-Type": "application/json",
+    }
+    now = datetime.now(timezone.utc)
+    since = now - timedelta(days=30)
+    out: list[dict] = []
+
+    for kind, url in (
+        ("FBS", "https://api-seller.ozon.ru/v3/posting/fbs/list"),
+        ("FBO", "https://api-seller.ozon.ru/v2/posting/fbo/list"),
+    ):
+        offset = 0
+        while True:
+            body = {
+                "dir": "ASC",
+                "filter": {"since": mp.iso(since), "to": mp.iso(now)},
+                "limit": 1000,
+                "offset": offset,
+            }
+            if kind == "FBS":
+                body["with"] = {
+                    "analytics_data": False,
+                    "barcodes": False,
+                    "financial_data": False,
+                    "translit": False,
+                }
+            else:
+                body["translit"] = False
+                body["with"] = {"analytics_data": False, "financial_data": False}
+
+            r = mp.net.req("POST", url, headers=headers, body=body)
+            if not r.ok:
+                if kind == "FBO":
+                    break
+                raise RuntimeError(f"Ozon {kind} HTTP {r.status_code}: {r.text[:300]}")
+
+            data = r.json()
+            root = data.get("result")
+            rows = (root.get("postings") or []) if isinstance(root, dict) else root if isinstance(root, list) else []
+
+            for listed in rows:
+                if not isinstance(listed, dict):
+                    continue
+
+                listed_status = s(listed.get("status"))
+                if mp.ozon_state(listed_status) in TERMINAL_TARGETS:
+                    continue
+
+                posting_number = s(listed.get("posting_number"))
+                detail = mp.ozon_posting_detail(headers, posting_number) if kind == "FBS" and posting_number else {}
+                src = detail or listed
+
+                status = s(src.get("status") or listed.get("status"))
+                sub = s(src.get("substatus") or listed.get("substatus"))
+                target_state = mp.ozon_state(status)
+                if target_state in TERMINAL_TARGETS:
+                    continue
+
+                products = []
+                for x in (src.get("products") or listed.get("products") or []):
+                    if not isinstance(x, dict):
+                        continue
+                    products.append({
+                        "sku": s(x.get("offer_id")),
+                        "name": s(x.get("name")),
+                        "quantity": max(1, int(mp.num(x.get("quantity"), 1))),
+                        "price": mp.num(x.get("price")) if x.get("price") not in (None, "") else None,
+                    })
+
+                customer = dict(src.get("customer") or {}) if isinstance(src.get("customer"), dict) else {}
+                addressee = src.get("addressee") if isinstance(src.get("addressee"), dict) else {}
+                if not s(customer.get("name")) and s(addressee.get("name")):
+                    customer["name"] = s(addressee.get("name"))
+                if not s(customer.get("phone")) and s(addressee.get("phone")):
+                    customer["phone"] = s(addressee.get("phone"))
+
+                raw_address = customer.get("address") if isinstance(customer.get("address"), dict) else {}
+                address = mp.normalize_ozon_address(raw_address)
+
+                delivery_price = mp.num(src.get("delivery_price")) if src.get("delivery_price") not in (None, "") else None
+                prr = src.get("prr_option") if isinstance(src.get("prr_option"), dict) else {}
+                lift_price = mp.num(prr.get("price")) if prr.get("price") not in (None, "") else None
+                lift_type = s(prr.get("code"))
+
+                created = mp.dt(src.get("in_process_at") or src.get("created_at") or src.get("shipment_date"))
+                out.append({
+                    "source": "ozon",
+                    "external_id": posting_number,
+                    "ozon_kind": kind,
+                    "created_at": mp.iso(created) if created else "",
+                    "status_raw": status + ("/" + sub if sub else ""),
+                    "target_state": target_state,
+                    "items": products,
+                    "buyer": customer,
+                    "recipient_name": s(customer.get("name")),
+                    "shipping_address": address,
+                    "delivery_price": delivery_price,
+                    "lift_price": lift_price,
+                    "lift_type": lift_type,
+                    "delivery_to": s(src.get("delivering_date")),
+                })
+
+            if len(rows) < 1000:
+                break
+            offset += len(rows)
+
+    return out
+
+
 def direct_ozon_rows(sku_names: dict[str, str]) -> tuple[dict[str, dict], set[str], list[str]]:
     rows: dict[str, dict] = {}
     terminal_keys: set[str] = set()
     warnings: list[str] = []
     try:
-        orders = mp.load_ozon()
+        orders = load_active_ozon_for_sheet()
     except Exception as exc:
         return rows, terminal_keys, [f"ozon: {type(exc).__name__}: {str(exc)[:300]}"]
 
