@@ -1,0 +1,67 @@
+name: KIT category mutation probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-category-mutation-probe-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Probe KIT product/category API (read only)
+        shell: bash
+        run: |
+          python - <<'PY2'
+          import json, os, requests
+          from pathlib import Path
+          base='https://api.kit.yandex.net'
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          out={}
+          def call(method,path,**kwargs):
+              r=requests.request(method,base+path,headers=h,timeout=60,**kwargs)
+              item={'status':r.status_code,'headers':{k:v for k,v in r.headers.items() if k.lower() in ('allow','content-type')},'text':r.text[:12000]}
+              try:item['json']=r.json()
+              except Exception: pass
+              return item
+          out['products_page']=call('GET','/v1/products',params={'page':1,'per_page':1})
+          out['variants_page']=call('GET','/v1/variants',params={'page':1,'per_page':1})
+          try:
+              vp=out['variants_page'].get('json') or {}
+              rows=vp.get('items') or vp.get('results') or vp.get('variants') or []
+              if rows:
+                  pid=rows[0].get('product_id')
+                  if pid:
+                      out['product_id']=pid
+                      out['product_get']=call('GET',f'/v1/products/{pid}')
+                      out['product_options']=call('OPTIONS',f'/v1/products/{pid}')
+          except Exception as e:
+              out['probe_error']=str(e)
+          Path('category-audit').mkdir(exist_ok=True)
+          Path('category-audit/kit_product_probe.json').write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(out,ensure_ascii=False,indent=2)[:20000])
+          PY2
+      - name: Commit probe result
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add category-audit/kit_product_probe.json
+          git commit -m "Probe KIT product category API" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
