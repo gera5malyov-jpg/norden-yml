@@ -385,6 +385,9 @@ def webasyst_active_rows(wa: WebasystClient, sku_names: dict[str, str]) -> dict[
                 products, qty = item_text(info.get("items"), sku_names)
                 contact = info.get("contact") if isinstance(info.get("contact"), dict) else {}
                 phone = phone_text(contact)
+                stored_ext = s(params.get("mp_phone_extension"))
+                if phone and stored_ext and f"доб. {stored_ext}" not in phone:
+                    phone += f" доб. {stored_ext}"
                 fio = person_name(contact)
                 addr = address_text(info.get("shipping_address")) or address_from_params(params)
 
@@ -552,6 +555,8 @@ def load_active_ozon_for_sheet() -> list[dict]:
                     customer["name"] = s(addressee.get("name"))
                 if not s(customer.get("phone")) and s(addressee.get("phone")):
                     customer["phone"] = s(addressee.get("phone"))
+                if s(addressee.get("pin")):
+                    customer["extension"] = s(addressee.get("pin"))
 
                 raw_address = customer.get("address") if isinstance(customer.get("address"), dict) else {}
                 address = mp.normalize_ozon_address(raw_address)
