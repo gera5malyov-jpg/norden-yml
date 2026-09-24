@@ -1,0 +1,37 @@
+name: Norden chairs stools status check read-only
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-chairs-stools-status-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Read statuses only
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python norden-kit/check_norden_chairs_stools_statuses.py
+      - name: Save status report
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/norden_chairs_stools_status_check.json
+          git commit -m "Save Norden chairs stools status check" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
