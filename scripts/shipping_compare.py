@@ -334,7 +334,7 @@ def quote_pek():
             ("take[moscow]",0),
             ("deliver[town]",to_id),
             ("deliver[moscow]",0),
-            ("strah",0),
+            ("strah",float(req.get("declared_value_rub",0) or 0)),
             ("pal",0)
         ]
         url="https://calc.pecom.ru/bitrix/components/pecom/calc/ajax.php?"+urllib.parse.urlencode(params)
