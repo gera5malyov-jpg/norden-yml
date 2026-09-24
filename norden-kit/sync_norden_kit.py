@@ -1139,24 +1139,27 @@ def main():
             article for article, item in source.items()
             if is_moscow_only_product(item)
         ]
+        # "Only Moscow" products are excluded from the managed KIT catalog entirely.
+        for article in excluded_moscow_only:
+            source.pop(article, None)
+
+        # Missing image / missing purchase price blocks creation of NEW cards only.
+        # Existing Norden cards remain in source so their valid stock/price fields
+        # can still be refreshed on later runs.
         excluded_without_images = [
             article for article, item in source.items()
-            if article not in excluded_moscow_only and not (item.get("images") or [])
+            if not (item.get("images") or [])
         ]
         excluded_without_purchase_price = [
             article for article, item in source.items()
-            if article not in excluded_moscow_only
-            and article not in excluded_without_images
-            and (dec(item.get("purchase")) is None or dec(item.get("purchase")) <= 0)
+            if dec(item.get("purchase")) is None or dec(item.get("purchase")) <= 0
         ]
-        for article in set(excluded_moscow_only + excluded_without_images + excluded_without_purchase_price):
-            source.pop(article, None)
     report["excluded_moscow_only_products"] = len(excluded_moscow_only)
     report["excluded_moscow_only_articles"] = excluded_moscow_only[:200]
-    report["excluded_without_images"] = len(excluded_without_images)
-    report["excluded_without_images_articles"] = excluded_without_images[:200]
-    report["excluded_without_purchase_price"] = len(excluded_without_purchase_price)
-    report["excluded_without_purchase_price_articles"] = excluded_without_purchase_price[:200]
+    report["new_creation_blocked_without_images"] = len(excluded_without_images)
+    report["new_creation_blocked_without_images_articles"] = excluded_without_images[:200]
+    report["new_creation_blocked_without_purchase_price"] = len(excluded_without_purchase_price)
+    report["new_creation_blocked_without_purchase_price_articles"] = excluded_without_purchase_price[:200]
 
     report["source_products"] = len(source)
     report["source_duplicate_articles"] = len(set(duplicates))
@@ -1242,8 +1245,11 @@ def main():
                 })
 
     # Preflight performs no writes other than local report/mapping files.
-    missing = [a for a in source if a not in mapping.get("variants", {})]
+    creation_blocked = set(excluded_without_images) | set(excluded_without_purchase_price)
+    missing_all = [a for a in source if a not in mapping.get("variants", {})]
+    missing = [a for a in missing_all if a not in creation_blocked]
     report["planned_new_products"] = len(missing)
+    report["new_products_blocked_by_required_fields"] = len(missing_all) - len(missing)
     if args.mode == "preflight":
         report["initial_complete"] = len(missing) == 0
         report["finished_at"] = now_iso()
@@ -1310,9 +1316,11 @@ def main():
                 report["warnings"].append("Error limit reached; stopping product creation.")
                 break
 
-    remaining = [a for a in source if a not in mapping.get("variants", {})]
+    remaining_all = [a for a in source if a not in mapping.get("variants", {})]
+    remaining = [a for a in remaining_all if a not in creation_blocked]
     mapping["initial_complete"] = len(remaining) == 0
     report["remaining_new_products"] = len(remaining)
+    report["remaining_blocked_by_required_fields"] = len(remaining_all) - len(remaining)
     report["initial_complete"] = mapping["initial_complete"]
     save_mapping(mapping)
     report["finished_at"] = now_iso()
