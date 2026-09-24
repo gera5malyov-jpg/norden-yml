@@ -28,10 +28,8 @@ def main():
 
     mod = load_sync()
     kit = mod.KitClient(os.environ.get("YANDEX_KIT_TOKEN",""))
-    source, source_dups = mod.source_from_xml(short=False)
-    source_kind = "xml-full+price"
+    source_kind = "audit-confirmed identity"
     api_error = None
-    source_index = mod.build_source_identity_index(source)
     identity_char_ids = mod.resolve_identity_characteristic_ids(kit.characteristics())
 
     warehouse_ids = [
@@ -73,15 +71,23 @@ def main():
             skipped.append({**item, "reason":"brand changed"})
             continue
 
-        live_article, matched, values, conflict = mod.match_source_by_identity(
-            row, source_index, identity_char_ids
+        article_key = mod.norm_code(article)
+        matched = []
+        for title in (mod.SELLER_CODE_TITLE, mod.CODE_SITE_TITLE, mod.NORDEN_CODE_TITLE, mod.ARTICLE_TITLE):
+            for cid in identity_char_ids.get(title, []):
+                value = mod.current_char_value(row, cid)
+                if value:
+                    matched.append({"field": title, "value": value})
+        hard_match = any(
+            x["field"] in (mod.SELLER_CODE_TITLE, mod.CODE_SITE_TITLE)
+            and mod.norm_code(x["value"]) == article_key
+            for x in matched
         )
-        if conflict or live_article != article:
+        if not hard_match:
             skipped.append({
                 **item,
-                "reason":"live identity no longer confirms same Norden article",
-                "live_article":live_article,
-                "conflict":conflict,
+                "reason":"live Код продавца/Код для сайта no longer confirms same Norden article",
+                "matched_identifiers":matched,
             })
             continue
         verified.append({
