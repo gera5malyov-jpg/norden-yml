@@ -51,6 +51,20 @@ if old_payload not in source:
     raise SystemExit("Не найден блок цен Webasyst для безопасного патча")
 source = source.replace(old_payload, new_payload, 1)
 
+old_category = '''    if not usable:
+        return [KIT_ROOT_CATEGORY]
+    longest = max(usable, key=len)
+    return [KIT_ROOT_CATEGORY] + longest
+'''
+new_category = '''    if not usable:
+        return [KIT_ROOT_CATEGORY]
+    longest = max(usable, key=len)
+    return longest
+'''
+if old_category not in source:
+    raise SystemExit("Не найден блок категорий ТД Андрей для безопасного патча")
+source = source.replace(old_category, new_category, 1)
+
 exec(
     compile(source, "sync_tdandrey.py", "exec"),
     {"__name__": "__main__", "__file__": str(ROOT / "sync_tdandrey.py")},
