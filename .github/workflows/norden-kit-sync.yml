@@ -56,10 +56,10 @@ jobs:
           if [ "${{ github.event_name }}" = "schedule" ]; then
             python norden-kit/sync_norden_kit.py \
               --mode scheduled \
-              --max-new 250 \
+              --no-create \
               --time-budget-seconds 17000
           else
-            ARGS="--mode ${{ inputs.mode }} --time-budget-seconds 17000"
+            ARGS="--mode ${{ inputs.mode }} --no-create --time-budget-seconds 17000"
             if [ "${{ inputs.rebuild_map }}" = "true" ]; then
               ARGS="$ARGS --rebuild-map"
             fi
