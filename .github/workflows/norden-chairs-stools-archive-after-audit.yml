@@ -1,18 +1,6 @@
 name: Archive Norden chair stool duplicates after audit
-# fast-xml-archive-v2
-# force-fast-archive-v3
-# no-supplier-reload-v4
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/norden-chairs-stools-archive-after-audit.yml'
-  workflow_run:
-    workflows:
-      - Norden chairs stools duplicate audit now
-    types:
-      - completed
   workflow_dispatch:
 
 permissions:
