@@ -1,0 +1,135 @@
+name: Apply Norden category policy to sync code
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-category-policy-code-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Patch sync code
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('norden-kit/sync_norden_kit.py')
+          s=p.read_text(encoding='utf-8')
+
+          old='''REPORT_PATH = ROOT / "last_sync_report.json"
+          EXISTING_SKUS_PATH = ROOT / "existing_norden_skus.txt"'''.replace('          ','')
+          new='''REPORT_PATH = ROOT / "last_sync_report.json"
+          CATEGORY_POLICY_PATH = ROOT / "category_policy.json"
+          EXISTING_SKUS_PATH = ROOT / "existing_norden_skus.txt"'''.replace('          ','')
+          if 'CATEGORY_POLICY_PATH = ROOT / "category_policy.json"' not in s:
+              if old not in s: raise SystemExit('constant marker not found')
+              s=s.replace(old,new,1)
+
+          marker='''def s(value):
+              return str(value or "").strip()
+
+
+          def norm_title(value):'''.replace('          ','')
+          insertion='''def s(value):
+              return str(value or "").strip()
+
+
+          _CATEGORY_POLICY_CACHE = None
+
+
+          def load_category_policy():
+              global _CATEGORY_POLICY_CACHE
+              if _CATEGORY_POLICY_CACHE is None:
+                  if not CATEGORY_POLICY_PATH.exists():
+                      raise RuntimeError("Norden category policy file is missing")
+                  _CATEGORY_POLICY_CACHE = json.loads(CATEGORY_POLICY_PATH.read_text(encoding="utf-8"))
+              return _CATEGORY_POLICY_CACHE
+
+
+          def approved_category_path(source_path):
+              parts = [s(x) for x in (source_path or []) if s(x)]
+              if not parts:
+                  return None
+              source = " > ".join(parts)
+              key = hashlib.sha256(source.encode("utf-8")).hexdigest()[:20]
+              policy = load_category_policy()
+              rule = (policy.get("rules") or {}).get(key)
+              if not rule:
+                  return None
+              destinations = policy.get("destinations") or []
+              try:
+                  target = destinations[int(rule[0])]
+              except (IndexError, ValueError, TypeError):
+                  raise RuntimeError(f"Invalid Norden category rule for {source!r}")
+              result = [s(x) for x in str(target).split(">") if s(x)]
+              if not result:
+                  raise RuntimeError(f"Empty Norden target category for {source!r}")
+              return result
+
+
+          def norm_title(value):'''.replace('          ','')
+          if 'def approved_category_path(source_path):' not in s:
+              if marker not in s: raise SystemExit('function marker not found')
+              s=s.replace(marker,insertion,1)
+
+          old='''    if not path:
+              path = ["Norden"]'''.replace('              ','')
+          new='''    if not path:
+              raise RuntimeError("Category path is required; automatic Norden fallback is disabled")'''.replace('              ','')
+          if 'automatic Norden fallback is disabled' not in s:
+              if old not in s: raise SystemExit('ensure_category_path marker not found')
+              s=s.replace(old,new,1)
+
+          old='''    category_id = ensure_category_path(kit, categories, item.get("category_path") or ["Norden"])'''
+          new='''    category_path = item.get("category_path") or []
+              if not category_path:
+                  raise RuntimeError("Approved category path is required for Norden product creation")
+              category_id = ensure_category_path(kit, categories, category_path)'''.replace('              ','    ')
+          if 'Approved category path is required for Norden product creation' not in s:
+              if old not in s: raise SystemExit('create_new_product marker not found')
+              s=s.replace(old,new,1)
+
+          old='''        item = source[article]
+              try:
+                  new = create_new_product('''.replace('              ','')
+          new='''        item = source[article]
+              approved_path = approved_category_path(item.get("category_path"))
+              if not approved_path:
+                  report.setdefault("category_review_required", []).append({
+                      "article": article,
+                      "source_category_path": " > ".join(item.get("category_path") or []),
+                      "reason": "NO_APPROVED_HIGH_CONFIDENCE_CATEGORY_RULE",
+                  })
+                  continue
+              item = dict(item)
+              item["category_path"] = approved_path
+              try:
+                  new = create_new_product('''.replace('              ','')
+          if 'NO_APPROVED_HIGH_CONFIDENCE_CATEGORY_RULE' not in s:
+              if old not in s: raise SystemExit('creation loop marker not found')
+              s=s.replace(old,new,1)
+
+          p.write_text(s,encoding='utf-8')
+          PY
+          python -m py_compile norden-kit/sync_norden_kit.py
+          grep -n "CATEGORY_POLICY\|approved_category_path\|NO_APPROVED_HIGH_CONFIDENCE\|fallback is disabled" norden-kit/sync_norden_kit.py
+      - name: Commit code
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/sync_norden_kit.py
+          git commit -m "Enforce approved Norden category policy" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
