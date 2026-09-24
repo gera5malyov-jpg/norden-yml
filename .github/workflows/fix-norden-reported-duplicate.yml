@@ -1,0 +1,23 @@
+name: Fix reported Norden duplicate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-norden-reported-duplicate.yml'
+  workflow_dispatch:
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Archive verified new duplicate only
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python norden-kit/archive_reported_norden_duplicate.py
