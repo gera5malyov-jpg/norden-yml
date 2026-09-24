@@ -123,7 +123,7 @@ def ozon_apply():
     # after verification below.
     st, bound = call("POST", OZON + "/v1/product/certificate/bind", oz_headers, {
         "certificate_id": int(cert_id),
-        "product_id": int(PRODUCT_ID),
+        "product_id": [int(PRODUCT_ID)],
     })
     print("OZON_BIND_STATUS", st)
     print("OZON_BIND_RESPONSE", json.dumps(bound, ensure_ascii=False)[:6000])
@@ -145,7 +145,8 @@ def ozon_apply():
         # Some versions don't return the number in the filtered list; verify linked products.
         st2, linked = call("POST", OZON + "/v1/product/certificate/products/list", oz_headers, {
             "certificate_id": int(cert_id),
-            "limit": 1000,
+            "page": 1,
+            "page_size": 1000,
         })
         print("OZON_LINKED_VERIFY_STATUS", st2)
         print("OZON_LINKED_VERIFY", json.dumps(linked, ensure_ascii=False)[:12000])
