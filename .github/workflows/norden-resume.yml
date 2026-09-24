@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: norden-kit-webasyst-daily
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   resume:
@@ -29,6 +29,11 @@ jobs:
           python-version: '3.12'
 
       - run: pip install requests
+
+      - name: Inspect reported duplicate pair
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python norden-kit/inspect_norden_pair.py
 
       - name: Continue Norden supplier -> KIT
         id: kit
