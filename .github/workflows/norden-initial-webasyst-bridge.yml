@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: norden-kit-webasyst-daily
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   initial:
