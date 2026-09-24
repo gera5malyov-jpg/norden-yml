@@ -1,0 +1,41 @@
+name: PEK resubmit with hard packing positions
+
+on:
+  push:
+    paths:
+      - '.github/workflows/pek-resubmit-hardpacking-runtime.yml'
+  workflow_dispatch:
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run corrected PEK preregistration
+        env:
+          PEK_LOGIN: ${{ secrets.PEK_LOGIN }}
+          PEK_API_KEY: ${{ secrets.PEK_API_KEY }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess, os, re
+          src=Path('.github/workflows/pek-spb-tolyatti-prereg-2026-09-25.yml').read_text(encoding='utf-8')
+          m=re.search(r"python3 - <<'PY'\n(.*?)\n\s*PY", src, re.S)
+          if not m:
+              raise SystemExit('embedded preregistration script not found')
+          code=m.group(1)
+          marker='"hardPacking": {'
+          i=code.find(marker)
+          if i<0:
+              raise SystemExit('hardPacking block not found')
+          j=code.find('"enabled": True,', i)
+          if j<0:
+              raise SystemExit('hardPacking enabled not found')
+          if '"positionsCount": 1' not in code[i:code.find('},', j)+2]:
+              at=j+len('"enabled": True,')
+              code=code[:at]+'\n                                  "positionsCount": 1,'+code[at:]
+          p=Path('/tmp/pek_corrected.py')
+          p.write_text(code,encoding='utf-8')
+          subprocess.run(['python3',str(p)],check=True,env=os.environ.copy())
+          PY
