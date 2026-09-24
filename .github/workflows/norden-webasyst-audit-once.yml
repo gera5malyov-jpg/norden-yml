@@ -1,0 +1,113 @@
+name: Audit Norden Webasyst to KIT once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-webasyst-audit-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Audit NORDEN-100
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import importlib.util,json,os,pathlib,re,sys,time,unicodedata
+          from collections import defaultdict
+          ROOT=pathlib.Path('.').resolve()
+          sys.path.insert(0,str(ROOT/'webasyst'))
+          from client import WebasystClient
+          spec=importlib.util.spec_from_file_location('norden',ROOT/'norden-kit'/'sync_norden_kit.py')
+          mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+          wa=WebasystClient(min_request_interval=0.55)
+          kit=mod.KitClient(os.environ['YANDEX_KIT_TOKEN'])
+          def s(v): return str(v or '').strip()
+          def norm(v):
+              return re.sub(r'[^0-9a-zа-яё]+','',unicodedata.normalize('NFKC',s(v)).casefold())
+          def listify(p,keys=()):
+              if isinstance(p,list): return [x for x in p if isinstance(x,dict)]
+              if not isinstance(p,dict): return []
+              for k in keys:
+                  v=p.get(k)
+                  if isinstance(v,list): return [x for x in v if isinstance(x,dict)]
+                  if isinstance(v,dict): return [x for x in v.values() if isinstance(x,dict)]
+              if p and all(isinstance(v,dict) for v in p.values()): return list(p.values())
+              return []
+          types=listify(wa.call('shop.type.getList'))
+          matches=[x for x in types if norm(x.get('name') or x.get('title'))==norm('NORDEN-100')]
+          if len(matches)!=1: raise RuntimeError(f'NORDEN-100 type matches: {len(matches)}')
+          tid=s(matches[0].get('id'))
+          products=[]; offset=0
+          while True:
+              p=wa.call('shop.product.search',params={'hash':f'type/{tid}','offset':offset,'limit':1000,'fields':'*,skus,stock_counts'})
+              b=listify(p,('products','items')); products+=b
+              total=(p.get('count') or p.get('total_count')) if isinstance(p,dict) else None
+              if not b or len(b)<1000 or (total not in (None,'') and len(products)>=int(total)): break
+              offset+=len(b)
+          skus=[]
+          for pr in products:
+              rows=pr.get('skus')
+              if isinstance(rows,dict): rows=list(rows.values())
+              if not isinstance(rows,list): rows=[]
+              for x in rows:
+                  if isinstance(x,dict) and s(x.get('sku')): skus.append((pr,x))
+          all_chars,by_title,code_site_id,article_id=mod.resolve_special_characteristics(kit)
+          found=[]; missing=[]; samples=[]
+          for i,(pr,skurow) in enumerate(skus,1):
+              sku=s(skurow.get('sku'))
+              p=kit.request('GET','/v1/variants',params={'name':sku,'page':1,'per_page':100})
+              rows=[x for x in kit.items(p) if s(x.get('sku'))==sku and s(x.get('brand')).casefold()=='norden']
+              active=[x for x in rows if s(x.get('status')).upper()!='ARCHIVED']
+              if len(active)==1:
+                  found.append(sku)
+              elif len(active)==0:
+                  missing.append({'sku':sku,'product_id':s(pr.get('id')),'name':s(pr.get('name'))})
+              else:
+                  missing.append({'sku':sku,'product_id':s(pr.get('id')),'name':s(pr.get('name')),'reason':f'duplicate KIT matches {len(active)}'})
+              if len(samples)<20:
+                  info=wa.call('shop.product.getInfo',params={'id':s(pr.get('id'))})
+                  samples.append({
+                      'product_id':s(pr.get('id')),'name':s(pr.get('name')),'sku':sku,
+                      'sku_fields':skurow,'product_keys':sorted(pr.keys()),
+                      'info_keys':sorted((info or {}).keys()) if isinstance(info,dict) else [],
+                      'features':(info or {}).get('features') if isinstance(info,dict) else None,
+                      'images':(info or {}).get('images') if isinstance(info,dict) else None,
+                  })
+              if i%50==0: print('checked',i,'of',len(skus),flush=True)
+          out={
+              'type_id':tid,'products':len(products),'skus':len(skus),
+              'matched_exact_sku':len(found),'missing_exact_sku':len(missing),
+              'missing':missing[:1000],'samples':samples
+          }
+          pathlib.Path('webasyst/norden_webasyst_audit.json').write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({k:v for k,v in out.items() if k not in ('missing','samples')},ensure_ascii=False,indent=2))
+          PY
+      - name: Commit audit
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          cp webasyst/norden_webasyst_audit.json /tmp/norden_webasyst_audit.json 2>/dev/null || true
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/norden_webasyst_audit.json webasyst/norden_webasyst_audit.json 2>/dev/null || true
+          git add webasyst/norden_webasyst_audit.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m 'Audit NORDEN-100 against KIT'
+          git push origin HEAD:main
