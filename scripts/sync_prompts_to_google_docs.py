@@ -14,7 +14,7 @@ RAW_CREDS = os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"].strip()
 
 SCOPES = [
     "https://www.googleapis.com/auth/documents",
-    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/drive",
 ]
 
 
@@ -26,7 +26,8 @@ def credentials():
 def get_doc(session):
     url = f"https://docs.googleapis.com/v1/documents/{DOC_ID}?includeTabsContent=true"
     r = session.get(url, timeout=60)
-    r.raise_for_status()
+    if not r.ok:
+        raise RuntimeError(f"Google Docs GET failed: HTTP {r.status_code}: {r.text[:2000]}")
     return r.json()
 
 
@@ -56,7 +57,8 @@ def tab_end_index(tab):
 def batch_update(session, requests):
     url = f"https://docs.googleapis.com/v1/documents/{DOC_ID}:batchUpdate"
     r = session.post(url, json={"requests": requests}, timeout=60)
-    r.raise_for_status()
+    if not r.ok:
+        raise RuntimeError(f"Google Docs batchUpdate failed: HTTP {r.status_code}: {r.text[:2000]}")
     return r.json()
 
 
