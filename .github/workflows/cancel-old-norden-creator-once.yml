@@ -1,4 +1,4 @@
-name: Cancel current full Norden sync once
+name: Cancel current Norden chairs update once
 
 on:
   push:
@@ -15,8 +15,8 @@ jobs:
   cancel:
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel current full Norden no-create run for targeted chairs sync
+      - name: Cancel current chairs/stools update before duplicate audit
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api --method POST repos/${{ github.repository }}/actions/runs/36022706383/cancel || true
+          gh api --method POST repos/${{ github.repository }}/actions/runs/36027177112/cancel || true
