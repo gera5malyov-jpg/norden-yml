@@ -1,0 +1,62 @@
+name: Norden — кресла и стулья каждые 6 часов
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'catalog/sync_norden_chairs_stools_6h.py'
+      - '.github/workflows/norden-chairs-stools-6h.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-chairs-stools-6h
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: pip install --disable-pip-version-check requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
+
+      - name: Проверить Python
+        run: python -m py_compile catalog/sync_norden_chairs_stools_6h.py norden-kit/sync_norden_kit.py norden-kit/webasyst_n100_to_kit_once.py webasyst/client.py
+
+      - name: Синхронизировать Norden — только кресла и стулья
+        env:
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
+          CATALOG_SHEET: 'Норден'
+          NORDEN_CATEGORY_REVIEW_SHEET: 'Норден — категории на согласование'
+          WEBASYST_BASE_URL: ${{ secrets.WEBASYST_BASE_URL }}
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python catalog/sync_norden_chairs_stools_6h.py
+
+      - name: Сохранить русский отчёт
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog/norden_chairs_stools_6h_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Обновить отчёт 6ч Norden кресла/стулья"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
