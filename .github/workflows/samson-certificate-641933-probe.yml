@@ -133,6 +133,15 @@ jobs:
           if not n:
               raise SystemExit("No conformity certificate images found")
           PY
+      - name: Extract certificate text for verification
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tesseract-ocr >/dev/null
+          for f in tmp/samson-cert-641933/*; do
+            echo "===== OCR $f ====="
+            tesseract "$f" stdout -l eng --psm 6 2>/dev/null || true
+          done
       - name: Commit certificate pages for inspection
         shell: bash
         run: |
