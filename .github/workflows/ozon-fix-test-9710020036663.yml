@@ -63,3 +63,5 @@ jobs:
           if not (y.get("price") or {}).get("auto_action_enabled"):
             raise SystemExit(2)
           PY
+
+# trigger
