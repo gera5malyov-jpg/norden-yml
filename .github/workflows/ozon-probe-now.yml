@@ -1,0 +1,42 @@
+name: Ozon probe now
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ozon-probe-now.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Probe Ozon order fields
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json, os, requests
+          h={"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"}
+          pn="30268053-0302-1"
+          r=requests.post("https://api-seller.ozon.ru/v3/posting/fbs/get",headers=h,json={"posting_number":pn,"with":{"analytics_data":False,"barcodes":False,"financial_data":False,"translit":False}},timeout=60)
+          r.raise_for_status()
+          d=r.json().get("result",r.json())
+          print(json.dumps({
+            "posting_number":d.get("posting_number"),
+            "status":d.get("status"),
+            "substatus":d.get("substatus"),
+            "customer":d.get("customer"),
+            "addressee":d.get("addressee"),
+            "prr_option":d.get("prr_option")
+          },ensure_ascii=False,indent=2))
+          PY
