@@ -44,21 +44,22 @@ st,info=call("POST",OZON+"/v3/product/info/list",oz_headers,{"offer_id":[OFFER]}
 print("OZON_INFO_STATUS",st)
 print("OZON_INFO",json.dumps(info,ensure_ascii=False)[:10000])
 
-for path,body in [
-    ("/v2/product/certification/options",{}),
-    ("/v2/product/certification/params",{"params":{
+for label,path,body in [
+    ("OPTIONS_EMPTY","/v2/product/certification/options",{}),
+    ("PARAMS_TYPE_ONLY","/v2/product/certification/params",{"params":{
+        "certificate_type":"DECLARATION"
+    }}),
+    ("PARAMS_CORE","/v2/product/certification/params",{"params":{
         "name":"Декларация о соответствии",
         "number":DOC,
         "issue_date":"2026-07-30T00:00:00Z",
-        "expired_date":{"date":{"day":28,"month":7,"year":2031},"infinite":False},
-        "certificate_type":"declaration",
-        "accordance_type":"technical_regulations_cu",
-        "certificate_country":"RU"
+        "expired_date":{"date":{"day":28,"month":7,"year":2031}},
+        "certificate_type":"DECLARATION"
     }})
 ]:
     st,res=call("POST",OZON+path,oz_headers,body)
-    print("OZON_META",path,"STATUS",st)
-    print(json.dumps(res,ensure_ascii=False)[:20000])
+    print("OZON_META",label,path,"STATUS",st)
+    print(json.dumps(res,ensure_ascii=False)[:30000])
 
 st,res=call("POST",OZON+"/v1/product/certificate/list",oz_headers,{
     "offer_id":OFFER,"page":1,"page_size":100
@@ -71,6 +72,10 @@ st,res=call("POST",OZON+"/v1/product/certificate/info",oz_headers,{
 })
 print("OZON_CERT_INFO_STATUS",st)
 print("OZON_CERT_INFO",json.dumps(res,ensure_ascii=False)[:15000])
+
+st,camps=call("GET",YANDEX+"/v2/campaigns?limit=100",ya_headers)
+print("YANDEX_CAMPAIGNS_STATUS",st)
+print("YANDEX_CAMPAIGNS",json.dumps(camps,ensure_ascii=False)[:30000])
 
 bid=os.getenv("YANDEX_MARKET_BUSINESS_ID","117585391")
 token=None
