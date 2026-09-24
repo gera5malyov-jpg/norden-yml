@@ -1,0 +1,52 @@
+name: Norden chairs and stools existing-only now
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-chairs-stools-now.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-kit-webasyst-daily
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests
+
+      - name: Validate targeted Norden updater
+        run: python -m py_compile norden-kit/sync_norden_kit.py norden-kit/update_norden_chairs_stools.py
+
+      - name: Update existing Norden chairs and stools only
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: python norden-kit/update_norden_chairs_stools.py
+
+      - name: Save targeted update report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/norden_chairs_stools_update_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Norden chairs stools targeted update report"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
