@@ -1,0 +1,23 @@
+name: Norden pair read-only check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-pair-check.yml'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Compare reported duplicate pair
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python norden-kit/inspect_norden_pair.py
