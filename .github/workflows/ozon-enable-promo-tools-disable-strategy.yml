@@ -1,0 +1,239 @@
+name: Ozon enable promo tools and disable pricing strategy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-enable-promo-tools-disable-strategy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Install requests
+        run: python -m pip install requests
+
+      - name: Enable promo tools and remove pricing strategies from all products
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json, os, time, requests
+
+          BASE = "https://api-seller.ozon.ru"
+          S = requests.Session()
+          S.headers.update({
+              "Client-Id": os.environ["OZON_CLIENT_ID"],
+              "Api-Key": os.environ["OZON_API_KEY"],
+              "Content-Type": "application/json",
+          })
+
+          def call(method, path, body=None, required=True):
+              last = None
+              for attempt in range(15):
+                  try:
+                      r = S.request(method, BASE + path, json=body, timeout=180)
+                      last = r
+                  except Exception as e:
+                      if attempt == 14:
+                          print("REQUEST_EXCEPTION", method, path, repr(e), flush=True)
+                      time.sleep(min(20, 1 + attempt))
+                      continue
+                  if r.status_code == 429:
+                      time.sleep(float(r.headers.get("Retry-After") or min(30, 1 + attempt)))
+                      continue
+                  if r.status_code >= 500:
+                      time.sleep(min(30, 1 + attempt))
+                      continue
+                  try:
+                      data = r.json() if r.content else {}
+                  except Exception:
+                      data = {"raw": r.text}
+                  if r.status_code >= 400:
+                      print("HTTP_ERROR", method, path, r.status_code,
+                            json.dumps(data, ensure_ascii=False)[:4000], flush=True)
+                      if required:
+                          return None, r
+                  return data, r
+              return None, last
+
+          def chunks(seq, n):
+              for i in range(0, len(seq), n):
+                  yield seq[i:i+n]
+
+          # Read every product.
+          items = []
+          seen = set()
+          cursor = ""
+          while True:
+              d, r = call("POST", "/v5/product/info/prices", {
+                  "cursor": cursor,
+                  "filter": {"visibility": "ALL"},
+                  "limit": 1000
+              })
+              if d is None:
+                  raise SystemExit("Cannot read Ozon products")
+              rows = d.get("items") or []
+              for x in rows:
+                  pid = x.get("product_id")
+                  if pid is not None and int(pid) not in seen:
+                      seen.add(int(pid))
+                      items.append(x)
+              nxt = d.get("cursor") or ""
+              if not rows or not nxt or nxt == cursor:
+                  break
+              cursor = nxt
+
+          products = []
+          for x in items:
+              products.append({
+                  "offer_id": x.get("offer_id"),
+                  "product_id": int(x.get("product_id")),
+              })
+
+          report = {
+              "products_total": len(products),
+              "flags_requested": 0,
+              "flags_updated": 0,
+              "flags_failed": [],
+              "timer_requested": 0,
+              "timer_batches_failed": 0,
+              "strategy_delete_requested": 0,
+              "strategy_delete_batches_failed": 0,
+              "strategy_delete_responses": [],
+              "verify_auto_action_disabled": 0,
+              "verify_auto_add_disabled": 0,
+              "verify_min_price_action_disabled": 0,
+              "verify_products_with_strategy": 0,
+              "verify_strategy_samples": [],
+          }
+
+          # Enable all three product controls. No price/min_price/old_price/declared_price is sent.
+          for batch in chunks(products, 500):
+              payload = {
+                  "prices": [{
+                      "offer_id": x["offer_id"],
+                      "auto_action_enabled": "ENABLED",
+                      "auto_add_to_ozon_actions_list_enabled": "ENABLED",
+                      "min_price_for_auto_actions_enabled": True
+                  } for x in batch if x.get("offer_id")]
+              }
+              if not payload["prices"]:
+                  continue
+              d, r = call("POST", "/v1/product/import/prices", payload, required=False)
+              report["flags_requested"] += len(payload["prices"])
+              if not d:
+                  report["flags_failed"].extend([
+                      {"offer_id": x["offer_id"], "reason": "request_failed"}
+                      for x in batch if x.get("offer_id")
+                  ])
+                  continue
+              results = d.get("result") or []
+              by_offer = {str(z.get("offer_id")): z for z in results if z.get("offer_id") is not None}
+              for x in batch:
+                  oid = str(x.get("offer_id") or "")
+                  if not oid:
+                      continue
+                  z = by_offer.get(oid)
+                  if z and z.get("updated") is True:
+                      report["flags_updated"] += 1
+                  else:
+                      report["flags_failed"].append({
+                          "offer_id": oid,
+                          "product_id": x.get("product_id"),
+                          "errors": (z or {}).get("errors") if z else "no_result"
+                      })
+
+          # Refresh action-limit timer for all product IDs. This does not change the numeric min_price.
+          pids = [str(x["product_id"]) for x in products]
+          for batch in chunks(pids, 1000):
+              d, r = call("POST", "/v1/product/action/timer/update",
+                          {"product_ids": batch}, required=False)
+              report["timer_requested"] += len(batch)
+              if d is None or (r is not None and r.status_code >= 400):
+                  report["timer_batches_failed"] += 1
+
+          # Remove every product from every pricing strategy.
+          # Endpoint was already used successfully in this repository for a single Ozon product.
+          for batch in chunks(pids, 50):
+              d, r = call("POST", "/v1/pricing-strategy/products/delete",
+                          {"product_id": batch}, required=False)
+              report["strategy_delete_requested"] += len(batch)
+              if d is None or (r is not None and r.status_code >= 400):
+                  report["strategy_delete_batches_failed"] += 1
+              elif len(report["strategy_delete_responses"]) < 20:
+                  report["strategy_delete_responses"].append(d)
+
+          time.sleep(5)
+
+          # Verify flags.
+          final_items = []
+          seen = set()
+          cursor = ""
+          while True:
+              d, r = call("POST", "/v5/product/info/prices", {
+                  "cursor": cursor,
+                  "filter": {"visibility": "ALL"},
+                  "limit": 1000
+              }, required=False)
+              if not d:
+                  break
+              rows = d.get("items") or []
+              for x in rows:
+                  pid = x.get("product_id")
+                  if pid is not None and int(pid) not in seen:
+                      seen.add(int(pid))
+                      final_items.append(x)
+              nxt = d.get("cursor") or ""
+              if not rows or not nxt or nxt == cursor:
+                  break
+              cursor = nxt
+
+          report["verify_auto_action_disabled"] = sum(
+              1 for x in final_items if not (x.get("price") or {}).get("auto_action_enabled")
+          )
+          report["verify_auto_add_disabled"] = sum(
+              1 for x in final_items if not (x.get("price") or {}).get("auto_add_to_ozon_actions_list_enabled")
+          )
+
+          # Verify min-price-for-actions timer flag in batches.
+          for batch in chunks(pids, 1000):
+              d, r = call("POST", "/v1/product/action/timer/status",
+                          {"product_ids": batch}, required=False)
+              statuses = (d or {}).get("statuses") or []
+              report["verify_min_price_action_disabled"] += sum(
+                  1 for st in statuses if not st.get("min_price_for_auto_actions_enabled")
+              )
+
+          # Verify that no product is attached to a pricing strategy.
+          for batch in chunks(pids, 50):
+              d, r = call("POST", "/v1/pricing-strategy/strategy-ids-by-product-ids",
+                          {"product_id": batch}, required=False)
+              if not d:
+                  continue
+              rows = d.get("result") or d.get("products") or d.get("items") or []
+              if isinstance(rows, dict):
+                  rows = rows.get("products") or rows.get("items") or []
+              for row in rows if isinstance(rows, list) else []:
+                  sids = row.get("strategy_ids") or row.get("strategy_id") or []
+                  if isinstance(sids, (str, int)):
+                      sids = [sids]
+                  if sids:
+                      report["verify_products_with_strategy"] += 1
+                      if len(report["verify_strategy_samples"]) < 50:
+                          report["verify_strategy_samples"].append(row)
+
+          print("FINAL_REPORT_JSON", json.dumps(report, ensure_ascii=False, sort_keys=True), flush=True)
+
+          if (report["verify_auto_action_disabled"]
+              or report["verify_auto_add_disabled"]
+              or report["verify_min_price_action_disabled"]
+              or report["verify_products_with_strategy"]):
+              raise SystemExit(2)
+          PY
