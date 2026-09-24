@@ -1,0 +1,47 @@
+name: PEK verify hard packing 789970098158
+
+on:
+  push:
+    paths:
+      - '.github/workflows/pek-verify-hardpacking-789970098158.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify PEK services
+        env:
+          PEK_LOGIN: ${{ secrets.PEK_LOGIN }}
+          PEK_API_KEY: ${{ secrets.PEK_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sS --basic --user "$PEK_LOGIN:$PEK_API_KEY" \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            -X POST \
+            -d '{"cargoCodes":["789970098158"]}' \
+            'https://kabinet.pecom.ru/api/v1/cargos/status/' > /tmp/pek-status.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/pek-status.json',encoding='utf-8'))
+          if isinstance(d,dict) and d.get('error'):
+              print(json.dumps({'error':d['error']},ensure_ascii=False))
+              raise SystemExit(2)
+          cargos=(d.get('cargos') or d.get('сargos') or []) if isinstance(d,dict) else []
+          for c in cargos:
+              services=c.get('services') or {}
+              items=services.get('items') or []
+              out={
+                'cargoCode': ((c.get('cargo') or {}).get('code') or '789970098158'),
+                'status': ((c.get('info') or {}).get('cargoStatus')),
+                'serviceItems': [
+                  {
+                    'name': x.get('serviceType') or x.get('name') or x.get('title') or x.get('serviceName'),
+                    'cost': x.get('cost') or x.get('sum'),
+                    'paid': x.get('paid')
+                  } for x in items if isinstance(x,dict)
+                ]
+              }
+              print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
