@@ -1,0 +1,50 @@
+name: Каталог — Ozon Norden → Google Sheets
+
+on:
+  push:
+    paths:
+      - '.github/workflows/catalog-ozon-norden-export.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: catalog-ozon-norden-export
+  cancel-in-progress: true
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: pip install --disable-pip-version-check "gspread>=6.1,<7" "google-auth>=2.35,<3"
+
+      - name: Выгрузить Norden из Ozon в Каталог
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          CATALOG_OWNER_EMAIL: 'gera5malyov@gmail.com'
+          CATALOG_TITLE: 'Каталог'
+          CATALOG_SHEET: 'Норден'
+        run: python catalog/export_ozon_norden_to_sheets.py
+
+      - name: Сохранить отчёт выполнения
+        if: always()
+        run: |
+          if [ -f catalog/last_run.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add catalog/last_run.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Обновить отчёт выгрузки каталога Norden"
+              git push
+            fi
+          fi
