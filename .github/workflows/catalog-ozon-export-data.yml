@@ -2,6 +2,9 @@ name: Каталог — получить Norden из Ozon
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'catalog/run_trigger.txt'
   issues:
     types: [opened]
 
