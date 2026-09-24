@@ -1,4 +1,4 @@
-name: Cancel slow Norden archive once
+name: Cancel superseded Norden archive once
 
 on:
   push:
@@ -19,4 +19,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api --method POST repos/${{ github.repository }}/actions/runs/36031235649/cancel || true
+          gh api --method POST repos/${{ github.repository }}/actions/runs/36031574061/cancel || true
