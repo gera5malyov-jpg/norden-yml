@@ -75,6 +75,13 @@ jobs:
           fi
           echo "Yandex Market API: OK"
 
+      - name: Probe SAMS-641933 certificate targets
+        if: github.event_name == 'push'
+        continue-on-error: true
+        env:
+          YANDEX_MARKET_BUSINESS_ID: "117585391"
+        run: python scripts/probe_sams_641933_certificate.py
+
       - name: Wildberries API read-only check
         id: wb
         continue-on-error: true
