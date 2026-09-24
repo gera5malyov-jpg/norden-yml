@@ -9,7 +9,7 @@ kit=mod.KitClient(os.environ.get("YANDEX_KIT_TOKEN",""))
 chars=kit.characteristics()
 matches=[x for x in chars if mod.norm_title(x.get("title"))==mod.norm_title(mod.CODE_SITE_TITLE)]
 code_id=mod.s(matches[0].get("id")) if len(matches)==1 else ""
-targets=["AF-30756476","100-1594419"]
+targets=[x.strip() for x in os.environ.get("TARGET_SKUS","AF-30756476,100-1594419").split(",") if x.strip()]
 out=[]
 for target in targets:
     payload=kit.request("GET","/v1/variants",params={"name":target,"page":1,"per_page":100})
