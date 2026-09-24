@@ -1,0 +1,56 @@
+name: KIT products list probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-products-list-probe-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Probe products collection
+        run: |
+          python - <<'PY'
+          import json,os,requests,time
+          from pathlib import Path
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          url='https://api.kit.yandex.net/v1/products'
+          last=None
+          for i in range(12):
+              r=requests.get(url,headers=h,params={'page':1,'per_page':5},timeout=60)
+              last=r
+              if r.status_code==429:
+                  time.sleep(min(30,2+i*2)); continue
+              break
+          out={'status':last.status_code,'text':last.text[:16000]}
+          try: out['json']=last.json()
+          except Exception: pass
+          Path('category-audit/kit_products_list_probe.json').write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          if last.status_code>=400: raise SystemExit(1)
+          PY
+      - name: Commit result
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add category-audit/kit_products_list_probe.json 2>/dev/null || true
+          git commit -m "Probe KIT products collection" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
