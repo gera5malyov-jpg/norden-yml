@@ -285,6 +285,11 @@ def main():
         r=byone.get(k)
         if not r: continue
         art=s(r.get("Артикул")); m=waby.get(nc(art),[]) if art else []
+        prior_hints=likely_duplicate(i,[x for x in rows if x["_row"]!=r["_row"]])
+        if prior_hints:
+            rep["sheet"]["possible_duplicates"]+=1
+            rep["possible_duplicate_items"].append({"yml_id":i["article"],"name":i["name"],"hits":prior_hints,"stage":"before_webasyst"})
+            continue
         try:
             if len(m)>1: rep["webasyst"]["ambiguous"]+=1; continue
             if len(m)==1: wa_update(wa,wstock,m[0][1],i); rep["webasyst"]["updated"]+=1
