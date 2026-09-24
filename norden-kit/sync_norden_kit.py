@@ -343,12 +343,51 @@ class KitClient:
         files = {"file": (name, r.content, mime)}
         return self.request("POST", "/v1/files", files=files, timeout=180)
 
+    def _bulk_with_missing_variant_retry(self, path, batch):
+        pending = list(batch)
+        skipped = []
+        while pending:
+            try:
+                self.request("POST", path, body={"items": pending})
+                return skipped
+            except HttpError as exc:
+                if exc.status != 400:
+                    raise
+                try:
+                    payload = json.loads(exc.body)
+                except Exception:
+                    raise
+                missing = {
+                    s(row.get("variant_id"))
+                    for row in (payload.get("errors") or [])
+                    if isinstance(row, dict)
+                    and s(row.get("code")) == "VARIANT_NOT_FOUND"
+                    and s(row.get("variant_id"))
+                }
+                if not missing:
+                    raise
+                skipped.extend(sorted(missing))
+                print(
+                    f"KIT {path}: skip {len(missing)} stale variant ids and retry batch",
+                    flush=True,
+                )
+                pending = [
+                    row for row in pending
+                    if s(row.get("variant_id")) not in missing
+                ]
+        return skipped
+
     def bulk_stocks(self, items):
+        skipped = []
         for start in range(0, len(items), 5000):
-            self.request("POST", "/v1/variants/stocks/bulk_update",
-                         body={"items": items[start:start+5000]})
+            skipped.extend(self._bulk_with_missing_variant_retry(
+                "/v1/variants/stocks/bulk_update",
+                items[start:start+5000],
+            ))
+        return list(dict.fromkeys(skipped))
 
     def bulk_prices(self, items, minimum_field=None):
+        skipped = []
         for start in range(0, len(items), 5000):
             batch = []
             for row in items[start:start+5000]:
@@ -360,7 +399,11 @@ class KitClient:
                 if minimum_field:
                     x[minimum_field] = str(row["minimum"])
                 batch.append(x)
-            self.request("POST", "/v1/variants/prices/bulk_update", body={"items": batch})
+            skipped.extend(self._bulk_with_missing_variant_retry(
+                "/v1/variants/prices/bulk_update",
+                batch,
+            ))
+        return list(dict.fromkeys(skipped))
 
     def discover_minimum_price_field(self, sample):
         if not sample:
