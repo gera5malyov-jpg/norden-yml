@@ -1,0 +1,58 @@
+name: Ozon final test 9710020036663 by product id
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-final-test-9710020036663.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - run: python -m pip install requests
+      - name: Update target by product id and verify
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,json,requests,time
+          B="https://api-seller.ozon.ru"
+          S=requests.Session()
+          S.headers.update({"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"})
+          body={"prices":[{
+            "product_id":6229462541,
+            "price":"9310",
+            "old_price":"13950",
+            "min_price":"8914",
+            "net_price":"0",
+            "currency_code":"RUB",
+            "vat":"0",
+            "declared_price":"156",
+            "auto_action_enabled":"ENABLED",
+            "auto_add_to_ozon_actions_list_enabled":"ENABLED",
+            "min_price_for_auto_actions_enabled":True,
+            "price_strategy_enabled":"DISABLED"
+          }]}
+          r=S.post(B+"/v1/product/import/prices",json=body,timeout=120)
+          print("UPDATE",r.status_code,r.text,flush=True)
+          time.sleep(12)
+          cur=""
+          target=None
+          while True:
+            rr=S.post(B+"/v5/product/info/prices",json={"cursor":cur,"filter":{"visibility":"ALL"},"limit":1000},timeout=120)
+            rr.raise_for_status(); d=rr.json()
+            for x in d.get("items") or []:
+              if int(x.get("product_id") or 0)==6229462541: target=x; break
+            if target: break
+            rows=d.get("items") or []; nxt=d.get("cursor") or ""
+            if not rows or not nxt or nxt==cur: break
+            cur=nxt
+          print("VERIFY",json.dumps(target,ensure_ascii=False,sort_keys=True),flush=True)
+          if not target or not (target.get("price") or {}).get("auto_action_enabled"):
+            raise SystemExit(2)
+          PY
