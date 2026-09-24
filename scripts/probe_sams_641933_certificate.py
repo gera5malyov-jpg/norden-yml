@@ -77,7 +77,7 @@ st,camps=call("GET",YANDEX+"/v2/campaigns?limit=100",ya_headers)
 print("YANDEX_CAMPAIGNS_STATUS",st)
 print("YANDEX_CAMPAIGNS",json.dumps(camps,ensure_ascii=False)[:30000])
 
-bid=os.getenv("YANDEX_MARKET_BUSINESS_ID","117585391")
+bid="20806099"
 token=None
 found=None
 for _ in range(100):
