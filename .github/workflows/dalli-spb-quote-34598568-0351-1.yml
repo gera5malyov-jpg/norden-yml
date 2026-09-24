@@ -1,0 +1,33 @@
+name: Quote Dalli SPB for Ozon 34598568-0351-1
+on:
+  push:
+    paths:
+      - '.github/workflows/dalli-spb-quote-34598568-0351-1.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Рассчитать доставку Dalli СПБ
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          DALLI_TOKEN: ${{ secrets.DALLI_TOKEN }}
+        run: python scripts/quote_dalli_spb_34598568_0351_1.py
+      - name: Сохранить результат
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+          git add dalli/order_34598568-0351-1_spb_delivery_quote.json || true
+          git diff --cached --quiet || git commit -m "Store Dalli SPB quote 34598568-0351-1"
+          git push
