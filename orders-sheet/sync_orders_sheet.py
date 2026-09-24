@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / "webasyst"))
 import marketplace_order_sync as mp  # noqa: E402
 from client import WebasystClient  # noqa: E402
 
-SHEET_TITLE = "заказы"
+# Google Sheet is owned by the user; GitHub service account only edits it.\nSHEET_TITLE = "заказы"
 TAB_TITLE = "Заказы"
 OWNER_EMAIL = os.getenv("GOOGLE_ORDERS_OWNER_EMAIL", "gera5malyov@gmail.com").strip()
 ID_FILE = HERE / "google_sheet_id.txt"
