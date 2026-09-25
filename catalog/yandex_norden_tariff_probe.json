@@ -361,14 +361,114 @@
       ]
     }
   },
-  "tariff_status": 400,
+  "tariff_status": 200,
   "tariff": {
-    "status": "ERROR",
-    "errors": [
-      {
-        "code": "BAD_REQUEST",
-        "message": "Forbidden to use \"campaignId\" parameter with \"sellingProgram\" or \"currency\"."
-      }
-    ]
+    "status": "OK",
+    "result": {
+      "offers": [
+        {
+          "offer": {
+            "categoryId": 10785222,
+            "price": 29825.0,
+            "length": 100.0,
+            "width": 60.0,
+            "height": 30.0,
+            "weight": 65.0,
+            "quantity": 1
+          },
+          "tariffs": [
+            {
+              "type": "FEE",
+              "amount": 14316.0,
+              "currency": "RUR",
+              "parameters": [
+                {
+                  "name": "value",
+                  "value": "48.00"
+                },
+                {
+                  "name": "billingUnit",
+                  "value": "item"
+                },
+                {
+                  "name": "valueType",
+                  "value": "relative"
+                },
+                {
+                  "name": "priceDependence",
+                  "value": "NOT_DEPENDED"
+                },
+                {
+                  "name": "priceFrom",
+                  "value": "0.00"
+                }
+              ]
+            },
+            {
+              "type": "AGENCY_COMMISSION",
+              "amount": 0.12,
+              "currency": "RUR",
+              "parameters": [
+                {
+                  "name": "value",
+                  "value": "0.12"
+                },
+                {
+                  "name": "billingUnit",
+                  "value": "item"
+                },
+                {
+                  "name": "valueType",
+                  "value": "absolute"
+                },
+                {
+                  "name": "priceDependence",
+                  "value": "NOT_DEPENDED"
+                },
+                {
+                  "name": "priceFrom",
+                  "value": "0.00"
+                }
+              ]
+            },
+            {
+              "type": "PAYMENT_TRANSFER",
+              "amount": 477.2,
+              "currency": "RUR",
+              "parameters": [
+                {
+                  "name": "value",
+                  "value": "1.60"
+                },
+                {
+                  "name": "billingUnit",
+                  "value": "item"
+                },
+                {
+                  "name": "valueType",
+                  "value": "relative"
+                },
+                {
+                  "name": "priceDependence",
+                  "value": "NOT_DEPENDED"
+                },
+                {
+                  "name": "priceFrom",
+                  "value": "0.00"
+                },
+                {
+                  "name": "frequency",
+                  "value": "weekly"
+                },
+                {
+                  "name": "paymentDelayWeeks",
+                  "value": "4"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
   }
 }
