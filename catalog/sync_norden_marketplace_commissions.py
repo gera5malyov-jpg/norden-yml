@@ -109,7 +109,10 @@ def offer_mappings(bid, offer_ids):
         d=call(ya,"POST",f"{YANDEX}/v2/businesses/{bid}/offer-mappings",body={"offerIds":batch})
         res=d.get("result") or {}
         for x in res.get("offerMappings") or []:
-            off=x.get("offer") or {}
+            off=dict(x.get("offer") or {})
+            mp=x.get("mapping") or {}
+            if not off.get("marketCategoryId") and mp.get("marketCategoryId"):
+                off["marketCategoryId"]=mp.get("marketCategoryId")
             oid=s(off.get("offerId"))
             if oid: out[oid]=off
     return out
