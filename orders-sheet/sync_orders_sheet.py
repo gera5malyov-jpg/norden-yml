@@ -447,6 +447,9 @@ def direct_marketplace_rows(sku_names: dict[str, str]) -> tuple[dict[str, dict],
                 continue
             k = order_key(source, ext)
             target = s(o.get("target_state"))
+            raw_status = s(o.get("status_raw")).lower()
+            if source == "ozon" and any(sub in raw_status for sub in OZON_COMPLETED_SUBSTATUSES):
+                target = "completed"
             if target in TERMINAL_TARGETS:
                 terminal_keys.add(k)
                 continue
@@ -624,7 +627,7 @@ def direct_ozon_rows(sku_names: dict[str, str]) -> tuple[dict[str, dict], set[st
         k = order_key("ozon", ext)
         target = s(o.get("target_state"))
         raw_status = s(o.get("status_raw")).lower()
-        if source == "ozon" and any(f"/{sub}" in raw_status for sub in OZON_COMPLETED_SUBSTATUSES):
+        if any(sub in raw_status for sub in OZON_COMPLETED_SUBSTATUSES):
             target = "completed"
         if target in TERMINAL_TARGETS:
             terminal_keys.add(k)
