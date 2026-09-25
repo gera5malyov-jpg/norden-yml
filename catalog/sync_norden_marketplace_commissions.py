@@ -67,19 +67,23 @@ def ozon_prices(offer_ids):
 def yandex_campaigns():
     d=call(ya,"GET",YANDEX+"/v2/campaigns",params={"limit":100})
     rows=d.get("campaigns") or ((d.get("result") or {}).get("campaigns") if isinstance(d.get("result"),dict) else []) or []
-    dbs=[]
-    for c in rows:
-        b=c.get("business") or {}
-        bid=s(b.get("id") or c.get("businessId"))
-        if PREFERRED_BUSINESS_ID and bid!=PREFERRED_BUSINESS_ID: continue
-        if s(c.get("placementType")).upper()!="DBS": continue
-        if s(c.get("apiAvailability")).upper() not in ("","AVAILABLE"): continue
-        dbs.append(c)
+    safe=[{
+      "id":c.get("id"),
+      "business_id":s((c.get("business") or {}).get("id") or c.get("businessId")),
+      "business_name":s((c.get("business") or {}).get("name")),
+      "domain":s(c.get("domain")),
+      "placementType":s(c.get("placementType")),
+      "apiAvailability":s(c.get("apiAvailability")),
+    } for c in rows if isinstance(c,dict)]
+    dbs=[c for c in rows if s(c.get("placementType")).upper()=="DBS" and s(c.get("apiAvailability")).upper() in ("","AVAILABLE")]
+    preferred=[c for c in dbs if s((c.get("business") or {}).get("id") or c.get("businessId"))==PREFERRED_BUSINESS_ID]
+    if preferred:
+        dbs=preferred
     if not dbs:
-        raise RuntimeError("Не найден доступный магазин Яндекс Маркета с placementType=DBS")
+        raise RuntimeError("Не найден доступный DBS-магазин. Кампании токена: "+json.dumps(safe,ensure_ascii=False))
     bids=sorted({s((c.get("business") or {}).get("id") or c.get("businessId")) for c in dbs if s((c.get("business") or {}).get("id") or c.get("businessId"))})
     if len(bids)!=1:
-        raise RuntimeError("DBS-кампании относятся к нескольким business_id: "+json.dumps(bids,ensure_ascii=False))
+        raise RuntimeError("Найдено несколько business_id с DBS: "+json.dumps({"business_ids":bids,"campaigns":safe},ensure_ascii=False))
     return bids[0],dbs
 
 def campaign_offers(cid):
