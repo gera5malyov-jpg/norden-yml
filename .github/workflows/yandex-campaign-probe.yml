@@ -69,7 +69,7 @@ jobs:
               po=offers[0]
               price=((po.get("campaignPrice") or {}).get("value") or (po.get("basicPrice") or {}).get("value"))
               if cat and price and all(float(wd.get(k) or 0)>0 for k in ("length","width","height","weight")):
-                  body={"parameters":{"campaignId":cid,"currency":"RUR"},"offers":[{
+                  body={"parameters":{"campaignId":cid},"offers":[{
                     "categoryId":int(cat),"price":float(price),"length":float(wd["length"]),"width":float(wd["width"]),
                     "height":float(wd["height"]),"weight":float(wd["weight"]),"quantity":1}]}
                   tr=requests.post(f"{base}/v2/tariffs/calculate",headers=h,json=body,timeout=60)
