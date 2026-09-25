@@ -125,7 +125,7 @@ def tariff_rows(cid, items):
         for oid,x in batch:
             req.append({"categoryId":int(x["categoryId"]),"price":x["price"],"length":x["length"],"width":x["width"],"height":x["height"],"weight":x["weight"],"quantity":1})
             ids.append(oid)
-        d=call(ya,"POST",YANDEX+"/v2/tariffs/calculate",body={"parameters":{"campaignId":int(cid),"currency":"RUR"},"offers":req})
+        d=call(ya,"POST",YANDEX+"/v2/tariffs/calculate",body={"parameters":{"campaignId":int(cid)},"offers":req})
         rr=((d.get("result") or {}).get("offers") or [])
         if len(rr)!=len(ids):
             raise RuntimeError(f"Yandex tariff response length mismatch campaign {cid}: {len(rr)} != {len(ids)}")
