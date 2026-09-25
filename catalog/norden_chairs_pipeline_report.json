@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-25T04:53:29.369715+00:00",
+  "started_at": "2026-09-25T11:46:56.543173+00:00",
   "scope": "Norden: only actual chairs and stools; accessories excluded",
   "rules": {
     "table_match": "Norden supplier article ↔ Google Sheet YML ID, normalized",
@@ -16,27 +16,28 @@
     "full_duplicates": 13,
     "price_duplicates": 16,
     "target_key_conflicts": [],
-    "source_kind": "xml-full-category-fallback+api",
-    "api_error": null,
-    "category_xml_fallback": true
+    "source_kind": "xml-full+price",
+    "api_error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "category_xml_fallback": false
   },
   "table": {
     "rows_before": 1077,
-    "matched": 349,
+    "matched": 347,
     "new_rows": 0,
-    "zeroed_missing": 6,
+    "zeroed_missing": 0,
     "duplicate_yml_ids": 10,
     "price_updates": 0,
-    "stock_updates": 28
+    "stock_updates": 13
   },
   "webasyst": {
     "duplicate_articles": 0,
-    "unchanged": 602,
-    "updated": 31
+    "unchanged": 620,
+    "updated": 13,
+    "skipped_no_article": 2
   },
   "kit": {
-    "variants_scanned": 96634,
-    "duplicate_articles": 4667,
+    "variants_scanned": 96784,
+    "duplicate_articles": 4666,
     "missing_existing": 113,
     "category_review_required": 19,
     "skipped_no_article": 26,
@@ -189,18 +190,6 @@
     },
     {
       "stage": "webasyst_create",
-      "row": 1074,
-      "yml_id": "HD-2216-4 H brown",
-      "message": "Нет положительной закупочной цены Norden"
-    },
-    {
-      "stage": "webasyst_create",
-      "row": 1075,
-      "yml_id": "HD-2216-4 L LB brown",
-      "message": "Нет положительной закупочной цены Norden"
-    },
-    {
-      "stage": "webasyst_create",
       "row": 1077,
       "yml_id": "BR-HA-100",
       "message": "Нет положительной закупочной цены Norden"
@@ -214,7 +203,7 @@
   ],
   "warnings": [],
   "complete": false,
-  "identity_review": 8,
+  "identity_review": 10,
   "category_review": 19,
-  "finished_at": "2026-09-25T05:09:38.250414+00:00"
+  "finished_at": "2026-09-25T11:58:16.961166+00:00"
 }
