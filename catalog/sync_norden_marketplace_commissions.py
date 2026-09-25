@@ -93,35 +93,25 @@ def yandex_campaigns():
         raise RuntimeError("Найдено несколько business_id с DBS: "+json.dumps({"business_ids":bids,"campaigns":safe},ensure_ascii=False))
     return bids[0],dbs
 
-def campaign_offers(cid):
-    out={}; token=""
-    while True:
-        params={"limit":200}
-        if token: params["pageToken"]=token
-        d=call(ya,"POST",f"{YANDEX}/v2/campaigns/{cid}/offers",body={},params=params)
+def campaign_offers(cid, offer_ids):
+    out={}
+    for batch in chunks(offer_ids,200):
+        d=call(ya,"POST",f"{YANDEX}/v2/campaigns/{cid}/offers",body={"offerIds":batch})
         res=d.get("result") or {}
         for x in res.get("offers") or []:
             oid=s(x.get("offerId"))
             if oid: out[oid]=x
-        nt=s((res.get("paging") or {}).get("nextPageToken"))
-        if not nt or nt==token: break
-        token=nt
     return out
 
-def offer_mappings(bid):
-    out={}; token=""
-    while True:
-        params={"limit":100}
-        if token: params["pageToken"]=token
-        d=call(ya,"POST",f"{YANDEX}/v2/businesses/{bid}/offer-mappings",body={},params=params)
+def offer_mappings(bid, offer_ids):
+    out={}
+    for batch in chunks(offer_ids,100):
+        d=call(ya,"POST",f"{YANDEX}/v2/businesses/{bid}/offer-mappings",body={"offerIds":batch})
         res=d.get("result") or {}
         for x in res.get("offerMappings") or []:
             off=x.get("offer") or {}
             oid=s(off.get("offerId"))
             if oid: out[oid]=off
-        nt=s((res.get("paging") or {}).get("nextPageToken"))
-        if not nt or nt==token: break
-        token=nt
     return out
 
 def tariff_rows(cid, items):
@@ -187,9 +177,9 @@ def main():
     campaign_data={}
     for c in dbs:
         cid=s(c.get("id"))
-        co=campaign_offers(cid); campaign_data[cid]=co
+        co=campaign_offers(cid,offers); campaign_data[cid]=co
         for oid in co: by_offer[oid].append(cid)
-    mappings=offer_mappings(bid)
+    mappings=offer_mappings(bid,offers)
 
     tariff_input=defaultdict(list)
     meta={}
