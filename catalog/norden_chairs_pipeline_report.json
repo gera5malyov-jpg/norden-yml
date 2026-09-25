@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-25T11:46:56.543173+00:00",
+  "started_at": "2026-09-25T17:07:37.356599+00:00",
   "scope": "Norden: only actual chairs and stools; accessories excluded",
   "rules": {
     "table_match": "Norden supplier article ↔ Google Sheet YML ID, normalized",
@@ -16,9 +16,9 @@
     "full_duplicates": 13,
     "price_duplicates": 16,
     "target_key_conflicts": [],
-    "source_kind": "xml-full+price",
-    "api_error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
-    "category_xml_fallback": false
+    "source_kind": "xml-full-category-fallback+api",
+    "api_error": null,
+    "category_xml_fallback": true
   },
   "table": {
     "rows_before": 1077,
@@ -27,17 +27,17 @@
     "zeroed_missing": 0,
     "duplicate_yml_ids": 10,
     "price_updates": 0,
-    "stock_updates": 13
+    "stock_updates": 22
   },
   "webasyst": {
     "duplicate_articles": 0,
-    "unchanged": 620,
-    "updated": 13,
+    "unchanged": 611,
+    "updated": 22,
     "skipped_no_article": 2
   },
   "kit": {
-    "variants_scanned": 96784,
-    "duplicate_articles": 4666,
+    "variants_scanned": 97350,
+    "duplicate_articles": 4667,
     "missing_existing": 113,
     "category_review_required": 19,
     "skipped_no_article": 26,
@@ -205,5 +205,5 @@
   "complete": false,
   "identity_review": 10,
   "category_review": 19,
-  "finished_at": "2026-09-25T11:58:16.961166+00:00"
+  "finished_at": "2026-09-25T17:19:33.478200+00:00"
 }
