@@ -1,0 +1,42 @@
+name: Dalli status check — SPB and MSK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/dalli-status-check.yml'
+      - 'scripts/check_dalli_statuses.py'
+      - 'dalli/status-check-trigger.txt'
+
+permissions:
+  contents: write
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      DALLI_TOKEN_SPB: ${{ secrets.DALLI_TOKEN }}
+      DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установить Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Получить статусы Dalli
+        run: python scripts/check_dalli_statuses.py
+
+      - name: Сохранить результаты проверки
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dalli/status_spb_latest.json dalli/status_msk_latest.json
+          if git diff --cached --quiet; then
+            echo "Статусы не изменились"
+          else
+            git commit -m "Update Dalli shipment statuses"
+            git push
+          fi
