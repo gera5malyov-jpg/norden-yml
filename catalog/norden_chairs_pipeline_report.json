@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-24T20:25:58.897301+00:00",
+  "started_at": "2026-09-25T04:53:29.369715+00:00",
   "scope": "Norden: only actual chairs and stools; accessories excluded",
   "rules": {
     "table_match": "Norden supplier article ↔ Google Sheet YML ID, normalized",
@@ -21,25 +21,25 @@
     "category_xml_fallback": true
   },
   "table": {
-    "rows_before": 1048,
-    "matched": 320,
-    "new_rows": 23,
-    "zeroed_missing": 250,
+    "rows_before": 1077,
+    "matched": 349,
+    "new_rows": 0,
+    "zeroed_missing": 6,
     "duplicate_yml_ids": 10,
     "price_updates": 0,
-    "stock_updates": 16
+    "stock_updates": 28
   },
   "webasyst": {
     "duplicate_articles": 0,
-    "updated": 219,
-    "unchanged": 411
+    "unchanged": 602,
+    "updated": 31
   },
   "kit": {
     "variants_scanned": 96634,
     "duplicate_articles": 4667,
     "missing_existing": 113,
-    "category_review_required": 16,
-    "skipped_no_article": 23,
+    "category_review_required": 19,
+    "skipped_no_article": 26,
     "stock_updates": 1006
   },
   "errors": [
@@ -59,12 +59,6 @@
       "stage": "webasyst_create",
       "row": 1050,
       "yml_id": "HD-2212-2 L black",
-      "message": "Нет положительной закупочной цены Norden"
-    },
-    {
-      "stage": "webasyst_create",
-      "row": 1051,
-      "yml_id": "CK38F",
       "message": "Нет положительной закупочной цены Norden"
     },
     {
@@ -192,11 +186,35 @@
       "row": 1072,
       "yml_id": "FK 0005-A beige leather",
       "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1074,
+      "yml_id": "HD-2216-4 H brown",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1075,
+      "yml_id": "HD-2216-4 L LB brown",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1077,
+      "yml_id": "BR-HA-100",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 1078,
+      "yml_id": "BR-HA-100-45",
+      "message": "Нет положительной закупочной цены Norden"
     }
   ],
   "warnings": [],
   "complete": false,
-  "identity_review": 14,
-  "category_review": 16,
-  "finished_at": "2026-09-24T20:43:22.915361+00:00"
+  "identity_review": 8,
+  "category_review": 19,
+  "finished_at": "2026-09-25T05:09:38.250414+00:00"
 }
