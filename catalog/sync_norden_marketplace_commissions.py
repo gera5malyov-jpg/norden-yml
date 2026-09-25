@@ -113,6 +113,8 @@ def offer_mappings(bid, offer_ids):
             mp=x.get("mapping") or {}
             if not off.get("marketCategoryId") and mp.get("marketCategoryId"):
                 off["marketCategoryId"]=mp.get("marketCategoryId")
+            if not off.get("marketCategoryName") and mp.get("marketCategoryName"):
+                off["marketCategoryName"]=mp.get("marketCategoryName")
             oid=s(off.get("offerId"))
             if oid: out[oid]=off
     return out
@@ -139,7 +141,7 @@ def main():
     headers=[s(x) for x in vals[0]]
     idx={h:i for i,h in enumerate(headers)}
     required=["Артикул","Ozon product_id","Ozon offer_id","Ozon sale_schema","Ozon комиссия %","Ozon эквайринг %","Ozon цена","Ozon старая цена","Ozon статус","Ozon дата",
-              "Yandex offer_id","Yandex business_id","Yandex campaign_id","Yandex category_id","Yandex модель размещения","Yandex tariffs JSON","Yandex комиссия %","Yandex эквайринг %","Yandex цена","Yandex статус","Yandex дата"]
+              "Yandex offer_id","Yandex business_id","Yandex campaign_id","Yandex category_id","Yandex категория","Yandex модель размещения","Yandex tariffs JSON","Yandex комиссия %","Yandex эквайринг %","Yandex цена","Yandex статус","Yandex дата"]
     miss=[x for x in required if x not in idx]
     if miss: raise RuntimeError("В листе нет колонок: "+", ".join(miss))
 
@@ -194,7 +196,7 @@ def main():
         wd=mp.get("weightDimensions") or {}
         category=int(mp.get("marketCategoryId") or 0)
         length=f(wd.get("length")); width=f(wd.get("width")); height=f(wd.get("height")); weight=f(wd.get("weight"))
-        meta[art]={"cid":cid,"price":price,"category":category}
+        meta[art]={"cid":cid,"price":price,"category":category,"category_name":s(mp.get("marketCategoryName"))}
         if category>0 and price>0 and length>0 and width>0 and height>0 and weight>0:
             tariff_input[cid].append((art,{"categoryId":category,"price":price,"length":length,"width":width,"height":height,"weight":weight}))
 
@@ -212,7 +214,7 @@ def main():
             base += [("Yandex статус","AMBIGUOUS_CAMPAIGN")]
         else:
             cid=cids[0]; m=meta.get(art) or {}
-            base += [("Yandex campaign_id",cid),("Yandex category_id",m.get("category") or ""),("Yandex цена",m.get("price") or 0)]
+            base += [("Yandex campaign_id",cid),("Yandex category_id",m.get("category") or ""),("Yandex категория",m.get("category_name") or ""),("Yandex цена",m.get("price") or 0)]
             tr=tariffs.get(art)
             if tr:
                 services=tr.get("tariffs") or []
