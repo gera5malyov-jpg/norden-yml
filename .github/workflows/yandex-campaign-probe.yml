@@ -1,0 +1,55 @@
+name: Yandex Market — probe campaigns
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/yandex-campaign-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Получить список кампаний
+        env:
+          YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json, os, requests
+          h={"Api-Key":os.environ["YANDEX_MARKET_API_KEY"],"Accept":"application/json"}
+          r=requests.get("https://api.partner.market.yandex.ru/v2/campaigns",headers=h,params={"limit":100},timeout=60)
+          r.raise_for_status()
+          d=r.json()
+          rows=d.get("campaigns") or (d.get("result") or {}).get("campaigns") or []
+          safe=[]
+          for c in rows:
+              b=c.get("business") or {}
+              safe.append({
+                  "campaign_id":c.get("id"),
+                  "business_id":b.get("id") or c.get("businessId"),
+                  "business_name":b.get("name"),
+                  "domain":c.get("domain"),
+                  "placementType":c.get("placementType"),
+                  "apiAvailability":c.get("apiAvailability"),
+              })
+          with open("catalog/yandex_campaigns_probe.json","w",encoding="utf-8") as f:
+              json.dump(safe,f,ensure_ascii=False,indent=2); f.write("\n")
+          print(json.dumps(safe,ensure_ascii=False,indent=2))
+          PY
+      - name: Сохранить результат
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog/yandex_campaigns_probe.json
+          git commit -m "Обновить диагностику кампаний Яндекс Маркета" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
