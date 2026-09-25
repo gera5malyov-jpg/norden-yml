@@ -14,6 +14,7 @@ OZON_CLIENT_ID=os.environ["OZON_CLIENT_ID"].strip()
 OZON_API_KEY=os.environ["OZON_API_KEY"].strip()
 YANDEX_API_KEY=os.environ["YANDEX_MARKET_API_KEY"].strip()
 PREFERRED_BUSINESS_ID=str(os.environ.get("YANDEX_MARKET_BUSINESS_ID") or "").strip()
+PREFERRED_CAMPAIGN_ID=str(os.environ.get("YANDEX_MARKET_CAMPAIGN_ID") or "").strip()
 
 OZON="https://api-seller.ozon.ru"
 YANDEX="https://api.partner.market.yandex.ru"
@@ -76,9 +77,15 @@ def yandex_campaigns():
       "apiAvailability":s(c.get("apiAvailability")),
     } for c in rows if isinstance(c,dict)]
     dbs=[c for c in rows if s(c.get("placementType")).upper()=="DBS" and s(c.get("apiAvailability")).upper() in ("","AVAILABLE")]
-    preferred=[c for c in dbs if s((c.get("business") or {}).get("id") or c.get("businessId"))==PREFERRED_BUSINESS_ID]
-    if preferred:
-        dbs=preferred
+    if PREFERRED_CAMPAIGN_ID:
+        exact=[c for c in dbs if s(c.get("id"))==PREFERRED_CAMPAIGN_ID]
+        if len(exact)!=1:
+            raise RuntimeError("Не найдена указанная DBS campaign_id="+PREFERRED_CAMPAIGN_ID+". Кампании токена: "+json.dumps(safe,ensure_ascii=False))
+        dbs=exact
+    elif PREFERRED_BUSINESS_ID:
+        preferred=[c for c in dbs if s((c.get("business") or {}).get("id") or c.get("businessId"))==PREFERRED_BUSINESS_ID]
+        if preferred:
+            dbs=preferred
     if not dbs:
         raise RuntimeError("Не найден доступный DBS-магазин. Кампании токена: "+json.dumps(safe,ensure_ascii=False))
     bids=sorted({s((c.get("business") or {}).get("id") or c.get("businessId")) for c in dbs if s((c.get("business") or {}).get("id") or c.get("businessId"))})
