@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-25T17:07:37.356599+00:00",
+  "started_at": "2026-09-25T21:32:14.265343+00:00",
   "scope": "Norden: only actual chairs and stools; accessories excluded",
   "rules": {
     "table_match": "Norden supplier article ↔ Google Sheet YML ID, normalized",
@@ -27,12 +27,11 @@
     "zeroed_missing": 0,
     "duplicate_yml_ids": 10,
     "price_updates": 0,
-    "stock_updates": 22
+    "stock_updates": 0
   },
   "webasyst": {
     "duplicate_articles": 0,
-    "unchanged": 611,
-    "updated": 22,
+    "unchanged": 633,
     "skipped_no_article": 2
   },
   "kit": {
@@ -205,5 +204,5 @@
   "complete": false,
   "identity_review": 10,
   "category_review": 19,
-  "finished_at": "2026-09-25T17:19:33.478200+00:00"
+  "finished_at": "2026-09-25T21:46:01.925389+00:00"
 }
