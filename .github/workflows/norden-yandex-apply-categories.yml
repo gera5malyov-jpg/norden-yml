@@ -1,0 +1,50 @@
+name: Norden — применить категории Яндекс из таблицы
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'catalog/apply_yandex_categories_from_sheet.py'
+      - '.github/workflows/norden-yandex-apply-categories.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-yandex-apply-categories
+  cancel-in-progress: true
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Установить зависимости
+        run: pip install --disable-pip-version-check requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
+      - name: Применить категории к товарам Яндекс Маркета
+        env:
+          YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+          YANDEX_MARKET_BUSINESS_ID: '20806099'
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
+          CATALOG_SHEET: 'Норден'
+        run: python catalog/apply_yandex_categories_from_sheet.py
+      - name: Сохранить отчёт
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog/yandex_category_apply_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Обновить отчёт применения категорий Яндекс"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
