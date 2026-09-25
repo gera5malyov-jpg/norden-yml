@@ -60,20 +60,29 @@ for batch in chunks(sorted({a for _,a in rows}),100):
             "id":mp.get("marketCategoryId") or off.get("marketCategoryId") or ""
         }
 
-updates=[]
 found=0
-for rn,art in rows:
+name_col=[]
+id_col=[]
+for row in vals[1:]:
+    current_name=s(row[idx["Yandex категория"]] if idx["Yandex категория"]<len(row) else "")
+    current_id=s(row[idx["Yandex category_id"]] if idx["Yandex category_id"]<len(row) else "")
+    art=s(row[idx["Артикул"]] if idx["Артикул"]<len(row) else "")
     m=mapping.get(art)
-    if not m: continue
-    if m["name"]:
-        updates.append({"range":gspread.utils.rowcol_to_a1(rn,idx["Yandex категория"]+1),"values":[[m["name"]]]})
+    if m and m["name"]:
+        current_name=m["name"]
         found+=1
-    if m["id"]:
-        updates.append({"range":gspread.utils.rowcol_to_a1(rn,idx["Yandex category_id"]+1),"values":[[m["id"]]]})
+    if m and m["id"]:
+        current_id=str(m["id"])
+    name_col.append([current_name])
+    id_col.append([current_id])
 
-for batch in chunks(updates,250):
-    ws.batch_update(batch,value_input_option="RAW")
-    time.sleep(0.15)
+if name_col:
+    start=2
+    end=len(vals)
+    name_letter=gspread.utils.rowcol_to_a1(1,idx["Yandex категория"]+1).rstrip("1")
+    id_letter=gspread.utils.rowcol_to_a1(1,idx["Yandex category_id"]+1).rstrip("1")
+    ws.update(range_name=f"{name_letter}{start}:{name_letter}{end}",values=name_col,value_input_option="RAW")
+    ws.update(range_name=f"{id_letter}{start}:{id_letter}{end}",values=id_col,value_input_option="RAW")
 
 report={"business_id":BID,"rows_with_article":len(rows),"mapping_found":len(mapping),"category_names_written":found}
 with open("catalog/yandex_categories_report.json","w",encoding="utf-8") as f:
