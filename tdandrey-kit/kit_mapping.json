@@ -1,7 +1,823 @@
 {
   "initial_complete": false,
-  "updated_at": "2026-09-24T11:50:29.317995+00:00",
+  "updated_at": "2026-09-25T10:25:24.065578+00:00",
   "variants": {
+    "000011": {
+      "sku": "AND-000011",
+      "variant_id": "01a0d2eb-ee08-70b2-9b12-38e32630568e"
+    },
+    "000012": {
+      "sku": "AND-000012",
+      "variant_id": "01a0d2eb-fc71-739e-80a6-0aff0d4736c1"
+    },
+    "000013": {
+      "sku": "AND-000013",
+      "variant_id": "01a0d2ec-0b10-72e7-a6ba-550da8aba6dd"
+    },
+    "000014": {
+      "sku": "AND-000014",
+      "variant_id": "01a0d2ec-1a84-7891-ac8c-bb494901f826"
+    },
+    "000015": {
+      "sku": "AND-000015",
+      "variant_id": "01a0d2ec-20ad-7240-88f9-0dc2c5a2208d"
+    },
+    "000016": {
+      "sku": "AND-000016",
+      "variant_id": "01a0d2ec-2866-786e-b01a-20876008a434"
+    },
+    "000017": {
+      "sku": "AND-000017",
+      "variant_id": "01a0d2ec-2fa4-7867-b1af-68d89777d21f"
+    },
+    "000042": {
+      "sku": "AND-000042",
+      "variant_id": "01a0d2ec-52a1-7586-93a3-010484a356df"
+    },
+    "000053": {
+      "sku": "AND-000053",
+      "variant_id": "01a0d2ec-68a9-7e45-813c-269565cd9fb8"
+    },
+    "000058": {
+      "sku": "AND-000058",
+      "variant_id": "01a0d2ec-8314-7f42-91e1-f9a6baac8184"
+    },
+    "000059": {
+      "sku": "AND-000059",
+      "variant_id": "01a0d2ec-885e-7687-894c-b0783a20c43b"
+    },
+    "000060": {
+      "sku": "AND-000060",
+      "variant_id": "01a0d2ec-98a7-732e-b8e2-d635c7ea7929"
+    },
+    "000061": {
+      "sku": "AND-000061",
+      "variant_id": "01a0d2ec-a055-7ad3-98dd-225ad708e48c"
+    },
+    "000062": {
+      "sku": "AND-000062",
+      "variant_id": "01a0d2ec-b663-7914-8ee7-6da7a9be5c3d"
+    },
+    "000065": {
+      "sku": "AND-000065",
+      "variant_id": "01a0d2ec-bbaa-7ced-ad26-775b554da562"
+    },
+    "000066": {
+      "sku": "AND-000066",
+      "variant_id": "01a0d2ec-cb51-7962-bd54-799d5438c2fd"
+    },
+    "000067": {
+      "sku": "AND-000067",
+      "variant_id": "01a0d2ec-d8fa-738c-89c4-a82e783ef85c"
+    },
+    "000068": {
+      "sku": "AND-000068",
+      "variant_id": "01a0d2ec-e048-78a6-9507-1351cf3e2309"
+    },
+    "000069": {
+      "sku": "AND-000069",
+      "variant_id": "01a0d2ec-e58d-746c-abf1-6291abf739f1"
+    },
+    "000070": {
+      "sku": "AND-000070",
+      "variant_id": "01a0d2ec-f337-74ec-aff8-cf6ba6df99aa"
+    },
+    "000071": {
+      "sku": "AND-000071",
+      "variant_id": "01a0d2ed-0318-7942-b169-67bb3cb90ce5"
+    },
+    "000072": {
+      "sku": "AND-000072",
+      "variant_id": "01a0d2ed-09fa-7b8c-a492-f71643f157bd"
+    },
+    "000073": {
+      "sku": "AND-000073",
+      "variant_id": "01a0d2ed-17a3-788a-9081-1766cc198687"
+    },
+    "000074": {
+      "sku": "AND-000074",
+      "variant_id": "01a0d2ed-1d8e-71da-82c5-69407af8d7c3"
+    },
+    "000080": {
+      "sku": "AND-000080",
+      "variant_id": "01a0d2ed-23d0-71d7-83e0-c19ea80a872c"
+    },
+    "000099": {
+      "sku": "AND-000099",
+      "variant_id": "01a0d2ed-531f-75ad-af46-d35b2df5664c"
+    },
+    "000100": {
+      "sku": "AND-000100",
+      "variant_id": "01a0d2ed-59f7-741d-a46d-0dcbb52a9c6f"
+    },
+    "000101": {
+      "sku": "AND-000101",
+      "variant_id": "01a0d2ed-6840-7c5c-b85a-b627c0145ef8"
+    },
+    "000102": {
+      "sku": "AND-000102",
+      "variant_id": "01a0d2ed-6f83-7c7e-930c-6eebac451472"
+    },
+    "000103": {
+      "sku": "AND-000103",
+      "variant_id": "01a0d2ed-7dd0-7eba-b37c-9a6eab370257"
+    },
+    "000108": {
+      "sku": "AND-000108",
+      "variant_id": "01a0d2ed-892b-7a09-a3e8-dcf6afde2d9a"
+    },
+    "000109": {
+      "sku": "AND-000109",
+      "variant_id": "01a0d2ed-8e74-77c3-8ec7-0807cec618e2"
+    },
+    "000110": {
+      "sku": "AND-000110",
+      "variant_id": "01a0d2ed-9531-7a22-a3bc-c8aefbdf956e"
+    },
+    "000111": {
+      "sku": "AND-000111",
+      "variant_id": "01a0d2ed-9c6c-7ced-8d94-f7f83b993028"
+    },
+    "000119": {
+      "sku": "AND-000119",
+      "variant_id": "01a0d2ed-b7a6-7169-b643-47a2c2b75b37"
+    },
+    "000120": {
+      "sku": "AND-000120",
+      "variant_id": "01a0d2ed-c619-747d-afca-867c6de82a6e"
+    },
+    "000124": {
+      "sku": "AND-000124",
+      "variant_id": "01a0d2ed-cce3-7c99-9207-98e4e4d68be3"
+    },
+    "000132": {
+      "sku": "AND-000132",
+      "variant_id": "01a097b8-a580-7996-a9bf-703fc6ab7a37"
+    },
+    "000149": {
+      "sku": "AND-000149",
+      "variant_id": "01a0d2ee-1647-735f-8a75-5230132d6eff"
+    },
+    "000150": {
+      "sku": "AND-000150",
+      "variant_id": "01a0d2ee-23ee-718e-9214-9717efa9613c"
+    },
+    "000151": {
+      "sku": "AND-000151",
+      "variant_id": "01a0d2ee-29cf-75c2-ac33-8173fba39b32"
+    },
+    "000152": {
+      "sku": "AND-000152",
+      "variant_id": "01a0d2ee-2fad-7a9a-8b70-1c5ec56c967f"
+    },
+    "000153": {
+      "sku": "AND-000153",
+      "variant_id": "01a0d2ee-3671-7b52-9da7-5e526781ac9e"
+    },
+    "000154": {
+      "sku": "AND-000154",
+      "variant_id": "01a0d2ee-3c60-777b-8e67-e1a2fdeb9706"
+    },
+    "000155": {
+      "sku": "AND-000155",
+      "variant_id": "01a0d2ee-41b1-7c6e-9f32-4b8815f97293"
+    },
+    "000156": {
+      "sku": "AND-000156",
+      "variant_id": "01a0d2ee-487a-7192-b327-b7e992739fd8"
+    },
+    "000157": {
+      "sku": "AND-000157",
+      "variant_id": "01a0d2ee-4f35-736d-8cdd-4a8bb48c4712"
+    },
+    "000158": {
+      "sku": "AND-000158",
+      "variant_id": "01a0d2ee-55fb-74b2-846b-c6b2be54908c"
+    },
+    "000159": {
+      "sku": "AND-000159",
+      "variant_id": "01a0d2ee-5cd7-71c4-962e-8d848ea634cf"
+    },
+    "000160": {
+      "sku": "AND-000160",
+      "variant_id": "01a0d2ee-621c-7add-a2fe-dbc6eb530765"
+    },
+    "000161": {
+      "sku": "AND-000161",
+      "variant_id": "01a0d2ee-680e-7a34-9bce-7c2ca42c4fae"
+    },
+    "000162": {
+      "sku": "AND-000162",
+      "variant_id": "01a0d2ee-6ec7-7bec-80aa-0d11ca579450"
+    },
+    "000172": {
+      "sku": "AND-000172",
+      "variant_id": "019a5a68-d739-73b9-86b1-61854350ffd9"
+    },
+    "000173": {
+      "sku": "AND-000173",
+      "variant_id": "01a0d2ee-93ff-7925-baab-c0c6fbf08457"
+    },
+    "000174": {
+      "sku": "AND-000174",
+      "variant_id": "01a0d2ee-9bc2-79bc-8891-96f598a8fb94"
+    },
+    "000175": {
+      "sku": "AND-000175",
+      "variant_id": "01a0d2ee-a96d-7730-91f5-664a0bbb70dd"
+    },
+    "000176": {
+      "sku": "AND-000176",
+      "variant_id": "01a0d2ee-aeb5-74cf-95cf-b61175b6c716"
+    },
+    "000177": {
+      "sku": "AND-000177",
+      "variant_id": "01a0d2ee-b570-7788-9a79-c7d2e4cd4ad0"
+    },
+    "000178": {
+      "sku": "AND-000178",
+      "variant_id": "01a0d2ee-bb69-71c6-8e1c-cd1aa3662c4f"
+    },
+    "000179": {
+      "sku": "AND-000179",
+      "variant_id": "01a0d2ee-c0ac-7d8f-8ac5-32618abd8483"
+    },
+    "000180": {
+      "sku": "AND-000180",
+      "variant_id": "01a0d2ee-c5f5-784f-8772-1279af1b304d"
+    },
+    "000181": {
+      "sku": "AND-000181",
+      "variant_id": "01a0d2ee-cb3d-7449-9b95-bb80d195427b"
+    },
+    "000182": {
+      "sku": "AND-000182",
+      "variant_id": "01a0d2ee-d202-7aed-840a-054fa3c8b63b"
+    },
+    "000183": {
+      "sku": "AND-000183",
+      "variant_id": "01a0d2ee-d8c0-7656-ad93-28c3392b3251"
+    },
+    "000184": {
+      "sku": "AND-000184",
+      "variant_id": "01a0d2ee-dfc1-7622-a595-5f7627a5e1dd"
+    },
+    "000185": {
+      "sku": "AND-000185",
+      "variant_id": "01a0d2ee-e680-7ade-b4b6-f2c53e4519ac"
+    },
+    "000186": {
+      "sku": "AND-000186",
+      "variant_id": "01a0d2ee-ed45-7878-849b-53d909d0e0ab"
+    },
+    "000187": {
+      "sku": "AND-000187",
+      "variant_id": "01a0d2ee-faee-7640-ac1e-2b4b41da883f"
+    },
+    "000188": {
+      "sku": "AND-000188",
+      "variant_id": "01a0d2ef-0a0e-7785-a44d-5c0f35548113"
+    },
+    "000189": {
+      "sku": "AND-000189",
+      "variant_id": "01a0d2ef-1001-7b47-8ace-d09a6677990f"
+    },
+    "000190": {
+      "sku": "AND-000190",
+      "variant_id": "01a0d2ef-16bf-7c02-beed-386aa9922da1"
+    },
+    "000191": {
+      "sku": "AND-000191",
+      "variant_id": "01a0d2ef-2502-7932-8161-f7969e390fd6"
+    },
+    "000192": {
+      "sku": "AND-000192",
+      "variant_id": "01a0d2ef-2a4a-7ec7-a7d1-85b113bb8fda"
+    },
+    "000193": {
+      "sku": "AND-000193",
+      "variant_id": "01a0d2ef-3110-7874-9a72-294323577e74"
+    },
+    "000194": {
+      "sku": "AND-000194",
+      "variant_id": "01a0d2ef-36f6-7460-ba3b-694711aa12f0"
+    },
+    "000195": {
+      "sku": "AND-000195",
+      "variant_id": "01a0d2ef-3dbd-7379-a4b3-a583eed5f5ee"
+    },
+    "000196": {
+      "sku": "AND-000196",
+      "variant_id": "01a0d2ef-4ce9-72d6-a14d-fc5fefbfd921"
+    },
+    "000198": {
+      "sku": "AND-000198",
+      "variant_id": "01a0d2ef-52c3-754f-945e-2e5d0e676c2a"
+    },
+    "000199": {
+      "sku": "AND-000199",
+      "variant_id": "01a0d2ef-597c-7ac9-82e1-50c81c12003b"
+    },
+    "000200": {
+      "sku": "AND-000200",
+      "variant_id": "01a0d2ef-7bd2-779c-a576-00c760a2004d"
+    },
+    "000202": {
+      "sku": "AND-000202",
+      "variant_id": "01a0d2ef-8a28-7a75-a695-96529a55f13f"
+    },
+    "000205": {
+      "sku": "AND-000205",
+      "variant_id": "01a0d2ef-9011-7738-b89d-dd9cbfbc285a"
+    },
+    "000207": {
+      "sku": "AND-000207",
+      "variant_id": "01a0d2ef-95fe-7b84-8af3-92f578e9757a"
+    },
+    "000208": {
+      "sku": "AND-000208",
+      "variant_id": "01a0d2ef-9bd6-7e32-b3a2-eb0232ac1182"
+    },
+    "000211": {
+      "sku": "AND-000211",
+      "variant_id": "01a0d2ef-aa1e-7b9f-8dfe-0ee0a7115f8a"
+    },
+    "000212": {
+      "sku": "AND-000212",
+      "variant_id": "01a0d2ef-b7c7-7644-9a83-fddf989f486b"
+    },
+    "000213": {
+      "sku": "AND-000213",
+      "variant_id": "01a0d2ef-bdb6-763a-9189-38ed4c5202cb"
+    },
+    "000214": {
+      "sku": "AND-000214",
+      "variant_id": "01a0d2ef-c48a-7565-b474-e5f35bbecf59"
+    },
+    "000215": {
+      "sku": "AND-000215",
+      "variant_id": "01a0d2ef-cb45-7576-950e-11b7391329fc"
+    },
+    "000216": {
+      "sku": "AND-000216",
+      "variant_id": "01a0d2ef-d224-791d-b391-0317a8711295"
+    },
+    "000217": {
+      "sku": "AND-000217",
+      "variant_id": "01a0d2ef-e098-7e39-8429-c4cc0abb6227"
+    },
+    "000218": {
+      "sku": "AND-000218",
+      "variant_id": "01a0d2ef-e768-7004-9a87-107d0a3d4981"
+    },
+    "000219": {
+      "sku": "AND-000219",
+      "variant_id": "01a0d2ef-ece3-7ef5-bd98-68fdad7aa3d7"
+    },
+    "000220": {
+      "sku": "AND-000220",
+      "variant_id": "01a0d2ef-f2b2-75d2-b1bb-dd6cc9b9bb1d"
+    },
+    "000223": {
+      "sku": "AND-000223",
+      "variant_id": "01a0d2ef-f7fa-71bb-80aa-116195682b9e"
+    },
+    "000224": {
+      "sku": "AND-000224",
+      "variant_id": "01a0d2ef-fd41-71b7-b12a-4a2ba0d2d4f3"
+    },
+    "000225": {
+      "sku": "AND-000225",
+      "variant_id": "01a0d2f0-0b8c-7c12-9a9d-c6f75ad12f62"
+    },
+    "000226": {
+      "sku": "AND-000226",
+      "variant_id": "01a0d2f0-10d1-7b57-b31a-ac76a8526863"
+    },
+    "000227": {
+      "sku": "AND-000227",
+      "variant_id": "01a0d2f0-16b1-72e1-bb19-b1181ca3ac30"
+    },
+    "000228": {
+      "sku": "AND-000228",
+      "variant_id": "01a0d2f0-25e1-7b09-82c4-a142b649eb1b"
+    },
+    "000229": {
+      "sku": "AND-000229",
+      "variant_id": "01a0d2f0-3510-7e66-b111-703f982fbbbf"
+    },
+    "000230": {
+      "sku": "AND-000230",
+      "variant_id": "01a0d2f0-3c53-71a5-8844-cc7d7c7d6dab"
+    },
+    "000231": {
+      "sku": "AND-000231",
+      "variant_id": "01a0d80e-f9fc-7b5c-9cdb-2cae84c8569b"
+    },
+    "000232": {
+      "sku": "AND-000232",
+      "variant_id": "01a0d80f-07e0-7347-97eb-d555b43adee3"
+    },
+    "000233": {
+      "sku": "AND-000233",
+      "variant_id": "01a0d80f-15c1-7bcd-91d3-00d973e1dc07"
+    },
+    "000234": {
+      "sku": "AND-000234",
+      "variant_id": "01a0d80f-2dda-70f3-89bf-3d68adbabde5"
+    },
+    "000235": {
+      "sku": "AND-000235",
+      "variant_id": "01a0d80f-359d-71e4-a645-eb4de3623590"
+    },
+    "000236": {
+      "sku": "AND-000236",
+      "variant_id": "01a0d80f-45ba-7a6a-b204-aad74042341f"
+    },
+    "000237": {
+      "sku": "AND-000237",
+      "variant_id": "01a0d80f-5c3d-73ec-b21a-65e1a1415b66"
+    },
+    "000239": {
+      "sku": "AND-000239",
+      "variant_id": "01a0d80f-61c1-71ef-a406-d480960f086e"
+    },
+    "000242": {
+      "sku": "AND-000242",
+      "variant_id": "01a0d80f-b0a2-7507-9c1a-fa8dbae6a9f0"
+    },
+    "000246": {
+      "sku": "AND-000246",
+      "variant_id": "01a0d80f-c668-7ba5-b6d7-5ac82d9561c8"
+    },
+    "000247": {
+      "sku": "AND-000247",
+      "variant_id": "01a0d80f-ddf4-7c42-8e02-6b0c8b27605c"
+    },
+    "000248": {
+      "sku": "AND-000248",
+      "variant_id": "01a0d80f-ecf4-7031-838c-d332b1856f73"
+    },
+    "000249": {
+      "sku": "AND-000249",
+      "variant_id": "01a0d810-0bee-79be-ba0e-ffc71f3779ca"
+    },
+    "000250": {
+      "sku": "AND-000250",
+      "variant_id": "01a0d810-2252-7602-bb47-64ab8e5b0e50"
+    },
+    "000251": {
+      "sku": "AND-000251",
+      "variant_id": "01a0d810-3997-7ac6-b5e6-9d04db188b53"
+    },
+    "000252": {
+      "sku": "AND-000252",
+      "variant_id": "01a0d810-52df-79cf-81a9-1e22f94173f2"
+    },
+    "000253": {
+      "sku": "AND-000253",
+      "variant_id": "01a0d810-75d0-74d3-aff6-aed1a39ca537"
+    },
+    "000254": {
+      "sku": "AND-000254",
+      "variant_id": "01a0d810-84aa-775c-bc8c-53c348283d64"
+    },
+    "000255": {
+      "sku": "AND-000255",
+      "variant_id": "01a0d810-89f0-77ec-aedd-5f54e2ef8e60"
+    },
+    "000257": {
+      "sku": "AND-000257",
+      "variant_id": "01a0d810-9059-7d1e-b0c5-eed3158bcde3"
+    },
+    "000258": {
+      "sku": "AND-000258",
+      "variant_id": "01a0d810-95a1-7086-88d0-01c808278e8a"
+    },
+    "000259": {
+      "sku": "AND-000259",
+      "variant_id": "01a0d810-b253-76d3-8a87-b04a4c37b2a4"
+    },
+    "000260": {
+      "sku": "AND-000260",
+      "variant_id": "01a0d810-c0ed-722a-9faf-bf5da47d9e68"
+    },
+    "000261": {
+      "sku": "AND-000261",
+      "variant_id": "01a0d810-d821-7ec1-98fe-d9067fa33d88"
+    },
+    "000262": {
+      "sku": "AND-000262",
+      "variant_id": "01a0d810-ee99-7411-9af0-c2b2fd293a1c"
+    },
+    "000263": {
+      "sku": "AND-000263",
+      "variant_id": "01a0d810-fe1c-71d2-9b7f-c5e12b306b9f"
+    },
+    "000264": {
+      "sku": "AND-000264",
+      "variant_id": "01a0d811-148d-7ab9-91bd-02efd15ebc36"
+    },
+    "000265": {
+      "sku": "AND-000265",
+      "variant_id": "01a0d811-3396-7eeb-9d78-e14b63dad5c7"
+    },
+    "000266": {
+      "sku": "AND-000266",
+      "variant_id": "01a0d811-4b98-7ec1-96cd-76c451998aad"
+    },
+    "000269": {
+      "sku": "AND-000269",
+      "variant_id": "01a0d811-5320-727d-9fe9-e0248eb0fb98"
+    },
+    "000292": {
+      "sku": "AND-000292",
+      "variant_id": "01a0d811-aa93-7afb-b7ea-96f82040d56e"
+    },
+    "000305": {
+      "sku": "AND-000305",
+      "variant_id": "01a0d811-be31-7bee-97b4-4a644165cd37"
+    },
+    "000306": {
+      "sku": "AND-000306",
+      "variant_id": "01a0d811-d4a1-7069-8195-b25f22820c84"
+    },
+    "000307": {
+      "sku": "AND-000307",
+      "variant_id": "01a0d811-f0ff-7a69-9b36-82bec40a64fd"
+    },
+    "000309": {
+      "sku": "AND-000309",
+      "variant_id": "01a0d812-07ba-7148-a240-4c4abcdb1c49"
+    },
+    "000315": {
+      "sku": "AND-000315",
+      "variant_id": "019a5a92-530b-76a8-91d0-43250ee5e0c0"
+    },
+    "000319": {
+      "sku": "AND-000319",
+      "variant_id": "01a0d812-40ac-7292-9c7b-5e77fcdf1e5f"
+    },
+    "000330": {
+      "sku": "AND-000330",
+      "variant_id": "01a0d812-aed1-7708-8ddd-e60dc48e860a"
+    },
+    "000331": {
+      "sku": "AND-000331",
+      "variant_id": "01a0d812-c4ff-707a-ab87-b640ef238ee5"
+    },
+    "000332": {
+      "sku": "AND-000332",
+      "variant_id": "01a0d812-db72-7eec-b580-5e152bcec01b"
+    },
+    "000333": {
+      "sku": "AND-000333",
+      "variant_id": "01a0d812-ff44-7abc-87f1-f5e8a061180d"
+    },
+    "000334": {
+      "sku": "AND-000334",
+      "variant_id": "01a0d813-18ba-7972-8807-41a561b02042"
+    },
+    "000345": {
+      "sku": "AND-000345",
+      "variant_id": "01a0d813-a933-7e87-8f66-14bd85b29310"
+    },
+    "000346": {
+      "sku": "AND-000346",
+      "variant_id": "01a0d813-c536-7ad0-82a0-04b824137647"
+    },
+    "000347": {
+      "sku": "AND-000347",
+      "variant_id": "01a0d813-cb9b-776a-9249-c946d47d2ad2"
+    },
+    "000348": {
+      "sku": "AND-000348",
+      "variant_id": "01a0d813-e448-7d1f-b497-d6531a3db30b"
+    },
+    "000349": {
+      "sku": "AND-000349",
+      "variant_id": "01a0d813-ffce-76ee-ad30-52495a78cd5c"
+    },
+    "000350": {
+      "sku": "AND-000350",
+      "variant_id": "01a0d814-30e5-700f-ab69-b24bb33afede"
+    },
+    "000351": {
+      "sku": "AND-000351",
+      "variant_id": "01a0d814-4753-77a7-b9e4-375d88038037"
+    },
+    "000352": {
+      "sku": "AND-000352",
+      "variant_id": "01a0d814-5dbf-78a2-aa60-dcf23fdfab1e"
+    },
+    "000353": {
+      "sku": "AND-000353",
+      "variant_id": "01a0d814-74f3-747f-a914-1bf43daa1e82"
+    },
+    "000354": {
+      "sku": "AND-000354",
+      "variant_id": "01a0d814-7c7e-7e9d-9ea6-da8f78e7a0e5"
+    },
+    "000372": {
+      "sku": "AND-000372",
+      "variant_id": "01a0d814-d311-7b79-a6fc-a8583becd54a"
+    },
+    "000373": {
+      "sku": "AND-000373",
+      "variant_id": "01a0d814-f42f-78bc-8e3c-4634ce45aa67"
+    },
+    "000374": {
+      "sku": "AND-000374",
+      "variant_id": "01a0d815-0328-7e78-9f21-65b7b2417e61"
+    },
+    "000375": {
+      "sku": "AND-000375",
+      "variant_id": "01a0d815-1c64-736d-b697-3fbbc5e93f99"
+    },
+    "000376": {
+      "sku": "AND-000376",
+      "variant_id": "01a0d815-3b6f-75dd-b9ed-fdf051336bd1"
+    },
+    "000377": {
+      "sku": "AND-000377",
+      "variant_id": "01a0d815-40b2-7852-8e5a-e25146c1acc1"
+    },
+    "000378": {
+      "sku": "AND-000378",
+      "variant_id": "01a0d815-47a2-708f-9cc5-fcf061c16479"
+    },
+    "000379": {
+      "sku": "AND-000379",
+      "variant_id": "01a0d815-5578-78ec-a07d-18941d44d2bf"
+    },
+    "000380": {
+      "sku": "AND-000380",
+      "variant_id": "01a0d815-76b6-7172-b5b3-9ebab728ee8e"
+    },
+    "000402": {
+      "sku": "AND-000402",
+      "variant_id": "01a0d815-b3cb-7a1f-a4e6-7cdf7589d7ec"
+    },
+    "000403": {
+      "sku": "AND-000403",
+      "variant_id": "01a0d815-ba9b-78f3-ae4a-02a4745078f2"
+    },
+    "000404": {
+      "sku": "AND-000404",
+      "variant_id": "01a0d815-c19f-7ba4-a506-1ea47ac0759e"
+    },
+    "000405": {
+      "sku": "AND-000405",
+      "variant_id": "01a0d815-d141-770e-bc65-9924bdb63aa9"
+    },
+    "000406": {
+      "sku": "AND-000406",
+      "variant_id": "01a0d815-df1b-70a8-8f07-01f6783384ed"
+    },
+    "000407": {
+      "sku": "AND-000407",
+      "variant_id": "01a0d815-fe1d-73a9-ba94-a9756179a2eb"
+    },
+    "000408": {
+      "sku": "AND-000408",
+      "variant_id": "01a0d816-140c-7d79-8171-1194230f8eca"
+    },
+    "000410": {
+      "sku": "AND-000410",
+      "variant_id": "01a0d816-2be4-7f30-a379-1c1d4d715b02"
+    },
+    "000411": {
+      "sku": "AND-000411",
+      "variant_id": "01a0d816-3cbc-79ad-aeb5-31fcf4e1bbb1"
+    },
+    "000412": {
+      "sku": "AND-000412",
+      "variant_id": "01a0d816-5411-7d37-9e2b-d1fd5fe8e526"
+    },
+    "000413": {
+      "sku": "AND-000413",
+      "variant_id": "01a0d816-6de5-7552-977d-74658aad7e82"
+    },
+    "000414": {
+      "sku": "AND-000414",
+      "variant_id": "01a0d816-9ef4-72c9-a933-f568d66fe52a"
+    },
+    "000415": {
+      "sku": "AND-000415",
+      "variant_id": "01a0d816-bedc-7ae6-9e19-358a7aa221b6"
+    },
+    "000416": {
+      "sku": "AND-000416",
+      "variant_id": "01a0d816-c422-73aa-b752-c42755c32581"
+    },
+    "000417": {
+      "sku": "AND-000417",
+      "variant_id": "01a0d816-dbb0-7137-9236-1dd8f0d9b6c3"
+    },
+    "000460": {
+      "sku": "AND-000460",
+      "variant_id": "01a0d817-2276-74e8-90f6-a594872dcf8e"
+    },
+    "000461": {
+      "sku": "AND-000461",
+      "variant_id": "01a0d817-3b10-74ae-9e65-755e8e1c9084"
+    },
+    "000462": {
+      "sku": "AND-000462",
+      "variant_id": "01a0d817-4aa4-78c9-8064-f9fc4088e62b"
+    },
+    "000463": {
+      "sku": "AND-000463",
+      "variant_id": "01a0d817-587d-75ed-a731-8bcaf9be15bd"
+    },
+    "000464": {
+      "sku": "AND-000464",
+      "variant_id": "01a0d817-6eec-7d4d-b0e1-74d8fec9fe38"
+    },
+    "000465": {
+      "sku": "AND-000465",
+      "variant_id": "01a0d817-7d81-742e-b88e-18110638cd39"
+    },
+    "000468": {
+      "sku": "AND-000468",
+      "variant_id": "01a0d817-a06a-7f23-93ed-b91b7d6e987f"
+    },
+    "000469": {
+      "sku": "AND-000469",
+      "variant_id": "01a0d817-b795-7902-8c3c-58d8926145e1"
+    },
+    "000470": {
+      "sku": "AND-000470",
+      "variant_id": "01a0d817-be6f-7544-b7a7-bad0103be07a"
+    },
+    "000471": {
+      "sku": "AND-000471",
+      "variant_id": "01a0d817-cde6-7f26-a079-a6250d458dd0"
+    },
+    "000472": {
+      "sku": "AND-000472",
+      "variant_id": "01a0d817-e518-7d57-97c8-5090fefc74eb"
+    },
+    "000473": {
+      "sku": "AND-000473",
+      "variant_id": "01a0d817-fd3f-735a-a08e-866dc954efee"
+    },
+    "000474": {
+      "sku": "AND-000474",
+      "variant_id": "01a0d29a-7dd9-74f5-a237-b26c631a4ccd"
+    },
+    "000476": {
+      "sku": "AND-000476",
+      "variant_id": "01a0d818-36d9-7bf4-a790-5fb039d0b82d"
+    },
+    "000477": {
+      "sku": "AND-000477",
+      "variant_id": "01a0d818-4611-7173-a624-33aad8279133"
+    },
+    "000661": {
+      "sku": "AND-000661",
+      "variant_id": "01a0d818-4cfe-791c-a8fc-99a23f4f86df"
+    },
+    "020662": {
+      "sku": "AND-020662",
+      "variant_id": "01a0d818-959a-7664-8643-d5249c86c2cc"
+    },
+    "020663": {
+      "sku": "AND-020663",
+      "variant_id": "01a0d818-ac03-74a6-a8fa-b92bb9b4eeed"
+    },
+    "020664": {
+      "sku": "AND-020664",
+      "variant_id": "01a0d818-baa6-7e2a-8ed2-a331a075b5dd"
+    },
+    "020665": {
+      "sku": "AND-020665",
+      "variant_id": "01a0d818-d2b7-7e0b-9408-b34a82f4eb99"
+    },
+    "020666": {
+      "sku": "AND-020666",
+      "variant_id": "01a0d818-d7fe-7ef0-81e3-429b811806e0"
+    },
+    "020667": {
+      "sku": "AND-020667",
+      "variant_id": "01a0d818-e696-740e-a124-7512d6b1af40"
+    },
+    "020668": {
+      "sku": "AND-020668",
+      "variant_id": "01a0d818-f619-7bfd-ac87-f580b0c10b6a"
+    },
+    "020669": {
+      "sku": "AND-020669",
+      "variant_id": "01a0d818-fd9d-7888-8f0e-991a8bd29648"
+    },
+    "020670": {
+      "sku": "AND-020670",
+      "variant_id": "01a0d819-0b72-7097-baf0-e354ff064c1b"
+    },
+    "020671": {
+      "sku": "AND-020671",
+      "variant_id": "01a0d819-2c3a-7731-9038-91f219196826"
+    },
     "020839": {
       "sku": "AND-020839",
       "variant_id": "01a0d33c-3ca6-71b6-9452-d284bdaec3d5"
