@@ -28,6 +28,7 @@ def path(cid):
     return list(reversed([x for x in out if x]))
 
 variants=[
+ "01a0dfaa-3c5e-7939-9898-c89cc10b6b53",
  "01a0df2f-3030-7957-a8f4-1561c0d7ca95",
  "01a0df2f-eb73-7572-b95a-a3fef52bec7f",
 ]
