@@ -209,9 +209,16 @@ def wa_create(wa,type_id,stock_id,item):
     x=ls[0]; article=s(x.get("sku"))
     if not article: raise RuntimeError(f"Webasyst did not generate SKU for product {pid}")
     wa_update(wa,stock_id,x,item)
+    supplier_yml=s(item.get("article"))
+    if not supplier_yml:
+        raise RuntimeError(f"Webasyst product {pid}: supplier YML ID is empty")
+    wa.call("shop.product.update",http_method="POST",params={"id":pid},data={"yml_id":supplier_yml})
     info=wa.call("shop.product.getInfo",params={"id":pid})
+    got_yml=s(info.get("yml_id")) if isinstance(info,dict) else ""
+    if got_yml!=supplier_yml:
+        raise RuntimeError(f"Webasyst product {pid}: yml_id verification failed, expected {supplier_yml!r}, got {got_yml!r}")
     url=s(info.get("frontend_url") or info.get("url")); url=(os.environ.get("WEBASYST_BASE_URL") or "https://profikompany.ru").rstrip("/")+"/"+url.lstrip("/") if url and not url.startswith("http") else url
-    return {"article":article,"pid":pid,"sid":s(x.get("id")),"url":url}
+    return {"article":article,"pid":pid,"sid":s(x.get("id")),"url":url,"yml_id":got_yml}
 
 def kit_prepare(kit):
     wh={nt(x.get("title") or x.get("name")):s(x.get("id")) for x in kit.warehouses()}
