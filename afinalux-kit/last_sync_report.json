@@ -1,9 +1,333 @@
 {
-  "started_at": "2026-09-25T12:01:11.930475+00:00",
-  "finished_at": "2026-09-25T12:01:11.930500+00:00",
-  "status": "error",
+  "started_at": "2026-09-26T11:34:20.628346+00:00",
+  "status": "ok",
   "dry_run": false,
   "feed_url": "https://afinalux.ru/index.php?route=feed/yandex_yml",
   "brand_expected": "Afina Garden",
-  "error": "Cannot download Afina Garden feed after retries: HTTPConnectionPool(host='afinalux.ru', port=80): Max retries exceeded with url: /index.php?route=feed/yandex_yml (Caused by ConnectTimeoutError(<HTTPConnection(host='afinalux.ru', port=80) at 0x7ffbf1de8a70>, 'Connection to afinalux.ru timed out. (connect timeout=10)'))"
+  "webasyst_type": "afinalux",
+  "webasyst_stock": "Основной склад",
+  "rules": {
+    "purchase_price": "YML <opt1mln>",
+    "customer_price": "закупочная цена × 1.30, округление вверх до 1 ₽",
+    "compare_price": "закупочная цена × 1.60, округление вверх до 1 ₽",
+    "webasyst_main_stock": "точный YML <stock>",
+    "creation": "если точного артикула нет — создать новую карточку в KIT и Webasyst",
+    "duplicate_guard": "перед созданием повторная точная проверка SKU/артикула",
+    "purchase_price_storage": "закупочная цена отдельным полем не записывается"
+  },
+  "errors": [],
+  "warnings": [],
+  "feed_offers_total": 276,
+  "feed_brand_items_unique": 276,
+  "feed_categories": 26,
+  "feed_non_brand_offers": 0,
+  "feed_invalid_purchase": [],
+  "feed_duplicate_vendor_codes": [],
+  "feed_zero_stock": 6,
+  "kit_afina_active_variants_before": 299,
+  "kit_matched_before_creation": 276,
+  "kit_detailed_reads": 299,
+  "kit_ambiguous": {},
+  "kit_created": 0,
+  "kit_would_create": 0,
+  "kit_reused_exact_sku": 0,
+  "kit_brand_fixed": 0,
+  "kit_images_uploaded": 0,
+  "kit_image_errors": 0,
+  "kit_matched_after_creation": 276,
+  "kit_unmatched_after_creation": [],
+  "kit_price_updates_planned": 276,
+  "kit_price_updates_sent": 276,
+  "webasyst_type_id": "63",
+  "webasyst_stock_id": "66",
+  "webasyst_products_in_type_before": 294,
+  "webasyst_matched_before_creation": 275,
+  "webasyst_name_fallback_matches": 262,
+  "webasyst_ambiguous": {
+    "y137cw56lightbrown": [
+      "149308",
+      "149125"
+    ]
+  },
+  "webasyst_created": 0,
+  "webasyst_would_create": 0,
+  "webasyst_existing_rerouted_to_type": 0,
+  "webasyst_matched_after_creation": 275,
+  "webasyst_unmatched_after_creation": [],
+  "webasyst_updates_planned": 275,
+  "webasyst_updates_sent": 275,
+  "samples": [
+    {
+      "vendor_code": "A30A2-W53 Brown",
+      "product_id": "149362",
+      "sku_id": "30266431",
+      "purchase": "25500",
+      "customer_price": "33150",
+      "compare_price": "40800",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A30B2-W56 Light Brown",
+      "product_id": "149365",
+      "sku_id": "30266434",
+      "purchase": "25500",
+      "customer_price": "33150",
+      "compare_price": "40800",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A30C2-W85 Latte",
+      "product_id": "1137215",
+      "sku_id": "31316089",
+      "purchase": "25500",
+      "customer_price": "33150",
+      "compare_price": "40800",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A35A2-W53 Brown",
+      "product_id": "149364",
+      "sku_id": "30266433",
+      "purchase": "29900",
+      "customer_price": "38870",
+      "compare_price": "47840",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A35C2-W85 Latte",
+      "product_id": "149361",
+      "sku_id": "30266430",
+      "purchase": "29900",
+      "customer_price": "38870",
+      "compare_price": "47840",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A37B Beige",
+      "product_id": "919377",
+      "sku_id": "31096467",
+      "purchase": "21500",
+      "customer_price": "27950",
+      "compare_price": "34400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "A37C Grey-Blue",
+      "product_id": "919373",
+      "sku_id": "31096463",
+      "purchase": "21500",
+      "customer_price": "27950",
+      "compare_price": "34400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1015A Green-white (3х6)",
+      "product_id": "149101",
+      "sku_id": "30266170",
+      "purchase": "13900",
+      "customer_price": "18070",
+      "compare_price": "22240",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1015B Blue-white (3х6)",
+      "product_id": "1476509",
+      "sku_id": "31655647",
+      "purchase": "13900",
+      "customer_price": "18070",
+      "compare_price": "22240",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1015C White (3х6)",
+      "product_id": "1476510",
+      "sku_id": "31655648",
+      "purchase": "13900",
+      "customer_price": "18070",
+      "compare_price": "22240",
+      "stock": 1
+    },
+    {
+      "vendor_code": "AFM-1022A Green (3х3/2.4х2.4)",
+      "product_id": "148891",
+      "sku_id": "30265959",
+      "purchase": "3300",
+      "customer_price": "4290",
+      "compare_price": "5280",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1022B Blue (3х3/2.4х2.4)",
+      "product_id": "1236362",
+      "sku_id": "31415498",
+      "purchase": "3300",
+      "customer_price": "4290",
+      "compare_price": "5280",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1022C White (3х3/2.4х2.4)",
+      "product_id": "1236369",
+      "sku_id": "31415505",
+      "purchase": "3300",
+      "customer_price": "4290",
+      "compare_price": "5280",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1026W White (4х6)",
+      "product_id": "1236370",
+      "sku_id": "31415506",
+      "purchase": "38500",
+      "customer_price": "50050",
+      "compare_price": "61600",
+      "stock": 0
+    },
+    {
+      "vendor_code": "AFM-1027W White (4х8)",
+      "product_id": "1236363",
+      "sku_id": "31415499",
+      "purchase": "49900",
+      "customer_price": "64870",
+      "compare_price": "79840",
+      "stock": 0
+    },
+    {
+      "vendor_code": "AFM-1029W White (5х10)",
+      "product_id": "1236372",
+      "sku_id": "31415508",
+      "purchase": "72900",
+      "customer_price": "94770",
+      "compare_price": "116640",
+      "stock": 1
+    },
+    {
+      "vendor_code": "AFM-1030W White (6x12)",
+      "product_id": "1236376",
+      "sku_id": "31415512",
+      "purchase": "85000",
+      "customer_price": "110500",
+      "compare_price": "136000",
+      "stock": 0
+    },
+    {
+      "vendor_code": "AFM-1032FB Beige (4x4)",
+      "product_id": "149334",
+      "sku_id": "30266403",
+      "purchase": "39000",
+      "customer_price": "50700",
+      "compare_price": "62400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1032W White (5х8)",
+      "product_id": "1236364",
+      "sku_id": "31415500",
+      "purchase": "62000",
+      "customer_price": "80600",
+      "compare_price": "99200",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1035NA Green (3x3/2.4x2.4)",
+      "product_id": "149106",
+      "sku_id": "30266175",
+      "purchase": "6500",
+      "customer_price": "8450",
+      "compare_price": "10400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1035NB Blue (3x3/2.4x2.4)",
+      "product_id": "148896",
+      "sku_id": "30265964",
+      "purchase": "6500",
+      "customer_price": "8450",
+      "compare_price": "10400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1035NC White (3x3/2.4x2.4)",
+      "product_id": "149107",
+      "sku_id": "30266176",
+      "purchase": "6500",
+      "customer_price": "8450",
+      "compare_price": "10400",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1036NA Green (3x3/2.4x2.4)",
+      "product_id": "148897",
+      "sku_id": "30265965",
+      "purchase": "7900",
+      "customer_price": "10270",
+      "compare_price": "12640",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1036NB Grey (3x3/2.4x2.4)",
+      "product_id": "148898",
+      "sku_id": "30265966",
+      "purchase": "7900",
+      "customer_price": "10270",
+      "compare_price": "12640",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1040NA Green (3х3)",
+      "product_id": "149108",
+      "sku_id": "30266177",
+      "purchase": "6900",
+      "customer_price": "8970",
+      "compare_price": "11040",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1040NB Blue (3х3)",
+      "product_id": "149109",
+      "sku_id": "30266178",
+      "purchase": "6900",
+      "customer_price": "8970",
+      "compare_price": "11040",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1045A Green-white (3х9)",
+      "product_id": "149110",
+      "sku_id": "30266179",
+      "purchase": "17900",
+      "customer_price": "23270",
+      "compare_price": "28640",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1045C White (3х9)",
+      "product_id": "1236371",
+      "sku_id": "31415507",
+      "purchase": "17900",
+      "customer_price": "23270",
+      "compare_price": "28640",
+      "stock": 0
+    },
+    {
+      "vendor_code": "AFM-1048H Green (2х2х2)",
+      "product_id": "148899",
+      "sku_id": "30265967",
+      "purchase": "10500",
+      "customer_price": "13650",
+      "compare_price": "16800",
+      "stock": 100
+    },
+    {
+      "vendor_code": "AFM-1061NA Green (2х3)",
+      "product_id": "149112",
+      "sku_id": "30266181",
+      "purchase": "6500",
+      "customer_price": "8450",
+      "compare_price": "10400",
+      "stock": 100
+    }
+  ],
+  "finished_at": "2026-09-26T12:24:05.827020+00:00",
+  "complete": true
 }
