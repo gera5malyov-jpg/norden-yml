@@ -33,13 +33,14 @@ report["ozon"]["tree_status"]=tree["status"]
 report["ozon"]["tree_error"]=None if tree["status"]<400 else tree["text"]
 candidates=[]
 if tree.get("json"):
-    def walk(node,path):
+    def walk(node,path,inherited_dc=None):
         if isinstance(node,dict):
             name=str(node.get("category_name") or node.get("name") or node.get("type_name") or "")
             p=path+([name] if name else [])
+            dc=node.get("description_category_id") or node.get("category_id") or inherited_dc
             if node.get("type_id") is not None:
                 candidates.append({
-                  "description_category_id":node.get("description_category_id") or node.get("category_id"),
+                  "description_category_id":dc,
                   "type_id":node.get("type_id"),
                   "name":name,
                   "path":p,
@@ -48,11 +49,11 @@ if tree.get("json"):
             for key in ("children","types","items","result"):
                 val=node.get(key)
                 if isinstance(val,list):
-                    for x in val: walk(x,p)
-                elif isinstance(val,dict): walk(val,p)
+                    for x in val: walk(x,p,dc)
+                elif isinstance(val,dict): walk(val,p,dc)
         elif isinstance(node,list):
-            for x in node: walk(x,path)
-    walk(tree["json"],[])
+            for x in node: walk(x,path,inherited_dc)
+    walk(tree["json"],[],None)
 matches=[x for x in candidates if "офис" in (" ".join(x["path"])).casefold() and "крес" in (" ".join(x["path"])).casefold()]
 report["ozon"]["office_chair_candidates"]=matches[:50]
 attrs=[]
