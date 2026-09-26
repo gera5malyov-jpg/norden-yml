@@ -27,6 +27,7 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
           CATALOG_SHEET: 'Норден'
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
         run: python catalog/append_new_norden_chairs_stools_table_only.py
       - name: Save report
         shell: bash
