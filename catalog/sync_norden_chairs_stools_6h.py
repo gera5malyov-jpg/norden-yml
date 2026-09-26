@@ -70,6 +70,9 @@ def actual_name(v):
     return ("кресл" in n or "стул" in n) and not n.startswith(EXCL)
 def target_item(i):
     path=" > ".join(i.get("category_path") or []).casefold().replace("ё","е")
+    name=nt(i.get("name")).replace("ё","е")
+    if "уценк" in name or "уценк" in path:
+        return False
     return ("кресл" in path or "стул" in path) and actual_name(i.get("name"))
 def imgf(u): return '=IMAGE("'+s(u).replace('"','""')+'")' if s(u) else ""
 def extimgs(urls): return "\n".join(f"[extimg]\n{s(u)}\n[/extimg]" for u in dict.fromkeys(urls or []) if s(u))
@@ -243,16 +246,19 @@ def main():
     rep={"started_at":now(),"status":"ВЫПОЛНЯЕТСЯ","source":{},"sheet":{"matched":0,"added":0,"zeroed_missing":0,"ambiguous_yml":0,"possible_duplicates":0},
          "webasyst":{"updated":0,"created":0,"zeroed_missing":0,"ambiguous":0,"errors":[]},"kit":{"updated":0,"created":0,"zeroed_missing":0,"ambiguous":0,"category_review":0,"errors":[]},
          "possible_duplicate_items":[],"category_review_items":[],"complete":False,
-         "rules":{"scope":"только кресла/стулья","new_table_rows":"только новые товары с остатком > 0","new_publish_gate":"создание в Webasyst/KIT только после TRUE в колонке 'Проверено — загрузить в KIT/Webasyst'","schedule":"каждые 6 часов","missing":"остаток 0, цены сохранять","webasyst_price":"закупка×1.23; зачеркнутая×1.65","kit_price":"закупка×1.26; зачеркнутая×1.65","old_norden_workflows":"STOP_ALL_NORDEN сохраняется"}}
+         "rules":{"scope":"только кресла/стулья, без УЦЕНКА","new_table_rows":"остаток > 0; новым считается любой товар без точного буквального YML ID; частичные/сомнительные совпадения добавляются отдельной строкой","new_publish_gate":"создание в Webasyst/KIT только после TRUE в колонке 'Проверено — загрузить в KIT/Webasyst'","schedule":"каждые 6 часов","missing":"остаток 0, цены сохранять","webasyst_price":"закупка×1.23; зачеркнутая×1.65","kit_price":"закупка×1.26; зачеркнутая×1.65","old_norden_workflows":"STOP_ALL_NORDEN сохраняется"}}
     src,meta=supplier(); rep["source"]=meta
-    sh,ws=sheets(); h,ix,rows=read(ws); by=defaultdict(list)
+    sh,ws=sheets(); h,ix,rows=read(ws)
+    by_literal=defaultdict(list)
     for r in rows:
-        if s(r.get("YML ID")): by[nc(r["YML ID"])].append(r)
+        if s(r.get("YML ID")):
+            by_literal[s(r["YML ID"])].append(r)
     changes=[]; matched=set()
     for k,i in src.items():
-        m=by.get(k,[])
+        literal=s(i.get("article"))
+        m=by_literal.get(literal,[])
         if len(m)==1:
-            matched.add(k); rep["sheet"]["matched"]+=1; r=m[0]
+            matched.add(literal); rep["sheet"]["matched"]+=1; r=m[0]
             if i.get("purchase") is not None: changes.append((r["_row"],"Закупка",ms(i["purchase"]),False))
             if i.get("rrp") is not None: changes.append((r["_row"],"РРЦ поставщика",ms(i["rrp"]),False))
             changes.append((r["_row"],"Остаток",i["total"],False))
@@ -265,12 +271,17 @@ def main():
     cells(ws,ix,changes)
     new=[]
     for k,i in src.items():
-        if k in matched or by.get(k): continue
-        # New supplier products are added to the sheet only when currently in stock.
+        literal=s(i.get("article"))
+        if literal in matched or by_literal.get(literal):
+            continue
+        # New supplier products are added only when in stock; markdown/УЦЕНКА is filtered in target_item().
         if q(i.get("total")) <= 0:
             continue
         hits=likely_duplicate(i,rows)
-        if hits: rep["sheet"]["possible_duplicates"]+=1; rep["possible_duplicate_items"].append({"yml_id":i["article"],"name":i["name"],"hits":hits}); continue
+        if hits:
+            rep["sheet"]["possible_duplicates"]+=1
+            rep["possible_duplicate_items"].append({"yml_id":i["article"],"name":i["name"],"hits":hits,"action":"ADDED_AS_NEW_PER_USER_RULE"})
+        # Partial/fuzzy matches are still separate new rows when the literal YML ID differs.
         new.append(i)
     if new:
         arr=[]
@@ -285,10 +296,10 @@ def main():
         for j in range(0,len(arr),50):
             b=arr[j:j+50]; ws.update(range_name=f"A{start+j}:{gspread.utils.rowcol_to_a1(start+j+len(b)-1,len(h))}",values=b,value_input_option="USER_ENTERED")
         rep["sheet"]["added"]=len(arr)
-    h,ix,rows=read(ws); byone={nc(r.get("YML ID")):r for r in rows if s(r.get("YML ID"))}
+    h,ix,rows=read(ws); byone={s(r.get("YML ID")):r for r in rows if s(r.get("YML ID"))}
     wa=WebasystClient(min_request_interval=0.45); tid,wstock,waby,wapid=wa_prepare(wa); wchanges=[]
     for k,i in src.items():
-        r=byone.get(k)
+        r=byone.get(s(i.get("article")))
         if not r: continue
         art=s(r.get("Артикул")); m=waby.get(nc(art),[]) if art else []
         prior_hints=likely_duplicate(i,[x for x in rows if x["_row"]!=r["_row"]])
@@ -320,7 +331,7 @@ def main():
     h,ix,rows=read(ws); byone={nc(r.get("YML ID")):r for r in rows if s(r.get("YML ID"))}
     kit=BRIDGE.KitClient(); msk_id,spb_id,kby,cats,chars=kit_prepare(kit); rev=[]
     for k,i in src.items():
-        r=byone.get(k)
+        r=byone.get(s(i.get("article")))
         if not r: continue
         art=s(r.get("Артикул"))
         if not art: continue
