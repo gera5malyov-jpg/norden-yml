@@ -1,0 +1,332 @@
+{
+  "started_at": "2026-09-26T11:17:14.545705+00:00",
+  "source": {
+    "spreadsheet_id": "1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w",
+    "sheet": "Норден"
+  },
+  "KIT": {
+    "targeted": 378,
+    "missing_mapping": 343,
+    "missing_sample": [
+      "AF-31391082",
+      "AF-31391081",
+      "AF-31395058",
+      "AF-31391079",
+      "AF-31383326",
+      "AF-31314232",
+      "AF-31213687",
+      "AF-31165062",
+      "AF-31165064",
+      "AF-31165846",
+      "AF-31072386",
+      "AF-31072385",
+      "AF-30965428",
+      "AF-31156838",
+      "AF-31165065",
+      "AF-31309401",
+      "AF-31165066",
+      "AF-31156839",
+      "AF-31155793",
+      "AF-31136635",
+      "AF-31136637",
+      "AF-31136636",
+      "AF-31637168",
+      "AF-31317076",
+      "AF-31289046",
+      "AF-31223615",
+      "AF-31289047",
+      "AF-31223180",
+      "AF-31395935",
+      "AF-31289343",
+      "AF-31225516",
+      "AF-31225140",
+      "AF-31156835",
+      "AF-31165060",
+      "AF-31094458",
+      "AF-31165061",
+      "AF-31136634",
+      "AF-31002789",
+      "AF-31025431",
+      "AF-31395937",
+      "AF-30981647",
+      "AF-30946760",
+      "AF-30980671",
+      "AF-30946761",
+      "AF-30945293",
+      "AF-31306840",
+      "AF-31306841",
+      "AF-31213683",
+      "AF-31213682",
+      "AF-31213684"
+    ],
+    "updated": 366,
+    "errors": [
+      {
+        "article": "AF-30899001",
+        "variant_id": "01a0c5df-33af-748d-bd6a-b6f385ba78dc",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0c5df-33af-748d-bd6a-b6f385ba78dc не найден\",\"variant_id\":\"01a0c5df-33af-748d-bd6a-b6f385ba78dc\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"7686c0c6c837eb0ca76f4e27d7ba23a0\"}"
+      },
+      {
+        "article": "AF-31394907",
+        "variant_id": "01a0ca55-c170-799c-ba19-ef06e2cc8f22",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0ca55-c170-799c-ba19-ef06e2cc8f22 не найден\",\"variant_id\":\"01a0ca55-c170-799c-ba19-ef06e2cc8f22\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"660279070e5dd83d5c83f8662749a3cc\"}"
+      },
+      {
+        "article": "AF-31394820",
+        "variant_id": "01a0ca56-0be3-7eb0-a9b9-f3f435ad1124",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0ca56-0be3-7eb0-a9b9-f3f435ad1124 не найден\",\"variant_id\":\"01a0ca56-0be3-7eb0-a9b9-f3f435ad1124\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"1048021c48569bc8f80c93655a32be31\"}"
+      },
+      {
+        "article": "AF-31394821",
+        "variant_id": "01a0ca56-3007-7e4b-a77e-71264053f6ac",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0ca56-3007-7e4b-a77e-71264053f6ac не найден\",\"variant_id\":\"01a0ca56-3007-7e4b-a77e-71264053f6ac\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"afb250ad344b21f97928c3308e3fc109\"}"
+      },
+      {
+        "article": "AF-31394819",
+        "variant_id": "01a0ca56-1496-7afe-940b-10f86a3455ea",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0ca56-1496-7afe-940b-10f86a3455ea не найден\",\"variant_id\":\"01a0ca56-1496-7afe-940b-10f86a3455ea\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"0d2adc63b392f71ec5c7bdbc1296ce8a\"}"
+      },
+      {
+        "article": "AF-31394818",
+        "variant_id": "01a0ca55-eeb2-7322-8be2-f2df8e9eaa90",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0ca55-eeb2-7322-8be2-f2df8e9eaa90 не найден\",\"variant_id\":\"01a0ca55-eeb2-7322-8be2-f2df8e9eaa90\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"e97c57a32825de8343f490838ddcbe84\"}"
+      },
+      {
+        "article": "AF-31394815",
+        "variant_id": "01a0ca55-a10c-7492-a7e7-0e862d854872",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0ca55-a10c-7492-a7e7-0e862d854872 не найден\",\"variant_id\":\"01a0ca55-a10c-7492-a7e7-0e862d854872\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"5d8dedb8cb209aed0e4f282368c2eafa\"}"
+      },
+      {
+        "article": "AF-31394816",
+        "variant_id": "01a0ca55-bab1-7dab-98d4-cf35ed638b42",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0ca55-bab1-7dab-98d4-cf35ed638b42 не найден\",\"variant_id\":\"01a0ca55-bab1-7dab-98d4-cf35ed638b42\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"be9d0b29b2f7ca9a4f01b2ad355418e3\"}"
+      },
+      {
+        "article": "AF-31394812",
+        "variant_id": "01a0ca55-77e7-764f-92bc-31820790e01a",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0ca55-77e7-764f-92bc-31820790e01a не найден\",\"variant_id\":\"01a0ca55-77e7-764f-92bc-31820790e01a\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"1d1a77a38936be8b9e5991c627f58bb0\"}"
+      },
+      {
+        "article": "AF-31394813",
+        "variant_id": "01a0ca55-7fd6-79f3-bf44-2e546d7fc617",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0ca55-7fd6-79f3-bf44-2e546d7fc617 не найден\",\"variant_id\":\"01a0ca55-7fd6-79f3-bf44-2e546d7fc617\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"d71e6b130b6048969de97443e7244427\"}"
+      },
+      {
+        "article": "AF-31394814",
+        "variant_id": "01a0ca55-9697-7d93-a370-819e76dcb764",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0ca55-9697-7d93-a370-819e76dcb764 не найден\",\"variant_id\":\"01a0ca55-9697-7d93-a370-819e76dcb764\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"7477a6de53806f9dd34580a7ad9b6e0f\"}"
+      },
+      {
+        "article": "AF-31364181",
+        "variant_id": "01a0c5de-ea14-7803-ab6e-6f77c95c673d",
+        "error": "HTTP 400: {\"code\":\"VALIDATION_ERROR\",\"errors\":[{\"code\":\"VARIANT_NOT_FOUND\",\"message\":\"Товар с id 01a0c5de-ea14-7803-ab6e-6f77c95c673d не найден\",\"variant_id\":\"01a0c5de-ea14-7803-ab6e-6f77c95c673d\"}],\"message\":\"Некорректные данные запроса\",\"trace_id\":\"0bdee8ba2cef934ae225abb680a01974\"}"
+      }
+    ],
+    "api_error_count": 12,
+    "verified_sample": 1,
+    "verification_sample_size": 25,
+    "verification_mismatch": [
+      {
+        "article": "AF-30895666",
+        "actual": [
+          "49515",
+          "34661"
+        ],
+        "expected": [
+          "49514.40",
+          "34660.08"
+        ]
+      },
+      {
+        "article": "AF-30899001",
+        "error": "HTTP 404: {\"code\":\"NOT_FOUND\",\"message\":\"Товар \\\"01a0c5df-33af-748d-bd6a-b6f385ba78dc\\\" не найден\",\"trace_id\":\"6149b363055a36c40f4f1f4499eb0056\"}"
+      },
+      {
+        "article": "AF-31652869",
+        "actual": [
+          "5631",
+          "3942"
+        ],
+        "expected": [
+          "5630.40",
+          "3941.28"
+        ]
+      },
+      {
+        "article": "AF-31649510",
+        "actual": [
+          "26496",
+          "18548"
+        ],
+        "expected": [
+          "26496.00",
+          "18547.20"
+        ]
+      },
+      {
+        "article": "AF-31646696",
+        "actual": [
+          "79041",
+          "55329"
+        ],
+        "expected": [
+          "79040.88",
+          "55328.62"
+        ]
+      },
+      {
+        "article": "AF-31396190",
+        "actual": [
+          "1988",
+          "1392"
+        ],
+        "expected": [
+          "1987.20",
+          "1391.04"
+        ]
+      },
+      {
+        "article": "AF-31394907",
+        "error": "HTTP 404: {\"code\":\"NOT_FOUND\",\"message\":\"Товар \\\"01a0ca55-c170-799c-ba19-ef06e2cc8f22\\\" не найден\",\"trace_id\":\"5247011c535a386022564be43e7aa50d\"}"
+      },
+      {
+        "article": "AF-31394823",
+        "actual": [
+          "2484",
+          "1739"
+        ],
+        "expected": [
+          "2484.00",
+          "1738.80"
+        ]
+      },
+      {
+        "article": "AF-31394824",
+        "actual": [
+          "2484",
+          "1739"
+        ],
+        "expected": [
+          "2484.00",
+          "1738.80"
+        ]
+      },
+      {
+        "article": "AF-31394820",
+        "error": "HTTP 404: {\"code\":\"NOT_FOUND\",\"message\":\"Товар \\\"01a0ca56-0be3-7eb0-a9b9-f3f435ad1124\\\" не найден\",\"trace_id\":\"12555f059f4fd9a4ae01965aa812ab19\"}"
+      },
+      {
+        "article": "AF-31394821",
+        "error": "HTTP 404: {\"code\":\"NOT_FOUND\",\"message\":\"Товар \\\"01a0ca56-3007-7e4b-a77e-71264053f6ac\\\" не найден\",\"trace_id\":\"a976d3e638d9d8c394540a6cd6d78dec\"}"
+      },
+      {
+        "article": "AF-31394819",
+        "error": "HTTP 404: {\"code\":\"NOT_FOUND\",\"message\":\"Товар \\\"01a0ca56-1496-7afe-940b-10f86a3455ea\\\" не найден\",\"trace_id\":\"4b73780e79e581d67e054cd12c0be3a4\"}"
+      },
+      {
+        "article": "AF-31394818",
+        "error": "HTTP 404: {\"code\":\"NOT_FOUND\",\"message\":\"Товар \\\"01a0ca55-eeb2-7322-8be2-f2df8e9eaa90\\\" не найден\",\"trace_id\":\"b33358c0507d496a8cddedff2efcb1f6\"}"
+      },
+      {
+        "article": "AF-31394815",
+        "error": "HTTP 404: {\"code\":\"NOT_FOUND\",\"message\":\"Товар \\\"01a0ca55-a10c-7492-a7e7-0e862d854872\\\" не найден\",\"trace_id\":\"ad7352c4c2c351f6fd04ebef1d883823\"}"
+      },
+      {
+        "article": "AF-31394816",
+        "error": "HTTP 404: {\"code\":\"NOT_FOUND\",\"message\":\"Товар \\\"01a0ca55-bab1-7dab-98d4-cf35ed638b42\\\" не найден\",\"trace_id\":\"b25d5ca98d1d87c7bdd0a7e9c7a3107c\"}"
+      },
+      {
+        "article": "AF-31394812",
+        "error": "HTTP 404: {\"code\":\"NOT_FOUND\",\"message\":\"Товар \\\"01a0ca55-77e7-764f-92bc-31820790e01a\\\" не найден\",\"trace_id\":\"884ca992e80c1efa44e9b2b0fca31e8a\"}"
+      },
+      {
+        "article": "AF-31394813",
+        "error": "HTTP 404: {\"code\":\"NOT_FOUND\",\"message\":\"Товар \\\"01a0ca55-7fd6-79f3-bf44-2e546d7fc617\\\" не найден\",\"trace_id\":\"2b38c22253f035ac0263941c528461a9\"}"
+      },
+      {
+        "article": "AF-31394814",
+        "error": "HTTP 404: {\"code\":\"NOT_FOUND\",\"message\":\"Товар \\\"01a0ca55-9697-7d93-a370-819e76dcb764\\\" не найден\",\"trace_id\":\"163bd7ce600ae79a108d64bb4c06e59c\"}"
+      },
+      {
+        "article": "AF-31390582",
+        "actual": [
+          "1160",
+          "812"
+        ],
+        "expected": [
+          "1159.20",
+          "811.44"
+        ]
+      },
+      {
+        "article": "AF-31378767",
+        "actual": [
+          "35444",
+          "24811"
+        ],
+        "expected": [
+          "35443.80",
+          "24810.66"
+        ]
+      },
+      {
+        "article": "AF-31378768",
+        "actual": [
+          "21654",
+          "15158"
+        ],
+        "expected": [
+          "21654.00",
+          "15157.80"
+        ]
+      },
+      {
+        "article": "AF-31378769",
+        "actual": [
+          "25254",
+          "17678"
+        ],
+        "expected": [
+          "25254.00",
+          "17677.80"
+        ]
+      },
+      {
+        "article": "AF-31364357",
+        "actual": [
+          "15984",
+          "11189"
+        ],
+        "expected": [
+          "15984.00",
+          "11188.80"
+        ]
+      },
+      {
+        "article": "AF-31364353",
+        "actual": [
+          "22968",
+          "16078"
+        ],
+        "expected": [
+          "22968.00",
+          "16077.60"
+        ]
+      }
+    ],
+    "minimum_price_note": "KIT API does not support a separate minimum-price field; internal KIT Минимальная цена was not pushed.",
+    "status": "ЧАСТИЧНО"
+  },
+  "Yandex": {
+    "targeted": 664,
+    "accepted": 664,
+    "errors": [],
+    "api_error_count": 0,
+    "verified": 664,
+    "verification_mismatch": [],
+    "status": "УСПЕШНО"
+  },
+  "catalog_rows": 1051,
+  "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
+  "finished_at": "2026-09-26T11:21:59.700852+00:00"
+}
