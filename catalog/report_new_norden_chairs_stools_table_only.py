@@ -54,7 +54,10 @@ def likely_duplicate(item, rows):
     return hits[:5]
 
 def main():
-    src,dups,kind,apierr=MOD.load_source(os.environ.get("NORDEN_SECRET",""),short=False)
+    # Use the complete Norden XML sources directly: this is read-only and much faster than paginated API.
+    src,dups=MOD.source_from_xml(short=False)
+    kind="xml-full+price"
+    apierr=None
     if len(src)<1000:
         raise RuntimeError(f"Safety stop: Norden full catalog too small ({len(src)})")
     targets=[]
