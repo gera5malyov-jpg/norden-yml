@@ -1,0 +1,34 @@
+name: Probe three Norden source and Ozon schema
+on:
+  push:
+    paths: ['catalog/probe_three_norden_ozon_schema_trigger.txt']
+permissions: {contents: write}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - env:
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: python catalog/probe_three_norden_ozon_schema.py
+      - if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add catalog/three_new_norden_source_and_ozon_schema.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save three Norden source and Ozon schema probe"
+            for i in 1 2 3; do
+              git push origin HEAD:main && break
+              git fetch origin main
+              git rebase origin/main || git rebase --abort
+              sleep $((i*3))
+            done
+          fi
