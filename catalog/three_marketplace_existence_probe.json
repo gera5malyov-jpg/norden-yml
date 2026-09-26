@@ -67,65 +67,65 @@
                 "value": 12395.0,
                 "currencyId": "RUR",
                 "discountBase": 19832.0,
-                "updatedAt": "2026-09-27T01:27:08+03:00"
+                "updatedAt": "2026-09-27T01:40:01+03:00"
               },
-              "cardStatus": "NO_CARD_PROCESSING",
+              "cardStatus": "HAS_CARD_CAN_UPDATE_ERRORS",
               "campaigns": [
                 {
                   "campaignId": 82585900,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 30684822,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 82251554,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 140624100,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 34711382,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 81159199,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 110447876,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 149001684,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 93424614,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 81995162,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 43598272,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 89405839,
-                  "status": "NO_STOCKS"
+                  "status": "PUBLISHED"
                 },
                 {
                   "campaignId": 79116619,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 },
                 {
                   "campaignId": 82691346,
-                  "status": "NO_STOCKS"
+                  "status": "REJECTED_BY_MARKET"
                 }
               ],
               "mediaFiles": {
@@ -178,9 +178,23 @@
               }
             },
             "mapping": {
+              "marketSku": 229730925263491072,
+              "marketSkuName": "Офисное кресло Norden Pinin Smart New CK38F, черный",
+              "marketModelId": 6298070100,
+              "marketModelName": "",
               "marketCategoryId": 61276996,
               "marketCategoryName": "Стулья"
-            }
+            },
+            "showcaseUrls": [
+              {
+                "showcaseType": "B2C",
+                "showcaseUrl": "https://market.yandex.ru/card/slug/229730925263491072?businessId=20806099"
+              },
+              {
+                "showcaseType": "B2B",
+                "showcaseUrl": "https://business.market.yandex.ru/card/slug/229730925263491072?businessId=20806099"
+              }
+            ]
           }
         ]
       }
@@ -212,7 +226,148 @@
       "status": "OK",
       "result": {
         "paging": {},
-        "offerMappings": []
+        "offerMappings": [
+          {
+            "offer": {
+              "offerId": "AF-31662420",
+              "name": "Офисное кресло Norden Corfu B1816 3S fabric LE8100-07, бирюзовый",
+              "pictures": [
+                "https://avatars.mds.yandex.net/get-yastore/19196982/rdtgn8cwpjcx4mblmgv7nfswv7nrwk79/orig",
+                "https://avatars.mds.yandex.net/get-yastore/21696355/f84m4qgbpfjs72blkh24wwwmbsrdqcb8/orig",
+                "https://avatars.mds.yandex.net/get-yastore/19782553/pjqtdqctpn7hgx5fgr69xdcgrwxlp9ql/orig",
+                "https://avatars.mds.yandex.net/get-yastore/19782553/tnwtp25d74wkkgmfv8wtd48sstpgk84d/orig",
+                "https://avatars.mds.yandex.net/get-yastore/20575719/mxm5kf42cpb8nmm44h7wmrnd4fb52k8b/orig"
+              ],
+              "vendor": "Norden",
+              "description": "Конференц-кресло Corfu – стильное и современное решение для вашего офиса. Обивка из прочной ткани и наполнителя высокой плотности PU обеспечивает комфорт и долговечность. Механизм качания без фиксации и регулировка высоты добавляют удобства. Полированная алюминиевая крестовина и PU колеса подчеркивают элегантный дизайн. Максимальная нагрузка – 130 кг. Сертифицировано BIFMA. Гарантия – 1 год. \nИдеально для переговорных комнат и конференц-залов.",
+              "manufacturerCountries": [
+                "Китай"
+              ],
+              "weightDimensions": {
+                "length": 69,
+                "width": 65,
+                "height": 65,
+                "weight": 31
+              },
+              "vendorCode": "B1816 3S fabric LE8100-07",
+              "customsCommodityCode": "9401390000",
+              "commodityCodes": [
+                {
+                  "code": "9401390000",
+                  "type": "CUSTOMS_COMMODITY_CODE"
+                }
+              ],
+              "boxCount": 1,
+              "basicPrice": {
+                "value": 64054.0,
+                "currencyId": "RUR",
+                "discountBase": 102487.0,
+                "updatedAt": "2026-09-27T01:41:06+03:00"
+              },
+              "cardStatus": "HAS_CARD_CAN_UPDATE",
+              "campaigns": [
+                {
+                  "campaignId": 82585900,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 30684822,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 82251554,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 140624100,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 34711382,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 81159199,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 110447876,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 149001684,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 93424614,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 81995162,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 43598272,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 89405839,
+                  "status": "PUBLISHED"
+                },
+                {
+                  "campaignId": 79116619,
+                  "status": "REJECTED_BY_MARKET"
+                },
+                {
+                  "campaignId": 82691346,
+                  "status": "REJECTED_BY_MARKET"
+                }
+              ],
+              "mediaFiles": {
+                "pictures": [
+                  {
+                    "url": "https://avatars.mds.yandex.net/get-yastore/19196982/rdtgn8cwpjcx4mblmgv7nfswv7nrwk79/orig",
+                    "uploadState": "UPLOADED"
+                  },
+                  {
+                    "url": "https://avatars.mds.yandex.net/get-yastore/21696355/f84m4qgbpfjs72blkh24wwwmbsrdqcb8/orig",
+                    "uploadState": "UPLOADED"
+                  },
+                  {
+                    "url": "https://avatars.mds.yandex.net/get-yastore/19782553/pjqtdqctpn7hgx5fgr69xdcgrwxlp9ql/orig",
+                    "uploadState": "UPLOADED"
+                  },
+                  {
+                    "url": "https://avatars.mds.yandex.net/get-yastore/19782553/tnwtp25d74wkkgmfv8wtd48sstpgk84d/orig",
+                    "uploadState": "UPLOADED"
+                  },
+                  {
+                    "url": "https://avatars.mds.yandex.net/get-yastore/20575719/mxm5kf42cpb8nmm44h7wmrnd4fb52k8b/orig",
+                    "uploadState": "UPLOADED"
+                  }
+                ]
+              }
+            },
+            "mapping": {
+              "marketSku": 229734031628238848,
+              "marketSkuName": "Офисное кресло Norden Corfu B1816 3S fabric LE8100-07, бирюзовый",
+              "marketModelId": 6298043024,
+              "marketModelName": "",
+              "marketCategoryId": 10785222,
+              "marketCategoryName": "Компьютерные кресла"
+            },
+            "showcaseUrls": [
+              {
+                "showcaseType": "B2C",
+                "showcaseUrl": "https://market.yandex.ru/card/slug/229734031628238848?businessId=20806099"
+              },
+              {
+                "showcaseType": "B2B",
+                "showcaseUrl": "https://business.market.yandex.ru/card/slug/229734031628238848?businessId=20806099"
+              }
+            ]
+          }
+        ]
       }
     }
   },
@@ -242,7 +397,153 @@
       "status": "OK",
       "result": {
         "paging": {},
-        "offerMappings": []
+        "offerMappings": [
+          {
+            "offer": {
+              "offerId": "AF-31662421",
+              "name": "Офисное кресло Norden Next Black CK-2518A-P, черный",
+              "pictures": [
+                "https://avatars.mds.yandex.net/get-yastore/18764786/b5lzw9dvx92jrcxztv5rv4994xwbvvmf/orig",
+                "https://avatars.mds.yandex.net/get-yastore/19396857/76686tc5txdn28x8mxxld52fdzdzfxcr/orig",
+                "https://avatars.mds.yandex.net/get-yastore/18793859/qcqsj7tl657b4dn99xgdjpjldf6mdb2j/orig",
+                "https://avatars.mds.yandex.net/get-yastore/18793859/9rbczm9ndqnlqqqj29d548658jzgmzc6/orig",
+                "https://avatars.mds.yandex.net/get-yastore/18919159/6j56n7k22cwjmncnrnkqn2fj7lxj9fwv/orig",
+                "https://avatars.mds.yandex.net/get-yastore/19396857/6svhhkznttqvs7xjs79fln4zxcpnmgdz/orig"
+              ],
+              "vendor": "Norden",
+              "description": "Эргономичное кресло Некст — это современное решение, объединяющее лаконичный дизайн и передовые технологии для максимальной продуктивности. Спинка модели выполнена из высокопрочной дышащей сетки, а сиденье обтянуто износостойкой тканью с наполнением из «умного» литого пенополиуретана, который мгновенно адаптируется к форме тела. Кресло оснащено современным синхромеханизмом с фиксацией в 4-х положениях и функцией «слайдер» для точной настройки глубины посадки. Комфорт дополняют 2D-подлокотники с регулировкой по высоте, настраиваемый по высоте и углу наклона подголовник. Устойчивость конструкции обеспечивает надежная крестовина, которая для моделей с высокой спинкой может быть выполнена из полированного алюминия (хром) или усиленного нейлона. На кресло предоставляется официальная гарантия 1 год при максимальной нагрузке до 130 кг. Кресло «Некст» станет идеальным выбором для тех, кто ценит индивидуальную настройку и безупречный комфорт в течение всего рабочего дня.",
+              "manufacturerCountries": [
+                "Китай"
+              ],
+              "weightDimensions": {
+                "length": 72,
+                "width": 55,
+                "height": 60,
+                "weight": 31
+              },
+              "vendorCode": "CK-2518A-P",
+              "customsCommodityCode": "9401390000",
+              "commodityCodes": [
+                {
+                  "code": "9401390000",
+                  "type": "CUSTOMS_COMMODITY_CODE"
+                }
+              ],
+              "boxCount": 1,
+              "basicPrice": {
+                "value": 22088.0,
+                "currencyId": "RUR",
+                "discountBase": 35341.0,
+                "updatedAt": "2026-09-27T01:42:12+03:00"
+              },
+              "cardStatus": "HAS_CARD_CAN_UPDATE_PROCESSING",
+              "campaigns": [
+                {
+                  "campaignId": 82585900,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 30684822,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 82251554,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 140624100,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 34711382,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 81159199,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 110447876,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 149001684,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 93424614,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 81995162,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 43598272,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 89405839,
+                  "status": "PUBLISHED"
+                },
+                {
+                  "campaignId": 79116619,
+                  "status": "NO_STOCKS"
+                },
+                {
+                  "campaignId": 82691346,
+                  "status": "NO_STOCKS"
+                }
+              ],
+              "mediaFiles": {
+                "pictures": [
+                  {
+                    "url": "https://avatars.mds.yandex.net/get-yastore/18764786/b5lzw9dvx92jrcxztv5rv4994xwbvvmf/orig",
+                    "uploadState": "UPLOADED"
+                  },
+                  {
+                    "url": "https://avatars.mds.yandex.net/get-yastore/19396857/76686tc5txdn28x8mxxld52fdzdzfxcr/orig",
+                    "uploadState": "UPLOADED"
+                  },
+                  {
+                    "url": "https://avatars.mds.yandex.net/get-yastore/18793859/qcqsj7tl657b4dn99xgdjpjldf6mdb2j/orig",
+                    "uploadState": "UPLOADED"
+                  },
+                  {
+                    "url": "https://avatars.mds.yandex.net/get-yastore/18793859/9rbczm9ndqnlqqqj29d548658jzgmzc6/orig",
+                    "uploadState": "UPLOADED"
+                  },
+                  {
+                    "url": "https://avatars.mds.yandex.net/get-yastore/18919159/6j56n7k22cwjmncnrnkqn2fj7lxj9fwv/orig",
+                    "uploadState": "UPLOADED"
+                  },
+                  {
+                    "url": "https://avatars.mds.yandex.net/get-yastore/19396857/6svhhkznttqvs7xjs79fln4zxcpnmgdz/orig",
+                    "uploadState": "UPLOADED"
+                  }
+                ]
+              }
+            },
+            "mapping": {
+              "marketSku": 229734303154868224,
+              "marketSkuName": "Офисное кресло Norden Next Black CK-2518A-P, черный",
+              "marketModelId": 6298014512,
+              "marketModelName": "",
+              "marketCategoryId": 10785222,
+              "marketCategoryName": "Компьютерные кресла"
+            },
+            "showcaseUrls": [
+              {
+                "showcaseType": "B2C",
+                "showcaseUrl": "https://market.yandex.ru/card/slug/229734303154868224?businessId=20806099"
+              },
+              {
+                "showcaseType": "B2B",
+                "showcaseUrl": "https://business.market.yandex.ru/card/slug/229734303154868224?businessId=20806099"
+              }
+            ]
+          }
+        ]
       }
     }
   }
