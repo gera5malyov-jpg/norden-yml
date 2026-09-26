@@ -329,6 +329,9 @@ def main():
             if len(m)>1: rep["kit"]["ambiguous"]+=1; continue
             if len(m)==1: kit_stock_price(kit,m[0],i,msk_id,spb_id); rep["kit"]["updated"]+=1
             else:
+                # Never create a new KIT product without the user's manual checkbox approval.
+                if not approved(r.get("Проверено — загрузить в KIT/Webasyst")):
+                    continue
                 path=MOD.approved_category_path(i.get("category_path") or [])
                 if not path: rev.append(i); rep["kit"]["category_review"]+=1; continue
                 vid=kit_create(kit,art,i,path,msk_id,spb_id,cats,chars); kby[nc(art)].append({"id":vid,"sku":art}); rep["kit"]["created"]+=1
