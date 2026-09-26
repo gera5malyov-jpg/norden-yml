@@ -71,17 +71,22 @@ class Client:
             for k in ("total","total_count"):
                 if isinstance(m.get(k),int): return m[k]
         return None
-    def all_collection(self,path):
-        first=self.req("GET",path,params={"page":1,"per_page":100})
+    def all_collection(self,path,extra=None):
+        base=dict(extra or {})
+        q=dict(base)
+        q.update({"page":1,"per_page":100})
+        first=self.req("GET",path,params=q)
         rows=self.items(first); total=self.total(first)
         if total is None or total<=len(rows): return rows
         pages=max(1,math.ceil(total/100)); out=list(rows)
-        def one(p):\n            q=dict(base); q.update({"page":p,"per_page":100})\n            return self.items(self.req("GET",path,params=q))
+        def one(p):
+            q=dict(base)
+            q.update({"page":p,"per_page":100})
+            return self.items(self.req("GET",path,params=q))
         with ThreadPoolExecutor(max_workers=6) as pool:
             fs=[pool.submit(one,p) for p in range(2,pages+1)]
             for f in as_completed(fs): out.extend(f.result())
         return out
-
 def load_rows():
     creds=Credentials.from_service_account_info(json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]),
         scopes=["https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive"])
