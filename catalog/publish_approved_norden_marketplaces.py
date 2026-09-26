@@ -234,7 +234,7 @@ def oz_postpublish_retry(art,vid):
     last=None
     for attempt in range(20):
         try:
-            return oz_postpublish_retry(art,vid)
+            return POST.sync_offer_to_kit(art,vid)
         except Exception as e:
             last=e
             time.sleep(min(15,3+attempt))
