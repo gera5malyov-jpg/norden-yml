@@ -96,7 +96,19 @@ existing={s(r[idx["YML ID"]]) for r in vals[1:] if idx["YML ID"]<len(r) and s(r[
 new=[x for x in items if x["yml"] not in existing]
 new.sort(key=lambda x:(x["name"],x["yml"]))
 
-start=len(vals)+1
+# Ignore checkbox-only/formatted blank rows. Append after the last real product row.
+article_i=idx.get("Артикул")
+name_i=idx.get("Название")
+yml_i=idx["YML ID"]
+last_data_row=1
+for rn,r in enumerate(vals[1:],start=2):
+    keys=[]
+    for ci in (article_i,name_i,yml_i):
+        if ci is not None and ci < len(r):
+            keys.append(s(r[ci]))
+    if any(keys):
+        last_data_row=rn
+start=last_data_row+1
 rows=[]
 for x in new:
     row=[""]*len(headers)
@@ -124,7 +136,11 @@ for x in new:
     rows.append(row)
 
 if rows:
-    # Write only to the Google Sheet. No marketplace/KIT/Webasyst client exists in this script.
+    # Ensure the grid is large enough, then write only to the Google Sheet.
+    need=start+len(rows)-1
+    if ws.row_count < need:
+        ws.resize(rows=need+20)
+    # No marketplace/KIT/Webasyst client exists in this script.
     ws.update(
       range_name=f"A{start}:{gspread.utils.rowcol_to_a1(start+len(rows)-1,len(headers))}",
       values=rows,
@@ -144,6 +160,7 @@ report={
   "eligible_supplier_items":len(items),
   "existing_exact_yml_count":len(existing),
   "added_count":len(new),
+  "last_data_row_before":last_data_row,
   "start_row":start if new else None,
   "end_row":start+len(new)-1 if new else None,
   "added":[{"yml_id":x["yml"],"name":x["name"],"stock":x["total"],"purchase":x["purchase"],"rrp":x["rrp"]} for x in new]
