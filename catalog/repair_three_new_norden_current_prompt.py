@@ -212,5 +212,5 @@ for article,cfg in TARGETS.items():
     if x["sheet_readback"]["market_approval"].upper() not in ("FALSE",""): raise RuntimeError(f"{article}: marketplace approval unexpectedly enabled")
     if s(x["webasyst"]["yml_id"])!=cfg["yml"]: raise RuntimeError(f"{article}: yml report mismatch")
     if not x["kit"].get("kit_id"): raise RuntimeError(f"{article}: KIT ID missing")
-report["status"]="УСПЕШНО"; OUT.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+report["status"]="УСПЕШНО"; OUT.write_text(json.dumps(report,ensure_ascii=False,indent=2,default=str)+"\n",encoding="utf-8")
 print(json.dumps({"status":report["status"],"marketplace_writes":False,"items":{k:{"kit_id":v["kit"]["kit_id"],"media":len(v["kit"]["media"] or []),"cargo":v["kit"]["cargo_boxes"],"characteristics":v["kit"]["characteristic_count"],"yml":v["webasyst"]["yml_id"],"market_approval":v["sheet_readback"]["market_approval"]} for k,v in report["items"].items()}},ensure_ascii=False,indent=2))
