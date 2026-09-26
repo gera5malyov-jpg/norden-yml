@@ -24,7 +24,7 @@ CONF=str.maketrans({"а":"a","в":"b","с":"c","е":"e","н":"h","к":"k","м":"
 EXCL=("чехол","сменный чехол","подголовник","подлокотник","крестовина","газлифт","ролик","колеса","колесо","механизм","сиденье","спинка")
 REQ=["Артикул","Название","YML ID","Бренд","Основное фото","Фото","Источник","Webasyst product_id","Webasyst sku_id",
      "Тип Webasyst при загрузке","Webasyst URL","Цена Webasyst","Старая цена Webasyst","Закупочная цена Webasyst",
-     "Закупка","РРЦ поставщика","Остаток"]
+     "Закупка","РРЦ поставщика","Остаток","Проверено — загрузить в KIT/Webasyst"]
 
 def load(path,name):
     p=ROOT/path; spec=importlib.util.spec_from_file_location(name,p); m=importlib.util.module_from_spec(spec); spec.loader.exec_module(m); return m
@@ -45,6 +45,8 @@ def num(v):
 def q(v):
     d=num(v)
     return 0 if d is None else max(0,int(d))
+def approved(v):
+    return s(v).casefold() in ("true","истина","да","yes","1")
 def rub(v):
     d=num(v)
     return None if d is None else d.quantize(MONEY,rounding=ROUND_HALF_UP)
@@ -241,7 +243,7 @@ def main():
     rep={"started_at":now(),"status":"ВЫПОЛНЯЕТСЯ","source":{},"sheet":{"matched":0,"added":0,"zeroed_missing":0,"ambiguous_yml":0,"possible_duplicates":0},
          "webasyst":{"updated":0,"created":0,"zeroed_missing":0,"ambiguous":0,"errors":[]},"kit":{"updated":0,"created":0,"zeroed_missing":0,"ambiguous":0,"category_review":0,"errors":[]},
          "possible_duplicate_items":[],"category_review_items":[],"complete":False,
-         "rules":{"scope":"только кресла/стулья","schedule":"каждые 6 часов","missing":"остаток 0, цены сохранять","webasyst_price":"закупка×1.23; зачеркнутая×1.65","kit_price":"закупка×1.26; зачеркнутая×1.65","old_norden_workflows":"STOP_ALL_NORDEN сохраняется"}}
+         "rules":{"scope":"только кресла/стулья","new_table_rows":"только новые товары с остатком > 0","new_publish_gate":"создание в Webasyst/KIT только после TRUE в колонке 'Проверено — загрузить в KIT/Webasyst'","schedule":"каждые 6 часов","missing":"остаток 0, цены сохранять","webasyst_price":"закупка×1.23; зачеркнутая×1.65","kit_price":"закупка×1.26; зачеркнутая×1.65","old_norden_workflows":"STOP_ALL_NORDEN сохраняется"}}
     src,meta=supplier(); rep["source"]=meta
     sh,ws=sheets(); h,ix,rows=read(ws); by=defaultdict(list)
     for r in rows:
@@ -264,6 +266,9 @@ def main():
     new=[]
     for k,i in src.items():
         if k in matched or by.get(k): continue
+        # New supplier products are added to the sheet only when currently in stock.
+        if q(i.get("total")) <= 0:
+            continue
         hits=likely_duplicate(i,rows)
         if hits: rep["sheet"]["possible_duplicates"]+=1; rep["possible_duplicate_items"].append({"yml_id":i["article"],"name":i["name"],"hits":hits}); continue
         new.append(i)
@@ -272,7 +277,8 @@ def main():
         for i in new:
             r=[""]*len(h)
             for c,v in {"Название":i["name"],"YML ID":i["article"],"Бренд":"Norden","Основное фото":imgf((i.get("images") or [""])[0]),"Фото":json.dumps(i.get("images") or [],ensure_ascii=False),
-                        "Источник":"Norden","Тип Webasyst при загрузке":TYPE,"Закупка":ms(i["purchase"]),"РРЦ поставщика":ms(i["rrp"]),"Остаток":i["total"]}.items(): r[ix[c]]=v
+                        "Источник":"Norden","Тип Webasyst при загрузке":TYPE,"Закупка":ms(i["purchase"]),"РРЦ поставщика":ms(i["rrp"]),"Остаток":i["total"],
+                        "Проверено — загрузить в KIT/Webasyst":False}.items(): r[ix[c]]=v
             arr.append(r)
         start=len(rows)+2
         if ws.row_count<start+len(arr)+5: ws.resize(rows=start+len(arr)+5)
@@ -295,6 +301,8 @@ def main():
             if len(m)==1: wa_update(wa,wstock,m[0][1],i); rep["webasyst"]["updated"]+=1
             elif art: rep["webasyst"]["errors"].append({"article":art,"yml_id":i["article"],"error":"Артикул есть в таблице, но точного SKU NORDEN-100 в Webasyst нет; не создавал дубль"})
             else:
+                if not approved(r.get("Проверено — загрузить в KIT/Webasyst")):
+                    continue
                 cr=wa_create(wa,tid,wstock,i); rep["webasyst"]["created"]+=1
                 for c,v in {"Артикул":cr["article"],"Webasyst product_id":cr["pid"],"Webasyst sku_id":cr["sid"],"Тип Webasyst при загрузке":TYPE,"Webasyst URL":cr["url"],
                             "Цена Webasyst":ms(price(i["purchase"],"1.23")),"Старая цена Webasyst":ms(price(i["purchase"],"1.65")),"Закупочная цена Webasyst":ms(i["purchase"])}.items():
