@@ -1,15 +1,14 @@
 {
-  "started_at": "2026-09-26T22:25:08.143984+00:00",
-  "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
+  "started_at": "2026-09-26T22:39:07.846992+00:00",
+  "status": "УСПЕШНО",
   "selected": 3,
   "items": [
     {
       "article": "AF-31662372",
-      "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
+      "status": "УСПЕШНО",
       "ozon": {
-        "status": "CREATED_BY_PIPELINE",
-        "product_id": 6459431016,
-        "task_id": 5707185359,
+        "status": "CREATED_BY_PIPELINE_EXISTING",
+        "product_id": "6459431016",
         "commission": 51.0,
         "acquiring": 2.0,
         "price": 13027,
@@ -19,29 +18,84 @@
           "offer_id": "AF-31662372",
           "ozon_product_id": 6459431016,
           "kit_variant_id": "01a0dfaa-3c5e-7939-9898-c89cc10b6b53",
-          "removed_temporary_count": 45,
-          "canonical_count": 74,
+          "removed_temporary_count": 74,
+          "canonical_count": 77,
           "status": "КАНОНИЧЕСКИЕ ДАННЫЕ ИЗ OZON"
-        },
-        "warnings": []
+        }
       },
-      "yandex": {},
-      "error": "Yandex exact offer not visible after create"
+      "yandex": {
+        "status": "CREATED_BY_PIPELINE_EXISTING",
+        "category_id": 61276996,
+        "category": "Стулья",
+        "commission": 49.0,
+        "acquiring": 1.6007905138339922,
+        "price": 12395,
+        "old_price": 19832,
+        "stock": "UPDATED"
+      }
     },
     {
       "article": "AF-31662420",
-      "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
-      "ozon": {},
-      "yandex": {},
-      "error": "Ozon exact offer_id AF-31662420: found 0"
+      "status": "УСПЕШНО",
+      "ozon": {
+        "status": "CREATED_BY_PIPELINE_EXISTING",
+        "product_id": "6459433194",
+        "commission": 51.0,
+        "acquiring": 2.0,
+        "price": 68687,
+        "old_price": 109900,
+        "min_price": 66984,
+        "postpublish": {
+          "offer_id": "AF-31662420",
+          "ozon_product_id": 6459433194,
+          "kit_variant_id": "01a0df2f-3030-7957-a8f4-1561c0d7ca95",
+          "removed_temporary_count": 45,
+          "canonical_count": 78,
+          "status": "КАНОНИЧЕСКИЕ ДАННЫЕ ИЗ OZON"
+        }
+      },
+      "yandex": {
+        "status": "CREATED_BY_PIPELINE",
+        "category_id": 10785222,
+        "category": "Компьютерные кресла",
+        "commission": 48.0,
+        "acquiring": 1.6001499250374813,
+        "price": 64054,
+        "old_price": 102487,
+        "stock": "UPDATED"
+      }
     },
     {
       "article": "AF-31662421",
-      "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
-      "ozon": {},
-      "yandex": {},
-      "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+      "status": "УСПЕШНО",
+      "ozon": {
+        "status": "CREATED_BY_PIPELINE_EXISTING",
+        "product_id": "6459433422",
+        "commission": 51.0,
+        "acquiring": 2.0,
+        "price": 23686,
+        "old_price": 37898,
+        "min_price": 23098,
+        "postpublish": {
+          "offer_id": "AF-31662421",
+          "ozon_product_id": 6459433422,
+          "kit_variant_id": "01a0df2f-eb73-7572-b95a-a3fef52bec7f",
+          "removed_temporary_count": 76,
+          "canonical_count": 79,
+          "status": "КАНОНИЧЕСКИЕ ДАННЫЕ ИЗ OZON"
+        }
+      },
+      "yandex": {
+        "status": "CREATED_BY_PIPELINE",
+        "category_id": 10785222,
+        "category": "Компьютерные кресла",
+        "commission": 48.0,
+        "acquiring": 1.6004347826086958,
+        "price": 22088,
+        "old_price": 35341,
+        "stock": "UPDATED"
+      }
     }
   ],
-  "finished_at": "2026-09-26T22:29:36.477244+00:00"
+  "finished_at": "2026-09-26T22:42:13.193396+00:00"
 }
