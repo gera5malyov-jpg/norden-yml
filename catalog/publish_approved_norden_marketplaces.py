@@ -46,7 +46,12 @@ class API:
         base=OZON_BASE if which=="oz" else YANDEX_BASE
         last=None
         for attempt in range(retries):
-            r=sess.request(method,base+path,json=body,params=params,timeout=120); last=r
+            try:
+                r=sess.request(method,base+path,json=body,params=params,timeout=120); last=r
+            except requests.RequestException:
+                if attempt+1<retries:
+                    time.sleep(min(30,2**attempt)); continue
+                raise
             if r.status_code in (420,429) or r.status_code>=500:
                 time.sleep(float(r.headers.get("Retry-After") or min(30,2**attempt))); continue
             try:data=r.json() if r.content else {}
@@ -225,6 +230,16 @@ def oz_create(art,item):
         if len(ex)==1:return int(ex[0].get("product_id") or 0),task
         time.sleep(4)
     raise RuntimeError("Ozon product not visible by exact offer_id after import")
+def oz_postpublish_retry(art,vid):
+    last=None
+    for attempt in range(20):
+        try:
+            return oz_postpublish_retry(art,vid)
+        except Exception as e:
+            last=e
+            time.sleep(min(15,3+attempt))
+    raise RuntimeError(f"Ozon postpublish readback failed for {art}: {last}")
+
 def oz_commission_and_price(art,purchase,pid):
     commission=51.0
     for _ in range(10):
@@ -325,7 +340,7 @@ def ya_create(art,offer):
     if exact and exact[0].get("errors"):raise RuntimeError("Yandex content create errors: "+json.dumps(exact[0],ensure_ascii=False)[:3000])
     # place in DBS store; this touches only the just-created SKU.
     api.req("ya","POST",f"/v2/campaigns/{CID}/offers/update",{"offers":[{"offerId":art,"available":True}]})
-    for _ in range(10):
+    for _ in range(30):
         ex=ya_mapping(art)
         if len(ex)==1:return ex[0]
         time.sleep(5)
@@ -375,14 +390,20 @@ for r in selected:
             if not (prior_status.startswith("CREATE_STARTED") or prior_status.startswith("CREATED_BY_PIPELINE") or (prior_pid and prior_pid==ep)):
                 item["ozon"]={"status":"ПРОПУЩЕНО_СТАРАЯ_КАРТОЧКА","product_id":ep}
             else:
-                post=POST.sync_offer_to_kit(art,vid)
-                item["ozon"]={"status":"CREATED_BY_PIPELINE_EXISTING","product_id":ep,"postpublish":post}
+                post=oz_postpublish_retry(art,vid)
+                commission,acq,oprice,oold,omin=oz_commission_and_price(art,purchase,int(ep))
+                rb=POST.ozon_readback(POST.OzonClient(),art)
+                oattrs=rb["attributes"]
+                update_row(rn,{"Ozon product_id":ep,"Ozon offer_id":art,"Ozon sale_schema":"RFBS","Ozon комиссия %":commission,"Ozon эквайринг %":acq,
+                    "Ozon Предельная цена без акций":oprice,"Ozon Зачёркнутая цена":oold,"Ozon Ограничение для акций и стратегий":omin,
+                    "Ozon media JSON":json.dumps(oattrs.get("images") or [],ensure_ascii=False),"Ozon статус":"CREATED_BY_PIPELINE:"+s((rb["info"].get("statuses") or {}).get("status_name")),"Ozon дата":now()})
+                item["ozon"]={"status":"CREATED_BY_PIPELINE_EXISTING","product_id":ep,"commission":commission,"acquiring":acq,"price":oprice,"old_price":oold,"min_price":omin,"postpublish":post}
         else:
             update_row(rn,{"Ozon статус":"CREATE_STARTED:"+now(),"Ozon offer_id":art,"Ozon sale_schema":"RFBS"})
             ozitem,ozurls,warns=oz_import_item(art,prep,v,purchase)
             opid,task=oz_create(art,ozitem)
             # Mandatory automatic post-publish canonical replacement in KIT.
-            post=POST.sync_offer_to_kit(art,vid)
+            post=oz_postpublish_retry(art,vid)
             commission,acq,oprice,oold,omin=oz_commission_and_price(art,purchase,opid)
             rb=POST.ozon_readback(POST.OzonClient(),art)
             oattrs=rb["attributes"]
@@ -398,7 +419,22 @@ for r in selected:
         if existing_y and not (prior_ys.startswith("CREATE_STARTED") or prior_ys.startswith("CREATED_BY_PIPELINE")):
             item["yandex"]={"status":"ПРОПУЩЕНО_СТАРАЯ_КАРТОЧКА"}
         elif existing_y:
-            item["yandex"]={"status":"CREATED_BY_PIPELINE_EXISTING"}
+            cat,catname=yandex_category(v); box=(v.get("cargo_boxes") or [None])[0]
+            if not box:raise RuntimeError("KIT cargo box missing for Yandex")
+            tariffs,fee,pay,ysale,yold=yandex_tariff(cat,purchase,box)
+            ya_price(art,ysale,yold)
+            stock=max([int(x.get("quantity") or 0) for x in (v.get("stocks") or [])] or [0])
+            try: ya_stock(art,stock); stock_status="UPDATED"
+            except Exception as se: stock_status="WARNING:"+str(se)[:400]
+            yurls=[]
+            for m in sorted([x for x in (v.get("media") or []) if s(x.get("type")).upper()=="IMAGE"],key=lambda x:int(x.get("display_sequence") or 0)):
+                fm=kit.request("GET",f"/v1/files/{s(m.get('image_id'))}");u=s(fm.get("url"))
+                if u:yurls.append(u)
+            update_row(rn,{"Yandex offer_id":art,"Yandex business_id":BID,"Yandex campaign_id":CID,"Yandex category_id":cat,"Yandex категория":catname,
+                "Yandex модель размещения":"DBS","Yandex tariffs JSON":json.dumps(tariffs,ensure_ascii=False,separators=(",",":")),
+                "Yandex комиссия %":fee,"Yandex эквайринг %":pay,"Yandex цена":ysale,"Yandex зачёркнутая цена":yold,
+                "Yandex media JSON":json.dumps(yurls,ensure_ascii=False),"Yandex статус":"CREATED_BY_PIPELINE","Yandex дата":now()})
+            item["yandex"]={"status":"CREATED_BY_PIPELINE_EXISTING","category_id":cat,"category":catname,"commission":fee,"acquiring":pay,"price":ysale,"old_price":yold,"stock":stock_status}
         else:
             update_row(rn,{"Yandex статус":"CREATE_STARTED:"+now(),"Yandex offer_id":art,"Yandex business_id":BID,"Yandex campaign_id":CID,"Yandex модель размещения":"DBS"})
             cat,catname=yandex_category(v); box=(v.get("cargo_boxes") or [None])[0]
