@@ -90,6 +90,18 @@ def kit_public_image_urls(kit, variant_id):
         raise RuntimeError(f"KIT variant {variant_id}: public image URLs not found")
     return urls
 
+def wa_set_kit_id(wa, product_id, kit_id):
+    kid=s(kit_id)
+    if not kid or not kid.isdigit():
+        raise RuntimeError(f"Webasyst product {product_id}: numeric KIT ID missing: {kit_id!r}")
+    wa.call("shop.product.update",http_method="POST",params={"id":s(product_id)},data={"features":{"kit_id":kid}})
+    info=wa.call("shop.product.getInfo",params={"id":s(product_id)})
+    feats=info.get("features") or {} if isinstance(info,dict) else {}
+    got=s(feats.get("kit_id")) if isinstance(feats,dict) else ""
+    if got!=kid:
+        raise RuntimeError(f"Webasyst product {product_id}: KIT ID readback failed, expected {kid!r}, got {got!r}")
+    return got
+
 def wa_replace_summary_with_kit_images(wa, product_id, urls):
     summary=extimgs(urls)
     if not summary:
