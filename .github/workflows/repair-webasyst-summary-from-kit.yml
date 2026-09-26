@@ -1,0 +1,33 @@
+name: Repair Webasyst short descriptions from KIT images
+on:
+  push:
+    paths:
+      - 'catalog/repair_webasyst_summary_from_kit_trigger.txt'
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install --disable-pip-version-check requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
+      - run: python -m py_compile catalog/repair_webasyst_summary_from_kit.py catalog/sync_norden_chairs_stools_6h.py
+      - env:
+          WEBASYST_BASE_URL: ${{ secrets.WEBASYST_BASE_URL }}
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python catalog/repair_webasyst_summary_from_kit.py
+      - if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add catalog/repair_webasyst_summary_from_kit_report.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Webasyst KIT image summary repair report"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
