@@ -26,16 +26,24 @@ YML="B1816 3S fabric LE8100-07"
 VID="01a0df2f-3030-7957-a8f4-1561c0d7ca95"
 WA_PID="1483282"
 
-urls=[
-    "https://norden.group/images/thumbnails/1140/960/detailed/12/00-00010488___B1816_3S_fabric_LE8100-07_438e761b-1102-11ef-badb-b44e9407c834.jpg",
-    "https://norden.group/images/thumbnails/1140/960/detailed/721/00-00010488___B1816_3S_fabric_LE8100-07_47b22bfc-3002-11f0-bb0d-c5a378e5bbc4.jpg",
-    "https://norden.group/images/thumbnails/1140/960/detailed/721/00-00010488___B1816_3S_fabric_LE8100-07_47b22bfd-3002-11f0-bb0d-c5a378e5bbc4.jpg",
-    "https://norden.group/images/thumbnails/1140/960/detailed/721/00-00010488___B1816_3S_fabric_LE8100-07_47b22bfe-3002-11f0-bb0d-c5a378e5bbc4.jpg",
-    "https://norden.group/images/thumbnails/1140/960/detailed/721/00-00010488___B1816_3S_fabric_LE8100-07_47b22bfb-3002-11f0-bb0d-c5a378e5bbc4.jpg",
-]
+secret=os.environ["NORDEN_SECRET"]
+api=requests.get(
+    "https://norden.group/api-products/",
+    headers={"secret":secret,"Accept":"application/json"},
+    params={"sku":YML},
+    timeout=120,
+)
+api.raise_for_status()
+rows=api.json().get("products") or []
+exact=[p for p in rows if str(p.get("product_code") or "").strip()==YML]
+if len(exact)!=1:
+    raise RuntimeError(f"Norden API exact SKU {YML}: found {len(exact)}")
+urls=list(dict.fromkeys([str(u).strip() for u in (exact[0].get("images") or []) if str(u).strip()]))
+if not urls:
+    raise RuntimeError(f"Norden API exact SKU {YML}: no images in supplier export")
 
 kit=BRIDGE.KitClient()
-report={"yml_id":YML,"source_image_count":len(urls),"source_urls":urls,"source_note":"5 official Norden product-page image URLs only; no third-party sources","uploads":[]}
+report={"yml_id":YML,"source_image_count":len(urls),"source_urls":urls,"source_note":"official Norden API supplier export only; no website scraping or third-party sources","uploads":[]}
 media=[]
 for idx,u in enumerate(urls):
     try:
