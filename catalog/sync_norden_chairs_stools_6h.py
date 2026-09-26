@@ -199,7 +199,9 @@ def kit_prepare(kit):
 
 def kit_stock_price(kit,row,item,msk_id,spb_id):
     vid=s(row.get("id"))
-    stocks=[{"variant_id":vid,"warehouse_id":msk_id,"quantity":item["msk"] if item else 0},{"variant_id":vid,"warehouse_id":spb_id,"quantity":item["spb"] if item else 0}]
+    # User rule for Norden in KIT: СПБ привозной mirrors the Moscow stock.
+    qty=item["msk"] if item else 0
+    stocks=[{"variant_id":vid,"warehouse_id":msk_id,"quantity":qty},{"variant_id":vid,"warehouse_id":spb_id,"quantity":qty}]
     kit.request("POST","/v1/variants/stocks/bulk_update",body={"items":stocks})
     if item and rub(item.get("purchase")) and rub(item["purchase"])>0:
         p=item["purchase"]
@@ -207,7 +209,8 @@ def kit_stock_price(kit,row,item,msk_id,spb_id):
 
 def kit_create(kit,article,item,path,msk_id,spb_id,cats,chars):
     cid=MOD.ensure_category_path(kit,cats,path); prod=kit.create_product(cid); pid=s(prod.get("id"))
-    body={"sku":article,"name":item["name"],"status":"PUBLISHED","product_id":pid,"brand":"Norden","stocks":[{"warehouse_id":msk_id,"quantity":item["msk"],"reserved":0},{"warehouse_id":spb_id,"quantity":item["spb"],"reserved":0}]}
+    qty=item["msk"]
+    body={"sku":article,"name":item["name"],"status":"PUBLISHED","product_id":pid,"brand":"Norden","stocks":[{"warehouse_id":msk_id,"quantity":qty,"reserved":0},{"warehouse_id":spb_id,"quantity":qty,"reserved":0}]}
     if rub(item.get("purchase")) and rub(item["purchase"])>0:
         p=item["purchase"]; body["pricing"]={"price":ms(price(p,"1.65")),"manual_discount_price":ms(price(p,"1.26"))}
     v=kit.create_variant(body); vid=s(v.get("id"))
@@ -246,7 +249,7 @@ def main():
     rep={"started_at":now(),"status":"ВЫПОЛНЯЕТСЯ","source":{},"sheet":{"matched":0,"added":0,"zeroed_missing":0,"ambiguous_yml":0,"possible_duplicates":0},
          "webasyst":{"updated":0,"created":0,"zeroed_missing":0,"ambiguous":0,"errors":[]},"kit":{"updated":0,"created":0,"zeroed_missing":0,"ambiguous":0,"category_review":0,"errors":[]},
          "possible_duplicate_items":[],"category_review_items":[],"complete":False,
-         "rules":{"scope":"только кресла/стулья, без УЦЕНКА","new_table_rows":"остаток > 0; новым считается любой товар без точного буквального YML ID; частичные/сомнительные совпадения добавляются отдельной строкой","new_publish_gate":"создание в Webasyst/KIT только после TRUE в колонке 'Проверено — загрузить в KIT/Webasyst'","schedule":"каждые 6 часов","missing":"остаток 0, цены сохранять","webasyst_price":"закупка×1.23; зачеркнутая×1.65","kit_price":"закупка×1.26; зачеркнутая×1.65","old_norden_workflows":"STOP_ALL_NORDEN сохраняется"}}
+         "rules":{"scope":"только кресла/стулья, без УЦЕНКА","new_table_rows":"остаток > 0; новым считается любой товар без точного буквального YML ID; частичные/сомнительные совпадения добавляются отдельной строкой","new_publish_gate":"создание в Webasyst/KIT только после TRUE в колонке 'Проверено — загрузить в KIT/Webasyst'","schedule":"каждые 6 часов","missing":"остаток 0, цены сохранять","webasyst_price":"закупка×1.23; зачеркнутая×1.65","kit_price":"закупка×1.26; зачеркнутая×1.65","kit_stock":"МСК = фактический остаток Norden МСК; СПБ привозной = тот же остаток, что МСК","old_norden_workflows":"STOP_ALL_NORDEN сохраняется"}}
     src,meta=supplier(); rep["source"]=meta
     sh,ws=sheets(); h,ix,rows=read(ws)
     by_literal=defaultdict(list)
