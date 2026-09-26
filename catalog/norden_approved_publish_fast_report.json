@@ -1,8 +1,8 @@
 {
-  "started_at": "2026-09-26T19:24:21.908438+00:00",
-  "apply": false,
+  "started_at": "2026-09-26T19:26:01.296997+00:00",
+  "apply": true,
   "mode": "APPROVED_ONLY_FAST",
-  "status": "ПРЕДПРОВЕРКА УСПЕШНА",
+  "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
   "selected": [
     {
       "row": 1053,
@@ -42,10 +42,55 @@
     }
   ],
   "preflight_errors": [],
-  "created": [],
+  "created": [
+    {
+      "row": 1054,
+      "yml_id": "CK-2518A-P",
+      "name": "Кресло офисное / Некст блэк / Next black / черная сетка / черная ткань / поясничный упор",
+      "webasyst": {
+        "action": "created",
+        "article": "AF-31662421",
+        "product_id": "1483283",
+        "sku_id": "31662421"
+      },
+      "kit": {
+        "action": "created",
+        "variant_id": "01a0df2f-eb73-7572-b95a-a3fef52bec7f",
+        "product_id": "01a0df2f-ea24-713c-ab49-a4ec47f61d4c",
+        "kit_id": 1596044
+      },
+      "verify": {
+        "webasyst_sku": "AF-31662421",
+        "kit_sku": "AF-31662421",
+        "kit_msk": 40,
+        "kit_spb_transfer": 40,
+        "kit_old": "15180",
+        "kit_sale": "11592"
+      }
+    }
+  ],
   "skipped_loaded": [],
-  "errors": [],
-  "complete": true,
+  "errors": [
+    {
+      "row": 1053,
+      "yml_id": "B1816 3S fabric LE8100-07",
+      "name": "Кресло офисное / Корфу / Corfu  / ткань бирюзовый /алюминиевая база",
+      "webasyst": {
+        "action": "created",
+        "article": "AF-31662420",
+        "product_id": "1483282",
+        "sku_id": "31662420"
+      },
+      "kit": {
+        "action": "created",
+        "variant_id": "01a0df2f-3030-7957-a8f4-1561c0d7ca95",
+        "product_id": "01a0df2f-2f10-7f1e-9ed9-83aae97cd7af",
+        "kit_id": 1596043
+      },
+      "error": "KIT price mismatch: price=44022 sale=33617"
+    }
+  ],
+  "complete": false,
   "rules": {
     "scope": "только отмеченные TRUE",
     "channels": [
@@ -58,5 +103,5 @@
     "kit_stock": "МСК=остаток Norden МСК; СПБ привозной=тот же остаток",
     "markdown": "УЦЕНКА запрещена"
   },
-  "finished_at": "2026-09-26T19:24:59.362854+00:00"
+  "finished_at": "2026-09-26T19:28:08.200211+00:00"
 }
