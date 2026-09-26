@@ -76,7 +76,7 @@ class Client:
         rows=self.items(first); total=self.total(first)
         if total is None or total<=len(rows): return rows
         pages=max(1,math.ceil(total/100)); out=list(rows)
-        def one(p): return self.items(self.req("GET",path,params={"page":p,"per_page":100}))
+        def one(p):\n            q=dict(base); q.update({"page":p,"per_page":100})\n            return self.items(self.req("GET",path,params=q))
         with ThreadPoolExecutor(max_workers=6) as pool:
             fs=[pool.submit(one,p) for p in range(2,pages+1)]
             for f in as_completed(fs): out.extend(f.result())
@@ -122,7 +122,7 @@ def main():
                 k=norm(v)
                 if k: idx[k].add(r["article"])
         cli=Client()
-        chars=cli.all_collection("/v1/characteristics")
+        chars=cli.all_collection("/v1/characteristics",{"status":"ACTIVE"})
         ids=defaultdict(list)
         wanted={norm(x) for x in IDENTITY_TITLES}
         for c in chars:
