@@ -26,12 +26,16 @@ YML="B1816 3S fabric LE8100-07"
 VID="01a0df2f-3030-7957-a8f4-1561c0d7ca95"
 WA_PID="1483282"
 
-src,_=MOD.source_from_xml(short=False)
-item=src[YML]
-urls=list(dict.fromkeys(item.get("images") or []))
+urls=[
+    "https://cdn.express-office.ru/3418923-original/konferenc-kreslo-korfu-b1816-3s-fabric-le8100-07-tkan-biryuzovaya-alyuminij.jpg",
+    "https://cdn.express-office.ru/3418924-original/konferenc-kreslo-korfu-b1816-3s-fabric-le8100-07-tkan-biryuzovaya-alyuminij.jpg",
+    "https://cdn.express-office.ru/3418922-original/konferenc-kreslo-korfu-b1816-3s-fabric-le8100-07-tkan-biryuzovaya-alyuminij.jpg",
+    "https://cdn.express-office.ru/3418921-original/konferenc-kreslo-korfu-b1816-3s-fabric-le8100-07-tkan-biryuzovaya-alyuminij.jpg",
+    "https://cdn.express-office.ru/3418920-original/konferenc-kreslo-korfu-b1816-3s-fabric-le8100-07-tkan-biryuzovaya-alyuminij.jpg",
+]
 
 kit=BRIDGE.KitClient()
-report={"yml_id":YML,"source_image_count":len(urls),"source_urls":urls,"uploads":[]}
+report={"yml_id":YML,"source_image_count":len(urls),"source_urls":urls,"source_note":"5 product gallery mirrors used because 4 Norden URLs self-redirect","uploads":[]}
 media=[]
 for idx,u in enumerate(urls):
     try:
