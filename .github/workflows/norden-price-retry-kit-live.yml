@@ -1,0 +1,75 @@
+name: Norden KIT live price remap retry
+
+on:
+  push:
+    paths:
+      - 'catalog/norden_price_retry_kit_live_trigger.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-price-retry-kit-live
+  cancel-in-progress: false
+
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install --disable-pip-version-check requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
+
+      - name: Remap live KIT Norden cards and update prices
+        id: sync
+        continue-on-error: true
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
+          CATALOG_SHEET: 'Норден'
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python catalog/retry_norden_kit_live_prices.py
+
+      - name: Add report to summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f catalog/norden_price_retry_kit_live_report.json ]; then
+            echo '## Norden KIT live price remap retry' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat catalog/norden_price_retry_kit_live_report.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Commit report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog/norden_price_retry_kit_live_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m 'Save Norden KIT live price remap report'
+            for i in 1 2 3 4 5; do
+              git push origin HEAD:main && break
+              git fetch origin main
+              git rebase origin/main || git rebase --abort
+              sleep $((i * 3))
+            done
+          fi
+
+      - name: Fail if retry failed
+        if: always()
+        run: test "${{ steps.sync.outcome }}" = "success"
