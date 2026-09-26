@@ -1,0 +1,28 @@
+name: Probe Norden API Corfu images
+on:
+  push:
+    paths: ['catalog/probe-norden-api-corfu-trigger.txt']
+permissions: {contents: write}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - env:
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+        run: python catalog/probe_norden_api_corfu_images.py
+      - if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add catalog/norden_api_corfu_images.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Norden API Corfu image probe"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
