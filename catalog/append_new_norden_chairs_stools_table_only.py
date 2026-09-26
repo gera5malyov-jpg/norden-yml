@@ -15,6 +15,8 @@ FULL_XML="https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=N
 PRICE_XML="https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.group+-K8%25.xml"
 OUT=Path("catalog/norden_table_only_append_report.json")
 APPROVAL="Проверено — загрузить в KIT/Webasyst"
+OZON_APPROVAL="Проверено — загрузить в Ozon"
+YANDEX_APPROVAL="Проверено — загрузить в Яндекс.Маркет"
 
 def s(v): return str(v or "").strip()
 def ntext(v): return re.sub(r"\s+"," ",unicodedata.normalize("NFKC",s(v)).casefold()).strip()
@@ -91,7 +93,7 @@ ws=gc.open_by_key(SID).worksheet(SHEET)
 vals=ws.get_all_values()
 headers=list(vals[0])
 idx={h:i for i,h in enumerate(headers)}
-required=["Название","YML ID","Бренд","Источник","Тип Webasyst при загрузке","Закупка","РРЦ поставщика","Остаток",APPROVAL]
+required=["Название","YML ID","Бренд","Источник","Тип Webasyst при загрузке","Закупка","РРЦ поставщика","Остаток",APPROVAL,OZON_APPROVAL,YANDEX_APPROVAL]
 missing=[h for h in required if h not in idx]
 if missing: raise RuntimeError("Missing columns: "+", ".join(missing))
 
@@ -157,6 +159,8 @@ for x in new:
     put("Остаток всего",x["total"])
     put("Дата источника",datetime.now(timezone.utc).isoformat())
     put(APPROVAL,False)
+    put(OZON_APPROVAL,False)
+    put(YANDEX_APPROVAL,False)
     images,image_source=supplier_export_images(x["yml"],x.get("images") or [])
     if images:
         put("Основное фото",'=IMAGE("'+images[0].replace('"','""')+'")')
@@ -174,6 +178,15 @@ if rows:
       values=rows,
       value_input_option="USER_ENTERED"
     )
+    # Ensure all three approval columns render as native checkboxes on newly appended rows.
+    for col in (APPROVAL,OZON_APPROVAL,YANDEX_APPROVAL):
+        ci=idx[col]
+        ws.spreadsheet.batch_update({"requests":[{
+          "setDataValidation":{
+            "range":{"sheetId":ws.id,"startRowIndex":start-1,"endRowIndex":start-1+len(rows),"startColumnIndex":ci,"endColumnIndex":ci+1},
+            "rule":{"condition":{"type":"BOOLEAN"},"strict":True,"showCustomUi":True}
+          }
+        }]})
 
 report={
   "ok":True,
