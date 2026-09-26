@@ -1,0 +1,27 @@
+name: Probe Yandex chair category parameters
+on:
+  push:
+    paths: ['catalog/probe_yandex_chair_parameters_trigger.txt']
+permissions: {contents: write}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - env:
+          YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+        run: python catalog/probe_yandex_chair_parameters.py
+      - if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add catalog/yandex_chair_parameters_probe.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Yandex chair parameter probe"
+            git pull --rebase origin main || true
+            git push origin HEAD:main || true
+          fi
