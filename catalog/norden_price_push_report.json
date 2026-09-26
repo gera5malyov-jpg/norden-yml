@@ -1,0 +1,59 @@
+{
+  "started_at": "2026-09-26T10:56:56.982469+00:00",
+  "source": {
+    "spreadsheet_id": "1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w",
+    "sheet": "Норден"
+  },
+  "rounding": "Ozon/Yandex: округление вверх до целого рубля; KIT/Webasyst: значения из таблицы до копеек",
+  "channels": {
+    "Ozon": {
+      "status": "УСПЕШНО",
+      "errors": [],
+      "warnings": [],
+      "targeted": 338,
+      "updated": 338,
+      "api_error_count": 0,
+      "api_errors": [],
+      "verified": 338,
+      "verification_mismatch_sample": []
+    },
+    "Yandex": {
+      "status": "ОШИБКА",
+      "errors": [
+        "HTTP 400: {\"status\":\"ERROR\",\"errors\":[{\"code\":\"BAD_REQUEST\",\"message\":\"Forbidden to use Shop SKUs with any other filters.\"}]}"
+      ],
+      "warnings": [],
+      "targeted": 664,
+      "accepted": 664,
+      "api_errors": [],
+      "api_error_count": 0
+    },
+    "KIT": {
+      "status": "ОШИБКА",
+      "errors": [
+        "NORDEN_STOPPED: all Norden operations are disabled by user"
+      ],
+      "warnings": []
+    },
+    "Webasyst": {
+      "status": "УСПЕШНО",
+      "errors": [],
+      "warnings": [],
+      "webasyst_products": 1049,
+      "duplicate_skus": [],
+      "targeted": 719,
+      "updated": 719,
+      "unchanged": 0,
+      "missing": 2,
+      "missing_sample": [
+        "AF-31223180",
+        "алюминиевая база / серая ткань CF"
+      ],
+      "verified": 719,
+      "verification_mismatch_sample": []
+    }
+  },
+  "catalog_rows": 1051,
+  "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
+  "finished_at": "2026-09-26T11:03:27.961190+00:00"
+}
