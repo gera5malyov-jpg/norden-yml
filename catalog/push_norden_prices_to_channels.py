@@ -645,27 +645,43 @@ def sync_yandex(rows, report):
 
 
 def main():
+    channel_order = [
+        ("KIT", sync_kit),
+        ("Webasyst", sync_webasyst),
+        ("Ozon", sync_ozon),
+        ("Yandex", sync_yandex),
+    ]
+    aliases = {name.casefold(): name for name, _ in channel_order}
+    raw_channels = os.environ.get("SYNC_CHANNELS", "KIT,Webasyst,Ozon,Yandex")
+    requested = [x.strip().casefold() for x in raw_channels.split(",") if x.strip()]
+    unknown = [x for x in requested if x not in aliases]
+    if unknown:
+        raise SystemExit("Unknown SYNC_CHANNELS: " + ", ".join(unknown))
+    selected = {aliases[x] for x in requested}
+
     report = {
         "started_at": now_iso(),
         "source": {"spreadsheet_id": SHEET_ID, "sheet": SHEET_NAME},
+        "selected_channels": [name for name, _ in channel_order if name in selected],
         "rounding": "Ozon/Yandex: округление вверх до целого рубля; KIT/Webasyst: значения из таблицы до копеек",
         "channels": {
-            "Ozon": {"status": "НЕ ЗАПУЩЕНО", "errors": [], "warnings": []},
-            "Yandex": {"status": "НЕ ЗАПУЩЕНО", "errors": [], "warnings": []},
-            "KIT": {"status": "НЕ ЗАПУЩЕНО", "errors": [], "warnings": []},
-            "Webasyst": {"status": "НЕ ЗАПУЩЕНО", "errors": [], "warnings": []},
+            "Ozon": {"status": "ПРОПУЩЕНО", "errors": [], "warnings": []},
+            "Yandex": {"status": "ПРОПУЩЕНО", "errors": [], "warnings": []},
+            "KIT": {"status": "ПРОПУЩЕНО", "errors": [], "warnings": []},
+            "Webasyst": {"status": "ПРОПУЩЕНО", "errors": [], "warnings": []},
         },
     }
     exit_code = 0
     try:
         rows = load_sheet()
         report["catalog_rows"] = len(rows)
-        # Independent channels: one failure must not block the other three.
-        sync_kit(rows, report)
-        sync_webasyst(rows, report)
-        sync_ozon(rows, report)
-        sync_yandex(rows, report)
-        bad = [k for k, v in report["channels"].items() if v["status"] not in ("УСПЕШНО",)]
+        # Run only explicitly selected channels. Default remains all four channels.
+        for name, fn in channel_order:
+            if name not in selected:
+                continue
+            report["channels"][name]["status"] = "НЕ ЗАПУЩЕНО"
+            fn(rows, report)
+        bad = [name for name in selected if report["channels"][name]["status"] != "УСПЕШНО"]
         report["status"] = "УСПЕШНО" if not bad else "ЗАВЕРШЕНО С ОШИБКАМИ"
         if bad:
             exit_code = 1
