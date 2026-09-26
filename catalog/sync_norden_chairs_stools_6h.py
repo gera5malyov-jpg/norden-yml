@@ -291,7 +291,8 @@ def main():
                         "Источник":"Norden","Тип Webasyst при загрузке":TYPE,"Закупка":ms(i["purchase"]),"РРЦ поставщика":ms(i["rrp"]),"Остаток":i["total"],
                         "Проверено — загрузить в KIT/Webasyst":False}.items(): r[ix[c]]=v
             arr.append(r)
-        start=len(rows)+2
+        last_real=max([r["_row"] for r in rows if s(r.get("Артикул")) or s(r.get("Название")) or s(r.get("YML ID"))] or [1])
+        start=last_real+1
         if ws.row_count<start+len(arr)+5: ws.resize(rows=start+len(arr)+5)
         for j in range(0,len(arr),50):
             b=arr[j:j+50]; ws.update(range_name=f"A{start+j}:{gspread.utils.rowcol_to_a1(start+j+len(b)-1,len(h))}",values=b,value_input_option="USER_ENTERED")
@@ -305,8 +306,9 @@ def main():
         prior_hints=likely_duplicate(i,[x for x in rows if x["_row"]!=r["_row"]])
         if prior_hints:
             rep["sheet"]["possible_duplicates"]+=1
-            rep["possible_duplicate_items"].append({"yml_id":i["article"],"name":i["name"],"hits":prior_hints,"stage":"before_webasyst"})
-            continue
+            rep["possible_duplicate_items"].append({"yml_id":i["article"],"name":i["name"],"hits":prior_hints,"stage":"before_webasyst","action":"MANUAL_APPROVAL_GOVERNS_NEW_CREATION"})
+            if not art and not approved(r.get("Проверено — загрузить в KIT/Webasyst")):
+                continue
         try:
             if len(m)>1: rep["webasyst"]["ambiguous"]+=1; continue
             if len(m)==1: wa_update(wa,wstock,m[0][1],i); rep["webasyst"]["updated"]+=1
@@ -328,7 +330,7 @@ def main():
                 try: wa_update(wa,wstock,m[0][1],None); rep["webasyst"]["zeroed_missing"]+=1
                 except Exception as e: rep["webasyst"]["errors"].append({"article":art,"error":str(e)[:800]})
     cells(ws,ix,wchanges)
-    h,ix,rows=read(ws); byone={nc(r.get("YML ID")):r for r in rows if s(r.get("YML ID"))}
+    h,ix,rows=read(ws); byone={s(r.get("YML ID")):r for r in rows if s(r.get("YML ID"))}
     kit=BRIDGE.KitClient(); msk_id,spb_id,kby,cats,chars=kit_prepare(kit); rev=[]
     for k,i in src.items():
         r=byone.get(s(i.get("article")))
