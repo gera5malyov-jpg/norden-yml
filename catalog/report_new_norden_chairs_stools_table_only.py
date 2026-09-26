@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import importlib.util, json, os, re, sys, unicodedata
+import xml.etree.ElementTree as ET
 from collections import defaultdict
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -60,12 +61,27 @@ def main():
     apierr=None
     if len(src)<1000:
         raise RuntimeError(f"Safety stop: Norden full catalog too small ({len(src)})")
+    # Current availability: only the two working Norden warehouses used by the catalog.
+    price_root=ET.fromstring(MOD.download_bytes(MOD.PRICE_XML_URL))
+    stock_total={}
+    for n in price_root.iter("Номенклатура"):
+        article=s(n.findtext("Артикул"))
+        if not article:
+            continue
+        total=0
+        for st in n.findall("СвободныйОстаток"):
+            wh=s(st.attrib.get("Склад"))
+            if wh in ("Основной склад","Питер Основной склад"):
+                total += MOD.parse_stock(st.text) or 0
+        stock_total[nc(article)]=total
+
     targets=[]
     for a,i in src.items():
         if not target_item(i):
             continue
         x=dict(i)
         x["article"]=s(x.get("article") or a)
+        x["stock_total"]=stock_total.get(nc(x["article"]),0)
         targets.append(x)
     if len(targets)<100:
         raise RuntimeError(f"Safety stop: chairs/stools scope too small ({len(targets)})")
@@ -110,12 +126,15 @@ def main():
         if hits:
             possible.append({"supplier":i,"hits":hits})
             continue
+        if int(i.get("stock_total") or 0) <= 0:
+            continue
         truly_new.append({
             "yml_id":i["article"],
             "name":s(i.get("name")),
             "category_path":i.get("category_path") or [],
             "images":i.get("images") or [],
             "description":s(i.get("description")),
+            "stock_total":i.get("stock_total",0),
             "source_item":i,
         })
 
