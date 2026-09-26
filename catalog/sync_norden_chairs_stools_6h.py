@@ -2,6 +2,7 @@
 from __future__ import annotations
 import importlib.util, json, os, re, sys, time, unicodedata
 import xml.etree.ElementTree as ET
+from urllib.parse import urlparse
 from collections import defaultdict
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
@@ -76,6 +77,13 @@ def target_item(i):
     return ("кресл" in path or "стул" in path) and actual_name(i.get("name"))
 def imgf(u): return '=IMAGE("'+s(u).replace('"','""')+'")' if s(u) else ""
 def extimgs(urls): return "\n".join(f"[extimg]\n{s(u)}\n[/extimg]" for u in dict.fromkeys(urls or []) if s(u))
+
+def official_norden_image_url(u):
+    try:
+        host=(urlparse(s(u)).hostname or "").casefold()
+    except Exception:
+        return False
+    return host=="norden.group" or host.endswith(".norden.group")
 
 def kit_public_image_urls(kit, variant_id):
     full=kit.request("GET",f"/v1/variants/{s(variant_id)}")
@@ -247,7 +255,11 @@ def kit_create(kit,article,item,path,msk_id,spb_id,cats,chars):
     desired=MOD.build_source_characteristics(item,kit,chars,bytitle,code,art,article)
     patch={"characteristics":desired}
     if s(item.get("description")): patch["description"]=s(item["description"])
-    source_images=list(dict.fromkeys([s(u) for u in (item.get("images") or []) if s(u)]))[:20]
+    all_images=list(dict.fromkeys([s(u) for u in (item.get("images") or []) if s(u)]))[:20]
+    forbidden=[u for u in all_images if not official_norden_image_url(u)]
+    if forbidden:
+        raise RuntimeError(f"Norden image source violation: only norden.group is allowed; forbidden={json.dumps(forbidden,ensure_ascii=False)}")
+    source_images=all_images
     media=[]; image_errors=[]
     for u in source_images:
         try:
@@ -286,7 +298,7 @@ def main():
     rep={"started_at":now(),"status":"ВЫПОЛНЯЕТСЯ","source":{},"sheet":{"matched":0,"added":0,"zeroed_missing":0,"ambiguous_yml":0,"possible_duplicates":0},
          "webasyst":{"updated":0,"created":0,"zeroed_missing":0,"ambiguous":0,"errors":[]},"kit":{"updated":0,"created":0,"zeroed_missing":0,"ambiguous":0,"category_review":0,"errors":[]},
          "possible_duplicate_items":[],"category_review_items":[],"complete":False,
-         "rules":{"scope":"только кресла/стулья, без УЦЕНКА","new_table_rows":"остаток > 0; новым считается любой товар без точного буквального YML ID; частичные/сомнительные совпадения добавляются отдельной строкой","new_publish_gate":"создание в Webasyst/KIT только после TRUE в колонке 'Проверено — загрузить в KIT/Webasyst'","schedule":"каждые 6 часов","missing":"остаток 0, цены сохранять","webasyst_price":"закупка×1.23; зачеркнутая×1.65","kit_price":"закупка×1.26; зачеркнутая×1.65","kit_stock":"МСК = фактический остаток Norden МСК; СПБ привозной = тот же остаток, что МСК","kit_images":"все уникальные фото источника обязательны; молча пропускать ошибки нельзя; число фото проверять после записи","old_norden_workflows":"STOP_ALL_NORDEN сохраняется"}}
+         "rules":{"scope":"только кресла/стулья, без УЦЕНКА","new_table_rows":"остаток > 0; новым считается любой товар без точного буквального YML ID; частичные/сомнительные совпадения добавляются отдельной строкой","new_publish_gate":"создание в Webasyst/KIT только после TRUE в колонке 'Проверено — загрузить в KIT/Webasyst'","schedule":"каждые 6 часов","missing":"остаток 0, цены сохранять","webasyst_price":"закупка×1.23; зачеркнутая×1.65","kit_price":"закупка×1.26; зачеркнутая×1.65","kit_stock":"МСК = фактический остаток Norden МСК; СПБ привозной = тот же остаток, что МСК","kit_images":"только официальные URL norden.group; сторонние сайты/зеркала запрещены; все уникальные фото источника обязательны; молча пропускать ошибки нельзя; число фото проверять после записи; битый Norden URL = ошибка, не повод брать фото с другого сайта","old_norden_workflows":"STOP_ALL_NORDEN сохраняется"}}
     src,meta=supplier(); rep["source"]=meta
     sh,ws=sheets(); h,ix,rows=read(ws)
     by_literal=defaultdict(list)
