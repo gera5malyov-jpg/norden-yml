@@ -88,6 +88,12 @@ for rn,row in enumerate(vals[1:],2):
     art=cell(row,"Артикул")
     if not art or (TARGETS and art not in TARGETS): continue
     if not truth(cell(row,"Проверено — загрузить в Ozon и Яндекс.Маркет")): continue
+    # Approval remains TRUE as an audit trail. Once both new marketplace cards were successfully
+    # created by this pipeline, scheduled checks must never update them again.
+    oz_status=cell(row,"Ozon статус")
+    ya_status=cell(row,"Yandex статус")
+    if oz_status.startswith("CREATED_BY_PIPELINE") and ya_status.startswith("CREATED_BY_PIPELINE"):
+        continue
     if not cell(row,"KIT variant_id") or not cell(row,"KIT ID") or not cell(row,"Webasyst product_id"): continue
     selected.append({"rn":rn,"row":row,"article":art})
 
