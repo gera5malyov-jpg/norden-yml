@@ -191,8 +191,8 @@ def main():
            "norden_msk":msk,"norden_spb":spb,"norden_total":total,
            "webasyst_sale":money(purchase*Decimal("1.23")) if purchase else "",
            "webasyst_old":money(purchase*Decimal("1.65")) if purchase else "",
-           "kit_sale":money(purchase*Decimal("1.26")) if purchase else "",
-           "kit_old":money(purchase*Decimal("1.65")) if purchase else "",
+           "kit_sale":str(MOD.ceil_rub(purchase*Decimal("1.26"))) if purchase else "",
+           "kit_old":str(MOD.ceil_rub(purchase*Decimal("1.65"))) if purchase else "",
            "kit_category":" > ".join(path),"kit_category_id":cid,
            "kit_exact_sku_matches":len(kit_hits),"errors":errs}
         rep["selected"].append(e)
@@ -256,8 +256,8 @@ def main():
             if got.get(msk_id)!=item["msk"] or got.get(spb_id)!=item["msk"]:
                 raise RuntimeError(f"KIT stock mismatch: {got}")
             price_obj=full.get("pricing") if isinstance(full.get("pricing"),dict) else full
-            exp_old=money(item["purchase"]*Decimal("1.65"))
-            exp_sale=money(item["purchase"]*Decimal("1.26"))
+            exp_old=str(MOD.ceil_rub(item["purchase"]*Decimal("1.65")))
+            exp_sale=str(MOD.ceil_rub(item["purchase"]*Decimal("1.26")))
             if dec(price_obj.get("price"))!=dec(exp_old) or dec(price_obj.get("manual_discount_price"))!=dec(exp_sale):
                 raise RuntimeError(f"KIT price mismatch: price={price_obj.get('price')} sale={price_obj.get('manual_discount_price')}")
 
