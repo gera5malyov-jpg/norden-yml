@@ -270,6 +270,10 @@ def main():
                 result["kit"]={"action":"created","variant_id":vid,"product_id":pid,"kit_id":kid}
                 kby[SYNC.nc(article)].append(full if isinstance(full,dict) else {"id":vid,"sku":article})
 
+            wa_pid=result["webasyst"].get("pid") or result["webasyst"].get("product_id") or r.get("Webasyst product_id")
+            SYNC.wa_set_kit_id(wa,wa_pid,result["kit"].get("kit_id"))
+            result["webasyst"]["kit_id"]=str(result["kit"].get("kit_id") or "")
+
             # After KIT creation/update, force Webasyst short description to use KIT-hosted image URLs.
             kit_urls=SYNC.kit_public_image_urls(kit,result["kit"]["variant_id"])
             SYNC.wa_replace_summary_with_kit_images(wa,result["webasyst"].get("pid") or result["webasyst"].get("product_id") or r.get("Webasyst product_id"),kit_urls)
