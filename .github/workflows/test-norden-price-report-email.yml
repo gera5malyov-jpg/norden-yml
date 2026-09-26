@@ -1,0 +1,22 @@
+name: Test Norden price report email
+on:
+  push:
+    paths: ['catalog/test_norden_price_report_email_trigger.txt']
+permissions: {contents: read}
+jobs:
+  mail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: 'shop@office-mag.com'
+          PRICE_REPORT_FILE: 'catalog/norden_price_push_report.json'
+          WORKFLOW_NAME: 'ТЕСТ — Norden price report email'
+          SYNC_OUTCOME: 'success'
+          RUN_URL: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        run: python catalog/send_norden_price_report.py
