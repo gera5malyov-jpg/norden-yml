@@ -99,14 +99,13 @@ def req_json(session, method, url, *, headers=None, params=None, body=None, atte
             if r.status_code >= 400:
                 raise RuntimeError(f"HTTP {r.status_code}: {r.text[:1500]}")
             return r.json() if r.content else {}
-        except Exception as exc:
+        except requests.RequestException as exc:
             last = exc
             if attempt + 1 < attempts:
                 time.sleep(min(20, 2 ** attempt))
                 continue
             raise
     raise last or RuntimeError("request failed")
-
 
 def load_sheet():
     raw = os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]
@@ -262,19 +261,21 @@ def sync_kit(rows, report):
                 part["warnings"].append(f"minimum field {field}: {str(exc)[:300]}")
         part["minimum_price_field"] = minimum_field
         if not minimum_field:
-            raise RuntimeError("KIT API не подтвердил поле минимальной цены; обновление остановлено, чтобы не потерять ограничение цены")
+            part["warnings"].append("KIT API не поддерживает отдельное поле минимальной цены; обновляются только цена до скидки и цена со скидкой. KIT Минимальная цена остаётся внутренним расчётным полем таблицы.")
 
         updated = 0
         api_errors = []
         for batch in chunks(updates, 500):
             items = []
             for u in batch:
-                items.append({
+                item = {
                     "variant_id": u["variant_id"],
                     "price": u["old"],
                     "manual_discount_price": u["sale"],
-                    minimum_field: u["minimum"],
-                })
+                }
+                if minimum_field:
+                    item[minimum_field] = u["minimum"]
+                items.append(item)
             try:
                 kit_req("POST", "/v1/variants/prices/bulk_update", body={"items": items})
                 updated += len(batch)
@@ -302,12 +303,13 @@ def sync_kit(rows, report):
                 v = kit_req("GET", f'/v1/variants/{u["variant_id"]}')
                 current_old = money(v.get("price") or (v.get("pricing") or {}).get("price"))
                 current_sale = money(v.get("manual_discount_price") or (v.get("pricing") or {}).get("manual_discount_price"))
-                current_min = money(v.get(minimum_field) or (v.get("pricing") or {}).get(minimum_field))
+                current_min = money(v.get(minimum_field) or (v.get("pricing") or {}).get(minimum_field)) if minimum_field else None
                 ok = (
                     current_old == money(u["old"])
                     and current_sale == money(u["sale"])
-                    and current_min == money(u["minimum"])
                 )
+                if minimum_field:
+                    ok = ok and current_min == money(u["minimum"])
                 if ok:
                     verified += 1
                 else:
