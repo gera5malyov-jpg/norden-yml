@@ -27,14 +27,17 @@ def get(url):
     r.raise_for_status()
     return r.content
 def is_target(name,group):
-    x=(ntext(name)+" "+ntext(group)).replace("ё","е")
-    if "уценк" in x:
+    nn=ntext(name).replace("ё","е")
+    gg=ntext(group).replace("ё","е")
+    # Only actual chairs/stools: the product name itself must identify a chair/stool.
+    if "кресл" not in nn and "стул" not in nn:
+        return False
+    if "уценк" in nn or "уценк" in gg:
         return False
     excluded=("чехол","сменный чехол","подголовник","подлокотник","крестовина","газлифт","ролик","колеса","колесо","механизм","сиденье","спинка")
-    nn=ntext(name).replace("ё","е")
-    if nn.startswith(excluded):
+    if any(x in nn for x in excluded):
         return False
-    return ("кресл" in x or "стул" in x)
+    return True
 
 full=ET.fromstring(get(FULL_XML))
 price=ET.fromstring(get(PRICE_XML))
