@@ -1,0 +1,78 @@
+name: Norden price retry Ozon and Webasyst
+
+on:
+  push:
+    paths:
+      - 'catalog/norden_price_retry_ozon_webasyst_trigger.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-price-retry-ozon-webasyst
+  cancel-in-progress: false
+
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install --disable-pip-version-check requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
+
+      - name: Retry Ozon and Webasyst prices
+        id: sync
+        continue-on-error: true
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
+          CATALOG_SHEET: 'Норден'
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: python catalog/retry_norden_ozon_webasyst_prices.py
+
+      - name: Add report to summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f catalog/norden_price_retry_ozon_webasyst_report.json ]; then
+            echo '## Norden Ozon + Webasyst price retry' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat catalog/norden_price_retry_ozon_webasyst_report.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Commit report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog/norden_price_retry_ozon_webasyst_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m 'Save Norden Ozon and Webasyst price retry report'
+            for i in 1 2 3 4 5; do
+              git push origin HEAD:main && break
+              git fetch origin main
+              git rebase origin/main || git rebase --abort
+              sleep $((i * 3))
+            done
+          fi
+
+      - name: Fail if retry failed
+        if: always()
+        run: test "${{ steps.sync.outcome }}" = "success"
