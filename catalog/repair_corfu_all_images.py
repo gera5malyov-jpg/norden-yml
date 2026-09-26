@@ -27,15 +27,15 @@ VID="01a0df2f-3030-7957-a8f4-1561c0d7ca95"
 WA_PID="1483282"
 
 urls=[
-    "https://cdn.express-office.ru/3418923-original/konferenc-kreslo-korfu-b1816-3s-fabric-le8100-07-tkan-biryuzovaya-alyuminij.jpg",
-    "https://cdn.express-office.ru/3418924-original/konferenc-kreslo-korfu-b1816-3s-fabric-le8100-07-tkan-biryuzovaya-alyuminij.jpg",
-    "https://cdn.express-office.ru/3418922-original/konferenc-kreslo-korfu-b1816-3s-fabric-le8100-07-tkan-biryuzovaya-alyuminij.jpg",
-    "https://cdn.express-office.ru/3418921-original/konferenc-kreslo-korfu-b1816-3s-fabric-le8100-07-tkan-biryuzovaya-alyuminij.jpg",
-    "https://cdn.express-office.ru/3418920-original/konferenc-kreslo-korfu-b1816-3s-fabric-le8100-07-tkan-biryuzovaya-alyuminij.jpg",
+    "https://norden.group/images/thumbnails/1140/960/detailed/12/00-00010488___B1816_3S_fabric_LE8100-07_438e761b-1102-11ef-badb-b44e9407c834.jpg",
+    "https://norden.group/images/thumbnails/1140/960/detailed/721/00-00010488___B1816_3S_fabric_LE8100-07_47b22bfc-3002-11f0-bb0d-c5a378e5bbc4.jpg",
+    "https://norden.group/images/thumbnails/1140/960/detailed/721/00-00010488___B1816_3S_fabric_LE8100-07_47b22bfd-3002-11f0-bb0d-c5a378e5bbc4.jpg",
+    "https://norden.group/images/thumbnails/1140/960/detailed/721/00-00010488___B1816_3S_fabric_LE8100-07_47b22bfe-3002-11f0-bb0d-c5a378e5bbc4.jpg",
+    "https://norden.group/images/thumbnails/1140/960/detailed/721/00-00010488___B1816_3S_fabric_LE8100-07_47b22bfb-3002-11f0-bb0d-c5a378e5bbc4.jpg",
 ]
 
 kit=BRIDGE.KitClient()
-report={"yml_id":YML,"source_image_count":len(urls),"source_urls":urls,"source_note":"5 product gallery mirrors used because 4 Norden URLs self-redirect","uploads":[]}
+report={"yml_id":YML,"source_image_count":len(urls),"source_urls":urls,"source_note":"5 official Norden product-page image URLs only; no third-party sources","uploads":[]}
 media=[]
 for idx,u in enumerate(urls):
     try:
