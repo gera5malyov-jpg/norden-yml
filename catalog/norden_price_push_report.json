@@ -1,29 +1,29 @@
 {
-  "started_at": "2026-09-26T17:08:18.229081+00:00",
+  "started_at": "2026-09-26T17:21:18.930703+00:00",
   "source": {
     "spreadsheet_id": "1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w",
     "sheet": "Норден"
   },
   "selected_channels": [
-    "Ozon"
+    "Yandex"
   ],
   "rounding": "Ozon/Yandex: округление вверх до целого рубля; KIT/Webasyst: значения из таблицы до копеек",
   "channels": {
     "Ozon": {
-      "status": "УСПЕШНО",
-      "errors": [],
-      "warnings": [],
-      "targeted": 338,
-      "updated": 338,
-      "api_error_count": 0,
-      "api_errors": [],
-      "verified": 338,
-      "verification_mismatch_sample": []
-    },
-    "Yandex": {
       "status": "ПРОПУЩЕНО",
       "errors": [],
       "warnings": []
+    },
+    "Yandex": {
+      "status": "УСПЕШНО",
+      "errors": [],
+      "warnings": [],
+      "targeted": 664,
+      "accepted": 664,
+      "api_errors": [],
+      "api_error_count": 0,
+      "verified_immediately": 664,
+      "pending_or_mismatch_sample": []
     },
     "KIT": {
       "status": "ПРОПУЩЕНО",
@@ -38,5 +38,5 @@
   },
   "catalog_rows": 1051,
   "status": "УСПЕШНО",
-  "finished_at": "2026-09-26T17:08:26.172710+00:00"
+  "finished_at": "2026-09-26T17:21:35.338958+00:00"
 }
