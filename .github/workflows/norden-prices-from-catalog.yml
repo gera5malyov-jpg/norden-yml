@@ -1,0 +1,81 @@
+name: Norden prices from Catalog to all channels
+
+on:
+  push:
+    paths:
+      - 'catalog/norden_price_push_trigger.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-price-push-all-channels
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install --disable-pip-version-check requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
+
+      - name: Push Norden prices from Catalog
+        id: sync
+        continue-on-error: true
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
+          CATALOG_SHEET: 'Норден'
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+        run: python catalog/push_norden_prices_to_channels.py
+
+      - name: Add report to job summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f catalog/norden_price_push_report.json ]; then
+            echo '## Norden price sync report' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat catalog/norden_price_push_report.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Commit report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog/norden_price_push_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m 'Save Norden price sync report'
+            for i in 1 2 3 4 5; do
+              git push origin HEAD:main && break
+              git fetch origin main
+              git rebase origin/main || git rebase --abort
+              sleep $((i * 3))
+            done
+          fi
+
+      - name: Fail if sync failed
+        if: always()
+        run: test "${{ steps.sync.outcome }}" = "success"
