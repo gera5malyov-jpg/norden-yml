@@ -21,11 +21,25 @@ jobs:
       - name: Установить зависимости
         run: pip install --disable-pip-version-check requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
       - name: Обновить только существующие строки
+        id: sync
+        continue-on-error: true
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
           CATALOG_SHEET: 'Норден'
         run: python catalog/update_norden_supplier_prices_stocks.py
+      - name: Email price update report
+        if: always()
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: 'shop@office-mag.com'
+          PRICE_REPORT_FILE: 'catalog/norden_supplier_price_stock_report.json'
+          WORKFLOW_NAME: '${{ github.workflow }}'
+          SYNC_OUTCOME: '${{ steps.sync.outcome }}'
+          RUN_URL: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        run: python catalog/send_norden_price_report.py
+
       - name: Сохранить отчёт
         if: always()
         run: |
@@ -36,3 +50,7 @@ jobs:
             git commit -m "Обновить отчёт цен и остатков Norden"
             git push
           fi
+
+      - name: Fail if supplier price sync failed
+        if: always()
+        run: test "${{ steps.sync.outcome }}" = "success"
