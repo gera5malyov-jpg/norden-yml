@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import importlib.util, json, os, sys, time
+import importlib.util, json, os, sys, time, requests
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
