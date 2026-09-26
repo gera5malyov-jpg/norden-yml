@@ -244,6 +244,11 @@ def main():
             pid=s(full.get("product_id")); kid=full.get("kit_id")
             result["kit"]={"action":"created","variant_id":vid,"product_id":pid,"kit_id":kid}
 
+            # After KIT creation, replace Webasyst short-description image links with public KIT URLs.
+            kit_urls=SYNC.kit_public_image_urls(kit,vid)
+            SYNC.wa_replace_summary_with_kit_images(wa,cr["pid"],kit_urls)
+            result["webasyst"]["kit_image_urls"]=kit_urls
+
             # Verify Webasyst SKU.
             wa_skus=SYNC.listify(wa.call("shop.product.skus.getList",params={"product_id":cr["pid"]}),("skus","items"))
             exact_wa=[x for x in wa_skus if s(x.get("sku"))==article]
