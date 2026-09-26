@@ -10,6 +10,7 @@ from google.oauth2.service_account import Credentials
 SID=os.environ["CATALOG_SPREADSHEET_ID"].strip()
 SHEET=os.environ.get("CATALOG_SHEET","Норден").strip()
 SA=os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]
+NORDEN_SECRET=os.environ.get("NORDEN_SECRET","").strip()
 FULL_XML="https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.xml"
 PRICE_XML="https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.group+-K8%25.xml"
 OUT=Path("catalog/norden_table_only_append_report.json")
@@ -99,6 +100,29 @@ existing={s(r[idx["YML ID"]]) for r in vals[1:] if idx["YML ID"]<len(r) and s(r[
 new=[x for x in items if x["yml"] not in existing]
 new.sort(key=lambda x:(x["name"],x["yml"]))
 
+def supplier_export_images(yml_id, xml_images):
+    # Only official Norden supplier exports are allowed as the image source.
+    # Prefer the official API export because it can contain corrected image paths;
+    # XML/YML export remains a supplier-export fallback. Never scrape the website or use third-party catalogs.
+    if NORDEN_SECRET:
+        try:
+            r=requests.get(
+                "https://norden.group/api-products/",
+                headers={"secret":NORDEN_SECRET,"Accept":"application/json"},
+                params={"sku":yml_id},
+                timeout=120,
+            )
+            r.raise_for_status()
+            rows=(r.json() or {}).get("products") or []
+            exact=[p for p in rows if s(p.get("product_code"))==yml_id]
+            if len(exact)==1:
+                api_images=list(dict.fromkeys([s(u) for u in (exact[0].get("images") or []) if s(u)]))
+                if api_images:
+                    return api_images,"api"
+        except Exception:
+            pass
+    return list(dict.fromkeys([s(u) for u in (xml_images or []) if s(u)])),"xml"
+
 # Ignore checkbox-only/formatted blank rows. Append after the last real product row.
 article_i=idx.get("Артикул")
 name_i=idx.get("Название")
@@ -133,9 +157,10 @@ for x in new:
     put("Остаток всего",x["total"])
     put("Дата источника",datetime.now(timezone.utc).isoformat())
     put(APPROVAL,False)
-    if x["images"]:
-        put("Основное фото",'=IMAGE("'+x["images"][0].replace('"','""')+'")')
-        put("Фото",json.dumps(x["images"],ensure_ascii=False))
+    images,image_source=supplier_export_images(x["yml"],x.get("images") or [])
+    if images:
+        put("Основное фото",'=IMAGE("'+images[0].replace('"','""')+'")')
+        put("Фото",json.dumps(images,ensure_ascii=False))
     rows.append(row)
 
 if rows:
@@ -158,7 +183,8 @@ report={
     "stock":"> 0 (МСК + СПБ Norden)",
     "markdown":"исключать товары, где в названии/группе есть 'уценк'",
     "identity":"только точное буквальное совпадение YML ID означает существующий товар; любые отличия считаются новым товаром",
-    "external_uploads":"запрещены"
+    "external_uploads":"запрещены",
+    "images":"только официальные выгрузки Norden (API/XML/YML); сайт вручную и сторонние источники запрещены"
   },
   "eligible_supplier_items":len(items),
   "existing_exact_yml_count":len(existing),
