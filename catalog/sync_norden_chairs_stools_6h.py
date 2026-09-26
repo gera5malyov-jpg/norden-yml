@@ -412,6 +412,8 @@ def main():
                 wa_pid=s(r.get("Webasyst product_id"))
                 if not wa_pid:
                     raise RuntimeError(f"{art}: Webasyst product_id missing after Webasyst creation")
+                full_created=kit.request("GET",f"/v1/variants/{vid}")
+                wa_set_kit_id(wa,wa_pid,full_created.get("kit_id"))
                 kit_urls=kit_public_image_urls(kit,vid)
                 wa_replace_summary_with_kit_images(wa,wa_pid,kit_urls)
         except Exception as e: rep["kit"]["errors"].append({"article":art,"yml_id":i["article"],"error":str(e)[:800]})
