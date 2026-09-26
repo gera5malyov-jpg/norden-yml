@@ -182,8 +182,23 @@ def load_kit_module():
 def sync_kit(rows, report):
     part = report["channels"]["KIT"]
     try:
-        mod = load_kit_module()
-        kit = mod.KitClient(os.environ["YANDEX_KIT_TOKEN"].strip())
+        token = os.environ["YANDEX_KIT_TOKEN"].strip()
+        if not token:
+            raise RuntimeError("YANDEX_KIT_TOKEN is not configured")
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": "megapolis-norden-price-only/1.0",
+        }
+        session = requests.Session()
+
+        def kit_req(method, path, *, body=None, params=None):
+            return req_json(
+                session, method, "https://api.kit.yandex.net" + path,
+                headers=headers, params=params, body=body, attempts=8, timeout=120,
+            )
+
         mapping_path = ROOT / "norden-kit" / "kit_mapping.json"
         mapping = json.loads(mapping_path.read_text(encoding="utf-8"))
         by_sku = defaultdict(list)
@@ -221,45 +236,95 @@ def sync_kit(rows, report):
                     "minimum": money_str(r["kit_min"]),
                     "article": r["article"],
                 })
+
         part["targeted"] = len(updates)
         part["missing_mapping"] = len(missing)
         part["missing_mapping_sample"] = missing[:50]
         if not updates:
             raise RuntimeError("Нет сопоставленных вариантов KIT")
 
-        minimum_field = kit.discover_minimum_price_field(updates[0])
+        # Discover the supported minimum-price field without invoking the globally stopped
+        # Norden catalog synchronizer. This is a price-only operation explicitly requested now.
+        minimum_field = None
+        sample = updates[0]
+        for field in ("minimum_price", "min_price", "minimum_sale_price", "manual_minimum_price"):
+            body = {"items": [{
+                "variant_id": sample["variant_id"],
+                "price": sample["old"],
+                "manual_discount_price": sample["sale"],
+                field: sample["minimum"],
+            }]}
+            try:
+                kit_req("POST", "/v1/variants/prices/bulk_update", body=body)
+                minimum_field = field
+                break
+            except Exception as exc:
+                part["warnings"].append(f"minimum field {field}: {str(exc)[:300]}")
         part["minimum_price_field"] = minimum_field
         if not minimum_field:
-            part["warnings"].append("KIT API не подтвердил отдельное поле минимальной цены; цена и зачёркнутая цена обновлены, минимум не подтверждён.")
-        skipped = kit.bulk_prices(updates, minimum_field=minimum_field)
-        part["skipped_stale_variant_ids"] = skipped[:100]
-        part["updated"] = len(updates) - len(skipped)
+            raise RuntimeError("KIT API не подтвердил поле минимальной цены; обновление остановлено, чтобы не потерять ограничение цены")
+
+        updated = 0
+        api_errors = []
+        for batch in chunks(updates, 500):
+            items = []
+            for u in batch:
+                items.append({
+                    "variant_id": u["variant_id"],
+                    "price": u["old"],
+                    "manual_discount_price": u["sale"],
+                    minimum_field: u["minimum"],
+                })
+            try:
+                kit_req("POST", "/v1/variants/prices/bulk_update", body={"items": items})
+                updated += len(batch)
+            except Exception as exc:
+                # Isolate a bad/stale mapping only when a batch fails.
+                for u, item in zip(batch, items):
+                    try:
+                        kit_req("POST", "/v1/variants/prices/bulk_update", body={"items": [item]})
+                        updated += 1
+                    except Exception as one_exc:
+                        api_errors.append({
+                            "article": u["article"],
+                            "variant_id": u["variant_id"],
+                            "error": str(one_exc)[:700],
+                        })
+
+        part["updated"] = updated
+        part["api_error_count"] = len(api_errors)
+        part["api_errors"] = api_errors[:50]
 
         verified = 0
         verify_errors = []
         for u in updates[:25]:
             try:
-                v = kit.get_variant(u["variant_id"])
+                v = kit_req("GET", f'/v1/variants/{u["variant_id"]}')
                 current_old = money(v.get("price") or (v.get("pricing") or {}).get("price"))
                 current_sale = money(v.get("manual_discount_price") or (v.get("pricing") or {}).get("manual_discount_price"))
-                ok = current_old == money(u["old"]) and current_sale == money(u["sale"])
-                if minimum_field:
-                    current_min = money(v.get(minimum_field) or (v.get("pricing") or {}).get(minimum_field))
-                    ok = ok and current_min == money(u["minimum"])
+                current_min = money(v.get(minimum_field) or (v.get("pricing") or {}).get(minimum_field))
+                ok = (
+                    current_old == money(u["old"])
+                    and current_sale == money(u["sale"])
+                    and current_min == money(u["minimum"])
+                )
                 if ok:
                     verified += 1
                 else:
-                    verify_errors.append({"article": u["article"], "variant_id": u["variant_id"]})
+                    verify_errors.append({
+                        "article": u["article"], "variant_id": u["variant_id"],
+                        "actual": [str(current_old), str(current_sale), str(current_min)],
+                        "expected": [u["old"], u["sale"], u["minimum"]],
+                    })
             except Exception as exc:
                 verify_errors.append({"article": u["article"], "error": str(exc)[:500]})
         part["verification_sample_size"] = min(25, len(updates))
         part["verified_sample"] = verified
         part["verification_mismatches"] = verify_errors[:25]
-        part["status"] = "УСПЕШНО" if not skipped and not verify_errors else "ЧАСТИЧНО"
+        part["status"] = "УСПЕШНО" if updated == len(updates) and not verify_errors else "ЧАСТИЧНО"
     except Exception as exc:
         part["status"] = "ОШИБКА"
         part["errors"].append(str(exc)[:2000])
-
 
 def load_webasyst_client():
     sys.path.insert(0, str(ROOT / "webasyst"))
@@ -547,7 +612,7 @@ def sync_yandex(rows, report):
                     f"{YANDEX_BASE}/v2/businesses/{bid}/offer-prices",
                     headers=yandex_headers(),
                     params={"limit": 500},
-                    body={"offerIds": ids, "archived": False},
+                    body={"offerIds": ids},
                 )
                 offers = ((d.get("result") or {}).get("offers") or [])
                 for off in offers:
