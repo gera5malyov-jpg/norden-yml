@@ -243,6 +243,8 @@ def main():
             full=kit.request("GET",f"/v1/variants/{vid}")
             pid=s(full.get("product_id")); kid=full.get("kit_id")
             result["kit"]={"action":"created","variant_id":vid,"product_id":pid,"kit_id":kid}
+            SYNC.wa_set_kit_id(wa,cr["pid"],kid)
+            result["webasyst"]["kit_id"]=str(kid)
 
             # After KIT creation, replace Webasyst short-description image links with public KIT URLs.
             kit_urls=SYNC.kit_public_image_urls(kit,vid)
