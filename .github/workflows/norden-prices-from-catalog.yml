@@ -76,6 +76,19 @@ jobs:
             done
           fi
 
+
+      - name: Email price update report
+        if: always()
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: 'shop@office-mag.com'
+          PRICE_REPORT_FILE: 'catalog/norden_price_push_report.json'
+          WORKFLOW_NAME: '${{ github.workflow }}'
+          SYNC_OUTCOME: '${{ steps.sync.outcome }}'
+          RUN_URL: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        run: python catalog/send_norden_price_report.py
+
       - name: Fail if sync failed
         if: always()
         run: test "${{ steps.sync.outcome }}" = "success"
