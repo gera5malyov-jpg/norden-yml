@@ -247,14 +247,27 @@ def kit_create(kit,article,item,path,msk_id,spb_id,cats,chars):
     desired=MOD.build_source_characteristics(item,kit,chars,bytitle,code,art,article)
     patch={"characteristics":desired}
     if s(item.get("description")): patch["description"]=s(item["description"])
-    media=[]
-    for u in (item.get("images") or [])[:20]:
+    source_images=list(dict.fromkeys([s(u) for u in (item.get("images") or []) if s(u)]))[:20]
+    media=[]; image_errors=[]
+    for u in source_images:
         try:
             up=kit.upload_image_url(u); fid=s(up.get("id"))
-            if fid: media.append({"type":"IMAGE","display_sequence":len(media),"image_id":fid})
-        except Exception: pass
-    if media: patch["media"]=media
+            if not fid:
+                raise RuntimeError(f"KIT image upload returned no id: {up}")
+            media.append({"type":"IMAGE","display_sequence":len(media),"image_id":fid})
+        except Exception as exc:
+            image_errors.append({"url":u,"error":str(exc)[:600]})
+    if media:
+        patch["media"]=media
     kit.patch_variant(vid,patch)
+    verify=kit.request("GET",f"/v1/variants/{vid}")
+    actual_media=[m for m in (verify.get("media") or []) if isinstance(m,dict) and s(m.get("type")).upper()=="IMAGE"]
+    if source_images and len(actual_media)!=len(source_images):
+        raise RuntimeError(
+            f"KIT images incomplete for {item.get('article')}: "
+            f"expected {len(source_images)}, uploaded/read-back {len(actual_media)}; "
+            f"errors={json.dumps(image_errors,ensure_ascii=False)}"
+        )
     return vid
 
 def review_sheet(sh,items):
@@ -273,7 +286,7 @@ def main():
     rep={"started_at":now(),"status":"ВЫПОЛНЯЕТСЯ","source":{},"sheet":{"matched":0,"added":0,"zeroed_missing":0,"ambiguous_yml":0,"possible_duplicates":0},
          "webasyst":{"updated":0,"created":0,"zeroed_missing":0,"ambiguous":0,"errors":[]},"kit":{"updated":0,"created":0,"zeroed_missing":0,"ambiguous":0,"category_review":0,"errors":[]},
          "possible_duplicate_items":[],"category_review_items":[],"complete":False,
-         "rules":{"scope":"только кресла/стулья, без УЦЕНКА","new_table_rows":"остаток > 0; новым считается любой товар без точного буквального YML ID; частичные/сомнительные совпадения добавляются отдельной строкой","new_publish_gate":"создание в Webasyst/KIT только после TRUE в колонке 'Проверено — загрузить в KIT/Webasyst'","schedule":"каждые 6 часов","missing":"остаток 0, цены сохранять","webasyst_price":"закупка×1.23; зачеркнутая×1.65","kit_price":"закупка×1.26; зачеркнутая×1.65","kit_stock":"МСК = фактический остаток Norden МСК; СПБ привозной = тот же остаток, что МСК","old_norden_workflows":"STOP_ALL_NORDEN сохраняется"}}
+         "rules":{"scope":"только кресла/стулья, без УЦЕНКА","new_table_rows":"остаток > 0; новым считается любой товар без точного буквального YML ID; частичные/сомнительные совпадения добавляются отдельной строкой","new_publish_gate":"создание в Webasyst/KIT только после TRUE в колонке 'Проверено — загрузить в KIT/Webasyst'","schedule":"каждые 6 часов","missing":"остаток 0, цены сохранять","webasyst_price":"закупка×1.23; зачеркнутая×1.65","kit_price":"закупка×1.26; зачеркнутая×1.65","kit_stock":"МСК = фактический остаток Norden МСК; СПБ привозной = тот же остаток, что МСК","kit_images":"все уникальные фото источника обязательны; молча пропускать ошибки нельзя; число фото проверять после записи","old_norden_workflows":"STOP_ALL_NORDEN сохраняется"}}
     src,meta=supplier(); rep["source"]=meta
     sh,ws=sheets(); h,ix,rows=read(ws)
     by_literal=defaultdict(list)
