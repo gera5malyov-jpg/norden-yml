@@ -77,6 +77,30 @@ def target_item(i):
 def imgf(u): return '=IMAGE("'+s(u).replace('"','""')+'")' if s(u) else ""
 def extimgs(urls): return "\n".join(f"[extimg]\n{s(u)}\n[/extimg]" for u in dict.fromkeys(urls or []) if s(u))
 
+def kit_public_image_urls(kit, variant_id):
+    full=kit.request("GET",f"/v1/variants/{s(variant_id)}")
+    media=[m for m in (full.get("media") or []) if isinstance(m,dict) and s(m.get("type")).upper()=="IMAGE" and s(m.get("image_id"))]
+    media.sort(key=lambda m:int(m.get("display_sequence") or 0))
+    urls=[]
+    for m in media:
+        meta=kit.request("GET",f"/v1/files/{s(m.get('image_id'))}")
+        u=s(meta.get("url")) if isinstance(meta,dict) else ""
+        if u and u not in urls: urls.append(u)
+    if not urls:
+        raise RuntimeError(f"KIT variant {variant_id}: public image URLs not found")
+    return urls
+
+def wa_replace_summary_with_kit_images(wa, product_id, urls):
+    summary=extimgs(urls)
+    if not summary:
+        raise RuntimeError(f"Webasyst product {product_id}: KIT image summary is empty")
+    wa.call("shop.product.update",http_method="POST",params={"id":s(product_id)},data={"summary":summary})
+    info=wa.call("shop.product.getInfo",params={"id":s(product_id)})
+    actual=s(info.get("summary")) if isinstance(info,dict) else ""
+    if actual.replace("\r\n","\n").strip()!=summary.replace("\r\n","\n").strip():
+        raise RuntimeError(f"Webasyst product {product_id}: summary KIT image links verification failed")
+    return summary
+
 def price_stock():
     r=requests.get(PRICE_XML,headers={"User-Agent":"Mozilla/5.0"},timeout=180); r.raise_for_status()
     root=ET.fromstring(r.content); out={}; dup=[]
@@ -351,6 +375,11 @@ def main():
                 path=MOD.approved_category_path(i.get("category_path") or [])
                 if not path: rev.append(i); rep["kit"]["category_review"]+=1; continue
                 vid=kit_create(kit,art,i,path,msk_id,spb_id,cats,chars); kby[nc(art)].append({"id":vid,"sku":art}); rep["kit"]["created"]+=1
+                wa_pid=s(r.get("Webasyst product_id"))
+                if not wa_pid:
+                    raise RuntimeError(f"{art}: Webasyst product_id missing after Webasyst creation")
+                kit_urls=kit_public_image_urls(kit,vid)
+                wa_replace_summary_with_kit_images(wa,wa_pid,kit_urls)
         except Exception as e: rep["kit"]["errors"].append({"article":art,"yml_id":i["article"],"error":str(e)[:800]})
     for r in rows:
         k=nc(r.get("YML ID")); art=s(r.get("Артикул"))
