@@ -1,5 +1,7 @@
 name: Publish approved new Norden to Ozon and Yandex
 on:
+  schedule:
+    - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:
       target_articles:
