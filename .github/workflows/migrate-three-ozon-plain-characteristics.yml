@@ -1,0 +1,37 @@
+name: Migrate three Norden KIT cards to plain Ozon characteristics
+on:
+  push:
+    paths:
+      - 'catalog/migrate_three_ozon_plain_characteristics_trigger.txt'
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - run: python -m py_compile catalog/sync_ozon_readback_to_kit.py catalog/migrate_three_ozon_plain_characteristics.py
+      - env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: python catalog/migrate_three_ozon_plain_characteristics.py
+      - if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add catalog/migrate_three_ozon_plain_characteristics_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save plain Ozon KIT characteristic migration report"
+            for i in 1 2 3 4; do
+              git push origin HEAD:main && break
+              git fetch origin main
+              git rebase origin/main || git rebase --abort
+              sleep $((i*3))
+            done
+          fi
