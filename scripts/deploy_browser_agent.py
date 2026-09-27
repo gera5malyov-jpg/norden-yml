@@ -139,8 +139,6 @@ if [ -f /opt/chatgpt-browser/docker-compose.yml ]; then
   elif command -v docker-compose >/dev/null 2>&1; then docker-compose down || true
   fi
 fi
-busy="$(ss -H -ltnp 2>/dev/null | awk '$4 ~ /:80$/ || $4 ~ /:443$/ {print}' || true)"
-if [ -n "$busy" ]; then echo "Ports 80/443 are already in use: $busy" >&2; exit 42; fi
 free_kb="$(df -Pk / | awk 'NR==2 {print $4}')"
 if [ "$free_kb" -lt 3500000 ]; then echo "Not enough disk: $free_kb KB free" >&2; exit 43; fi
 if ! command -v docker >/dev/null 2>&1; then
