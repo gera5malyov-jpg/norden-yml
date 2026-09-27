@@ -1,0 +1,108 @@
+{
+  "account": "MSK",
+  "destination": "Санкт-Петербург, Невский проспект, 1",
+  "package": {
+    "weight_kg": 31,
+    "length_cm": 50,
+    "width_cm": 50,
+    "height_cm": 100
+  },
+  "rows": [
+    {
+      "places": 1,
+      "actual_weight_total_kg": 31,
+      "volumetric_weight_total_kg": 50,
+      "volume_m3": 0.25,
+      "response": {
+        "partner": "DS",
+        "townto": "Санкт-Петербург, Невский проспект, 1",
+        "to_filial": "7157",
+        "days_id": "0",
+        "zone": "SPB",
+        "prices": [
+          {
+            "service": "32",
+            "typedelivery": "KUR",
+            "price": 2148.0,
+            "delivery_period": 1,
+            "msg": "Доставка на следующий день после передачи заказа в курьерскую службу. Стоимость включает 22% НДС",
+            "zone": "0",
+            "VATrate": "22"
+          }
+        ]
+      }
+    },
+    {
+      "places": 2,
+      "actual_weight_total_kg": 62,
+      "volumetric_weight_total_kg": 100,
+      "volume_m3": 0.5,
+      "response": {
+        "partner": "DS",
+        "townto": "Санкт-Петербург, Невский проспект, 1",
+        "to_filial": "7157",
+        "days_id": "0",
+        "zone": "SPB",
+        "prices": [
+          {
+            "service": "32",
+            "typedelivery": "KUR",
+            "price": 3246.0,
+            "delivery_period": 1,
+            "msg": "Доставка на следующий день после передачи заказа в курьерскую службу. Стоимость включает 22% НДС",
+            "zone": "0",
+            "VATrate": "22"
+          }
+        ]
+      }
+    },
+    {
+      "places": 3,
+      "actual_weight_total_kg": 93,
+      "volumetric_weight_total_kg": 150,
+      "volume_m3": 0.75,
+      "response": {
+        "partner": "DS",
+        "townto": "Санкт-Петербург, Невский проспект, 1",
+        "to_filial": "7157",
+        "days_id": "0",
+        "zone": "SPB",
+        "prices": [
+          {
+            "service": "32",
+            "typedelivery": "KUR",
+            "price": 5076.0,
+            "delivery_period": 1,
+            "msg": "Доставка на следующий день после передачи заказа в курьерскую службу. Стоимость включает 22% НДС",
+            "zone": "0",
+            "VATrate": "22"
+          }
+        ]
+      }
+    },
+    {
+      "places": 4,
+      "actual_weight_total_kg": 124,
+      "volumetric_weight_total_kg": 200,
+      "volume_m3": 1.0,
+      "response": {
+        "partner": "DS",
+        "townto": "Санкт-Петербург, Невский проспект, 1",
+        "to_filial": "7157",
+        "days_id": "0",
+        "zone": "SPB",
+        "prices": [
+          {
+            "service": "32",
+            "typedelivery": "KUR",
+            "price": 5076.0,
+            "delivery_period": 1,
+            "msg": "Доставка на следующий день после передачи заказа в курьерскую службу. Стоимость включает 22% НДС",
+            "zone": "0",
+            "VATrate": "22"
+          }
+        ]
+      }
+    }
+  ]
+}
