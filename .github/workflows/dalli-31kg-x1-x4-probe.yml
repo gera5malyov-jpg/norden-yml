@@ -1,0 +1,49 @@
+name: Dalli 31kg x1-x4 probe
+
+on:
+  push:
+    paths:
+      - '.github/workflows/dalli-31kg-x1-x4-probe.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+      DALLI_ACCOUNT: msk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe 1-4 identical places
+        run: |
+          python - <<'PY'
+          import json
+          from dalli.dalli_api import DalliClient
+          client = DalliClient.from_env()
+          address = "Санкт-Петербург, Невский проспект, 1"
+          rows=[]
+          pkg={"weight_kg":31,"length_cm":50,"width_cm":50,"height_cm":100}
+          for places in range(1,5):
+              try:
+                  res=client.delivery_cost(address,[pkg.copy() for _ in range(places)],order_price=0,insurance_price=0,output_x2=True)
+                  rows.append({"places":places,"actual_weight_total_kg":31*places,"volumetric_weight_total_kg":50*places,"volume_m3":0.25*places,"response":res})
+              except Exception as e:
+                  rows.append({"places":places,"error":str(e)})
+          out={"account":"MSK","destination":address,"package":pkg,"rows":rows}
+          with open("dalli/msk_spb_31kg_50x50x100_x1_x4_2026-09-27.json","w",encoding="utf-8") as f:
+              json.dump(out,f,ensure_ascii=False,indent=2)
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dalli/msk_spb_31kg_50x50x100_x1_x4_2026-09-27.json
+          git commit -m "Probe Dalli 31kg x1-x4 [skip ci]" || exit 0
+          git push
