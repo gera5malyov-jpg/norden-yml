@@ -2,29 +2,38 @@
 set -euo pipefail
 
 HOST="browser-45-86-180-49.sslip.io"
-CONF="/etc/nginx/sites-available/chatgpt-browser-mcp"
+SITE="/etc/nginx/sites-available/chatgpt-browser-mcp"
+ACME_ROOT="/var/www/chatgpt-browser-acme"
+SSL_DIR="/etc/nginx/ssl/chatgpt-browser"
 
-if ! command -v nginx >/dev/null 2>&1; then
-  apt-get update -qq
-  apt-get install -y nginx
-fi
+command -v nginx >/dev/null 2>&1
+command -v openssl >/dev/null 2>&1
 
-if ! command -v certbot >/dev/null 2>&1; then
-  apt-get update -qq
-  apt-get install -y certbot python3-certbot-nginx
-fi
-
-install -m 0644 /opt/chatgpt-browser/nginx.conf "$CONF"
-ln -sfn "$CONF" /etc/nginx/sites-enabled/chatgpt-browser-mcp
-
+mkdir -p "$ACME_ROOT/.well-known/acme-challenge" "$SSL_DIR"
+install -m 0644 /opt/chatgpt-browser/nginx-bootstrap.conf "$SITE"
+ln -sfn "$SITE" /etc/nginx/sites-enabled/chatgpt-browser-mcp
 nginx -t
 systemctl reload nginx
 
-if [ ! -f "/etc/letsencrypt/live/$HOST/fullchain.pem" ]; then
-  certbot --nginx -d "$HOST" --non-interactive --agree-tos --email shop@office-mag.com --redirect
-else
-  nginx -t
-  systemctl reload nginx
+if [ ! -x /root/.acme.sh/acme.sh ]; then
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL https://get.acme.sh | sh -s email=shop@office-mag.com
+  else
+    wget -qO- https://get.acme.sh | sh -s email=shop@office-mag.com
+  fi
 fi
+
+/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+if [ ! -s "$SSL_DIR/fullchain.pem" ] || [ ! -s "$SSL_DIR/key.pem" ]; then
+  /root/.acme.sh/acme.sh --issue --server letsencrypt -d "$HOST" -w "$ACME_ROOT" --keylength ec-256
+fi
+touch "$SSL_DIR/key.pem" "$SSL_DIR/fullchain.pem"
+/root/.acme.sh/acme.sh --install-cert -d "$HOST" --ecc   --key-file "$SSL_DIR/key.pem"   --fullchain-file "$SSL_DIR/fullchain.pem"   --reloadcmd "systemctl reload nginx"
+
+chmod 600 "$SSL_DIR/key.pem"
+chmod 644 "$SSL_DIR/fullchain.pem"
+install -m 0644 /opt/chatgpt-browser/nginx.conf "$SITE"
+nginx -t
+systemctl reload nginx
 
 curl -fsS --max-time 10 "http://127.0.0.1:18000/health"
