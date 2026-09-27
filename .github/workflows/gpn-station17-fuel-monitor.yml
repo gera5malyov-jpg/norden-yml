@@ -1,5 +1,10 @@
 name: GPN station 17 fuel monitor
 on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/gpn_station17_monitor.py"
+      - ".github/workflows/gpn-station17-fuel-monitor.yml"
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
