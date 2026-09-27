@@ -1,0 +1,73 @@
+name: Browser agent bootstrap key
+
+on:
+  push:
+    paths:
+      - '.github/workflows/browser-agent-bootstrap.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  install-ephemeral-key:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      TARGET_IP: 45.86.180.49
+      SSH_PUBLIC_KEY: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIClWggcRFp65a4/5+4gBPCJWvgRVOm3dS3wJ+v5wy+0H chatgpt-browser-bootstrap-2026-09-27"
+    steps:
+      - name: Add temporary SSH key to NetAngels VM
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.parse, urllib.request, urllib.error
+
+          api_key = os.environ["NETANGELS_API_KEY"].strip()
+          target_ip = os.environ["TARGET_IP"].strip()
+          pubkey = os.environ["SSH_PUBLIC_KEY"].strip()
+
+          def req_json(url, *, method="GET", headers=None, data=None):
+              request = urllib.request.Request(url, method=method, headers=headers or {}, data=data)
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  raw = response.read().decode("utf-8")
+                  return response.status, json.loads(raw) if raw else {}
+
+          token_data = urllib.parse.urlencode({"api_key": api_key}).encode()
+          status, payload = req_json(
+              "https://panel.netangels.ru/api/gateway/token/",
+              method="POST",
+              headers={"Content-Type": "application/x-www-form-urlencoded"},
+              data=token_data,
+          )
+          token = payload.get("token")
+          if not token:
+              raise SystemExit("NetAngels token not returned")
+
+          headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
+          status, vms = req_json("https://api-ms.netangels.ru/api/v1/cloud/vms/?limit=100", headers=headers)
+          entities = vms.get("entities", vms if isinstance(vms, list) else [])
+          vm = next((x for x in entities if str(x.get("main_ip", "")).strip() == target_ip), None)
+          if not vm:
+              raise SystemExit(f"VM with IP {target_ip} not found")
+
+          vm_id = vm["id"]
+          body = json.dumps({"key": pubkey, "name": "chatgpt-browser-bootstrap-2026-09-27"}).encode()
+          headers2 = {**headers, "Content-Type": "application/json"}
+          try:
+              status, created = req_json(
+                  f"https://api-ms.netangels.ru/api/v1/cloud/vms/{vm_id}/ssh/create/",
+                  method="POST",
+                  headers=headers2,
+                  data=body,
+              )
+              print(f"temporary_key_added vm_id={vm_id} ip={target_ip} key_id={created.get('id')}")
+          except urllib.error.HTTPError as e:
+              txt = e.read().decode("utf-8", errors="replace")
+              if e.code == 400 and ("exist" in txt.lower() or "существ" in txt.lower()):
+                  print(f"temporary_key_already_present vm_id={vm_id} ip={target_ip}")
+              else:
+                  raise
+          PY
