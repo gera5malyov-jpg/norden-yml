@@ -142,8 +142,37 @@ fi
 free_kb="$(df -Pk / | awk 'NR==2 {print $4}')"
 if [ "$free_kb" -lt 3500000 ]; then echo "Not enough disk: $free_kb KB free" >&2; exit 43; fi
 if ! command -v docker >/dev/null 2>&1; then
-  apt-get update -qq
-  apt-get install -y docker.io docker-compose-plugin || apt-get install -y docker.io docker-compose
+  tmpdir="$(mktemp -d)"
+  url="https://download.docker.com/linux/static/stable/x86_64/docker-29.8.1.tgz"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$url" -o "$tmpdir/docker.tgz"
+  else
+    wget -qO "$tmpdir/docker.tgz" "$url"
+  fi
+  tar -xzf "$tmpdir/docker.tgz" -C "$tmpdir"
+  cp "$tmpdir"/docker/* /usr/local/bin/
+  rm -rf "$tmpdir"
+  cat >/etc/systemd/system/docker.service <<'UNIT'
+[Unit]
+Description=Docker Application Container Engine
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=notify
+ExecStart=/usr/local/bin/dockerd -H unix:///var/run/docker.sock
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=2
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+Delegate=yes
+KillMode=process
+[Install]
+WantedBy=multi-user.target
+UNIT
+  systemctl daemon-reload
 fi
 systemctl enable --now docker
 mkdir -p /opt/chatgpt-browser/browser-profile /opt/chatgpt-browser/playwright-output /opt/chatgpt-browser/auth-data /opt/chatgpt-browser/caddy-data /opt/chatgpt-browser/caddy-config
