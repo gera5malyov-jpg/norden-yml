@@ -156,7 +156,8 @@ chmod 700 /opt/chatgpt-browser/auth-data
             src = BASE / "infra" / "browser-agent"
             scp(key, src / "auth_server.py", "/opt/chatgpt-browser/auth_server.py")
             scp(key, src / "docker-compose.yml", "/opt/chatgpt-browser/docker-compose.yml")
-            scp(key, src / "Caddyfile", "/opt/chatgpt-browser/Caddyfile")
+            scp(key, src / "nginx.conf", "/opt/chatgpt-browser/nginx.conf")
+            scp(key, src / "install_nginx_proxy.sh", "/opt/chatgpt-browser/install_nginx_proxy.sh")
             env_text = "MCP_HOST=" + MCP_HOST + "\nLOGIN_PASSWORD=" + password + "\n"
             p = ssh_cmd(key, "umask 077; cat > /opt/chatgpt-browser/.env; chmod 600 /opt/chatgpt-browser/.env", stdin=env_text, check=False)
             if p.returncode != 0:
