@@ -110,6 +110,20 @@ def deploy():
             result["login_password_rsa_oaep_sha256_b64"] = encrypt_password(password, work)
 
             token, headers, vm_id = token_and_vm()
+
+            # Remove the one-time bootstrap key left from the first setup pass.
+            try:
+                _, keys_payload = req_json(
+                    "https://api-ms.netangels.ru/api/v1/cloud/vms/" + vm_id + "/ssh/?limit=100",
+                    headers=headers
+                )
+                for item in keys_payload.get("entities", []):
+                    if item.get("name") == "chatgpt-browser-bootstrap-2026-09-27":
+                        api_delete_key(headers, vm_id, item["id"])
+                        print("old bootstrap SSH key removed")
+            except Exception as e:
+                print("WARNING: old bootstrap key cleanup skipped:", e, file=sys.stderr)
+
             pubkey = (key.with_suffix(".pub")).read_text().strip()
             body = json.dumps({"key": pubkey, "name": "chatgpt-browser-deploy-" + RUN_ID}).encode()
             _, created = req_json(
@@ -130,6 +144,19 @@ def deploy():
                 time.sleep(5)
             if not connected:
                 raise RuntimeError("SSH not available after temporary key upload: " + last_err)
+
+            # Reuse the existing owner password so future deployments do not
+            # invalidate ChatGPT authorization.
+            existing = ssh_cmd(
+                key,
+                "test -f /opt/chatgpt-browser/.env && sed -n 's/^LOGIN_PASSWORD=//p' /opt/chatgpt-browser/.env | head -n1",
+                check=False
+            )
+            existing_password = existing.stdout.strip() if existing.returncode == 0 else ""
+            if len(existing_password) >= 24:
+                password = existing_password
+                print("::add-mask::" + password, flush=True)
+                result["login_password_rsa_oaep_sha256_b64"] = encrypt_password(password, work)
 
             prep = r"""set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
