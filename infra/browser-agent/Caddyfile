@@ -1,0 +1,19 @@
+{$MCP_HOST} {
+  encode zstd gzip
+
+  @oauth path /.well-known/* /authorize /token /register /health
+  handle @oauth {
+    reverse_proxy auth:8000
+  }
+
+  handle /mcp* {
+    forward_auth auth:8000 {
+      uri /validate
+    }
+    reverse_proxy playwright:8931
+  }
+
+  handle {
+    reverse_proxy auth:8000
+  }
+}
