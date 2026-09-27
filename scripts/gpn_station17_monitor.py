@@ -1,7 +1,7 @@
 import json, os, smtplib, ssl
 from datetime import datetime, timezone, timedelta
 from email.message import EmailMessage
-from urllib.request import Request, build_opener, HTTPCookieProcessor
+import subprocess\nfrom urllib.request import Request, build_opener, HTTPCookieProcessor
 from urllib.error import HTTPError
 from http.cookiejar import CookieJar
 
