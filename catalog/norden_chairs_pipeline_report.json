@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-26T21:06:27.925490+00:00",
+  "started_at": "2026-09-27T05:14:48.477952+00:00",
   "scope": "Norden: only actual chairs and stools; accessories excluded",
   "rules": {
     "table_match": "Norden supplier article ↔ Google Sheet YML ID, normalized",
@@ -21,26 +21,25 @@
     "category_xml_fallback": true
   },
   "table": {
-    "rows_before": 2034,
-    "matched": 325,
-    "new_rows": 22,
+    "rows_before": 2067,
+    "matched": 347,
+    "new_rows": 0,
     "zeroed_missing": 0,
     "duplicate_yml_ids": 10,
     "price_updates": 0,
-    "stock_updates": 1
+    "stock_updates": 0
   },
   "webasyst": {
     "duplicate_articles": 0,
-    "unchanged": 633,
-    "updated": 1
+    "unchanged": 623
   },
   "kit": {
-    "variants_scanned": 98001,
+    "variants_scanned": 98002,
     "duplicate_articles": 4667,
     "missing_existing": 112,
-    "category_review_required": 19,
+    "category_review_required": 18,
     "skipped_no_article": 22,
-    "stock_updates": 1010
+    "stock_updates": 1012
   },
   "errors": [
     {
@@ -53,6 +52,72 @@
       "stage": "webasyst_create_existing_article",
       "row": 410,
       "article": "алюминиевая база / серая ткань CF",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 542,
+      "article": "AF-31394907",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 545,
+      "article": "AF-31394820",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 546,
+      "article": "AF-31394821",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 547,
+      "article": "AF-31394819",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 548,
+      "article": "AF-31394818",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 549,
+      "article": "AF-31394815",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 550,
+      "article": "AF-31394816",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 551,
+      "article": "AF-31394812",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 552,
+      "article": "AF-31394813",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 553,
+      "article": "AF-31394814",
+      "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create_existing_article",
+      "row": 1051,
+      "article": "AF-31662371",
       "message": "Нет положительной закупочной цены Norden"
     },
     {
@@ -191,6 +256,6 @@
   "warnings": [],
   "complete": false,
   "identity_review": 10,
-  "category_review": 19,
-  "finished_at": "2026-09-26T21:20:26.835761+00:00"
+  "category_review": 18,
+  "finished_at": "2026-09-27T05:27:48.578170+00:00"
 }
