@@ -99,65 +99,80 @@ def characteristic_id(kit,rows,by_title,title):
 def is_ozon_characteristic_title(title):
     return s(title).startswith("Ozon ")
 
+CUSTOMER_EXCLUDE_IDS={
+    9048,   # Название модели для объединения
+    12141,  # Название модели для шаблона
+    9024,   # Код продавца
+    4180,   # Название карточки
+    23171,  # Хештеги
+    4191,   # Аннотация
+    22232,  # ТН ВЭД
+    11650,  # Количество заводских упаковок
+    22073,  # Планирование нескольких упаковок
+    23536,  # Нужен код маркировки
+    8790,   # Документ PDF
+}
+CUSTOMER_EXCLUDE_NAME_PARTS=(
+    "для объединения",
+    "для шаблона",
+    "код продавца",
+    "хештег",
+    "аннотация",
+    "тн вэд",
+    "код маркировки",
+    "заводских упаков",
+    "планирую доставлять",
+    "документ pdf",
+)
+
 def join_values(values):
     out=[]
-    ids=[]
     for v in values or []:
-        if not isinstance(v,dict): continue
+        if not isinstance(v,dict):
+            continue
         val=s(v.get("value"))
-        if val: out.append(val)
-        did=v.get("dictionary_value_id")
-        if did not in (None,"",0,"0"):
-            ids.append(str(did))
-    return ";".join(out),ids
+        if val and val not in out:
+            out.append(val)
+    return ", ".join(out)
 
-def build_ozon_rows(kit,rows,by_title,card,info,schema):
-    result=[]
-    def add(title,value):
-        if value is None or s(value)=="":
-            return
-        cid=characteristic_id(kit,rows,by_title,title)
-        sv=s(value)
-        result.append({"characteristic_id":cid,"value":sv,"values":[sv]})
+def is_customer_attribute(aid,name):
+    if int(aid or 0) in CUSTOMER_EXCLUDE_IDS:
+        return False
+    n=norm(name)
+    if not n or n.startswith("attribute_"):
+        return False
+    return not any(x in n for x in CUSTOMER_EXCLUDE_NAME_PARTS)
 
-    pid=int(card.get("id") or info.get("id") or 0)
-    offer=s(card.get("offer_id") or info.get("offer_id"))
-    sku=s(card.get("sku") or info.get("sku"))
-    dc=card.get("description_category_id") or info.get("description_category_id")
-    tid=card.get("type_id") or info.get("type_id")
-
-    add("Ozon 0 — source_product_id",pid)
-    add("Ozon 0 — source_offer_id",offer)
-    add("Ozon 0 — source_sku",sku)
-    add("Ozon 0 — description_category_id",dc)
-    add("Ozon 0 — type_id",tid)
-    add("Ozon 0 — readback_at",time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()))
-    add("Ozon 0 — Статус данных","КАНОНИЧЕСКИЕ ДАННЫЕ ИЗ OZON")
-
-    # Top-level facts returned by Ozon but not ordinary attributes.
-    add("Ozon 0 — Фактическое название Ozon",card.get("name") or info.get("name"))
-    add("Ozon 0 — Ozon height",card.get("height"))
-    add("Ozon 0 — Ozon width",card.get("width"))
-    add("Ozon 0 — Ozon depth",card.get("depth"))
-    add("Ozon 0 — Ozon dimension_unit",card.get("dimension_unit"))
-    add("Ozon 0 — Ozon weight",card.get("weight"))
-    add("Ozon 0 — Ozon weight_unit",card.get("weight_unit"))
-    status=info.get("statuses") or {}
-    add("Ozon 0 — status",status.get("status"))
-    add("Ozon 0 — status_name",status.get("status_name"))
-    add("Ozon 0 — moderate_status",status.get("moderate_status"))
-    add("Ozon 0 — validation_status",status.get("validation_status"))
-
+def customer_attribute_values(card,schema):
+    out=[]
+    seen=set()
     for a in card.get("attributes") or []:
         aid=int(a.get("id") or a.get("attribute_id") or 0)
-        if not aid: continue
+        if not aid:
+            continue
         meta=schema.get(aid) or {}
         name=s(meta.get("name")) or f"attribute_{aid}"
-        value,dict_ids=join_values(a.get("values") or [])
-        if value:
-            add(f"Ozon {aid} — {name}",value)
-        if dict_ids:
-            add(f"Ozon {aid} — dictionary_value_id",";".join(dict_ids))
+        if not is_customer_attribute(aid,name):
+            continue
+        value=join_values(a.get("values") or [])
+        if not value:
+            continue
+        key=norm(name)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({"attribute_id":aid,"title":name,"value":value})
+    return out
+
+def build_customer_rows(kit,rows,by_title,customer_values):
+    result=[]
+    for x in customer_values:
+        title=s(x.get("title"))
+        value=s(x.get("value"))
+        if not title or not value:
+            continue
+        cid=characteristic_id(kit,rows,by_title,title)
+        result.append({"characteristic_id":cid,"value":value,"values":[value]})
     return result
 
 def sync_offer_to_kit(offer_id, expected_kit_variant_id=None):
@@ -177,34 +192,57 @@ def sync_offer_to_kit(offer_id, expected_kit_variant_id=None):
     rows,by_title=characteristic_index(kit)
     char_meta={s(x.get("id")):s(x.get("title")) for x in rows}
 
+    customer_values=customer_attribute_values(card,schema)
+    customer_titles={norm(x["title"]) for x in customer_values}
+
     keep=[]
     removed=[]
+    replaced=[]
     for c in current.get("characteristics") or []:
         title=char_meta.get(s(c.get("characteristic_id")),"")
         if is_ozon_characteristic_title(title):
             removed.append({"title":title,"value":c.get("value")})
-        else:
-            keep.append(c)
+            continue
+        if norm(title) in customer_titles:
+            replaced.append({"title":title,"value":c.get("value")})
+            continue
+        keep.append(c)
 
-    canonical=build_ozon_rows(kit,rows,by_title,card,info,schema)
+    # KIT storefront must contain only normal human-readable product characteristics.
+    # Ozon API IDs, dictionary IDs, product IDs, statuses, readback timestamps and other
+    # integration metadata stay in the report/Google Sheet and are never written as KIT characteristics.
+    canonical=build_customer_rows(kit,rows,by_title,customer_values)
     patch={"characteristics":keep+canonical}
     kit.patch_variant(vid,patch)
 
     verify=kit.request("GET",f"/v1/variants/{vid}")
     rows2=kit.characteristics()
     titles2={s(x.get("id")):s(x.get("title")) for x in rows2}
-    ozon_after=[]
+    assigned=[]
     for c in verify.get("characteristics") or []:
         title=titles2.get(s(c.get("characteristic_id")),"")
-        if is_ozon_characteristic_title(title):
-            ozon_after.append({"title":title,"value":s(c.get("value"))})
-    if not any(x["title"]=="Ozon 0 — Статус данных" and x["value"]=="КАНОНИЧЕСКИЕ ДАННЫЕ ИЗ OZON" for x in ozon_after):
-        raise RuntimeError(f"KIT {offer_id}: canonical Ozon status missing after readback")
+        assigned.append({"title":title,"value":s(c.get("value"))})
+
+    leftovers=[x for x in assigned if is_ozon_characteristic_title(x["title"])]
+    if leftovers:
+        raise RuntimeError(f"KIT {offer_id}: technical Ozon characteristics still assigned: {leftovers[:10]}")
+
+    actual_by_title={norm(x["title"]):x["value"] for x in assigned if x["title"]}
+    missing=[]
+    for x in customer_values:
+        if actual_by_title.get(norm(x["title"])) != s(x["value"]):
+            missing.append({"title":x["title"],"expected":x["value"],"actual":actual_by_title.get(norm(x["title"]))})
+    if missing:
+        raise RuntimeError(f"KIT {offer_id}: customer Ozon characteristics readback mismatch: {missing[:10]}")
+
     return {
-        "offer_id":offer_id,"ozon_product_id":rb["product_id"],"kit_variant_id":vid,
-        "removed_temporary_count":len(removed),
-        "canonical_count":len(ozon_after),
-        "status":"КАНОНИЧЕСКИЕ ДАННЫЕ ИЗ OZON",
+        "offer_id":offer_id,
+        "ozon_product_id":rb["product_id"],
+        "kit_variant_id":vid,
+        "removed_technical_ozon_count":len(removed),
+        "replaced_same_name_count":len(replaced),
+        "customer_characteristic_count":len(customer_values),
+        "status":"КЛИЕНТСКИЕ ХАРАКТЕРИСТИКИ ИЗ OZON",
     }
 
 def main():
