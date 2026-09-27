@@ -175,7 +175,18 @@ UNIT
   systemctl daemon-reload
 fi
 systemctl enable --now docker
-mkdir -p /opt/chatgpt-browser/browser-profile /opt/chatgpt-browser/playwright-output /opt/chatgpt-browser/auth-data /opt/chatgpt-browser/caddy-data /opt/chatgpt-browser/caddy-config
+if ! docker compose version >/dev/null 2>&1; then
+  mkdir -p /usr/local/lib/docker/cli-plugins
+  compose_url="https://github.com/docker/compose/releases/download/v5.5.1/docker-compose-linux-x86_64"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$compose_url" -o /usr/local/lib/docker/cli-plugins/docker-compose
+  else
+    wget -qO /usr/local/lib/docker/cli-plugins/docker-compose "$compose_url"
+  fi
+  chmod 755 /usr/local/lib/docker/cli-plugins/docker-compose
+fi
+docker compose version
+mkdir -p /opt/chatgpt-browser/browser-profile /opt/chatgpt-browser/playwright-output /opt/chatgpt-browser/auth-data
 chmod 700 /opt/chatgpt-browser/auth-data
 """
             p = ssh_cmd(key, "bash -s", stdin=prep, check=False)
@@ -185,6 +196,7 @@ chmod 700 /opt/chatgpt-browser/auth-data
             src = BASE / "infra" / "browser-agent"
             scp(key, src / "auth_server.py", "/opt/chatgpt-browser/auth_server.py")
             scp(key, src / "docker-compose.yml", "/opt/chatgpt-browser/docker-compose.yml")
+            scp(key, src / "nginx-bootstrap.conf", "/opt/chatgpt-browser/nginx-bootstrap.conf")
             scp(key, src / "nginx.conf", "/opt/chatgpt-browser/nginx.conf")
             scp(key, src / "install_nginx_proxy.sh", "/opt/chatgpt-browser/install_nginx_proxy.sh")
             env_text = "MCP_HOST=" + MCP_HOST + "\nLOGIN_PASSWORD=" + password + "\n"
