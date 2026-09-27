@@ -33,35 +33,19 @@ services:
     volumes:
       - ./browser-profile:/data/profile
       - ./playwright-output:/data/output
-    expose:
-      - "8931"
+    ports:
+      - "127.0.0.1:18931:8931"
 
   auth:
     image: python:3.12-slim
     restart: unless-stopped
     environment:
-      MCP_BASE_URL: "https://${MCP_HOST}"
+      MCP_BASE_URL: "https://browser-45-86-180-49.sslip.io"
       LOGIN_PASSWORD: "${LOGIN_PASSWORD}"
       STATE_FILE: "/data/state.json"
     volumes:
       - ./auth_server.py:/app/auth_server.py:ro
       - ./auth-data:/data
     command: ["python", "/app/auth_server.py"]
-    expose:
-      - "8000"
-
-  caddy:
-    image: caddy:2
-    restart: unless-stopped
-    depends_on:
-      - auth
-      - playwright
-    environment:
-      MCP_HOST: "${MCP_HOST}"
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./caddy-data:/data
-      - ./caddy-config:/config
+      - "127.0.0.1:18000:8000"
