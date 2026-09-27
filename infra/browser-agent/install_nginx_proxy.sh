@@ -2,7 +2,7 @@
 set -euo pipefail
 
 HOST="browser-45-86-180-49.sslip.io"
-SITE="/etc/nginx/sites-available/chatgpt-browser-mcp"
+SITE="/etc/nginx/sites-available/chatgpt-browser-mcp.conf"
 ACME_ROOT="/var/www/chatgpt-browser-acme"
 SSL_DIR="/etc/nginx/ssl/chatgpt-browser"
 
@@ -11,7 +11,8 @@ command -v openssl >/dev/null 2>&1
 
 mkdir -p "$ACME_ROOT/.well-known/acme-challenge" "$SSL_DIR"
 install -m 0644 /opt/chatgpt-browser/nginx-bootstrap.conf "$SITE"
-ln -sfn "$SITE" /etc/nginx/sites-enabled/chatgpt-browser-mcp
+rm -f /etc/nginx/sites-enabled/chatgpt-browser-mcp
+ln -sfn "$SITE" /etc/nginx/sites-enabled/chatgpt-browser-mcp.conf
 nginx -t
 systemctl reload nginx
 
