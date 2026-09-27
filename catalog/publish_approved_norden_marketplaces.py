@@ -167,6 +167,31 @@ def oz_existing(offer):
     d=api.req("oz","POST","/v3/product/list",{"filter":{"offer_id":[offer],"visibility":"ALL"},"limit":100})
     items=((d.get("result") or {}).get("items") or [])
     return [x for x in items if s(x.get("offer_id"))==offer]
+def prep_from_ozon_readback(art):
+    rb=POST.ozon_readback(POST.OzonClient(),art)
+    card=rb["attributes"]; info=rb["info"]
+    dc=int(card.get("description_category_id") or info.get("description_category_id") or 0)
+    tid=int(card.get("type_id") or info.get("type_id") or 0)
+    if not dc or not tid:
+        raise RuntimeError(f"Ozon {art}: category/type missing in readback")
+    schema=oz_schema(dc,tid)
+    prep={
+      "Ozon 0 — description_category_id":str(dc),
+      "Ozon 0 — type_id":str(tid),
+      "Ozon 0 — Статус подготовки":"ПОДГОТОВЛЕНО ИЗ ФАКТИЧЕСКОЙ КАРТОЧКИ OZON",
+    }
+    for a in card.get("attributes") or []:
+        aid=int(a.get("id") or a.get("attribute_id") or 0)
+        if not aid: continue
+        name=s((schema.get(aid) or {}).get("name")) or f"attribute_{aid}"
+        vals=[]
+        for x in a.get("values") or []:
+            if isinstance(x,dict) and s(x.get("value")):
+                vals.append(s(x.get("value")))
+        if vals:
+            prep[f"Ozon {aid} — {name}"]=";".join(vals)
+    return prep
+
 def oz_import_attributes(prep,dc,tid):
     schema=oz_schema(dc,tid); attrs=[]; warnings=[]
     ids=sorted({int(m.group(1)) for k in prep for m in [re.match(r"^Ozon (\d+) — ",k)] if m and int(m.group(1))>0})
@@ -381,9 +406,14 @@ for r in selected:
     try:
         vid=cell(row,"KIT variant_id");kid=cell(row,"KIT ID");pid=cell(row,"Webasyst product_id");yml=cell(row,"YML ID")
         v=exact_variant(art,vid); prep=kit_prep(v)
-        # Mandatory preparation marker
-        if ozval(prep,0,"Статус подготовки")!="ПОДГОТОВЛЕНО В KIT — НЕ ВЫГРУЖЕНО" and ozval(prep,0,"Статус данных")!="КАНОНИЧЕСКИЕ ДАННЫЕ ИЗ OZON":
-            raise RuntimeError("KIT Ozon preparation status missing")
+        # Legacy/pre-publication cards may still carry internal Ozon-prefixed preparation fields.
+        # After Ozon post-publish cleanup KIT contains only normal customer-facing titles.
+        # If resuming after Ozon creation, rebuild technical mapping in memory from Ozon API;
+        # never write those technical fields back to KIT.
+        if not prep and oz_existing(art):
+            prep=prep_from_ozon_readback(art)
+        if not prep:
+            raise RuntimeError("KIT/Ozon preparation data missing for marketplace publication")
         set_wa_kit_id(pid,kid)
         purchase=nfloat(cell(row,"Закупочная цена Webasyst"))
         if purchase<=0:raise RuntimeError("Purchase price missing")
@@ -418,8 +448,9 @@ for r in selected:
                 "Ozon media JSON":json.dumps(oattrs.get("images") or [],ensure_ascii=False),"Ozon статус":"CREATED_BY_PIPELINE:"+s((rb["info"].get("statuses") or {}).get("status_name")),"Ozon дата":now()})
             item["ozon"]={"status":"CREATED_BY_PIPELINE","product_id":opid,"task_id":task,"commission":commission,"acquiring":acq,"price":oprice,"old_price":oold,"min_price":omin,"postpublish":post,"warnings":warns}
 
-        # Refresh KIT because Ozon postpublish replaced temp Ozon block with canonical Ozon block.
-        v=exact_variant(art,vid); prep=kit_prep(v)
+        # Refresh KIT after Ozon post-publish cleanup, but keep the pre-publication
+        # mapping in memory for the Yandex step. KIT itself now exposes only plain customer characteristics.
+        v=exact_variant(art,vid)
         # Yandex old-card protection / creation
         existing_y=ya_mapping(art); prior_ys=cell(row,"Yandex статус")
         if existing_y and not (prior_ys.startswith("CREATE_STARTED") or prior_ys.startswith("CREATED_BY_PIPELINE")):
