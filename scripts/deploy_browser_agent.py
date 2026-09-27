@@ -178,6 +178,10 @@ fi
             p = ssh_cmd(key, "bash -s", stdin=up, check=False)
             if p.returncode != 0:
                 raise RuntimeError("Docker deployment failed: " + (p.stderr or p.stdout)[-1500:])
+
+            p = ssh_cmd(key, "bash /opt/chatgpt-browser/install_nginx_proxy.sh", check=False)
+            if p.returncode != 0:
+                raise RuntimeError("Nginx/TLS setup failed: " + (p.stderr or p.stdout)[-1800:])
             result["deploy"] = "success"
 
             resolved = socket.gethostbyname(MCP_HOST)
