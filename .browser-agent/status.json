@@ -1,13 +1,13 @@
 {
-  "status": "FAILED",
+  "status": "READY",
   "endpoint": "https://browser-45-86-180-49.sslip.io/mcp",
   "oauth_authorization": "https://browser-45-86-180-49.sslip.io/authorize",
   "target_ip": "45.86.180.49",
   "netangels": "success",
-  "deploy": "pending",
-  "verify": "pending",
-  "login_password_rsa_oaep_sha256_b64": "Osjiy6V/g1VWEl1RlGDPRD1a4cfWxw6KmL9OSs70+LFv4US6yBAcSBLuHvn4EVCQ6fPh0qZq/j0xCmOA3hYkt0JJ9Y3CFrWDki1i5KXnskZjh7eNjC3wGi4dPWBmR97igvThm+Xfi/6r5HA0P6EUJ28Rh33upfaQC/UVNX30YuerZqhdKG6k85RoV3bU/JWQZGogTJbk+zqf5EP32yG5aqU6uF9TDtK8v0PeWIASaZHJJK14olpsHmjgKcH/TMu/8x/xW05FwXxxHWmsd8TgkYW4gfYKeE7cY2PgeJ1LKmeinaZlxmb/AjE9PH5areXgqUdQ7xfAMGHmA+KRnxfiNkOylHfkS2H+BxkK6SxD7WY3xulXmPtI+LC5mbOm93PIKl17ZgM78emKtfpaFN5aOZ4P4N7wqf0QrS8/mNYhpQryTvgP8hmddwawPoZ13Ly5o92+zqsriFxYmwF3k2mDPqG1JJEUP0tN2qe94IfunxZTN30WAuNWhIcW8Gw3E25T6Qa1wwnsk13YpAnZJ+nSjsYTrBK3VSOU3vtC+dRphl5BGgk89iUtN26829m4yFrW5rKoOZQcNFgTCrGUJL8dvLovXo4bY9Yexela7RzCjC0VTKgTe9CSB8+lNzdcB6/GHdCVYGxP2ZF7KFRQcWDSFjeKHnm+O0R3TV9SJsiJgng=",
-  "updated_at": "2026-09-27T19:06:35.169241+00:00",
-  "run_id": "36343065026",
-  "error": "Nginx/TLS setup failed: Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.\nnginx: the configuration file /etc/nginx/nginx.conf syntax is ok\nnginx: configuration file /etc/nginx/nginx.conf test is successful\n[Sun Sep 27 22:06:31 MSK 2026] browser-45-86-180-49.sslip.io: Invalid status. Verification error details: 45.86.180.49: Invalid response from http://browser-45-86-180-49.sslip.io/.well-known/acme-challenge/_9WobV5-cgrP5xBVU6RP5BMRaV5azZlcMfALxdlQ-OQ: 404\n[Sun Sep 27 22:06:31 MSK 2026] Please add '--debug' or '--log' to see more information.\n[Sun Sep 27 22:06:31 MSK 2026] See: https://github.com/acmesh-official/acme.sh/wiki/How-to-debug-acme.sh\n"
+  "deploy": "success",
+  "verify": "success",
+  "login_password_rsa_oaep_sha256_b64": "jWiFv6ttHhFFfowGaSYhZ/hXWDGeX4ZsNzjnwAsPwTKikwqKFBFm+xB8scpMluxig2whhAS1athY6nwM98dsnVC22amcQKlhMCg26zQpEzSzaqkyk8vB/Xi1GD/y0tHS+cggiLTx7DBK0MorlaSCirKYHcGlYh1QmvgxMVCDBVK7Hpnt/vhSbPWLrvBOpJOg1UEYHRMiACfLweM9FUap91Ub+DWOrZjgAm5GjKehfAVLKpKHMpfOOUxzR4YkMex02tPqPJo2ukVzPThPK74JeNaGyLfjULTymbN2RTyHDQlhqU7iSVQHTSzvrupW4O38Rzrv0mufP6/W9iZ86Dhic8npVqWVqQZ2kV5mrTTnSt6HzM4V5JNw9XyWnG5t9v8ovn0i39apOc42srcAlobbDWlqTfJHur4yMKFEdYeEnXOwzoM2NXGTwH9XYVL8ezsloQPqQpr/MRkq5d0kvb7hKKE/aYZMFkukiuBp2Cz7HHLxjDICtYPY842j0a+m3BP8AJc3AKpjANL/A04hG150r+/B7TWmk8C6QZ3BNceWz/NU1cmVg5sz+Dt6MtULmIrg3Y0vLuH0wZTo28bfnC8+9UspKiORzmd5EViM/UDnJ+CEGj82ZAmmhRapOM8j4nEQUuR/SGkURNxztqPyvLRMVB++CWqfjHNrazlO0gBXAQY=",
+  "updated_at": "2026-09-27T19:09:56.836335+00:00",
+  "run_id": "36343257871",
+  "error": ""
 }
