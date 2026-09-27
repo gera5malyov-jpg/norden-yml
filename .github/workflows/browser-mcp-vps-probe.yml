@@ -1,0 +1,23 @@
+name: Browser MCP VPS probe
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "scripts/browser_mcp_vps_probe.py"
+      - ".github/workflows/browser-mcp-vps-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: List existing NetAngels VDS
+        run: python3 scripts/browser_mcp_vps_probe.py
