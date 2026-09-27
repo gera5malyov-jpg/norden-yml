@@ -3,34 +3,58 @@ from datetime import datetime
 from email.message import EmailMessage
 from urllib.request import Request, urlopen
 
-URL="https://tutbenz.app/azs/5d130823-c9c8-48d1-af6a-924dd248d333"
 TO=os.getenv("RECIPIENT","gera5@list.ru")
+SOURCE="https://xn--90addebmh2bc.xn--p1ai/region/sankt-peterburg/a92"
+ADDRESS="Московское шоссе, 46, корп. 3"
 
-def get_status():
-    req=Request(URL,headers={"User-Agent":"Mozilla/5.0"})
-    with urlopen(req,timeout=30) as r:
-        text=r.read().decode("utf-8","replace")
+def fetch_text():
+    req=Request(SOURCE,headers={"User-Agent":"Mozilla/5.0 (compatible; GPN17Monitor/1.0)"})
+    with urlopen(req,timeout=20) as r:
+        html=r.read().decode("utf-8","replace")
+    text=re.sub(r"<script[\\s\\S]*?</script>|<style[\\s\\S]*?</style>"," ",html,flags=re.I)
     text=re.sub(r"<[^>]+>"," ",text)
-    text=re.sub(r"\\s+"," ",text)
-    out={}
-    for fuel in ("АИ-92","АИ-95","ДТ"):
-        m=re.search(re.escape(fuel)+r".{0,180}?(Есть|Нет данных|Нет)",text,re.I)
-        out[fuel]=m.group(1).upper() if m else "НЕТ ДАННЫХ"
-    return out
+    text=re.sub(r"&nbsp;"," ",text)
+    return re.sub(r"\\s+"," ",text)
 
-def mail(status):
+def status():
+    text=fetch_text()
+    pos=text.lower().find(ADDRESS.lower())
+    if pos<0:
+        raise RuntimeError("АЗС №17 не найдена в источнике")
+    block=text[max(0,pos-500):pos+1200]
+    def one(names):
+        for name in names:
+            m=re.search(re.escape(name)+r".{0,80}?(В наличии|Нет в наличии|Нет данных|нет|есть)",block,re.I)
+            if m:
+                v=m.group(1).lower()
+                if "в наличии" in v or v=="есть": return "ЕСТЬ"
+                if "нет данных" in v: return "НЕТ ДАННЫХ"
+                return "НЕТ"
+        return "НЕТ ДАННЫХ"
+    return {"АИ-92":one(["АИ-92","Аи-92"]),"АИ-95":one(["АИ-95","Аи-95"]),"ДТ":one(["Дизель","ДТ"])}
+
+def send(st,err=None):
     user=os.environ["GMAIL_SMTP_USER"].strip()
     password="".join(os.environ["GMAIL_APP_PASSWORD"].split())
-    body=["АЗС №17 — Санкт-Петербург, Московское шоссе, 46 к3","",
-          "АИ-92: "+status["АИ-92"],"АИ-95: "+status["АИ-95"],"ДТ: "+status["ДТ"],"",
-          "Проверено: "+datetime.now().astimezone().strftime("%d.%m.%Y %H:%M %Z"),
-          "Источник мониторинга: "+URL]
-    msg=EmailMessage(); msg["From"]=user; msg["To"]=TO; msg["Subject"]="[АЗС №17] Наличие топлива"; msg.set_content("\n".join(body))
+    now=datetime.now().astimezone().strftime("%d.%m.%Y %H:%M %Z")
+    if err:
+        subject="[АЗС №17] Ошибка проверки"
+        body=f"АЗС №17\nСанкт-Петербург, Московское шоссе, 46 к3\n\nПроверено: {now}\nНе удалось получить актуальные данные: {err}"
+    else:
+        subject="[АЗС №17] Наличие топлива"
+        body=("АЗС №17\nСанкт-Петербург, Московское шоссе, 46 к3\n\n"
+              f"АИ-92: {st['АИ-92']}\nАИ-95: {st['АИ-95']}\nДТ: {st['ДТ']}\n"
+              "G-95: НЕТ ДАННЫХ\n\n"
+              f"Проверено: {now}\nИсточник: ГдеБензин.рф")
+    msg=EmailMessage(); msg["From"]=user; msg["To"]=TO; msg["Subject"]=subject; msg.set_content(body)
     ctx=ssl.create_default_context()
-    with smtplib.SMTP("smtp.gmail.com",587,timeout=60) as s:
+    with smtplib.SMTP("smtp.gmail.com",587,timeout=30) as s:
         s.ehlo(); s.starttls(context=ctx); s.ehlo(); s.login(user,password); s.send_message(msg)
 
 if __name__=="__main__":
-    status=get_status()
-    print(status)
-    mail(status)
+    try:
+        st=status(); print(st); send(st)
+    except Exception as e:
+        print("ERROR:",type(e).__name__,str(e))
+        send({},f"{type(e).__name__}: {e}")
+        raise
