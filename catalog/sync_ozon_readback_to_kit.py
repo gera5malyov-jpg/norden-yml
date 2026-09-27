@@ -94,6 +94,24 @@ def characteristic_index(kit):
     return rows,by_title
 
 def characteristic_id(kit,rows,by_title,title):
+    key=MOD.norm_title(title)
+    matches=list(by_title.get(key) or [])
+    if len(matches)==1:
+        return s(matches[0].get("id"))
+    if len(matches)>1:
+        # KIT may contain legacy duplicate characteristic definitions with the same visible title.
+        # Reuse one deterministic ACTIVE definition instead of failing or creating yet another duplicate.
+        def rank(x):
+            status=0 if s(x.get("status")).upper()=="ACTIVE" else 1
+            seq=x.get("display_sequence")
+            try: seq=int(seq)
+            except: seq=10**9
+            return (status,seq,s(x.get("id")))
+        chosen=sorted(matches,key=rank)[0]
+        cid=s(chosen.get("id"))
+        if not cid:
+            raise RuntimeError(f"KIT characteristic {title!r}: selected duplicate has no id")
+        return cid
     return MOD.characteristic_id(kit,rows,by_title,title)
 
 def is_ozon_characteristic_title(title):
