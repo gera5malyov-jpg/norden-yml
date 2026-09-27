@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: browser-agent-deploy
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -39,8 +39,11 @@ jobs:
             mkdir -p .browser-agent
             printf '%s\n' '{"status":"FAILED","error":"deployer did not create status.json"}' > .browser-agent/status.json
           fi
+          cp .browser-agent/status.json /tmp/browser-agent-status.json
           git fetch origin main
-          git checkout -B main origin/main
+          git reset --hard origin/main
+          mkdir -p .browser-agent
+          cp /tmp/browser-agent-status.json .browser-agent/status.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .browser-agent/status.json
