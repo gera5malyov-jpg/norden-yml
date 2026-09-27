@@ -1,0 +1,13 @@
+{
+  "status": "FAILED",
+  "endpoint": "https://browser-45-86-180-49.sslip.io/mcp",
+  "oauth_authorization": "https://browser-45-86-180-49.sslip.io/authorize",
+  "target_ip": "45.86.180.49",
+  "netangels": "success",
+  "deploy": "pending",
+  "verify": "pending",
+  "login_password_rsa_oaep_sha256_b64": "cmFTNq43URZ2SbGkTpXKi/pz/emy773KvpbJ/90Eiok6l32YHA+L0aBhMSByEk8FRTLG+QTYTXjyFxE4opyYE9dBc7NrsNvPLCVxDtEADqf8NpabQDcnv6PkCle7q7lxPx7cGg9Mdx2x3hasEhUJzlKLg00j2RmWZIzMS77wWj2wrT1fsEb/URr+NjOf6EjwieH0gy4gKBq+tZrWYkkue2NU2Yy2BNnD75h52s7do9v5OlDWUTYqaLVNYb5TtQde7+HwEImYf0yD4XPvwRuu7DRMXg8b/cNcBpCQeu+vRRAKksI4WLUhReM/Oobw7r+rAAWJGq4F5EfehFXJESQKBm9bJi7uMGSmuFPbHzVlGzES8bk61VS0wOn242mCeT8vFFd6iHudFMpni7s63VqC6iROtuzU7aWdHQ4wBQuxt4YhoU9Vd1UP6E4wtOPGz3uCwTNnh6hlE+/0KqDzreWMDCp63RXDFy1fsNmTjExYpT/ylQjDnKLUcYCgVPGySez48AH+ManOLyGiiDbZ9xO+4h20HZUqNC8YvTlbA8Sa9ctBqTRHc883DGtguvzwmxiFu4uKdsbadDxtdPUxWcxk1eKKCDkq44nr/PevvTBZWB/ePbuQEFF53AoglnWmdFnWYXyA593p0dZ2GNtETKYTdLjkh99+xsYRpwU6PfESZHc=",
+  "updated_at": "2026-09-27T18:54:07.909741+00:00",
+  "run_id": "36342336369",
+  "error": "Remote preparation failed: (\"nginx\",pid=1032,fd=6),(\"nginx\",pid=1031,fd=6),(\"nginx\",pid=1030,fd=6),(\"nginx\",pid=1029,fd=6),(\"nginx\",pid=1028,fd=6),(\"nginx\",pid=1027,fd=6),(\"nginx\",pid=1026,fd=6))\nLISTEN     0      128    127.0.0.1:80                       *:*                   users:((\"apache2\",pid=93328,fd=3),(\"apache2\",pid=77654,fd=3),(\"apache2\",pid=77653,fd=3),(\"apache2\",pid=77651,fd=3),(\"apache2\",pid=539,fd=3))\nLISTEN     0      128          *:443                      *:*                   users:((\"nginx\",pid=1034,fd=7),(\"nginx\",pid=1033,fd=7),(\"nginx\",pid=1032,fd=7),(\"nginx\",pid=1031,fd=7),(\"nginx\",pid=1030,fd=7),(\"nginx\",pid=1029,fd=7),(\"nginx\",pid=1028,fd=7),(\"nginx\",pid=1027,fd=7),(\"nginx\",pid=1026,fd=7))\nLISTEN     0      128         :::443                     :::*                   users:((\"nginx\",pid=1034,fd=8),(\"nginx\",pid=1033,fd=8),(\"nginx\",pid=1032,fd=8),(\"nginx\",pid=1031,fd=8),(\"nginx\",pid=1030,fd=8),(\"nginx\",pid=1029,fd=8),(\"nginx\",pid=1028,fd=8),(\"nginx\",pid=1027,fd=8),(\"nginx\",pid=1026,fd=8))\n"
+}
