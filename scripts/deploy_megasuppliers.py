@@ -78,11 +78,6 @@ def main():
                         "'backend_prod' => 'backendProd',",
                         "'backend_prod' => 'backendProd',\n        'backend_products' => 'backendProducts',\n        'products_collection' => 'productsCollection',"
                     )
-                if "'backend_prod_filters' => 'backendProdFilters'" not in text_data:
-                    text_data=text_data.replace(
-                        "'backend_products' => 'backendProducts',",
-                        "'backend_products' => 'backendProducts',\n        'backend_prod_filters' => 'backendProdFilters',"
-                    )
                 for event_name, method_name in [
                     ("backend_product_edit", "backendProductEdit"),
                     ("backend_prod_content", "backendProdContent"),
