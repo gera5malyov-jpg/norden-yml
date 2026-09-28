@@ -1,0 +1,40 @@
+name: Assign two test suppliers
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/assign_two_test_suppliers.py'
+      - '.github/workflows/assign-two-test-suppliers.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Assign suppliers
+        run: python3 scripts/assign_two_test_suppliers.py
+      - name: Save report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/megasuppliers-test-assignments.txt || echo "assignment report missing" > .deploy-probe/megasuppliers-test-assignments.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/megasuppliers-test-assignments.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save megasuppliers test assignment report [skip ci]"
+            git push origin HEAD:main
+          fi
