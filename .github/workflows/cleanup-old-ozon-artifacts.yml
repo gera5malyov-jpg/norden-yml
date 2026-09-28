@@ -1,0 +1,25 @@
+name: Cleanup old Ozon image artifacts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cleanup-old-ozon-artifacts.yml'
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old image artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for id in 10993878677 10996662127; do
+            gh api --method DELETE "/repos/$REPO/actions/artifacts/$id" || true
+          done
