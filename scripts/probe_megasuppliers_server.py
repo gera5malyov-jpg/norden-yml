@@ -171,6 +171,32 @@ for f in "$ROOT/wa-apps/shop/plugins/yml/lib/shopYml.plugin.php" "$ROOT/wa-apps/
 done
 find "$ROOT/wa-apps/shop/plugins/yml/lib/actions/backend" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | sort | head -n 80
 
+echo "--- existing supplier metadata sources ---"
+cat >/tmp/ms_supplier_sources.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$m=new waModel();
+
+echo "[types]\n";
+$types=$m->query("SELECT t.id,t.name,COUNT(p.id) c FROM shop_type t LEFT JOIN shop_product p ON p.type_id=t.id GROUP BY t.id,t.name HAVING c>0 ORDER BY c DESC,t.name LIMIT 200")->fetchAll();
+foreach($types as $r){ echo $r['id']."\t".$r['c']."\t".$r['name']."\n"; }
+
+echo "[features]\n";
+$features=$m->query("SELECT id,code,name,type,multiple,selectable FROM shop_feature WHERE LOWER(name) LIKE '%постав%' OR LOWER(code) LIKE '%supplier%' OR LOWER(code) LIKE '%postav%' ORDER BY id")->fetchAll();
+foreach($features as $r){ echo json_encode($r,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n"; }
+
+echo "[product_params_supplier_like]\n";
+$params=$m->query("SELECT name,COUNT(*) c FROM shop_product_params WHERE LOWER(name) LIKE '%постав%' OR LOWER(name) LIKE '%supplier%' GROUP BY name ORDER BY c DESC LIMIT 100")->fetchAll();
+foreach($params as $r){ echo $r['name']."\t".$r['c']."\n"; }
+PHP
+chown web:web /tmp/ms_supplier_sources.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_supplier_sources.php' || true
+rm -f /tmp/ms_supplier_sources.php
+
 echo "--- supplier mapping counts ---"
 cat >/tmp/ms_supplier_counts.php <<'PHP'
 <?php
