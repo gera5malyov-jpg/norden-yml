@@ -9,7 +9,7 @@ from pathlib import Path
 
 import gspread, requests
 from google.oauth2.service_account import Credentials
-from norden_category_fallback import enrich_missing_categories
+from norden_category_fallback import enrich_missing_categories, target_article_keys
 
 ROOT=Path(__file__).resolve().parents[1]
 REPORT=ROOT/"catalog"/"norden_chairs_stools_6h_report.json"
@@ -134,12 +134,14 @@ def supplier():
     if len(src)<1000: raise RuntimeError(f"Safety stop: Norden full catalog too small ({len(src)})")
 
     target_before=sum(1 for i in src.values() if target_item(i))
+    fallback_targets=set()
     category_fallback={"used":False,"target_before":target_before}
     if kind=="api" and target_before<100:
         xml_src,xml_dups=MOD.source_from_xml(short=False)
         if len(xml_src)<1000:
             raise RuntimeError(f"Safety stop: Norden XML category fallback too small ({len(xml_src)})")
-        xml_target=sum(1 for i in xml_src.values() if target_item(i))
+        fallback_targets=target_article_keys(xml_src,target_item)
+        xml_target=len(fallback_targets)
         src,fb=enrich_missing_categories(src,xml_src)
         category_fallback={
             "used":True,
@@ -154,7 +156,10 @@ def supplier():
 
     ps,pdups=price_stock(); out={}
     for a,i in src.items():
-        if not target_item(i): continue
+        if category_fallback["used"]:
+            if nc(a) not in fallback_targets: continue
+        elif not target_item(i):
+            continue
         x=dict(i); p=ps.get(nc(a),{})
         x.update({"purchase":p.get("purchase"),"rrp":p.get("rrp"),"msk":p.get("msk",0),"spb":p.get("spb",0),"total":p.get("total",0)})
         out[nc(a)]=x
