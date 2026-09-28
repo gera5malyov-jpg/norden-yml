@@ -82,6 +82,16 @@ else
 fi
 echo "--- existing plugin ownership sample ---"
 find "$ROOT/wa-apps/shop/plugins" -mindepth 1 -maxdepth 1 -type d -printf '%u:%g %m %p\\n' | head -n 12
+echo "--- web user php modules ---"
+su -s /bin/bash web -c 'php -m | grep -E "mysqli|pdo_mysql|zip|SimpleXML|mbstring" || true'
+echo "--- nordenstock config ---"
+for f in "$ROOT/wa-apps/shop/plugins/nordenstock/lib/config/plugin.php" "$ROOT/wa-apps/shop/plugins/nordenstock/lib/config/db.php" "$ROOT/wa-apps/shop/plugins/nordenstock/lib/config/install.php"; do
+  if [ -f "$f" ]; then echo "### $f"; sed -n '1,260p' "$f"; fi
+done
+echo "--- sample plugin backend actions ---"
+find "$ROOT/wa-apps/shop/plugins" -path '*/lib/actions/backend/*.php' -type f | head -n 5 | while read f; do echo "### $f"; sed -n '1,180p' "$f"; done
+echo "--- framework plugin installer references ---"
+grep -RIn "function.*install.*Plugin\|install.php\|lib/config/db.php" "$ROOT/wa-system" "$ROOT/wa-installer/lib" 2>/dev/null | head -n 120 || true
 """
             ok=False
             for user in ("root","web"):
