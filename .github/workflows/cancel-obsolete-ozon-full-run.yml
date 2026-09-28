@@ -14,9 +14,11 @@ jobs:
   cancel:
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel obsolete run
+      - name: Cancel obsolete runs
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
-          gh api --method POST "/repos/$REPO/actions/runs/36487873403/cancel" || true
+          for id in 36487873403 36487854115; do
+            gh api --method POST "/repos/$REPO/actions/runs/$id/cancel" || true
+          done
