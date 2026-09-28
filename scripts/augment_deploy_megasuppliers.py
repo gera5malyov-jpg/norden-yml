@@ -82,3 +82,59 @@ s=s.replace(
     'text_data=text_data.replace("\'version\' => \'1.0.1\'", "\'version\' => \'1.0.7\'")'
 )
 p.write_text(s,encoding="utf-8")
+
+
+s=p.read_text(encoding="utf-8")
+s=s.replace(
+    """            $queries = $this->supplierProductSubqueries($id, $row['code']);
+            $count_row = $model->query('SELECT COUNT(*) c FROM ('.implode(' UNION ', $queries).') ms_products')->fetch();
+            $count = $count_row ? (int)$count_row['c'] : 0;""",
+    """            $count = (int)$model->query(
+                'SELECT COUNT(DISTINCT product_id) FROM shop_megasuppliers_product '
+                .'WHERE supplier_id='.(int)$id.' AND product_id>0'
+            )->fetchField();"""
+)
+s=s.replace(
+    """        $queries = $this->supplierProductSubqueries($supplier_id, $supplier['code']);
+        $collection->addWhere('id IN ('.implode(' UNION ', $queries).')');""",
+    """        $collection->addWhere(
+            'EXISTS (SELECT 1 FROM shop_megasuppliers_product ms '
+            .'WHERE ms.product_id=p.id AND ms.supplier_id='.(int)$supplier_id.')'
+        );"""
+)
+s=s.replace(
+    """                $queries = $this->supplierProductSubqueries($supplier_id, $supplier['code']);
+                $params['collection']->addWhere('p.id IN ('.implode(' UNION ', $queries).')');""",
+    """                $params['collection']->addWhere(
+                    'EXISTS (SELECT 1 FROM shop_megasuppliers_product ms '
+                    .'WHERE ms.product_id=p.id AND ms.supplier_id='.(int)$supplier_id.')'
+                );"""
+)
+s=s.replace(
+    """foreach ($sql as $q) {
+    if (!$mysqli->query($q)) {
+        fwrite(STDERR, "DB schema failed: ".$mysqli->error+"\\n");
+        exit(4);
+    }
+}
+$now = date('Y-m-d H:i:s');""".replace("+","."), 
+    """foreach ($sql as $q) {
+    if (!$mysqli->query($q)) {
+        fwrite(STDERR, "DB schema failed: ".$mysqli->error."\\n");
+        exit(4);
+    }
+}
+$idx=$mysqli->query("SHOW INDEX FROM shop_megasuppliers_product WHERE Key_name='supplier_product'");
+if (!$idx || !$idx->num_rows) {
+    if (!$mysqli->query("ALTER TABLE shop_megasuppliers_product ADD KEY supplier_product (supplier_id, product_id)")) {
+        fwrite(STDERR, "DB index failed: ".$mysqli->error."\\n");
+        exit(4);
+    }
+}
+$now = date('Y-m-d H:i:s');"""
+)
+s=s.replace(
+    'text_data=text_data.replace("\'version\' => \'1.0.1\'", "\'version\' => \'1.0.7\'")',
+    'text_data=text_data.replace("\'version\' => \'1.0.1\'", "\'version\' => \'1.0.8\'")'
+)
+p.write_text(s,encoding="utf-8")
