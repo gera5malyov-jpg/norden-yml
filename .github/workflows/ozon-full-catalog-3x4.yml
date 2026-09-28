@@ -22,7 +22,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 0
       END_BATCH: 19
     steps:
@@ -52,7 +55,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 20
       END_BATCH: 39
     steps:
@@ -82,7 +88,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 40
       END_BATCH: 59
     steps:
@@ -112,7 +121,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 60
       END_BATCH: 79
     steps:
@@ -142,7 +154,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 80
       END_BATCH: 99
     steps:
@@ -172,7 +187,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 100
       END_BATCH: 119
     steps:
@@ -202,7 +220,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 120
       END_BATCH: 139
     steps:
@@ -232,7 +253,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 140
       END_BATCH: 159
     steps:
@@ -262,7 +286,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 160
       END_BATCH: 179
     steps:
@@ -292,7 +319,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 180
       END_BATCH: 199
     steps:
@@ -322,7 +352,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 200
       END_BATCH: 219
     steps:
@@ -352,7 +385,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 220
       END_BATCH: 239
     steps:
@@ -382,7 +418,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 240
       END_BATCH: 259
     steps:
@@ -412,7 +451,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 260
       END_BATCH: 279
     steps:
@@ -442,7 +484,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 280
       END_BATCH: 299
     steps:
@@ -472,7 +517,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 300
       END_BATCH: 319
     steps:
@@ -502,7 +550,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 320
       END_BATCH: 339
     steps:
@@ -532,7 +583,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 340
       END_BATCH: 359
     steps:
@@ -562,7 +616,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 360
       END_BATCH: 379
     steps:
@@ -592,7 +649,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 380
       END_BATCH: 399
     steps:
@@ -622,7 +682,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 400
       END_BATCH: 419
     steps:
@@ -652,7 +715,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 420
       END_BATCH: 439
     steps:
@@ -682,7 +748,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 440
       END_BATCH: 459
     steps:
@@ -712,7 +781,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 460
       END_BATCH: 479
     steps:
@@ -742,7 +814,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 480
       END_BATCH: 499
     steps:
@@ -772,7 +847,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 500
       END_BATCH: 519
     steps:
@@ -802,7 +880,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 520
       END_BATCH: 539
     steps:
@@ -832,7 +913,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 540
       END_BATCH: 559
     steps:
@@ -862,7 +946,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 560
       END_BATCH: 579
     steps:
@@ -892,7 +979,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 580
       END_BATCH: 599
     steps:
@@ -922,7 +1012,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 600
       END_BATCH: 619
     steps:
@@ -952,7 +1045,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 620
       END_BATCH: 639
     steps:
@@ -982,7 +1078,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 640
       END_BATCH: 659
     steps:
@@ -1012,7 +1111,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 660
       END_BATCH: 679
     steps:
@@ -1042,7 +1144,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 680
       END_BATCH: 699
     steps:
@@ -1072,7 +1177,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 700
       END_BATCH: 719
     steps:
@@ -1102,7 +1210,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 720
       END_BATCH: 739
     steps:
@@ -1132,7 +1243,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 740
       END_BATCH: 759
     steps:
@@ -1162,7 +1276,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 760
       END_BATCH: 779
     steps:
@@ -1192,7 +1309,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 780
       END_BATCH: 799
     steps:
@@ -1222,7 +1342,10 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}\n      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}\n      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}\n      MAIL_TO: 'shop@office-mag.com'
+      GITHUB_TOKEN: ${{ github.token }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: 'shop@office-mag.com'
       START_BATCH: 800
       END_BATCH: 816
     steps:
@@ -1254,6 +1377,8 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 1
+      - name: Install progress reporter dependency
+        run: python -m pip install --disable-pip-version-check requests
       - name: Remove temporary cumulative progress branch
         if: always()
         env:
