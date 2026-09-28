@@ -65,3 +65,11 @@ def enrich_missing_categories(api_items: dict, xml_items: dict):
         "enriched_from_xml": replaced,
         "generic_after": generic_after,
     }
+
+
+def target_article_keys(xml_items: dict, predicate):
+    return {
+        _norm_article(article)
+        for article, item in (xml_items or {}).items()
+        if _norm_article(article) and isinstance(item, dict) and predicate(item)
+    }
