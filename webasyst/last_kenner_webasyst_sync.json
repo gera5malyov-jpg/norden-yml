@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-27T10:03:15.681493+00:00",
+  "started_at": "2026-09-28T11:00:17.483676+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=334",
   "type_name": "kennermebel-334",
@@ -8,25 +8,98 @@
   "webasyst_stock_id": "66",
   "kit_stock": "МСК",
   "kit_stock_id": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
-  "kit_variants_scanned": 90,
-  "kit_webasyst_334_variants": 73,
+  "kit_variants_scanned": 92,
+  "kit_webasyst_334_variants": 75,
   "kit_duplicate_skus": 0,
   "webasyst_products": 73,
   "webasyst_duplicate_skus": 0,
-  "processed": 73,
-  "created": 0,
-  "updated_prices_stock": 2,
+  "processed": 75,
+  "created": 2,
+  "updated_prices_stock": 10,
   "summaries_updated_from_kit": 0,
   "kit_variants_without_images": 0,
-  "unchanged": 71,
+  "unchanged": 63,
   "features_created": 0,
-  "feature_values_written": 0,
-  "file_urls_resolved": 1169,
+  "feature_values_written": 34,
+  "file_urls_resolved": 1223,
   "image_source": "Yandex KIT media only",
   "webasyst_routing": "Webasyst=334",
   "errors": [],
-  "sample_new": [],
+  "sample_new": [
+    {
+      "sku": "334-324439",
+      "product_id": "1483284",
+      "name": "Стол Kenner RR900, черный/керамика BAOLAI арт.170114",
+      "url": "stol-kenner-rr900-chernyy-keramika-baolai-art-170114-334-324439",
+      "price": "27840.00",
+      "compare_price": "27840.00",
+      "stock": 9,
+      "features": 18,
+      "images_in_summary": 25
+    },
+    {
+      "sku": "334-324440",
+      "product_id": "1483285",
+      "name": "Стол Kenner RR900, черный/керамика CARLA LARKIN арт.170116",
+      "url": "stol-kenner-rr900-chernyy-keramika-carla-larkin-art-170116-334-324440",
+      "price": "27840.00",
+      "compare_price": "27840.00",
+      "stock": 9,
+      "features": 16,
+      "images_in_summary": 29
+    }
+  ],
   "sample_updates": [
+    {
+      "sku": "334-320829",
+      "fields": [
+        "stock"
+      ],
+      "price": "20180.00",
+      "compare_price": "20180.00",
+      "stock": 8,
+      "images_in_summary": 16
+    },
+    {
+      "sku": "334-320832",
+      "fields": [
+        "stock"
+      ],
+      "price": "20180.00",
+      "compare_price": "20180.00",
+      "stock": 38,
+      "images_in_summary": 16
+    },
+    {
+      "sku": "334-320839",
+      "fields": [
+        "stock"
+      ],
+      "price": "21080.00",
+      "compare_price": "21080.00",
+      "stock": 8,
+      "images_in_summary": 21
+    },
+    {
+      "sku": "334-320850",
+      "fields": [
+        "stock"
+      ],
+      "price": "17340.00",
+      "compare_price": "17340.00",
+      "stock": 32,
+      "images_in_summary": 16
+    },
+    {
+      "sku": "334-320851",
+      "fields": [
+        "stock"
+      ],
+      "price": "17340.00",
+      "compare_price": "17340.00",
+      "stock": 8,
+      "images_in_summary": 17
+    },
     {
       "sku": "334-323468",
       "fields": [
@@ -46,11 +119,41 @@
       "compare_price": "12240.00",
       "stock": 1,
       "images_in_summary": 11
+    },
+    {
+      "sku": "334-324210",
+      "fields": [
+        "stock"
+      ],
+      "price": "12240.00",
+      "compare_price": "12240.00",
+      "stock": 10,
+      "images_in_summary": 9
+    },
+    {
+      "sku": "334-325174",
+      "fields": [
+        "stock"
+      ],
+      "price": "42590.00",
+      "compare_price": "64500.00",
+      "stock": 10,
+      "images_in_summary": 28
+    },
+    {
+      "sku": "334-325184",
+      "fields": [
+        "stock"
+      ],
+      "price": "43320.00",
+      "compare_price": "67517.00",
+      "stock": 3,
+      "images_in_summary": 21
     }
   ],
   "complete": true,
   "webasyst_routing_feature_code": "kenner_f93046718124",
   "webasyst_334_products": 73,
-  "finished_at": "2026-09-27T10:23:25.475964+00:00",
+  "finished_at": "2026-09-28T11:20:21.855273+00:00",
   "status": "ok"
 }
