@@ -82,7 +82,74 @@ PY
   if [ "$JPG_COUNT" != "0" ] && [ "$STATUS" = "SUCCESS" ]; then
     git push origin --delete "$OZON_TEMP_BRANCH" || true
   elif [ "$JPG_COUNT" != "0" ]; then
-    echo "Keeping $OZON_TEMP_BRANCH until Ozon CDN owns all images."
+    KEEP_LIST="$(mktemp)"
+    python - <<'PY' "$MAT" > "$KEEP_LIST"
+import json, sys
+d=json.load(open(sys.argv[1],encoding="utf-8"))
+for p in d.get("keep_files") or []:
+    print(p)
+PY
+    KEEP_COUNT="$(grep -cve '^
+
+  python ozon/catalog_3x4/process_batch.py compact "$BATCH_INDEX" || true
+  if [ -f "$BATCH_DIR/summary.json" ]; then
+    cp "$BATCH_DIR/summary.json" "$REPORT_DIR/batch_$(printf '%04d' "$BATCH_INDEX").json"
+  fi
+
+  find "$BATCH_DIR" -type f -name '*.jpg' -delete || true
+  rm -rf "$BATCH_DIR"
+  echo "===== BATCH $BATCH_INDEX DONE ====="
+done
+
+python - <<'PY'
+import json, glob, os, pathlib
+start=int(os.environ["START_BATCH"])
+end=int(os.environ["END_BATCH"])
+report_dir=f"ozon/catalog_3x4/range_reports_{start}_{end}"
+files=sorted(glob.glob(f"{report_dir}/batch_*.json"))
+rows=[json.loads(pathlib.Path(p).read_text(encoding="utf-8")) for p in files]
+out={
+    "range_start":start,
+    "range_end":end,
+    "batches_reported":len(rows),
+    "cards_requested":sum(len(x.get("requested") or []) for x in rows),
+    "cards_success":sum((x.get("summary") or {}).get("success",0) for x in rows),
+    "cards_error":sum((x.get("summary") or {}).get("error",0) for x in rows),
+    "images_converted":sum(sum((o.get("converted_count") or 0) for o in (x.get("offers") or [])) for x in rows),
+}
+pathlib.Path(f"{report_dir}/range_summary.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+print(json.dumps(out,ensure_ascii=False,indent=2))
+PY
+
+exit "$RANGE_ERROR"
+ "$KEEP_LIST" || true)"
+    if [ "$KEEP_COUNT" = "0" ]; then
+      echo "No current Ozon URL references the temp branch; deleting it."
+      git push origin --delete "$OZON_TEMP_BRANCH" || true
+    else
+      echo "Trimming $OZON_TEMP_BRANCH to $KEEP_COUNT still-referenced JPG files."
+      TRIM="$(mktemp -d)"
+      while IFS= read -r f; do
+        [ -n "$f" ] || continue
+        if [ -f "$f" ]; then
+          mkdir -p "$TRIM/$(dirname "$f")"
+          cp "$f" "$TRIM/$f"
+        fi
+      done < "$KEEP_LIST"
+      cp "$BATCH_DIR/active.json" "$TRIM/.ozon_batch_meta.json" || true
+      (
+        cd "$TRIM"
+        git init -b temp >/dev/null
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -A
+        git commit -m "temp: retain only Ozon-referenced JPGs batch $BATCH_INDEX [skip ci]" >/dev/null
+        git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+        git push --force origin "HEAD:refs/heads/$OZON_TEMP_BRANCH"
+      )
+      rm -rf "$TRIM"
+    fi
+    rm -f "$KEEP_LIST"
   fi
 
   python ozon/catalog_3x4/process_batch.py compact "$BATCH_INDEX" || true
