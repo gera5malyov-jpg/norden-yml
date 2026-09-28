@@ -78,7 +78,12 @@ def main():
                         "'backend_prod' => 'backendProd',",
                         "'backend_prod' => 'backendProd',\n        'backend_products' => 'backendProducts',\n        'products_collection' => 'productsCollection',"
                     )
-                text_data=text_data.replace("'version' => '1.0.1'", "'version' => '1.0.3'")
+                if "'backend_prod_filters' => 'backendProdFilters'" not in text_data:
+                    text_data=text_data.replace(
+                        "'backend_products' => 'backendProducts',",
+                        "'backend_products' => 'backendProducts',\n        'backend_prod_filters' => 'backendProdFilters',"
+                    )
+                text_data=text_data.replace("'version' => '1.0.1'", "'version' => '1.0.4'")
                 data=text_data.encode("utf-8")
             elif item.filename == "megasuppliers/lib/models/shopMegasuppliersMeta.model.php":
                 text_data=data.decode("utf-8")
