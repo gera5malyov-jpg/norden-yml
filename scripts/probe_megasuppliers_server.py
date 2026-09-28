@@ -257,6 +257,11 @@ try {
     echo "supplier_model_exists=".(class_exists('shopMegasuppliersSupplierModel')?'yes':'no')."\n";
     $m=new shopMegasuppliersSupplierModel();
     echo "supplier_count=".$m->countAll()."\n";
+    $sidebar=$p->backendProducts(array());
+    $html=is_array($sidebar)&&isset($sidebar['sidebar_section'])?$sidebar['sidebar_section']:'';
+    echo "sidebar_render=".($html!==''?'yes':'no')."\n";
+    echo "sidebar_filter_link=".(strpos($html,'#/products/hash=megasuppliers/')!==false?'yes':'no')."\n";
+    echo "sidebar_norden=".(strpos($html,'Norden')!==false?'yes':'no')."\n";
 } catch (Throwable $e) {
     echo "backend_probe_error=".get_class($e).": ".$e->getMessage()."\n".$e->getTraceAsString()."\n";
 }
