@@ -70,3 +70,15 @@ s=s.replace(
     '            .\'var b=$("#s-megasuppliers-sidebar");\'\n            .\'var sets=$("#s-set-list-block");if(sets.length){b.insertAfter(sets);}\'\n            .\'b.find("h5.heading")'
 )
 p.write_text(s,encoding="utf-8")
+
+
+s=p.read_text(encoding="utf-8")
+s=s.replace(
+    "$params['collection']->addWhere('id IN ('.implode(' UNION ', $queries).')');",
+    "$params['collection']->addWhere('p.id IN ('.implode(' UNION ', $queries).')');"
+)
+s=s.replace(
+    'text_data=text_data.replace("\'version\' => \'1.0.1\'", "\'version\' => \'1.0.6\'")',
+    'text_data=text_data.replace("\'version\' => \'1.0.1\'", "\'version\' => \'1.0.7\'")'
+)
+p.write_text(s,encoding="utf-8")
