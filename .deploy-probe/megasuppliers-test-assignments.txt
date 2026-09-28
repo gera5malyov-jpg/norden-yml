@@ -1,0 +1,6 @@
+4sis_created=yes
+assign AF-31662421 supplier=NORDEN linked=1 skipped=0 errors=0
+assign AF-31655692 supplier=4SIS linked=1 skipped=0 errors=0
+verify AF-31662421 [{"product_id":"1483283","name":"Кресло офисное / Некст блэк / Next black / черная сетка / черная ткань / поясничный упор","sku_id":"31662421","sku":"AF-31662421","supplier_name":"Norden","supplier_code":"NORDEN"}]
+verify AF-31655692 [{"product_id":"1476554","name":"\"Модена\" шезлонг из алюминия, ткань текстилен, цвет белый","sku_id":"31655692","sku":"AF-31655692","supplier_name":"4SIS","supplier_code":"4SIS"}]
+stderr=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
