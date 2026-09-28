@@ -1,0 +1,22 @@
+name: Cancel obsolete Ozon full run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-obsolete-ozon-full-run.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel obsolete run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api --method POST "/repos/$REPO/actions/runs/36487873403/cancel" || true
