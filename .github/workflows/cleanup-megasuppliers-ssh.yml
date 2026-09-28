@@ -1,0 +1,25 @@
+name: Cleanup megasuppliers SSH keys
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/cleanup_megasuppliers_ssh_keys.py'
+      - '.github/workflows/cleanup-megasuppliers-ssh.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Cleanup
+        run: python3 scripts/cleanup_megasuppliers_ssh_keys.py
