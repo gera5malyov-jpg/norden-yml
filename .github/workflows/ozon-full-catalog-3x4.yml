@@ -35,14 +35,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 0-19 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-0-19
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_01:
     needs: range_00
@@ -65,14 +65,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 20-39 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-20-39
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_02:
     needs: range_01
@@ -95,14 +95,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 40-59 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-40-59
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_03:
     needs: range_02
@@ -125,14 +125,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 60-79 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-60-79
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_04:
     needs: range_03
@@ -155,14 +155,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 80-99 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-80-99
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_05:
     needs: range_04
@@ -185,14 +185,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 100-119 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-100-119
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_06:
     needs: range_05
@@ -215,14 +215,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 120-139 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-120-139
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_07:
     needs: range_06
@@ -245,14 +245,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 140-159 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-140-159
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_08:
     needs: range_07
@@ -275,14 +275,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 160-179 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-160-179
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_09:
     needs: range_08
@@ -305,14 +305,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 180-199 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-180-199
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_10:
     needs: range_09
@@ -335,14 +335,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 200-219 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-200-219
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_11:
     needs: range_10
@@ -365,14 +365,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 220-239 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-220-239
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_12:
     needs: range_11
@@ -395,14 +395,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 240-259 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-240-259
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_13:
     needs: range_12
@@ -425,14 +425,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 260-279 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-260-279
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_14:
     needs: range_13
@@ -455,14 +455,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 280-299 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-280-299
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_15:
     needs: range_14
@@ -485,14 +485,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 300-319 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-300-319
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_16:
     needs: range_15
@@ -515,14 +515,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 320-339 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-320-339
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_17:
     needs: range_16
@@ -545,14 +545,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 340-359 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-340-359
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_18:
     needs: range_17
@@ -575,14 +575,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 360-379 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-360-379
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_19:
     needs: range_18
@@ -605,14 +605,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 380-399 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-380-399
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_20:
     needs: range_19
@@ -635,14 +635,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 400-419 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-400-419
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_21:
     needs: range_20
@@ -665,14 +665,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 420-439 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-420-439
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_22:
     needs: range_21
@@ -695,14 +695,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 440-459 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-440-459
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_23:
     needs: range_22
@@ -725,14 +725,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 460-479 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-460-479
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_24:
     needs: range_23
@@ -755,14 +755,14 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests pillow
       - name: Process batches 480-499 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ozon-3x4-range-480-499
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
   range_25:
     needs: range_24
@@ -774,7 +774,7 @@ jobs:
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
       GITHUB_TOKEN: ${{ github.token }}
       START_BATCH: 500
-      END_BATCH: 515
+      END_BATCH: 519
     steps:
       - name: Checkout fixed pipeline revision
         uses: actions/checkout@v4
@@ -783,16 +783,472 @@ jobs:
           fetch-depth: 1
       - name: Install dependencies
         run: python -m pip install --disable-pip-version-check requests pillow
-      - name: Process batches 500-515 sequentially
+      - name: Process batches 500-519 sequentially
         run: bash ozon/catalog_3x4/run_range.sh
-      - name: Upload range report
+      - name: Upload compact range report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ozon-3x4-range-500-515
+          name: ozon-3x4-range-500-519
           path: ozon/catalog_3x4/range_reports_*/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
+  range_26:
+    needs: range_25
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 520
+      END_BATCH: 539
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 520-539 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-520-539
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
 
-# trigger sequential full-catalog run
+  range_27:
+    needs: range_26
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 540
+      END_BATCH: 559
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 540-559 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-540-559
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_28:
+    needs: range_27
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 560
+      END_BATCH: 579
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 560-579 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-560-579
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_29:
+    needs: range_28
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 580
+      END_BATCH: 599
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 580-599 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-580-599
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_30:
+    needs: range_29
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 600
+      END_BATCH: 619
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 600-619 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-600-619
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_31:
+    needs: range_30
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 620
+      END_BATCH: 639
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 620-639 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-620-639
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_32:
+    needs: range_31
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 640
+      END_BATCH: 659
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 640-659 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-640-659
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_33:
+    needs: range_32
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 660
+      END_BATCH: 679
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 660-679 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-660-679
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_34:
+    needs: range_33
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 680
+      END_BATCH: 699
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 680-699 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-680-699
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_35:
+    needs: range_34
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 700
+      END_BATCH: 719
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 700-719 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-700-719
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_36:
+    needs: range_35
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 720
+      END_BATCH: 739
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 720-739 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-720-739
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_37:
+    needs: range_36
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 740
+      END_BATCH: 759
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 740-759 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-740-759
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_38:
+    needs: range_37
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 760
+      END_BATCH: 779
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 760-779 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-760-779
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_39:
+    needs: range_38
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 780
+      END_BATCH: 799
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 780-799 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-780-799
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  range_40:
+    needs: range_39
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      START_BATCH: 800
+      END_BATCH: 816
+    steps:
+      - name: Checkout fixed pipeline revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+      - name: Process batches 800-816 sequentially
+        run: bash ozon/catalog_3x4/run_range.sh
+      - name: Upload compact range report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-range-800-816
+          path: ozon/catalog_3x4/range_reports_*/
+          if-no-files-found: warn
+          retention-days: 1
+
+  complete:
+    needs: range_40
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'Full Ozon 3x4 catalog pass reached the final range.'
+
+# full queue: 16,336 cards / 817 batches / ALL + ARCHIVED
