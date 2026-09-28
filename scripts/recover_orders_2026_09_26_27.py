@@ -22,19 +22,9 @@ TARGET_OZON = {"0128881552-0579-1", "29680191-1530-1"}
 MSK = timezone(timedelta(hours=3))
 TAB = "Восстановление 26-27"
 
-LABEL = {
-    "yandex_market": "Яндекс Маркет",
-    "ozon": "Ozon",
-    "wildberries": "Wildberries",
-    "yandex_kit": "Яндекс KIT",
-    "webasyst": "Сайт/Webasyst",
-}
-
-
 def local_date(value):
     x = mp.dt(value)
     return x.astimezone(MSK).strftime("%Y-%m-%d") if x else ""
-
 
 def quantity(value):
     try:
@@ -42,27 +32,42 @@ def quantity(value):
     except Exception:
         return 1
 
+wa = WebasystClient(min_request_interval=0.10)
+name_cache = {}
 
-wa = WebasystClient(min_request_interval=0.15)
-rows = {}
+def sku_name(code):
+    code = oss.s(code)
+    if not code:
+        return ""
+    if code in name_cache:
+        return name_cache[code]
+    name = code
+    try:
+        p = wa.call("shop.product.search", params={
+            "hash": f"search/query={code}", "limit": 30, "fields": "id,name,skus"
+        })
+        products = oss.listify((p or {}).get("products") if isinstance(p, dict) else p)
+        for prod in products:
+            for sku in oss.listify(prod.get("skus")):
+                if oss.s(sku.get("sku")) == code:
+                    name = oss.s(prod.get("name")) or code
+                    raise StopIteration
+    except StopIteration:
+        pass
+    except Exception:
+        pass
+    name_cache[code] = name
+    return name
+
+rows = []
 errors = []
 
-
-def put(source, ext, created, phone, items, qty):
+def add_row(created, source, order_no, phone, items, qty):
     d = local_date(created)
-    if d not in TARGET_DATES:
-        return
-    rows[(source, str(ext))] = {
-        "date": d,
-        "source": LABEL.get(source, source),
-        "order_no": str(ext),
-        "phone": phone or "",
-        "items": items or "",
-        "qty": qty or 0,
-    }
+    if d in TARGET_DATES:
+        rows.append([d, source, order_no, phone or "", items or "", qty or 0])
 
-
-# 1) Exact Yandex order seen by the scheduled sync on 26 Sep.
+# Yandex order that first appeared in the 26 Sep scheduled sync.
 try:
     token = os.getenv("YANDEX_MARKET_API_KEY", "").strip()
     h = {"Api-Key": token, "Accept": "application/json", "Content-Type": "application/json"}
@@ -74,11 +79,10 @@ try:
         bid = b.get("id") if isinstance(b, dict) else c.get("businessId") if isinstance(c, dict) else None
         if bid and bid not in business_ids:
             business_ids.append(bid)
-
+    done = False
     for bid in business_ids:
         page = None
-        found = False
-        while True:
+        while not done:
             params = {"limit": 50}
             if page:
                 params["pageToken"] = page
@@ -105,24 +109,22 @@ try:
                         continue
                     n = quantity(it.get("count") or it.get("quantity"))
                     total += n
-                    name = oss.s(it.get("offerName") or it.get("name") or it.get("offerId") or it.get("shopSku"))
+                    sku = oss.s(it.get("offerId") or it.get("shopSku"))
+                    name = oss.s(it.get("offerName") or it.get("name")) or sku_name(sku)
                     parts.append(f"{name or 'Товар'} × {n}")
-                put("yandex_market", oid, o.get("creationDate"), phone, "; ".join(parts), total)
-                found = True
-            if found:
+                add_row(o.get("creationDate"), "Яндекс Маркет", oid, phone, "; ".join(parts), total)
+                done = True
                 break
             paging = root.get("paging") if isinstance(root, dict) else None
             page = (paging or {}).get("nextPageToken") if isinstance(paging, dict) else None
             if not page:
                 break
-        if found:
+        if done:
             break
 except Exception as exc:
     errors.append(f"yandex:{type(exc).__name__}")
 
-
-# 2) Ozon orders around the outage. The source timestamp decides whether the
-# second order belongs to 27 Sep or to 28 Sep.
+# Ozon: exact postings seen during/after the 27 Sep sync.
 try:
     cid = os.getenv("OZON_CLIENT_ID", "").strip()
     secret = os.getenv("OZON_API_KEY", "").strip()
@@ -147,56 +149,12 @@ try:
             total += n
             name = oss.s(it.get("name") or it.get("offer_id"))
             parts.append(f"{name or 'Товар'} × {n}")
-        put("ozon", posting, created, phone, "; ".join(parts), total)
+        add_row(created, "Ozon", posting, phone, "; ".join(parts), total)
 except Exception as exc:
     errors.append(f"ozon:{type(exc).__name__}")
 
-
-# 3) Current Webasyst: enrich marketplace rows from Shop-Script and include any
-# direct site orders whose own creation date is 26/27 Sep.
-try:
-    p = wa.call("shop.order.search", params={"limit": 100, "offset": 0, "fields": "*,state"})
-    batch = oss.listify((p or {}).get("orders") if isinstance(p, dict) else p)
-    for summary in batch:
-        oid = oss.s(summary.get("id"))
-        if not oid:
-            continue
-        try:
-            info = wa.call("shop.order.getInfo", params={"id": oid})
-        except Exception:
-            info = summary
-        if not isinstance(info, dict):
-            continue
-        params = dict(info.get("params") or {}) if isinstance(info.get("params"), dict) else {}
-        source = oss.s(params.get("mp_source")) or "webasyst"
-        ext = oss.s(params.get("mp_external_id")) or oss.s(info.get("id_str")) or oid
-        source_created = oss.s(params.get("mp_created_at"))
-        own_created = oss.s(info.get("create_datetime") or summary.get("create_datetime"))
-        created = source_created or own_created
-
-        products, qty = oss.item_text(info.get("items"), {})
-        contact = info.get("contact") if isinstance(info.get("contact"), dict) else {}
-        phone = oss.phone_text(contact)
-        saved_ext = oss.s(params.get("mp_phone_extension"))
-        if phone and saved_ext and f"доб. {saved_ext}" not in phone:
-            phone += f" доб. {saved_ext}"
-
-        key = (source, ext)
-        if key in rows:
-            if phone:
-                rows[key]["phone"] = phone
-            if products:
-                rows[key]["items"] = products
-                rows[key]["qty"] = qty
-        elif local_date(created) in TARGET_DATES:
-            put(source, ext, created, phone, products, qty)
-except Exception as exc:
-    errors.append(f"webasyst:{type(exc).__name__}")
-
-
 values = [["Дата заказа", "Источник", "Номер заказа", "Телефон", "Что заказали", "Количество"]]
-for r in sorted(rows.values(), key=lambda x: (x["date"], x["source"], x["order_no"])):
-    values.append([r["date"], r["source"], r["order_no"], r["phone"], r["items"], r["qty"]])
+values.extend(sorted(rows, key=lambda x: (x[0], x[1], x[2])))
 
 info = oss.service_account_info(os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", ""))
 gc = gspread.service_account_from_dict(info)
@@ -210,4 +168,4 @@ ws.clear()
 ws.resize(rows=max(100, len(values) + 10), cols=6)
 ws.update(range_name="A1", values=values, value_input_option="RAW")
 
-print(f"recovered_rows={len(values)-1}; source_errors={','.join(errors) if errors else 'none'}")
+print(f"recovered_rows={len(rows)}; source_errors={','.join(errors) if errors else 'none'}")
