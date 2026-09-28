@@ -138,3 +138,31 @@ s=s.replace(
     'text_data=text_data.replace("\'version\' => \'1.0.1\'", "\'version\' => \'1.0.8\'")'
 )
 p.write_text(s,encoding="utf-8")
+
+
+# Remove eager supplier counters from the legacy sidebar too. The supplier list
+# is navigation; counts are not needed for filtering and cause N aggregate queries.
+s=p.read_text(encoding="utf-8")
+s=s.replace(
+    """    public function backendProducts($params = array())
+    {
+        $model = new waModel();
+        $rows = (new shopMegasuppliersSupplierModel())->select('id,name,code')->where('active=1')->order('name')->fetchAll();""",
+    """    public function backendProducts($params = array())
+    {
+        $rows = (new shopMegasuppliersSupplierModel())->select('id,name,code')->where('active=1')->order('name')->fetchAll();"""
+)
+s=s.replace(
+    """            $count = (int)$model->query(
+                'SELECT COUNT(DISTINCT product_id) FROM shop_megasuppliers_product '
+                .'WHERE supplier_id='.(int)$id.' AND product_id>0'
+            )->fetchField();
+""",
+    ""
+)
+s=s.replace(
+    """                .'<span class="count">'.$count.'</span>'
+                .'<a href="#/products/hash=megasuppliers/'.$id.'/">'""",
+    """                .'<a href="#/products/hash=megasuppliers/'.$id.'/">'"""
+)
+p.write_text(s,encoding="utf-8")
