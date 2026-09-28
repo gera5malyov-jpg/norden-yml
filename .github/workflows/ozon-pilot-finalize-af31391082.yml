@@ -1,0 +1,76 @@
+name: Finalize Ozon pilot AF-31391082 CDN
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-pilot-finalize-af31391082.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      TEMP_BRANCH: ozon-image-temp-pilot20-36484945811
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Wait for Ozon CDN
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, time, requests
+          s=requests.Session()
+          s.headers.update({
+            "Client-Id":os.environ["OZON_CLIENT_ID"].strip(),
+            "Api-Key":os.environ["OZON_API_KEY"].strip(),
+            "Content-Type":"application/json",
+          })
+          offer="AF-31391082"
+          last=None
+          for attempt in range(1,61):
+            r=s.post("https://api-seller.ozon.ru/v3/product/info/list",json={"offer_id":[offer]},timeout=60)
+            r.raise_for_status()
+            item=(r.json().get("items") or [None])[0]
+            if not item: raise RuntimeError("Ozon product not found")
+            vals=[]
+            for key in ("primary_image","images"):
+              v=item.get(key) or []
+              if isinstance(v,str): v=[v]
+              for x in v:
+                if isinstance(x,dict): x=x.get("url") or x.get("file_name") or x.get("src")
+                if isinstance(x,str) and x not in vals: vals.append(x)
+            raw=[u for u in vals if "raw.githubusercontent.com" in u]
+            last={"attempt":attempt,"count":len(vals),"raw_github_count":len(raw),"urls":vals}
+            print(json.dumps(last,ensure_ascii=False))
+            if len(vals)==5 and not raw:
+              break
+            time.sleep(10)
+          os.makedirs("ozon/pilot_20/run",exist_ok=True)
+          ok=bool(last and last["count"]==5 and last["raw_github_count"]==0)
+          out={"offer_id":offer,"status":"SUCCESS" if ok else "ERROR",**(last or {})}
+          open("ozon/pilot_20/run/cdn_finalize_AF-31391082.json","w",encoding="utf-8").write(json.dumps(out,ensure_ascii=False,indent=2))
+          if not ok: raise SystemExit("Ozon CDN materialization not complete")
+          PY
+
+      - name: Delete disposable image branch
+        shell: bash
+        run: |
+          git push origin --delete "$TEMP_BRANCH" || true
+
+      - name: Commit final CDN report
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+          git add ozon/pilot_20/run/cdn_finalize_AF-31391082.json
+          git commit -m "report: finalize Ozon pilot CDN cleanup [skip ci]" || exit 0
+          git push
