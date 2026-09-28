@@ -178,7 +178,8 @@ def main():
             'ALETAN' => array(46, 122, 202),
             'RED_BLACK' => array(150),
             'B2B_FABRIKA' => array(204),
-            'KENNER' => array(203)
+            'KENNER' => array(203),
+            '4SIS' => array(11)
         );
     }
 
@@ -231,6 +232,19 @@ def main():
             .'})(jQuery);</script>';
 
         return array('sidebar_section' => $html);
+    }
+
+    public function backendProdFilters(&$params)
+    {
+        $supplier_id = waRequest::get('megasupplier', 0, waRequest::TYPE_INT);
+        if ($supplier_id && !empty($params['collection'])) {
+            $supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
+            if ($supplier && !empty($supplier['active'])) {
+                $queries = $this->supplierProductSubqueries($supplier_id, $supplier['code']);
+                $params['collection']->addWhere('id IN ('.implode(' UNION ', $queries).')');
+            }
+        }
+        return array();
     }
 
     public function productsCollection($params)
