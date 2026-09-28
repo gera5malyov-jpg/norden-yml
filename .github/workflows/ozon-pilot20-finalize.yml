@@ -1,0 +1,56 @@
+name: Finalize Ozon pilot20 temp branch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-pilot20-finalize.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      TEMP_BRANCH: ozon-image-temp-pilot20-36484945811
+    steps:
+      - name: Check CDN and cleanup
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, requests, sys, json, time
+          s=requests.Session()
+          s.headers.update({
+            "Client-Id":os.environ["OZON_CLIENT_ID"].strip(),
+            "Api-Key":os.environ["OZON_API_KEY"].strip(),
+            "Content-Type":"application/json",
+          })
+          for attempt in range(1,13):
+            r=s.post("https://api-seller.ozon.ru/v3/product/info/list",json={"offer_id":["AF-31391082"]},timeout=60)
+            r.raise_for_status()
+            item=(r.json().get("items") or [])[0]
+            urls=[]
+            for k in ("primary_image","images"):
+              v=item.get(k) or []
+              if isinstance(v,str): v=[v]
+              for x in v:
+                if isinstance(x,dict): x=x.get("url") or x.get("file_name") or x.get("src")
+                if isinstance(x,str) and x not in urls: urls.append(x)
+            raw=sum("raw.githubusercontent.com" in u for u in urls)
+            print(json.dumps({"attempt":attempt,"count":len(urls),"raw_github_count":raw},ensure_ascii=False))
+            if raw==0:
+              open("/tmp/ready","w").write("1")
+              sys.exit(0)
+            time.sleep(10)
+          sys.exit(2)
+          PY
+          if [ -f /tmp/ready ]; then
+            git init /tmp/cleanup
+            cd /tmp/cleanup
+            git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+            git push origin --delete "$TEMP_BRANCH"
+          fi
