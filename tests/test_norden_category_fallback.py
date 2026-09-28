@@ -1,6 +1,6 @@
 import unittest
 
-from catalog.norden_category_fallback import enrich_missing_categories
+from catalog.norden_category_fallback import enrich_missing_categories, target_article_keys
 
 
 class CategoryFallbackTest(unittest.TestCase):
@@ -85,6 +85,29 @@ class CategoryFallbackTest(unittest.TestCase):
         )
         self.assertEqual(stats["matched_xml_articles"], 1)
         self.assertEqual(stats["enriched_from_xml"], 1)
+
+    def test_target_keys_can_be_driven_by_xml_name_and_category(self):
+        xml = {
+            "CH-3": {
+                "article": "CH-3",
+                "name": "Кресло офисное / Test",
+                "category_path": ["Norden", "Кресло офисное"],
+            },
+            "TABLE-3": {
+                "article": "TABLE-3",
+                "name": "Стол",
+                "category_path": ["Norden", "Столы"],
+            },
+        }
+
+        keys = target_article_keys(
+            xml,
+            lambda item: "кресл" in " ".join(item.get("category_path") or []).casefold()
+            and "кресл" in str(item.get("name") or "").casefold(),
+        )
+
+        self.assertIn("ch3", keys)
+        self.assertNotIn("table3", keys)
 
 
 if __name__ == "__main__":
