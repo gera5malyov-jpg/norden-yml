@@ -97,6 +97,25 @@ class Kit:
         payload=self.request("GET","/v1/variants",params={"name":value,"page":1,"per_page":100})
         return [x for x in self.items(payload) if isinstance(x,dict)]
 
+    def search_all(self, value):
+        out=[]
+        page=1
+        while True:
+            payload=self.request("GET","/v1/variants",params={"name":value,"page":page,"per_page":100})
+            rows=[x for x in self.items(payload) if isinstance(x,dict)]
+            out.extend(rows)
+            total=None
+            if isinstance(payload,dict):
+                total=payload.get("total_count")
+                if not isinstance(total,int):
+                    total=payload.get("total")
+            if not rows or (isinstance(total,int) and len(out)>=total) or (total is None and len(rows)<100):
+                break
+            page += 1
+            if page % 25 == 0:
+                print(f"Search {value}: {len(out)} rows",flush=True)
+        return out
+
     def characteristics(self):
         payload=self.request("GET","/v1/characteristics",params={"status":["ACTIVE"],"page":1,"per_page":1000})
         return [x for x in self.items(payload) if isinstance(x,dict)]
@@ -176,6 +195,13 @@ def main():
         if ids:
             identity_ids[title]=ids
 
+    af_rows=kit.search_all("AF-")
+    af_index=defaultdict(list)
+    for r in af_rows:
+        sku_key=norm(r.get("sku"))
+        if sku_key:
+            af_index[sku_key].append(r)
+
     cache={}
     def search_cached(q):
         q=s(q)
@@ -196,17 +222,9 @@ def main():
         yml=t["yml_id"]
         exact=[]
 
-        # Primary key: exact KIT SKU == Catalog article (AF-...).
+        # Primary key: exact KIT SKU == Catalog article (AF-...) from one AF index.
         if article:
-            try:
-                rows=search_cached(article)
-            except Exception as exc:
-                query_errors.append({"row":t["row"],"article":article,"query":article,"error":str(exc)[:800]})
-                rows=[]
-            exact=[
-                r for r in rows
-                if norm(r.get("sku"))==t["article_key"]
-            ]
+            exact=list(af_index.get(t["article_key"],[]))
 
         # Fallback: search by supplier/YML ID and require exact identity value
         # from a live variant read. Name-only matches are never enough to restore.
@@ -371,7 +389,9 @@ def main():
         "identity_titles_found":identity_ids,
         "counts":{
             "catalog_rows":len(targets),
-            "search_queries_cached":len(cache),
+            "af_index_rows":len(af_rows),
+            "af_index_unique_skus":len(af_index),
+            "fallback_search_queries_cached":len(cache),
             "already_published":len(already),
             "restore_candidates_before_dedupe":len(chosen_rows),
             "restore_planned_unique_variants":len(plans),
