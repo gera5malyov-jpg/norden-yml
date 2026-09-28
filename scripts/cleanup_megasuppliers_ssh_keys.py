@@ -20,7 +20,7 @@ _,tok=req("https://panel.netangels.ru/api/gateway/token/","POST",body,
 headers={"Authorization":"Bearer "+tok["token"],"Content-Type":"application/json","Accept":"application/json"}
 base=f"https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/"
 status,data=req(base,"GET",None,headers)
-print("list_status",status)
+print("list_status",status)\nprint("payload_type",type(data).__name__)\nprint("payload_keys",sorted(list(data.keys())) if isinstance(data,dict) else [])
 
 if isinstance(data,list):
     items=data
