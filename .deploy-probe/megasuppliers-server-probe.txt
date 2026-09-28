@@ -1,0 +1,32 @@
+ssh_user=root exit=0
+hostname=vm-23f9aff9
+root_exists=yes
+drwxr-xr-x 15 web web 4096 Sep  9 16:27 /home/web/vm-23f9aff9.na4u.ru/www
+drwxr-xr-x 17 web web 4096 Sep 26 20:26 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps
+drwxr-xr-x 14 web web 4096 Aug 27 10:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop
+drwxr-xr-x 81 web web 4096 Sep 28 14:46 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
+--- php ---
+PHP 7.3.19 (cli) (built: Jun 25 2020 05:00:00) ( NTS )
+Copyright (c) 1997-2018 The PHP Group
+Zend Engine v3.3.19, Copyright (c) 1998-2018 Zend Technologies
+--- plugin ---
+plugin_exists=no
+--- plugin config registration ---
+-rw-rw-r-- 1 web web 1976 Sep 21 21:59 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
+--- existing plugin ownership sample ---
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/cleanup
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/lib
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/sizer
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/js
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/plugincontrol
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/coupon
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/guesshowmanyordersdoihave
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/singleskuname
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/yml
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/bnpdelete
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/redirect
+web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/open
+
+stderr=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
+
+temp_key_removed=yes
