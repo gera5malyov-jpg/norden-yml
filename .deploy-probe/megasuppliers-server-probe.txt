@@ -112,6 +112,569 @@ web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/yml
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/bnpdelete
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/redirect
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/open
+--- web user php modules ---
+mbstring
+mysqli
+pdo_mysql
+SimpleXML
+zip
+--- nordenstock config ---
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/nordenstock/lib/config/plugin.php
+<?php
+return array(
+    'name' => 'Norden: цены и остатки',
+    'description' => 'Обновление цен и остатков Norden только для товаров типа NORDEN.',
+    'vendor' => 'megapolis',
+    'version' => '1.1.7',
+    'img' => 'img/nordenstock.png',
+    'frontend' => false,
+    'handlers' => array(),
+);
+--- sample plugin backend actions ---
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/cleanup/lib/actions/backend/shopCleanupPluginBackend.actions.php
+<?php
+
+class shopCleanupPluginBackendActions extends waJsonController
+{
+
+    public function execute()
+    {
+        if(waRequest::get('action') == 'deleteOrder') {
+            $this->deleteOrder();
+        }
+
+        if(waRequest::get('action') == 'countImages') {
+            $this->ajaxCountImages();
+        }
+    }
+
+    public function __construct()
+    {
+        if (!$this->getUser()->isAdmin('shop')) {
+            throw new waRightsException(_ws('Access denied'));
+        }
+    }
+
+    public static function deleteOrder()
+    {
+        $order = waRequest::post('order', null, 'int');
+        if (!$order) return;
+        $orders = new shopOrderModel();
+        $sql_list="SELECT id FROM shop_order WHERE state_id='deleted'";
+        $deleted_orders = $orders->query($sql_list)->fetchAll();
+        $num=array();
+        $sql="Delete from shop_order where shop_order.id = ?;";
+            $orders->exec($sql, $order);
+        $sql="Delete from shop_order_items where order_id = ?;";
+            $orders->exec($sql, $order);
+        $sql="Delete from shop_order_log where order_id = ?;";
+            $orders->exec($sql, $order);
+        $sql="Delete from shop_order_log_params where order_id = ?;";
+            $orders->exec($sql, $order);
+        $sql="Delete from shop_order_params where order_id = ?;";
+            $orders->exec($sql, $order);
+        $sql="Delete from shop_affiliate_transaction where order_id = ?;";
+            $orders->exec($sql, $order);
+        $sql="DELETE wa_transaction, wa_transaction_data FROM wa_transaction INNER JOIN wa_transaction_data WHERE wa_transaction.id = wa_transaction_data.transaction_id and wa_transaction.order_id = ?;";
+            $orders->exec($sql, $order);
+            $orders->recalculateProductsTotalSales($order);
+        return;
+    }
+
+    public static function showcategory()
+    {
+        $category_model = new shopCategoryModel();
+        $categories = $category_model->getFullTree('id, left_key, right_key, parent_id, depth, name, count, type, status, include_sub_categories');
+        if (!empty($categories)) {
+            foreach ($categories as &$item) {
+                if (!isset($item['children_count'])) {
+                    $item['children_count'] = 0;
+                }
+                if (!isset($item['total_count'])) {
+                    $item['total_count'] = $item['count'];
+                }
+                if (isset($categories[$item['parent_id']])) {
+                    $parentcat = &$categories[$item['parent_id']];
+                    if (!isset($parentcat['children_count'])) {
+                        $parentcat['children_count'] = 0;
+                    }
+                    if (!isset($parentcat['total_count'])) {
+                        $parentcat['total_count'] = $parentcat['count'];
+                    }
+                    ++$parentcat['children_count'];
+                    $parentcat['total_count'] += $item['count'];
+                    unset($parentcat);
+                }
+            }
+            unset($item);
+            return $categories;
+        }
+    }
+
+    public static function showtags()
+    {
+        $tags_model = new shopTagModel();
+        $tags = $tags_model->getCloud();
+        function cmp($a, $b)
+        {
+            return strnatcmp($a["name"], $b["name"]);
+        }
+        usort($tags, "cmp");
+        return $tags;
+    }
+
+    public static function orders($action)
+    {
+        $orders = new shopOrderModel();
+        return $orders->getStateCounters('deleted');
+    }
+
+    public static function reviews($action)
+    {
+        $recalc=new shopProductReviewsModel();
+        return $recalc->countByField('status', 'deleted');
+    }
+
+    public static function images($action = '')
+    {
+        $images = new shopProductImagesModel();
+        return $images->countAll();
+    }
+
+    public function ajaxCountImages()
+    {
+        $images = new shopProductImagesModel();
+        
+        if (waRequest::post()) {
+            $type_id =  waRequest::post('s-cleanup-filter-type-value');
+            $set_id = waRequest::post('s-cleanup-filter-value');
+
+            if ($type_id) {
+                $sql="SELECT id as product_id FROM shop_product where type_id = '".$type_id."'";
+            }
+
+            if ($set_id) {
+                $sql="SELECT product_id FROM shop_set_products where set_id = '".$set_id."'";
+            }
+
+            if ($set_id && $type_id) {
+                $sql="SELECT id as product_id FROM `shop_product` AS t1 LEFT JOIN `shop_set_products` AS t2 ON t1.id = t2.product_id WHERE t1.type_id='".$type_id."' AND t2.set_id='".$set_id."'";
+            }
+        }
+
+        return $this->response = array(
+            'countImages' => (isset($sql)) ? $images->query("SELECT * FROM shop_product_images WHERE product_id IN (" . $sql . ")")->count() : $images->countAll(),
+        );
+    }
+
+    public static function badges($action)
+    {
+        $badges=new shopProductModel();
+        $sql="SELECT id FROM ".$badges->getTableName()." WHERE badge !='' ";
+        return $badges->query($sql)->count();
+    }
+    
+    public static function missingImages()
+    {
+        $product_image_model = new shopProductImagesModel();
+        if ($product_images = $product_image_model->getAll()) {
+            $missing_image_products = array();
+            foreach ($product_images as $image) {
+                if (!in_array($image['product_id'], $missing_image_products) && !file_exists(shopImage::getPath($image))) {
+                    $missing_image_products[] = $image['id'];
+                }
+            }
+            return count($missing_image_products);
+        }
+    }
+}
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/cleanup/lib/actions/backend/shopCleanupPluginBackendRun.action.php
+<?php
+class shopCleanupPluginBackendRunAction extends waViewAction
+{
+    private function stocksLog_del()
+    {
+        $model = new waModel();
+        $model->exec('TRUNCATE TABLE `shop_product_stocks_log`;');
+    }
+    
+    private function waLog_del()
+    {
+        $model = new waModel();
+        $model->exec('DELETE FROM `wa_log` WHERE `wa_log`.`app_id` = "shop"');
+    }
+    
+    private function workflow_del()
+    {
+        $workflow=new shopWorkflow();
+        $file = wa()->getConfig()->getAppsPath('shop', 'lib/config/data/workflow.php');
+        if (file_exists($file)) {
+            $config = include($file);
+            $workflow->setconfig($config);
+        } else {
+            return _wp('<h2>File workflow.php not found<h2>');
+        }
+    }
+
+    private function wFlowAction_del($action)
+    {
+        $app_config=wa()->getConfig()->getAppConfig('shop');
+        $path=$app_config->getConfigPath('workflow.php', true);
+        if (file_exists($path)) {
+            $workflow=include($path);
+            if (is_array($action)) {
+                foreach ($action as $id) {
+                    unset($workflow['actions'][$id]);
+                }
+            } else {
+                unset($workflow['actions'][$action]);
+            }
+            waUtils::varExportToFile($workflow, $path, true);
+        }
+    }
+    
+    private function orders_del($date = null, $date_from = null)
+    {
+        $orders = new shopOrderModel();
+        $sql_list="SELECT id FROM shop_order WHERE state_id='deleted'";
+        if ($date) {
+            $sql_list.=" AND create_datetime < '".$orders->escape($date)."'";
+        }
+        if ($date_from) {
+            $sql_list.=" AND create_datetime > '".$orders->escape($date_from)."'";
+        }
+        $deleted_orders = $orders->query($sql_list)->fetchAll();
+        if (empty($deleted_orders)) {
+            return;
+        }
+        $num=array();
+        foreach ($deleted_orders as $order) {
+                array_push($num, $order['id']);
+        }
+        $todelete=implode(',', $num);
+        $sql="Delete from shop_order where shop_order.id IN (".$todelete.");";
+            $orders->exec($sql);
+        $sql="Delete from shop_order_items where order_id IN (".$todelete.");";
+            $orders->exec($sql);
+        $sql="Delete from shop_order_log where order_id IN (".$todelete.");";
+            $orders->exec($sql);
+        $sql="Delete from shop_order_log_params where order_id IN (".$todelete.");";
+            $orders->exec($sql);
+        $sql="Delete from shop_order_params where order_id IN (".$todelete.");";
+            $orders->exec($sql);
+        $sql="Delete from shop_affiliate_transaction where order_id IN (".$todelete.");";
+            $orders->exec($sql);
+        $sql="DELETE wa_transaction, wa_transaction_data  FROM wa_transaction  INNER JOIN wa_transaction_data WHERE wa_transaction.id= wa_transaction_data.transaction_id and wa_transaction.order_id IN (".$todelete.");";
+            $orders->exec($sql);
+        foreach ($num as $order) {
+            $orders->recalculateProductsTotalSales($order);
+        }
+        unset($order);
+        return;
+    }
+
+    private function reviews_del()
+    {
+        $recalc=new shopProductReviewsModel();
+        $deleted_reviews=$recalc->getByField('status', 'deleted', true);
+        foreach ($deleted_reviews as $review) {
+            $product_model = new shopProductModel();
+            $product = $product_model->getById($review['product_id']);
+            $update = array(
+					'rating' => ($product['rating']*$product['rating_count'] - $review['rate'])/($product['rating_count'] - 1),
+					'rating_count' => $product['rating_count'] - 1
+                );
+			$update['rating'] = min($update['rating'], '5'); //Max 5 rate is allowed
+            $product_model->updateById($review['product_id'], $update);
+            $recalc->deleteById($review['id']);
+        }
+        unset($review);
+    }
+
+    private function images_del($cats = null, $sets = null, $types = null)
+    {
+        $images=new shopProductImagesModel();
+        $productModel = new shopProductModel();
+        $sql="SELECT product_id FROM shop_product_images";
+        if ($cats) {
+            $sql="SELECT product_id FROM shop_category_products where category_id = '".$cats."'";
+        }
+        if ($sets) {
+            $sql="SELECT product_id FROM shop_set_products where set_id = '".$sets."'";
+        }
+        if ($types) {
+            $sql="SELECT id as product_id FROM shop_product where type_id = '".$types."'";
+        }
+        if ($sets && $types) {
+            $sql="SELECT id as product_id FROM `shop_product` AS t1 LEFT JOIN `shop_set_products` AS t2 ON t1.product_id = t2.product_id WHERE t1.type_id='".$types."' AND t2.set_id='".$sets."'";
+        }
+        $products=$images->query($sql)->fetchAll();
+        $products_id = array();
+        foreach ($products as $row) {
+            $products_id[]=$row['product_id'];
+            $productModel->updateById($row['product_id'], array('image_id'=>'null'));
+            $productModel->exec("UPDATE `shop_product_skus` SET image_id = NULL WHERE product_id = ".$row['product_id'].";");
+        }
+        $images->deleteByProducts($products_id, true);
+        unset($row);
+    }
+
+    private static function missingImages()
+    {
+        $product_image_model = new shopProductImagesModel();
+        if ($product_images = $product_image_model->getAll()) {
+            $missing_image_products = array();
+            foreach ($product_images as $image) {
+                if (!in_array($image['product_id'], $missing_image_products) && !file_exists(shopImage::getPath($image))) {
+                    $missing_image_products[] = $image['id'];
+                }
+            }
+            if (!empty($missing_image_products)) {
+                $product_image_model->deleteById($missing_image_products);
+            }
+        }
+    }
+    
+    private static function originalImages($all = false)
+    {
+        $path = wa('shop')->getDataPath('products');
+        if (!$all) {
+            $list = waFiles::listdir($path, 1);
+            $list = array_filter($list, function($var) {
+                preg_match('/(.original.\w{3,4})$/', $var, $match);
+                return !empty($match);
+            });
+            return $count;
+        } else {
+            $list = waFiles::listdir($path);
+        }
+        $count = 0;
+        foreach ($list as $image) {
+            waFiles::delete($path.DIRECTORY_SEPARATOR.$image, true);
+            $count++;
+        }
+        return $count;
+    }
+    
+    public static function fixThumb()
+    {
+        $path = wa()->getDataPath('products', true, 'shop');
+        waFiles::delete($path.'/thumb.php');
+        waFiles::write($path.'/thumb.php', '<?php
+        $file = realpath(dirname(__FILE__)."/../../../../")."/wa-apps/shop/lib/config/data/thumb.php";
+        
+        if (file_exists($file)) {
+            include($file);
+        } else {
+            header("HTTP/1.0 404 Not Found");
+        }
+        ');
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/plugincontrol/lib/actions/backend/shopPlugincontrolPluginBackend.controller.php
+<?php
+
+class shopPlugincontrolPluginBackendController extends waJsonController
+{
+    public function execute()
+    {
+        if (!$this->getUser()->getRights('shop', 'settings')) {
+            throw new waException(_w('Access denied'));
+        }
+        if (waRequest::post('id')=='run') {
+            $this->generateConfig();
+        }
+    }
+
+
+    private function generateConfig()
+    {
+        $plugins = waRequest::post();
+        unset($plugins['id']);
+        foreach ($plugins as &$value) {
+            $value = (bool) $value;
+        }
+        $app_config = wa()->getConfig()->getAppConfig('shop');
+        $path = $app_config->getConfigPath('plugins.php', true);
+        $plugin_php = include $path;
+        foreach ($plugins as $plugin => $state) {
+            $plugin_php[$plugin] = $state;
+        }
+        waUtils::varExportToFile($plugin_php, $path, true);
+        if (wa()->appExists('installer')) {
+            wa('installer');
+            installerHelper::flushCache();
+        }
+    }
+}
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/yml/lib/actions/backend/shopYmlPluginBackendSave.controller.php
+<?php
+
+class shopYmlPluginBackendSaveController extends waJsonController
+{
+	protected int $profile_id;
+
+	private const CONFIG_FILES     = [
+		   'markup' => 'markup.php',
+		   'pnames' => 'pnames.php',
+		   'stocks' => 'stocks.php'
+	];
+
+	public function execute()
+	{
+		$this->profile_id = waRequest::post('profile_id', 0, waRequest::TYPE_INT);
+		$settings   = waRequest::post('settings', [], waRequest::TYPE_ARRAY);
+
+		$checkboxes = [
+			   'ignore_no_images',
+			   'filter_by_price',
+			   'no_update_products',
+			   'http_auth',
+			   'no_new_products',
+			   'no_new_categs',
+			   'allow_categ_map',
+			   'restore',
+			   'limit_stream',
+			   'no_update_categs',
+			   'searchbyname',
+			   'reset_stocks',
+			   'searchbysku',
+			   'duplicate_as_child',
+			   'import_categories',
+			   'hide_excluded',
+			   'bind_to_profile',
+			   'automatization',
+			   'enforce_protocol',
+			   'limit_by_count',
+			   'nl2br',
+			   'raw_image_links',
+			   'convert_prices',
+			   'category_urls',
+			   'create_thumbs',
+			   'skip_another_profiles',
+			   'set_purchase_price',
+			   'set_purchase_price_rrc',
+			   'no_product_save',
+			   'reset_stock_default',
+			   'hide_new_products',
+			   'update_nesting',
+			   'rrc_limit',
+			   'add_features_to_desc',
+			   'feature_to_desc_default',
+			   'feature_to_desc_norewrite',
+			   'reset_all_stocks'
+		];
+
+		foreach($checkboxes as $field) {
+			$settings[$field] = ifempty($settings[$field], 0);
+		}
+
+		shopYmlHelper::saveProfileConfig($this->profile_id, $settings);
+
+		if (($settings['markup_type'] == '2') && ($markup = waRequest::post('stepped_markup', [], waRequest::TYPE_ARRAY))) {
+			$path = wa()->getDataPath('plugins/yml/' . $this->profile_id . '/', true, 'shop') . '/markup.php';
+
+			$m = [
+				   'steps'   => $markup,
+				   'default' => waRequest::post('stepped_default', [], waRequest::TYPE_ARRAY)
+			];
+
+			waUtils::varExportToFile($m, $path);
+		}
+
+		$pnames = waRequest::post('pnames', [], waRequest::TYPE_ARRAY_TRIM);
+		$name_path = wa('shop')->getDataPath('plugins/yml/' . $this->profile_id . '/' . $settings['source_type'] . '/', false, 'shop', true) . 'pnames.php';
+		waUtils::varExportToFile($pnames, $name_path);
+
+		$this->saveStocksConfig();
+	}
+
+	private function saveStocksConfig(): void
+	{
+		$stocks = waRequest::post('stock', [], waRequest::TYPE_ARRAY_INT);
+		$path   = $this->getPluginPath(self::CONFIG_FILES['stocks']);
+		$this->saveConfigFile($stocks, $path);
+	}
+
+	private function getPluginPath(string $filename, string $subdir = ''): string
+	{
+		$path = wa('shop')->getDataPath(
+			   "plugins/yml/" . $this->profile_id . '/' . ($subdir ? $subdir . '/' : ''),
+			   false,
+			   'shop'
+		);
+
+		return $path . $filename;
+	}
+
+	private function saveConfigFile(array $data, string $path): void
+	{
+		if (!waUtils::varExportToFile($data, $path)) {
+			$this->setError(sprintf('Failed to save configuration file: %s', $path));
+		}
+	}
+}### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/yml/lib/actions/backend/shopYmlPluginBackendProducts.controller.php
+<?php
+
+class shopYmlPluginBackendProductsController extends waJsonController
+{
+	public function execute()
+	{
+		$data = waRequest::request();
+
+		$data['method'] = ifempty($data['method']);
+
+		if (!empty($data['method'])) {
+			$this->{$data['method']}($data);
+		}
+	}
+
+	protected function editextid($data)
+	{
+		$product         = new shopProduct($data['intid']);
+		$product->yml_id = $data['extid'];
+		$product->save();
+	}
+}
+--- framework plugin installer references ---
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/database/waModel.class.php:173:        $path = wa()->getConfig()->getAppsPath($app_id, 'lib/config/db.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/verification/models/waVerificationChannel.model.php:304:        $db_path = wa()->getAppPath('lib/config/db.php', 'webasyst');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/classes/webasystInstaller.class.php:140:    public function connectToWaid($source='install.php')
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/classes/webasystInstaller.class.php:230:            $db_path = wa('webasyst')->getAppPath('lib/config/db.php', 'webasyst');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystGenerateDb.cli.php:67:    Examine all tables of an app or plugin and update its lib/config/db.php file
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystGenerateDb.cli.php:188:                $path = wa()->getConfig()->getPath('plugins').'/'.$type.'/'.$plugin_id.'/lib/config/db.php';
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystGenerateDb.cli.php:191:                $path = wa()->getConfig()->getAppsPath($app_id, 'plugins/'.$plugin_id.'/lib/config/db.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystGenerateDb.cli.php:194:            $path = wa()->getConfig()->getAppsPath($app_id, 'lib/config/db.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystGenerateDb.cli.php:240:                            $plugin_path = wa()->getConfig()->getAppsPath($app_id, 'plugins/'.$_plugin_id.'/lib/config/db.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystGenerateDb.cli.php:346:            // save schema to lib/config/db.php of the app
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystCreateSystemplugin.cli.php:163:                    $structure['lib/config/db.php'] = array();
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystCreateSystemplugin.cli.php:174:                    $structure['lib/config/db.php'] = array();
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystCreatePlugin.cli.php:177:    private function installPlugin()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystCompress.cli.php:977:        $install = in_array('lib/config/install.php', $this->files);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystCompress.cli.php:978:        $uninstall = in_array('lib/config/uninstall.php', $this->files);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/cli/webasystCompress.cli.php:980:            $this->tracef('NOTICE: only one of install.php & uninstall.php present');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/actions/repair/webasystRepair.actions.php:63:                    $path = wa()->getConfig()->getAppsPath($app_id, 'plugins/'.$plugin_id.'/lib/config/db.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/actions/login/webasystLoginFirst.action.php:18:        if (file_exists($this->getConfig()->getRootPath().'/install.php')) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/webasyst/lib/actions/login/webasystLoginFirst.action.php:19:            @unlink($this->getConfig()->getRootPath().'/install.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/config/waAppConfig.class.php:302:                    // To avoid running install.php multiple times in parallel, obtain a named lock
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/config/waAppConfig.class.php:355:                // Updates are all skipped on app's first launch with install.php
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/config/waAppConfig.class.php:444:        $file_db = $this->getAppPath('lib/config/db.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/config/waAppConfig.class.php:477:        // check uninstall.php
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/config/waAppConfig.class.php:483:        $file_db = $this->getAppPath('lib/config/db.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/.files.md5:1271:23794a5d2794caddfaaa285a4d0603c1 *webasyst/lib/config/db.php
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/.files.md5:1273:8b8db2c69196c366e45299c8453274be *webasyst/lib/config/install.php
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waSystemPlugin.class.php:811:        $file_db = self::getPath($this->type, $this->id, 'lib/config/db.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waSystemPlugin.class.php:830:        $file = self::getPath($this->type, $this->id, 'lib/config/install.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waSystemPlugin.class.php:857:                // To avoid running install.php multiple times in parallel, obtain a named lock
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waSystemPlugin.class.php:900:                // Updates are all skipped on app's first launch with install.php
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waSystemPlugin.class.php:953:        $file = self::getPath($this->type, $this->id, 'lib/config/uninstall.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waSystemPlugin.class.php:965:        $file_db = self::getPath($this->type, $this->id, 'lib/config/db.php');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waPlugin.class.php:97:                // To avoid running install.php multiple times in parallel, obtain a named lock
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waPlugin.class.php:220:        $file_db = $this->path.'/lib/config/db.php';
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waPlugin.class.php:226:        // check install.php
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waPlugin.class.php:227:        $file = $this->path.'/lib/config/install.php';
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waPlugin.class.php:245:        // check uninstall.php
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waPlugin.class.php:246:        $file = $this->path.'/lib/config/uninstall.php';
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waPlugin.class.php:259:        $file_db = $this->path.'/lib/config/db.php';
+/home/web/vm-23f9aff9.na4u.ru/www/wa-installer/lib/config/requirements.php:52:            'install.php',
 
 stderr=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
 
