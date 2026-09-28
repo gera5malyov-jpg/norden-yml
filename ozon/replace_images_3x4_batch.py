@@ -24,7 +24,7 @@ ROOT = Path("ozon/image_3x4_replace_batch")
 MANIFEST = ROOT / "manifest.json"
 BATCH_REPORT = ROOT / "batch_report.json"
 REPO = os.environ.get("GITHUB_REPOSITORY", "gera5malyov-jpg/norden-yml")
-BRANCH = os.environ.get("GITHUB_REF_NAME", "main")
+BRANCH = os.environ.get("OZON_TEMP_BRANCH", os.environ.get("GITHUB_REF_NAME", "main"))
 CLIENT_ID = os.environ.get("OZON_CLIENT_ID", "").strip()
 API_KEY = os.environ.get("OZON_API_KEY", "").strip()
 
@@ -487,11 +487,77 @@ def apply():
         raise SystemExit(1)
 
 
+def wait_materialized():
+    """
+    Wait until Ozon /v3/product/info/list returns only Ozon-hosted image URLs
+    for every prepared offer. This is the safety gate before deleting the
+    temporary public Git branch that hosted converted images.
+    """
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    prepared = {
+        k: v for k, v in (manifest.get("offers") or {}).items()
+        if v.get("prepare_status") == "SUCCESS"
+    }
+    if not prepared:
+        raise RuntimeError("No successfully prepared offers in manifest")
+
+    last = {}
+    for attempt in range(1, 25):
+        all_ready = True
+        last = {}
+        for offer_id, pre in prepared.items():
+            item = get_item(offer_id)
+            gallery, primary = ordered_gallery(item)
+            raw_count = sum("raw.githubusercontent.com" in u for u in gallery)
+            expected_count = int(pre.get("source_image_count") or 0)
+            count_ok = len(gallery) == expected_count
+            primary_ok = bool(primary) and bool(gallery) and primary[0] == gallery[0]
+            ozon_owned = all(
+                ("ozone.ru" in u or "ozon.ru" in u) and "raw.githubusercontent.com" not in u
+                for u in gallery
+            )
+            last[offer_id] = {
+                "count": len(gallery),
+                "expected_count": expected_count,
+                "raw_github_count": raw_count,
+                "count_ok": count_ok,
+                "primary_ok": primary_ok,
+                "ozon_owned": ozon_owned,
+            }
+            if not (count_ok and primary_ok and ozon_owned and raw_count == 0):
+                all_ready = False
+
+        print(
+            f"MATERIALIZATION attempt={attempt}: "
+            + json.dumps(last, ensure_ascii=False),
+            flush=True,
+        )
+        if all_ready:
+            write_json(ROOT / "materialization_report.json", {
+                "status": "SUCCESS",
+                "attempt": attempt,
+                "offers": last,
+            })
+            return
+        time.sleep(10)
+
+    write_json(ROOT / "materialization_report.json", {
+        "status": "ERROR",
+        "offers": last,
+    })
+    raise RuntimeError(
+        "Ozon did not fully materialize all images to its CDN; "
+        "temporary branch must NOT be deleted."
+    )
+
+
 if __name__ == "__main__":
     stage = sys.argv[1] if len(sys.argv) > 1 else ""
     if stage == "prepare":
         prepare()
     elif stage == "apply":
         apply()
+    elif stage == "wait-materialized":
+        wait_materialized()
     else:
-        raise SystemExit("Usage: replace_images_3x4_batch.py prepare|apply")
+        raise SystemExit("Usage: replace_images_3x4_batch.py prepare|apply|wait-materialized")
