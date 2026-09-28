@@ -73,6 +73,12 @@ def main():
                         "'backend_prod' => 'backendProd',",
                         "'backend_prod' => 'backendProd',\n        'routing' => 'routing',"
                     )
+                if "'backend_products' => 'backendProducts'" not in text_data:
+                    text_data=text_data.replace(
+                        "'backend_prod' => 'backendProd',",
+                        "'backend_prod' => 'backendProd',\n        'backend_products' => 'backendProducts',\n        'products_collection' => 'productsCollection',"
+                    )
+                text_data=text_data.replace("'version' => '1.0.1'", "'version' => '1.0.2'")
                 data=text_data.encode("utf-8")
             elif item.filename == "megasuppliers/lib/models/shopMegasuppliersMeta.model.php":
                 text_data=data.decode("utf-8")
@@ -101,6 +107,84 @@ def main():
     }
 """
                     text_data=text_data[:pos]+method+text_data[pos:]
+                if "public function backendProducts(" not in text_data:
+                    pos=text_data.rfind("\n}")
+                    if pos < 0:
+                        raise RuntimeError("cannot patch supplier sidebar methods")
+                    methods=r"""
+    public function backendProducts($params = array())
+    {
+        $model = new waModel();
+        $rows = $model->query(
+            "SELECT s.id, s.name, s.code, COUNT(DISTINCT CASE WHEN mp.product_id > 0 THEN mp.product_id END) product_count
+             FROM shop_megasuppliers_supplier s
+             LEFT JOIN shop_megasuppliers_product mp ON mp.supplier_id = s.id
+             WHERE s.active = 1
+             GROUP BY s.id, s.name, s.code
+             ORDER BY s.name"
+        )->fetchAll();
+
+        $items = '';
+        foreach ($rows as $row) {
+            $id = (int)$row['id'];
+            $name = htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8');
+            $count = (int)$row['product_count'];
+            $items .= '<li id="s-megasuppliers-'.$id.'">'
+                .'<span class="count">'.$count.'</span>'
+                .'<a href="#/products/hash=megasuppliers/'.$id.'/">'
+                .'<i class="icon16 folders"></i>'.$name.'</a></li>';
+        }
+
+        $manage_url = wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers';
+        $manage_url = htmlspecialchars($manage_url, ENT_QUOTES, 'UTF-8');
+
+        $html = '<div class="block" id="s-megasuppliers-sidebar">'
+            .'<span class="count"><a href="'.$manage_url.'" title="Управление поставщиками"><i class="icon16 settings"></i></a></span>'
+            .'<h5 class="heading" style="cursor:pointer"><i class="icon16 collapse-handler darr"></i>Поставщики</h5>'
+            .'<ul class="menu-v with-icons">'.$items.'</ul>'
+            .'</div>'
+            .'<script>(function($){'
+            .'var b=$("#s-megasuppliers-sidebar");'
+            .'b.find("h5.heading").off("click.megasuppliers").on("click.megasuppliers",function(e){'
+            .'if($(e.target).closest("a").length){return;}'
+            .'b.find("ul.menu-v").slideToggle(120);'
+            .'b.find(".collapse-handler").toggleClass("darr").toggleClass("rarr");'
+            .'});'
+            .'})(jQuery);</script>';
+
+        return array('sidebar_section' => $html);
+    }
+
+    public function productsCollection($params)
+    {
+        if (wa()->getEnv() != 'backend' || empty($params['collection'])) {
+            return null;
+        }
+        $collection = $params['collection'];
+        $hash = $collection->getHash();
+        if (empty($hash) || $hash[0] !== $this->id || empty($hash[1])) {
+            return null;
+        }
+        $supplier_id = (int)$hash[1];
+        if (!$supplier_id) {
+            return null;
+        }
+
+        $collection->addWhere(
+            'id IN (SELECT DISTINCT product_id FROM shop_megasuppliers_product '
+            .'WHERE supplier_id = '.$supplier_id.' AND product_id > 0)'
+        );
+
+        if (!empty($params['auto_title'])) {
+            $supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
+            if ($supplier) {
+                $collection->addTitle('Поставщик: '.$supplier['name']);
+            }
+        }
+        return true;
+    }
+"""
+                    text_data=text_data[:pos]+methods+text_data[pos:]
                 data=text_data.encode("utf-8")
             zout.writestr(item, data)
     os.replace(patched, pkg)
