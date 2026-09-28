@@ -1,9 +1,5 @@
     public function backendProdList($params)
     {
-        if (wa()->getEnv() !== 'backend') {
-            return array();
-        }
-
         $model = new waModel();
         $rows = (new shopMegasuppliersSupplierModel())
             ->select('id,name,code')
