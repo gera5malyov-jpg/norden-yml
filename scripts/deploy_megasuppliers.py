@@ -59,6 +59,44 @@ def main():
             raise RuntimeError("unsafe package layout")
     log("package_verified=yes")
 
+    # Ensure the public API route is registered through Shop-Script's routing hook.
+    # The source package is checksum-verified above; this deterministic compatibility
+    # patch is applied only to the deploy copy.
+    patched=pkg+".patched"
+    with zipfile.ZipFile(pkg, "r") as zin, zipfile.ZipFile(patched, "w", zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            data=zin.read(item.filename)
+            if item.filename == "megasuppliers/lib/config/plugin.php":
+                text_data=data.decode("utf-8")
+                if "'routing' => 'routing'" not in text_data:
+                    text_data=text_data.replace(
+                        "'backend_prod' => 'backendProd',",
+                        "'backend_prod' => 'backendProd',\n        'routing' => 'routing',"
+                    )
+                data=text_data.encode("utf-8")
+            elif item.filename == "megasuppliers/lib/shopMegasuppliers.plugin.php":
+                text_data=data.decode("utf-8")
+                if "public function routing(" not in text_data:
+                    pos=text_data.rfind("\n}")
+                    if pos < 0:
+                        raise RuntimeError("cannot patch plugin routing method")
+                    method=r"""
+    public function routing($route)
+    {
+        if (wa()->getEnv() === 'frontend') {
+            return [
+                'megasuppliers-api/' => 'frontend/api',
+            ];
+        }
+        return [];
+    }
+"""
+                    text_data=text_data[:pos]+method+text_data[pos:]
+                data=text_data.encode("utf-8")
+            zout.writestr(item, data)
+    os.replace(patched, pkg)
+    log("routing_patch=yes")
+
     # Temporary SSH key through NetAngels API.
     token_body=urllib.parse.urlencode({"api_key":API_KEY}).encode()
     _,tok=req_json("https://panel.netangels.ru/api/gateway/token/","POST",token_body,
