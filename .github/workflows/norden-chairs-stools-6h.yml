@@ -10,6 +10,7 @@ on:
       - 'catalog/sync_norden_chairs_stools_6h.py'
       - 'catalog/norden_category_fallback.py'
       - 'tests/test_norden_category_fallback.py'
+      - 'catalog/send_norden_chairs_stools_report.py'
       - '.github/workflows/norden-chairs-stools-6h.yml'
 
 permissions:
@@ -38,10 +39,11 @@ jobs:
 
       - name: Проверить Python и fallback категорий
         run: |
-          python -m py_compile catalog/sync_norden_chairs_stools_6h.py catalog/norden_category_fallback.py norden-kit/sync_norden_kit.py norden-kit/webasyst_n100_to_kit_once.py webasyst/client.py
+          python -m py_compile catalog/sync_norden_chairs_stools_6h.py catalog/norden_category_fallback.py catalog/send_norden_chairs_stools_report.py norden-kit/sync_norden_kit.py norden-kit/webasyst_n100_to_kit_once.py webasyst/client.py
           python -m unittest tests/test_norden_category_fallback.py
 
       - name: Синхронизировать Norden — только кресла и стулья
+        id: sync
         env:
           NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
@@ -52,6 +54,17 @@ jobs:
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         run: python catalog/sync_norden_chairs_stools_6h.py
+
+      - name: Отправить отчёт на почту
+        if: always()
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: 'shop@office-mag.com'
+          REPORT_FILE: 'catalog/norden_chairs_stools_6h_report.json'
+          SYNC_OUTCOME: ${{ steps.sync.outcome }}
+          RUN_URL: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        run: python catalog/send_norden_chairs_stools_report.py
 
       - name: Сохранить русский отчёт
         if: always()
