@@ -1,0 +1,60 @@
+name: Check Ozon archive coverage
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/check-ozon-archive-coverage.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install --disable-pip-version-check requests
+      - name: Compare archived cards with selection
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, requests, pathlib
+          sel=json.load(open("ozon/catalog_3x4/selection.json"))
+          selected={str(x["product_id"]) for x in sel.get("selected",[]) if x.get("product_id")}
+          s=requests.Session()
+          s.headers.update({"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"})
+          archived=[]
+          last_id=""
+          for _ in range(100):
+              r=s.post("https://api-seller.ozon.ru/v3/product/list",json={"filter":{"visibility":"ARCHIVED"},"last_id":last_id,"limit":1000},timeout=90)
+              r.raise_for_status()
+              d=r.json().get("result") or {}
+              batch=d.get("items") or []
+              archived.extend(batch)
+              new=d.get("last_id") or ""
+              if not batch or not new or new==last_id: break
+              last_id=new
+              if len(batch)<1000: break
+          arch_ids={str(x.get("product_id") or x.get("id")) for x in archived if x.get("product_id") or x.get("id")}
+          missing=sorted(arch_ids-selected)
+          out={
+              "selection_count":len(selected),
+              "archived_count":len(arch_ids),
+              "archived_in_selection":len(arch_ids & selected),
+              "archived_missing_from_selection":len(missing),
+              "sample_missing":missing[:20],
+          }
+          pathlib.Path("ozon/catalog_3x4/archive_coverage.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ozon/catalog_3x4/archive_coverage.json
+          git commit -m "report: verify archived Ozon coverage [skip ci]" || exit 0
+          git push
