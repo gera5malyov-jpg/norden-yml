@@ -1,0 +1,40 @@
+name: Backfill all Webasyst supplier values
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/backfill_all_supplier_feature_values.py'
+      - '.github/workflows/backfill-all-supplier-values.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Backfill all supplier values
+        run: python3 scripts/backfill_all_supplier_feature_values.py
+      - name: Save report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/megasuppliers-feature681-backfill.txt || echo "BACKFILL_STATUS=FAILED_NO_REPORT" > .deploy-probe/megasuppliers-feature681-backfill.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/megasuppliers-feature681-backfill.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save all supplier feature backfill report [skip ci]"
+            git push origin HEAD:main || true
+          fi
