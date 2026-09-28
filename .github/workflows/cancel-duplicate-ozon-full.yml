@@ -1,0 +1,22 @@
+name: Cancel duplicate Ozon full runs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-duplicate-ozon-full.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel queued duplicate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api --method POST "/repos/$REPO/actions/runs/36488037290/cancel" || true
