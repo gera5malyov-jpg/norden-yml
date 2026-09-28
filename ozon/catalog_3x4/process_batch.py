@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from urllib.parse import unquote
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import requests
@@ -147,20 +148,33 @@ def cdn_check(batch_index, attempts=6, delay=10):
                         x = x.get("url") or x.get("file_name") or x.get("src")
                     if isinstance(x, str) and x not in urls:
                         urls.append(x)
-            raw = sum("raw.githubusercontent.com" in u for u in urls)
+            branch = os.environ.get("OZON_TEMP_BRANCH", "").strip()
+            marker = f"/{branch}/" if branch else ""
+            raw_urls = [u for u in urls if "raw.githubusercontent.com" in u and (not marker or marker in u)]
+            keep_files = []
+            for u in raw_urls:
+                if marker and marker in u:
+                    keep_files.append(unquote(u.split(marker, 1)[1]))
+            raw = len(raw_urls)
             ready = raw == 0
-            last[offer_id] = {"count": len(urls), "raw_github_count": raw, "ready": ready}
+            last[offer_id] = {
+                "count": len(urls),
+                "raw_github_count": raw,
+                "ready": ready,
+                "keep_files": keep_files,
+            }
             if not ready:
                 all_ready = False
         if all_ready:
-            out = {"status": "SUCCESS", "attempt": attempt, "offers": last}
+            out = {"status": "SUCCESS", "attempt": attempt, "keep_files": [], "offers": last}
             write_json(batch_root / "materialization_report.json", out)
             print(json.dumps(out, ensure_ascii=False, indent=2))
             return
         if attempt < attempts:
             time.sleep(delay)
 
-    out = {"status": "PENDING", "attempt": attempts, "offers": last}
+    keep = sorted({p for x in last.values() for p in (x.get("keep_files") or [])})
+    out = {"status": "PENDING", "attempt": attempts, "keep_files": keep, "offers": last}
     write_json(batch_root / "materialization_report.json", out)
     print(json.dumps(out, ensure_ascii=False, indent=2))
 
