@@ -1,0 +1,83 @@
+name: Ozon image source materialization probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-image-source-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install --disable-pip-version-check requests
+      - name: Probe current Ozon image URLs
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, requests
+          offers = [
+              "SAMS-532541",
+              "SAMS-531863",
+              "SAMS-530067",
+              "SAMS-531578",
+              "RED-00-00011489",
+              "SAMS-531829",
+              "SAMS-532542",
+              "SAMS-640419",
+              "SAMS-532489",
+          ]
+          s = requests.Session()
+          s.headers.update({
+              "Client-Id": os.environ["OZON_CLIENT_ID"].strip(),
+              "Api-Key": os.environ["OZON_API_KEY"].strip(),
+              "Content-Type": "application/json",
+          })
+          out = {}
+          for offer in offers:
+              r = s.post("https://api-seller.ozon.ru/v3/product/info/list",
+                         json={"offer_id":[offer]}, timeout=60)
+              r.raise_for_status()
+              items = r.json().get("items") or []
+              if not items:
+                  out[offer] = {"error":"not_found"}
+                  continue
+              item = items[0]
+              vals = []
+              for key in ("primary_image","images"):
+                  v = item.get(key) or []
+                  if isinstance(v, str): v=[v]
+                  for x in v:
+                      if isinstance(x, dict):
+                          x = x.get("url") or x.get("file_name") or x.get("src")
+                      if isinstance(x,str) and x not in vals:
+                          vals.append(x)
+              out[offer] = {
+                  "count": len(vals),
+                  "raw_github_count": sum("raw.githubusercontent.com" in u for u in vals),
+                  "ozon_cdn_count": sum(("ozone.ru" in u or "ozon.ru" in u) for u in vals),
+                  "urls": vals,
+              }
+          with open("ozon/image_source_probe.json","w",encoding="utf-8") as f:
+              json.dump(out,f,ensure_ascii=False,indent=2)
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Save probe
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ozon/image_source_probe.json
+          if ! git diff --cached --quiet; then
+            git commit -m "report: Ozon image source materialization probe [skip ci]"
+            git push
+          fi
