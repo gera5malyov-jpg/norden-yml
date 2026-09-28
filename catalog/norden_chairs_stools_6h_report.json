@@ -1,8 +1,1148 @@
 {
-  "started_at": "2026-09-28T16:16:41.651650+00:00",
-  "finished_at": "2026-09-28T16:16:41.651672+00:00",
-  "status": "ОШИБКА",
+  "started_at": "2026-09-28T17:02:52.656340+00:00",
+  "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
+  "source": {
+    "catalog": 8488,
+    "target": 377,
+    "source": "api",
+    "category_source": "api+xml-fallback",
+    "category_fallback": {
+      "used": true,
+      "reason": "API category scope suspiciously small",
+      "target_before": 0,
+      "xml_catalog": 8363,
+      "xml_target": 377,
+      "xml_duplicates": 13,
+      "generic_before": 138,
+      "matched_xml_articles": 8364,
+      "enriched_from_xml": 8364,
+      "generic_after": 9,
+      "target_after": 377
+    },
+    "api_error": null,
+    "source_duplicates": 15,
+    "price_duplicates": 16
+  },
+  "sheet": {
+    "matched": 367,
+    "added": 1,
+    "zeroed_missing": 309,
+    "ambiguous_yml": 0,
+    "possible_duplicates": 72
+  },
+  "webasyst": {
+    "updated": 342,
+    "created": 0,
+    "zeroed_missing": 309,
+    "ambiguous": 0,
+    "errors": [
+      {
+        "article": "алюминиевая база / серая ткань CF",
+        "yml_id": "L347LCA-1-CF-grey fabric n",
+        "error": "Артикул есть в таблице, но точного SKU NORDEN-100 в Webasyst нет; не создавал дубль"
+      },
+      {
+        "article": "AF-31662371",
+        "yml_id": "HD-2218-3 L LB brown",
+        "error": "Артикул есть в таблице, но точного SKU NORDEN-100 в Webasyst нет; не создавал дубль"
+      },
+      {
+        "article": "AF-31223180",
+        "yml_id": "HA-101-322",
+        "error": "Артикул есть в таблице, но точного SKU NORDEN-100 в Webasyst нет; не создавал дубль"
+      }
+    ]
+  },
+  "kit": {
+    "updated": 0,
+    "created": 0,
+    "zeroed_missing": 0,
+    "ambiguous": 0,
+    "category_review": 3,
+    "errors": []
+  },
+  "possible_duplicate_items": [
+    {
+      "yml_id": "CH-223B-HS G-BB",
+      "name": "Бетта / Betta",
+      "hits": [
+        {
+          "row": 176,
+          "yml": "CH-223B-HS",
+          "name": "Кресло офисное Betta серый пластик сетка ткань"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CH-223B-HS",
+      "name": "Бетта грэй / Betta grey",
+      "hits": [
+        {
+          "row": 42,
+          "yml": "CH-223B-HS G-BB",
+          "name": "Кресло для персонала Betta CH-223B-HS G-BB"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "A1918 black PU",
+      "name": "Бордо",
+      "hits": [
+        {
+          "row": 1011,
+          "yml": "A1918 black",
+          "name": "Кресло офисное / Бордо / черная экокожа / алюминий крестовина"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "C1918 CF brown leather",
+      "name": "Бордо CF",
+      "hits": [
+        {
+          "row": 61,
+          "yml": "C1918 CF brown",
+          "name": "Конференц-кресло Бордо CF C1918 CF brown"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "C1918 CF brown",
+      "name": "Бордо CF",
+      "hits": [
+        {
+          "row": 203,
+          "yml": "C1918 CF brown leather",
+          "name": "Кресло офисное Бордо CF коричневая кожа алюминий крестовина"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "8001A-2 cian",
+      "name": "Бостон",
+      "hits": [
+        {
+          "row": 989,
+          "yml": "8001A-2",
+          "name": "Кресло для руководителя Бостон 8001A-2"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "8001A-2 black",
+      "name": "Бостон SL",
+      "hits": [
+        {
+          "row": 989,
+          "yml": "8001A-2",
+          "name": "Кресло для руководителя Бостон 8001A-2"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "WH256A",
+      "name": "Бэст / Best",
+      "hits": [
+        {
+          "row": 481,
+          "yml": "WH256AG",
+          "name": "Кресло Best grey WH256AG"
+        },
+        {
+          "row": 486,
+          "yml": "WH256AW",
+          "name": "Кресло Best white WH256AW"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "WH256B",
+      "name": "Бэст LB / Best LB",
+      "hits": [
+        {
+          "row": 473,
+          "yml": "WH256BW",
+          "name": "Кресло Best LB white WH256BW"
+        },
+        {
+          "row": 478,
+          "yml": "WH256BG",
+          "name": "Кресло Best LB grey WH256BG"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "WH256BW",
+      "name": "Бэст LB вайт / Best LB white",
+      "hits": [
+        {
+          "row": 479,
+          "yml": "WH256B",
+          "name": "Кресло Best LB WH256B"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "WH256BG",
+      "name": "Бэст LB грэй / Best LB grey",
+      "hits": [
+        {
+          "row": 479,
+          "yml": "WH256B",
+          "name": "Кресло Best LB WH256B"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "WH256AW",
+      "name": "Бэст вайт / Best white",
+      "hits": [
+        {
+          "row": 487,
+          "yml": "WH256A",
+          "name": "Кресло Best WH256A"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "WH256AG",
+      "name": "Бэст грэй / Best grey",
+      "hits": [
+        {
+          "row": 487,
+          "yml": "WH256A",
+          "name": "Кресло Best WH256A"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "6227A",
+      "name": "Гарда Люкс / Garda Lux",
+      "hits": [
+        {
+          "row": 539,
+          "yml": "6227A-HS",
+          "name": "Кресло Гарда Люкс / Garda Lux 6227A-HS"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "6227A-HS",
+      "name": "Гарда Люкс / Garda Lux",
+      "hits": [
+        {
+          "row": 538,
+          "yml": "6227A",
+          "name": "Кресло Гарда Люкс / Garda Lux 6227A"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "6227B-HS",
+      "name": "Гарда Люкс ЛБ / Garda Lux LB",
+      "hits": [
+        {
+          "row": 2038,
+          "yml": "6227B",
+          "name": "Кресло офисное / Гарда Люкс ЛБ / Garda Lux LB / черная сетка / черная ткань / черный пластик / черная база"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "6227B",
+      "name": "Гарда Люкс ЛБ / Garda Lux LB",
+      "hits": [
+        {
+          "row": 2037,
+          "yml": "6227B-HS",
+          "name": "Кресло офисное / Гарда Люкс ЛБ / Garda Lux LB / серая сетка / серая ткань / серый пластик / серая база"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "AM 188A-2",
+      "name": "Гранд / Grand",
+      "hits": [
+        {
+          "row": 158,
+          "yml": "AM 188A",
+          "name": "Кресло для руководителя Grand black AM 188A"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "AM 188B",
+      "name": "Гранд LB блэк / Grand LB black",
+      "hits": [
+        {
+          "row": 157,
+          "yml": "AM 188B-2",
+          "name": "Кресло для руководителя Grand LB brown AM 188B-2"
+        },
+        {
+          "row": 160,
+          "yml": "AM 188B-3",
+          "name": "Кресло для руководителя Grand LB ivory AM 188B-3"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "AM 188B-2",
+      "name": "Гранд LB браун / Grand LB brown",
+      "hits": [
+        {
+          "row": 159,
+          "yml": "AM 188B",
+          "name": "Кресло для руководителя Grand LB black AM 188B"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "AM 188B-3",
+      "name": "Гранд LB йвери / Grand LB ivory",
+      "hits": [
+        {
+          "row": 159,
+          "yml": "AM 188B",
+          "name": "Кресло для руководителя Grand LB black AM 188B"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "YS-0817H(D+T)",
+      "name": "Имидж",
+      "hits": [
+        {
+          "row": 143,
+          "yml": "YS-0817H",
+          "name": "Кресло для руководителя Имидж black YS-0817H"
+        },
+        {
+          "row": 245,
+          "yml": "YS-0817H(D+T)W",
+          "name": "Кресло офисное / Имидж gray YS-0817H(D+T)W белый пластик серая сетка и ткань"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "YS-0817H",
+      "name": "Имидж black",
+      "hits": [
+        {
+          "row": 240,
+          "yml": "YS-0817H(FYR+FYR)W",
+          "name": "Кресло офисное / Имидж gray 2 YS-0817H(FYR+FYR)W белый пластик серая ткань"
+        },
+        {
+          "row": 245,
+          "yml": "YS-0817H(D+T)W",
+          "name": "Кресло офисное / Имидж gray YS-0817H(D+T)W белый пластик серая сетка и ткань"
+        },
+        {
+          "row": 246,
+          "yml": "YS-0817H(D+T)",
+          "name": "Кресло офисное Имидж черный пластик серая сетка серая ткань"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "YS-0817H(D+T)W",
+      "name": "Имидж gray",
+      "hits": [
+        {
+          "row": 143,
+          "yml": "YS-0817H",
+          "name": "Кресло для руководителя Имидж black YS-0817H"
+        },
+        {
+          "row": 246,
+          "yml": "YS-0817H(D+T)",
+          "name": "Кресло офисное Имидж черный пластик серая сетка серая ткань"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "YS-0817H(FYR+FYR)W",
+      "name": "Имидж gray 2",
+      "hits": [
+        {
+          "row": 143,
+          "yml": "YS-0817H",
+          "name": "Кресло для руководителя Имидж black YS-0817H"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CH-180A-OA2016-AK30-63 chrome base",
+      "name": "Интер",
+      "hits": [
+        {
+          "row": 239,
+          "yml": "CH-180A-OA2016*АК30-",
+          "name": "Кресло офисное Интер / база нейлон черный пластик серая сетка зеленая ткань"
+        },
+        {
+          "row": 242,
+          "yml": "CH-180A-ОA2016*АК30-",
+          "name": "Кресло офисное Интер база нейлон черный пластик серая сетка черная ткань"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CH-336A",
+      "name": "Йорк / York",
+      "hits": [
+        {
+          "row": 98,
+          "yml": "CH-336A grey leather",
+          "name": "Кресло для руководителя York-4 CH-336A grey leather"
+        },
+        {
+          "row": 110,
+          "yml": "CH-336A light brown",
+          "name": "Кресло для руководителя York-3 CH-336A light brown leather"
+        },
+        {
+          "row": 113,
+          "yml": "CH-336A ivory leathe",
+          "name": "Кресло для руководителя York-2 CH-336A ivory leather"
+        },
+        {
+          "row": 120,
+          "yml": "CH-336A brown leathe",
+          "name": "Кресло для руководителя / York-1 CH-336A brown leather"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "B1816 3S fabric LE8100-07",
+      "name": "Корфу / Corfu",
+      "hits": [
+        {
+          "row": 29,
+          "yml": "B1816 3S fabric LE81",
+          "name": "Конференц-кресло/Corfu beige B1816 3S fabric LE8100-01"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "YS-8309H(M+M)",
+      "name": "Крон алюминюм блэк / Kron aluminium black",
+      "hits": [
+        {
+          "row": 378,
+          "yml": "YS-8309H(M+M)G",
+          "name": "Кресло для руководителя / Kron aluminium grey YS-8309H(M+M)G"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "YS-8309H(M+M)G",
+      "name": "Крон алюминюм грэй / Kron aluminium grey",
+      "hits": [
+        {
+          "row": 381,
+          "yml": "YS-8309H(M+M)",
+          "name": "Кресло для руководителя / Kron aluminium black YS-8309H(M+M)"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "AF-01AC black",
+      "name": "Лайк блэк / Like black",
+      "hits": [
+        {
+          "row": 536,
+          "yml": "AF-01AC black- FL06 black fabric",
+          "name": "Конференц кресло Лайк блэк / Like black AF-01AC black- FL06 black fabric"
+        },
+        {
+          "row": 536,
+          "yml": "AF-01AC black- FL06 black fabric",
+          "name": "Конференц кресло Лайк блэк / Like black AF-01AC black- FL06 black fabric"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "AF-01AC black- FL06 black fabric",
+      "name": "Лайк блэк / Like black",
+      "hits": [
+        {
+          "row": 438,
+          "yml": "AF-01AC black",
+          "name": "Стул Like black AF-01AC black"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "L347LCA-1-CF-grey fabric n",
+      "name": "Ливерпуль Нью CF  / Liverpool New CF",
+      "hits": [
+        {
+          "row": 412,
+          "yml": "L347LCA-1-CF-grey fa",
+          "name": "Конференц-кресло Liverpool New CF grey fabric L347LCA-1-CF-grey fabric n"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CH-320A-B-GG",
+      "name": "Напа / Napa",
+      "hits": [
+        {
+          "row": 86,
+          "yml": "CH-320A-B-GG-A",
+          "name": "Кресло для руководителя Napa aluminium CH-320A-B-GG-A"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CH-320A-B-GG-A",
+      "name": "Напа алюминюм / Napa aluminium",
+      "hits": [
+        {
+          "row": 376,
+          "yml": "CH-320A-B-GG",
+          "name": "Кресло для руководителя Napa Черный"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CK-2518B",
+      "name": "Некст LB блэк / Next LB black",
+      "hits": [
+        {
+          "row": 509,
+          "yml": "CK-2518B-GG",
+          "name": "Эргономичное кресло Некст LB грэй / Next LB grey CK-2518B-GG"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CK-2518B-GG",
+      "name": "Некст LB грэй / Next LB grey",
+      "hits": [
+        {
+          "row": 506,
+          "yml": "CK-2518B",
+          "name": "Эргономичное кресло Некст LB блэк / Next LB black CK-2518B"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CK-2518A",
+      "name": "Некст блэк / Next black",
+      "hits": [
+        {
+          "row": 495,
+          "yml": "CK-2518A-GG",
+          "name": "Эргономичное кресло Некст грэй / Next grey CK-2518A-GG"
+        },
+        {
+          "row": 496,
+          "yml": "CK-2518A-D",
+          "name": "Эргономичное кресло Некст блэк хром / Next black chrome CK-2518A-D"
+        },
+        {
+          "row": 499,
+          "yml": "CK-2518A-GG-D",
+          "name": "Эргономичное кресло Некст грэй хром / Next grey chrome CK-2518A-GG-D"
+        },
+        {
+          "row": 1053,
+          "yml": "CK-2518A-P",
+          "name": "Кресло офисное / Некст блэк / Next black / черная сетка / черная ткань / поясничный упор"
+        },
+        {
+          "row": 1053,
+          "yml": "CK-2518A-P",
+          "name": "Кресло офисное / Некст блэк / Next black / черная сетка / черная ткань / поясничный упор"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CK-2518A-P",
+      "name": "Некст блэк / Next black",
+      "hits": [
+        {
+          "row": 503,
+          "yml": "CK-2518A",
+          "name": "Эргономичное кресло Некст блэк / Next black CK-2518A"
+        },
+        {
+          "row": 503,
+          "yml": "CK-2518A",
+          "name": "Эргономичное кресло Некст блэк / Next black CK-2518A"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CK-2518A-D",
+      "name": "Некст блэк хром / Next black chrome",
+      "hits": [
+        {
+          "row": 503,
+          "yml": "CK-2518A",
+          "name": "Эргономичное кресло Некст блэк / Next black CK-2518A"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CK-2518A-GG",
+      "name": "Некст грэй / Next grey",
+      "hits": [
+        {
+          "row": 499,
+          "yml": "CK-2518A-GG-D",
+          "name": "Эргономичное кресло Некст грэй хром / Next grey chrome CK-2518A-GG-D"
+        },
+        {
+          "row": 503,
+          "yml": "CK-2518A",
+          "name": "Эргономичное кресло Некст блэк / Next black CK-2518A"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CK-2518A-GG-D",
+      "name": "Некст грэй хром / Next grey chrome",
+      "hits": [
+        {
+          "row": 495,
+          "yml": "CK-2518A-GG",
+          "name": "Эргономичное кресло Некст грэй / Next grey CK-2518A-GG"
+        },
+        {
+          "row": 503,
+          "yml": "CK-2518A",
+          "name": "Эргономичное кресло Некст блэк / Next black CK-2518A"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "EVL-002A-BS",
+      "name": "Осло / Oslo",
+      "hits": [
+        {
+          "row": 384,
+          "yml": "EVL-002A",
+          "name": "Кресло для руководителя Oslo EVL-002A"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "EVL-002A",
+      "name": "Осло блэк / Oslo black",
+      "hits": [
+        {
+          "row": 132,
+          "yml": "EVL-002A-BS",
+          "name": "Кресло для руководителя Oslo EVL-002A-BS"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-2021-70-5 leather",
+      "name": "Парламент",
+      "hits": [
+        {
+          "row": 272,
+          "yml": "H-2021-70-5",
+          "name": "Кресло офисное Парламент (ivory) сталь + хром слоновая кость экокожа"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-2021-35 leather",
+      "name": "Парламент",
+      "hits": [
+        {
+          "row": 273,
+          "yml": "H-2021-35",
+          "name": "Кресло офисное Парламент (black) сталь + хром черная экокожа"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-2021-35",
+      "name": "Парламент",
+      "hits": [
+        {
+          "row": 274,
+          "yml": "H-2021-35 leather",
+          "name": "Кресло офисное Парламент (black) сталь + хром черная кожа"
+        },
+        {
+          "row": 275,
+          "yml": "H-2021-35-54",
+          "name": "Кресло офисное Парламент (grey-brown) сталь + хром серо коричневый экокожа"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-2021-322 leather",
+      "name": "Парламент",
+      "hits": [
+        {
+          "row": 354,
+          "yml": "H-2021-322",
+          "name": "Кресло офисное Парламент (brown) сталь + хром темно-коричневая экокожа"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-2021-35-54",
+      "name": "Парламент",
+      "hits": [
+        {
+          "row": 273,
+          "yml": "H-2021-35",
+          "name": "Кресло офисное Парламент (black) сталь + хром черная экокожа"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-2021-70-5",
+      "name": "Парламент",
+      "hits": [
+        {
+          "row": 271,
+          "yml": "H-2021-70-5 leather",
+          "name": "Кресло офисное Парламент (ivory) сталь + хром слоновая кость кожа"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-2021-322",
+      "name": "Парламент",
+      "hits": [
+        {
+          "row": 144,
+          "yml": "H-2021-322 leather",
+          "name": "Кресло для руководителя Парламент H-2021-322 leather"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "M6256 black",
+      "name": "Пино блэк LB / Pino black LB",
+      "hits": [
+        {
+          "row": 2056,
+          "yml": "M6256 chrome black",
+          "name": "Кресло офисное / Пино блэк LB / Pino black LB / черный пластик / черная ткань / черная сетка/хром база"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "F181 black leather",
+      "name": "Порше / Porsche",
+      "hits": [
+        {
+          "row": 370,
+          "yml": "F181 black",
+          "name": "Кресло офисное Porsche черная экокожа/ алюминий крестовина"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-1133-322",
+      "name": "Президент",
+      "hits": [
+        {
+          "row": 355,
+          "yml": "H-1133-322 leather",
+          "name": "Кресло офисное Президент сталь + хром темно-коричневая кожа"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-1133-70-5 leather",
+      "name": "Президент",
+      "hits": [
+        {
+          "row": 467,
+          "yml": "H-1133-70-5",
+          "name": "Кресло офисное / Президент / сталь + хром / слоновая кость экокожа"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-1133-322 leather",
+      "name": "Президент",
+      "hits": [
+        {
+          "row": 289,
+          "yml": "H-1133-322",
+          "name": "Кресло офисное Президент сталь + хром темно-коричневая экокожа"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-1133-35",
+      "name": "Президент",
+      "hits": [
+        {
+          "row": 154,
+          "yml": "H-1133-35-54",
+          "name": "Кресло для руководителя Президент H-1133-35-54"
+        },
+        {
+          "row": 356,
+          "yml": "H-1133-35 leather",
+          "name": "Кресло офисное Президент сталь + хром черная кожа"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-1133-35 leather",
+      "name": "Президент",
+      "hits": [
+        {
+          "row": 286,
+          "yml": "H-1133-35",
+          "name": "Кресло офисное Президент сталь + хром черная экокожа"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "H-1133-70-5",
+      "name": "Президент",
+      "hits": [
+        {
+          "row": 353,
+          "yml": "H-1133-70-5 leather",
+          "name": "Кресло для руководителя / Президент H-1133-70-5 leather"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "842-297",
+      "name": "Райт блэк / Right black",
+      "hits": [
+        {
+          "row": 2,
+          "yml": "842-297 grey fabric",
+          "name": "Кресло Right grey 842-297 grey fabric"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "842-297 grey fabric",
+      "name": "Райт грэй / Right grey",
+      "hits": [
+        {
+          "row": 3,
+          "yml": "842-297",
+          "name": "Кресло Right black 842-297 черная сетка / черная ткань /хром база"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "HY-839C W grey",
+      "name": "Свифт / Swift",
+      "hits": [
+        {
+          "row": 396,
+          "yml": "HY-839C W",
+          "name": "Конференц-кресло Swift HY-839C W"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "CH-226C-BS-K304D-14-N204",
+      "name": "Сильвия white / gray CF",
+      "hits": [
+        {
+          "row": 523,
+          "yml": "CH-226C-BS-К304D-14*",
+          "name": "Конференц-кресло/Сильвия white/gray CF CH-226C-BS-К304D-14*N204"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "AM 1716A-2",
+      "name": "Сорбонна / Sorbonne",
+      "hits": [
+        {
+          "row": 320,
+          "yml": "AM 1716A",
+          "name": "Кресло офисное Sorbonne AM 1716A"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "AM 1716B-2",
+      "name": "Сорбонна LB / Sorbonne LB",
+      "hits": [
+        {
+          "row": 317,
+          "yml": "AM 1716B",
+          "name": "Кресло офисное Sorbonne LB AM 1716B"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "HY-815C",
+      "name": "Стэп М / Step M",
+      "hits": [
+        {
+          "row": 434,
+          "yml": "HY-815CL",
+          "name": "Конференц-кресло Step M+R HY-815CL"
+        },
+        {
+          "row": 521,
+          "yml": "HY-815СL",
+          "name": "Офисный стул Step M+R HY-815СL"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "HY-815CL",
+      "name": "Стэп М+Р / Step M+R",
+      "hits": [
+        {
+          "row": 433,
+          "yml": "HY-815C",
+          "name": "Стул на ножках с пюпитром Step M HY-815C черный пластик / черная сетка / черная ткань/ пюпитр"
+        },
+        {
+          "row": 520,
+          "yml": "HY-815С",
+          "name": "Офисный стул Step M HY-815С"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "RT-8046-5",
+      "name": "Танго фабрик / Tango fabric",
+      "hits": [
+        {
+          "row": 502,
+          "yml": "RT-8046-6",
+          "name": "Конференц-кресло Танго фабрик / Tango fabric RT-8046-6"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "RT-8046-6",
+      "name": "Танго фабрик / Tango fabric",
+      "hits": [
+        {
+          "row": 510,
+          "yml": "RT-8046-5",
+          "name": "Конференц-кресло Танго фабрик / Tango fabric RT-8046-5"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "YS-0810H-T(E+E)",
+      "name": "Хироу блэк / Hero black",
+      "hits": [
+        {
+          "row": 389,
+          "yml": "YS-0810H-T(E+E)W",
+          "name": "Кресло офисное Hero white белый пластик / серая сетка"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "YS-0810H-T(E+E)W",
+      "name": "Хироу вайт / Hero white",
+      "hits": [
+        {
+          "row": 388,
+          "yml": "YS-0810H-T(E+E)",
+          "name": "Кресло офисное Hero black черный пластик / черная сетка"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    },
+    {
+      "yml_id": "FK 0005-A beige leather",
+      "name": "Шопен",
+      "hits": [
+        {
+          "row": 121,
+          "yml": "FK 0005-A beige leat",
+          "name": "Кресло офисное Шопен бежевая кожа алюминий крестовина"
+        }
+      ],
+      "stage": "before_webasyst",
+      "action": "MANUAL_APPROVAL_GOVERNS_NEW_CREATION"
+    }
+  ],
+  "category_review_items": [
+    {
+      "yml_id": "B1816 3S fabric LE8100-07",
+      "name": "Корфу / Corfu",
+      "source_category": "Norden > Кресло офисное"
+    },
+    {
+      "yml_id": "CK-2518A-P",
+      "name": "Некст блэк / Next black",
+      "source_category": "Norden > Кресло офисное"
+    },
+    {
+      "yml_id": "CK38F",
+      "name": "Пинин смарт Нью",
+      "source_category": "Norden > Стул"
+    }
+  ],
   "complete": false,
-  "fatal_error": "Safety stop: chairs/stools scope too small (0)",
-  "safety": "При неполном/ошибочном источнике массовое обнуление не выполняется."
+  "rules": {
+    "scope": "только кресла/стулья, без УЦЕНКА",
+    "new_table_rows": "остаток > 0; новым считается любой товар без точного буквального YML ID; частичные/сомнительные совпадения добавляются отдельной строкой",
+    "new_publish_gate": "создание в Webasyst/KIT только после TRUE в колонке 'Проверено — загрузить в KIT/Webasyst'",
+    "schedule": "каждые 6 часов",
+    "missing": "остаток 0, цены сохранять",
+    "webasyst_price": "закупка×1.23; зачеркнутая×1.65",
+    "kit_price": "закупка×1.26; зачеркнутая×1.65",
+    "kit_stock": "МСК = фактический остаток Norden МСК; СПБ привозной = тот же остаток, что МСК",
+    "kit_images": "только изображения из официальной выгрузки/API/XML Norden для конкретного YML ID; сайт вручную не парсить; сторонние сайты/зеркала/маркетплейсы запрещены; все уникальные фото выгрузки обязательны; молча пропускать ошибки нельзя; битая ссылка из выгрузки = ошибка источника, подмена запрещена",
+    "old_norden_workflows": "STOP_ALL_NORDEN сохраняется"
+  },
+  "finished_at": "2026-09-28T17:19:28.305121+00:00"
 }
