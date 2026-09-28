@@ -385,7 +385,21 @@ php -l "$API_DIR/index.php"
 echo "api_bridge=yes"
 
 # Functional API guard check without exposing the key.
-API_TEST_KEY="$(php -r '$c=include "/home/web/vm-23f9aff9.na4u.ru/www/wa-config/db.php"; $d=isset($c["default"])?$c["default"]:$c; $m=new mysqli(isset($d["host"])?$d["host"]:"localhost",$d["user"],$d["password"],$d["database"],isset($d["port"])?(int)$d["port"]:3306); $r=$m->query("SELECT value FROM shop_megasuppliers_meta WHERE name=\"api_key\" LIMIT 1"); $x=$r?$r->fetch_assoc():null; echo $x?$x["value"]:"";')"
+cat >/tmp/ms_api_key.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+wa('shop')->getPlugin('megasuppliers',true);
+$row=(new shopMegasuppliersMetaModel())->getById('api_key');
+echo $row ? $row['value'] : '';
+PHP
+chown web:web /tmp/ms_api_key.php
+API_TEST_KEY="$(su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/ms_api_key.php')"
+rm -f /tmp/ms_api_key.php
+test -n "$API_TEST_KEY"
 API_TEST_STATUS="$(curl -ksS -o /tmp/ms_api_guard_body.txt -w '%{http_code}' -X POST -H "Content-Type: application/json" -H "X-Megasuppliers-Key: $API_TEST_KEY" --data '{"items":[{"артикул":"__guard_test__"}]}' "https://profikompany.ru/megasuppliers-api/" || true)"
 echo "api_supplier_required_status=$API_TEST_STATUS"
 echo "api_supplier_required_body=$(cat /tmp/ms_api_guard_body.txt 2>/dev/null || true)"
