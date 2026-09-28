@@ -139,15 +139,18 @@ def supplier():
         xml_src,xml_dups=MOD.source_from_xml(short=False)
         if len(xml_src)<1000:
             raise RuntimeError(f"Safety stop: Norden XML category fallback too small ({len(xml_src)})")
+        xml_target=sum(1 for i in xml_src.values() if target_item(i))
         src,fb=enrich_missing_categories(src,xml_src)
         category_fallback={
             "used":True,
             "reason":"API category scope suspiciously small",
             "target_before":target_before,
             "xml_catalog":len(xml_src),
+            "xml_target":xml_target,
             "xml_duplicates":len(xml_dups),
             **fb,
         }
+        print(json.dumps({"category_fallback_diagnostics":category_fallback},ensure_ascii=False),flush=True)
 
     ps,pdups=price_stock(); out={}
     for a,i in src.items():
