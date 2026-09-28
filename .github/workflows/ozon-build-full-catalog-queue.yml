@@ -1,0 +1,102 @@
+name: Build full Ozon catalog 3x4 queue
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-build-full-catalog-queue.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install --disable-pip-version-check requests
+      - name: Build oldest-to-newest queue for all Ozon cards
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, requests, math
+          s=requests.Session()
+          s.headers.update({
+            "Client-Id":os.environ["OZON_CLIENT_ID"].strip(),
+            "Api-Key":os.environ["OZON_API_KEY"].strip(),
+            "Content-Type":"application/json",
+          })
+          def post(path, body):
+            r=s.post("https://api-seller.ozon.ru"+path,json=body,timeout=90)
+            try: data=r.json()
+            except: data={"raw":r.text}
+            if r.status_code>=400:
+              raise RuntimeError(f"{path} HTTP {r.status_code}: {json.dumps(data,ensure_ascii=False)[:3000]}")
+            return data
+
+          items=[]
+          last_id=""
+          for _ in range(100):
+            d=post("/v3/product/list",{"filter":{"visibility":"ALL"},"last_id":last_id,"limit":1000})
+            res=d.get("result") or {}
+            batch=res.get("items") or []
+            items.extend(batch)
+            new_last=res.get("last_id") or ""
+            if not batch or not new_last or new_last==last_id: break
+            last_id=new_last
+            if len(batch)<1000: break
+
+          offers=[x.get("offer_id") for x in items if x.get("offer_id")]
+          infos={}
+          for i in range(0,len(offers),1000):
+            d=post("/v3/product/info/list",{"offer_id":offers[i:i+1000]})
+            for x in d.get("items") or []:
+              infos[x.get("offer_id")] = x
+
+          rows=[]
+          for base in items:
+            offer=base.get("offer_id")
+            if not offer: continue
+            inf=infos.get(offer,{})
+            pid=int(base.get("product_id") or base.get("id") or inf.get("id") or inf.get("product_id") or 0)
+            created=None
+            for k in ("created_at","created","create_date","created_time"):
+              if inf.get(k):
+                created=inf.get(k); break
+            rows.append({
+              "offer_id":offer,
+              "product_id":pid,
+              "created_at":created,
+              "visible":base.get("visibility"),
+              "archived": bool(inf.get("is_archived") or inf.get("archived")),
+            })
+          rows.sort(key=lambda x:(x.get("created_at") or "9999", x.get("product_id") or 0, x["offer_id"]))
+          out={
+            "catalog_count":len(rows),
+            "batch_size":20,
+            "batch_count":math.ceil(len(rows)/20),
+            "ordering":"created_at_then_product_id",
+            "scope":"ALL cards regardless of stock or archive",
+            "selected":rows,
+          }
+          os.makedirs("ozon/catalog_3x4",exist_ok=True)
+          with open("ozon/catalog_3x4/selection.json","w",encoding="utf-8") as f:
+            json.dump(out,f,ensure_ascii=False,indent=2)
+          print(json.dumps({k:v for k,v in out.items() if k!="selected"},ensure_ascii=False,indent=2))
+          print("first20", json.dumps(rows[:20],ensure_ascii=False,indent=2))
+          print("last5", json.dumps(rows[-5:],ensure_ascii=False,indent=2))
+          PY
+      - name: Commit queue
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ozon/catalog_3x4/selection.json
+          if ! git diff --cached --quiet; then
+            git commit -m "catalog: build full Ozon oldest-to-newest 3x4 queue [skip ci]"
+            git push
+          fi
