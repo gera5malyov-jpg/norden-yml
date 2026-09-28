@@ -12,6 +12,8 @@
             $collection->addWhere('0');
             return;
         }
-        $queries = $this->supplierProductSubqueries($supplier_id, $supplier['code']);
-        $collection->addWhere('p.id IN ('.implode(' UNION ', $queries).')');
+        $collection->addWhere(
+            'EXISTS (SELECT 1 FROM shop_megasuppliers_product ms '
+            .'WHERE ms.product_id=p.id AND ms.supplier_id='.(int)$supplier_id.')'
+        );
     }
