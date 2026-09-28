@@ -148,6 +148,37 @@ echo "--- megasuppliers routing ---"
 for f in "$PLUGIN/lib/config/plugin.php" "$PLUGIN/lib/config/routing.php" "$PLUGIN/lib/config/install.php" "$PLUGIN/lib/shopMegasuppliers.plugin.php" "$PLUGIN/lib/models/shopMegasuppliersMeta.model.php" "$PLUGIN/lib/models/shopMegasuppliersSupplier.model.php" "$PLUGIN/lib/models/shopMegasuppliersProduct.model.php" "$PLUGIN/lib/classes/shopMegasuppliersImportService.class.php" "$PLUGIN/lib/actions/backend/shopMegasuppliersPluginBackend.action.php" "$PLUGIN/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php" "$PLUGIN/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php"; do
   if [ -f "$f" ]; then echo "### $f"; sed -n '1,320p' "$f"; fi
 done
+echo "--- recent megasuppliers/webasyst errors ---"
+for log in "$ROOT/wa-log/shop/plugins/megasuppliers.log" "$ROOT/wa-log/php.log" "$ROOT/wa-log/error.log" "$ROOT/wa-log/webasyst.log"; do
+  if [ -f "$log" ]; then
+    echo "### $log"
+    tail -n 120 "$log" | grep -i -E "megasuppliers|fatal|exception|error" | tail -n 80 || true
+  fi
+done
+
+echo "--- backend action cli diagnostic ---"
+cat >/tmp/ms_backend_probe.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+try {
+    $p=wa('shop')->getPlugin('megasuppliers',true);
+    echo "plugin=".get_class($p)."\n";
+    echo "backend_class_exists=".(class_exists('shopMegasuppliersPluginBackendAction')?'yes':'no')."\n";
+    echo "supplier_model_exists=".(class_exists('shopMegasuppliersSupplierModel')?'yes':'no')."\n";
+    $m=new shopMegasuppliersSupplierModel();
+    echo "supplier_count=".$m->countAll()."\n";
+} catch (Throwable $e) {
+    echo "backend_probe_error=".get_class($e).": ".$e->getMessage()."\n".$e->getTraceAsString()."\n";
+}
+PHP
+chown web:web /tmp/ms_backend_probe.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_backend_probe.php' || true
+rm -f /tmp/ms_backend_probe.php
+
 echo "--- api bridge diagnostic ---"
 if [ -f "$ROOT/megasuppliers-api/index.php" ]; then
   php -l "$ROOT/megasuppliers-api/index.php" || true
