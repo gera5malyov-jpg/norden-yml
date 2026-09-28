@@ -314,7 +314,7 @@ done
                     "-o","UserKnownHostsFile=/dev/null",
                     "-o","ConnectTimeout=12",
                     f"{user}@{VM_IP}","bash -s"
-                ],input=remote_cmd,text=True,capture_output=True,timeout=40)
+                ],input=remote_cmd,text=True,capture_output=True,timeout=120)
                 add(f"ssh_user={user} exit={p.returncode}")
                 if p.stdout:
                     add(p.stdout)
