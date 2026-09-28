@@ -151,9 +151,13 @@ def load_catalog():
     expected=["Артикул","Название","YML ID","Бренд","Архивный"]
     if header[:5] != expected:
         raise RuntimeError(f"Unexpected catalog headers A:E: {header[:5]}")
-    targets=[]
-    seen=set()
-    duplicate_keys=[]
+
+    # The sheet contains a small number of visually identical Norden IDs that
+    # differ only by Latin/Cyrillic look-alike letters. KIT identity matching
+    # deliberately normalizes those letters too, so treat such rows as one
+    # target identity instead of restoring duplicate KIT cards.
+    by_key={}
+    catalog_rows=0
     for rowno,row in enumerate(values[1:], start=2):
         row=list(row)+[""]*(5-len(row))
         article,name,yml_id,brand,archive_flag=[s(x) for x in row[:5]]
@@ -162,30 +166,57 @@ def load_catalog():
         key=norm(yml_id)
         if not key:
             continue
-        if key in seen:
-            duplicate_keys.append({"row":rowno,"yml_id":yml_id})
-            continue
-        seen.add(key)
-        targets.append({
-            "row":rowno,
-            "article":article,
-            "article_key":norm(article),
-            "name":name,
-            "yml_id":yml_id,
-            "yml_key":key,
-            "sheet_archive_flag":archive_flag,
-        })
-    if duplicate_keys:
-        raise RuntimeError(f"Duplicate normalized YML IDs in catalog: {duplicate_keys[:20]}")
+        catalog_rows += 1
+        if key not in by_key:
+            by_key[key]={
+                "row":rowno,
+                "rows":[rowno],
+                "article":article,
+                "article_aliases":[article] if article else [],
+                "name":name,
+                "yml_id":yml_id,
+                "yml_aliases":[yml_id],
+                "yml_key":key,
+                "sheet_archive_flag":archive_flag,
+            }
+        else:
+            t=by_key[key]
+            t["rows"].append(rowno)
+            if article and article not in t["article_aliases"]:
+                t["article_aliases"].append(article)
+            if yml_id and yml_id not in t["yml_aliases"]:
+                t["yml_aliases"].append(yml_id)
+
+    targets=list(by_key.values())
+    duplicate_groups=[
+        {
+            "normalized_yml_key":t["yml_key"],
+            "rows":t["rows"],
+            "yml_aliases":t["yml_aliases"],
+            "article_aliases":t["article_aliases"],
+        }
+        for t in targets if len(t["rows"])>1
+    ]
+    if not (500 <= catalog_rows <= 2000):
+        raise RuntimeError(f"Safety guard: unexpected Norden row count {catalog_rows}")
     if not (500 <= len(targets) <= 2000):
-        raise RuntimeError(f"Safety guard: unexpected Norden target count {len(targets)}")
-    return targets
+        raise RuntimeError(f"Safety guard: unexpected Norden unique target count {len(targets)}")
+    return targets, {
+        "catalog_rows":catalog_rows,
+        "unique_targets":len(targets),
+        "duplicate_normalized_identity_groups":duplicate_groups,
+    }
 
 def main():
     started=now()
-    targets=load_catalog()
-    by_yml={t["yml_key"]:t for t in targets}
-    by_article={t["article_key"]:t for t in targets if t["article_key"]}
+    targets,catalog_meta=load_catalog()
+    target_by_key={t["yml_key"]:t for t in targets}
+    identity_index=defaultdict(set)
+    for t in targets:
+        for value in list(t.get("yml_aliases") or []) + list(t.get("article_aliases") or []):
+            key=norm(value)
+            if key:
+                identity_index[key].add(t["yml_key"])
 
     kit=Kit(TOKEN)
     chars=kit.collection("/v1/characteristics", {"status":["ACTIVE"]})
@@ -221,29 +252,30 @@ def main():
                 if v:
                     values.append((title,v))
 
-        matched={}
+        matched_keys=set()
         for field,value in values:
             k=norm(value)
-            if not k:
-                continue
-            if k in by_yml:
-                t=by_yml[k]
-                matched[t["yml_key"]]=t
-            if k in by_article:
-                t=by_article[k]
-                matched[t["yml_key"]]=t
-        if len(matched)>1:
+            if k:
+                matched_keys.update(identity_index.get(k,set()))
+        if len(matched_keys)>1:
             variant_conflicts.append({
                 "variant_id":vid,
                 "kit_id":row.get("kit_id"),
                 "sku":sku,
                 "status":s(row.get("status")).upper(),
-                "matched_targets":[{"yml_id":t["yml_id"],"article":t["article"]} for t in matched.values()],
+                "matched_targets":[
+                    {
+                        "yml_id":target_by_key[k]["yml_id"],
+                        "yml_aliases":target_by_key[k].get("yml_aliases") or [],
+                        "article_aliases":target_by_key[k].get("article_aliases") or [],
+                    }
+                    for k in sorted(matched_keys)
+                ],
                 "identity_values":[{"field":f,"value":v} for f,v in values],
             })
             continue
-        if len(matched)==1:
-            key=next(iter(matched))
+        if len(matched_keys)==1:
+            key=next(iter(matched_keys))
             candidates[key][vid]={
                 "variant_id":vid,
                 "kit_id":row.get("kit_id"),
@@ -261,13 +293,27 @@ def main():
     for t in targets:
         rows=list(candidates.get(t["yml_key"],{}).values())
         if not rows:
-            unresolved.append({k:t[k] for k in ("row","article","name","yml_id")})
+            unresolved.append({
+                "rows":t.get("rows") or [t["row"]],
+                "article":t["article"],
+                "article_aliases":t.get("article_aliases") or [],
+                "name":t["name"],
+                "yml_id":t["yml_id"],
+                "yml_aliases":t.get("yml_aliases") or [],
+            })
             continue
         published=[r for r in rows if r["status"]=="PUBLISHED"]
         if published:
             published.sort(key=lambda r:(int(r["kit_id"]) if str(r.get("kit_id","")).isdigit() else 10**18, r["sku"]))
             already.append({
-                "target":{k:t[k] for k in ("row","article","name","yml_id")},
+                "target":{
+                    "rows":t.get("rows") or [t["row"]],
+                    "article":t["article"],
+                    "article_aliases":t.get("article_aliases") or [],
+                    "name":t["name"],
+                    "yml_id":t["yml_id"],
+                    "yml_aliases":t.get("yml_aliases") or [],
+                },
                 "published":published,
                 "other_candidates":[r for r in rows if r["status"]!="PUBLISHED"],
             })
@@ -275,13 +321,21 @@ def main():
         archived=[r for r in rows if r["status"] in RESTORABLE]
         if not archived:
             nonarchive_only.append({
-                "target":{k:t[k] for k in ("row","article","name","yml_id")},
+                "target":{
+                    "rows":t.get("rows") or [t["row"]],
+                    "article":t["article"],
+                    "article_aliases":t.get("article_aliases") or [],
+                    "name":t["name"],
+                    "yml_id":t["yml_id"],
+                    "yml_aliases":t.get("yml_aliases") or [],
+                },
                 "candidates":rows,
             })
             continue
 
         def canonical(r):
-            exact_sheet_sku = 0 if t["article"] and norm(r["sku"])==t["article_key"] else 1
+            article_keys={norm(x) for x in (t.get("article_aliases") or []) if norm(x)}
+            exact_sheet_sku = 0 if norm(r["sku"]) in article_keys else 1
             legacy = 0 if r["sku"] and not r["sku"].startswith("100-") else 1
             try: kid=int(r.get("kit_id"))
             except Exception: kid=10**18
@@ -342,8 +396,11 @@ def main():
         "brand":BRAND,
         "stop_all_norden_untouched":True,
         "identity_titles_found":identity_ids,
+        "catalog_duplicate_normalized_identity_groups":catalog_meta["duplicate_normalized_identity_groups"],
         "counts":{
+            "catalog_rows":catalog_meta["catalog_rows"],
             "catalog_targets":len(targets),
+            "duplicate_normalized_identity_groups":len(catalog_meta["duplicate_normalized_identity_groups"]),
             "kit_variants_scanned":len(variants),
             "variant_identity_conflicts":len(variant_conflicts),
             "already_published":len(already),
