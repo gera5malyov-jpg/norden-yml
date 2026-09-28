@@ -1,0 +1,79 @@
+    public function backendProdList($params)
+    {
+        if (wa()->getEnv() !== 'backend') {
+            return array();
+        }
+
+        $model = new waModel();
+        $rows = (new shopMegasuppliersSupplierModel())
+            ->select('id,name,code')
+            ->where('active=1')
+            ->order('name')
+            ->fetchAll();
+
+        $selected_id = waRequest::get('megasupplier', 0, waRequest::TYPE_INT);
+        $base_url = wa('shop')->getAppUrl(null, true).'products/';
+
+        $items = '';
+        foreach ($rows as $row) {
+            $id = (int)$row['id'];
+            $queries = $this->supplierProductSubqueries($id, $row['code']);
+            $count_row = $model->query(
+                'SELECT COUNT(*) c FROM ('.implode(' UNION ', $queries).') ms_products'
+            )->fetch();
+            $count = $count_row ? (int)$count_row['c'] : 0;
+            $name = htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8');
+            $url = htmlspecialchars($base_url.'?megasupplier='.$id, ENT_QUOTES, 'UTF-8');
+            $active = ($selected_id === $id) ? ' selected' : '';
+
+            $items .= '<li class="s-megasuppliers-new-item'.$active.'">'
+                .'<a href="'.$url.'" data-megasupplier-id="'.$id.'" class="flexbox middle full-width">'
+                .'<span class="s-icon icon"><i class="fas fa-truck"></i></span>'
+                .'<span class="s-name wide">'.$name.'</span>'
+                .'<span class="count gray smaller">'.$count.'</span>'
+                .'</a></li>';
+        }
+
+        $expanded = $selected_id ? 'true' : 'false';
+        $display = $selected_id ? '' : ' style="display:none;"';
+
+        $section = '<section class="vue-component-sidebar-section s-megasuppliers-new-list'.($selected_id ? ' is-expanded' : '').'" id="s-megasuppliers-new-list">'
+            .'<header class="heading cursor-pointer">'
+            .'<span class="flexbox middle space-4">'
+            .'<span class="icon"><span class="caret"><i class="fas fa-caret-'.($selected_id ? 'down' : 'right').'"></i></span></span>'
+            .'<span class="s-name">Поставщики</span>'
+            .'</span>'
+            .'</header>'
+            .'<div class="s-sidebar-list-wrapper"'.$display.'>'
+            .'<div class="s-section-content"><div class="s-content-list-wrapper"><ul class="menu">'.$items.'</ul></div></div>'
+            .'</div>'
+            .'</section>';
+
+        $section_json = json_encode($section, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        $html = '<span id="s-megasuppliers-new-bootstrap" style="display:none"></span>'
+            .'<script>(function($){'
+            .'var markup='.$section_json.';'
+            .'function install(){'
+            .'var host=$(".s-filter-categories-section").first();'
+            .'if(!host.length){return false;}'
+            .'if(!host.find("#s-megasuppliers-new-list").length){host.append(markup);}'
+            .'var box=host.find("#s-megasuppliers-new-list");'
+            .'box.find("header.heading").off("click.megasuppliers").on("click.megasuppliers",function(){'
+            .'var body=box.find(".s-sidebar-list-wrapper");'
+            .'var open=body.is(":visible");'
+            .'body.toggle(!open);'
+            .'box.toggleClass("is-expanded",!open);'
+            .'box.find(".caret i").toggleClass("fa-caret-right",open).toggleClass("fa-caret-down",!open);'
+            .'});'
+            .'box.find("a[data-megasupplier-id]").off("click.megasuppliers").on("click.megasuppliers",function(e){'
+            .'e.preventDefault();window.location.href=this.href;'
+            .'});'
+            .'return true;'
+            .'}'
+            .'var tries=0;var timer=setInterval(function(){tries++;if(install()||tries>80){clearInterval(timer);}},125);'
+            .'$(document).off("wa_megasuppliers_install").on("wa_megasuppliers_install",install);'
+            .'})(jQuery);</script>';
+
+        return array('header_left' => $html);
+    }
