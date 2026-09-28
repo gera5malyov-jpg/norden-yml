@@ -14,9 +14,9 @@ jobs:
   cancel:
     runs-on: ubuntu-latest
     steps:
-      - name: Force-cancel obsolete run
+      - name: Force-cancel broken full-catalog run
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
-          gh api --method POST "/repos/$REPO/actions/runs/36487854115/force-cancel" || true
+          gh api --method POST "/repos/$REPO/actions/runs/36488514645/force-cancel" || true
