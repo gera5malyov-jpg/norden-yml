@@ -1,5 +1,5 @@
-VERSION=1.0.4
-HANDLERS={"backend_extended_menu":"backendExtendedMenu","backend_menu":"backendMenu","backend_prod":"backendProd","backend_products":"backendProducts","backend_prod_filters":"backendProdFilters","products_collection":"productsCollection","routing":"routing"}
+VERSION=1.0.5
+HANDLERS={"backend_extended_menu":"backendExtendedMenu","backend_menu":"backendMenu","backend_prod":"backendProd","backend_products":"backendProducts","backend_prod_filters":"backendProdFilters","products_collection":"productsCollection","routing":"routing","products_collection.filter":"productsCollectionFilter","backend_prod_content":"backendProdContent","backend_product_edit":"backendProductEdit"}
 DIRECT_SIDEBAR=yes LEN=2764
 EVENT_KEYS=yandexmarket-plugin,nullcat-plugin,yml-plugin,lostproducts-plugin,xml-plugin,massedit-plugin,bwsimplesearch-plugin
 EVENT_MS_SIDEBAR=no
