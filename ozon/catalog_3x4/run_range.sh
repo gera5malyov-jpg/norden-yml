@@ -126,6 +126,10 @@ PY
   python ozon/catalog_3x4/process_batch.py compact "$BATCH_INDEX" || true
   if [ -f "$BATCH_DIR/summary.json" ]; then
     cp "$BATCH_DIR/summary.json" "$REPORT_DIR/batch_$(printf '%04d' "$BATCH_INDEX").json"
+    if ! python ozon/catalog_3x4/progress_mailer.py update "$BATCH_DIR/summary.json"; then
+      echo "Progress/email reporter failed for batch $BATCH_INDEX"
+      RANGE_ERROR=1
+    fi
   fi
 
   find "$BATCH_DIR" -type f -name '*.jpg' -delete || true
