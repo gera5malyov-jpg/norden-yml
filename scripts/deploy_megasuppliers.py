@@ -83,7 +83,18 @@ def main():
                         "'backend_products' => 'backendProducts',",
                         "'backend_products' => 'backendProducts',\n        'backend_prod_filters' => 'backendProdFilters',"
                     )
-                text_data=text_data.replace("'version' => '1.0.1'", "'version' => '1.0.4'")
+                for event_name, method_name in [
+                    ("backend_product_edit", "backendProductEdit"),
+                    ("backend_prod_content", "backendProdContent"),
+                    ("products_collection.filter", "productsCollectionFilter"),
+                ]:
+                    needle = "'" + event_name + "' => '" + method_name + "'"
+                    if needle not in text_data:
+                        text_data=text_data.replace(
+                            "'routing' => 'routing',",
+                            "'routing' => 'routing',\n        " + needle + ","
+                        )
+                text_data=text_data.replace("'version' => '1.0.1'", "'version' => '1.0.5'")
                 data=text_data.encode("utf-8")
             elif item.filename == "megasuppliers/lib/models/shopMegasuppliersMeta.model.php":
                 text_data=data.decode("utf-8")
@@ -278,6 +289,12 @@ def main():
                     text_data=text_data[:pos]+methods+text_data[pos:]
                 data=text_data.encode("utf-8")
             zout.writestr(item, data)
+        controller_path=Path("webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendAssignSupplier.controller.php")
+        if controller_path.exists():
+            zout.writestr(
+                "megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendAssignSupplier.controller.php",
+                controller_path.read_bytes()
+            )
     os.replace(patched, pkg)
     log("compatibility_patches=yes")
 
