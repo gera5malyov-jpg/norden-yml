@@ -49,6 +49,11 @@ def post_status(account: str, token: str, days: int = 14):
     for order in parsed.findall("order"):
         status = order.find("status")
         receiver = order.find("receiver")
+        packages = []
+        for pkg in order.findall("./packages/package"):
+            packages.append({k: v for k, v in pkg.attrib.items()})
+
+        deliveryprice = order.find("deliveryprice")
         orders.append({
             "orderno": order.get("orderno", ""),
             "ordercode": order.get("ordercode", ""),
@@ -59,6 +64,15 @@ def post_status(account: str, token: str, days: int = 14):
             "status_eventtime": status.get("eventtime", "") if status is not None else "",
             "status_store": status.get("eventstore", "") if status is not None else "",
             "delivery_date": (receiver.findtext("date", "") if receiver is not None else ""),
+            "weight_kg": (order.findtext("weight", "") or "").strip(),
+            "quantity": (order.findtext("quantity", "") or "").strip(),
+            "service": (order.findtext("service", "") or "").strip(),
+            "deliveryprice_total": deliveryprice.get("total", "") if deliveryprice is not None else "",
+            "length_cm": (order.findtext("length", "") or "").strip(),
+            "width_cm": (order.findtext("width", "") or "").strip(),
+            "height_cm": (order.findtext("height", "") or "").strip(),
+            "volume": (order.findtext("volume", "") or "").strip(),
+            "packages": packages,
         })
 
     def sort_key(item):
