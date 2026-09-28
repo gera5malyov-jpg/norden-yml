@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   check:
@@ -23,3 +23,17 @@ jobs:
           ref: main
       - name: Final check
         run: python3 scripts/check_megasuppliers_final.py
+      - name: Save final check report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/megasuppliers-final-check.txt || echo "FINAL_CHECK=FAILED_NO_REPORT" > .deploy-probe/megasuppliers-final-check.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/megasuppliers-final-check.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save megasuppliers final check [skip ci]"
+            git push origin HEAD:main || true
+          fi
