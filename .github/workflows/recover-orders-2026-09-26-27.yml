@@ -1,0 +1,38 @@
+name: Recover orders 26-27 Sep 2026
+
+on:
+  push:
+    paths:
+      - 'scripts/recover_orders_2026_09_26_27.py'
+      - '.github/workflows/recover-orders-2026-09-26-27.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install requests gspread google-auth
+      - name: Read APIs and write private Google Sheet tab
+        env:
+          DRY_RUN: "1"
+          SYNC_SOURCES: yandex_market,wildberries,yandex_kit,ozon
+          OZON_ORDER_IMPORT_CUTOFF: 2026-09-22T00:00:00Z
+          YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_ORDERS_SHEET_ID: ${{ secrets.GOOGLE_ORDERS_SHEET_ID }}
+        run: python scripts/recover_orders_2026_09_26_27.py
