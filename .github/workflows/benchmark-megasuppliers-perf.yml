@@ -1,0 +1,44 @@
+name: Benchmark megasuppliers performance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/benchmark_megasuppliers_perf.py'
+      - '.github/workflows/benchmark-megasuppliers-perf.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Benchmark
+        run: python3 scripts/benchmark_megasuppliers_perf.py
+      - name: Save report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/megasuppliers-perf.txt || echo "BENCHMARK_FAILED" > .deploy-probe/megasuppliers-perf.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/megasuppliers-perf.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save megasuppliers performance benchmark [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
