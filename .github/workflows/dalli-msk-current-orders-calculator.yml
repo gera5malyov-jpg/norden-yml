@@ -32,5 +32,6 @@ jobs:
             echo "No result changes"
           else
             git commit -m "Update Dalli MSK current order calculator results"
+            git pull --rebase origin main
             git push
           fi
