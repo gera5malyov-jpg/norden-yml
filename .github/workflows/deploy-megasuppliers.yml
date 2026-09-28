@@ -1,0 +1,43 @@
+name: Deploy Webasyst megasuppliers
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-megasuppliers.yml'
+      - 'scripts/deploy_megasuppliers.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      DRIVE_FILE_ID: '129zSQGB1FKGrn1AgkbJg-EGIvQYylfxQ'
+      EXPECTED_SHA256: '5538d704c8f40a5e3b3743a3af507f3b03e14356be789dcf2d8ef427245afa42'
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install Google client
+        run: pip -q install google-api-python-client google-auth
+      - name: Deploy plugin
+        run: python3 scripts/deploy_megasuppliers.py
+      - name: Save install report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/megasuppliers-install.txt || echo "INSTALL_STATUS=FAILED_NO_REPORT" > .deploy-probe/megasuppliers-install.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/megasuppliers-install.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save megasuppliers install report [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
