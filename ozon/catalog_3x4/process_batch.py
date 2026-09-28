@@ -116,6 +116,56 @@ def wait_materialized(batch_index):
     else:
         write_json(batch_root / "materialization_report.json", {"status": "SUCCESS", "offers": {}})
 
+def cdn_check(batch_index, attempts=6, delay=10):
+    batch_root = ROOT / "run" / f"batch_{batch_index:04d}"
+    state = json.loads((batch_root / "active.json").read_text(encoding="utf-8"))
+    active = state.get("active_for_apply", state.get("active", []))
+    last = {}
+    if not active:
+        out = {"status": "SUCCESS", "offers": {}}
+        write_json(batch_root / "materialization_report.json", out)
+        print(json.dumps(out, ensure_ascii=False))
+        return
+
+    import time
+    for attempt in range(1, attempts + 1):
+        all_ready = True
+        last = {}
+        for offer_id in active:
+            data = post("/v3/product/info/list", {"offer_id": [offer_id]})
+            items = data.get("items") or []
+            if not items:
+                last[offer_id] = {"error": "not_found"}
+                all_ready = False
+                continue
+            item = items[0]
+            urls = []
+            for key in ("primary_image", "images"):
+                val = item.get(key) or []
+                if isinstance(val, str):
+                    val = [val]
+                for x in val:
+                    if isinstance(x, dict):
+                        x = x.get("url") or x.get("file_name") or x.get("src")
+                    if isinstance(x, str) and x not in urls:
+                        urls.append(x)
+            raw = sum("raw.githubusercontent.com" in u for u in urls)
+            ready = raw == 0
+            last[offer_id] = {"count": len(urls), "raw_github_count": raw, "ready": ready}
+            if not ready:
+                all_ready = False
+        if all_ready:
+            out = {"status": "SUCCESS", "attempt": attempt, "offers": last}
+            write_json(batch_root / "materialization_report.json", out)
+            print(json.dumps(out, ensure_ascii=False, indent=2))
+            return
+        if attempt < attempts:
+            time.sleep(delay)
+
+    out = {"status": "PENDING", "attempt": attempts, "offers": last}
+    write_json(batch_root / "materialization_report.json", out)
+    print(json.dumps(out, ensure_ascii=False, indent=2))
+
 def compact(batch_index):
     batch_root = ROOT / "run" / f"batch_{batch_index:04d}"
     state = json.loads((batch_root / "active.json").read_text(encoding="utf-8"))
@@ -154,7 +204,7 @@ def compact(batch_index):
 
 def main():
     if len(sys.argv) < 3:
-        raise SystemExit("Usage: process_batch.py <prepare|apply|wait-materialized|compact> <batch_index>")
+        raise SystemExit("Usage: process_batch.py <prepare|apply|wait-materialized|cdn-check|compact> <batch_index>")
     stage = sys.argv[1]
     batch_index = int(sys.argv[2])
     if stage == "prepare":
@@ -163,6 +213,8 @@ def main():
         apply(batch_index)
     elif stage == "wait-materialized":
         wait_materialized(batch_index)
+    elif stage == "cdn-check":
+        cdn_check(batch_index)
     elif stage == "compact":
         compact(batch_index)
     else:
