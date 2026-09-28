@@ -13,7 +13,7 @@ def req_json(url, method="GET", data=None, headers=None):
         raw=x.read().decode("utf-8")
         return x.status, json.loads(raw) if raw else {}
 
-def ssh(key, command, stdin=None, check=True, timeout=90):
+def ssh(key, command, stdin=None, check=True, timeout=60):
     p=subprocess.run([
         "ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no",
         "-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=15",
@@ -75,50 +75,36 @@ $e2=wa('shop')->event('backend_prod_list',$params_list);
 echo "EVENT_LEGACY=".(isset($e1['megasuppliers-plugin']['sidebar_section'])?'yes':'no')."\n";
 echo "EVENT_NEW=".(isset($e2['megasuppliers-plugin']['header_left'])?'yes':'no')."\n";
 
-$sm=new shopMegasuppliersSupplierModel();
-$s4=$sm->getByField('code','4SIS');
-$sn=$sm->getByField('code','NORDEN');
-echo "S4=".json_encode($s4,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
-echo "SN=".json_encode($sn,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
-
 $m=new waModel();
-$pid4=(int)$m->query("SELECT p.id FROM shop_product_skus s JOIN shop_product p ON p.id=s.product_id WHERE s.sku='AF-31655692' LIMIT 1")->fetchField();
-$pidn=(int)$m->query("SELECT p.id FROM shop_product_skus s JOIN shop_product p ON p.id=s.product_id WHERE s.sku='AF-31662421' LIMIT 1")->fetchField();
-$pids=(int)$m->query("SELECT p.id FROM shop_product_skus s JOIN shop_product p ON p.id=s.product_id WHERE s.sku='AF-31391502' LIMIT 1")->fetchField();
-
-if ($s4) {
-    $_GET['megasupplier']=(int)$s4['id'];
-    $_REQUEST['megasupplier']=(int)$s4['id'];
-    $c4=new shopProductsCollection('');
-    $filter_params=array('filter'=>null,'filter_options'=>array(),'collection'=>$c4);
-    $p->backendProdFilters($filter_params);
-    $count4=$c4->count();
-    $rows4=$c4->getProducts('id',0,min(2000,max(1,$count4)),false);
-    echo "FILTER_4SIS_COUNT=".$count4."\n";
-    echo "FILTER_4SIS_TEST_INCLUDED=".(isset($rows4[$pid4])?'yes':'no')."\n";
-    echo "FILTER_4SIS_NORDEN_EXCLUDED=".(!isset($rows4[$pidn])?'yes':'no')."\n";
+$checks=array(
+    'AF-31391502'=>'NORDEN',
+    'AF-31662421'=>'NORDEN',
+    'AF-31655692'=>'4SIS'
+);
+foreach($checks as $sku=>$expected){
+    $row=$m->query(
+        "SELECT p.id product_id,p.type_id,s.sku,sp.name supplier_name,sp.code supplier_code
+         FROM shop_product_skus s
+         JOIN shop_product p ON p.id=s.product_id
+         LEFT JOIN shop_megasuppliers_product mp ON mp.product_id=p.id
+         LEFT JOIN shop_megasuppliers_supplier sp ON sp.id=mp.supplier_id
+         WHERE s.sku=s:sku
+         ORDER BY mp.updated_at DESC,mp.id DESC LIMIT 1",
+        array('sku'=>$sku)
+    )->fetch();
+    echo "MAP_".$sku."=".json_encode($row,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+    echo "MAP_".$sku."_OK=".($row && $row['supplier_code']===$expected?'yes':'no')."\n";
+    if($row){
+        $product=new shopProduct((int)$row['product_id']);
+        $old_card=$p->backendProductEdit($product);
+        $new_card=$p->backendProdContent(array('product'=>$product,'content_id'=>'general'));
+        $old_html=isset($old_card['basics'])?$old_card['basics']:'';
+        $new_html=isset($new_card['form_bottom'])?$new_card['form_bottom']:'';
+        $needle='selected>'.htmlspecialchars($row['supplier_name'],ENT_QUOTES,'UTF-8').'</option>';
+        echo "CARD_".$sku."_OLD_SELECTED=".(strpos($old_html,$needle)!==false?'yes':'no')."\n";
+        echo "CARD_".$sku."_NEW_SELECTED=".(strpos($new_html,$needle)!==false?'yes':'no')."\n";
+    }
 }
-if ($sn) {
-    $_GET['megasupplier']=(int)$sn['id'];
-    $_REQUEST['megasupplier']=(int)$sn['id'];
-    $cn=new shopProductsCollection('');
-    $filter_params_n=array('filter'=>null,'filter_options'=>array(),'collection'=>$cn);
-    $p->backendProdFilters($filter_params_n);
-    $countn=$cn->count();
-    $rowsn=$cn->getProducts('id',0,min(2000,max(1,$countn)),false);
-    echo "FILTER_NORDEN_COUNT=".$countn."\n";
-    echo "FILTER_NORDEN_TEST_INCLUDED=".(isset($rowsn[$pidn])?'yes':'no')."\n";
-    echo "FILTER_NORDEN_SCREENSHOT_INCLUDED=".(isset($rowsn[$pids])?'yes':'no')."\n";
-    echo "FILTER_NORDEN_4SIS_EXCLUDED=".(!isset($rowsn[$pid4])?'yes':'no')."\n";
-}
-
-$product_screen=new shopProduct($pids);
-$old_card=$p->backendProductEdit($product_screen);
-$new_card=$p->backendProdContent(array('product'=>$product_screen,'content_id'=>'general'));
-$old_card_html=isset($old_card['basics'])?$old_card['basics']:'';
-$new_card_html=isset($new_card['form_bottom'])?$new_card['form_bottom']:'';
-echo "CARD_SCREENSHOT_OLD_NORDEN_SELECTED=".(strpos($old_card_html,'selected>Norden</option>')!==false?'yes':'no')."\n";
-echo "CARD_SCREENSHOT_NEW_NORDEN_SELECTED=".(strpos($new_card_html,'selected>Norden</option>')!==false?'yes':'no')."\n";
 PHP
 chown web:web /tmp/ms_ui_diag.php
 su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_ui_diag.php'
