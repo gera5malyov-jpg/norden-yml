@@ -156,6 +156,8 @@ for log in "$ROOT/wa-log/shop/plugins/megasuppliers.log" "$ROOT/wa-log/php.log" 
   fi
 done
 
+echo "--- shop plugin dispatcher ---"
+grep -RIn "waRequest::.*plugin\|getPlugin(.*true\|PluginBackend" "$ROOT/wa-apps/shop/lib/actions/backend" "$ROOT/wa-apps/shop/lib/config" 2>/dev/null | head -n 180 || true
 echo "--- working plugin backend structure ---"
 for f in "$ROOT/wa-apps/shop/plugins/yml/lib/shopYml.plugin.php" "$ROOT/wa-apps/shop/plugins/yml/lib/actions/backend/shopYmlPluginBackendSetup.action.php"; do
   if [ -f "$f" ]; then echo "### $f"; sed -n '1,260p' "$f"; fi
