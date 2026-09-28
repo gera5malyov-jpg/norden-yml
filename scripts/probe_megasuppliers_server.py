@@ -141,7 +141,7 @@ sed -n '140,235p' "$ROOT/wa-system/webasyst/lib/cli/webasystCreatePlugin.cli.php
 echo "--- shop getPlugin references ---"
 grep -RIn "getPlugin(" "$ROOT/wa-apps/shop/lib" 2>/dev/null | head -n 60 || true
 echo "--- megasuppliers routing ---"
-for f in "$PLUGIN/lib/config/plugin.php" "$PLUGIN/lib/config/routing.php" "$PLUGIN/lib/shopMegasuppliers.plugin.php" "$PLUGIN/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php" "$PLUGIN/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php"; do
+for f in "$PLUGIN/lib/config/plugin.php" "$PLUGIN/lib/config/routing.php" "$PLUGIN/lib/config/install.php" "$PLUGIN/lib/shopMegasuppliers.plugin.php" "$PLUGIN/lib/models/shopMegasuppliersMeta.model.php" "$PLUGIN/lib/models/shopMegasuppliersSupplier.model.php" "$PLUGIN/lib/models/shopMegasuppliersProduct.model.php" "$PLUGIN/lib/classes/shopMegasuppliersImportService.class.php" "$PLUGIN/lib/actions/backend/shopMegasuppliersPluginBackend.action.php" "$PLUGIN/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php" "$PLUGIN/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php"; do
   if [ -f "$f" ]; then echo "### $f"; sed -n '1,320p' "$f"; fi
 done
 echo "--- megasuppliers templates ---"
