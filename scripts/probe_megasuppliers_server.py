@@ -171,6 +171,22 @@ for f in "$ROOT/wa-apps/shop/plugins/yml/lib/shopYml.plugin.php" "$ROOT/wa-apps/
 done
 find "$ROOT/wa-apps/shop/plugins/yml/lib/actions/backend" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | sort | head -n 80
 
+echo "--- supplier mapping counts ---"
+cat >/tmp/ms_supplier_counts.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$m=new waModel();
+$rows=$m->query("SELECT s.id,s.name,s.code,COUNT(DISTINCT CASE WHEN mp.product_id>0 THEN mp.product_id END) c FROM shop_megasuppliers_supplier s LEFT JOIN shop_megasuppliers_product mp ON mp.supplier_id=s.id GROUP BY s.id,s.name,s.code ORDER BY s.name")->fetchAll();
+foreach($rows as $r){ echo $r['id']."\t".$r['code']."\t".$r['name']."\t".$r['c']."\n"; }
+PHP
+chown web:web /tmp/ms_supplier_counts.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_supplier_counts.php' || true
+rm -f /tmp/ms_supplier_counts.php
+
 echo "--- backend action cli diagnostic ---"
 cat >/tmp/ms_backend_probe.php <<'PHP'
 <?php
