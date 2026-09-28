@@ -156,6 +156,10 @@ for log in "$ROOT/wa-log/shop/plugins/megasuppliers.log" "$ROOT/wa-log/php.log" 
   fi
 done
 
+echo "--- working plugin backend structure ---"
+for f in "$ROOT/wa-apps/shop/plugins/yml/lib/shopYml.plugin.php" "$ROOT/wa-apps/shop/plugins/yml/lib/actions/backend/shopYmlPluginBackendSetup.action.php"; do
+  if [ -f "$f" ]; then echo "### $f"; sed -n '1,260p' "$f"; fi
+done
 echo "--- compare existing plugin backend routing ---"
 for f in "$ROOT/wa-apps/shop/plugins/yml/lib/shopYml.plugin.php" "$ROOT/wa-apps/shop/plugins/plugincontrol/lib/shopPlugincontrol.plugin.php"; do
   if [ -f "$f" ]; then
