@@ -1,17 +1,17 @@
 ssh_user=root exit=0
 hostname=vm-23f9aff9
 root_exists=yes
-drwxr-xr-x 15 web web 4096 Sep  9 16:27 /home/web/vm-23f9aff9.na4u.ru/www
+drwxr-xr-x 16 web web 4096 Sep 28 22:16 /home/web/vm-23f9aff9.na4u.ru/www
 drwxr-xr-x 17 web web 4096 Sep 26 20:26 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps
 drwxr-xr-x 14 web web 4096 Aug 27 10:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop
-drwxr-xr-x 81 web web 4096 Sep 28 22:12 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
+drwxr-xr-x 81 web web 4096 Sep 28 22:18 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
 --- php ---
 PHP 7.3.19 (cli) (built: Jun 25 2020 05:00:00) ( NTS )
 Copyright (c) 1997-2018 The PHP Group
 Zend Engine v3.3.19, Copyright (c) 1998-2018 Zend Technologies
 --- plugin ---
 plugin_exists=yes
-drwxr-xr-x 5 web web 4096 Sep 28 22:12 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
+drwxr-xr-x 5 web web 4096 Sep 28 22:18 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersFileReader.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
@@ -45,7 +45,7 @@ No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plug
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php
 --- plugin config registration ---
 84:  'megasuppliers' => true,
--rw-rw-r-- 1 web web 1980 Sep 28 22:12 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
+-rw-rw-r-- 1 web web 1980 Sep 28 22:18 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
 --- plugins.php contents ---
 <?php
 
@@ -137,7 +137,7 @@ shop_megasuppliers_supplier=yes
 shop_megasuppliers_product=yes
 shop_megasuppliers_import=yes
 shop_megasuppliers_meta=yes
-plugin_init_error=Unknown field id
+plugin_class=shopMegasuppliersPlugin version=1.0.1
 --- existing plugin ownership sample ---
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/cleanup
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/lib
@@ -2151,6 +2151,7 @@ class shopMegasuppliersPlugin extends shopPlugin
 class shopMegasuppliersMetaModel extends waModel
 {
     protected $table = 'shop_megasuppliers_meta';
+    protected $id = 'name';
 }
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersSupplier.model.php
 <?php
@@ -2552,6 +2553,80 @@ class shopMegasuppliersPluginBackendImportController extends waController
         wa()->getResponse()->redirect(wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers&err='.urlencode($msg));
     }
 }
+--- recent megasuppliers/webasyst errors ---
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-log/shop/plugins/megasuppliers.log
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+Megasuppliers install error: Unknown field id
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-log/error.log
+Error installing plugin shop.megasuppliers at first run:
+#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+Error installing plugin shop.megasuppliers at first run:
+#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+Error installing plugin shop.megasuppliers at first run:
+#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+Uncaught Error: Unknown field id
+#3 megasuppliers-api/index.php(22): waModel->getById('api_key')
+Uncaught Error: Unknown field id
+#3 megasuppliers-api/index.php(22): waModel->getById('api_key')
+--- backend action cli diagnostic ---
+
+Warning: Declaration of shopMegasuppliersPlugin::routing($route) should be compatible with waPlugin::routing($route = Array) in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php on line 43
+plugin=shopMegasuppliersPlugin
+backend_class_exists=yes
+supplier_model_exists=yes
+supplier_count=13
+--- api bridge diagnostic ---
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/megasuppliers-api/index.php
+
+Fatal error: Uncaught Error: Class 'mysqli' not found in /home/web/vm-23f9aff9.na4u.ru/www/wa-system/database/waDbMysqliAdapter.class.php:35
+Stack trace:
+#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/database/waDbAdapter.class.php(30): waDbMysqliAdapter->connect(Array)
+#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/database/waDbConnector.class.php(52): waDbAdapter->__construct(Array)
+#2 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/database/waModel.class.php(77): waDbConnector::getConnection('default', false)
+#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/contact/waContact.class.php(72): waModel->__construct()
+#4 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/user/waUser.class.php(22): waContact->init()
+#5 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/user/waAuthUser.class.php(32): waUser->init()
+#6 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/user/waAuthUser.class.php(27): waAuthUser->init()
+#7 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/waSystem.class.php(251): waAuthUser->__construct(NULL, Array)
+#8 /home/web/vm-23f9aff9.na4u in /home/web/vm-23f9aff9.na4u.ru/www/wa-system/database/waDbMysqliAdapter.class.php on line 35
 --- megasuppliers templates ---
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/templates/actions/backend/Backend.html
 <div class="content blank" id="s-megasuppliers">
