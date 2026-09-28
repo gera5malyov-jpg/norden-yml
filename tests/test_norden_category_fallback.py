@@ -45,6 +45,22 @@ class CategoryFallbackTest(unittest.TestCase):
         self.assertEqual(stats["enriched_from_xml"], 1)
         self.assertEqual(stats["generic_after"], 0)
 
+    def test_matches_visually_confusable_cyrillic_and_latin_article(self):
+        api = {
+            "CH-1": {"article": "CH-1", "name": "Кресло", "category_path": ["Norden"]},
+        }
+        xml = {
+            "СН-1": {"article": "СН-1", "category_path": ["Norden", "Кресло офисное"]},
+        }
+
+        merged, stats = enrich_missing_categories(api, xml)
+
+        self.assertEqual(
+            merged["CH-1"]["category_path"],
+            ["Norden", "Кресло офисное"],
+        )
+        self.assertEqual(stats["enriched_from_xml"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()
