@@ -104,10 +104,17 @@ cp -a "$CONF" "$BACK/plugins.php.before"
 if [ -e "$PLUGIN" ]; then
   tar -C "$(dirname "$PLUGIN")" -czf "$BACK/megasuppliers.before.tgz" "$(basename "$PLUGIN")"
 fi
+echo "stage=extract"
 unzip -q /tmp/megasuppliers-1.0.1.zip -d "$STAGE"
 test -f "$STAGE/megasuppliers/lib/config/plugin.php"
-find "$STAGE/megasuppliers" -name '*.php' -print0 | while IFS= read -r -d '' f; do php -l "$f" >/dev/null; done
+echo "stage=lint php=$(php -r 'echo PHP_VERSION;')"
+while IFS= read -r f; do
+  echo "lint=$f"
+  php -d display_errors=1 -l "$f"
+done < <(find "$STAGE/megasuppliers" -name '*.php' -type f | sort)
+echo "stage=lint_ok"
 
+echo "stage=copy_plugin"
 rm -rf "$PLUGIN"
 cp -a "$STAGE/megasuppliers" "$PLUGIN"
 chown -R web:web "$PLUGIN"
