@@ -1,0 +1,25 @@
+name: Check megasuppliers final
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/check_megasuppliers_final.py'
+      - '.github/workflows/check-megasuppliers-final.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Final check
+        run: python3 scripts/check_megasuppliers_final.py
