@@ -62,5 +62,30 @@ class CategoryFallbackTest(unittest.TestCase):
         self.assertEqual(stats["enriched_from_xml"], 1)
 
 
+    def test_replaces_non_generic_api_category_when_fallback_is_active(self):
+        api = {
+            "CH-2": {
+                "article": "CH-2",
+                "name": "Кресло B",
+                "category_path": ["Norden", "API category 999"],
+            },
+        }
+        xml = {
+            "CH-2": {
+                "article": "CH-2",
+                "category_path": ["Norden", "Кресло офисное"],
+            },
+        }
+
+        merged, stats = enrich_missing_categories(api, xml)
+
+        self.assertEqual(
+            merged["CH-2"]["category_path"],
+            ["Norden", "Кресло офисное"],
+        )
+        self.assertEqual(stats["matched_xml_articles"], 1)
+        self.assertEqual(stats["enriched_from_xml"], 1)
+
+
 if __name__ == "__main__":
     unittest.main()
