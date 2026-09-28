@@ -1,17 +1,17 @@
 ssh_user=root exit=0
 hostname=vm-23f9aff9
 root_exists=yes
-drwxr-xr-x 16 web web 4096 Sep 28 22:27 /home/web/vm-23f9aff9.na4u.ru/www
+drwxr-xr-x 16 web web 4096 Sep 28 22:30 /home/web/vm-23f9aff9.na4u.ru/www
 drwxr-xr-x 17 web web 4096 Sep 26 20:26 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps
 drwxr-xr-x 14 web web 4096 Aug 27 10:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop
-drwxr-xr-x 81 web web 4096 Sep 28 22:27 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
+drwxr-xr-x 81 web web 4096 Sep 28 22:30 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
 --- php ---
 PHP 7.3.19 (cli) (built: Jun 25 2020 05:00:00) ( NTS )
 Copyright (c) 1997-2018 The PHP Group
 Zend Engine v3.3.19, Copyright (c) 1998-2018 Zend Technologies
 --- plugin ---
 plugin_exists=yes
-drwxr-xr-x 5 web web 4096 Sep 28 22:27 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
+drwxr-xr-x 5 web web 4096 Sep 28 22:30 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersFileReader.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
@@ -45,7 +45,7 @@ No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plug
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php
 --- plugin config registration ---
 84:  'megasuppliers' => true,
--rw-rw-r-- 1 web web 1980 Sep 28 22:27 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
+-rw-rw-r-- 1 web web 1980 Sep 28 22:30 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
 --- plugins.php contents ---
 <?php
 
@@ -137,7 +137,7 @@ shop_megasuppliers_supplier=yes
 shop_megasuppliers_product=yes
 shop_megasuppliers_import=yes
 shop_megasuppliers_meta=yes
-plugin_class=shopMegasuppliersPlugin version=1.0.1
+plugin_class=shopMegasuppliersPlugin version=1.0.2
 --- existing plugin ownership sample ---
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/cleanup
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/lib
@@ -2036,12 +2036,14 @@ return [
     'description' => 'Справочник поставщиков, обязательная привязка поставщика при импорте XLSX/CSV и API, экспорт и синхронизация с товарами Shop-Script.',
     'img' => 'img/megasuppliers.svg',
     'vendor' => 'megapolis',
-    'version' => '1.0.1',
+    'version' => '1.0.2',
     'frontend' => true,
     'handlers' => [
         'backend_extended_menu' => 'backendExtendedMenu',
         'backend_menu' => 'backendMenu',
         'backend_prod' => 'backendProd',
+        'backend_products' => 'backendProducts',
+        'products_collection' => 'productsCollection',
         'routing' => 'routing',
     ],
 ];
@@ -2143,6 +2145,78 @@ class shopMegasuppliersPlugin extends shopPlugin
             ];
         }
         return [];
+    }
+
+    public function backendProducts($params = array())
+    {
+        $model = new waModel();
+        $rows = $model->query(
+            "SELECT s.id, s.name, s.code, COUNT(DISTINCT CASE WHEN mp.product_id > 0 THEN mp.product_id END) product_count
+             FROM shop_megasuppliers_supplier s
+             LEFT JOIN shop_megasuppliers_product mp ON mp.supplier_id = s.id
+             WHERE s.active = 1
+             GROUP BY s.id, s.name, s.code
+             ORDER BY s.name"
+        )->fetchAll();
+
+        $items = '';
+        foreach ($rows as $row) {
+            $id = (int)$row['id'];
+            $name = htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8');
+            $count = (int)$row['product_count'];
+            $items .= '<li id="s-megasuppliers-'.$id.'">'
+                .'<span class="count">'.$count.'</span>'
+                .'<a href="#/products/hash=megasuppliers/'.$id.'/">'
+                .'<i class="icon16 folders"></i>'.$name.'</a></li>';
+        }
+
+        $manage_url = wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers';
+        $manage_url = htmlspecialchars($manage_url, ENT_QUOTES, 'UTF-8');
+
+        $html = '<div class="block" id="s-megasuppliers-sidebar">'
+            .'<span class="count"><a href="'.$manage_url.'" title="Управление поставщиками"><i class="icon16 settings"></i></a></span>'
+            .'<h5 class="heading" style="cursor:pointer"><i class="icon16 collapse-handler darr"></i>Поставщики</h5>'
+            .'<ul class="menu-v with-icons">'.$items.'</ul>'
+            .'</div>'
+            .'<script>(function($){'
+            .'var b=$("#s-megasuppliers-sidebar");'
+            .'b.find("h5.heading").off("click.megasuppliers").on("click.megasuppliers",function(e){'
+            .'if($(e.target).closest("a").length){return;}'
+            .'b.find("ul.menu-v").slideToggle(120);'
+            .'b.find(".collapse-handler").toggleClass("darr").toggleClass("rarr");'
+            .'});'
+            .'})(jQuery);</script>';
+
+        return array('sidebar_section' => $html);
+    }
+
+    public function productsCollection($params)
+    {
+        if (wa()->getEnv() != 'backend' || empty($params['collection'])) {
+            return null;
+        }
+        $collection = $params['collection'];
+        $hash = $collection->getHash();
+        if (empty($hash) || $hash[0] !== $this->id || empty($hash[1])) {
+            return null;
+        }
+        $supplier_id = (int)$hash[1];
+        if (!$supplier_id) {
+            return null;
+        }
+
+        $collection->addWhere(
+            'id IN (SELECT DISTINCT product_id FROM shop_megasuppliers_product '
+            .'WHERE supplier_id = '.$supplier_id.' AND product_id > 0)'
+        );
+
+        if (!empty($params['auto_title'])) {
+            $supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
+            if ($supplier) {
+                $collection->addTitle('Поставщик: '.$supplier['name']);
+            }
+        }
+        return true;
     }
 
 }
@@ -2931,6 +3005,20 @@ class shopYmlPluginBackendSetupAction extends waViewAction
 shopYmlPluginBackendProducts.controller.php
 shopYmlPluginBackendSave.controller.php
 shopYmlPluginBackendSetup.action.php
+--- supplier mapping counts ---
+3	4SEASONS	4 Сезона	0
+8	AFINA	Afina Garden	0
+9	ALETAN	Aletan	0
+12	B2B_FABRIKA	B2B Fabrika	0
+4	DEEPHOUSE	DEEPHOUSE	0
+13	KENNER	Kenner	0
+5	LEVMAR	Levmar	0
+1	NORDEN	Norden	0
+10	RED_BLACK	Red-Black	0
+6	TREEZ	Treez	0
+7	YOURROOM	Yourroom	0
+2	TD_ANDREY	ТД Андрей	0
+11	TD_NIKITIN	ТД Никитин	0
 --- backend action cli diagnostic ---
 plugin=shopMegasuppliersPlugin
 backend_class_exists=yes
