@@ -1,0 +1,37 @@
+name: List NetAngels VM SSH keys
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/list_netangels_vm_ssh_keys.py'
+      - '.github/workflows/list-netangels-vm-ssh-keys.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: List VM SSH keys
+        run: python3 scripts/list_netangels_vm_ssh_keys.py
+      - name: Save report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/netangels-vm-ssh-keys.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save NetAngels SSH key diagnostic [skip ci]"
+            git push origin HEAD:main || true
+          fi
