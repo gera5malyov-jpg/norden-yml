@@ -6,7 +6,7 @@ on:
       - '.github/workflows/probe-webasyst-deploy-access.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   probe:
     runs-on: ubuntu-latest
@@ -34,14 +34,33 @@ jobs:
       WEBASYST_BASE_URL: ${{ secrets.WEBASYST_BASE_URL }}
       WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
     steps:
-      - name: Report only presence of deployment credentials
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Write presence-only report
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p .deploy-probe
+          : > .deploy-probe/webasyst-access.txt
           for n in TIMEWEB_API_TOKEN TIMEWEB_TOKEN TIMEWEB_CLOUD_TOKEN SSH_HOST SSH_PORT SSH_USER SSH_PRIVATE_KEY SSH_KEY SFTP_HOST SFTP_USER SFTP_PASSWORD FTP_HOST FTP_USER FTP_PASSWORD WEBASYST_SSH_HOST WEBASYST_SSH_USER WEBASYST_SSH_KEY HOSTING_API_TOKEN NETANGELS_API_KEY WEBASYST_BASE_URL WEBASYST_API_TOKEN; do
             if [ -n "${!n:-}" ]; then
-              printf '%s=SET\n' "$n"
+              printf '%s=SET\n' "$n" >> .deploy-probe/webasyst-access.txt
             else
-              printf '%s=UNSET\n' "$n"
+              printf '%s=UNSET\n' "$n" >> .deploy-probe/webasyst-access.txt
             fi
           done
+          cat .deploy-probe/webasyst-access.txt
+      - name: Save presence report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/webasyst-access.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Webasyst deploy access probe [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
