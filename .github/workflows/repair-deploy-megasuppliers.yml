@@ -46,19 +46,21 @@ jobs:
           s = s.replace('{ROOT!r}', "'/home/web/vm-23f9aff9.na4u.ru/www'")
           s = s.replace('{{}}', '{}')
           anchor = 'test -f "$STAGE/megasuppliers/lib/config/plugin.php"\necho "stage=lint php=$(php -r \'echo PHP_VERSION;\')"'
-          patch = '''test -f "$STAGE/megasuppliers/lib/config/plugin.php"
-python3 - "$STAGE/megasuppliers/lib/models/shopMegasuppliersMeta.model.php" <<'PYFIX'
-import sys
-from pathlib import Path
-p=Path(sys.argv[1])
-s=p.read_text(encoding='utf-8')
-needle="    protected $table = 'shop_megasuppliers_meta';"
-fixed=needle+"\\n    protected $id = 'name';"
-if "protected $id = 'name';" not in s:
-    s=s.replace(needle,fixed,1)
-p.write_text(s,encoding='utf-8')
-PYFIX
-echo "stage=lint php=$(php -r 'echo PHP_VERSION;')"'''
+          patch = '\n'.join([
+              'test -f "$STAGE/megasuppliers/lib/config/plugin.php"',
+              'python3 - "$STAGE/megasuppliers/lib/models/shopMegasuppliersMeta.model.php" <<\'PYFIX\'',
+              'import sys',
+              'from pathlib import Path',
+              'p=Path(sys.argv[1])',
+              "s=p.read_text(encoding='utf-8')",
+              'needle="    protected $table = \'shop_megasuppliers_meta\';"',
+              'fixed=needle+"\\n    protected $id = \'name\';"',
+              'if "protected $id = \'name\';" not in s:',
+              '    s=s.replace(needle,fixed,1)',
+              "p.write_text(s,encoding='utf-8')",
+              'PYFIX',
+              'echo "stage=lint php=$(php -r \'echo PHP_VERSION;\')"',
+          ])
           if anchor in s:
               s = s.replace(anchor, patch, 1)
           p.write_text(s, encoding='utf-8')
