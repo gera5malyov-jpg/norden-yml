@@ -1,0 +1,135 @@
+name: Ozon 3x4 catalog batch worker
+
+on:
+  workflow_call:
+    inputs:
+      batch:
+        required: true
+        type: number
+    secrets:
+      OZON_CLIENT_ID:
+        required: true
+      OZON_API_KEY:
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      OZON_TEMP_BRANCH: ozon-image-temp-catalog-${{ github.run_id }}-${{ inputs.batch }}
+      BATCH_INDEX: ${{ inputs.batch }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Download catalog selection
+        uses: actions/download-artifact@v4
+        with:
+          name: ozon-catalog-selection
+          path: ozon/catalog_3x4
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pillow
+
+      - name: Prepare batch
+        run: python ozon/catalog_3x4/process_batch.py prepare "$BATCH_INDEX"
+
+      - name: Preserve local batch data
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="ozon/catalog_3x4/run/batch_$(printf '%04d' "$BATCH_INDEX")"
+          rm -rf /tmp/ozon-batch
+          mkdir -p /tmp/ozon-batch
+          cp -a "$SRC"/. /tmp/ozon-batch/
+
+      - name: Publish converted JPGs on disposable branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="ozon/catalog_3x4/run/batch_$(printf '%04d' "$BATCH_INDEX")"
+          JPG_COUNT="$(find "$SRC" -type f -name '*.jpg' | wc -l | tr -d ' ')"
+          echo "Converted JPG count: $JPG_COUNT"
+          if [ "$JPG_COUNT" = "0" ]; then
+            echo "No temporary image hosting needed."
+            exit 0
+          fi
+
+          STAGE="$(mktemp -d)"
+          find "$SRC" -type f -name '*.jpg' -print0 | while IFS= read -r -d '' f; do
+            mkdir -p "$STAGE/$(dirname "$f")"
+            cp "$f" "$STAGE/$f"
+          done
+
+          python - <<'PY' > "$STAGE/.ozon_batch_meta.json"
+          import json, os, pathlib
+          idx=int(os.environ["BATCH_INDEX"])
+          p=pathlib.Path(f"ozon/catalog_3x4/run/batch_{idx:04d}/active.json")
+          d=json.loads(p.read_text())
+          print(json.dumps({
+            "batch_index": idx,
+            "temp_branch": os.environ["OZON_TEMP_BRANCH"],
+            "offers": d.get("active", []),
+          }, ensure_ascii=False, indent=2))
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan "$OZON_TEMP_BRANCH"
+          git rm -rf . >/dev/null 2>&1 || true
+          cp -a "$STAGE"/. .
+          git add -A
+          git commit -m "temp: Ozon catalog 3x4 batch $BATCH_INDEX [skip ci]"
+          git push --force origin "HEAD:$OZON_TEMP_BRANCH"
+
+          git switch --detach "$GITHUB_SHA"
+          rm -rf "$SRC"
+          mkdir -p "$SRC"
+          cp -a /tmp/ozon-batch/. "$SRC"/
+
+      - name: Apply replacements and verify
+        run: python ozon/catalog_3x4/process_batch.py apply "$BATCH_INDEX"
+
+      - name: Short CDN check
+        run: python ozon/catalog_3x4/process_batch.py cdn-check "$BATCH_INDEX"
+
+      - name: Delete disposable branch when Ozon CDN is ready
+        shell: bash
+        run: |
+          set -euo pipefail
+          P="ozon/catalog_3x4/run/batch_$(printf '%04d' "$BATCH_INDEX")/materialization_report.json"
+          STATUS="$(python -c 'import json,sys; print(json.load(open(sys.argv[1])).get("status",""))' "$P")"
+          echo "CDN status: $STATUS"
+          if [ "$STATUS" = "SUCCESS" ]; then
+            git push origin --delete "$OZON_TEMP_BRANCH" || true
+          else
+            echo "Temporary branch retained until scheduled cleanup confirms Ozon CDN ownership."
+          fi
+
+      - name: Create compact batch report
+        if: always()
+        shell: bash
+        run: |
+          P="ozon/catalog_3x4/run/batch_$(printf '%04d' "$BATCH_INDEX")/active.json"
+          if [ -f "$P" ]; then
+            python ozon/catalog_3x4/process_batch.py compact "$BATCH_INDEX" || true
+          fi
+
+      - name: Upload compact report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-3x4-batch-${{ inputs.batch }}
+          path: ozon/catalog_3x4/run/batch_*/summary.json
+          if-no-files-found: ignore
+          retention-days: 7
