@@ -25,6 +25,12 @@ def _generic_category_path(path: object) -> bool:
 
 
 def enrich_missing_categories(api_items: dict, xml_items: dict):
+    """Replace API category paths with official XML paths during category fallback.
+
+    This function is called only after the API-derived chair/stool scope is
+    suspiciously small. In that mode the API category tree is not trusted,
+    while all non-category product fields remain sourced from the API.
+    """
     xml_by_article = {
         _norm_article(article): item
         for article, item in (xml_items or {}).items()
@@ -32,17 +38,21 @@ def enrich_missing_categories(api_items: dict, xml_items: dict):
     }
     merged = {}
     generic_before = 0
-    enriched = 0
+    matched_xml = 0
+    replaced = 0
 
     for article, item in (api_items or {}).items():
         current = dict(item or {})
         if _generic_category_path(current.get("category_path")):
             generic_before += 1
-            xml_item = xml_by_article.get(_norm_article(article))
-            xml_path = (xml_item or {}).get("category_path")
-            if not _generic_category_path(xml_path):
-                current["category_path"] = list(xml_path)
-                enriched += 1
+        xml_item = xml_by_article.get(_norm_article(article))
+        xml_path = (xml_item or {}).get("category_path")
+        if xml_item is not None:
+            matched_xml += 1
+        if not _generic_category_path(xml_path):
+            if list(current.get("category_path") or []) != list(xml_path):
+                replaced += 1
+            current["category_path"] = list(xml_path)
         merged[article] = current
 
     generic_after = sum(
@@ -51,6 +61,7 @@ def enrich_missing_categories(api_items: dict, xml_items: dict):
     )
     return merged, {
         "generic_before": generic_before,
-        "enriched_from_xml": enriched,
+        "matched_xml_articles": matched_xml,
+        "enriched_from_xml": replaced,
         "generic_after": generic_after,
     }
