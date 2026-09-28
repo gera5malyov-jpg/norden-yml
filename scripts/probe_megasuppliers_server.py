@@ -92,6 +92,12 @@ echo "--- sample plugin backend actions ---"
 find "$ROOT/wa-apps/shop/plugins" -path '*/lib/actions/backend/*.php' -type f | head -n 5 | while read f; do echo "### $f"; sed -n '1,180p' "$f"; done
 echo "--- framework plugin installer references ---"
 grep -RIn "function.*install.*Plugin\|install.php\|lib/config/db.php" "$ROOT/wa-system" "$ROOT/wa-installer/lib" 2>/dev/null | head -n 120 || true
+echo "--- waPlugin install implementation ---"
+sed -n '1,310p' "$ROOT/wa-system/plugin/waPlugin.class.php"
+echo "--- create plugin CLI install helper ---"
+sed -n '140,235p' "$ROOT/wa-system/webasyst/lib/cli/webasystCreatePlugin.cli.php"
+echo "--- shop getPlugin references ---"
+grep -RIn "getPlugin(" "$ROOT/wa-apps/shop/lib" 2>/dev/null | head -n 60 || true
 """
             ok=False
             for user in ("root","web"):
