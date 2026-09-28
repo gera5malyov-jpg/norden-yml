@@ -53,3 +53,8 @@ if raw:
             print("delete_body_type="+type(payload).__name__)
     except Exception:
         print("delete_body_text="+raw[:1000].replace("\n"," "))
+
+status, raw=open_req("https://api-ms.netangels.ru/api/v1/sshkeys/"+str(kid)+"/","DELETE",None,auth)
+print("account_delete_status="+str(status))
+if raw:
+    print("account_delete_body="+raw[:1000].replace("\n"," "))
