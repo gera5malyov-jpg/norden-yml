@@ -92,8 +92,8 @@ def main():
                 pkg,"root@"+VM_IP+":/tmp/megasuppliers-1.0.1.zip"
             ],check=True)
 
-            remote = f"""set -euo pipefail
-ROOT={shlex.quote(ROOT)}
+            remote = """set -euo pipefail
+ROOT=/home/web/vm-23f9aff9.na4u.ru/www
 PLUGIN="$ROOT/wa-apps/shop/plugins/megasuppliers"
 CONF="$ROOT/wa-config/apps/shop/plugins.php"
 TS="$(date +%Y%m%d-%H%M%S)"
@@ -118,12 +118,12 @@ echo "stage=copy_plugin"
 rm -rf "$PLUGIN"
 cp -a "$STAGE/megasuppliers" "$PLUGIN"
 chown -R web:web "$PLUGIN"
-find "$PLUGIN" -type d -exec chmod 755 {{}} +
-find "$PLUGIN" -type f -exec chmod 644 {{}} +
+find "$PLUGIN" -type d -exec chmod 755 {} +
+find "$PLUGIN" -type f -exec chmod 644 {} +
 
 cat >/tmp/ms_register.php <<'PHP'
 <?php
-$path = {ROOT!r}.'/wa-config/apps/shop/plugins.php';
+$path = '/home/web/vm-23f9aff9.na4u.ru/www'.'/wa-config/apps/shop/plugins.php';
 $p = file_exists($path) ? include($path) : array();
 if (!is_array($p)) $p = array();
 $p['megasuppliers'] = true;
@@ -135,7 +135,7 @@ su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_register
 
 cat >/tmp/ms_db_init.php <<'PHP'
 <?php
-$root = {ROOT!r};
+$root = '/home/web/vm-23f9aff9.na4u.ru/www';
 $db_cfg = include $root.'/wa-config/db.php';
 if (isset($db_cfg['default']) && is_array($db_cfg['default'])) {
     $d = $db_cfg['default'];
@@ -244,7 +244,7 @@ rm -rf "$ROOT/wa-cache/apps/shop" || true
 
 cat >/tmp/ms_verify.php <<'PHP'
 <?php
-$root = {ROOT!r};
+$root = '/home/web/vm-23f9aff9.na4u.ru/www';
 $db_cfg = include $root.'/wa-config/db.php';
 $d = isset($db_cfg['default']) && is_array($db_cfg['default']) ? $db_cfg['default'] : $db_cfg;
 $mysqli = new mysqli(isset($d['host'])?$d['host']:'localhost', $d['user'], $d['password'], $d['database'], isset($d['port'])?(int)$d['port']:3306);
@@ -259,7 +259,7 @@ echo "suppliers=".$r->fetch_assoc()['c']."\n";
 $r=$mysqli->query("SELECT CHAR_LENGTH(value) l FROM shop_megasuppliers_meta WHERE name='api_key'");
 $row=$r?$r->fetch_assoc():null;
 echo "api_key_generated=".(($row && (int)$row['l']>=64)?"yes":"no")."\n";
-$p=include {ROOT!r}.'/wa-config/apps/shop/plugins.php';
+$p=include '/home/web/vm-23f9aff9.na4u.ru/www'.'/wa-config/apps/shop/plugins.php';
 echo "config_enabled=".(!empty($p['megasuppliers'])?"yes":"no")."\n";
 PHP
 chown web:web /tmp/ms_verify.php
