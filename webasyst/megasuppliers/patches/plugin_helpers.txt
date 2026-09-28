@@ -1,16 +1,90 @@
+    private function supplierCodeFromExistingProduct($product_id)
+    {
+        $product_id = (int)$product_id;
+        if (!$product_id) {
+            return '';
+        }
+
+        $model = new waModel();
+
+        $feature_value = $model->query(
+            "SELECT fv.value
+             FROM shop_product_features pf
+             JOIN shop_feature_values_varchar fv ON fv.id = pf.feature_value_id
+             WHERE pf.product_id = i:product_id AND pf.feature_id = 681
+             LIMIT 1",
+            array('product_id' => $product_id)
+        )->fetchField();
+
+        if ($feature_value !== false && $feature_value !== null) {
+            $key = mb_strtolower(trim((string)$feature_value), 'UTF-8');
+            $aliases = array(
+                'norden' => 'NORDEN',
+                '4sis' => '4SIS',
+                'afinalux' => 'AFINA',
+                'aletan.ru' => 'ALETAN',
+                'aletan-provence.ru' => 'ALETAN',
+                'deephouse' => 'DEEPHOUSE',
+                'левмар' => 'LEVMAR',
+                'treez' => 'TREEZ',
+                'red-black' => 'RED_BLACK',
+                'тд андрей' => 'TD_ANDREY',
+                'андрей' => 'TD_ANDREY',
+                'кмк тд никитин' => 'TD_NIKITIN',
+                '4 сезона' => '4SEASONS',
+                '4seasons' => '4SEASONS',
+                'yourroom' => 'YOURROOM',
+                'kenner' => 'KENNER',
+                'b2b fabrika' => 'B2B_FABRIKA',
+                'в2в' => 'B2B_FABRIKA'
+            );
+            if (isset($aliases[$key])) {
+                return $aliases[$key];
+            }
+        }
+
+        $type_id = (int)$model->query(
+            "SELECT type_id FROM shop_product WHERE id = i:product_id LIMIT 1",
+            array('product_id' => $product_id)
+        )->fetchField();
+
+        if ($type_id) {
+            foreach ($this->legacySupplierTypeMap() as $code => $type_ids) {
+                if (in_array($type_id, array_map('intval', $type_ids), true)) {
+                    return $code;
+                }
+            }
+        }
+
+        return '';
+    }
+
     private function getProductSupplierId($product_id)
     {
         $product_id = (int)$product_id;
         if (!$product_id) {
             return 0;
         }
+
         $row = (new shopMegasuppliersProductModel())
             ->select('supplier_id')
             ->where('product_id = i:product_id', array('product_id' => $product_id))
             ->order('updated_at DESC, id DESC')
             ->limit(1)
             ->fetchAssoc();
-        return $row ? (int)$row['supplier_id'] : 0;
+        if ($row) {
+            return (int)$row['supplier_id'];
+        }
+
+        $code = $this->supplierCodeFromExistingProduct($product_id);
+        if ($code !== '') {
+            $supplier = (new shopMegasuppliersSupplierModel())->getByField('code', $code);
+            if ($supplier && !empty($supplier['active'])) {
+                return (int)$supplier['id'];
+            }
+        }
+
+        return 0;
     }
 
     private function supplierSelectOptions($selected_id)
