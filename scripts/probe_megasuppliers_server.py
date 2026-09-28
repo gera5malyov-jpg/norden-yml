@@ -148,6 +148,11 @@ echo "--- megasuppliers routing ---"
 for f in "$PLUGIN/lib/config/plugin.php" "$PLUGIN/lib/config/routing.php" "$PLUGIN/lib/config/install.php" "$PLUGIN/lib/shopMegasuppliers.plugin.php" "$PLUGIN/lib/models/shopMegasuppliersMeta.model.php" "$PLUGIN/lib/models/shopMegasuppliersSupplier.model.php" "$PLUGIN/lib/models/shopMegasuppliersProduct.model.php" "$PLUGIN/lib/classes/shopMegasuppliersImportService.class.php" "$PLUGIN/lib/actions/backend/shopMegasuppliersPluginBackend.action.php" "$PLUGIN/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php" "$PLUGIN/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php"; do
   if [ -f "$f" ]; then echo "### $f"; sed -n '1,320p' "$f"; fi
 done
+echo "--- api bridge diagnostic ---"
+if [ -f "$ROOT/megasuppliers-api/index.php" ]; then
+  php -l "$ROOT/megasuppliers-api/index.php" || true
+  REQUEST_METHOD=POST php -d display_errors=1 -d log_errors=0 "$ROOT/megasuppliers-api/index.php" 2>&1 || true
+fi
 echo "--- megasuppliers templates ---"
 find "$PLUGIN/templates" -maxdepth 3 -type f -print 2>/dev/null | while read f; do echo "### $f"; sed -n '1,320p' "$f"; done
 """
