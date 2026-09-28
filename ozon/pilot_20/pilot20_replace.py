@@ -3,6 +3,8 @@ import os
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 import ozon.replace_images_3x4_batch as core
 
 SEL = Path("ozon/pilot_20/selection.json")
