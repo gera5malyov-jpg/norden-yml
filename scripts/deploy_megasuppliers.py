@@ -145,20 +145,15 @@ def main():
     public function backendProducts($params = array())
     {
         $model = new waModel();
-        $rows = $model->query(
-            "SELECT s.id, s.name, s.code, COUNT(DISTINCT CASE WHEN mp.product_id > 0 THEN mp.product_id END) product_count
-             FROM shop_megasuppliers_supplier s
-             LEFT JOIN shop_megasuppliers_product mp ON mp.supplier_id = s.id
-             WHERE s.active = 1
-             GROUP BY s.id, s.name, s.code
-             ORDER BY s.name"
-        )->fetchAll();
+        $rows = (new shopMegasuppliersSupplierModel())->select('id,name,code')->where('active=1')->order('name')->fetchAll();
 
         $items = '';
         foreach ($rows as $row) {
             $id = (int)$row['id'];
+            $queries = $this->supplierProductSubqueries($id, $row['code']);
+            $count_row = $model->query('SELECT COUNT(*) c FROM ('.implode(' UNION ', $queries).') ms_products')->fetch();
+            $count = $count_row ? (int)$count_row['c'] : 0;
             $name = htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8');
-            $count = (int)$row['product_count'];
             $items .= '<li id="s-megasuppliers-'.$id.'">'
                 .'<span class="count">'.$count.'</span>'
                 .'<a href="#/products/hash=megasuppliers/'.$id.'/">'
