@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: norden-restore-from-catalog-once
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   restore:
