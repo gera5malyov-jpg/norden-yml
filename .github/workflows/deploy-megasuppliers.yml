@@ -41,3 +41,5 @@ jobs:
             git pull --rebase origin main || true
             git push origin HEAD:main
           fi
+
+# trigger install retry 2026-09-28
