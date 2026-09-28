@@ -1,0 +1,129 @@
+name: Ozon select oldest in-stock pilot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-select-oldest-instock-pilot.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install --disable-pip-version-check requests
+      - name: Select oldest in-stock products
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, requests, time
+          s=requests.Session()
+          s.headers.update({
+            "Client-Id":os.environ["OZON_CLIENT_ID"].strip(),
+            "Api-Key":os.environ["OZON_API_KEY"].strip(),
+            "Content-Type":"application/json",
+          })
+          def post(path, body):
+            r=s.post("https://api-seller.ozon.ru"+path,json=body,timeout=90)
+            try: data=r.json()
+            except: data={"raw":r.text}
+            if r.status_code>=400:
+              raise RuntimeError(f"{path} HTTP {r.status_code}: {json.dumps(data,ensure_ascii=False)[:3000]}")
+            return data
+
+          # Product catalog
+          items=[]
+          last_id=""
+          for _ in range(100):
+            d=post("/v3/product/list",{"filter":{"visibility":"ALL"},"last_id":last_id,"limit":1000})
+            res=d.get("result") or {}
+            batch=res.get("items") or []
+            items.extend(batch)
+            new_last=res.get("last_id") or ""
+            if not batch or not new_last or new_last==last_id: break
+            last_id=new_last
+            if len(batch)<1000: break
+          by_id={str(x.get("product_id") or x.get("id")):x for x in items if x.get("product_id") or x.get("id")}
+
+          # Stocks, cursor pagination.
+          stocks={}
+          cursor=""
+          stock_error=None
+          try:
+            for _ in range(200):
+              body={"filter":{"visibility":"ALL"},"limit":1000}
+              if cursor: body["cursor"]=cursor
+              d=post("/v4/product/info/stocks",body)
+              batch=d.get("items") or d.get("result",{}).get("items") or []
+              for x in batch:
+                pid=str(x.get("product_id") or "")
+                present=sum(int(z.get("present") or 0) for z in (x.get("stocks") or []))
+                reserved=sum(int(z.get("reserved") or 0) for z in (x.get("stocks") or []))
+                stocks[pid]={"offer_id":x.get("offer_id"),"present":present,"reserved":reserved,"raw":x}
+              new_cursor=d.get("cursor") or d.get("result",{}).get("cursor") or ""
+              if not batch or not new_cursor or new_cursor==cursor: break
+              cursor=new_cursor
+          except Exception as e:
+            stock_error=repr(e)
+
+          # Fetch detailed info in batches; inspect potential timestamps.
+          infos={}
+          offer_ids=[x.get("offer_id") for x in items if x.get("offer_id")]
+          for i in range(0,len(offer_ids),1000):
+            d=post("/v3/product/info/list",{"offer_id":offer_ids[i:i+1000]})
+            for x in d.get("items") or []:
+              infos[str(x.get("id") or x.get("product_id"))]=x
+
+          candidates=[]
+          for pid,base in by_id.items():
+            inf=infos.get(pid,{})
+            st=stocks.get(pid,{})
+            present=st.get("present",0)
+            if present<=0: continue
+            created=None
+            for k in ("created_at","created","create_date","created_time"):
+              if inf.get(k):
+                created=inf.get(k); break
+            candidates.append({
+              "product_id":int(pid),
+              "offer_id":base.get("offer_id") or inf.get("offer_id") or st.get("offer_id"),
+              "present":present,
+              "reserved":st.get("reserved",0),
+              "created_at":created,
+              "info_keys":sorted(inf.keys()),
+            })
+          if any(x.get("created_at") for x in candidates):
+            candidates.sort(key=lambda x:(x.get("created_at") or "9999",x["product_id"]))
+            ordering="created_at_then_product_id"
+          else:
+            candidates.sort(key=lambda x:x["product_id"])
+            ordering="product_id_ascending_proxy_for_age"
+
+          out={
+            "catalog_count":len(items),
+            "stock_rows":len(stocks),
+            "stock_error":stock_error,
+            "in_stock_count":len(candidates),
+            "ordering":ordering,
+            "selected":candidates[:20],
+            "sample_info": list(infos.values())[:2],
+          }
+          os.makedirs("ozon/pilot_20",exist_ok=True)
+          open("ozon/pilot_20/selection.json","w",encoding="utf-8").write(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit selection
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ozon/pilot_20/selection.json
+          git commit -m "report: select oldest 20 in-stock Ozon products [skip ci]" || exit 0
+          git push
