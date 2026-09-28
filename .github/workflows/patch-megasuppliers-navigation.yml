@@ -1,0 +1,40 @@
+name: Patch megasuppliers navigation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/patch_megasuppliers_navigation.py'
+      - '.github/workflows/patch-megasuppliers-navigation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Patch navigation
+        run: python3 scripts/patch_megasuppliers_navigation.py
+      - name: Save report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/megasuppliers-navigation.txt || echo "navigation report missing" > .deploy-probe/megasuppliers-navigation.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/megasuppliers-navigation.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save megasuppliers navigation report [skip ci]"
+            git push origin HEAD:main
+          fi
