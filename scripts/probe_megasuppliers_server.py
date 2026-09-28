@@ -140,6 +140,12 @@ echo "--- create plugin CLI install helper ---"
 sed -n '140,235p' "$ROOT/wa-system/webasyst/lib/cli/webasystCreatePlugin.cli.php"
 echo "--- shop getPlugin references ---"
 grep -RIn "getPlugin(" "$ROOT/wa-apps/shop/lib" 2>/dev/null | head -n 60 || true
+echo "--- megasuppliers routing ---"
+for f in "$PLUGIN/lib/config/plugin.php" "$PLUGIN/lib/config/routing.php" "$PLUGIN/lib/shopMegasuppliers.plugin.php" "$PLUGIN/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php" "$PLUGIN/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php"; do
+  if [ -f "$f" ]; then echo "### $f"; sed -n '1,320p' "$f"; fi
+done
+echo "--- megasuppliers templates ---"
+find "$PLUGIN/templates" -maxdepth 3 -type f -print 2>/dev/null | while read f; do echo "### $f"; sed -n '1,320p' "$f"; done
 """
             ok=False
             for user in ("root","web"):
