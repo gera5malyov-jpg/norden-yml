@@ -7,6 +7,7 @@ on:
       - 'scripts/deploy_megasuppliers.py'
       - 'scripts/augment_deploy_megasuppliers.py'
       - 'webasyst/megasuppliers/**'
+      - 'scripts/wait_netangels_ready.py'
   workflow_dispatch:
 permissions:
   contents: write
@@ -26,6 +27,8 @@ jobs:
         with: {python-version: '3.12'}
       - name: Install Google client
         run: pip -q install google-api-python-client google-auth
+      - name: Wait for NetAngels VM and clean stale keys
+        run: python3 scripts/wait_netangels_ready.py
       - name: Augment deployer
         run: python3 scripts/augment_deploy_megasuppliers.py
       - name: Deploy plugin
