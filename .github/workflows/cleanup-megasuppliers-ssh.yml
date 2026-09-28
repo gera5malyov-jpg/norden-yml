@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'scripts/cleanup_megasuppliers_ssh_keys.py'
+      - 'scripts/cleanup_megasuppliers_ssh_keys_v2.py'
       - '.github/workflows/cleanup-megasuppliers-ssh.yml'
   workflow_dispatch:
 
