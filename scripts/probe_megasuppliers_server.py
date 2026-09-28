@@ -199,6 +199,38 @@ if [ -f "$ROOT/megasuppliers-api/index.php" ]; then
 fi
 echo "--- megasuppliers templates ---"
 find "$PLUGIN/templates" -maxdepth 3 -type f -print 2>/dev/null | while read f; do echo "### $f"; sed -n '1,320p' "$f"; done
+echo "--- megasuppliers backend direct probe ---"
+cat >/tmp/ms_backend_probe.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$p=wa('shop')->getPlugin('megasuppliers',true);
+echo "plugin=".get_class($p)."\n";
+echo "backend_action_class=".(class_exists('shopMegasuppliersPluginBackendAction')?'yes':'no')."\n";
+$m=new shopMegasuppliersMetaModel();
+$row=$m->getById('api_key');
+echo "meta_read=".(is_array($row)&&!empty($row['value'])?'yes':'no')."\n";
+$s=new shopMegasuppliersSupplierModel();
+echo "supplier_count=".$s->countAll()."\n";
+$i=new shopMegasuppliersImportModel();
+echo "import_count=".$i->countAll()."\n";
+PHP
+chown web:web /tmp/ms_backend_probe.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_backend_probe.php' || true
+rm -f /tmp/ms_backend_probe.php
+
+echo "--- recent megasuppliers/errors in wa-log ---"
+find "$ROOT/wa-log" -type f -mmin -60 -print0 2>/dev/null | while IFS= read -r -d '' f; do
+  hits=$(grep -Ein "megasuppliers|Fatal error|Uncaught|Exception|Unknown field|Smarty" "$f" 2>/dev/null | tail -n 80 || true)
+  if [ -n "$hits" ]; then
+    echo "### $f"
+    echo "$hits"
+  fi
+done
+
 """
             ok=False
             for user in ("root","web"):
