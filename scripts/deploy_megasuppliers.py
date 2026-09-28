@@ -95,6 +95,54 @@ def main():
                 data=text_data.encode("utf-8")
             elif item.filename == "megasuppliers/lib/shopMegasuppliers.plugin.php":
                 text_data=data.decode("utf-8")
+                old_menu = """    public function backendExtendedMenu(&$params)
+    {
+        $url = wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers';
+        $params['menu']['megasuppliers'] = [
+            'name' => 'Поставщики',
+            'icon' => '<i class="fas fa-truck"></i>',
+            'url' => $url,
+        ];
+    }
+"""
+                new_menu = """    public function backendExtendedMenu(&$params)
+    {
+        $base_url = wa('shop')->getAppUrl(null, true);
+        $supplier_model = new shopMegasuppliersSupplierModel();
+        $suppliers = $supplier_model->select('id,name,code')->where('active=1')->order('name')->fetchAll();
+
+        if (isset($params['menu']['catalog']) && class_exists('shopMainMenu') && method_exists('shopMainMenu', 'createSection')) {
+            shopMainMenu::createSection(
+                $params['menu'],
+                'megasuppliers',
+                'Поставщики',
+                [
+                    'icon' => '<i class="fas fa-truck"></i>',
+                    'insert_after' => 'catalog',
+                    'submenu' => [],
+                ]
+            );
+            foreach ($suppliers as $supplier) {
+                $params['menu']['megasuppliers']['submenu'][] = [
+                    'name' => $supplier['name'],
+                    'url' => $base_url.'products/?megasupplier='.(int)$supplier['id'],
+                ];
+            }
+            $params['menu']['megasuppliers']['submenu'][] = [
+                'name' => 'Управление поставщиками',
+                'url' => $base_url.'?plugin=megasuppliers',
+            ];
+        } else {
+            $params['menu']['megasuppliers'] = [
+                'name' => 'Поставщики',
+                'icon' => '<i class="fas fa-truck"></i>',
+                'url' => $base_url.'?plugin=megasuppliers',
+            ];
+        }
+    }
+"""
+                if old_menu in text_data:
+                    text_data=text_data.replace(old_menu, new_menu, 1)
                 text_data=text_data.replace("public function routing($route)", "public function routing($route = array())")
                 if "public function routing(" not in text_data:
                     pos=text_data.rfind("\n}")
