@@ -1,0 +1,221 @@
+name: Append 3x4 images to Ozon SAMS-532541
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-append-3x4-SAMS-532541.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  append:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      OFFER_ID: SAMS-532541
+      PRODUCT_ID: "472846243"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests
+
+      - name: Append 3x4 images without removing originals
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import time
+          from pathlib import Path
+          import requests
+
+          offer_id = os.environ["OFFER_ID"]
+          expected_product_id = int(os.environ["PRODUCT_ID"])
+          client_id = os.environ["OZON_CLIENT_ID"].strip()
+          api_key = os.environ["OZON_API_KEY"].strip()
+          if not client_id or not api_key:
+              raise SystemExit("Missing OZON_CLIENT_ID/OZON_API_KEY")
+
+          session = requests.Session()
+          session.headers.update({
+              "Client-Id": client_id,
+              "Api-Key": api_key,
+              "Content-Type": "application/json",
+              "User-Agent": "Megapolis-Ozon-Append-3x4/1.0",
+          })
+
+          def post(path, body):
+              r = session.post("https://api-seller.ozon.ru" + path, json=body, timeout=90)
+              try:
+                  data = r.json() if r.content else {}
+              except Exception:
+                  data = {"raw": r.text}
+              if r.status_code >= 400:
+                  raise RuntimeError(f"Ozon HTTP {r.status_code} {path}: {json.dumps(data, ensure_ascii=False)[:4000]}")
+              return data
+
+          def normalize_urls(value):
+              if not value:
+                  return []
+              if isinstance(value, str):
+                  value = [value]
+              out, seen = [], set()
+              if not isinstance(value, list):
+                  return out
+              for x in value:
+                  if isinstance(x, dict):
+                      x = x.get("url") or x.get("file_name") or x.get("src")
+                  if isinstance(x, str):
+                      x = x.strip()
+                      if x.startswith(("https://", "http://")) and x not in seen:
+                          seen.add(x)
+                          out.append(x)
+              return out
+
+          # Read current Ozon gallery immediately before write.
+          info = post("/v3/product/info/list", {"offer_id": [offer_id]})
+          items = info.get("items") or []
+          if len(items) != 1:
+              raise RuntimeError(f"Expected exactly 1 Ozon item for {offer_id}, got {len(items)}")
+          item = items[0]
+          product_id = int(item.get("id") or item.get("product_id") or 0)
+          if product_id != expected_product_id:
+              raise RuntimeError(f"Product id drift: expected {expected_product_id}, got {product_id}")
+
+          primary = normalize_urls(item.get("primary_image"))
+          photos = normalize_urls(item.get("images"))
+          current = []
+          seen = set()
+          for u in primary + photos:
+              if u not in seen:
+                  seen.add(u)
+                  current.append(u)
+
+          if len(current) != 13:
+              raise RuntimeError(
+                  f"Safety stop: expected 13 current images before append, got {len(current)}. "
+                  "No Ozon changes made."
+              )
+
+          report_path = Path("ozon/image_3x4_test/SAMS-532541/report.json")
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          expected_sources = [x["source_url"] for x in report.get("images", [])]
+          if set(current) != set(expected_sources):
+              raise RuntimeError(
+                  "Safety stop: current Ozon gallery differs from the gallery used for conversion. "
+                  "No Ozon changes made."
+              )
+
+          new_urls = []
+          for idx in range(2, 14):
+              u = (
+                  "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/main/"
+                  f"ozon/image_3x4_test/SAMS-532541/image_{idx:02d}_3x4.jpg"
+              )
+              check = requests.get(u, timeout=60, allow_redirects=True)
+              if check.status_code != 200 or not check.content:
+                  raise RuntimeError(f"Converted image is not publicly reachable: {u} HTTP {check.status_code}")
+              new_urls.append(u)
+
+          combined = current + [u for u in new_urls if u not in current]
+          if len(combined) != 25:
+              raise RuntimeError(f"Safety stop: expected 25 images after append, got {len(combined)}")
+          if len(combined) > 30:
+              raise RuntimeError("Safety stop: Ozon image limit exceeded")
+
+          body = {
+              "product_id": product_id,
+              "images": combined,
+          }
+          color = normalize_urls(item.get("color_image"))
+          if color:
+              body["color_image"] = color[0]
+
+          before = {
+              "offer_id": offer_id,
+              "product_id": product_id,
+              "original_count": len(current),
+              "original_urls": current,
+              "append_count": len(new_urls),
+              "append_urls": new_urls,
+              "sent_total": len(combined),
+          }
+
+          result = post("/v1/product/pictures/import", body)
+
+          # Ozon recommends checking final picture processing status after ~10 seconds.
+          picture_info = None
+          for _ in range(6):
+              time.sleep(10)
+              picture_info = post("/v2/product/pictures/info", {"product_id": [str(product_id)]})
+              rows = picture_info.get("items") or []
+              if rows:
+                  errors = rows[0].get("errors") or []
+                  primary_photo = normalize_urls(rows[0].get("primary_photo"))
+                  photo = normalize_urls(rows[0].get("photo"))
+                  total = len(primary_photo + [u for u in photo if u not in primary_photo])
+                  if not errors and total >= 25:
+                      break
+
+          rows = (picture_info or {}).get("items") or []
+          verification = {}
+          if rows:
+              row = rows[0]
+              p1 = normalize_urls(row.get("primary_photo"))
+              p2 = normalize_urls(row.get("photo"))
+              final_urls = []
+              seen2 = set()
+              for u in p1 + p2:
+                  if u not in seen2:
+                      seen2.add(u)
+                      final_urls.append(u)
+              verification = {
+                  "primary_photo_count": len(p1),
+                  "photo_count": len(p2),
+                  "total_unique": len(final_urls),
+                  "errors": row.get("errors") or [],
+                  "original_urls_still_present": all(u in final_urls for u in current),
+                  "primary_preserved": bool(primary) and bool(p1) and primary[0] == p1[0],
+                  "final_urls": final_urls,
+              }
+
+          out = {
+              "before": before,
+              "import_response": result,
+              "verification": verification,
+          }
+          out_path = Path("ozon/image_3x4_test/SAMS-532541/upload_report.json")
+          out_path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(json.dumps(out, ensure_ascii=False, indent=2))
+
+          # Hard verification: originals must remain and gallery must contain at least 25.
+          if verification.get("errors"):
+              raise RuntimeError("Ozon reported image errors: " + json.dumps(verification["errors"], ensure_ascii=False))
+          if verification.get("total_unique", 0) < 25:
+              raise RuntimeError(f"Final Ozon gallery has only {verification.get('total_unique', 0)} unique images")
+          if not verification.get("original_urls_still_present"):
+              raise RuntimeError("Safety verification failed: at least one original image is missing")
+          if not verification.get("primary_preserved"):
+              raise RuntimeError("Safety verification failed: original primary image is not preserved")
+          PY
+
+      - name: Save upload verification report
+        if: always()
+        shell: bash
+        run: |
+          if [ -f ozon/image_3x4_test/SAMS-532541/upload_report.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add ozon/image_3x4_test/SAMS-532541/upload_report.json
+            if ! git diff --cached --quiet; then
+              git commit -m "report: Ozon 3x4 append SAMS-532541 [skip ci]"
+              git push
+            fi
+          fi
