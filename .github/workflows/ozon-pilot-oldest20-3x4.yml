@@ -96,3 +96,5 @@ jobs:
             git commit -m "report: Ozon oldest20 3x4 pilot verification [skip ci]"
             git push
           fi
+
+# retry after import-path fix
