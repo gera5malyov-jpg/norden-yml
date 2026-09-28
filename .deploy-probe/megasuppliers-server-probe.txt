@@ -1,17 +1,17 @@
 ssh_user=root exit=0
 hostname=vm-23f9aff9
 root_exists=yes
-drwxr-xr-x 16 web web 4096 Sep 28 22:30 /home/web/vm-23f9aff9.na4u.ru/www
+drwxr-xr-x 16 web web 4096 Sep 28 22:39 /home/web/vm-23f9aff9.na4u.ru/www
 drwxr-xr-x 17 web web 4096 Sep 26 20:26 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps
 drwxr-xr-x 14 web web 4096 Aug 27 10:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop
-drwxr-xr-x 81 web web 4096 Sep 28 22:30 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
+drwxr-xr-x 81 web web 4096 Sep 28 22:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
 --- php ---
 PHP 7.3.19 (cli) (built: Jun 25 2020 05:00:00) ( NTS )
 Copyright (c) 1997-2018 The PHP Group
 Zend Engine v3.3.19, Copyright (c) 1998-2018 Zend Technologies
 --- plugin ---
 plugin_exists=yes
-drwxr-xr-x 5 web web 4096 Sep 28 22:30 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
+drwxr-xr-x 5 web web 4096 Sep 28 22:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersFileReader.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
@@ -45,7 +45,7 @@ No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plug
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php
 --- plugin config registration ---
 84:  'megasuppliers' => true,
--rw-rw-r-- 1 web web 1980 Sep 28 22:30 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
+-rw-rw-r-- 1 web web 1980 Sep 28 22:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
 --- plugins.php contents ---
 <?php
 
@@ -137,7 +137,7 @@ shop_megasuppliers_supplier=yes
 shop_megasuppliers_product=yes
 shop_megasuppliers_import=yes
 shop_megasuppliers_meta=yes
-plugin_class=shopMegasuppliersPlugin version=1.0.2
+plugin_class=shopMegasuppliersPlugin version=1.0.3
 --- existing plugin ownership sample ---
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/cleanup
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/lib
@@ -2036,7 +2036,7 @@ return [
     'description' => 'Справочник поставщиков, обязательная привязка поставщика при импорте XLSX/CSV и API, экспорт и синхронизация с товарами Shop-Script.',
     'img' => 'img/megasuppliers.svg',
     'vendor' => 'megapolis',
-    'version' => '1.0.2',
+    'version' => '1.0.3',
     'frontend' => true,
     'handlers' => [
         'backend_extended_menu' => 'backendExtendedMenu',
@@ -2147,23 +2147,48 @@ class shopMegasuppliersPlugin extends shopPlugin
         return [];
     }
 
+    private function legacySupplierTypeMap()
+    {
+        return array(
+            'NORDEN' => array(142),
+            'TD_ANDREY' => array(126),
+            'DEEPHOUSE' => array(24),
+            'LEVMAR' => array(125),
+            'TREEZ' => array(199),
+            'YOURROOM' => array(26),
+            'AFINA' => array(63),
+            'ALETAN' => array(46, 122, 202),
+            'RED_BLACK' => array(150),
+            'B2B_FABRIKA' => array(204),
+            'KENNER' => array(203)
+        );
+    }
+
+    private function supplierProductSubqueries($supplier_id, $supplier_code)
+    {
+        $queries = array(
+            'SELECT product_id FROM shop_megasuppliers_product WHERE supplier_id = '.(int)$supplier_id.' AND product_id > 0'
+        );
+        $map = $this->legacySupplierTypeMap();
+        if (!empty($map[$supplier_code])) {
+            $type_ids = array_map('intval', $map[$supplier_code]);
+            $queries[] = 'SELECT id AS product_id FROM shop_product WHERE type_id IN ('.implode(',', $type_ids).')';
+        }
+        return $queries;
+    }
+
     public function backendProducts($params = array())
     {
         $model = new waModel();
-        $rows = $model->query(
-            "SELECT s.id, s.name, s.code, COUNT(DISTINCT CASE WHEN mp.product_id > 0 THEN mp.product_id END) product_count
-             FROM shop_megasuppliers_supplier s
-             LEFT JOIN shop_megasuppliers_product mp ON mp.supplier_id = s.id
-             WHERE s.active = 1
-             GROUP BY s.id, s.name, s.code
-             ORDER BY s.name"
-        )->fetchAll();
+        $rows = (new shopMegasuppliersSupplierModel())->select('id,name,code')->where('active=1')->order('name')->fetchAll();
 
         $items = '';
         foreach ($rows as $row) {
             $id = (int)$row['id'];
+            $queries = $this->supplierProductSubqueries($id, $row['code']);
+            $count_row = $model->query('SELECT COUNT(*) c FROM ('.implode(' UNION ', $queries).') ms_products')->fetch();
+            $count = $count_row ? (int)$count_row['c'] : 0;
             $name = htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8');
-            $count = (int)$row['product_count'];
             $items .= '<li id="s-megasuppliers-'.$id.'">'
                 .'<span class="count">'.$count.'</span>'
                 .'<a href="#/products/hash=megasuppliers/'.$id.'/">'
@@ -2204,17 +2229,16 @@ class shopMegasuppliersPlugin extends shopPlugin
         if (!$supplier_id) {
             return null;
         }
+        $supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
+        if (!$supplier || empty($supplier['active'])) {
+            return null;
+        }
 
-        $collection->addWhere(
-            'id IN (SELECT DISTINCT product_id FROM shop_megasuppliers_product '
-            .'WHERE supplier_id = '.$supplier_id.' AND product_id > 0)'
-        );
+        $queries = $this->supplierProductSubqueries($supplier_id, $supplier['code']);
+        $collection->addWhere('id IN ('.implode(' UNION ', $queries).')');
 
         if (!empty($params['auto_title'])) {
-            $supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
-            if ($supplier) {
-                $collection->addTitle('Поставщик: '.$supplier['name']);
-            }
+            $collection->addTitle('Поставщик: '.$supplier['name']);
         }
         return true;
     }
