@@ -8,6 +8,7 @@ extra='''                for snippet_path, method_marker in [
                     ("webasyst/megasuppliers/patches/plugin_helpers.txt", "private function getProductSupplierId("),
                     ("webasyst/megasuppliers/patches/plugin_ui_methods.txt", "public function backendProductEdit("),
                     ("webasyst/megasuppliers/patches/plugin_filter_method.txt", "public function productsCollectionFilter("),
+                    ("webasyst/megasuppliers/patches/plugin_list_ui_method.txt", "public function backendProdList("),
                 ]:
                     if method_marker not in text_data:
                         snippet=Path(snippet_path).read_text(encoding="utf-8")
