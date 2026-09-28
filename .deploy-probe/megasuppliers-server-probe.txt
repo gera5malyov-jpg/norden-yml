@@ -1151,6 +1151,7 @@ return [
         'backend_extended_menu' => 'backendExtendedMenu',
         'backend_menu' => 'backendMenu',
         'backend_prod' => 'backendProd',
+        'routing' => 'routing',
     ],
 ];
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/routing.php
@@ -1158,6 +1159,48 @@ return [
 return [
     'megasuppliers-api/' => 'frontend/api',
 ];
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php
+<?php
+try {
+    $supplier_model = new shopMegasuppliersSupplierModel();
+    if (!$supplier_model->countAll()) {
+        $now = date('Y-m-d H:i:s');
+        $suppliers = [
+            ['Norden', 'NORDEN'],
+            ['ТД Андрей', 'TD_ANDREY'],
+            ['4 Сезона', '4SEASONS'],
+            ['DEEPHOUSE', 'DEEPHOUSE'],
+            ['Levmar', 'LEVMAR'],
+            ['Treez', 'TREEZ'],
+            ['Yourroom', 'YOURROOM'],
+            ['Afina Garden', 'AFINA'],
+            ['Aletan', 'ALETAN'],
+            ['Red-Black', 'RED_BLACK'],
+            ['ТД Никитин', 'TD_NIKITIN'],
+            ['B2B Fabrika', 'B2B_FABRIKA'],
+            ['Kenner', 'KENNER'],
+        ];
+        foreach ($suppliers as $row) {
+            $supplier_model->insert([
+                'name' => $row[0],
+                'code' => $row[1],
+                'active' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+    }
+    $meta = new shopMegasuppliersMetaModel();
+    if (!$meta->getById('api_key')) {
+        $meta->insert([
+            'name' => 'api_key',
+            'value' => bin2hex(random_bytes(32)),
+        ]);
+    }
+} catch (Exception $e) {
+    waLog::log('Megasuppliers install error: '.$e->getMessage(), 'shop/plugins/megasuppliers.log');
+    throw $e;
+}
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php
 <?php
 class shopMegasuppliersPlugin extends shopPlugin
@@ -1200,6 +1243,310 @@ class shopMegasuppliersPlugin extends shopPlugin
         return [
             'header' => '<div class="s-details"><span class="hint">Поставщик: '.implode('; ', $parts).'</span></div>',
         ];
+    }
+    public function routing($route)
+    {
+        if (wa()->getEnv() === 'frontend') {
+            return [
+                'megasuppliers-api/' => 'frontend/api',
+            ];
+        }
+        return [];
+    }
+
+}
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersMeta.model.php
+<?php
+class shopMegasuppliersMetaModel extends waModel
+{
+    protected $table = 'shop_megasuppliers_meta';
+}
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersSupplier.model.php
+<?php
+class shopMegasuppliersSupplierModel extends waModel
+{
+    protected $table = 'shop_megasuppliers_supplier';
+}
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
+<?php
+class shopMegasuppliersProductModel extends waModel
+{
+    protected $table = 'shop_megasuppliers_product';
+}
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
+<?php
+class shopMegasuppliersImportService
+{
+    private $supplier_model;
+    private $map_model;
+    private $import_model;
+    private $sku_model;
+
+    public function __construct()
+    {
+        $this->supplier_model = new shopMegasuppliersSupplierModel();
+        $this->map_model = new shopMegasuppliersProductModel();
+        $this->import_model = new shopMegasuppliersImportModel();
+        $this->sku_model = new shopProductSkusModel();
+    }
+
+    public function importRows($supplier_id, array $rows, array $options = [])
+    {
+        $supplier_id = (int)$supplier_id;
+        $supplier = $this->supplier_model->getById($supplier_id);
+        if (!$supplier || empty($supplier['active'])) {
+            throw new waException('Поставщик не выбран или отключён.');
+        }
+        if (!$rows) {
+            throw new waException('Нет строк для импорта.');
+        }
+
+        $source = isset($options['source']) ? (string)$options['source'] : 'file';
+        $filename = isset($options['filename']) ? (string)$options['filename'] : '';
+        $create_missing = !empty($options['create_missing']);
+        $update_catalog = !array_key_exists('update_catalog', $options) || !empty($options['update_catalog']);
+        $field_map = isset($options['field_map']) && is_array($options['field_map']) ? $options['field_map'] : [];
+
+        $now = date('Y-m-d H:i:s');
+        $import_id = $this->import_model->insert([
+            'supplier_id' => $supplier_id,
+            'source' => $source,
+            'filename' => $filename,
+            'status' => 'running',
+            'total' => count($rows),
+            'created_count' => 0,
+            'updated_count' => 0,
+            'linked_count' => 0,
+            'skipped_count' => 0,
+            'error_count' => 0,
+            'errors_json' => '[]',
+            'user_id' => wa()->getUser()->getId() ?: 0,
+            'created_at' => $now,
+            'finished_at' => null,
+        ]);
+
+        $stats = ['created' => 0, 'updated' => 0, 'linked' => 0, 'skipped' => 0, 'errors' => []];
+        foreach ($rows as $index => $raw) {
+            try {
+                $item = $this->mapRow($raw, $field_map);
+                if ($item['supplier_sku'] === '') {
+                    throw new waException('Не указан артикул поставщика.');
+                }
+                $result = $this->upsertItem($supplier_id, $item, $raw, $create_missing, $update_catalog);
+                $stats[$result]++;
+            } catch (Exception $e) {
+                $stats['errors'][] = ['row' => $index + 2, 'error' => $e->getMessage()];
+                if (count($stats['errors']) > 100) {
+                    $stats['errors'] = array_slice($stats['errors'], 0, 100);
+                }
+            }
+        }
+
+        $this->import_model->updateById($import_id, [
+            'status' => $stats['errors'] ? 'done_with_errors' : 'done',
+            'created_count' => $stats['created'],
+            'updated_count' => $stats['updated'],
+            'linked_count' => $stats['linked'],
+            'skipped_count' => $stats['skipped'],
+            'error_count' => count($stats['errors']),
+            'errors_json' => json_encode($stats['errors'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'finished_at' => date('Y-m-d H:i:s'),
+        ]);
+        $stats['import_id'] = $import_id;
+        $stats['supplier'] = $supplier;
+        return $stats;
+    }
+
+    private function mapRow(array $row, array $field_map)
+    {
+        $aliases = [
+            'supplier_sku' => ['артикул поставщика', 'артикул', 'sku', 'код', 'код товара', 'vendor code', 'vendor_code', 'article'],
+            'external_id' => ['внешний id', 'external id', 'external_id', 'yml id', 'id поставщика'],
+            'name' => ['наименование', 'название', 'товар', 'name'],
+            'price' => ['цена', 'цена продажи', 'розничная цена', 'price'],
+            'purchase_price' => ['закупка', 'закупочная цена', 'себестоимость', 'purchase price', 'purchase_price', 'cost'],
+            'compare_price' => ['цена до скидки', 'старая цена', 'compare price', 'compare_price'],
+            'stock' => ['остаток', 'наличие', 'количество', 'stock', 'qty'],
+        ];
+        $item = [];
+        foreach ($aliases as $target => $names) {
+            $value = '';
+            if (!empty($field_map[$target]) && array_key_exists($field_map[$target], $row)) {
+                $value = $row[$field_map[$target]];
+            } else {
+                foreach ($names as $name) {
+                    if (array_key_exists($name, $row)) {
+                        $value = $row[$name];
+                        break;
+                    }
+                }
+            }
+            $item[$target] = is_scalar($value) ? trim((string)$value) : '';
+        }
+        return $item;
+    }
+
+    private function upsertItem($supplier_id, array $item, array $raw, $create_missing, $update_catalog)
+    {
+        $link = $this->map_model->getByField([
+            'supplier_id' => $supplier_id,
+            'supplier_sku' => $item['supplier_sku'],
+        ]);
+        $product_id = $link ? (int)$link['product_id'] : 0;
+        $sku_id = $link ? (int)$link['sku_id'] : 0;
+        $result = $link ? 'updated' : 'linked';
+
+        if (!$product_id || !$sku_id) {
+            $matches = $this->sku_model->getByField('sku', $item['supplier_sku'], true);
+            if (count($matches) === 1) {
+                $sku = reset($matches);
+                $product_id = (int)$sku['product_id'];
+                $sku_id = (int)$sku['id'];
+                $result = 'linked';
+            } elseif (count($matches) > 1) {
+                throw new waException('Найдено несколько товаров Webasyst с таким артикулом; автоматическая привязка отменена.');
+            } elseif ($create_missing) {
+                list($product_id, $sku_id) = $this->createProduct($item);
+                $result = 'created';
+            } else {
+                $this->saveLink($supplier_id, 0, 0, $item, $raw);
+                return 'skipped';
+            }
+        }
+
+        if ($update_catalog) {
+            $this->updateProduct($product_id, $sku_id, $item);
+        }
+        $this->saveLink($supplier_id, $product_id, $sku_id, $item, $raw);
+        return $result;
+    }
+
+    private function createProduct(array $item)
+    {
+        if ($item['name'] === '') {
+            throw new waException('Для создания нового товара требуется название.');
+        }
+        $type_model = new shopTypeModel();
+        $type = $type_model->select('id')->order('sort')->fetchAssoc();
+        $currency = wa('shop')->getConfig()->getCurrency();
+        $sku_data = [
+            'sku' => $item['supplier_sku'],
+            'available' => 1,
+            'status' => 1,
+        ];
+        foreach (['price', 'purchase_price', 'compare_price'] as $field) {
+            if ($item[$field] !== '') {
+                $sku_data[$field] = $this->number($item[$field]);
+            }
+        }
+        if ($item['stock'] !== '') {
+            $sku_data['count'] = $this->number($item['stock']);
+        }
+        $data = [
+            'name' => $item['name'],
+            'currency' => $currency,
+            'status' => 1,
+            'type_id' => $type ? (int)$type['id'] : 0,
+            'skus' => [-1 => $sku_data],
+        ];
+        $product = new shopProduct();
+        if (!$product->save($data)) {
+            throw new waException('Webasyst не сохранил новый товар.');
+        }
+        $product_id = (int)$product->getId();
+        $skus = $product->skus;
+        if (!$product_id || !$skus) {
+            throw new waException('Не удалось определить SKU созданного товара.');
+        }
+        $sku = reset($skus);
+        return [$product_id, (int)$sku['id']];
+    }
+
+    private function updateProduct($product_id, $sku_id, array $item)
+    {
+        $product = new shopProduct((int)$product_id);
+        $data = ['skus' => [(int)$sku_id => []]];
+        if ($item['name'] !== '') {
+            $data['name'] = $item['name'];
+        }
+        foreach (['price', 'purchase_price', 'compare_price'] as $field) {
+            if ($item[$field] !== '') {
+                $data['skus'][(int)$sku_id][$field] = $this->number($item[$field]);
+            }
+        }
+        if ($item['stock'] !== '') {
+            $data['skus'][(int)$sku_id]['count'] = $this->number($item['stock']);
+        }
+        if (!$data['skus'][(int)$sku_id]) {
+            unset($data['skus']);
+        }
+        if (count($data) > 0) {
+            $product->save($data);
+        }
+    }
+
+    private function saveLink($supplier_id, $product_id, $sku_id, array $item, array $raw)
+    {
+        $data = [
+            'supplier_id' => (int)$supplier_id,
+            'product_id' => (int)$product_id,
+            'sku_id' => (int)$sku_id,
+            'supplier_sku' => $item['supplier_sku'],
+            'external_id' => $item['external_id'],
+            'purchase_price' => $item['purchase_price'] === '' ? null : $this->number($item['purchase_price']),
+            'stock' => $item['stock'] === '' ? null : $this->number($item['stock']),
+            'raw_json' => json_encode($raw, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+        $existing = $this->map_model->getByField([
+            'supplier_id' => (int)$supplier_id,
+            'supplier_sku' => $item['supplier_sku'],
+        ]);
+        if ($existing) {
+            $this->map_model->updateById($existing['id'], $data);
+        } else {
+            $this->map_model->insert($data);
+        }
+    }
+
+    private function number($value)
+    {
+        $value = str_replace(["\xc2\xa0", ' ', ','], ['', '', '.'], trim((string)$value));
+        if (!is_numeric($value)) {
+            throw new waException('Некорректное числовое значение: '.$value);
+        }
+        return (float)$value;
+    }
+}
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php
+<?php
+class shopMegasuppliersPluginBackendAction extends waViewAction
+{
+    public function execute()
+    {
+        if (!wa()->getUser()->getRights('shop', 'settings')) {
+            throw new waRightsException('Недостаточно прав для управления поставщиками.');
+        }
+        $supplier_model = new shopMegasuppliersSupplierModel();
+        $import_model = new shopMegasuppliersImportModel();
+        $meta_model = new shopMegasuppliersMetaModel();
+        $suppliers = $supplier_model->order('name')->fetchAll('id');
+        foreach ($suppliers as &$supplier) {
+            $supplier['product_count'] = (int)(new shopMegasuppliersProductModel())->countByField('supplier_id', $supplier['id']);
+        }
+        unset($supplier);
+        $imports = $import_model->query(
+            'SELECT i.*, s.name supplier_name FROM shop_megasuppliers_import i LEFT JOIN shop_megasuppliers_supplier s ON s.id=i.supplier_id ORDER BY i.id DESC LIMIT 20'
+        )->fetchAll();
+        $api = $meta_model->getById('api_key');
+        $this->view->assign([
+            'suppliers' => $suppliers,
+            'imports' => $imports,
+            'api_key' => $api ? $api['value'] : '',
+            'backend_url' => wa('shop')->getAppUrl(null, true),
+            'message' => waRequest::get('msg', '', waRequest::TYPE_STRING_TRIM),
+            'error' => waRequest::get('err', '', waRequest::TYPE_STRING_TRIM),
+        ]);
     }
 }
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php
