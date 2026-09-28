@@ -111,6 +111,19 @@ su -s /bin/bash web -c 'php /tmp/ms_table_probe.php' || true
 rm -f /tmp/ms_table_probe.php
 echo "--- existing plugin ownership sample ---"
 find "$ROOT/wa-apps/shop/plugins" -mindepth 1 -maxdepth 1 -type d -printf '%u:%g %m %p\\n' | head -n 12
+echo "--- bootstrap diagnostic ---"
+cat >/tmp/ms_bootstrap_diag.php <<'PHP'
+<?php
+chdir('/home/web/vm-23f9aff9.na4u.ru/www');
+require_once '/home/web/vm-23f9aff9.na4u.ru/www/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null, new SystemConfig());
+wa('shop');
+$p=wa('shop')->getPlugin('nordenstock', true);
+echo get_class($p),"\\n";
+PHP
+chown web:web /tmp/ms_bootstrap_diag.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_bootstrap_diag.php'; echo "bootstrap_exit=$?" || true
+rm -f /tmp/ms_bootstrap_diag.php
 echo "--- web user php modules ---"
 su -s /bin/bash web -c 'php -m | grep -E "mysqli|pdo_mysql|zip|SimpleXML|mbstring" || true'
 echo "--- nordenstock config ---"
