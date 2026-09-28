@@ -1,0 +1,17 @@
+    public function productsCollectionFilter($collection)
+    {
+        if (wa()->getEnv() !== 'backend') {
+            return;
+        }
+        $supplier_id = waRequest::get('megasupplier', 0, waRequest::TYPE_INT);
+        if (!$supplier_id) {
+            return;
+        }
+        $supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
+        if (!$supplier || empty($supplier['active'])) {
+            $collection->addWhere('0');
+            return;
+        }
+        $queries = $this->supplierProductSubqueries($supplier_id, $supplier['code']);
+        $collection->addWhere('p.id IN ('.implode(' UNION ', $queries).')');
+    }
