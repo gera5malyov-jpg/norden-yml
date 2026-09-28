@@ -54,3 +54,19 @@ rm -f /tmp/ms_event_clear.php"""
 if "ms_event_clear.php" not in s:
     s=s.replace(cache_line, cache_block)
 p.write_text(s,encoding="utf-8")
+
+
+s=p.read_text(encoding="utf-8")
+s=s.replace(
+    '                    ("products_collection.filter", "productsCollectionFilter"),\n                ]:',
+    '                    ("products_collection.filter", "productsCollectionFilter"),\n                    ("backend_prod_list", "backendProdList"),\n                ]:'
+)
+s=s.replace(
+    'text_data=text_data.replace("\'version\' => \'1.0.1\'", "\'version\' => \'1.0.5\'")',
+    'text_data=text_data.replace("\'version\' => \'1.0.1\'", "\'version\' => \'1.0.6\'")'
+)
+s=s.replace(
+    '            .\'var b=$("#s-megasuppliers-sidebar");\'\n            .\'b.find("h5.heading")',
+    '            .\'var b=$("#s-megasuppliers-sidebar");\'\n            .\'var sets=$("#s-set-list-block");if(sets.length){b.insertAfter(sets);}\'\n            .\'b.find("h5.heading")'
+)
+p.write_text(s,encoding="utf-8")
