@@ -75,6 +75,8 @@ echo "--- plugin config registration ---"
 if [ -f "$ROOT/wa-config/apps/shop/plugins.php" ]; then
   grep -n "megasuppliers" "$ROOT/wa-config/apps/shop/plugins.php" || true
   ls -l "$ROOT/wa-config/apps/shop/plugins.php"
+  echo "--- plugins.php contents ---"
+  cat "$ROOT/wa-config/apps/shop/plugins.php"
 else
   echo "plugins.php not found"
 fi
