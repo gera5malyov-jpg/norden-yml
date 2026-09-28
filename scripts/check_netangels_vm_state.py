@@ -27,3 +27,5 @@ else:
     print("name="+str(vm.get("name")))
     print("hostname="+str(vm.get("hostname")))
     print("transitions="+json.dumps(vm.get("transitions"),ensure_ascii=False)[:2000])
+
+# check requested 2026-09-29
