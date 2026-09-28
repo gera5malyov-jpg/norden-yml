@@ -1,0 +1,207 @@
+name: Ozon all catalog to 3x4 oldest-first
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-all-catalog-3x4.yml'
+  workflow_dispatch:
+    inputs:
+      batch_index:
+        description: 'Batch index to process'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      OZON_BATCH_SIZE: '50'
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Install
+        run: python -m pip install --disable-pip-version-check requests pillow
+
+      - name: Build full queue once
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f ozon/all_catalog_3x4/queue.json ]; then
+            python ozon/all_catalog_3x4.py build-queue
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add ozon/all_catalog_3x4/queue.json ozon/all_catalog_3x4/state.json
+            git commit -m "report: initialize full Ozon 3x4 queue [skip ci]"
+            git push
+          fi
+
+      - name: Resolve batch index
+        id: batch
+        shell: bash
+        env:
+          INPUT_BATCH: ${{ github.event.inputs.batch_index }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_BATCH:-}" ]; then
+            IDX="$INPUT_BATCH"
+          else
+            IDX="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("ozon/all_catalog_3x4/state.json")
+          print((json.loads(p.read_text()) if p.exists() else {"next_batch":0})["next_batch"])
+          PY
+          )"
+          fi
+          TOTAL="$(python - <<'PY'
+          import json
+          q=json.load(open("ozon/all_catalog_3x4/queue.json"))
+          print(q["total_batches"])
+          PY
+          )"
+          echo "index=$IDX" >> "$GITHUB_OUTPUT"
+          echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
+          echo "OZON_TEMP_BRANCH=ozon-image-all-${{ github.run_id }}-batch-$IDX" >> "$GITHUB_ENV"
+          echo "BATCH_ROOT=ozon/all_catalog_3x4/work/batch_$(printf '%04d' "$IDX")" >> "$GITHUB_ENV"
+          echo "Processing batch $IDX of $TOTAL"
+
+      - name: Stop if queue already complete
+        if: ${{ fromJSON(steps.batch.outputs.index) >= fromJSON(steps.batch.outputs.total) }}
+        run: echo "All batches already processed."
+
+      - name: Prepare batch
+        if: ${{ fromJSON(steps.batch.outputs.index) < fromJSON(steps.batch.outputs.total) }}
+        run: python ozon/all_catalog_3x4.py prepare ${{ steps.batch.outputs.index }}
+
+      - name: Preserve working batch
+        if: ${{ fromJSON(steps.batch.outputs.index) < fromJSON(steps.batch.outputs.total) }}
+        shell: bash
+        run: |
+          rm -rf /tmp/ozon-all-work
+          mkdir -p /tmp/ozon-all-work
+          cp -a "$BATCH_ROOT"/. /tmp/ozon-all-work/
+
+      - name: Publish converted images on disposable branch
+        if: ${{ fromJSON(steps.batch.outputs.index) < fromJSON(steps.batch.outputs.total) }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          JPG_COUNT="$(find "$BATCH_ROOT" -type f -name '*.jpg' | wc -l | tr -d ' ')"
+          echo "Converted JPG count: $JPG_COUNT"
+          if [ "$JPG_COUNT" = "0" ]; then
+            echo "TEMP_BRANCH_CREATED=0" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          STAGE="$(mktemp -d)"
+          find "$BATCH_ROOT" -type f -name '*.jpg' -print0 | while IFS= read -r -d '' f; do
+            mkdir -p "$STAGE/$(dirname "$f")"
+            cp "$f" "$STAGE/$f"
+          done
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan "$OZON_TEMP_BRANCH"
+          git rm -rf . >/dev/null 2>&1 || true
+          cp -a "$STAGE"/. .
+          git add "$BATCH_ROOT"
+          git commit -m "temp: Ozon 3x4 batch ${{ steps.batch.outputs.index }} [skip ci]"
+          git push --force origin "HEAD:$OZON_TEMP_BRANCH"
+          echo "TEMP_BRANCH_CREATED=1" >> "$GITHUB_ENV"
+
+          git switch main
+          git reset --hard origin/main
+          rm -rf "$BATCH_ROOT"
+          mkdir -p "$BATCH_ROOT"
+          cp -a /tmp/ozon-all-work/. "$BATCH_ROOT"/
+
+      - name: Apply batch to Ozon
+        if: ${{ fromJSON(steps.batch.outputs.index) < fromJSON(steps.batch.outputs.total) }}
+        run: python ozon/all_catalog_3x4.py apply ${{ steps.batch.outputs.index }}
+
+      - name: Check Ozon source materialization
+        if: ${{ fromJSON(steps.batch.outputs.index) < fromJSON(steps.batch.outputs.total) }}
+        run: python ozon/all_catalog_3x4.py finalize ${{ steps.batch.outputs.index }}
+
+      - name: Trim or delete disposable image branch
+        if: ${{ fromJSON(steps.batch.outputs.index) < fromJSON(steps.batch.outputs.total) }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${TEMP_BRANCH_CREATED:-0}" != "1" ]; then
+            exit 0
+          fi
+
+          KEEP_COUNT="$(grep -cve '^$' "$BATCH_ROOT/keep_files.txt" || true)"
+          if [ "$KEEP_COUNT" = "0" ]; then
+            git push origin --delete "$OZON_TEMP_BRANCH" || true
+            exit 0
+          fi
+
+          echo "Keeping $KEEP_COUNT still-referenced JPG files on $OZON_TEMP_BRANCH"
+          TRIM="$(mktemp -d)"
+          while IFS= read -r f; do
+            [ -n "$f" ] || continue
+            if [ -f "$f" ]; then
+              mkdir -p "$TRIM/$(dirname "$f")"
+              cp "$f" "$TRIM/$f"
+            fi
+          done < "$BATCH_ROOT/keep_files.txt"
+
+          rm -rf /tmp/ozon-final-work
+          mkdir -p /tmp/ozon-final-work
+          cp -a "$BATCH_ROOT"/. /tmp/ozon-final-work/
+          git clean -fdx
+          git switch --orphan "trim-${{ github.run_id }}-${{ steps.batch.outputs.index }}"
+          git rm -rf . >/dev/null 2>&1 || true
+          cp -a "$TRIM"/. .
+          git add .
+          git commit -m "temp: retain only Ozon-referenced JPGs batch ${{ steps.batch.outputs.index }} [skip ci]"
+          git push --force origin "HEAD:$OZON_TEMP_BRANCH"
+
+          git switch main
+          git reset --hard origin/main
+          rm -rf "$BATCH_ROOT"
+          mkdir -p "$BATCH_ROOT"
+          cp -a /tmp/ozon-final-work/. "$BATCH_ROOT"/
+
+      - name: Save compact report and advance state
+        if: ${{ fromJSON(steps.batch.outputs.index) < fromJSON(steps.batch.outputs.total) }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python ozon/all_catalog_3x4.py compact ${{ steps.batch.outputs.index }}
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+          git add ozon/all_catalog_3x4/state.json ozon/all_catalog_3x4/reports/
+          if ! git diff --cached --quiet; then
+            git commit -m "report: Ozon 3x4 batch ${{ steps.batch.outputs.index }} [skip ci]"
+            git push
+          fi
+
+      - name: Dispatch next batch
+        if: ${{ fromJSON(steps.batch.outputs.index) + 1 < fromJSON(steps.batch.outputs.total) }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NEXT=$(( ${{ steps.batch.outputs.index }} + 1 ))
+          gh workflow run ozon-all-catalog-3x4.yml --ref main -f batch_index="$NEXT"
+
+      - name: Mark complete
+        if: ${{ fromJSON(steps.batch.outputs.index) + 1 >= fromJSON(steps.batch.outputs.total) && fromJSON(steps.batch.outputs.index) < fromJSON(steps.batch.outputs.total) }}
+        run: echo "Full Ozon catalog queue has reached its final batch."
