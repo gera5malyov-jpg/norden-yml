@@ -242,6 +242,47 @@ chown web:web /tmp/ms_supplier_counts.php
 su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_supplier_counts.php' || true
 rm -f /tmp/ms_supplier_counts.php
 
+echo "--- navigation/filter runtime diagnostic ---"
+cat >/tmp/ms_nav_runtime.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$p=wa('shop')->getPlugin('megasuppliers',true);
+$cfg=include $root.'/wa-apps/shop/plugins/megasuppliers/lib/config/plugin.php';
+echo "version=".ifset($cfg['version'])."\n";
+echo "handlers=".json_encode(ifset($cfg['handlers'],array()),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+$direct=$p->backendProducts(array());
+echo "direct_sidebar=".(isset($direct['sidebar_section'])?'yes':'no')." len=".strlen(ifset($direct['sidebar_section'],''))."\n";
+$evt=wa('shop')->event('backend_products');
+echo "event_plugins=".implode(',',array_keys($evt))."\n";
+echo "event_sidebar=".(isset($evt['megasuppliers']['sidebar_section'])?'yes':'no')." len=".strlen(ifset($evt['megasuppliers']['sidebar_section'],''))."\n";
+
+$sm=new shopMegasuppliersSupplierModel();
+$s4=$sm->getByField('code','4SIS');
+echo "4sis_id=".ifset($s4['id'])."\n";
+if($s4){
+    $_GET['megasupplier']=(int)$s4['id'];
+    $_REQUEST['megasupplier']=(int)$s4['id'];
+    $col=new shopProductsCollection('');
+    $before=$col->count();
+    $params=array('filter'=>null,'filter_options'=>array(),'collection'=>$col);
+    $p->backendProdFilters($params);
+    $after=$col->count();
+    echo "manual_filter_before=".$before." after=".$after."\n";
+    $products=$col->getProducts('id,name',0,20,false);
+    echo "manual_filter_ids=".implode(',',array_keys($products))."\n";
+    $test=$m=new waModel();
+    $pid=$m->query("SELECT p.id FROM shop_product_skus s JOIN shop_product p ON p.id=s.product_id WHERE s.sku='AF-31655692' LIMIT 1")->fetchField();
+    echo "test_4sis_pid=".$pid." included=".(isset($products[$pid])?'first20':'not_first20')."\n";
+}
+PHP
+chown web:web /tmp/ms_nav_runtime.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_nav_runtime.php' || true
+rm -f /tmp/ms_nav_runtime.php
+
 echo "--- backend action cli diagnostic ---"
 cat >/tmp/ms_backend_probe.php <<'PHP'
 <?php
