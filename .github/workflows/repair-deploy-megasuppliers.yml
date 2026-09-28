@@ -38,13 +38,13 @@ jobs:
           from pathlib import Path
           p = Path('scripts/deploy_megasuppliers.py')
           s = p.read_text(encoding='utf-8')
-          bad = '"""            p=ssh(key,"bash -s",stdin=remote,check=True,timeout=180)'
-          good = '"""\n            p=ssh(key,"bash -s",stdin=remote,check=True,timeout=180)'
-          if bad in s:
-              s = s.replace(bad, good, 1)
+          marker = '"""\\n            p=ssh(key,"bash -s",stdin=remote,check=True,timeout=180)'
+          fixed = '"""\n            p=ssh(key,"bash -s",stdin=remote,check=True,timeout=180)'
+          s = s.replace(marker, fixed, 1)
           s = s.replace('remote = f"""set -euo pipefail', 'remote = """set -euo pipefail', 1)
           s = s.replace('{shlex.quote(ROOT)}', '/home/web/vm-23f9aff9.na4u.ru/www')
           s = s.replace('{ROOT!r}', "'/home/web/vm-23f9aff9.na4u.ru/www'")
+          s = s.replace('{{}}', '{}')
           p.write_text(s, encoding='utf-8')
           PY
           python3 -m py_compile scripts/deploy_megasuppliers.py
