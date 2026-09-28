@@ -100,3 +100,5 @@ jobs:
             git commit -m "catalog: build full Ozon oldest-to-newest 3x4 queue [skip ci]"
             git push
           fi
+
+# trigger full queue build
