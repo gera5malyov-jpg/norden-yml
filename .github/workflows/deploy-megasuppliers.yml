@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/deploy-megasuppliers.yml'
       - 'scripts/deploy_megasuppliers.py'
+      - 'scripts/augment_deploy_megasuppliers.py'
+      - 'webasyst/megasuppliers/**'
   workflow_dispatch:
 permissions:
   contents: write
@@ -24,6 +26,8 @@ jobs:
         with: {python-version: '3.12'}
       - name: Install Google client
         run: pip -q install google-api-python-client google-auth
+      - name: Augment deployer
+        run: python3 scripts/augment_deploy_megasuppliers.py
       - name: Deploy plugin
         run: python3 scripts/deploy_megasuppliers.py
       - name: Save install report
