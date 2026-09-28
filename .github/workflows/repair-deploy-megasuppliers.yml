@@ -54,7 +54,7 @@ jobs:
               'p=Path(sys.argv[1])',
               "s=p.read_text(encoding='utf-8')",
               'needle="    protected $table = \'shop_megasuppliers_meta\';"',
-              'fixed=needle+"\\n    protected $id = \'name\';"',
+              'fixed=needle+"\\\\n    protected $id = \'name\';"',
               'if "protected $id = \'name\';" not in s:',
               '    s=s.replace(needle,fixed,1)',
               "p.write_text(s,encoding='utf-8')",
