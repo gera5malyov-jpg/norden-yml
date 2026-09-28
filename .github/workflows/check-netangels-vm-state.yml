@@ -1,0 +1,25 @@
+name: Check NetAngels VM state
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/check_netangels_vm_state.py'
+      - '.github/workflows/check-netangels-vm-state.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Check VM
+        run: python3 scripts/check_netangels_vm_state.py
