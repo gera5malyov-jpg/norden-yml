@@ -1,0 +1,66 @@
+name: Norden — восстановить из архива по Каталогу
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'norden-kit/restore_from_catalog_trigger.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-restore-from-catalog-once
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Установить зависимости
+        run: pip install --disable-pip-version-check "requests>=2.32,<3" "gspread>=6.1,<7" "google-auth>=2.35,<3"
+      - name: Проверить скрипт
+        run: python -m py_compile norden-kit/restore_from_catalog.py
+      - name: Восстановить архивные товары KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          CATALOG_SPREADSHEET_ID: '1DvMYvKRr8fX8mfLFaeJCXCccQofPViPcIP2CgIctc8w'
+          CATALOG_SHEET: 'Норден'
+        run: python norden-kit/restore_from_catalog.py
+      - name: Сохранить отчёт
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main || true
+          git add norden-kit/restore_from_catalog_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Отчёт восстановления Norden из Каталога"
+            git push
+          fi
+      - name: Итог
+        if: always()
+        run: |
+          if [ -f norden-kit/restore_from_catalog_report.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          d=json.loads(Path("norden-kit/restore_from_catalog_report.json").read_text(encoding="utf-8"))
+          c=d.get("counts",{})
+          print("## Восстановление Norden из архива KIT")
+          print(f"- Строк Каталога: **{c.get('catalog_targets','—')}**")
+          print(f"- Уже опубликованы: **{c.get('already_published','—')}**")
+          print(f"- Запланировано восстановить: **{c.get('restore_planned','—')}**")
+          print(f"- Восстановлено и проверено: **{c.get('restored_verified','—')}**")
+          print(f"- Ошибки: **{c.get('restore_errors','—')}**")
+          print(f"- Не найдено в KIT: **{c.get('unresolved_no_kit_match','—')}**")
+          print("- STOP_ALL_NORDEN не изменялся.")
+          PY
+          fi
