@@ -71,40 +71,38 @@ def configure_core(batch_index, offers):
 
 def prepare(batch_index):
     requested = load_batch(batch_index)
-    requested_offers = [x["offer_id"] for x in requested if x.get("offer_id")]
-    stocks = current_positive_stock(requested_offers)
-    active = [o for o in requested_offers if stocks.get(o, {}).get("present", 0) > 0]
-    skipped = [o for o in requested_offers if o not in active]
-    batch_root = configure_core(batch_index, active)
+    offers = [x["offer_id"] for x in requested if x.get("offer_id")]
+    batch_root = configure_core(batch_index, offers)
     write_json(batch_root / "active.json", {
         "batch_index": batch_index,
-        "requested": requested_offers,
-        "active": active,
-        "skipped_zero_stock_before_prepare": skipped,
-        "stock_snapshot": stocks,
+        "requested": offers,
+        "active": offers,
+        "scope": "ALL cards regardless of stock or archive",
     })
-    if active:
+    if offers:
         core.prepare()
     else:
         write_json(core.MANIFEST, {"offers": {}, "repo": core.REPO, "branch": core.BRANCH})
-    print(json.dumps({"batch": batch_index, "requested": requested_offers, "active": active, "skipped": skipped}, ensure_ascii=False))
+    print(json.dumps({"batch": batch_index, "requested": offers, "active": offers}, ensure_ascii=False))
 
 def apply(batch_index):
     batch_root = ROOT / "run" / f"batch_{batch_index:04d}"
     state = json.loads((batch_root / "active.json").read_text(encoding="utf-8"))
-    before = state.get("active") or []
-    stocks = current_positive_stock(before)
-    active = [o for o in before if stocks.get(o, {}).get("present", 0) > 0]
-    newly_zero = [o for o in before if o not in active]
+    active = state.get("active") or []
     state["active_for_apply"] = active
-    state["skipped_zero_stock_before_apply"] = newly_zero
-    state["apply_stock_snapshot"] = stocks
     write_json(batch_root / "active.json", state)
     configure_core(batch_index, active)
-    if active:
-        core.apply()
-    else:
+    if not active:
         write_json(core.BATCH_REPORT, {"offers": {}, "summary": {"requested": 0, "success": 0, "error": 0}})
+        return
+    try:
+        core.apply()
+    except SystemExit as e:
+        # core.apply writes a complete per-offer report before returning non-zero
+        # when individual cards fail. Keep the batch report and continue catalog processing.
+        if not core.BATCH_REPORT.exists():
+            raise
+        print(f"Batch {batch_index} completed with per-card errors; continuing catalog. exit={e}", flush=True)
 
 def wait_materialized(batch_index):
     batch_root = ROOT / "run" / f"batch_{batch_index:04d}"
@@ -194,7 +192,7 @@ def compact(batch_index):
         "batch_index": batch_index,
         "requested": state.get("requested") or [],
         "processed": state.get("active_for_apply", state.get("active", [])),
-        "skipped_zero_stock": sorted(set((state.get("skipped_zero_stock_before_prepare") or []) + (state.get("skipped_zero_stock_before_apply") or []))),
+        "scope": state.get("scope"),
         "summary": report.get("summary") or {},
         "materialization_status": mat.get("status"),
         "offers": rows,
