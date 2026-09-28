@@ -4,8 +4,16 @@ import re
 import unicodedata
 
 
+CONFUSABLES = str.maketrans({
+    "а": "a", "в": "b", "с": "c", "е": "e", "н": "h", "к": "k",
+    "м": "m", "о": "o", "р": "p", "т": "t", "х": "x", "у": "y",
+    "А": "a", "В": "b", "С": "c", "Е": "e", "Н": "h", "К": "k",
+    "М": "m", "О": "o", "Р": "p", "Т": "t", "Х": "x", "У": "y",
+})
+
+
 def _norm_article(value: object) -> str:
-    text = unicodedata.normalize("NFKC", str(value or "")).casefold()
+    text = unicodedata.normalize("NFKC", str(value or "")).translate(CONFUSABLES).casefold()
     return re.sub(r"[^0-9a-zа-яё]+", "", text)
 
 
