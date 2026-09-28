@@ -65,3 +65,5 @@ http https://profikompany.ru/ 200 body='<!DOCTYPE html><html lang="ru_RU" class=
 http https://profikompany.ru/megasuppliers-api/ 405 body='{"errors":["method_not_allowed"]}'
 INSTALL_STATUS=SUCCESS
 temp_key_removed=yes
+INSTALL_STATUS=FAILED
+ERROR=<HTTPError 400: 'Bad Request'>
