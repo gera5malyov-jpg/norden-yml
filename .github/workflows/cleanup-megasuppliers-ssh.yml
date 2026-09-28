@@ -22,4 +22,4 @@ jobs:
         with:
           ref: main
       - name: Cleanup
-        run: python3 scripts/cleanup_megasuppliers_ssh_keys.py
+        run: python3 scripts/cleanup_megasuppliers_ssh_keys_v2.py
