@@ -30,8 +30,6 @@ jobs:
         run: python3 scripts/augment_deploy_megasuppliers.py
       - name: Deploy plugin
         run: python3 scripts/deploy_megasuppliers.py
-      - name: Backfill existing supplier assignments
-        run: python3 scripts/backfill_megasuppliers_existing.py
       - name: Save install report
         if: always()
         shell: bash
@@ -51,3 +49,5 @@ jobs:
 # trigger install retry 2026-09-28
 
 # trigger direct install retry 2026-09-28
+
+# fresh deploy after NetAngels key check
