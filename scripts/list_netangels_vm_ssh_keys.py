@@ -16,6 +16,10 @@ body=urllib.parse.urlencode({"api_key":API_KEY}).encode()
 _,tok=req("https://panel.netangels.ru/api/gateway/token/","POST",body,
           {"Content-Type":"application/x-www-form-urlencoded"})
 headers={"Authorization":"Bearer "+tok["token"],"Accept":"application/json"}
+_,vms=req("https://api-ms.netangels.ru/api/v1/cloud/vms/?limit=100","GET",None,headers)
+vm_items=vms.get("entities",[]) if isinstance(vms,dict) else []
+vm=next((x for x in vm_items if int(x.get("id",0))==VM_ID),{})
+print("vm_state="+str(vm.get("state","unknown")))
 _,data=req(f"https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/?limit=100","GET",None,headers)
 items=data.get("entities",[]) if isinstance(data,dict) else data
 lines=["vm_key_count="+str(len(items))]
