@@ -9,6 +9,7 @@ from pathlib import Path
 
 import gspread, requests
 from google.oauth2.service_account import Credentials
+from norden_category_fallback import enrich_missing_categories
 
 ROOT=Path(__file__).resolve().parents[1]
 REPORT=ROOT/"catalog"/"norden_chairs_stools_6h_report.json"
@@ -131,14 +132,41 @@ def price_stock():
 def supplier():
     src,dups,kind,apierr=MOD.load_source(os.environ.get("NORDEN_SECRET",""),short=False)
     if len(src)<1000: raise RuntimeError(f"Safety stop: Norden full catalog too small ({len(src)})")
+
+    target_before=sum(1 for i in src.values() if target_item(i))
+    category_fallback={"used":False,"target_before":target_before}
+    if kind=="api" and target_before<100:
+        xml_src,xml_dups=MOD.source_from_xml(short=False)
+        if len(xml_src)<1000:
+            raise RuntimeError(f"Safety stop: Norden XML category fallback too small ({len(xml_src)})")
+        src,fb=enrich_missing_categories(src,xml_src)
+        category_fallback={
+            "used":True,
+            "reason":"API category scope suspiciously small",
+            "target_before":target_before,
+            "xml_catalog":len(xml_src),
+            "xml_duplicates":len(xml_dups),
+            **fb,
+        }
+
     ps,pdups=price_stock(); out={}
     for a,i in src.items():
         if not target_item(i): continue
         x=dict(i); p=ps.get(nc(a),{})
         x.update({"purchase":p.get("purchase"),"rrp":p.get("rrp"),"msk":p.get("msk",0),"spb":p.get("spb",0),"total":p.get("total",0)})
         out[nc(a)]=x
+    category_fallback["target_after"]=len(out)
     if len(out)<100: raise RuntimeError(f"Safety stop: chairs/stools scope too small ({len(out)})")
-    return out,{"catalog":len(src),"target":len(out),"source":kind,"api_error":apierr,"source_duplicates":len(dups),"price_duplicates":len(pdups)}
+    return out,{
+        "catalog":len(src),
+        "target":len(out),
+        "source":kind,
+        "category_source":"api+xml-fallback" if category_fallback["used"] else kind,
+        "category_fallback":category_fallback,
+        "api_error":apierr,
+        "source_duplicates":len(dups),
+        "price_duplicates":len(pdups),
+    }
 
 def sheets():
     cr=json.loads(SA); gc=gspread.authorize(Credentials.from_service_account_info(cr,scopes=["https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive"]))
