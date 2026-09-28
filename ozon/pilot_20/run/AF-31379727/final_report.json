@@ -1,0 +1,117 @@
+{
+  "offer_id": "AF-31379727",
+  "product_id": 1093496475,
+  "source_image_count": 6,
+  "converted_count": 5,
+  "already_3x4_count": 1,
+  "final_image_count": 6,
+  "import_response": {
+    "result": {
+      "pictures": [
+        {
+          "product_id": 1093496475,
+          "url": "https://ir-20.ozone.ru/s3/multimedia-1-6/7839004254.jpg",
+          "state": "imported",
+          "is_primary": true,
+          "is_360": false,
+          "is_color": false
+        },
+        {
+          "product_id": 1093496475,
+          "url": "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/ozon-image-temp-pilot20-36484945811/ozon/pilot_20/run/AF-31379727/image_02_3x4.jpg",
+          "state": "imported",
+          "is_primary": false,
+          "is_360": false,
+          "is_color": false
+        },
+        {
+          "product_id": 1093496475,
+          "url": "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/ozon-image-temp-pilot20-36484945811/ozon/pilot_20/run/AF-31379727/image_03_3x4.jpg",
+          "state": "imported",
+          "is_primary": false,
+          "is_360": false,
+          "is_color": false
+        },
+        {
+          "product_id": 1093496475,
+          "url": "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/ozon-image-temp-pilot20-36484945811/ozon/pilot_20/run/AF-31379727/image_04_3x4.jpg",
+          "state": "imported",
+          "is_primary": false,
+          "is_360": false,
+          "is_color": false
+        },
+        {
+          "product_id": 1093496475,
+          "url": "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/ozon-image-temp-pilot20-36484945811/ozon/pilot_20/run/AF-31379727/image_05_3x4.jpg",
+          "state": "imported",
+          "is_primary": false,
+          "is_360": false,
+          "is_color": false
+        },
+        {
+          "product_id": 1093496475,
+          "url": "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/ozon-image-temp-pilot20-36484945811/ozon/pilot_20/run/AF-31379727/image_06_3x4.jpg",
+          "state": "imported",
+          "is_primary": false,
+          "is_360": false,
+          "is_color": false
+        }
+      ]
+    }
+  },
+  "verification": {
+    "source_count": 6,
+    "target_count": 6,
+    "final_count": 6,
+    "count_correct": true,
+    "order_preserved": true,
+    "primary_is_expected_first_image": true,
+    "all_images_3x4": true,
+    "ozon_errors": [],
+    "final_dimensions": [
+      {
+        "index": 1,
+        "url": "https://ir-20.ozone.ru/s3/multimedia-1-6/7839004254.jpg",
+        "width": 1500,
+        "height": 2000,
+        "is_3x4": true
+      },
+      {
+        "index": 2,
+        "url": "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/ozon-image-temp-pilot20-36484945811/ozon/pilot_20/run/AF-31379727/image_02_3x4.jpg",
+        "width": 777,
+        "height": 1036,
+        "is_3x4": true
+      },
+      {
+        "index": 3,
+        "url": "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/ozon-image-temp-pilot20-36484945811/ozon/pilot_20/run/AF-31379727/image_03_3x4.jpg",
+        "width": 972,
+        "height": 1296,
+        "is_3x4": true
+      },
+      {
+        "index": 4,
+        "url": "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/ozon-image-temp-pilot20-36484945811/ozon/pilot_20/run/AF-31379727/image_04_3x4.jpg",
+        "width": 972,
+        "height": 1296,
+        "is_3x4": true
+      },
+      {
+        "index": 5,
+        "url": "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/ozon-image-temp-pilot20-36484945811/ozon/pilot_20/run/AF-31379727/image_05_3x4.jpg",
+        "width": 972,
+        "height": 1296,
+        "is_3x4": true
+      },
+      {
+        "index": 6,
+        "url": "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/ozon-image-temp-pilot20-36484945811/ozon/pilot_20/run/AF-31379727/image_06_3x4.jpg",
+        "width": 546,
+        "height": 728,
+        "is_3x4": true
+      }
+    ]
+  },
+  "result": "SUCCESS"
+}
