@@ -1,0 +1,56 @@
+name: Probe NetAngels VMs
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-netangels-vms.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Read VM inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.parse, urllib.request
+          from pathlib import Path
+          key=os.environ.get("NETANGELS_API_KEY","").strip()
+          if not key:
+              raise SystemExit("NETANGELS_API_KEY missing")
+          data=urllib.parse.urlencode({"api_key":key}).encode()
+          req=urllib.request.Request("https://panel.netangels.ru/api/gateway/token/",data=data,method="POST",headers={"Content-Type":"application/x-www-form-urlencoded"})
+          with urllib.request.urlopen(req,timeout=30) as r:
+              token=json.load(r)["token"]
+          req=urllib.request.Request("https://api-ms.netangels.ru/api/v1/cloud/vms/?limit=100",headers={"Authorization":"Bearer "+token,"Accept":"application/json"})
+          with urllib.request.urlopen(req,timeout=30) as r:
+              payload=json.load(r)
+          entities=payload.get("entities",payload if isinstance(payload,list) else [])
+          keep=[]
+          for x in entities:
+              keep.append({k:x.get(k) for k in ("id","name","main_ip","status","state","hostname","domain") if k in x})
+          Path(".deploy-probe").mkdir(exist_ok=True)
+          Path(".deploy-probe/netangels-vms.json").write_text(json.dumps(keep,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(keep,ensure_ascii=False,indent=2))
+          PY
+      - name: Save report
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/netangels-vms.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Save NetAngels VM probe [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
