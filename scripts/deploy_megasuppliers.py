@@ -27,7 +27,7 @@ def ssh(key, command, stdin=None, check=True, timeout=120):
         "root@"+VM_IP,command
     ],input=stdin,text=True,capture_output=True,timeout=timeout)
     if check and p.returncode:
-        raise RuntimeError("remote command failed: "+(p.stderr or p.stdout)[-2000:])
+        raise RuntimeError("remote command failed: STDOUT="+p.stdout[-3000:]+" STDERR="+p.stderr[-3000:])
     return p
 
 def main():
