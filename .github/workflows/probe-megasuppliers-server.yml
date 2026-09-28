@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/probe-megasuppliers-server.yml'
+      - 'scripts/probe_megasuppliers_server.py'
   workflow_dispatch:
 permissions:
   contents: write
@@ -13,95 +14,17 @@ jobs:
     timeout-minutes: 10
     env:
       NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
-      TARGET_IP: '45.86.180.49'
     steps:
       - uses: actions/checkout@v4
         with: {ref: main, fetch-depth: 0}
-      - name: Inspect Webasyst target through temporary SSH key
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p .deploy-probe
-          python3 - <<'PY'
-          import json, os, subprocess, tempfile, time, urllib.parse, urllib.request, traceback
-          out=[]
-          def log(x):
-              out.append(str(x)); print(x)
-          try:
-              api=os.environ["NETANGELS_API_KEY"].strip()
-              ip=os.environ["TARGET_IP"]
-              def req(url, method="GET", headers=None, data=None):
-                  r=urllib.request.Request(url,method=method,headers=headers or {},data=data)
-                  with urllib.request.urlopen(r,timeout=30) as x:
-                      raw=x.read().decode()
-                      return json.loads(raw) if raw else {}
-              payload=req("https://panel.netangels.ru/api/gateway/token/","POST",{"Content-Type":"application/x-www-form-urlencoded"},urllib.parse.urlencode({"api_key":api}).encode())
-              token=payload["token"]; headers={"Authorization":"Bearer "+token,"Accept":"application/json"}
-              vms=req("https://api-ms.netangels.ru/api/v1/cloud/vms/?limit=100",headers=headers)
-              ents=vms.get("entities",vms if isinstance(vms,list) else [])
-              vm=next(x for x in ents if str(x.get("main_ip","")).strip()==ip)
-              vm_id=str(vm["id"])
-              with tempfile.TemporaryDirectory() as td:
-                  key=td+"/id_ed25519"
-                  subprocess.run(["ssh-keygen","-q","-t","ed25519","-N","","-f",key],check=True)
-                  pub=open(key+".pub").read().strip()
-                  body=json.dumps({"key":pub,"name":"chatgpt-megasuppliers-probe-"+os.environ["GITHUB_RUN_ID"]}).encode()
-                  created=req("https://api-ms.netangels.ru/api/v1/cloud/vms/"+vm_id+"/ssh/create/","POST",{**headers,"Content-Type":"application/json"},body)
-                  kid=str(created["id"])
-                  try:
-                      ok=False
-                      for _ in range(18):
-                          p=subprocess.run(["ssh","-i",key,"-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=15","root@"+ip,"echo ok"],capture_output=True,text=True)
-                          if p.returncode==0:
-                              ok=True; break
-                          time.sleep(5)
-                      if not ok:
-                          log("ERROR: temporary SSH connection failed")
-                      else:
-                          remote=r'''set -eu
-ROOT=/home/web/vm-23f9aff9.na4u.ru/www
-PLUGIN="$ROOT/wa-apps/shop/plugins/megasuppliers"
-echo "hostname=$(hostname)"
-echo "root_exists=$(test -d "$ROOT" && echo yes || echo no)"
-ls -ld "$ROOT" "$ROOT/wa-apps" "$ROOT/wa-apps/shop" "$ROOT/wa-apps/shop/plugins" 2>&1 || true
-echo "--- php ---"
-php -v 2>&1 | head -n 3 || true
-echo "--- plugin ---"
-if [ -e "$PLUGIN" ]; then
-  echo "plugin_exists=yes"
-  ls -ld "$PLUGIN"
-  find "$PLUGIN" -maxdepth 2 -type f -printf '%u:%g %m %p\n' | head -n 30
-else
-  echo "plugin_exists=no"
-fi
-echo "--- plugin config registration ---"
-if [ -f "$ROOT/wa-config/apps/shop/plugins.php" ]; then
-  grep -n "megasuppliers" "$ROOT/wa-config/apps/shop/plugins.php" || true
-  ls -l "$ROOT/wa-config/apps/shop/plugins.php"
-else
-  echo "plugins.php not found"
-fi
-echo "--- existing plugin ownership sample ---"
-find "$ROOT/wa-apps/shop/plugins" -mindepth 1 -maxdepth 1 -type d -printf '%u:%g %m %p\n' | head -n 10
-'''
-                          p=subprocess.run(["ssh","-i",key,"-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","root@"+ip,"bash -s"],input=remote,text=True,capture_output=True)
-                          log("ssh_returncode="+str(p.returncode))
-                          log(p.stdout)
-                          if p.stderr: log("stderr="+p.stderr[-1200:])
-                  finally:
-                      q=urllib.request.Request("https://api-ms.netangels.ru/api/v1/cloud/vms/"+vm_id+"/ssh/"+kid+"/",method="DELETE",headers=headers)
-                      try: urllib.request.urlopen(q,timeout=30).read()
-                      except Exception as e: log("WARNING temp key cleanup: "+str(e))
-          except Exception as e:
-              log("ERROR: "+repr(e))
-              log(traceback.format_exc())
-          open(".deploy-probe/megasuppliers-server-probe.txt","w").write("\n".join(out))
-          PY
-      - name: Save safe probe report
+      - name: Probe server
+        run: python3 scripts/probe_megasuppliers_server.py
+      - name: Save safe report
         if: always()
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p .deploy-probe
           test -f .deploy-probe/megasuppliers-server-probe.txt || echo "probe did not produce report" > .deploy-probe/megasuppliers-server-probe.txt
           git config user.name github-actions
           git config user.email actions@github.com
