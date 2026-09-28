@@ -2598,14 +2598,28 @@ Megasuppliers install error: Unknown field id
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-log/error.log
 Error installing plugin shop.megasuppliers at first run:
 #3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-Error installing plugin shop.megasuppliers at first run:
-#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-Error installing plugin shop.megasuppliers at first run:
-#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
 Uncaught Error: Unknown field id
 #3 megasuppliers-api/index.php(22): waModel->getById('api_key')
 Uncaught Error: Unknown field id
 #3 megasuppliers-api/index.php(22): waModel->getById('api_key')
+webasyst/shop/?plugin=megasuppliers
+Uncaught exception waException:
+#3 wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php(20): waModel->getById('api_key')
+#4 wa-system/controller/waViewAction.class.php(188): shopMegasuppliersPluginBackendAction->execute()
+#6 wa-system/controller/waDefaultViewController.class.php(48): waViewController->executeAction(Object(shopMegasuppliersPluginBackendAction))
+#12 wa-system/controller/waFrontController.class.php(84): waFrontController->execute('megasuppliers', 'backend', NULL)
+webasyst/shop/?plugin=megasuppliers
+Uncaught exception waException:
+#3 wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php(20): waModel->getById('api_key')
+#4 wa-system/controller/waViewAction.class.php(188): shopMegasuppliersPluginBackendAction->execute()
+#6 wa-system/controller/waDefaultViewController.class.php(48): waViewController->executeAction(Object(shopMegasuppliersPluginBackendAction))
+#12 wa-system/controller/waFrontController.class.php(84): waFrontController->execute('megasuppliers', 'backend', NULL)
+--- compare existing plugin backend routing ---
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/yml/lib/shopYml.plugin.php
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/plugincontrol/lib/shopPlugincontrol.plugin.php
+shopYmlPluginBackendProducts.controller.php
+shopYmlPluginBackendSave.controller.php
+shopYmlPluginBackendSetup.action.php
 --- backend action cli diagnostic ---
 
 Warning: Declaration of shopMegasuppliersPlugin::routing($route) should be compatible with waPlugin::routing($route = Array) in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php on line 43
