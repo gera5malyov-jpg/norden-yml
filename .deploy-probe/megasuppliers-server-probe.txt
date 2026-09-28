@@ -3005,6 +3005,118 @@ class shopYmlPluginBackendSetupAction extends waViewAction
 shopYmlPluginBackendProducts.controller.php
 shopYmlPluginBackendSave.controller.php
 shopYmlPluginBackendSetup.action.php
+--- existing supplier metadata sources ---
+[types]
+61	14434	Тайпит
+126	10853	ТД Андрей автовыгрузка
+22	5855	Roomers
+21	4122	stoolgroup
+144	4048	miomarket
+141	3237	UTFC STORE
+79	2771	33 Кровати-333
+164	2710	sheffilton
+132	2607	enjoyme
+150	2228	RED-Black1
+58	2191	Logomebel
+20	2099	Weekend-billiard
+124	2058	samsonopt.ru
+42	2013	Столлайн
+52	1917	Тетчер
+24	1889	deephouse-336
+188	1886	neopoliscasa
+19	1853	Этажерка
+23	1749	barcelonadesign
+196	1631	z3k.ru
+51	1594	Промет
+199	1488	Treez.ru
+35	1477	Louvrehome
+84	1451	Просто купи Бувардо
+67	1396	reehouse
+14	1384	miralls.ru
+145	1283	blago-mebel.ru
+190	1255	zip-mebel
+31	1131	mebelik
+136	1055	Riva
+28	1051	montre-vip
+192	1032	Garda Decor
+202	979	aletan.ru
+11	945	4sis.ru
+149	929	Merdes
+48	900	Camelgroup
+112	885	metta
+134	854	EverProf
+143	842	esf Склад
+60	815	Просто-Купи
+152	811	mebelcity стулья
+93	783	idcollection
+37	706	tothome
+147	702	Натурмебель
+142	664	NORDEN-100
+45	582	Artikul-mebel
+125	571	Левмар-337
+39	567	Трия
+120	562	rotang.spb.ru
+68	541	mebwill
+161	525	bradexhome.ru
+195	465	championtool.ru
+128	461	gartlex.ru
+121	460	toform
+55	452	Терминал Китай
+34	339	art-zerkalo
+165	330	avalonmebel.ru
+70	318	lidamebel
+194	301	demimebel
+117	298	metkon
+63	294	afinalux
+59	262	ALAVANN
+189	248	mdehouse
+77	220	Leomebel
+41	217	Spbmebel.ru
+29	190	graumstore
+17	190	Фабрикант диваны
+82	185	Deccon.ru
+75	176	Inmedix / inclassix
+184	171	Фабрикант- Стулья/столы/
+130	168	Sonum
+91	155	СПб-Офис Директория Кабинеты
+92	153	College
+15	145	Euroforma
+182	141	FINSOFFA
+57	132	Scotthoward
+12	116	Директория диваны
+133	112	sale@podstolia.ru
+204	112	Мебельная фабрика В2В-335
+118	111	Фабрикант - комп кресла
+115	97	Good-kresla
+86	97	СПб-Офис Директория Кресла
+198	92	Евроформа
+98	82	Belsi-home
+203	75	kennermebel-334
+154	61	Эколайн
+139	60	rattan-mebel.ru
+97	44	Тайпит Диваны
+56	44	Терминал Витрины
+80	38	Shelf-on.ru
+81	34	Starbarrel
+169	31	plastek-technic.ru
+163	30	Мир шитья
+185	26	Фабрикант Банкетки
+168	20	Фабрикант Кресла для театров
+175	15	PAOLI
+73	2	desperadosport
+105	1	Офисная магия
+[features]
+{"id":"183","code":"kuda_postavit","name":"Куда поставить","type":"varchar","multiple":"0","selectable":"0"}
+{"id":"310","code":"forma_postavki","name":"Форма поставки","type":"varchar","multiple":"0","selectable":"1"}
+{"id":"337","code":"vid_postavki","name":"Вид поставки","type":"varchar","multiple":"0","selectable":"0"}
+{"id":"681","code":"postavshchik_1","name":"ПОСТАВЩИК 1","type":"varchar","multiple":"0","selectable":"1"}
+{"id":"929","code":"komplekt_postavki","name":"Комплект   поставки","type":"varchar","multiple":"0","selectable":"0"}
+{"id":"1150","code":"postavlyaetsya_v_razobrannom_vide","name":"Поставляется в разобранном виде","type":"varchar","multiple":"0","selectable":"0"}
+{"id":"1176","code":"tip_postavki","name":"Тип поставки","type":"varchar","multiple":"0","selectable":"0"}
+{"id":"1638","code":"postavka_izdeliya","name":"Поставка изделия","type":"varchar","multiple":"0","selectable":"0"}
+{"id":"2219","code":"kenner_65123dcbc196","name":"Артикул поставщика","type":"varchar","multiple":"0","selectable":"0"}
+{"id":"2255","code":"redkit_b6cbcdaacacf3d21","name":"Форма поставки","type":"varchar","multiple":"0","selectable":"0"}
+[product_params_supplier_like]
 --- supplier mapping counts ---
 3	4SEASONS	4 Сезона	0
 8	AFINA	Afina Garden	0
