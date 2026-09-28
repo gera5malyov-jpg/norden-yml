@@ -67,7 +67,9 @@ echo "--- plugin ---"
 if [ -e "$PLUGIN" ]; then
   echo "plugin_exists=yes"
   ls -ld "$PLUGIN"
-  find "$PLUGIN" -maxdepth 2 -type f -printf '%u:%g %m %p\\n' | head -n 30
+  find "$PLUGIN" -maxdepth 3 -type f -printf '%u:%g %m %p\\n' | head -n 60
+  echo "--- plugin php lint ---"
+  find "$PLUGIN" -name '*.php' -print0 | while IFS= read -r -d '' f; do php -l "$f" || true; done
 else
   echo "plugin_exists=no"
 fi
@@ -80,6 +82,33 @@ if [ -f "$ROOT/wa-config/apps/shop/plugins.php" ]; then
 else
   echo "plugins.php not found"
 fi
+echo "--- megasuppliers DB tables ---"
+cat >/tmp/ms_table_probe.php <<'PHP'
+<?php
+$root = '/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null, new SystemConfig());
+wa('shop');
+$m=new waModel();
+foreach (array('shop_megasuppliers_supplier','shop_megasuppliers_product','shop_megasuppliers_import','shop_megasuppliers_meta') as $t) {
+  try {
+    $r=$m->query("SHOW TABLES LIKE s:table", array('table'=>$t))->fetch();
+    echo $t."=".($r ? "yes" : "no")."\\n";
+  } catch (Exception $e) {
+    echo $t."=ERROR ".$e->getMessage()."\\n";
+  }
+}
+try {
+  $p=wa('shop')->getPlugin('megasuppliers', true);
+  echo "plugin_class=".get_class($p)." version=".$p->getVersion()."\\n";
+} catch (Exception $e) {
+  echo "plugin_init_error=".$e->getMessage()."\\n";
+}
+PHP
+chown web:web /tmp/ms_table_probe.php
+su -s /bin/bash web -c 'php /tmp/ms_table_probe.php' || true
+rm -f /tmp/ms_table_probe.php
 echo "--- existing plugin ownership sample ---"
 find "$ROOT/wa-apps/shop/plugins" -mindepth 1 -maxdepth 1 -type d -printf '%u:%g %m %p\\n' | head -n 12
 echo "--- web user php modules ---"
