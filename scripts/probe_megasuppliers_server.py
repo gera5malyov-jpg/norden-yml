@@ -156,6 +156,15 @@ for log in "$ROOT/wa-log/shop/plugins/megasuppliers.log" "$ROOT/wa-log/php.log" 
   fi
 done
 
+echo "--- compare existing plugin backend routing ---"
+for f in "$ROOT/wa-apps/shop/plugins/yml/lib/shopYml.plugin.php" "$ROOT/wa-apps/shop/plugins/plugincontrol/lib/shopPlugincontrol.plugin.php"; do
+  if [ -f "$f" ]; then
+    echo "### $f"
+    grep -n -E "backendMenu|backendExtendedMenu|getAppUrl|plugin=" "$f" | head -n 80 || true
+  fi
+done
+find "$ROOT/wa-apps/shop/plugins/yml/lib/actions/backend" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | sort | head -n 80
+
 echo "--- backend action cli diagnostic ---"
 cat >/tmp/ms_backend_probe.php <<'PHP'
 <?php
