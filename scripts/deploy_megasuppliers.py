@@ -305,7 +305,8 @@ su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_verify.p
 
 echo "backup=$BACK"
 rm -rf "$STAGE" /tmp/ms_register.php /tmp/ms_db_init.php /tmp/ms_verify.php /tmp/megasuppliers-1.0.1.zip
-"""\n            p=ssh(key,"bash -s",stdin=remote,check=True,timeout=180)
+"""
+            p=ssh(key,"bash -s",stdin=remote,check=True,timeout=180)
             log(p.stdout.strip())
             if p.stderr.strip():
                 log("remote_stderr="+p.stderr.strip()[-1200:])
