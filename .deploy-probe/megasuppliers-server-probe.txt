@@ -2614,7 +2614,315 @@ Uncaught exception waException:
 #4 wa-system/controller/waViewAction.class.php(188): shopMegasuppliersPluginBackendAction->execute()
 #6 wa-system/controller/waDefaultViewController.class.php(48): waViewController->executeAction(Object(shopMegasuppliersPluginBackendAction))
 #12 wa-system/controller/waFrontController.class.php(84): waFrontController->execute('megasuppliers', 'backend', NULL)
---- compare existing plugin backend routing ---
+--- working plugin backend structure ---
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/yml/lib/shopYml.plugin.php
+<?php
+
+class shopYmlPlugin extends shopPlugin
+{
+
+	public static function translate($key = null)
+	{
+		$translates = [];
+		$translates['product'] = _w('Basic fields');
+		$translates['product_custom_fields'] = _w("Custom product fields");
+		$translates['sku'] = _w('SKU fields');
+		$translates['sku_custom_fields'] = _w("Custom sku fields");
+		$translates['feature'] = 'Характеристики товара';
+		$translates['pricex'] = 'Цены PRO';
+
+		//$translates['feature+'] = _w('Add as new feature');
+
+		return $key ? ifempty($translates[$key], '') : $translates;
+	}
+
+	public function backendCategoryDialog($category)
+	{
+		return waHtmlControl::getControl(
+			   waHtmlControl::INPUT, 'yml_id', [
+				   'value'           => $category['yml_id'],
+				   'title'           => 'YML ID',
+				   'title_wrapper'   => '%s',
+				   'control_wrapper' => '<div class="field"><div class="name">%s</div><div class="value no-shift">%s%s</div></div>'
+			   ]
+		);
+	}
+
+	public function categorySave()
+	{
+		if (waRequest::method() === 'post') {
+			$id     = waRequest::request('category_id');
+			$yml_id = waRequest::post('yml_id');
+
+			if ($id && $yml_id) {
+				$model  = new shopCategoryModel();
+
+				$holders = [
+					   'yml_id' => $yml_id,
+					   'id'     => $id
+				];
+
+				$sql = "UPDATE `shop_category` SET yml_id = s:yml_id WHERE `id` = i:id";
+				$model->exec($sql, $holders);
+			}
+		}
+	}
+
+	public static function getHtmlTree($profile_id, $tree, $depth = 0, $disabled = false): string
+	{
+		$html = '';
+
+		if (!empty($tree)){
+			static $matches_model;
+			if (!isset($matches_model)){
+				$matches_model = new shopYmlCategoriesModel();
+			}
+
+			$map = $matches_model->getMap(
+				   $profile_id,
+				   !empty($tree)
+					      ? array_keys($tree)
+					      : []
+			);
+
+			$html = '<ul class="yml-category-tree' . (!$depth ? ' first' : '') . '">';
+			foreach ($tree as $t){
+				$has_child     = !empty($t['children']);
+
+				$special_class = '';
+				$status        = 1;
+				$status_icon   = 'green';
+
+				if (isset($map[$t['id']])){
+					if (!empty($map[$t['id']]['shop_id'])){
+						$special_class = ' matched';
+					}
+
+					if (empty($map[$t['id']]['status'])){
+						$status = 0;
+						$special_class .= ' disabled';
+						$status_icon = 'red';
+					}
+				}
+
+				if ($disabled && $status){
+					$status = 0;
+				}
+
+				if ($has_child){
+					$special_class .= ' dynamic';
+				}
+
+				$html .= '<li' . ($special_class ? ' class="' . trim($special_class) . '"' : '').  '>
+                            <span class="category-name' . (!$status ? ' dis' : '') .
+				         ($has_child ? ' has_children' : '') . '" 
+                                                        data-depth="'.$depth.'" 
+                                                        data-id="' . $t['id'] . '">
+                                <span class="categ-status">
+                                    <i class="fa-solid fa-circle status-' . $status_icon . '"></i>
+                                </span>
+
+                                <span class="js-cat-name' . (!$status ? ' js-dis' : '') . '">
+                                    <i class="fa-solid fa-folder"></i> '
+					            . $t['name'] .
+					         '</span>' .
+				         ($has_child ? '<span class="category-arr">
+                                                      <i class="fa-solid fa-caret-down"></i>
+                                                 </span>' : '') .
+				         '</span>';
+
+				if (!empty($t['children'])){
+					$html .= self::getHtmlTree($profile_id, $t['children'], $depth + 1);
+				}
+
+				$html .= '</li>';
+			}
+
+			$html .= '</ul>';
+		}
+
+		return $html;
+	}
+
+	public function backendProducts()
+	{
+		$profiles_model = new shopYmlProfilesModel();
+		$profiles 		= $profiles_model->getList();
+
+		$list = '';
+
+		if ($profiles) {
+			$list = '<ul class="menu-v with-icons">';
+			foreach($profiles as $p_id => $p) {
+				$list .= '
+                        <li data-type="yml_id" id="yml_id-' . $p_id . '">
+                            <a href="#/products/hash=yml_id/' . $p_id . '/">
+                                <i class="icon16 box fa-solid fa-box"></i>
+                                ' . $p['name'] . '
+                            </a>
+                        </li>
+                    ';
+			}
+			$list .= '</ul>';
+		}
+
+		return [
+			   'sidebar_section' => '
+                <div class="block drop-target" id="s-yml-profiles-block">
+                    <h5 class="heading">
+                        <i class="icon16 collapse-handler darr fa-solid fa-caret-down" id="s-yml-profiles-handler"></i>
+                        Профили YML
+                    </h5>
+                    
+                    <div class="s-collection-list" id="s-yml-profiles-list">
+                        ' . $list . '
+                    </div>
+                </div>
+
+                <script type="text/javascript">
+                    $.products.ymlAction = function(){
+                        let params = Array.prototype.join.call(arguments, \'/\');
+                        params = $.shop.helper.parseParams(params || \'\');
+                        
+                        this.load(\'?module=products&\' + this.buildProductsUrlComponent(params), this.checkAlerts);
+                    };
+                </script>'
+		];
+	}
+
+	public function productsCollection($params): bool
+	{
+		$collection = $params['collection'];
+		$hash       = $collection->getHash();
+
+		if (count($hash) === 2 && $hash[0] === 'yml_id') {
+			$yml_id = (int)$hash[1];
+
+			$params['auto_title'] = false;
+
+			$profile_name = (new shopYmlProfilesModel())->getName($yml_id);
+
+			$collection->addTitle($profile_name);
+
+			$collection->addWhere('yml_profile_id = ' . $yml_id);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function formatSize($size): string
+	{
+		if (!is_numeric($size) && is_string($size) && file_exists($size)) {
+			$size = filesize($size);
+		}
+
+		if ($size >= 1073741824) {
+			$size = number_format($size / 1073741824, 2) . ' GB';
+		} elseif ($size >= 1048576) {
+			$size = number_format($size / 1048576, 2) . ' MB';
+		} elseif ($size >= 1024) {
+			$size = number_format($size / 1024, 2) . ' KB';
+		} elseif ($size > 1) {
+			$size = $size . ' bytes';
+		} elseif ($size == 1) {
+			$size = $size . ' bytes';
+		} else {
+			$size = '0 bytes';
+		}
+
+		return $size;
+	}
+
+	public static function pathInfo($path)
+	{
+		return $path ? pathinfo($path) : [];
+	}
+
+	public static function getChilds($category, $breads, $selected_id = null): string
+	{
+		$html = ' <ul class="menu-v with-icons">';
+
+		foreach($breads[$category['id']] as $sc) {
+			$html .= '<li class="dr' . ($sc['id'] == $selected_id ? ' matched' : '') . '" id = "yml-category-' . $sc['id'] . '" data-id="' . $sc['id'] . '" data-depth="' . $sc['depth'] . '" data-type="category">
+                <a href="#/products/category_id=' . $sc['id'] . '" class="s-product-list">
+                    <span class="name">
+                        <i class="fa-solid fa-folder"></i>
+                            ' . $sc['name'] . '
+                    </span>
+
+                    ' . ($sc['children_count']
+						  ? '<i class="fa-solid fa-caret-down overhanging" id="yml-category-' . $sc['id'] . '-handler"></i>'
+						  : '') . '
+                </a>
+               ';
+
+			if (!empty($breads[$sc['id']])) {
+				$html .= self::getChilds($sc, $breads, $selected_id);
+			}
+
+			$html .= '</li>';
+		}
+
+		$html .= '</ul>';
+
+		return $html;
+	}
+
+	public function categoryDelete($category)
+	{
+		$yml_categories_model = new shopYmlCategoriesModel();
+		$yml_categories_model->deleteByField('shop_id', $category['id']);
+	}
+
+	public static function dateDiff($date2){
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/yml/lib/actions/backend/shopYmlPluginBackendSetup.action.php
+<?php
+
+class shopYmlPluginBackendSetupAction extends waViewAction
+{
+	public function execute()
+	{
+		if ($this->check()) {
+			$this->setVersion();
+			$this->assignProfiles();
+
+			$is_legacy = shopYmlHelper::isLegacy();
+			$this->view->assign('is_legacy', $is_legacy);
+		}
+	}
+
+	public function check(): bool
+	{
+		$check = true;
+		if(class_exists('waLicensing')) {
+			try {
+				$check = waLicensing::check('shop/plugins/yml')->hasLicense();
+				if(!$check) {
+					throw new waException('No license');
+				}
+			} catch (waException $e) {
+				$this->setTemplate('NoLicense');
+				$check = false;
+			}
+		}
+
+		return $check;
+	}
+
+	public function setVersion(): void
+	{
+		$version = wa('shop')->getPlugin('yml')->getVersion();
+		$this->view->assign('version', $version);
+	}
+
+	public function assignProfiles(): void
+	{
+		$profiles_model = new shopYmlProfilesModel();
+		$profiles 		= $profiles_model->getList();
+		$this->view->assign('profiles', $profiles);
+	}
+}--- compare existing plugin backend routing ---
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/yml/lib/shopYml.plugin.php
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/plugincontrol/lib/shopPlugincontrol.plugin.php
 shopYmlPluginBackendProducts.controller.php
@@ -2744,6 +3052,177 @@ Stack trace:
         </tbody>
     </table>
 </div>
+--- megasuppliers backend direct probe ---
+
+Warning: Declaration of shopMegasuppliersPlugin::routing($route) should be compatible with waPlugin::routing($route = Array) in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php on line 43
+plugin=shopMegasuppliersPlugin
+backend_action_class=yes
+meta_read=yes
+supplier_count=13
+import_count=0
+--- recent megasuppliers/errors in wa-log ---
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-log/shop/plugins/megasuppliers.log
+1821:Megasuppliers install error: Unknown field id
+1824:Megasuppliers install error: Unknown field id
+1827:Megasuppliers install error: Unknown field id
+1830:Megasuppliers install error: Unknown field id
+1833:Megasuppliers install error: Unknown field id
+1836:Megasuppliers install error: Unknown field id
+1839:Megasuppliers install error: Unknown field id
+1842:Megasuppliers install error: Unknown field id
+1845:Megasuppliers install error: Unknown field id
+1848:Megasuppliers install error: Unknown field id
+1851:Megasuppliers install error: Unknown field id
+1854:Megasuppliers install error: Unknown field id
+1857:Megasuppliers install error: Unknown field id
+1860:Megasuppliers install error: Unknown field id
+1863:Megasuppliers install error: Unknown field id
+1866:Megasuppliers install error: Unknown field id
+1869:Megasuppliers install error: Unknown field id
+1872:Megasuppliers install error: Unknown field id
+1875:Megasuppliers install error: Unknown field id
+1878:Megasuppliers install error: Unknown field id
+1881:Megasuppliers install error: Unknown field id
+1884:Megasuppliers install error: Unknown field id
+1887:Megasuppliers install error: Unknown field id
+1890:Megasuppliers install error: Unknown field id
+1893:Megasuppliers install error: Unknown field id
+1896:Megasuppliers install error: Unknown field id
+1899:Megasuppliers install error: Unknown field id
+1902:Megasuppliers install error: Unknown field id
+1905:Megasuppliers install error: Unknown field id
+1908:Megasuppliers install error: Unknown field id
+1911:Megasuppliers install error: Unknown field id
+1914:Megasuppliers install error: Unknown field id
+1917:Megasuppliers install error: Unknown field id
+1920:Megasuppliers install error: Unknown field id
+1923:Megasuppliers install error: Unknown field id
+1926:Megasuppliers install error: Unknown field id
+1929:Megasuppliers install error: Unknown field id
+1932:Megasuppliers install error: Unknown field id
+1935:Megasuppliers install error: Unknown field id
+1938:Megasuppliers install error: Unknown field id
+1941:Megasuppliers install error: Unknown field id
+1944:Megasuppliers install error: Unknown field id
+1947:Megasuppliers install error: Unknown field id
+1950:Megasuppliers install error: Unknown field id
+1953:Megasuppliers install error: Unknown field id
+1956:Megasuppliers install error: Unknown field id
+1959:Megasuppliers install error: Unknown field id
+1962:Megasuppliers install error: Unknown field id
+1965:Megasuppliers install error: Unknown field id
+1968:Megasuppliers install error: Unknown field id
+1971:Megasuppliers install error: Unknown field id
+1974:Megasuppliers install error: Unknown field id
+1977:Megasuppliers install error: Unknown field id
+1980:Megasuppliers install error: Unknown field id
+1983:Megasuppliers install error: Unknown field id
+1986:Megasuppliers install error: Unknown field id
+1989:Megasuppliers install error: Unknown field id
+1992:Megasuppliers install error: Unknown field id
+1995:Megasuppliers install error: Unknown field id
+1998:Megasuppliers install error: Unknown field id
+2001:Megasuppliers install error: Unknown field id
+2004:Megasuppliers install error: Unknown field id
+2007:Megasuppliers install error: Unknown field id
+2010:Megasuppliers install error: Unknown field id
+2013:Megasuppliers install error: Unknown field id
+2016:Megasuppliers install error: Unknown field id
+2019:Megasuppliers install error: Unknown field id
+2022:Megasuppliers install error: Unknown field id
+2025:Megasuppliers install error: Unknown field id
+2028:Megasuppliers install error: Unknown field id
+2031:Megasuppliers install error: Unknown field id
+2034:Megasuppliers install error: Unknown field id
+2037:Megasuppliers install error: Unknown field id
+2040:Megasuppliers install error: Unknown field id
+2043:Megasuppliers install error: Unknown field id
+2046:Megasuppliers install error: Unknown field id
+2049:Megasuppliers install error: Unknown field id
+2052:Megasuppliers install error: Unknown field id
+2055:Megasuppliers install error: Unknown field id
+2058:Megasuppliers install error: Unknown field id
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-log/error.log
+21852:Unknown field id (500)
+21856:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+21888:Error installing plugin shop.megasuppliers at first run:
+21889:Unknown field id (500)
+21893:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+21911:Error installing plugin shop.megasuppliers at first run:
+21912:Unknown field id (500)
+21916:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+21948:Error installing plugin shop.megasuppliers at first run:
+21949:Unknown field id (500)
+21953:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+21971:Error installing plugin shop.megasuppliers at first run:
+21972:Unknown field id (500)
+21976:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22007:Error installing plugin shop.megasuppliers at first run:
+22008:Unknown field id (500)
+22012:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22030:Error installing plugin shop.megasuppliers at first run:
+22031:Unknown field id (500)
+22035:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22067:Error installing plugin shop.megasuppliers at first run:
+22068:Unknown field id (500)
+22072:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22090:Error installing plugin shop.megasuppliers at first run:
+22091:Unknown field id (500)
+22095:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22127:Error installing plugin shop.megasuppliers at first run:
+22128:Unknown field id (500)
+22132:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22150:Error installing plugin shop.megasuppliers at first run:
+22151:Unknown field id (500)
+22155:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22187:Error installing plugin shop.megasuppliers at first run:
+22188:Unknown field id (500)
+22192:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22210:Error installing plugin shop.megasuppliers at first run:
+22211:Unknown field id (500)
+22215:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22246:Error installing plugin shop.megasuppliers at first run:
+22247:Unknown field id (500)
+22251:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22269:Error installing plugin shop.megasuppliers at first run:
+22270:Unknown field id (500)
+22274:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22306:Error installing plugin shop.megasuppliers at first run:
+22307:Unknown field id (500)
+22311:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22329:Error installing plugin shop.megasuppliers at first run:
+22330:Unknown field id (500)
+22334:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22365:Error installing plugin shop.megasuppliers at first run:
+22366:Unknown field id (500)
+22370:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22388:Error installing plugin shop.megasuppliers at first run:
+22389:Unknown field id (500)
+22393:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22425:Error installing plugin shop.megasuppliers at first run:
+22426:Unknown field id (500)
+22430:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22448:Error installing plugin shop.megasuppliers at first run:
+22449:Unknown field id (500)
+22453:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
+22485:Uncaught Error: Unknown field id
+22493:#3 megasuppliers-api/index.php(22): waModel->getById('api_key')
+22497:Uncaught Error: Unknown field id
+22505:#3 megasuppliers-api/index.php(22): waModel->getById('api_key')
+22509:webasyst/shop/?plugin=megasuppliers
+22510:Uncaught exception waException:
+22511:Unknown field id (500)
+22516:#3 wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php(20): waModel->getById('api_key')
+22517:#4 wa-system/controller/waViewAction.class.php(188): shopMegasuppliersPluginBackendAction->execute()
+22519:#6 wa-system/controller/waDefaultViewController.class.php(48): waViewController->executeAction(Object(shopMegasuppliersPluginBackendAction))
+22525:#12 wa-system/controller/waFrontController.class.php(84): waFrontController->execute('megasuppliers', 'backend', NULL)
+22533:webasyst/shop/?plugin=megasuppliers
+22534:Uncaught exception waException:
+22535:Unknown field id (500)
+22540:#3 wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php(20): waModel->getById('api_key')
+22541:#4 wa-system/controller/waViewAction.class.php(188): shopMegasuppliersPluginBackendAction->execute()
+22543:#6 wa-system/controller/waDefaultViewController.class.php(48): waViewController->executeAction(Object(shopMegasuppliersPluginBackendAction))
+22549:#12 wa-system/controller/waFrontController.class.php(84): waFrontController->execute('megasuppliers', 'backend', NULL)
 
 stderr=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
 
