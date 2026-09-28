@@ -1,0 +1,49 @@
+phase=feature_aliases
+feature NORDEN before=1 after=662 added=661
+feature 4SIS before=1 after=945 added=944
+feature AFINA before=0 after=279 added=279
+feature ALETAN before=0 after=0 added=0
+feature DEEPHOUSE before=0 after=1887 added=1887
+feature LEVMAR before=0 after=571 added=571
+feature TREEZ before=0 after=1488 added=1488
+feature RED_BLACK before=0 after=2187 added=2187
+feature TD_ANDREY before=0 after=9423 added=9423
+feature TD_NIKITIN before=0 after=0 added=0
+feature 4SEASONS before=0 after=0 added=0
+feature YOURROOM before=0 after=0 added=0
+feature KENNER before=0 after=0 added=0
+feature B2B_FABRIKA before=0 after=0 added=0
+phase=type_fallback
+type NORDEN before=662 after=664 added=2
+type TD_ANDREY before=9423 after=9427 added=4
+type DEEPHOUSE before=1887 after=1889 added=2
+type LEVMAR before=571 after=571 added=0
+type TREEZ before=1488 after=1488 added=0
+type YOURROOM before=0 after=0 added=0
+type AFINA before=279 after=294 added=15
+type ALETAN before=0 after=979 added=979
+type RED_BLACK before=2187 after=2221 added=34
+type B2B_FABRIKA before=0 after=112 added=112
+type KENNER before=0 after=75 added=75
+type 4SIS before=945 after=945 added=0
+verify_samples
+AF-31391502=[{"product_id":"1212393","type_id":"142","sku":"AF-31391502","supplier_name":"Norden","supplier_code":"NORDEN"}]
+AF-31662421=[{"product_id":"1483283","type_id":"142","sku":"AF-31662421","supplier_name":"Norden","supplier_code":"NORDEN"}]
+AF-31655692=[{"product_id":"1476554","type_id":"11","sku":"AF-31655692","supplier_name":"4SIS","supplier_code":"4SIS"}]
+summary
+4SEASONS	4 Сезона	0
+4SIS	4SIS	945
+AFINA	Afina Garden	294
+ALETAN	Aletan	979
+B2B_FABRIKA	B2B Fabrika	112
+DEEPHOUSE	DEEPHOUSE	1889
+KENNER	Kenner	75
+LEVMAR	Levmar	571
+NORDEN	Norden	664
+RED_BLACK	Red-Black	2221
+TREEZ	Treez	1488
+YOURROOM	Yourroom	0
+TD_ANDREY	ТД Андрей	9427
+TD_NIKITIN	ТД Никитин	0
+STDERR
+Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
