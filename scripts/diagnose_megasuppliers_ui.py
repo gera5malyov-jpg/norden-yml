@@ -58,27 +58,67 @@ $p=wa('shop')->getPlugin('megasuppliers',true);
 $cfg=include $root.'/wa-apps/shop/plugins/megasuppliers/lib/config/plugin.php';
 echo "VERSION=".ifset($cfg['version'])."\n";
 echo "HANDLERS=".json_encode(ifset($cfg['handlers'],array()),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
-$r=$p->backendProducts(array());
-echo "DIRECT_SIDEBAR=".(isset($r['sidebar_section'])?'yes':'no')." LEN=".strlen(ifset($r['sidebar_section'],''))."\n";
-$e=wa('shop')->event('backend_products');
-echo "EVENT_KEYS=".implode(',',array_keys($e))."\n";
-echo "EVENT_MS_SIDEBAR=".(isset($e['megasuppliers']['sidebar_section'])?'yes':'no')."\n";
+
+$legacy=$p->backendProducts(array());
+$legacy_html=isset($legacy['sidebar_section'])?$legacy['sidebar_section']:'';
+echo "LEGACY_SIDEBAR=".(strpos($legacy_html,'Поставщики')!==false?'yes':'no')."\n";
+echo "LEGACY_RELOCATE_SCRIPT=".(strpos($legacy_html,'s-set-list-block')!==false?'yes':'no')."\n";
+
+$params_list=array('products'=>array(),'products_total_count'=>0,'current_page'=>1,'pages_count'=>1);
+$new=$p->backendProdList($params_list);
+$new_html=isset($new['header_left'])?$new['header_left']:'';
+echo "NEW_UI_HOOK=".(strpos($new_html,'s-megasuppliers-new-list')!==false?'yes':'no')."\n";
+echo "NEW_UI_TARGET=".(strpos($new_html,'s-filter-categories-section')!==false?'yes':'no')."\n";
+
+$e1=wa('shop')->event('backend_products');
+$e2=wa('shop')->event('backend_prod_list',$params_list);
+echo "EVENT_LEGACY=".(isset($e1['megasuppliers-plugin']['sidebar_section'])?'yes':'no')."\n";
+echo "EVENT_NEW=".(isset($e2['megasuppliers-plugin']['header_left'])?'yes':'no')."\n";
+
 $sm=new shopMegasuppliersSupplierModel();
-$s=$sm->getByField('code','4SIS');
-echo "S4=".json_encode($s,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
-if ($s) {
-    $_GET['megasupplier']=(int)$s['id'];
-    $_REQUEST['megasupplier']=(int)$s['id'];
-    $c=new shopProductsCollection('');
-    echo "COUNT_BEFORE=".$c->count()."\n";
-    $params=array('filter'=>null,'filter_options'=>array(),'collection'=>$c);
-    $p->backendProdFilters($params);
-    echo "COUNT_AFTER=".$c->count()."\n";
-    $m=new waModel();
-    $pid=$m->query("SELECT p.id FROM shop_product_skus s JOIN shop_product p ON p.id=s.product_id WHERE s.sku='AF-31655692' LIMIT 1")->fetchField();
-    $one=$c->getProducts('id',0,5000,false);
-    echo "TEST_PID=".$pid." INCLUDED=".(isset($one[$pid])?'yes':'no')."\n";
+$s4=$sm->getByField('code','4SIS');
+$sn=$sm->getByField('code','NORDEN');
+echo "S4=".json_encode($s4,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+echo "SN=".json_encode($sn,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+
+$m=new waModel();
+$pid4=(int)$m->query("SELECT p.id FROM shop_product_skus s JOIN shop_product p ON p.id=s.product_id WHERE s.sku='AF-31655692' LIMIT 1")->fetchField();
+$pidn=(int)$m->query("SELECT p.id FROM shop_product_skus s JOIN shop_product p ON p.id=s.product_id WHERE s.sku='AF-31662421' LIMIT 1")->fetchField();
+$pids=(int)$m->query("SELECT p.id FROM shop_product_skus s JOIN shop_product p ON p.id=s.product_id WHERE s.sku='AF-31391502' LIMIT 1")->fetchField();
+
+if ($s4) {
+    $_GET['megasupplier']=(int)$s4['id'];
+    $_REQUEST['megasupplier']=(int)$s4['id'];
+    $c4=new shopProductsCollection('');
+    $filter_params=array('filter'=>null,'filter_options'=>array(),'collection'=>$c4);
+    $p->backendProdFilters($filter_params);
+    $count4=$c4->count();
+    $rows4=$c4->getProducts('id',0,min(2000,max(1,$count4)),false);
+    echo "FILTER_4SIS_COUNT=".$count4."\n";
+    echo "FILTER_4SIS_TEST_INCLUDED=".(isset($rows4[$pid4])?'yes':'no')."\n";
+    echo "FILTER_4SIS_NORDEN_EXCLUDED=".(!isset($rows4[$pidn])?'yes':'no')."\n";
 }
+if ($sn) {
+    $_GET['megasupplier']=(int)$sn['id'];
+    $_REQUEST['megasupplier']=(int)$sn['id'];
+    $cn=new shopProductsCollection('');
+    $filter_params_n=array('filter'=>null,'filter_options'=>array(),'collection'=>$cn);
+    $p->backendProdFilters($filter_params_n);
+    $countn=$cn->count();
+    $rowsn=$cn->getProducts('id',0,min(2000,max(1,$countn)),false);
+    echo "FILTER_NORDEN_COUNT=".$countn."\n";
+    echo "FILTER_NORDEN_TEST_INCLUDED=".(isset($rowsn[$pidn])?'yes':'no')."\n";
+    echo "FILTER_NORDEN_SCREENSHOT_INCLUDED=".(isset($rowsn[$pids])?'yes':'no')."\n";
+    echo "FILTER_NORDEN_4SIS_EXCLUDED=".(!isset($rowsn[$pid4])?'yes':'no')."\n";
+}
+
+$product_screen=new shopProduct($pids);
+$old_card=$p->backendProductEdit($product_screen);
+$new_card=$p->backendProdContent(array('product'=>$product_screen,'content_id'=>'general'));
+$old_card_html=isset($old_card['basics'])?$old_card['basics']:'';
+$new_card_html=isset($new_card['form_bottom'])?$new_card['form_bottom']:'';
+echo "CARD_SCREENSHOT_OLD_NORDEN_SELECTED=".(strpos($old_card_html,'selected>Norden</option>')!==false?'yes':'no')."\n";
+echo "CARD_SCREENSHOT_NEW_NORDEN_SELECTED=".(strpos($new_card_html,'selected>Norden</option>')!==false?'yes':'no')."\n";
 PHP
 chown web:web /tmp/ms_ui_diag.php
 su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_ui_diag.php'
