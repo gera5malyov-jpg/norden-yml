@@ -18,9 +18,17 @@ _,tok=req("https://panel.netangels.ru/api/gateway/token/","POST",body,
 headers={"Authorization":"Bearer "+tok["token"],"Accept":"application/json"}
 _,data=req(f"https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/?limit=100","GET",None,headers)
 items=data.get("entities",[]) if isinstance(data,dict) else data
-lines=["count="+str(len(items))]
+lines=["vm_key_count="+str(len(items))]
 for item in items:
-    lines.append("id={id} name={name} created={created} fingerprint={fingerprint}".format(
+    lines.append("vm id={id} name={name} created={created} fingerprint={fingerprint}".format(
+        id=item.get("id"), name=item.get("name",""), created=item.get("created",""), fingerprint=item.get("fingerprint","")
+    ))
+
+_,global_data=req("https://api-ms.netangels.ru/api/v1/sshkeys/?limit=100","GET",None,headers)
+global_items=global_data.get("entities",[]) if isinstance(global_data,dict) else global_data
+lines.append("account_key_count="+str(len(global_items)))
+for item in global_items:
+    lines.append("account id={id} name={name} created={created} fingerprint={fingerprint}".format(
         id=item.get("id"), name=item.get("name",""), created=item.get("created",""), fingerprint=item.get("fingerprint","")
     ))
 OUT.parent.mkdir(exist_ok=True)
