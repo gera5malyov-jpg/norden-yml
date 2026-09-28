@@ -4,6 +4,13 @@ on:
   schedule:
     - cron: '17 */6 * * *'
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'catalog/sync_norden_chairs_stools_6h.py'
+      - 'catalog/norden_category_fallback.py'
+      - 'tests/test_norden_category_fallback.py'
+      - '.github/workflows/norden-chairs-stools-6h.yml'
 
 permissions:
   contents: write
