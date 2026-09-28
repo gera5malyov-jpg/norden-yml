@@ -197,6 +197,35 @@ chown web:web /tmp/ms_supplier_sources.php
 su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_supplier_sources.php' || true
 rm -f /tmp/ms_supplier_sources.php
 
+echo "--- supplier metadata details ---"
+cat >/tmp/ms_supplier_details.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$m=new waModel();
+
+echo "[matching_types]\n";
+$rows=$m->query("SELECT t.id,t.name,COUNT(p.id) c FROM shop_type t LEFT JOIN shop_product p ON p.type_id=t.id WHERE LOWER(t.name) LIKE '%сезон%' OR LOWER(t.name) LIKE '%your%' OR LOWER(t.name) LIKE '%никит%' OR LOWER(t.name) LIKE '%fh%' OR LOWER(t.name) LIKE '%afina%' OR LOWER(t.name) LIKE '%kenner%' OR LOWER(t.name) LIKE '%levmar%' OR LOWER(t.name) LIKE '%левмар%' OR LOWER(t.name) LIKE '%norden%' OR LOWER(t.name) LIKE '%deep%' OR LOWER(t.name) LIKE '%treez%' OR LOWER(t.name) LIKE '%red%' OR LOWER(t.name) LIKE '%алет%' OR LOWER(t.name) LIKE '%aletan%' OR LOWER(t.name) LIKE '%b2b%' OR LOWER(t.name) LIKE '%в2в%' OR LOWER(t.name) LIKE '%андрей%' GROUP BY t.id,t.name ORDER BY t.name")->fetchAll();
+foreach($rows as $r){ echo $r['id']."\t".$r['c']."\t".$r['name']."\n"; }
+
+echo "[feature_681_values]\n";
+$f=(new shopFeatureModel())->getById(681);
+if($f){
+  $vm=shopFeatureModel::getValuesModel($f['type']);
+  $vals=$vm->select('id,value')->where('feature_id=681')->fetchAll('id');
+  foreach($vals as $id=>$v){
+    $cnt=$m->query("SELECT COUNT(DISTINCT product_id) c FROM shop_product_features WHERE feature_id=681 AND feature_value_id=i:id",array('id'=>$id))->fetchField('c');
+    echo $id."\t".$cnt."\t".$v['value']."\n";
+  }
+}
+PHP
+chown web:web /tmp/ms_supplier_details.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_supplier_details.php' || true
+rm -f /tmp/ms_supplier_details.php
+
 echo "--- supplier mapping counts ---"
 cat >/tmp/ms_supplier_counts.php <<'PHP'
 <?php
