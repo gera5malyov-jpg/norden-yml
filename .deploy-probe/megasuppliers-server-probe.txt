@@ -2614,6 +2614,9 @@ Uncaught exception waException:
 #4 wa-system/controller/waViewAction.class.php(188): shopMegasuppliersPluginBackendAction->execute()
 #6 wa-system/controller/waDefaultViewController.class.php(48): waViewController->executeAction(Object(shopMegasuppliersPluginBackendAction))
 #12 wa-system/controller/waFrontController.class.php(84): waFrontController->execute('megasuppliers', 'backend', NULL)
+--- shop plugin dispatcher ---
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/backend/shopBackendWelcome.action.php:80:        if ($plugin_id = waRequest::post('plugin')) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/backend/shopBackendWelcome.action.php:81:            $data = waRequest::post($plugin_id);
 --- working plugin backend structure ---
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/yml/lib/shopYml.plugin.php
 <?php
