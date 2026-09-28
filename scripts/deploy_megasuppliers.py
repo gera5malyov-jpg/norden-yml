@@ -89,7 +89,7 @@ def main():
                     if pos < 0:
                         raise RuntimeError("cannot patch plugin routing method")
                     method=r"""
-    public function routing($route)
+    public function routing($route = array())
     {
         if (wa()->getEnv() === 'frontend') {
             return [
@@ -166,6 +166,21 @@ cp -a "$STAGE/megasuppliers" "$PLUGIN"
 chown -R web:web "$PLUGIN"
 find "$PLUGIN" -type d -exec chmod 755 {} +
 find "$PLUGIN" -type f -exec chmod 644 {} +
+
+# Reset PHP-FPM OPcache through a one-time web request so replaced plugin classes
+# are visible immediately to backend/browser requests.
+OPRESET="$ROOT/ms-opcache-reset-$TS.php"
+cat >"$OPRESET" <<'PHP'
+<?php
+header('Content-Type: text/plain; charset=utf-8');
+echo function_exists('opcache_reset') ? (opcache_reset() ? 'opcache_reset=yes' : 'opcache_reset=no') : 'opcache_reset=unavailable';
+PHP
+chown web:web "$OPRESET"
+chmod 644 "$OPRESET"
+RESET_NAME="$(basename "$OPRESET")"
+RESET_OUT="$(curl -kfsS --max-time 20 "https://profikompany.ru/$RESET_NAME" || true)"
+echo "$RESET_OUT"
+rm -f "$OPRESET"
 
 cat >/tmp/ms_register.php <<'PHP'
 <?php
@@ -367,6 +382,14 @@ chmod 755 "$API_DIR"
 chmod 644 "$API_DIR/index.php"
 php -l "$API_DIR/index.php"
 echo "api_bridge=yes"
+
+# Functional API guard check without exposing the key.
+API_TEST_KEY="$(php -r '$c=include "/home/web/vm-23f9aff9.na4u.ru/www/wa-config/db.php"; $d=isset($c["default"])?$c["default"]:$c; $m=new mysqli(isset($d["host"])?$d["host"]:"localhost",$d["user"],$d["password"],$d["database"],isset($d["port"])?(int)$d["port"]:3306); $r=$m->query("SELECT value FROM shop_megasuppliers_meta WHERE name=\"api_key\" LIMIT 1"); $x=$r?$r->fetch_assoc():null; echo $x?$x["value"]:"";')"
+API_TEST_STATUS="$(curl -ksS -o /tmp/ms_api_guard_body.txt -w '%{http_code}' -X POST -H "Content-Type: application/json" -H "X-Megasuppliers-Key: $API_TEST_KEY" --data '{"items":[{"артикул":"__guard_test__"}]}' "https://profikompany.ru/megasuppliers-api/" || true)"
+echo "api_supplier_required_status=$API_TEST_STATUS"
+echo "api_supplier_required_body=$(cat /tmp/ms_api_guard_body.txt 2>/dev/null || true)"
+rm -f /tmp/ms_api_guard_body.txt
+test "$API_TEST_STATUS" = "422"
 
 # Remove Shop-Script cache only; it is regenerated automatically.
 rm -rf "$ROOT/wa-cache/apps/shop" || true
