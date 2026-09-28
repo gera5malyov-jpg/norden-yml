@@ -1,17 +1,17 @@
 ssh_user=root exit=0
 hostname=vm-23f9aff9
 root_exists=yes
-drwxr-xr-x 16 web web 4096 Sep 28 22:39 /home/web/vm-23f9aff9.na4u.ru/www
+drwxr-xr-x 16 web web 4096 Sep 28 23:19 /home/web/vm-23f9aff9.na4u.ru/www
 drwxr-xr-x 17 web web 4096 Sep 26 20:26 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps
 drwxr-xr-x 14 web web 4096 Aug 27 10:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop
-drwxr-xr-x 81 web web 4096 Sep 28 22:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
+drwxr-xr-x 81 web web 4096 Sep 28 23:19 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
 --- php ---
 PHP 7.3.19 (cli) (built: Jun 25 2020 05:00:00) ( NTS )
 Copyright (c) 1997-2018 The PHP Group
 Zend Engine v3.3.19, Copyright (c) 1998-2018 Zend Technologies
 --- plugin ---
 plugin_exists=yes
-drwxr-xr-x 5 web web 4096 Sep 28 22:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
+drwxr-xr-x 5 web web 4096 Sep 28 23:19 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersFileReader.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
@@ -45,7 +45,7 @@ No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plug
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php
 --- plugin config registration ---
 84:  'megasuppliers' => true,
--rw-rw-r-- 1 web web 1980 Sep 28 22:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
+-rw-rw-r-- 1 web web 1980 Sep 28 23:19 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
 --- plugins.php contents ---
 <?php
 
@@ -137,7 +137,7 @@ shop_megasuppliers_supplier=yes
 shop_megasuppliers_product=yes
 shop_megasuppliers_import=yes
 shop_megasuppliers_meta=yes
-plugin_class=shopMegasuppliersPlugin version=1.0.3
+plugin_class=shopMegasuppliersPlugin version=1.0.4
 --- existing plugin ownership sample ---
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/cleanup
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/lib
@@ -2036,13 +2036,14 @@ return [
     'description' => 'Справочник поставщиков, обязательная привязка поставщика при импорте XLSX/CSV и API, экспорт и синхронизация с товарами Shop-Script.',
     'img' => 'img/megasuppliers.svg',
     'vendor' => 'megapolis',
-    'version' => '1.0.3',
+    'version' => '1.0.4',
     'frontend' => true,
     'handlers' => [
         'backend_extended_menu' => 'backendExtendedMenu',
         'backend_menu' => 'backendMenu',
         'backend_prod' => 'backendProd',
         'backend_products' => 'backendProducts',
+        'backend_prod_filters' => 'backendProdFilters',
         'products_collection' => 'productsCollection',
         'routing' => 'routing',
     ],
@@ -2100,12 +2101,38 @@ class shopMegasuppliersPlugin extends shopPlugin
 {
     public function backendExtendedMenu(&$params)
     {
-        $url = wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers';
-        $params['menu']['megasuppliers'] = [
-            'name' => 'Поставщики',
-            'icon' => '<i class="fas fa-truck"></i>',
-            'url' => $url,
-        ];
+        $base_url = wa('shop')->getAppUrl(null, true);
+        $supplier_model = new shopMegasuppliersSupplierModel();
+        $suppliers = $supplier_model->select('id,name,code')->where('active=1')->order('name')->fetchAll();
+
+        if (isset($params['menu']['catalog']) && class_exists('shopMainMenu') && method_exists('shopMainMenu', 'createSection')) {
+            shopMainMenu::createSection(
+                $params['menu'],
+                'megasuppliers',
+                'Поставщики',
+                [
+                    'icon' => '<i class="fas fa-truck"></i>',
+                    'insert_after' => 'catalog',
+                    'submenu' => [],
+                ]
+            );
+            foreach ($suppliers as $supplier) {
+                $params['menu']['megasuppliers']['submenu'][] = [
+                    'name' => $supplier['name'],
+                    'url' => $base_url.'products/?megasupplier='.(int)$supplier['id'],
+                ];
+            }
+            $params['menu']['megasuppliers']['submenu'][] = [
+                'name' => 'Управление поставщиками',
+                'url' => $base_url.'?plugin=megasuppliers',
+            ];
+        } else {
+            $params['menu']['megasuppliers'] = [
+                'name' => 'Поставщики',
+                'icon' => '<i class="fas fa-truck"></i>',
+                'url' => $base_url.'?plugin=megasuppliers',
+            ];
+        }
     }
 
     public function backendMenu()
@@ -2160,7 +2187,8 @@ class shopMegasuppliersPlugin extends shopPlugin
             'ALETAN' => array(46, 122, 202),
             'RED_BLACK' => array(150),
             'B2B_FABRIKA' => array(204),
-            'KENNER' => array(203)
+            'KENNER' => array(203),
+            '4SIS' => array(11)
         );
     }
 
@@ -2213,6 +2241,19 @@ class shopMegasuppliersPlugin extends shopPlugin
             .'})(jQuery);</script>';
 
         return array('sidebar_section' => $html);
+    }
+
+    public function backendProdFilters(&$params)
+    {
+        $supplier_id = waRequest::get('megasupplier', 0, waRequest::TYPE_INT);
+        if ($supplier_id && !empty($params['collection'])) {
+            $supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
+            if ($supplier && !empty($supplier['active'])) {
+                $queries = $this->supplierProductSubqueries($supplier_id, $supplier['code']);
+                $params['collection']->addWhere('id IN ('.implode(' UNION ', $queries).')');
+            }
+        }
+        return array();
     }
 
     public function productsCollection($params)
@@ -3352,13 +3393,14 @@ shopYmlPluginBackendSetup.action.php
 104189	1853	Этажерка
 --- supplier mapping counts ---
 3	4SEASONS	4 Сезона	0
+14	4SIS	4SIS	1
 8	AFINA	Afina Garden	0
 9	ALETAN	Aletan	0
 12	B2B_FABRIKA	B2B Fabrika	0
 4	DEEPHOUSE	DEEPHOUSE	0
 13	KENNER	Kenner	0
 5	LEVMAR	Levmar	0
-1	NORDEN	Norden	0
+1	NORDEN	Norden	1
 10	RED_BLACK	Red-Black	0
 6	TREEZ	Treez	0
 7	YOURROOM	Yourroom	0
@@ -3368,7 +3410,7 @@ shopYmlPluginBackendSetup.action.php
 plugin=shopMegasuppliersPlugin
 backend_class_exists=yes
 supplier_model_exists=yes
-supplier_count=13
+supplier_count=14
 sidebar_render=yes
 sidebar_filter_link=yes
 sidebar_norden=yes
@@ -3493,171 +3535,9 @@ Stack trace:
 plugin=shopMegasuppliersPlugin
 backend_action_class=yes
 meta_read=yes
-supplier_count=13
-import_count=0
+supplier_count=14
+import_count=2
 --- recent megasuppliers/errors in wa-log ---
-### /home/web/vm-23f9aff9.na4u.ru/www/wa-log/shop/plugins/megasuppliers.log
-1821:Megasuppliers install error: Unknown field id
-1824:Megasuppliers install error: Unknown field id
-1827:Megasuppliers install error: Unknown field id
-1830:Megasuppliers install error: Unknown field id
-1833:Megasuppliers install error: Unknown field id
-1836:Megasuppliers install error: Unknown field id
-1839:Megasuppliers install error: Unknown field id
-1842:Megasuppliers install error: Unknown field id
-1845:Megasuppliers install error: Unknown field id
-1848:Megasuppliers install error: Unknown field id
-1851:Megasuppliers install error: Unknown field id
-1854:Megasuppliers install error: Unknown field id
-1857:Megasuppliers install error: Unknown field id
-1860:Megasuppliers install error: Unknown field id
-1863:Megasuppliers install error: Unknown field id
-1866:Megasuppliers install error: Unknown field id
-1869:Megasuppliers install error: Unknown field id
-1872:Megasuppliers install error: Unknown field id
-1875:Megasuppliers install error: Unknown field id
-1878:Megasuppliers install error: Unknown field id
-1881:Megasuppliers install error: Unknown field id
-1884:Megasuppliers install error: Unknown field id
-1887:Megasuppliers install error: Unknown field id
-1890:Megasuppliers install error: Unknown field id
-1893:Megasuppliers install error: Unknown field id
-1896:Megasuppliers install error: Unknown field id
-1899:Megasuppliers install error: Unknown field id
-1902:Megasuppliers install error: Unknown field id
-1905:Megasuppliers install error: Unknown field id
-1908:Megasuppliers install error: Unknown field id
-1911:Megasuppliers install error: Unknown field id
-1914:Megasuppliers install error: Unknown field id
-1917:Megasuppliers install error: Unknown field id
-1920:Megasuppliers install error: Unknown field id
-1923:Megasuppliers install error: Unknown field id
-1926:Megasuppliers install error: Unknown field id
-1929:Megasuppliers install error: Unknown field id
-1932:Megasuppliers install error: Unknown field id
-1935:Megasuppliers install error: Unknown field id
-1938:Megasuppliers install error: Unknown field id
-1941:Megasuppliers install error: Unknown field id
-1944:Megasuppliers install error: Unknown field id
-1947:Megasuppliers install error: Unknown field id
-1950:Megasuppliers install error: Unknown field id
-1953:Megasuppliers install error: Unknown field id
-1956:Megasuppliers install error: Unknown field id
-1959:Megasuppliers install error: Unknown field id
-1962:Megasuppliers install error: Unknown field id
-1965:Megasuppliers install error: Unknown field id
-1968:Megasuppliers install error: Unknown field id
-1971:Megasuppliers install error: Unknown field id
-1974:Megasuppliers install error: Unknown field id
-1977:Megasuppliers install error: Unknown field id
-1980:Megasuppliers install error: Unknown field id
-1983:Megasuppliers install error: Unknown field id
-1986:Megasuppliers install error: Unknown field id
-1989:Megasuppliers install error: Unknown field id
-1992:Megasuppliers install error: Unknown field id
-1995:Megasuppliers install error: Unknown field id
-1998:Megasuppliers install error: Unknown field id
-2001:Megasuppliers install error: Unknown field id
-2004:Megasuppliers install error: Unknown field id
-2007:Megasuppliers install error: Unknown field id
-2010:Megasuppliers install error: Unknown field id
-2013:Megasuppliers install error: Unknown field id
-2016:Megasuppliers install error: Unknown field id
-2019:Megasuppliers install error: Unknown field id
-2022:Megasuppliers install error: Unknown field id
-2025:Megasuppliers install error: Unknown field id
-2028:Megasuppliers install error: Unknown field id
-2031:Megasuppliers install error: Unknown field id
-2034:Megasuppliers install error: Unknown field id
-2037:Megasuppliers install error: Unknown field id
-2040:Megasuppliers install error: Unknown field id
-2043:Megasuppliers install error: Unknown field id
-2046:Megasuppliers install error: Unknown field id
-2049:Megasuppliers install error: Unknown field id
-2052:Megasuppliers install error: Unknown field id
-2055:Megasuppliers install error: Unknown field id
-2058:Megasuppliers install error: Unknown field id
-### /home/web/vm-23f9aff9.na4u.ru/www/wa-log/error.log
-21852:Unknown field id (500)
-21856:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-21888:Error installing plugin shop.megasuppliers at first run:
-21889:Unknown field id (500)
-21893:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-21911:Error installing plugin shop.megasuppliers at first run:
-21912:Unknown field id (500)
-21916:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-21948:Error installing plugin shop.megasuppliers at first run:
-21949:Unknown field id (500)
-21953:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-21971:Error installing plugin shop.megasuppliers at first run:
-21972:Unknown field id (500)
-21976:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22007:Error installing plugin shop.megasuppliers at first run:
-22008:Unknown field id (500)
-22012:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22030:Error installing plugin shop.megasuppliers at first run:
-22031:Unknown field id (500)
-22035:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22067:Error installing plugin shop.megasuppliers at first run:
-22068:Unknown field id (500)
-22072:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22090:Error installing plugin shop.megasuppliers at first run:
-22091:Unknown field id (500)
-22095:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22127:Error installing plugin shop.megasuppliers at first run:
-22128:Unknown field id (500)
-22132:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22150:Error installing plugin shop.megasuppliers at first run:
-22151:Unknown field id (500)
-22155:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22187:Error installing plugin shop.megasuppliers at first run:
-22188:Unknown field id (500)
-22192:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22210:Error installing plugin shop.megasuppliers at first run:
-22211:Unknown field id (500)
-22215:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22246:Error installing plugin shop.megasuppliers at first run:
-22247:Unknown field id (500)
-22251:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22269:Error installing plugin shop.megasuppliers at first run:
-22270:Unknown field id (500)
-22274:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22306:Error installing plugin shop.megasuppliers at first run:
-22307:Unknown field id (500)
-22311:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22329:Error installing plugin shop.megasuppliers at first run:
-22330:Unknown field id (500)
-22334:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22365:Error installing plugin shop.megasuppliers at first run:
-22366:Unknown field id (500)
-22370:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22388:Error installing plugin shop.megasuppliers at first run:
-22389:Unknown field id (500)
-22393:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22425:Error installing plugin shop.megasuppliers at first run:
-22426:Unknown field id (500)
-22430:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22448:Error installing plugin shop.megasuppliers at first run:
-22449:Unknown field id (500)
-22453:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-22485:Uncaught Error: Unknown field id
-22493:#3 megasuppliers-api/index.php(22): waModel->getById('api_key')
-22497:Uncaught Error: Unknown field id
-22505:#3 megasuppliers-api/index.php(22): waModel->getById('api_key')
-22509:webasyst/shop/?plugin=megasuppliers
-22510:Uncaught exception waException:
-22511:Unknown field id (500)
-22516:#3 wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php(20): waModel->getById('api_key')
-22517:#4 wa-system/controller/waViewAction.class.php(188): shopMegasuppliersPluginBackendAction->execute()
-22519:#6 wa-system/controller/waDefaultViewController.class.php(48): waViewController->executeAction(Object(shopMegasuppliersPluginBackendAction))
-22525:#12 wa-system/controller/waFrontController.class.php(84): waFrontController->execute('megasuppliers', 'backend', NULL)
-22533:webasyst/shop/?plugin=megasuppliers
-22534:Uncaught exception waException:
-22535:Unknown field id (500)
-22540:#3 wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php(20): waModel->getById('api_key')
-22541:#4 wa-system/controller/waViewAction.class.php(188): shopMegasuppliersPluginBackendAction->execute()
-22543:#6 wa-system/controller/waDefaultViewController.class.php(48): waViewController->executeAction(Object(shopMegasuppliersPluginBackendAction))
-22549:#12 wa-system/controller/waFrontController.class.php(84): waFrontController->execute('megasuppliers', 'backend', NULL)
 
 stderr=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
 
