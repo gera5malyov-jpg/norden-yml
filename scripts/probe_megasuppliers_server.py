@@ -341,6 +341,69 @@ chown web:web /tmp/ms_backend_probe.php
 su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_backend_probe.php' || true
 rm -f /tmp/ms_backend_probe.php
 
+echo "--- megasuppliers performance benchmark (read-only) ---"
+cat >/tmp/ms_perf_probe.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$m=new waModel();
+$p=wa('shop')->getPlugin('megasuppliers',true);
+
+echo "[indexes]\n";
+foreach($m->query("SHOW INDEX FROM shop_megasuppliers_product")->fetchAll() as $r){
+    echo $r['Key_name']."\t".$r['Seq_in_index']."\t".$r['Column_name']."\n";
+}
+echo "[sizes]\n";
+echo "mapping_rows=".$m->query("SELECT COUNT(*) FROM shop_megasuppliers_product")->fetchField()."\n";
+echo "mapped_products=".$m->query("SELECT COUNT(DISTINCT product_id) FROM shop_megasuppliers_product WHERE product_id>0")->fetchField()."\n";
+
+$top=$m->query("SELECT supplier_id,COUNT(DISTINCT product_id) c FROM shop_megasuppliers_product WHERE product_id>0 GROUP BY supplier_id ORDER BY c DESC LIMIT 1")->fetch();
+$sid=$top?(int)$top['supplier_id']:0;
+echo "benchmark_supplier_id=".$sid." products=".($top?(int)$top['c']:0)."\n";
+
+$t=microtime(true);
+$rows=$m->query("SELECT supplier_id,COUNT(DISTINCT product_id) c FROM shop_megasuppliers_product WHERE product_id>0 GROUP BY supplier_id")->fetchAll();
+echo "group_counts_ms=".round((microtime(true)-$t)*1000,2)." suppliers=".count($rows)."\n";
+
+$t=microtime(true);
+$suppliers=(new shopMegasuppliersSupplierModel())->select('id')->where('active=1')->fetchAll();
+foreach($suppliers as $r){
+    $id=(int)$r['id'];
+    $m->query("SELECT COUNT(DISTINCT product_id) FROM shop_megasuppliers_product WHERE supplier_id=i:id AND product_id>0",array('id'=>$id))->fetchField();
+}
+echo "per_supplier_counts_ms=".round((microtime(true)-$t)*1000,2)." suppliers=".count($suppliers)."\n";
+
+if(method_exists($p,'backendProdList')){
+    $t=microtime(true);
+    $x=$p->backendProdList(array());
+    echo "backendProdList_ms=".round((microtime(true)-$t)*1000,2)." len=".strlen(isset($x['header_left'])?$x['header_left']:'')."\n";
+}
+if(method_exists($p,'backendProducts')){
+    $t=microtime(true);
+    $x=$p->backendProducts(array());
+    echo "backendProducts_ms=".round((microtime(true)-$t)*1000,2)." len=".strlen(isset($x['sidebar_section'])?$x['sidebar_section']:'')."\n";
+}
+
+if($sid){
+    $q1="SELECT COUNT(*) FROM shop_product p WHERE EXISTS (SELECT 1 FROM shop_megasuppliers_product ms WHERE ms.product_id=p.id AND ms.supplier_id=".$sid.")";
+    $q2="SELECT COUNT(*) FROM shop_product p WHERE p.id IN (SELECT product_id FROM shop_megasuppliers_product WHERE supplier_id=".$sid." AND product_id>0)";
+    foreach(array('exists'=>$q1,'in'=>$q2) as $name=>$q){
+        $times=array(); $val=0;
+        for($i=0;$i<3;$i++){
+            $t=microtime(true); $val=(int)$m->query($q)->fetchField(); $times[]=round((microtime(true)-$t)*1000,2);
+        }
+        echo "filter_".$name."_count=".$val." ms=".implode(',',$times)."\n";
+        echo "explain_".$name."=".json_encode($m->query("EXPLAIN ".$q)->fetchAll(),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+    }
+}
+PHP
+chown web:web /tmp/ms_perf_probe.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_perf_probe.php' || true
+rm -f /tmp/ms_perf_probe.php
+
 echo "--- recent megasuppliers/errors in wa-log ---"
 find "$ROOT/wa-log" -type f -mmin -60 -print0 2>/dev/null | while IFS= read -r -d '' f; do
   hits=$(grep -Ein "megasuppliers|Fatal error|Uncaught|Exception|Unknown field|Smarty" "$f" 2>/dev/null | tail -n 80 || true)
