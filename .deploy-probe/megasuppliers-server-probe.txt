@@ -675,6 +675,426 @@ class shopYmlPluginBackendProductsController extends waJsonController
 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waPlugin.class.php:246:        $file = $this->path.'/lib/config/uninstall.php';
 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waPlugin.class.php:259:        $file_db = $this->path.'/lib/config/db.php';
 /home/web/vm-23f9aff9.na4u.ru/www/wa-installer/lib/config/requirements.php:52:            'install.php',
+--- waPlugin install implementation ---
+<?php
+
+class waPlugin
+{
+    protected $id;
+    protected $app_id;
+    protected $info = array();
+    protected $path;
+
+    /**
+     * @var waAppSettingsModel
+     */
+    protected static $app_settings_model;
+
+    /**
+     * @var mixed[string]
+     */
+    protected $settings;
+    /**
+     * @var mixed[string]
+     */
+    protected $settings_config;
+
+    /**
+     * @var mixed[string] App defined settings list
+     */
+    protected $common_settings_config = array();
+
+
+    public function __construct($info)
+    {
+        $this->info = $info;
+        $this->id = $this->info['id'];
+        if (isset($this->info['app_id'])) {
+            $this->app_id = $this->info['app_id'];
+        } else {
+            $this->app_id = waSystem::getInstance()->getApp();
+        }
+        $this->path = wa()->getAppPath('plugins/'.$this->id, $this->app_id);
+
+        $this->checkUpdates();
+    }
+
+    /**
+     * Returns plugin ID.
+     * @return string
+     * @since 1.8.2
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Returns localized plugin name.
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->info['name'];
+    }
+
+    /**
+     * Returns plugin's version number.
+     * @return string
+     */
+    public function getVersion()
+    {
+        $version = isset($this->info['version']) ? $this->info['version'] : '0.0.1';
+        if (!empty($this->info['build'])) {
+            $version .= '.'.$this->info['build'];
+        }
+        return $version;
+    }
+
+    /**
+     * @return array
+     */
+    public function getInfo()
+    {
+        return $this->info;
+    }
+
+    protected function checkUpdates()
+    {
+        $is_from_template = waConfig::get('is_template');
+        $disable_exception_log = waConfig::get('disable_exception_log');
+        waConfig::set('is_template', null);
+
+        $locking_model = $app_settings_model = new waAppSettingsModel();
+        $time = $app_settings_model->get(array($this->app_id, $this->id), 'update_time');
+
+        try {
+            if (!$time) {
+                $is_first_launch = true;
+
+                // To avoid running install.php multiple times in parallel, obtain a named lock
+                // and then read update_time again because it might have changed in another thread
+                $locking_model->exec("SELECT GET_LOCK(?, -1)", ["wa_init_plugin_{$this->app_id}_{$this->id}"]);
+                $app_settings_model->clearCache(array($this->app_id, $this->id));
+                $time = $app_settings_model->get(array($this->app_id, $this->id), 'update_time', null);
+
+                try {
+                    if (!$time) {
+                        waConfig::set('disable_exception_log', true);
+                        $this->install();
+                    } else {
+                        // All work has already been done in another thread.
+                        return;
+                    }
+                } catch (Exception $e) {
+                    waLog::log("Error installing plugin ".$this->app_id.".".$this->id." at first run:\n".$e->getMessage()." (".$e->getCode().")\n".$e->getTraceAsString());
+                    throw $e;
+                }
+            } else {
+                $is_first_launch = false;
+            }
+
+            $is_debug = waSystemConfig::isDebug();
+
+            if (!$is_debug) {
+                $cache = new waVarExportCache('updates', -1, $this->app_id.".".$this->id);
+                if ($cache->isCached() && $cache->get() <= $time) {
+                    return;
+                }
+            }
+            $path = $this->path.'/lib/updates';
+            $cache_database_dir = wa()->getConfig()->getPath('cache').'/db';
+            if (file_exists($path)) {
+                $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path), RecursiveIteratorIterator::SELF_FIRST);
+                $files = array();
+                foreach ($iterator as $file) {
+                    /**
+                     * @var SplFileInfo $file
+                     */
+                    if ($file->isFile() && preg_match('/^[0-9]+\.php$/', $file->getFilename())) {
+                        $t = substr($file->getFilename(), 0, -4);
+                        if ($t > $time) {
+                            $files[$t] = $file->getPathname();
+                        }
+                    }
+                }
+
+                if ($files && !$is_first_launch) {
+                    // To avoid running meta-updates in parallel, obtain a named lock
+                    // and then read update_time again because it might have changed in another thread
+                    $locking_model->exec("SELECT GET_LOCK(?, -1)", ["wa_init_plugin_{$this->app_id}_{$this->id}"]);
+                    $app_settings_model->clearCache(array($this->app_id, $this->id));
+                    $time = $app_settings_model->get(array($this->app_id, $this->id), 'update_time', null);
+                }
+
+                ksort($files);
+                if (!$is_debug && !empty($cache)) {
+                    // get last time
+                    if ($files) {
+                        $keys = array_keys($files);
+                        $cache->set(end($keys));
+                    } else {
+                        $cache->set($time ? $time : 1);
+                    }
+                }
+                waConfig::set('disable_exception_log', true);
+                foreach ($files as $t => $file) {
+                    try {
+                        if (!$is_first_launch && $time < $t) {
+                            $this->includeUpdate($file);
+                            waFiles::delete($cache_database_dir);
+                            $app_settings_model->set(array($this->app_id, $this->id), 'update_time', $t);
+                        }
+                    } catch (Exception $e) {
+                        waLog::log("Error running update of plugin {$this->app_id}.{$this->id}: {$file}\n".$e->getMessage()." (".$e->getCode().")\n".$e->getTraceAsString());
+                        throw new waException(sprintf(_ws('Error while running update of %s.%s plugin: %s'), $this->app_id, $this->id, $file), 500, $e);
+                    }
+                }
+            } else {
+                $t = 1;
+            }
+
+            if ($is_first_launch) {
+                $app_settings_model->set(array($this->app_id, $this->id), 'update_time', ifempty($t, 1));
+            }
+        } finally {
+            waConfig::set('is_template', $is_from_template);
+            waConfig::set('disable_exception_log', $disable_exception_log);
+            if (!empty($is_first_launch) || !empty($files)) {
+                $locking_model->exec("SELECT RELEASE_LOCK(?)", ["wa_init_plugin_{$this->app_id}_{$this->id}"]);
+            }
+        }
+    }
+
+    /**
+     * @param string $file
+     */
+    private function includeUpdate($file)
+    {
+        /**
+         * @var waPlugin $this
+         */
+        include($file);
+    }
+
+    private function includeConfig($file)
+    {
+        return include($file);
+    }
+
+    private function includeCode($file)
+    {
+        $app_id = $this->app_id;
+        /**
+         * @var string $app_id
+         * @var waPlugin $this
+         */
+        include($file);
+    }
+
+    protected function install()
+    {
+
+        $file_db = $this->path.'/lib/config/db.php';
+        if (file_exists($file_db)) {
+            $schema = $this->includeConfig($file_db);
+            $model = new waModel();
+            $model->createSchema($schema);
+        }
+        // check install.php
+        $file = $this->path.'/lib/config/install.php';
+        if (file_exists($file)) {
+            $this->includeCode($file);
+            // clear db scheme cache, see waModel::getMetadata
+            try {
+                // remove files
+                $path = waConfig::get('wa_path_cache').'/db/';
+                waFiles::delete($path, true);
+            } catch (waException $e) {
+                waLog::log($e->__toString());
+            }
+            // clear runtime cache
+            waRuntimeCache::clearAll();
+        }
+    }
+
+    public function uninstall($force = false)
+    {
+        // check uninstall.php
+        $file = $this->path.'/lib/config/uninstall.php';
+        if (file_exists($file)) {
+            try {
+                $this->includeCode($file);
+            } catch (Exception $ex) {
+                if ($force) {
+                    waLog::log(sprintf("Error while uninstall %s at %s: %s", $this->id, $this->app_id, $ex->getMessage(), 'installer.log'));
+                } else {
+                    throw $ex;
+                }
+            }
+        }
+
+        $file_db = $this->path.'/lib/config/db.php';
+        if (file_exists($file_db)) {
+            $schema = $this->includeConfig($file_db);
+            $model = new waModel();
+            foreach ($schema as $table => $fields) {
+                $sql = "DROP TABLE IF EXISTS ".$table;
+                $model->exec($sql);
+            }
+        }
+        // Remove plugin settings
+        $app_settings_model = new waAppSettingsModel();
+        $app_settings_model->del($this->app_id.".".$this->id);
+
+        if (!empty($this->info['rights'])) {
+            // Remove rights to plugin
+            $contact_rights_model = new waContactRightsModel();
+            $sql = "DELETE FROM ".$contact_rights_model->getTableName()."
+                    WHERE app_id = s:app_id AND (
+                        name = '".$contact_rights_model->escape('plugin.'.$this->id)."' OR
+                        name LIKE '".$contact_rights_model->escape('plugin.'.$this->id).".%'
+                    )";
+            $contact_rights_model->exec($sql, array('app_id' => $this->app_id));
+        }
+
+        // Remove cache of the application
+        waFiles::delete(wa()->getAppCachePath('', $this->app_id));
+    }
+
+    /**
+     * Returns URL of plugin's root directory.
+     * @param bool $absolute Whether absolute URL must be returned.
+     * @return string
+     */
+    public function getPluginStaticUrl($absolute = false)
+    {
+        return wa()->getAppStaticUrl($this->app_id, $absolute).'plugins/'.$this->id.'/';
+    }
+
+    public function getRights($name = '', $assoc = true)
+    {
+        $right = 'plugin.'.$this->id;
+        if ($name) {
+            $right .= '.'.$name;
+        }
+        return wa()->getUser()->getRights(wa()->getConfig()->getApplication(), $right, $assoc);
+    }
+
+    public function rightsConfig(waRightConfig $rights_config)
+    {
+        $rights_config->addItem('plugin.'.$this->id, $this->info['name'], 'checkbox');
+    }
+
+--- create plugin CLI install helper ---
+        return $config;
+    }
+
+    private function getPluginClassCode()
+    {
+        $class_name = $this->app_id.ucfirst($this->plugin_id).'Plugin';
+        wa($this->app_id, true);
+        $extends = $this->app_id.'Plugin';
+        if (!class_exists($extends)) {
+            $extends = 'waPlugin';
+        }
+        $code = <<<PHP
+<?php
+
+class {$class_name} extends {$extends}
+{
+
+}
+
+PHP;
+        return $code;
+    }
+
+    protected function showReport($data = array(), $params = array())
+    {
+        echo <<<REPORT
+Plugin with id "$this->plugin_id" created!
+
+Useful commands:
+    #generate plugin's database description file db.php
+    php wa.php generateDb $this->app_id/$this->plugin_id table1 table2 table3
+
+    #generate plugin's locale files
+    php wa.php locale $this->app_id/plugins/$this->plugin_id
+REPORT;
+    }
+
+    private function installPlugin()
+    {
+        $path = wa()->getConfig()->getConfigPath('plugins.php', true, $this->app_id);
+        $plugins = null;
+        if (file_exists($path)) {
+            $plugins = include($path);
+        }
+        if (!is_array($plugins)) {
+            $plugins = array();
+        }
+        $plugins[$this->plugin_id] = true;
+        waUtils::varExportToFile($plugins, $path);
+    }
+}
+--- shop getPlugin references ---
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/checkout/shopCheckoutShipping.class.php:152:            $plugin = shopShipping::getPlugin($m['plugin'], $m['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/checkout/shopCheckoutShipping.class.php:534:            $plugin = shopShipping::getPlugin($plugin_info['plugin'], $id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/checkout/shopCheckoutShipping.class.php:696:                    $plugin = shopShipping::getPlugin($plugin_info['plugin'], $plugin_info['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/checkout/shopCheckoutPayment.class.php:23:                    $plugin = shopPayment::getPlugin($m['plugin'], $m['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopHelper.class.php:74:                $plugin = shopPayment::getPlugin($m['plugin'], $m['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopHelper.class.php:253:                    $plugin = shopShipping::getPlugin($m['plugin'], $method_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopPrintforms.class.php:46:                        $plugin = shopPayment::getPlugin(null, $key);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopPrintforms.class.php:48:                        $plugin = shopShipping::getPlugin(null, $key);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopNotifications.class.php:340:                $data['shipping_plugin'] = shopShipping::getPlugin(ifset($data['order']['params']['shipping_plugin']), $data['order']['params']['shipping_id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopOrder.class.php:815:                $plugin = shopPayment::getPlugin(null, $params['payment_id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopOrder.class.php:4241:                $plugin = shopShipping::getPlugin(null, $params['shipping_id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopDiscounts.class.php:177:                    $d = wa('shop')->getPlugin($pid)->getName();
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/checkout2/shopCheckoutConfig.class.php:681:                $m['__instance'] = shopPayment::getPlugin($m['plugin'], $m['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/checkout2/shopCheckoutConfig.class.php:703:        $plugin = shopShipping::getPlugin(ifset($variant, 'plugin', null), $shop_plugin_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopProductsCollection.class.php:4777:                            $name = _wp(wa('shop')->getPlugin($plugin_id, true)->getName());
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopPayment.class.php:54:    public static function getPlugin($plugin, $plugin_id = null)
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopPayment.class.php:113:        $data = self::pluginModel()->getPlugin($id, shopPluginModel::TYPE_PAYMENT);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopPayment.class.php:984:                    $plugin = shopPayment::getPlugin(null, $plugin);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopPayment.class.php:986:                    $plugin = shopPayment::getPlugin($plugin);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopPayment.class.php:1050:                $m['instance'] = $m['instance'] ?? shopPayment::getPlugin($m['plugin'], $m['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopPayment.class.php:1130:                $plugin = shopPayment::getPlugin($m['plugin'], $m['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopPayment.class.php:1201:            $plugin = $m['instance'] = $m['instance'] ?? shopPayment::getPlugin($m['plugin'], $m['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopShipping.class.php:44:    public static function getPlugin($plugin, $plugin_id = null)
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopImportexportHelper.class.php:511:                        $plugin_instance = wa('shop')->getPlugin($plugin_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/frontApi/v1/shopFrontendApiOrderPayment.controller.php:87:        $plugin = $m['instance'] ?? shopPayment::getPlugin($m['plugin'], $m['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/frontApi/v1/shopFrontendApiOrder.controller.php:33:                        $plugin = $m['instance'] ?? shopPayment::getPlugin($m['plugin'], $m['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendShipping.controller.php:83:            $plugin = shopShipping::getPlugin($plugin_info['plugin'], $plugin_info['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendCheckoutSuccessPaymentSelection.action.php:104:                        $plugin = $m['instance'] ?? shopPayment::getPlugin($m['plugin'], $m['id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendCheckout.action.php:194:                        $plugin = shopPayment::getPlugin(null, $order['params']['payment_id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendShippingPlugin.controller.php:12:        $plugin = shopShipping::getPlugin(null, $plugin_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendPaymentLink.action.php:143:                $plugin = shopPayment::getPlugin(null, $payment_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/my/shopFrontendMyOrderPrintform.action.php:48:                if (empty($order['params']['payment_id']) || !($payment = shopPayment::getPlugin(null, $order['params']['payment_id']))) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/my/shopFrontendMyOrder.action.php:104:                        $plugin = shopPayment::getPlugin(null, $order['params']['payment_id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/my/shopFrontendMyOrder.action.php:131:                $plugin = shopShipping::getPlugin(null, $order['params']['shipping_id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/backend/shopBackendWelcome.action.php:84:                if (($plugin = wa('shop')->getPlugin($plugin_id)) && (method_exists($plugin, 'getWelcomeUrl'))) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/order/shopOrderSendprintform.controller.php:13:                    $plugin = wa()->getPlugin($plugin_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/order/shopOrderSendprintform.controller.php:41:                                $plugin = shopPayment::getPlugin(null, $params['payment_id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/order/shopOrderSendprintform.controller.php:46:                                $plugin = shopShipping::getPlugin(null, $params['shipping_id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/order/shopOrderTracking.controller.php:23:                $plugin = shopShipping::getPlugin(null, $params['shipping_id']);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/order/shopOrderPrintform.action.php:45:        $plugin = self::getPlugin($type, ifempty($params[$type . '_id']));
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/order/shopOrderPrintform.action.php:97:    private static function getPlugin($type, $key)
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/order/shopOrderPrintform.action.php:103:                    $plugin = shopPayment::getPlugin(null, $key);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/order/shopOrderPrintform.action.php:106:                    $plugin = shopShipping::getPlugin(null, $key);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/settings/payment/shopSettingsPaymentSetup.action.php:14:            $instance = shopPayment::getPlugin($plugin['plugin'], $plugin_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/settings/print_form/shopSettingsPrintformSetup.action.php:15:                $plugin = waSystem::getInstance()->getPlugin($plugin_id, true);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/settings/print_form/shopSettingsPrintformTemplate.actions.php:18:            $this->plugin = waSystem::getInstance()->getPlugin($id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/settings/shipping/shopSettingsShippingSetup.action.php:20:            $instance = shopShipping::getPlugin($info['plugin'], $plugin_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/workflow/shopWorkflowEditAction.class.php:160:                if ($shipping_plugin = shopShipping::getPlugin(null, $data['params']['shipping_id'])) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/workflow/shopWorkflowCreateAction.class.php:467:                if ($shipping_plugin = shopShipping::getPlugin(null, $data['params']['shipping_id'])) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/workflow/shopWorkflowCreateAction.class.php:718:                            $plugin = shopShipping::getPlugin(null, $key);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/workflow/shopWorkflowCreateAction.class.php:723:                            $plugin = shopPayment::getPlugin(null, $key);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/workflow/shopWorkflowCreateAction.class.php:727:                            $plugin = wa('shop')->getPlugin($id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/workflow/shopWorkflowCompleteAction.class.php:92:                $payment_plugin = shopPayment::getPlugin(null, $payment_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/workflow/shopWorkflowAction.class.php:439:                $plugin = shopPayment::getPlugin(null, $payment_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/workflow/shopWorkflowAction.class.php:481:                $plugin = shopShipping::getPlugin(null, $shipping_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/model/shopPlugin.model.php:214:    public function getPlugin($id, $type)
 
 stderr=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
 
