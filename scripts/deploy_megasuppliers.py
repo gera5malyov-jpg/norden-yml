@@ -277,6 +277,89 @@ PHP
 chown web:web /tmp/ms_db_init.php
 su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_db_init.php'
 
+# Stable public API bridge. Older Shop-Script builds on this installation do not
+# expose plugin frontend routing reliably, so keep Webasyst/plugin logic but use
+# a physical endpoint directory that is not affected by storefront rewrite rules.
+API_DIR="$ROOT/megasuppliers-api"
+if [ -e "$API_DIR" ]; then
+  tar -C "$ROOT" -czf "$BACK/megasuppliers-api.before.tgz" "megasuppliers-api"
+fi
+mkdir -p "$API_DIR"
+cat >"$API_DIR/index.php" <<'PHP'
+<?php
+header('Content-Type: application/json; charset=utf-8');
+
+function ms_json($status, $payload)
+{
+    http_response_code($status);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+if (strtolower(isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : '') !== 'post') {
+    ms_json(405, array('errors' => array('method_not_allowed')));
+}
+
+$root = dirname(__DIR__);
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null, new SystemConfig());
+wa('shop');
+wa('shop')->getPlugin('megasuppliers', true);
+
+$meta = (new shopMegasuppliersMetaModel())->getById('api_key');
+$expected = $meta ? (string)$meta['value'] : '';
+$provided = isset($_SERVER['HTTP_X_MEGASUPPLIERS_KEY']) ? trim((string)$_SERVER['HTTP_X_MEGASUPPLIERS_KEY']) : '';
+if ($expected === '' || $provided === '' || !hash_equals($expected, $provided)) {
+    ms_json(401, array('errors' => array('unauthorized')));
+}
+
+$payload = json_decode(file_get_contents('php://input'), true);
+if (!is_array($payload)) {
+    ms_json(400, array('errors' => array('invalid_json')));
+}
+$supplier_code = isset($payload['supplier_code']) ? strtoupper(trim((string)$payload['supplier_code'])) : '';
+if ($supplier_code === '') {
+    ms_json(422, array('errors' => array('SUPPLIER_REQUIRED')));
+}
+$supplier = (new shopMegasuppliersSupplierModel())->getByField('code', $supplier_code);
+if (!$supplier || empty($supplier['active'])) {
+    ms_json(422, array('errors' => array('SUPPLIER_NOT_FOUND')));
+}
+$items = isset($payload['items']) ? $payload['items'] : array();
+if (!is_array($items) || !$items) {
+    ms_json(422, array('errors' => array('ITEMS_REQUIRED')));
+}
+
+try {
+    $service = new shopMegasuppliersImportService();
+    $stats = $service->importRows((int)$supplier['id'], $items, array(
+        'source' => 'api',
+        'filename' => '',
+        'create_missing' => !empty($payload['create_missing']),
+        'update_catalog' => !array_key_exists('update_catalog', $payload) || !empty($payload['update_catalog']),
+        'field_map' => isset($payload['field_map']) && is_array($payload['field_map']) ? $payload['field_map'] : array(),
+    ));
+    ms_json(200, array(
+        'status' => 'ok',
+        'supplier' => array('id' => (int)$supplier['id'], 'code' => $supplier['code'], 'name' => $supplier['name']),
+        'import_id' => (int)$stats['import_id'],
+        'created' => $stats['created'],
+        'updated' => $stats['updated'],
+        'linked' => $stats['linked'],
+        'skipped' => $stats['skipped'],
+        'errors' => $stats['errors'],
+    ));
+} catch (Exception $e) {
+    ms_json(422, array('errors' => array($e->getMessage())));
+}
+PHP
+chown -R web:web "$API_DIR"
+chmod 755 "$API_DIR"
+chmod 644 "$API_DIR/index.php"
+php -l "$API_DIR/index.php"
+echo "api_bridge=yes"
+
 # Remove Shop-Script cache only; it is regenerated automatically.
 rm -rf "$ROOT/wa-cache/apps/shop" || true
 
