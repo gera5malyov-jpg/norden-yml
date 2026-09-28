@@ -87,18 +87,6 @@ def main():
                 raise RuntimeError("temporary SSH unavailable")
             log("ssh=yes")
 
-            # Read-only bootstrap test on an existing plugin before any write.
-            bootstrap = f"""<?php
-chdir({ROOT!r});
-require_once {ROOT!r}.'/wa-config/SystemConfig.class.php';
-waSystem::getInstance(null, new SystemConfig());
-wa('shop');
-$p=wa('shop')->getPlugin('nordenstock', true);
-echo get_class($p),"\\n";
-"""
-            p=ssh(key,"cat >/tmp/ms_bootstrap_test.php && chown web:web /tmp/ms_bootstrap_test.php && su -s /bin/bash web -c 'php /tmp/ms_bootstrap_test.php'",stdin=bootstrap,check=True)
-            log("bootstrap="+p.stdout.strip())
-
             subprocess.run([
                 "scp","-i",key,"-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null",
                 pkg,"root@"+VM_IP+":/tmp/megasuppliers-1.0.1.zip"
@@ -119,6 +107,7 @@ fi
 unzip -q /tmp/megasuppliers-1.0.1.zip -d "$STAGE"
 test -f "$STAGE/megasuppliers/lib/config/plugin.php"
 find "$STAGE/megasuppliers" -name '*.php' -print0 | while IFS= read -r -d '' f; do php -l "$f" >/dev/null; done
+
 rm -rf "$PLUGIN"
 cp -a "$STAGE/megasuppliers" "$PLUGIN"
 chown -R web:web "$PLUGIN"
@@ -135,36 +124,143 @@ $data = "<?php\n\nreturn ".var_export($p, true).";\n//EOF";
 if (file_put_contents($path, $data) === false) exit(2);
 PHP
 chown web:web /tmp/ms_register.php
-su -s /bin/bash web -c 'php /tmp/ms_register.php'
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_register.php'
 
-cat >/tmp/ms_init.php <<'PHP'
+cat >/tmp/ms_db_init.php <<'PHP'
 <?php
 $root = {ROOT!r};
-chdir($root);
-require_once $root.'/wa-config/SystemConfig.class.php';
-waSystem::getInstance(null, new SystemConfig());
-wa('shop');
-$p=wa('shop')->getPlugin('megasuppliers', true);
-echo "class=".get_class($p)."\n";
-echo "version=".$p->getVersion()."\n";
-$m=new waModel();
-$tables=array('shop_megasuppliers_supplier','shop_megasuppliers_product','shop_megasuppliers_import','shop_megasuppliers_meta');
-foreach($tables as $t) {{
-    $r=$m->query("SHOW TABLES LIKE s:table", array('table'=>$t))->fetch();
-    echo "table_".$t."=".($r ? "yes" : "no")."\n";
-}}
-echo "suppliers=".(new shopMegasuppliersSupplierModel())->countAll()."\n";
-$meta=(new shopMegasuppliersMetaModel())->getById('api_key');
-echo "api_key_generated=".(($meta && strlen((string)$meta['value'])>=64) ? "yes" : "no")."\n";
+$db_cfg = include $root.'/wa-config/db.php';
+if (isset($db_cfg['default']) && is_array($db_cfg['default'])) {
+    $d = $db_cfg['default'];
+} else {
+    $d = $db_cfg;
+}
+$host = isset($d['host']) ? $d['host'] : 'localhost';
+$port = isset($d['port']) ? (int)$d['port'] : 3306;
+$user = isset($d['user']) ? $d['user'] : '';
+$pass = isset($d['password']) ? $d['password'] : '';
+$name = isset($d['database']) ? $d['database'] : '';
+$mysqli = new mysqli($host, $user, $pass, $name, $port);
+if ($mysqli->connect_errno) {
+    fwrite(STDERR, "DB connect failed\n");
+    exit(3);
+}
+$mysqli->set_charset('utf8mb4');
+$sql = array(
+"CREATE TABLE IF NOT EXISTS shop_megasuppliers_supplier (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL DEFAULT '',
+  code VARCHAR(64) NOT NULL DEFAULT '',
+  active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY code (code),
+  KEY name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+"CREATE TABLE IF NOT EXISTS shop_megasuppliers_product (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  supplier_id INT(11) NOT NULL,
+  product_id INT(11) NOT NULL DEFAULT 0,
+  sku_id INT(11) NOT NULL DEFAULT 0,
+  supplier_sku VARCHAR(255) NOT NULL DEFAULT '',
+  external_id VARCHAR(255) NOT NULL DEFAULT '',
+  purchase_price DECIMAL(15,4) NULL,
+  stock DECIMAL(15,3) NULL,
+  raw_json MEDIUMTEXT NULL,
+  updated_at DATETIME NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY supplier_sku (supplier_id, supplier_sku),
+  KEY product_id (product_id),
+  KEY sku_id (sku_id),
+  KEY external_id (external_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+"CREATE TABLE IF NOT EXISTS shop_megasuppliers_import (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  supplier_id INT(11) NOT NULL,
+  source VARCHAR(32) NOT NULL DEFAULT 'file',
+  filename VARCHAR(255) NOT NULL DEFAULT '',
+  status VARCHAR(32) NOT NULL DEFAULT 'running',
+  total INT(11) NOT NULL DEFAULT 0,
+  created_count INT(11) NOT NULL DEFAULT 0,
+  updated_count INT(11) NOT NULL DEFAULT 0,
+  linked_count INT(11) NOT NULL DEFAULT 0,
+  skipped_count INT(11) NOT NULL DEFAULT 0,
+  error_count INT(11) NOT NULL DEFAULT 0,
+  errors_json MEDIUMTEXT NULL,
+  user_id INT(11) NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL,
+  finished_at DATETIME NULL,
+  PRIMARY KEY (id),
+  KEY supplier_id (supplier_id),
+  KEY created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+"CREATE TABLE IF NOT EXISTS shop_megasuppliers_meta (
+  name VARCHAR(64) NOT NULL DEFAULT '',
+  value TEXT NULL,
+  PRIMARY KEY (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+);
+foreach ($sql as $q) {
+    if (!$mysqli->query($q)) {
+        fwrite(STDERR, "DB schema failed: ".$mysqli->error."\n");
+        exit(4);
+    }
+}
+$now = date('Y-m-d H:i:s');
+$suppliers = array(
+    array('Norden','NORDEN'), array('ТД Андрей','TD_ANDREY'), array('4 Сезона','4SEASONS'),
+    array('DEEPHOUSE','DEEPHOUSE'), array('Levmar','LEVMAR'), array('Treez','TREEZ'),
+    array('Yourroom','YOURROOM'), array('Afina Garden','AFINA'), array('Aletan','ALETAN'),
+    array('Red-Black','RED_BLACK'), array('ТД Никитин','TD_NIKITIN'),
+    array('B2B Fabrika','B2B_FABRIKA'), array('Kenner','KENNER')
+);
+$stmt=$mysqli->prepare("INSERT IGNORE INTO shop_megasuppliers_supplier(name,code,active,created_at,updated_at) VALUES(?,?,1,?,?)");
+foreach ($suppliers as $row) {
+    $stmt->bind_param('ssss',$row[0],$row[1],$now,$now);
+    if (!$stmt->execute()) { fwrite(STDERR,"supplier seed failed\n"); exit(5); }
+}
+$res=$mysqli->query("SELECT value FROM shop_megasuppliers_meta WHERE name='api_key' LIMIT 1");
+if (!$res || !$res->num_rows) {
+    $key=bin2hex(random_bytes(32));
+    $stmt2=$mysqli->prepare("INSERT INTO shop_megasuppliers_meta(name,value) VALUES('api_key',?)");
+    $stmt2->bind_param('s',$key);
+    if (!$stmt2->execute()) { fwrite(STDERR,"api key seed failed\n"); exit(6); }
+}
+echo "db_init=ok\n";
 PHP
-chown web:web /tmp/ms_init.php
-su -s /bin/bash web -c 'php /tmp/ms_init.php'
+chown web:web /tmp/ms_db_init.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_db_init.php'
 
-echo "config_enabled=$(php -r '$p=include "'$CONF'"; echo !empty($p["megasuppliers"]) ? "yes" : "no";')"
+# Remove Shop-Script cache only; it is regenerated automatically.
+rm -rf "$ROOT/wa-cache/apps/shop" || true
+
+cat >/tmp/ms_verify.php <<'PHP'
+<?php
+$root = {ROOT!r};
+$db_cfg = include $root.'/wa-config/db.php';
+$d = isset($db_cfg['default']) && is_array($db_cfg['default']) ? $db_cfg['default'] : $db_cfg;
+$mysqli = new mysqli(isset($d['host'])?$d['host']:'localhost', $d['user'], $d['password'], $d['database'], isset($d['port'])?(int)$d['port']:3306);
+$tables=array('shop_megasuppliers_supplier','shop_megasuppliers_product','shop_megasuppliers_import','shop_megasuppliers_meta');
+foreach($tables as $t) {
+  $esc=$mysqli->real_escape_string($t);
+  $r=$mysqli->query("SHOW TABLES LIKE '$esc'");
+  echo "table_".$t."=".(($r && $r->num_rows)?"yes":"no")."\n";
+}
+$r=$mysqli->query("SELECT COUNT(*) c FROM shop_megasuppliers_supplier");
+echo "suppliers=".$r->fetch_assoc()['c']."\n";
+$r=$mysqli->query("SELECT CHAR_LENGTH(value) l FROM shop_megasuppliers_meta WHERE name='api_key'");
+$row=$r?$r->fetch_assoc():null;
+echo "api_key_generated=".(($row && (int)$row['l']>=64)?"yes":"no")."\n";
+$p=include {ROOT!r}.'/wa-config/apps/shop/plugins.php';
+echo "config_enabled=".(!empty($p['megasuppliers'])?"yes":"no")."\n";
+PHP
+chown web:web /tmp/ms_verify.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_verify.php'
+
 echo "backup=$BACK"
-rm -rf "$STAGE" /tmp/ms_register.php /tmp/ms_init.php /tmp/ms_bootstrap_test.php /tmp/megasuppliers-1.0.1.zip
-"""
-            p=ssh(key,"bash -s",stdin=remote,check=True,timeout=180)
+rm -rf "$STAGE" /tmp/ms_register.php /tmp/ms_db_init.php /tmp/ms_verify.php /tmp/megasuppliers-1.0.1.zip
+"""            p=ssh(key,"bash -s",stdin=remote,check=True,timeout=180)
             log(p.stdout.strip())
             if p.stderr.strip():
                 log("remote_stderr="+p.stderr.strip()[-1200:])
