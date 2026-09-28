@@ -1,0 +1,47 @@
+name: Probe Webasyst deploy credentials
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-webasyst-deploy-access.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TIMEWEB_API_TOKEN: ${{ secrets.TIMEWEB_API_TOKEN }}
+      TIMEWEB_TOKEN: ${{ secrets.TIMEWEB_TOKEN }}
+      TIMEWEB_CLOUD_TOKEN: ${{ secrets.TIMEWEB_CLOUD_TOKEN }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SFTP_HOST: ${{ secrets.SFTP_HOST }}
+      SFTP_USER: ${{ secrets.SFTP_USER }}
+      SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USER: ${{ secrets.FTP_USER }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      WEBASYST_SSH_HOST: ${{ secrets.WEBASYST_SSH_HOST }}
+      WEBASYST_SSH_USER: ${{ secrets.WEBASYST_SSH_USER }}
+      WEBASYST_SSH_KEY: ${{ secrets.WEBASYST_SSH_KEY }}
+      HOSTING_API_TOKEN: ${{ secrets.HOSTING_API_TOKEN }}
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      WEBASYST_BASE_URL: ${{ secrets.WEBASYST_BASE_URL }}
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - name: Report only presence of deployment credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          for n in TIMEWEB_API_TOKEN TIMEWEB_TOKEN TIMEWEB_CLOUD_TOKEN SSH_HOST SSH_PORT SSH_USER SSH_PRIVATE_KEY SSH_KEY SFTP_HOST SFTP_USER SFTP_PASSWORD FTP_HOST FTP_USER FTP_PASSWORD WEBASYST_SSH_HOST WEBASYST_SSH_USER WEBASYST_SSH_KEY HOSTING_API_TOKEN NETANGELS_API_KEY WEBASYST_BASE_URL WEBASYST_API_TOKEN; do
+            if [ -n "${!n:-}" ]; then
+              printf '%s=SET\n' "$n"
+            else
+              printf '%s=UNSET\n' "$n"
+            fi
+          done
