@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-28T13:48:02.210632+00:00",
+  "started_at": "2026-09-28T23:14:19.993071+00:00",
   "scope": "Norden: only actual chairs and stools; accessories excluded",
   "rules": {
     "table_match": "Norden supplier article ↔ Google Sheet YML ID, normalized",
@@ -22,23 +22,24 @@
   },
   "table": {
     "rows_before": 2067,
-    "matched": 347,
+    "matched": 348,
     "new_rows": 0,
-    "zeroed_missing": 0,
+    "zeroed_missing": 6,
     "duplicate_yml_ids": 10,
     "price_updates": 0,
     "stock_updates": 0
   },
   "webasyst": {
     "duplicate_articles": 0,
-    "unchanged": 623
+    "unchanged": 616,
+    "updated": 7
   },
   "kit": {
-    "variants_scanned": 99100,
+    "variants_scanned": 99203,
     "duplicate_articles": 4667,
     "missing_existing": 112,
     "category_review_required": 18,
-    "skipped_no_article": 22,
+    "skipped_no_article": 23,
     "stock_updates": 1012
   },
   "errors": [
@@ -251,11 +252,17 @@
       "row": 2057,
       "yml_id": "FK 0005-A beige leather",
       "message": "Нет положительной закупочной цены Norden"
+    },
+    {
+      "stage": "webasyst_create",
+      "row": 2058,
+      "yml_id": "8002C-2SNH cian HY60214",
+      "message": "Нет положительной закупочной цены Norden"
     }
   ],
   "warnings": [],
   "complete": false,
-  "identity_review": 10,
+  "identity_review": 9,
   "category_review": 18,
-  "finished_at": "2026-09-28T14:02:56.853442+00:00"
+  "finished_at": "2026-09-28T23:28:45.765678+00:00"
 }
