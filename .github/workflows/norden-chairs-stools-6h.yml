@@ -29,8 +29,10 @@ jobs:
       - name: Установить зависимости
         run: pip install --disable-pip-version-check requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
 
-      - name: Проверить Python
-        run: python -m py_compile catalog/sync_norden_chairs_stools_6h.py norden-kit/sync_norden_kit.py norden-kit/webasyst_n100_to_kit_once.py webasyst/client.py
+      - name: Проверить Python и fallback категорий
+        run: |
+          python -m py_compile catalog/sync_norden_chairs_stools_6h.py catalog/norden_category_fallback.py norden-kit/sync_norden_kit.py norden-kit/webasyst_n100_to_kit_once.py webasyst/client.py
+          python -m unittest tests/test_norden_category_fallback.py
 
       - name: Синхронизировать Norden — только кресла и стулья
         env:
