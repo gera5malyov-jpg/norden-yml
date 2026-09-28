@@ -5,7 +5,7 @@ from pathlib import Path
 API_KEY=os.environ["NETANGELS_API_KEY"].strip()
 VM_ID=44780
 VM_IP="45.86.180.49"
-REPORT=Path(".deploy-probe/megasuppliers-perf.txt")
+REPORT=Path(".deploy-probe/megasuppliers-perf.txt")\n# rerun after optimized deploy attempt
 
 def req(url, method="GET", data=None, headers=None):
     q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
