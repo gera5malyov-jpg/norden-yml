@@ -74,6 +74,14 @@ def main():
                         "'backend_prod' => 'backendProd',\n        'routing' => 'routing',"
                     )
                 data=text_data.encode("utf-8")
+            elif item.filename == "megasuppliers/lib/models/shopMegasuppliersMeta.model.php":
+                text_data=data.decode("utf-8")
+                if "protected $id = 'name';" not in text_data:
+                    text_data=text_data.replace(
+                        "    protected $table = 'shop_megasuppliers_meta';",
+                        "    protected $table = 'shop_megasuppliers_meta';\n    protected $id = 'name';"
+                    )
+                data=text_data.encode("utf-8")
             elif item.filename == "megasuppliers/lib/shopMegasuppliers.plugin.php":
                 text_data=data.decode("utf-8")
                 if "public function routing(" not in text_data:
@@ -95,7 +103,7 @@ def main():
                 data=text_data.encode("utf-8")
             zout.writestr(item, data)
     os.replace(patched, pkg)
-    log("routing_patch=yes")
+    log("compatibility_patches=yes")
 
     # Temporary SSH key through NetAngels API.
     token_body=urllib.parse.urlencode({"api_key":API_KEY}).encode()
