@@ -1,0 +1,34 @@
+name: Trim Ozon pilot temp images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/trim-ozon-pilot-temp.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  trim:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ozon-image-temp-pilot20-36484945811
+          fetch-depth: 1
+      - name: Keep only AF-31391082 source images
+        shell: bash
+        run: |
+          set -euo pipefail
+          TMP="$(mktemp -d)"
+          cp -a ozon/pilot_20/run/AF-31391082 "$TMP/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan trimmed-pilot-source
+          git rm -rf . >/dev/null 2>&1 || true
+          mkdir -p ozon/pilot_20/run
+          cp -a "$TMP/AF-31391082" ozon/pilot_20/run/
+          git add ozon/pilot_20/run/AF-31391082
+          git commit -m "temp: keep only AF-31391082 source images [skip ci]"
+          git push --force origin HEAD:ozon-image-temp-pilot20-36484945811
