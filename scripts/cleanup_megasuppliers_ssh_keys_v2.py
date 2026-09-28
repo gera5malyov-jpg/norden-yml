@@ -39,7 +39,7 @@ items=[]
 if isinstance(data,list):
     items=data
 elif isinstance(data,dict):
-    for key in ("results","items","data","ssh","keys"):
+    for key in ("results","items","data","ssh","keys","entities"):
         value=data.get(key)
         if isinstance(value,list):
             items=value
