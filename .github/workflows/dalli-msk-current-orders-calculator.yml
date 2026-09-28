@@ -1,0 +1,36 @@
+name: Dalli MSK — current orders calculator
+
+on:
+  push:
+    paths:
+      - '.github/workflows/dalli-msk-current-orders-calculator.yml'
+      - 'scripts/dalli_msk_current_orders_calculator.py'
+      - 'dalli/msk-current-calculator-trigger.txt'
+
+permissions:
+  contents: write
+
+jobs:
+  calculate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Calculate six current Moscow orders
+        run: python scripts/dalli_msk_current_orders_calculator.py
+      - name: Save safe calculator result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dalli/msk_current_orders_calculator.json
+          if git diff --cached --quiet; then
+            echo "No result changes"
+          else
+            git commit -m "Update Dalli MSK current order calculator results"
+            git push
+          fi
