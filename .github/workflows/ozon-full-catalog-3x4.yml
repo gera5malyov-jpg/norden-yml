@@ -1,0 +1,250 @@
+name: Ozon full catalog images to 3x4
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-full-catalog-3x4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: ozon-full-catalog-3x4
+  cancel-in-progress: false
+
+jobs:
+  range_00:
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 0
+      end_batch: 19
+    secrets: inherit
+
+  range_01:
+    needs: range_00
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 20
+      end_batch: 39
+    secrets: inherit
+
+  range_02:
+    needs: range_01
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 40
+      end_batch: 59
+    secrets: inherit
+
+  range_03:
+    needs: range_02
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 60
+      end_batch: 79
+    secrets: inherit
+
+  range_04:
+    needs: range_03
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 80
+      end_batch: 99
+    secrets: inherit
+
+  range_05:
+    needs: range_04
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 100
+      end_batch: 119
+    secrets: inherit
+
+  range_06:
+    needs: range_05
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 120
+      end_batch: 139
+    secrets: inherit
+
+  range_07:
+    needs: range_06
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 140
+      end_batch: 159
+    secrets: inherit
+
+  range_08:
+    needs: range_07
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 160
+      end_batch: 179
+    secrets: inherit
+
+  range_09:
+    needs: range_08
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 180
+      end_batch: 199
+    secrets: inherit
+
+  range_10:
+    needs: range_09
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 200
+      end_batch: 219
+    secrets: inherit
+
+  range_11:
+    needs: range_10
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 220
+      end_batch: 239
+    secrets: inherit
+
+  range_12:
+    needs: range_11
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 240
+      end_batch: 259
+    secrets: inherit
+
+  range_13:
+    needs: range_12
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 260
+      end_batch: 279
+    secrets: inherit
+
+  range_14:
+    needs: range_13
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 280
+      end_batch: 299
+    secrets: inherit
+
+  range_15:
+    needs: range_14
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 300
+      end_batch: 319
+    secrets: inherit
+
+  range_16:
+    needs: range_15
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 320
+      end_batch: 339
+    secrets: inherit
+
+  range_17:
+    needs: range_16
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 340
+      end_batch: 359
+    secrets: inherit
+
+  range_18:
+    needs: range_17
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 360
+      end_batch: 379
+    secrets: inherit
+
+  range_19:
+    needs: range_18
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 380
+      end_batch: 399
+    secrets: inherit
+
+  range_20:
+    needs: range_19
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 400
+      end_batch: 419
+    secrets: inherit
+
+  range_21:
+    needs: range_20
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 420
+      end_batch: 439
+    secrets: inherit
+
+  range_22:
+    needs: range_21
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 440
+      end_batch: 459
+    secrets: inherit
+
+  range_23:
+    needs: range_22
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 460
+      end_batch: 479
+    secrets: inherit
+
+  range_24:
+    needs: range_23
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 480
+      end_batch: 499
+    secrets: inherit
+
+  range_25:
+    needs: range_24
+    if: ${{ always() }}
+    uses: ./.github/workflows/ozon-catalog-3x4-range.yml
+    with:
+      start_batch: 500
+      end_batch: 515
+    secrets: inherit
+
