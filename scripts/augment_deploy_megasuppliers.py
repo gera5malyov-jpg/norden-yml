@@ -31,3 +31,25 @@ s=s.replace(
     'rm -rf "$ROOT/wa-cache/apps/shop" || true\nrm -rf "$ROOT/wa-cache/apps/system/waEvent/cache" || true'
 )
 p.write_text(s,encoding="utf-8")
+
+s=p.read_text(encoding="utf-8")
+cache_line='rm -rf "$ROOT/wa-cache/apps/system/waEvent/cache" || true'
+cache_block=cache_line + """\ncat >/tmp/ms_event_clear.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+waEvent::clearCache();
+waEvent::reset();
+wa('shop');
+$e=wa('shop')->event('backend_products');
+echo "event_cache_clear=ok\\n";
+echo "megasuppliers_event=".(isset($e['megasuppliers-plugin'])?'yes':'no')."\\n";
+PHP
+chown web:web /tmp/ms_event_clear.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_event_clear.php'
+rm -f /tmp/ms_event_clear.php"""
+if "ms_event_clear.php" not in s:
+    s=s.replace(cache_line, cache_block)
+p.write_text(s,encoding="utf-8")
