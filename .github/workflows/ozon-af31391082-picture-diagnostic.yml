@@ -1,0 +1,41 @@
+name: Diagnose AF-31391082 picture processing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-af31391082-picture-diagnostic.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install --disable-pip-version-check requests
+      - name: Read Ozon picture processing state
+        run: |
+          python - <<'PY'
+          import json, os, requests
+          s=requests.Session()
+          s.headers.update({"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"})
+          r=s.post("https://api-seller.ozon.ru/v2/product/pictures/info",json={"product_id":["1093496461"]},timeout=60)
+          r.raise_for_status()
+          d=r.json()
+          os.makedirs("ozon/pilot_20/run",exist_ok=True)
+          open("ozon/pilot_20/run/AF-31391082_picture_info.json","w",encoding="utf-8").write(json.dumps(d,ensure_ascii=False,indent=2))
+          print(json.dumps(d,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit diagnostic
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+          git add ozon/pilot_20/run/AF-31391082_picture_info.json
+          git commit -m "report: AF-31391082 picture processing state [skip ci]" || exit 0
+          git push
