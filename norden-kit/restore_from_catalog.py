@@ -56,7 +56,7 @@ class Kit:
     def request(self, method, path, *, params=None, body=None):
         url = KIT_BASE + path
         for attempt in range(12):
-            delay = 0.43 - (time.monotonic() - self.last)
+            delay = 0.35 - (time.monotonic() - self.last)
             if delay > 0:
                 time.sleep(delay)
             self.last = time.monotonic()
@@ -71,7 +71,7 @@ class Kit:
                 time.sleep(min(20, 2 ** attempt))
                 continue
             if r.status_code >= 400:
-                raise RuntimeError(f"HTTP {r.status_code} {r.url}: {r.text[:700]}")
+                raise RuntimeError(f"HTTP {r.status_code} {r.url}: {r.text[:800]}")
             if not r.content:
                 return {}
             return r.json()
@@ -93,47 +93,24 @@ class Kit:
             return data["items"]
         return []
 
-    @staticmethod
-    def total(payload):
-        if not isinstance(payload, dict):
-            return None
-        for k in ("total","total_count"):
-            if isinstance(payload.get(k), int):
-                return payload[k]
-        meta = payload.get("meta")
-        if isinstance(meta, dict):
-            for k in ("total","total_count"):
-                if isinstance(meta.get(k), int):
-                    return meta[k]
-        return None
+    def search(self, value):
+        payload=self.request("GET","/v1/variants",params={"name":value,"page":1,"per_page":100})
+        return [x for x in self.items(payload) if isinstance(x,dict)]
 
-    def collection(self, path, params=None):
-        out=[]
-        page=1
-        while True:
-            q=dict(params or {})
-            q.update({"page":page,"per_page":100})
-            payload=self.request("GET",path,params=q)
-            rows=[x for x in self.items(payload) if isinstance(x,dict)]
-            out.extend(rows)
-            total=self.total(payload)
-            if not rows or (total is not None and len(out)>=total) or (total is None and len(rows)<100):
-                break
-            page += 1
-            if page % 25 == 0:
-                print(f"{path}: read {len(out)} rows", flush=True)
-        return out
-
-    def patch_status(self, variant_id, status):
-        return self.request("PATCH", f"/v1/variants/{variant_id}", body={"status":status})
+    def characteristics(self):
+        payload=self.request("GET","/v1/characteristics",params={"status":["ACTIVE"],"page":1,"per_page":1000})
+        return [x for x in self.items(payload) if isinstance(x,dict)]
 
     def get_variant(self, variant_id):
-        return self.request("GET", f"/v1/variants/{variant_id}")
+        return self.request("GET",f"/v1/variants/{variant_id}")
+
+    def publish(self, variant_id):
+        return self.request("PATCH",f"/v1/variants/{variant_id}",body={"status":"PUBLISHED"})
 
 def current_char_value(row, char_id):
     for c in row.get("characteristics") or []:
         if s(c.get("characteristic_id")) == char_id:
-            vals = c.get("values") or []
+            vals=c.get("values") or []
             return s(c.get("value") or (vals[0] if vals else ""))
     return ""
 
@@ -151,227 +128,225 @@ def load_catalog():
     expected=["Артикул","Название","YML ID","Бренд","Архивный"]
     if header[:5] != expected:
         raise RuntimeError(f"Unexpected catalog headers A:E: {header[:5]}")
-
-    # The sheet contains a small number of visually identical Norden IDs that
-    # differ only by Latin/Cyrillic look-alike letters. KIT identity matching
-    # deliberately normalizes those letters too, so treat such rows as one
-    # target identity instead of restoring duplicate KIT cards.
-    by_key={}
-    catalog_rows=0
-    for rowno,row in enumerate(values[1:], start=2):
+    targets=[]
+    for rowno,row in enumerate(values[1:],start=2):
         row=list(row)+[""]*(5-len(row))
         article,name,yml_id,brand,archive_flag=[s(x) for x in row[:5]]
-        if not yml_id or brand.casefold()!=BRAND.casefold():
+        if brand.casefold()!=BRAND.casefold():
             continue
-        key=norm(yml_id)
-        if not key:
+        if not article and not yml_id:
             continue
-        catalog_rows += 1
-        if key not in by_key:
-            by_key[key]={
-                "row":rowno,
-                "rows":[rowno],
-                "article":article,
-                "article_aliases":[article] if article else [],
-                "name":name,
-                "yml_id":yml_id,
-                "yml_aliases":[yml_id],
-                "yml_key":key,
-                "sheet_archive_flag":archive_flag,
-            }
-        else:
-            t=by_key[key]
-            t["rows"].append(rowno)
-            if article and article not in t["article_aliases"]:
-                t["article_aliases"].append(article)
-            if yml_id and yml_id not in t["yml_aliases"]:
-                t["yml_aliases"].append(yml_id)
-
-    targets=list(by_key.values())
-    duplicate_groups=[
-        {
-            "normalized_yml_key":t["yml_key"],
-            "rows":t["rows"],
-            "yml_aliases":t["yml_aliases"],
-            "article_aliases":t["article_aliases"],
-        }
-        for t in targets if len(t["rows"])>1
-    ]
-    if not (500 <= catalog_rows <= 2000):
-        raise RuntimeError(f"Safety guard: unexpected Norden row count {catalog_rows}")
+        targets.append({
+            "row":rowno,
+            "article":article,
+            "article_key":norm(article),
+            "name":name,
+            "yml_id":yml_id,
+            "yml_key":norm(yml_id),
+            "sheet_archive_flag":archive_flag,
+        })
     if not (500 <= len(targets) <= 2000):
-        raise RuntimeError(f"Safety guard: unexpected Norden unique target count {len(targets)}")
-    return targets, {
-        "catalog_rows":catalog_rows,
-        "unique_targets":len(targets),
-        "duplicate_normalized_identity_groups":duplicate_groups,
+        raise RuntimeError(f"Safety guard: unexpected Norden target row count {len(targets)}")
+    return targets
+
+def compact(row):
+    return {
+        "variant_id":s(row.get("id")),
+        "kit_id":row.get("kit_id"),
+        "sku":s(row.get("sku")),
+        "brand":s(row.get("brand")),
+        "name":s(row.get("name")),
+        "status":s(row.get("status")).upper(),
     }
 
 def main():
     started=now()
-    targets,catalog_meta=load_catalog()
-    target_by_key={t["yml_key"]:t for t in targets}
-    identity_index=defaultdict(set)
-    for t in targets:
-        for value in list(t.get("yml_aliases") or []) + list(t.get("article_aliases") or []):
-            key=norm(value)
-            if key:
-                identity_index[key].add(t["yml_key"])
-
+    targets=load_catalog()
     kit=Kit(TOKEN)
-    chars=kit.collection("/v1/characteristics", {"status":["ACTIVE"]})
-    by_title=defaultdict(list)
+
+    chars=kit.characteristics()
+    title_to_ids=defaultdict(list)
     for c in chars:
-        title=s(c.get("title"))
-        cid=s(c.get("id"))
-        if title and cid:
-            by_title[norm(title)].append(cid)
+        cid=s(c.get("id")); title=s(c.get("title"))
+        if cid and title:
+            title_to_ids[norm(title)].append(cid)
     identity_ids={}
     for title in IDENTITY_TITLES:
-        ids=list(dict.fromkeys(by_title.get(norm(title), [])))
+        ids=list(dict.fromkeys(title_to_ids.get(norm(title),[])))
         if ids:
             identity_ids[title]=ids
 
-    variants=kit.collection("/v1/variants")
-    candidates=defaultdict(dict)
-    variant_conflicts=[]
+    cache={}
+    def search_cached(q):
+        q=s(q)
+        if not q:
+            return []
+        if q not in cache:
+            cache[q]=kit.search(q)
+        return cache[q]
 
-    for row in variants:
-        if s(row.get("brand")).casefold()!=BRAND.casefold():
-            continue
-        vid=s(row.get("id"))
-        if not vid:
-            continue
-        values=[]
-        sku=s(row.get("sku"))
-        if sku:
-            values.append(("SKU",sku))
-        for title,ids in identity_ids.items():
-            for cid in ids:
-                v=current_char_value(row,cid)
-                if v:
-                    values.append((title,v))
-
-        matched_keys=set()
-        for field,value in values:
-            k=norm(value)
-            if k:
-                matched_keys.update(identity_index.get(k,set()))
-        if len(matched_keys)>1:
-            variant_conflicts.append({
-                "variant_id":vid,
-                "kit_id":row.get("kit_id"),
-                "sku":sku,
-                "status":s(row.get("status")).upper(),
-                "matched_targets":[
-                    {
-                        "yml_id":target_by_key[k]["yml_id"],
-                        "yml_aliases":target_by_key[k].get("yml_aliases") or [],
-                        "article_aliases":target_by_key[k].get("article_aliases") or [],
-                    }
-                    for k in sorted(matched_keys)
-                ],
-                "identity_values":[{"field":f,"value":v} for f,v in values],
-            })
-            continue
-        if len(matched_keys)==1:
-            key=next(iter(matched_keys))
-            candidates[key][vid]={
-                "variant_id":vid,
-                "kit_id":row.get("kit_id"),
-                "sku":sku,
-                "name":s(row.get("name")),
-                "status":s(row.get("status")).upper(),
-                "identity_values":[{"field":f,"value":v} for f,v in values],
-            }
-
-    plans=[]
+    chosen_rows=[]
     already=[]
     unresolved=[]
-    nonarchive_only=[]
     ambiguous=[]
-    for t in targets:
-        rows=list(candidates.get(t["yml_key"],{}).values())
-        if not rows:
+    query_errors=[]
+
+    for i,t in enumerate(targets,start=1):
+        article=t["article"]
+        yml=t["yml_id"]
+        exact=[]
+
+        # Primary key: exact KIT SKU == Catalog article (AF-...).
+        if article:
+            try:
+                rows=search_cached(article)
+            except Exception as exc:
+                query_errors.append({"row":t["row"],"article":article,"query":article,"error":str(exc)[:800]})
+                rows=[]
+            exact=[
+                r for r in rows
+                if norm(r.get("sku"))==t["article_key"]
+            ]
+
+        # Fallback: search by supplier/YML ID and require exact identity value
+        # from a live variant read. Name-only matches are never enough to restore.
+        fallback=[]
+        if not exact and yml:
+            try:
+                rows=search_cached(yml)
+            except Exception as exc:
+                query_errors.append({"row":t["row"],"article":article,"query":yml,"error":str(exc)[:800]})
+                rows=[]
+            for r in rows:
+                vid=s(r.get("id"))
+                if not vid:
+                    continue
+                try:
+                    live=kit.get_variant(vid)
+                except Exception as exc:
+                    query_errors.append({"row":t["row"],"article":article,"variant_id":vid,"error":str(exc)[:800]})
+                    continue
+                values=[]
+                sku=s(live.get("sku"))
+                if sku:
+                    values.append(("SKU",sku))
+                for title,ids in identity_ids.items():
+                    for cid in ids:
+                        v=current_char_value(live,cid)
+                        if v:
+                            values.append((title,v))
+                keys={norm(v) for _,v in values if norm(v)}
+                if t["yml_key"] and t["yml_key"] in keys:
+                    fallback.append(live)
+
+        candidates=exact or fallback
+        unique={}
+        for r in candidates:
+            vid=s(r.get("id"))
+            if vid:
+                unique[vid]=r
+        candidates=list(unique.values())
+
+        if not candidates:
             unresolved.append({
-                "rows":t.get("rows") or [t["row"]],
-                "article":t["article"],
-                "article_aliases":t.get("article_aliases") or [],
-                "name":t["name"],
-                "yml_id":t["yml_id"],
-                "yml_aliases":t.get("yml_aliases") or [],
+                "row":t["row"],"article":article,"name":t["name"],"yml_id":yml
             })
-            continue
-        published=[r for r in rows if r["status"]=="PUBLISHED"]
-        if published:
-            published.sort(key=lambda r:(int(r["kit_id"]) if str(r.get("kit_id","")).isdigit() else 10**18, r["sku"]))
-            already.append({
-                "target":{
-                    "rows":t.get("rows") or [t["row"]],
-                    "article":t["article"],
-                    "article_aliases":t.get("article_aliases") or [],
-                    "name":t["name"],
-                    "yml_id":t["yml_id"],
-                    "yml_aliases":t.get("yml_aliases") or [],
-                },
-                "published":published,
-                "other_candidates":[r for r in rows if r["status"]!="PUBLISHED"],
-            })
-            continue
-        archived=[r for r in rows if r["status"] in RESTORABLE]
-        if not archived:
-            nonarchive_only.append({
-                "target":{
-                    "rows":t.get("rows") or [t["row"]],
-                    "article":t["article"],
-                    "article_aliases":t.get("article_aliases") or [],
-                    "name":t["name"],
-                    "yml_id":t["yml_id"],
-                    "yml_aliases":t.get("yml_aliases") or [],
-                },
-                "candidates":rows,
-            })
+            if i % 100 == 0 or i==len(targets):
+                print(f"Resolve {i}/{len(targets)}",flush=True)
             continue
 
-        def canonical(r):
-            article_keys={norm(x) for x in (t.get("article_aliases") or []) if norm(x)}
-            exact_sheet_sku = 0 if norm(r["sku"]) in article_keys else 1
-            legacy = 0 if r["sku"] and not r["sku"].startswith("100-") else 1
+        published=[r for r in candidates if s(r.get("status")).upper()=="PUBLISHED"]
+        if published:
+            published.sort(key=lambda r:(int(r.get("kit_id")) if str(r.get("kit_id","")).isdigit() else 10**18,s(r.get("sku"))))
+            already.append({
+                "target":{"row":t["row"],"article":article,"yml_id":yml,"name":t["name"]},
+                "published":[compact(r) for r in published],
+                "other_candidates":[compact(r) for r in candidates if s(r.get("status")).upper()!="PUBLISHED"],
+            })
+            if i % 100 == 0 or i==len(targets):
+                print(f"Resolve {i}/{len(targets)}",flush=True)
+            continue
+
+        restorables=[r for r in candidates if s(r.get("status")).upper() in RESTORABLE]
+        if not restorables:
+            unresolved.append({
+                "row":t["row"],"article":article,"name":t["name"],"yml_id":yml,
+                "reason":"matched candidate is neither PUBLISHED nor HIDDEN/ARCHIVED",
+                "candidates":[compact(r) for r in candidates],
+            })
+            if i % 100 == 0 or i==len(targets):
+                print(f"Resolve {i}/{len(targets)}",flush=True)
+            continue
+
+        def rank(r):
+            exact_sku=0 if article and norm(r.get("sku"))==t["article_key"] else 1
+            legacy=0 if s(r.get("sku")) and not s(r.get("sku")).startswith("100-") else 1
             try: kid=int(r.get("kit_id"))
             except Exception: kid=10**18
-            return (exact_sheet_sku, legacy, kid, r["sku"], r["variant_id"])
+            return (exact_sku,legacy,kid,s(r.get("sku")),s(r.get("id")))
 
-        archived.sort(key=canonical)
-        chosen=archived[0]
-        same_rank=[r for r in archived if canonical(r)[:2]==canonical(chosen)[:2]]
-        # Multiple archived candidates are expected after historical duplicate cleanup.
-        # Restore exactly one canonical item; leave duplicate archive rows untouched.
-        plans.append({
-            "target":{k:t[k] for k in ("row","article","name","yml_id")},
-            "chosen":chosen,
-            "other_archived_candidates":[r for r in archived[1:]],
-            "all_candidates":rows,
+        restorables.sort(key=rank)
+        chosen=restorables[0]
+        chosen_rows.append({
+            "target":{"row":t["row"],"article":article,"yml_id":yml,"name":t["name"]},
+            "chosen":compact(chosen),
+            "other_restorable_candidates":[compact(r) for r in restorables[1:]],
+            "match_mode":"exact_sku" if exact else "exact_identity_fallback",
         })
+
+        if i % 100 == 0 or i==len(targets):
+            print(f"Resolve {i}/{len(targets)}",flush=True)
+
+    # Do not restore the same KIT variant twice if duplicate table rows point to it.
+    by_variant={}
+    duplicate_table_targets=[]
+    for p in chosen_rows:
+        vid=p["chosen"]["variant_id"]
+        if vid not in by_variant:
+            by_variant[vid]=p
+        else:
+            duplicate_table_targets.append({
+                "variant_id":vid,
+                "kept_target":by_variant[vid]["target"],
+                "duplicate_target":p["target"],
+            })
+    plans=list(by_variant.values())
 
     restored=[]
     errors=[]
-    for i,p in enumerate(plans, start=1):
-        chosen=p["chosen"]
-        vid=chosen["variant_id"]
+    for i,p in enumerate(plans,start=1):
+        vid=p["chosen"]["variant_id"]
         try:
-            kit.patch_status(vid,"PUBLISHED")
+            before=kit.get_variant(vid)
+            before_status=s(before.get("status")).upper()
+            if before_status=="PUBLISHED":
+                already.append({
+                    "target":p["target"],
+                    "published":[compact(before)],
+                    "other_candidates":[],
+                    "note":"became published before write",
+                })
+                continue
+            if before_status not in RESTORABLE:
+                errors.append({
+                    "target":p["target"],"variant_id":vid,
+                    "error":f"live status changed to {before_status}",
+                })
+                continue
+            kit.publish(vid)
             live=kit.get_variant(vid)
-            live_status=s(live.get("status")).upper()
+            after=s(live.get("status")).upper()
             item={
                 "target":p["target"],
+                "match_mode":p["match_mode"],
                 "variant_id":vid,
-                "kit_id":chosen.get("kit_id"),
-                "sku":chosen.get("sku"),
-                "before_status":chosen.get("status"),
-                "after_status":live_status,
-                "other_archived_candidates_left_untouched":len(p["other_archived_candidates"]),
+                "kit_id":live.get("kit_id"),
+                "sku":s(live.get("sku")),
+                "before_status":before_status,
+                "after_status":after,
+                "other_restorable_candidates_left_untouched":len(p["other_restorable_candidates"]),
             }
-            if live_status=="PUBLISHED":
+            if after=="PUBLISHED":
                 restored.append(item)
             else:
                 item["error"]="verification status is not PUBLISHED"
@@ -380,43 +355,41 @@ def main():
             errors.append({
                 "target":p["target"],
                 "variant_id":vid,
-                "kit_id":chosen.get("kit_id"),
-                "sku":chosen.get("sku"),
                 "error":str(exc)[:1000],
             })
         if i % 50 == 0 or i==len(plans):
-            print(f"Restore progress {i}/{len(plans)}", flush=True)
+            print(f"Restore {i}/{len(plans)}",flush=True)
 
     report={
         "started_at":started,
         "finished_at":now(),
-        "operation":"restore Norden KIT products from Catalog sheet",
+        "operation":"restore Norden KIT products from Catalog sheet using targeted search",
         "spreadsheet_id":SPREADSHEET_ID,
         "sheet":SHEET,
         "brand":BRAND,
         "stop_all_norden_untouched":True,
         "identity_titles_found":identity_ids,
-        "catalog_duplicate_normalized_identity_groups":catalog_meta["duplicate_normalized_identity_groups"],
         "counts":{
-            "catalog_rows":catalog_meta["catalog_rows"],
-            "catalog_targets":len(targets),
-            "duplicate_normalized_identity_groups":len(catalog_meta["duplicate_normalized_identity_groups"]),
-            "kit_variants_scanned":len(variants),
-            "variant_identity_conflicts":len(variant_conflicts),
+            "catalog_rows":len(targets),
+            "search_queries_cached":len(cache),
             "already_published":len(already),
-            "restore_planned":len(plans),
+            "restore_candidates_before_dedupe":len(chosen_rows),
+            "restore_planned_unique_variants":len(plans),
             "restored_verified":len(restored),
             "restore_errors":len(errors),
-            "unresolved_no_kit_match":len(unresolved),
-            "matched_but_not_published_or_archived":len(nonarchive_only),
+            "unresolved":len(unresolved),
+            "ambiguous":len(ambiguous),
+            "duplicate_table_targets_same_variant":len(duplicate_table_targets),
+            "query_errors":len(query_errors),
         },
         "restored":restored,
         "already_published":already,
         "unresolved":unresolved,
-        "nonarchive_only":nonarchive_only,
-        "variant_conflicts":variant_conflicts,
+        "ambiguous":ambiguous,
+        "duplicate_table_targets_same_variant":duplicate_table_targets,
+        "query_errors":query_errors,
         "errors":errors,
-        "complete":len(errors)==0,
+        "complete":len(errors)==0 and len(query_errors)==0,
     }
     REPORT.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps(report["counts"],ensure_ascii=False,indent=2))
