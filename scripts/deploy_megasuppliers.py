@@ -112,6 +112,36 @@ def main():
                     if pos < 0:
                         raise RuntimeError("cannot patch supplier sidebar methods")
                     methods=r"""
+    private function legacySupplierTypeMap()
+    {
+        return array(
+            'NORDEN' => array(142),
+            'TD_ANDREY' => array(126),
+            'DEEPHOUSE' => array(24),
+            'LEVMAR' => array(125),
+            'TREEZ' => array(199),
+            'YOURROOM' => array(26),
+            'AFINA' => array(63),
+            'ALETAN' => array(46, 122, 202),
+            'RED_BLACK' => array(150),
+            'B2B_FABRIKA' => array(204),
+            'KENNER' => array(203)
+        );
+    }
+
+    private function supplierProductSubqueries($supplier_id, $supplier_code)
+    {
+        $queries = array(
+            'SELECT product_id FROM shop_megasuppliers_product WHERE supplier_id = '.(int)$supplier_id.' AND product_id > 0'
+        );
+        $map = $this->legacySupplierTypeMap();
+        if (!empty($map[$supplier_code])) {
+            $type_ids = array_map('intval', $map[$supplier_code]);
+            $queries[] = 'SELECT id AS product_id FROM shop_product WHERE type_id IN ('.implode(',', $type_ids).')';
+        }
+        return $queries;
+    }
+
     public function backendProducts($params = array())
     {
         $model = new waModel();
