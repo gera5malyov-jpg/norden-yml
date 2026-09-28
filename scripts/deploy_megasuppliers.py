@@ -84,6 +84,7 @@ def main():
                 data=text_data.encode("utf-8")
             elif item.filename == "megasuppliers/lib/shopMegasuppliers.plugin.php":
                 text_data=data.decode("utf-8")
+                text_data=text_data.replace("public function routing($route)", "public function routing($route = array())")
                 if "public function routing(" not in text_data:
                     pos=text_data.rfind("\n}")
                     if pos < 0:
