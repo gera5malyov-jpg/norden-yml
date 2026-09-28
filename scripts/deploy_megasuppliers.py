@@ -78,7 +78,7 @@ def main():
                         "'backend_prod' => 'backendProd',",
                         "'backend_prod' => 'backendProd',\n        'backend_products' => 'backendProducts',\n        'products_collection' => 'productsCollection',"
                     )
-                text_data=text_data.replace("'version' => '1.0.1'", "'version' => '1.0.2'")
+                text_data=text_data.replace("'version' => '1.0.1'", "'version' => '1.0.3'")
                 data=text_data.encode("utf-8")
             elif item.filename == "megasuppliers/lib/models/shopMegasuppliersMeta.model.php":
                 text_data=data.decode("utf-8")
@@ -194,17 +194,16 @@ def main():
         if (!$supplier_id) {
             return null;
         }
+        $supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
+        if (!$supplier || empty($supplier['active'])) {
+            return null;
+        }
 
-        $collection->addWhere(
-            'id IN (SELECT DISTINCT product_id FROM shop_megasuppliers_product '
-            .'WHERE supplier_id = '.$supplier_id.' AND product_id > 0)'
-        );
+        $queries = $this->supplierProductSubqueries($supplier_id, $supplier['code']);
+        $collection->addWhere('id IN ('.implode(' UNION ', $queries).')');
 
         if (!empty($params['auto_title'])) {
-            $supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
-            if ($supplier) {
-                $collection->addTitle('Поставщик: '.$supplier['name']);
-            }
+            $collection->addTitle('Поставщик: '.$supplier['name']);
         }
         return true;
     }
