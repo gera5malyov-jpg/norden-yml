@@ -23,7 +23,9 @@ jobs:
           ref: main
           fetch-depth: 0
       - name: Diagnose
-        run: python3 scripts/diagnose_megasuppliers_ui.py
+        run: |
+          python3 scripts/diagnose_megasuppliers_ui.py
+          cat .deploy-probe/megasuppliers-ui-diagnostic.txt
       - name: Save report
         shell: bash
         run: |
@@ -33,5 +35,5 @@ jobs:
           git add .deploy-probe/megasuppliers-ui-diagnostic.txt
           if ! git diff --cached --quiet; then
             git commit -m "Save megasuppliers UI diagnostic [skip ci]"
-            git push origin HEAD:main
+            git push origin HEAD:main || true
           fi
