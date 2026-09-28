@@ -26,8 +26,8 @@ headers={
     "Content-Type":"application/json",
     "Accept":"application/json"
 }
-base=f"https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/"
-status,data=req(base,"GET",None,headers)
+base="https://api-ms.netangels.ru/api/v1/sshkeys/"
+status,data=req(base+"?limit=100","GET",None,headers)
 print("list_status",status)
 print("payload_type",type(data).__name__)
 if isinstance(data,dict):
