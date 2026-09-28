@@ -20,6 +20,8 @@ _,vms=req("https://api-ms.netangels.ru/api/v1/cloud/vms/?limit=100","GET",None,h
 vm_items=vms.get("entities",[]) if isinstance(vms,dict) else []
 vm=next((x for x in vm_items if int(x.get("id",0))==VM_ID),{})
 print("vm_state="+str(vm.get("state","unknown")))
+print("vm_updated="+str(vm.get("updated","")))
+print("vm_transitions="+json.dumps(vm.get("transitions",[]),ensure_ascii=False)[:5000])
 _,data=req(f"https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/?limit=100","GET",None,headers)
 items=data.get("entities",[]) if isinstance(data,dict) else data
 lines=["vm_key_count="+str(len(items))]
