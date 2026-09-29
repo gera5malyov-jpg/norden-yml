@@ -37,7 +37,9 @@ require_once $root.'/wa-config/SystemConfig.class.php';
 waSystem::getInstance(null,new SystemConfig());
 wa('shop');
 $m=new waModel();
-$p=wa('shop')->getPlugin('megasuppliers',true);\necho "INTERACTION_URL_RUNTIME=".$p->getInteractionUrl('thumbs')."\\n";\n$skus=array('DEEP-59179','DEEP-59180','DEEP-59176','DEEP-59177','DEEP-61461','AF-31662421','AF-31655692');
+$p=wa('shop')->getPlugin('megasuppliers',true);
+echo "INTERACTION_URL_RUNTIME=".$p->getInteractionUrl('thumbs')."\\n";
+$skus=array('DEEP-59179','DEEP-59180','DEEP-59176','DEEP-59177','DEEP-61461','AF-31662421','AF-31655692');
 foreach($skus as $sku){
   $r=$m->query(
     "SELECT p.id,p.name,p.summary,p.description,p.image_id,s.id sku_id,s.sku
