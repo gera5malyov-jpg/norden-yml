@@ -86,12 +86,47 @@ def clients(x):
     if isinstance(x,dict) and isinstance(x.get("clients"),list): return x["clients"]
     return x if isinstance(x,list) else []
 
+def mcp_http(payload, session=None):
+    h={"Authorization":"Bearer "+MCP_TOKEN,"Accept":"application/json, text/event-stream","Content-Type":"application/json"}
+    if session: h["Mcp-Session-Id"]=session
+    req=urllib.request.Request(MCP_URL,data=json.dumps(payload).encode(),headers=h,method="POST")
+    with urllib.request.urlopen(req,timeout=25) as r:
+        raw=r.read().decode("utf-8","replace")
+        headers={k.lower():v for k,v in r.headers.items()}
+    raw=raw.strip()
+    if raw.startswith("data:") or "\ndata:" in raw:
+        chunks=[]
+        for line in raw.splitlines():
+            if line.startswith("data:"):
+                val=line[5:].strip()
+                if val and val!="[DONE]": chunks.append(val)
+        raw=chunks[-1] if chunks else "{}"
+    return (json.loads(raw) if raw else {}), headers
+
 def mcp_check():
     if not MCP_TOKEN: return {"configured":False,"ok":False}
-    payload={"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"github-h1cloud","version":"1.0"}}}
+    init={"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"github-h1cloud","version":"1.0"}}}
     try:
-        obj,_=call(MCP_URL,"POST",{"Authorization":"Bearer "+MCP_TOKEN,"Accept":"application/json, text/event-stream"},payload)
-        return {"configured":True,"ok":not bool(obj.get("error")) if isinstance(obj,dict) else True}
+        obj,h=mcp_http(init)
+        if isinstance(obj,dict) and obj.get("error"):
+            return {"configured":True,"ok":False,"reason":str(obj.get("error"))[:300]}
+        session=h.get("mcp-session-id")
+        try:
+            mcp_http({"jsonrpc":"2.0","method":"notifications/initialized","params":{}},session)
+        except Exception:
+            pass
+        tools_obj,_=mcp_http({"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}},session)
+        tools=[]
+        if isinstance(tools_obj,dict):
+            arr=(tools_obj.get("result") or {}).get("tools") or []
+            for t in arr:
+                if isinstance(t,dict):
+                    tools.append({
+                        "name":t.get("name"),
+                        "description":(t.get("description") or "")[:240],
+                        "inputSchema":t.get("inputSchema")
+                    })
+        return {"configured":True,"ok":True,"tools":tools}
     except Exception as e:
         return {"configured":True,"ok":False,"reason":str(e)[:300]}
 
