@@ -73,6 +73,9 @@ echo "--- SHOP PLUGIN INTERACTION IMPLEMENTATION ---"
 grep -RIn "class shopPlugin" "$ROOT/wa-apps/shop" 2>/dev/null | head -n 20 || true
 grep -RIn "getInteractionUrl" "$ROOT/wa-apps/shop" 2>/dev/null | head -n 80 || true
 echo "--- SHOP PLUGIN INTERACTION IMPLEMENTATION END ---"
+echo "--- LIVE THUMB METHODS ---"
+grep -n -A 140 "thumbnailEndpointUrl" "$ROOT/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php" 2>/dev/null || true
+echo "--- LIVE THUMB METHODS END ---"
 echo "--- INTERACTION URL METHOD ---"
 grep -RIn "function getInteractionUrl\|getInteractionUrl(" "$ROOT/wa-system" "$ROOT/wa-apps/shop" 2>/dev/null | head -n 80 || true
 echo "--- INTERACTION URL METHOD END ---"
