@@ -1,6 +1,15 @@
     private function thumbnailEndpointUrl()
     {
-        return wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers&module=backend&action=thumbs';
+        if (method_exists($this, 'getInteractionUrl')) {
+            $url = $this->getInteractionUrl('thumbs');
+            if ($url) {
+                return $url;
+            }
+        }
+
+        $root = rtrim(wa()->getRootUrl(true), '/').'/';
+        $backend = trim(wa()->getConfig()->getBackendUrl(), '/');
+        return $root.$backend.'/shop/?plugin=megasuppliers&action=thumbs';
     }
 
     private function thumbnailBootstrap()
