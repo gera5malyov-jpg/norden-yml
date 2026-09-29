@@ -1,0 +1,38 @@
+name: Baserow token check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - baserow-token-check.txt
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify Baserow token
+        env:
+          BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BASEROW_DATABASE_TOKEN:-}" ]; then
+            echo "BASEROW_DATABASE_TOKEN is missing"
+            exit 1
+          fi
+          code=$(curl -sS -o /tmp/baserow.json -w "%{http_code}"             -H "Authorization: Token $BASEROW_DATABASE_TOKEN"             "http://147.78.67.6/api/database/rows/table/156/?user_field_names=true&size=1")
+          echo "HTTP $code"
+          if [ "$code" != "200" ]; then
+            cat /tmp/baserow.json
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/baserow.json'))
+          print("BASEROW_TOKEN_OK")
+          print("count=", data.get("count"))
+          PY
