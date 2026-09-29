@@ -62,7 +62,7 @@ def brand(p):
 def list_certs():
     out=[]; errors=[]
     for page in range(1,101):
-        d=post("/v1/product/certificate/list",{"page":page,"page_size":1000})
+        d=post("/v1/product/certificate/list",{"page":page,"page_size":100})
         if "__http_error__" in d or "__error__" in d:
             errors.append(d); break
         rows=d.get("result")
@@ -94,7 +94,7 @@ aliases={
 }
 
 options=post("/v2/product/certification/options",{})
-accord=get("/v2/product/certificate/accordance-types/list")
+cert_params=post("/v2/product/certification/params",{"params":{"certificate_type":"DECLARATION"}})\naccord=get("/v2/product/certificate/accordance-types/list")
 types=get("/v1/product/certificate/types")
 certs,cert_errors=list_certs()
 pl=list_products()
@@ -118,7 +118,7 @@ for pid,p in by_id.items():
 
 out={
  "options":options,
- "accordance_types":accord,
+ "certification_params_declaration":cert_params,\n "accordance_types":accord,
  "certificate_types":types,
  "certificate_count":len(certs),
  "certificate_errors":cert_errors,
@@ -129,5 +129,5 @@ out={
  "supplier_hits":{k:{"count":len(v),"sample":v[:20]} for k,v in supplier_hits.items()},
 }
 print("===CERTIFICATE_AUDIT_JSON===")
-open("ozon/certificates/audit_report.json","w",encoding="utf-8").write(json.dumps(out,ensure_ascii=False,indent=2)+"\\n")
+open("ozon/certificates/audit_report.json","w",encoding="utf-8").write(json.dumps(out,ensure_ascii=False,indent=2)+"\n")
 print(json.dumps({"certificate_count":len(certs),"product_count":len(by_id),"supplier_counts":{k:len(v) for k,v in supplier_hits.items()}},ensure_ascii=False))
