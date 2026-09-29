@@ -1,0 +1,65 @@
+name: Ozon Norden → Database data sync
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'baserow/ozon_norden_database_trigger.txt'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ozon-norden-database-data-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install
+        run: pip install --disable-pip-version-check requests
+
+      - name: Compile
+        run: python -m py_compile baserow/sync_ozon_norden_to_database.py
+
+      - name: Sync Ozon Norden to Database
+        id: sync
+        continue-on-error: true
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+        run: python baserow/sync_ozon_norden_to_database.py
+
+      - name: Save report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add baserow/ozon_norden_database_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Ozon Norden Database sync report"
+            for i in 1 2 3; do
+              git push origin HEAD:main && break
+              git fetch origin main
+              git rebase origin/main || git rebase --abort
+              sleep $((i*3))
+            done
+          fi
+
+      - name: Fail if sync failed
+        if: steps.sync.outcome == 'failure'
+        run: exit 1
