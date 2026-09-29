@@ -1,0 +1,68 @@
+name: Database Norden source audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/database-norden-source-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Audit source
+        run: |
+          python3 - <<'PY'
+          import json, os, requests, time, re
+          url='https://norden.group/api-products/'
+          headers={'secret':os.environ['NORDEN_SECRET']}
+          rows=[]; page=1
+          while True:
+              r=requests.get(url,headers=headers,params={'page':page},timeout=90)
+              r.raise_for_status()
+              j=r.json(); batch=j.get('products') or []; rows += batch
+              pd=j.get('page_data') or {}
+              total=int(str(pd.get('total_items') or 0).replace(' ','') or 0)
+              per=int(str(pd.get('items_per_page') or len(batch) or 500))
+              if not batch or len(rows)>=total or len(batch)<per: break
+              page += 1; time.sleep(6.2)
+          print('TOTAL',len(rows))
+          keys=sorted(set().union(*(x.keys() for x in rows if isinstance(x,dict))))
+          print('KEYS',json.dumps(keys,ensure_ascii=False))
+          def s(v): return str(v or '').strip()
+          def q(v):
+              x=s(v).replace('\xa0',' ').replace(' ','').replace(',','.')
+              if not x: return None
+              if x.startswith('>'):
+                  m=re.search(r'\d+',x)
+                  return 100 if m and int(m.group())>=99 else None
+              try: return max(0,int(float(x)))
+              except: return None
+          instock=[x for x in rows if (q(x.get('qty')) or 0)>0]
+          print('IN_STOCK',len(instock))
+          special=[]
+          for x in rows:
+              hay=' | '.join(s(x.get(k)) for k in ('name','description','category','product_code','Kod')).casefold()
+              if 'уцен' in hay or 'моск' in hay:
+                  special.append({
+                    'product_code':x.get('product_code'),
+                    'Kod':x.get('Kod'),
+                    'name':x.get('name'),
+                    'category':x.get('category'),
+                    'qty':x.get('qty'),
+                    'price':x.get('price')
+                  })
+          print('SPECIAL_COUNT',len(special))
+          print('SPECIAL_SAMPLE',json.dumps(special[:100],ensure_ascii=False))
+          print('SAMPLE',json.dumps([{k:x.get(k) for k in ('product_code','Kod','name','category','qty','price')} for x in rows[:10]],ensure_ascii=False))
+          PY
