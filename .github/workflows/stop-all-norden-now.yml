@@ -15,40 +15,81 @@ jobs:
   stop:
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel and disable all Norden workflows
+      - uses: actions/checkout@v4
+
+      - name: Cancel and disable every workflow related to Norden
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
 
-          echo "Collect Norden workflows..."
-          gh api --paginate "repos/$REPO/actions/workflows?per_page=100"             --jq '.workflows[] | select(((.name // "") + " " + (.path // "")) | ascii_downcase | contains("norden")) | [.id,.name,.path] | @tsv'             > /tmp/norden-workflows.tsv
+          echo "Collect all workflow IDs and paths..."
+          gh api --paginate "repos/$REPO/actions/workflows?per_page=100" \
+            --jq '.workflows[] | [.id,.name,.path,.state] | @tsv' \
+            > /tmp/all-workflows.tsv
 
-          echo "Found:"
+          echo "Find workflows related to Norden by name, path, or file contents..."
+          : > /tmp/norden-paths.txt
+
+          awk -F '\t' 'tolower($2 " " $3) ~ /norden/ {print $3}' /tmp/all-workflows.tsv \
+            >> /tmp/norden-paths.txt
+
+          grep -liE 'norden|NORDEN-100|NORDEN_SECRET|sync_norden|norden-kit|norden-yml' \
+            .github/workflows/*.yml .github/workflows/*.yaml 2>/dev/null \
+            | sed 's#^#/#' \
+            >> /tmp/norden-paths.txt || true
+
+          sort -u /tmp/norden-paths.txt -o /tmp/norden-paths.txt
+
+          awk -F '\t' 'NR==FNR {wanted[$1]=1; next} ($3 in wanted) {print $0}' \
+            /tmp/norden-paths.txt /tmp/all-workflows.tsv \
+            > /tmp/norden-workflows.tsv
+
+          echo "Norden-related workflows:"
           cat /tmp/norden-workflows.tsv || true
 
           cut -f1 /tmp/norden-workflows.tsv | sort -u > /tmp/norden-workflow-ids.txt
 
           echo "Cancel active Norden runs..."
-          gh api --paginate "repos/$REPO/actions/runs?per_page=100"             --jq '.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="requested" or .status=="pending") | [.id,.workflow_id,.name,.status] | @tsv'             > /tmp/active-runs.tsv
+          gh api --paginate "repos/$REPO/actions/runs?per_page=100" \
+            --jq '.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="requested" or .status=="pending") | [.id,.workflow_id,.name,.status] | @tsv' \
+            > /tmp/active-runs.tsv
 
           while IFS=$'\t' read -r run_id workflow_id run_name run_status; do
             [ -z "${run_id:-}" ] && continue
+            if [ "$run_id" = "$CURRENT_RUN_ID" ]; then
+              echo "Keep current stop run alive: $run_id"
+              continue
+            fi
             if grep -qx "$workflow_id" /tmp/norden-workflow-ids.txt; then
               echo "Cancel $run_id | $run_name | $run_status"
               gh api --method POST "repos/$REPO/actions/runs/$run_id/cancel" || true
             fi
           done < /tmp/active-runs.tsv
 
-          echo "Disable Norden workflows..."
-          while IFS=$'\t' read -r workflow_id workflow_name workflow_path; do
+          echo "Disable Norden-related workflows..."
+          while IFS=$'\t' read -r workflow_id workflow_name workflow_path workflow_state; do
             [ -z "${workflow_id:-}" ] && continue
-            echo "Disable $workflow_id | $workflow_name | $workflow_path"
-            gh api --method PUT "repos/$REPO/actions/workflows/$workflow_id/disable"
+            echo "Disable $workflow_id | $workflow_name | $workflow_path | $workflow_state"
+            gh api --method PUT "repos/$REPO/actions/workflows/$workflow_id/disable" || true
           done < /tmp/norden-workflows.tsv
 
-          echo "Verify enabled Norden workflows:"
-          left="$(gh api --paginate "repos/$REPO/actions/workflows?per_page=100"             --jq '[.workflows[] | select((((.name // "") + " " + (.path // "")) | ascii_downcase | contains("norden")) and .state=="active")] | length')"          
+          echo "Verify no matched workflow remains active..."
+          gh api --paginate "repos/$REPO/actions/workflows?per_page=100" \
+            --jq '.workflows[] | [.id,.name,.path,.state] | @tsv' \
+            > /tmp/workflows-after.tsv
+
+          left=0
+          while IFS= read -r workflow_id; do
+            [ -z "${workflow_id:-}" ] && continue
+            state="$(awk -F '\t' -v id="$workflow_id" '$1==id {print $4}' /tmp/workflows-after.tsv | head -n1)"
+            if [ "$state" = "active" ]; then
+              echo "STILL ACTIVE: $workflow_id"
+              left=$((left+1))
+            fi
+          done < /tmp/norden-workflow-ids.txt
+
           echo "ACTIVE_NORDEN_WORKFLOWS=$left"
           test "$left" = "0"
