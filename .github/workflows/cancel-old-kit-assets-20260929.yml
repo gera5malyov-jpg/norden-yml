@@ -5,6 +5,8 @@ on:
     paths:
       - 'catalog/cancel_old_kit_assets_trigger.txt'
   workflow_dispatch:
+  issues:
+    types: [opened]
 
 permissions:
   actions: write
@@ -12,6 +14,7 @@ permissions:
 
 jobs:
   cancel:
+    if: github.event_name != 'issues' || startsWith(github.event.issue.title, '[CANCEL-KIT-ASSETS]')
     runs-on: ubuntu-latest
     steps:
       - name: Cancel old run
