@@ -1,0 +1,90 @@
+name: H1Cloud VPN
+
+on:
+  push:
+    branches:
+      - h1cloud-vpn
+    paths:
+      - h1cloud-run.txt
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Mode"
+        required: true
+        default: "inspect"
+        type: choice
+        options:
+          - inspect
+          - apply
+          - verify
+
+permissions:
+  contents: write
+
+jobs:
+  h1cloud:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      H1CLOUD_PANEL_URL: http://pl3.h1cloud.net:25076
+      H1CLOUD_MCP_URL: https://my.h1cloud.net/api/v1/mcp
+      H1CLOUD_CLIENT_NAME: georgiy-vpn
+      H1CLOUD_CLIENT_DAYS: "3650"
+      H1CLOUD_PANEL_TOKEN: ${{ secrets.H1CLOUD_PANEL_TOKEN }}
+      H1CLOUD_MCP_TOKEN: ${{ secrets.H1CLOUD_MCP_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: h1cloud-vpn
+
+      - name: Determine mode
+        id: mode
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MODE="${{ inputs.mode }}"
+          else
+            MODE="$(head -n 1 h1cloud-run.txt | tr -d '[:space:]')"
+          fi
+          case "$MODE" in inspect|apply|verify) ;; *) echo "Invalid mode: $MODE" >&2; exit 1 ;; esac
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+
+      - name: Mask configured secrets
+        shell: bash
+        run: |
+          for value in "$H1CLOUD_PANEL_TOKEN" "$H1CLOUD_MCP_TOKEN"; do
+            if [ -n "$value" ]; then echo "::add-mask::$value"; fi
+          done
+
+      - name: Run H1Cloud manager
+        id: manager
+        continue-on-error: true
+        shell: bash
+        run: python3 scripts/h1cloud_vpn.py "${{ steps.mode.outputs.mode }}"
+
+      - name: Publish safe status
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p status
+          if [ -f h1cloud-safe-result.json ]; then
+            cp h1cloud-safe-result.json status/h1cloud-safe-result.json
+          else
+            printf '{"fatal":"workflow produced no safe result"}\n' > status/h1cloud-safe-result.json
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add status/h1cloud-safe-result.json
+          if ! git diff --cached --quiet; then
+            git commit -m "H1Cloud status: ${{ steps.mode.outputs.mode }}"
+            git push origin HEAD:h1cloud-vpn
+          fi
+
+      - name: Fail if manager failed
+        if: steps.manager.outcome != 'success'
+        shell: bash
+        run: exit 1
