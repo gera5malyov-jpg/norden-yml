@@ -1,11 +1,6 @@
 name: Database Norden sync
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/database-norden-sync.yml'
-      - 'baserow/sync_norden_database.py'
   workflow_dispatch:
   schedule:
     - cron: '23 */6 * * *'
