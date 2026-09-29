@@ -92,6 +92,15 @@ def patch_method(text, marker, old_return, new_return):
     part=part.replace(old_return,new_return,1)
     return text[:start]+part+text[nxt:], True
 
+new_endpoint=re.search(
+    r"    private function thumbnailEndpointUrl\(\)\n    \{.*?\n    \}\n\n    private function thumbnailBootstrap",
+    snippet,
+    re.S
+)
+if not new_endpoint:
+    raise SystemExit("endpoint helper not found in snippet")
+endpoint_method=new_endpoint.group(0).rsplit("\n\n    private function thumbnailBootstrap",1)[0]
+
 if "private function thumbnailEndpointUrl(" not in s:
     pos=s.rfind("\n}")
     if pos < 0:
@@ -99,7 +108,12 @@ if "private function thumbnailEndpointUrl(" not in s:
     s=s[:pos]+"\n"+snippet+s[pos:]
     print("THUMB_HELPERS=added")
 else:
-    print("THUMB_HELPERS=exists")
+    pattern=r"    private function thumbnailEndpointUrl\(\)\n    \{.*?\n    \}\n(?=\n    private function thumbnailBootstrap)"
+    s2,n=re.subn(pattern,endpoint_method,s,count=1,flags=re.S)
+    if n != 1:
+        raise SystemExit("cannot replace thumbnailEndpointUrl")
+    s=s2
+    print("THUMB_ENDPOINT=updated")
 
 s,changed_new=patch_method(
     s,
@@ -120,12 +134,14 @@ print("OLD_UI_BOOTSTRAP="+("added" if changed_old else "exists"))
 plugin.write_text(s,encoding='utf-8')
 
 c=cfg.read_text(encoding='utf-8')
-c2=re.sub(r"'version'\s*=>\s*'1\.0\.8'", "'version' => '1.0.9'", c, count=1)
+c2=re.sub(r"'version'\s*=>\s*'1\.0\.9'", "'version' => '1.0.10'", c, count=1)
 if c2==c:
-    c2=re.sub(r"'version'\s*=>\s*'1\.0\.7'", "'version' => '1.0.9'", c, count=1)
+    c2=re.sub(r"'version'\s*=>\s*'1\.0\.8'", "'version' => '1.0.10'", c, count=1)
+if c2==c:
+    c2=re.sub(r"'version'\s*=>\s*'1\.0\.7'", "'version' => '1.0.10'", c, count=1)
 if c2!=c:
     cfg.write_text(c2,encoding='utf-8')
-    print("VERSION=1.0.9")
+    print("VERSION=1.0.10")
 else:
     m=re.search(r"'version'\s*=>\s*'([^']+)'",c)
     print("VERSION="+(m.group(1) if m else "unknown"))
@@ -164,6 +180,46 @@ su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_thumb_ve
 rm -f /tmp/ms_thumb_verify.php
 
 rm -rf "$ROOT/wa-cache/apps/shop" "$ROOT/wa-cache/apps/system/waEvent/cache" 2>/dev/null || true
+
+cat >/tmp/ms_thumb_route_verify.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$p=wa('shop')->getPlugin('megasuppliers',true);
+echo "METHOD_EXISTS=".(method_exists($p,'getInteractionUrl')?'yes':'no')."\n";
+echo "INTERACTION_URL=".$p->getInteractionUrl('thumbs')."\n";
+$a=$p->backendProducts(array());
+$b=$p->backendProdList(array());
+echo "OLD_HOOK=".(is_array($a)&&isset($a['sidebar_section'])&&strpos($a['sidebar_section'],'__msExtThumbs')!==false?'ok':'bad')."\n";
+echo "NEW_HOOK=".(is_array($b)&&isset($b['header_left'])&&strpos($b['header_left'],'__msExtThumbs')!==false?'ok':'bad')."\n";
+PHP
+chown web:web /tmp/ms_thumb_route_verify.php
+ROUTE_OUT="$(su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_thumb_route_verify.php')"
+echo "$ROUTE_OUT"
+INTERACTION_URL="$(printf '%s\n' "$ROUTE_OUT" | sed -n 's/^INTERACTION_URL=//p' | tail -n1)"
+rm -f /tmp/ms_thumb_route_verify.php
+if [ -z "$INTERACTION_URL" ]; then
+  echo "ROUTE_VERIFY=missing_url"
+  exit 7
+fi
+case "$INTERACTION_URL" in
+  http://*|https://*) TEST_URL="$INTERACTION_URL" ;;
+  /*) TEST_URL="https://profikompany.ru$INTERACTION_URL" ;;
+  *) TEST_URL="https://profikompany.ru/$INTERACTION_URL" ;;
+esac
+ROUTE_HTTP="$(curl -k -sS -o /tmp/ms_thumb_route_body --max-time 15 -w '%{http_code}' "$TEST_URL" || true)"
+echo "ROUTE_HTTP=$ROUTE_HTTP"
+if [ "$ROUTE_HTTP" = "404" ] || [ "$ROUTE_HTTP" = "000" ]; then
+  echo "ROUTE_VERIFY=failed"
+  head -c 500 /tmp/ms_thumb_route_body 2>/dev/null || true
+  exit 8
+fi
+echo "ROUTE_VERIFY=ok"
+rm -f /tmp/ms_thumb_route_body
+
 RESET="$ROOT/ms-opcache-reset-$TS.php"
 cat >"$RESET" <<'PHP'
 <?php
