@@ -5,6 +5,8 @@ on:
   push:
     paths:
       - 'catalog/ozon_norden_to_kit_trigger.txt'
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
@@ -15,6 +17,7 @@ concurrency:
 
 jobs:
   sync:
+    if: github.event_name != 'issues' || startsWith(github.event.issue.title, '[OZON-NORDEN-KIT]')
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
