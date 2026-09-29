@@ -1,0 +1,45 @@
+name: Inspect KIT Norden media
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - kit-norden-media-inspect.txt
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Inspect one Norden variant media
+        run: |
+          python3 - <<'PY'
+          import os, json, requests
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          base='https://api.kit.yandex.net'
+          r=requests.get(base+'/v1/variants',headers=h,params={'name':'AF-31662421','page':1,'per_page':100},timeout=60)
+          r.raise_for_status()
+          d=r.json()
+          rows=d.get('items') or d.get('results') or d.get('variants') or d.get('data') or []
+          if isinstance(rows,dict): rows=rows.get('items') or []
+          rows=[x for x in rows if isinstance(x,dict) and str(x.get('sku') or '').strip()=='AF-31662421']
+          print('MATCHES=',len(rows))
+          for x in rows[:3]:
+              print('SUMMARY=',json.dumps({k:x.get(k) for k in ['id','kit_id','sku','name','brand','status','media']},ensure_ascii=False,indent=2))
+              vid=x.get('id')
+              if vid:
+                  rr=requests.get(base+f'/v1/variants/{vid}',headers=h,timeout=60)
+                  rr.raise_for_status()
+                  full=rr.json()
+                  print('FULL_MEDIA=',json.dumps(full.get('media'),ensure_ascii=False,indent=2))
+          PY
