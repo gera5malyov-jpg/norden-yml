@@ -231,11 +231,84 @@ def verify(p):
     safe["client"]={"state":"present" if any(x.get("name")==CLIENT for x in clients(p.get("/clients"))) else "missing"}
     return safe,private
 
+def shape(v, depth=0):
+    if depth > 3: return type(v).__name__
+    if isinstance(v, dict):
+        return {str(k):shape(x,depth+1) for k,x in v.items()}
+    if isinstance(v, list):
+        return [shape(v[0],depth+1)] if v else []
+    return type(v).__name__
+
+def wgprobe(p):
+    cl=clients(p.get("/clients"))
+    client=next((x for x in cl if x.get("name")==CLIENT),None)
+    probes={}
+    paths=[
+        f"/clients/{urllib.parse.quote(CLIENT,safe='')}",
+        f"/clients/{urllib.parse.quote(CLIENT,safe='')}/wireguard",
+        f"/clients/{urllib.parse.quote(CLIENT,safe='')}/wg",
+        "/wireguard",
+        "/wireguard/clients",
+        "/wg"
+    ]
+    for path in paths:
+        try:
+            obj=p.get(path)
+            probes[path]={"ok":True,"shape":shape(obj)}
+        except Exception as e:
+            probes[path]={"ok":False,"error":str(e)[:160]}
+
+    js_hits=[]
+    try:
+        html,_=call(PANEL+"/panel/clients",headers=p.h)
+        if not isinstance(html,str):
+            # call() tries JSON; fall back to raw HTML fetch.
+            html=""
+    except Exception:
+        try:
+            req=urllib.request.Request(PANEL+"/panel/clients",headers=p.h)
+            with urllib.request.urlopen(req,timeout=25) as r:
+                html=r.read().decode("utf-8","replace")
+        except Exception:
+            html=""
+    import re
+    assets=re.findall(r'<script[^>]+src=["\']([^"\']+)["\']',html)
+    for a in assets[-10:]:
+        u=urllib.parse.urljoin(PANEL+"/panel/clients",a)
+        try:
+            req=urllib.request.Request(u,headers={"Accept":"*/*"})
+            with urllib.request.urlopen(req,timeout=25) as r:
+                txt=r.read().decode("utf-8","replace")
+            low=txt.lower()
+            for needle in ["wireguard","__wg__","wg_enabled","/wg","/wireguard"]:
+                pos=0
+                while True:
+                    i=low.find(needle.lower(),pos)
+                    if i<0: break
+                    sn=txt[max(0,i-180):min(len(txt),i+260)]
+                    sn=re.sub(r'\s+',' ',sn)
+                    if sn not in js_hits: js_hits.append(sn)
+                    pos=i+len(needle)
+                    if len(js_hits)>=25: break
+                if len(js_hits)>=25: break
+        except Exception:
+            pass
+        if len(js_hits)>=25: break
+
+    return {
+        "mode":"wgprobe",
+        "auth":p.auth,
+        "client_shape":shape(client) if client else None,
+        "api_probes":probes,
+        "frontend_hits":js_hits[:25],
+        "results":[]
+    }, {"client":client}
+
 def main():
     mode=(sys.argv[1] if len(sys.argv)>1 else "inspect").lower()
-    if mode not in ("inspect","apply","verify"): raise E("bad mode")
+    if mode not in ("inspect","apply","verify","wgprobe"): raise E("bad mode")
     p=Panel(); p.login()
-    safe,private={"inspect":inspect,"apply":apply,"verify":verify}[mode](p)
+    safe,private={"inspect":inspect,"apply":apply,"verify":verify,"wgprobe":wgprobe}[mode](p)
     save(safe,private)
     print(json.dumps(safe,ensure_ascii=False,indent=2))
 
