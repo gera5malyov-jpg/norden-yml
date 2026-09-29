@@ -452,6 +452,241 @@ NATIVE_IMAGES=[{"id":"6549318","product_id":"1476554","ext":"jpg","original_file
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:409:                <div class="block pagination s-product-list-paginations">
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:420:    <div class="dialog width400px height250px" id="s-product-list-delete-dialog">
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:484:    <div class="dialog width400px height200px" id="s-product-list-duplicate-error-dialog">
+--- FORMAT PRODUCT RETURN ---
+            }
+        }
+
+        if (!empty($product["badge"])) {
+            switch ($product["badge"]) {
+                case "new":
+                    $product["badge"] = '<div class="badge"><i class="fas fa-bolt"></i> '._w("New!").'</div>';
+                    break;
+                case "lowprice":
+                    $product["badge"] = '<div class="badge"><i class="fas fa-piggy-bank"></i> '._w("Low price!").'</div>';
+                    break;
+                case "bestseller":
+                    $product["badge"] = '<div class="badge"><i class="fas fa-chart-line"></i> '._w("Bestseller!").'</div>';
+                    break;
+            }
+        }
+
+        return [
+            "id"                       => $product["id"],
+            "name"                     => $product["name"],
+            "status"                   => $product["status"],
+            "badge"                    => $product["badge"],
+            "sku_id"                   => $product["sku_id"],
+            "sku_type"                 => $product["sku_type"],
+            "currency"                 => $product["currency"],
+            "image_id"                 => $product["image_id"],
+            "normal_mode"              => $_normal_mode,
+            "skus"                     => array_values( $skus ),
+            "photos"                   => array_values( $photos ),
+            "create_date_string"       => date( 'd.m.Y', strtotime( $product["create_datetime"] ) ),
+            "columns"                  => $product["columns"],
+            "product_from_subcategory" => ifset($product, "product_from_subcategory", false)
+        ];
+    }
+
+    protected static function getProductFeatures($types, $products)
+    {
+        $feature_model = new shopFeatureModel();
+
+        // Features attached to product type
+        $product_ids = array_keys($products);
+        $type_features = [];
+        if ($types) {
+            $sql = "
+                SELECT f.*, t.type_id
+                FROM `{$feature_model->getTableName()}` `f`
+                JOIN `shop_type_features` `t` ON `t`.`feature_id`=`f`.`id`
+                WHERE `t`.`type_id` IN (i:type_id) AND `f`.`parent_id` IS NULL
+                ORDER BY `t`.`sort`, `t`.`feature_id`";
+            $type_features = $feature_model->query($sql, ['type_id' => $types])->fetchAll('code');
+            foreach ($type_features as $code => $feature) {
+                $type_features[$code]['internal'] = true;
+            }
+        }
+
+        $product_features = [];
+        if ($product_ids) {
+            $sql = "SELECT DISTINCT `f`.*, pf.product_id FROM `{$feature_model->getTableName()}` `f`
+                JOIN `shop_product_features` `pf` ON `pf`.`feature_id` = `f`.`id`
+                WHERE `pf`.`product_id` IN (i:id)";
+            $product_features = $feature_model->query($sql, array('id' => $product_ids))->fetchAll('id');
+            $sql = "SELECT DISTINCT `f`.*, pf.product_id FROM `{$feature_model->getTableName()}` `f`
+                JOIN `shop_product_features_selectable` `pf` ON `pf`.`feature_id` = `f`.`id`
+                WHERE `pf`.`product_id` IN (i:id)";
+            $product_features += $feature_model->query($sql, array('id' => $product_ids))->fetchAll('id');
+        }
+
+        $group_features = [];
+        foreach ($products as $product_id => $product) {
+            foreach ($type_features as $feature) {
+                if ($feature['type_id'] = $product['type_id']) {
+                    $group_features[$product_id][$feature['code']] = $feature;
+                }
+            }
+            foreach ($product_features as $feature) {
+                if ($feature['product_id'] = $product_id && !isset($group_features[$product_id][$feature['code']])) {
+                    $group_features[$product_id][$feature['code']] = $feature;
+                }
+            }
+        }
+
+        return $group_features;
+    }
+
+    protected static function getProductsFeatureIds($product_ids)
+    {
+        $features_selectable_model = new shopProductFeaturesSelectableModel();
+        $result = [];
+        if (!empty($product_ids) && is_array($product_ids)) {
+            $features = $features_selectable_model->select("DISTINCT product_id, feature_id")->where("product_id IN (?)", [$product_ids])->order('sort')->fetchAll();
+            $result = array_flip($product_ids);
+            array_walk($result, function (&$value) {
+                $value = [];
+            });
+            foreach ($features as $feature) {
+                $result[$feature['product_id']][] = $feature['feature_id'];
+            }
+        }
+        return $result;
+    }
+
+    public function mergeColumns($columns, $presentation_columns, $remove_disabled=true)
+    {
+        $position = 0;
+        foreach ($presentation_columns as $enabled_column) {
+            if (isset($columns[$enabled_column['column_type']])) {
+                $columns[$enabled_column['column_type']]['enabled'] = true;
+                $columns[$enabled_column['column_type']]['sort'] = $enabled_column['sort'];
+                $columns[$enabled_column['column_type']]['settings'] = [];
+                if (!empty($enabled_column['data'])) {
+                    $columns[$enabled_column['column_type']]['settings'] = ifset($enabled_column, 'data', 'settings', []);
+                }
+            }
+            $position = max($enabled_column['sort'], $position);
+        }
+        foreach ($columns as $col_id => &$column) {
+            if (empty($column['enabled'])) {
+                if ($remove_disabled) {
+                    unset($columns[$col_id]);
+                    continue;
+                } else {
+                    $column['enabled'] = false;
+                }
+            }
+            if (!isset($column['sort'])) {
+                $column['sort'] = ++$position;
+            }
+        }
+        unset($column);
+
+        usort($columns, function($a, $b) {
+            if ($a['sort'] == $b['sort']) {
+                return 0;
+            }
+            return $a['sort'] > $b['sort'] ? 1 : -1;
+        });
+
+        return $columns;
+    }
+
+    public function formatColumns($columns, $skip_selectable = false) {
+--- NEW JS PHOTO COMPUTED ---
+                                            const is_normal_mode = self.product.normal_mode,
+                                                  is_extended = (that.presentation.view === "table_extended");
+
+                                            return {
+                                                states: {
+                                                    edit_key: 0,
+                                                    is_edit: false,
+                                                    is_locked: false,
+                                                    name_on_focus: self.column_data.value,
+
+                                                    is_extended   : is_extended,
+                                                    is_product_col: is_product_col,
+                                                    is_sku_col    : is_sku_col,
+                                                    is_sku_mod_col: is_sku_mod_col
+                                                }
+                                            };
+                                        },
+                                        template: that.components["component-product-column-name"],
+                                        delimiters: ['{ { ', ' } }'],
+                                        components: {
+                                            "component-textarea": that.vue_components["component-textarea"]
+                                        },
+                                        computed: {
+                                            product_url: function() {
+                                                return this.$parent.product_url;
+                                            },
+                                            sku_mod_photo: function() {
+                                                var self = this,
+                                                    result = null;
+
+                                                var presentation_columns = $.wa.construct(that.presentation.columns, "column_type"),
+                                                    display_photo = !!presentation_columns["image_crop_small"];
+
+                                                if (display_photo) {
+                                                    if (self.product.photos.length) {
+                                                        var photos = $.wa.construct(self.product.photos, "id");
+                                                        if (photos[self.sku_mod.image_id]) {
+                                                            result = photos[self.sku_mod.image_id];
+                                                        // } else if (photos[self.product.image_id]) {
+                                                        //     result = photos[self.product.image_id];
+                                                        } else {
+                                                            result = {};
+                                                        }
+                                                    } else {
+                                                        result = {};
+                                                    }
+                                                }
+
+                                                return result;
+                                            },
+                                            name_class: function() {
+                                                let result = [];
+
+                                                var name_column = that.columns["name"],
+                                                    settings = name_column?.settings;
+
+                                                if (settings) {
+                                                    var name_format = (settings.long_name_format ? settings.long_name_format : "");
+                                                    if (name_format === "hide_end") {
+                                                        result.push("one-line");
+                                                    }
+--- PRESENTATION GETPRODUCTS SUMMARY ---
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopPresentation.class.php:284:    public function getProducts($collection, $options = [])
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/shopPresentation.class.php:337:            'summary' => [
+--- LEGACY LIST ACTION DATA ---
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsDeleteFromCategory.controller.php:5:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProducts.action.php:3:class shopProductsAction extends shopProductListAction
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProducts.action.php:8:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsAddToCategories.controller.php:20:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsLoadList.controller.php:3:class shopProductsLoadListController extends shopProductListAction
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsLoadList.controller.php:5:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsInlineEditorData.controller.php:5:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsAssociatePromoDialog.action.php:5:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsTableColumns.controller.php:5:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsWelcome.action.php:4:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsAssignTags.controller.php:5:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsMoveList.controller.php:3:class shopProductsMoveListController extends waJsonController
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsMoveList.controller.php:5:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsLoadTypes.action.php:4:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsSetTypes.controller.php:20:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsMassUpdate.controller.php:5:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsDuplicate.controller.php:5:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsAddToSets.controller.php:21:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsDeleteList.controller.php:3:class shopProductsDeleteListController extends waJsonController
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsDeleteList.controller.php:5:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsSortCategories.controller.php:5:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsInlineSave.controller.php:4:class shopProductsInlineSaveController extends shopProductListAction
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsInlineSave.controller.php:11:    public function execute()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProductsDeleteFromSet.controller.php:5:    public function execute()
+shopProductsDeleteList.controller.php
+shopProductsLoadList.controller.php
+shopProductsMoveList.controller.php
 --- FORMAT PRODUCTS METHOD ---
 460:    public function formatProducts($products) {
                 }
