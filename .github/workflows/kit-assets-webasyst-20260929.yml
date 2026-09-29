@@ -1,0 +1,54 @@
+name: KIT images and ID to Webasyst 20260929
+
+on:
+  push:
+    paths:
+      - 'catalog/kit_assets_webasyst_trigger.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kit-assets-webasyst-20260929
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 420
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: pip install --disable-pip-version-check requests
+      - name: Compile
+        run: python -m py_compile catalog/sync_kit_images_id_to_webasyst.py norden-kit/webasyst_n100_to_kit_once.py webasyst/client.py
+      - name: Sync KIT images and numeric KIT ID to Webasyst
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          PILOT_ARTICLE: AF-31662421
+        run: python catalog/sync_kit_images_id_to_webasyst.py
+      - name: Save report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog/kit_images_id_to_webasyst_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save KIT assets to Webasyst report"
+            for i in 1 2 3 4 5; do
+              git push origin HEAD:main && break
+              git fetch origin main
+              git rebase origin/main || git rebase --abort
+              sleep $((i*4))
+            done
+          fi
