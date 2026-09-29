@@ -2,12 +2,6 @@ name: Sync KIT Norden images to Baserow
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '17 */6 * * *'
-  push:
-    branches: [main]
-    paths:
-      - kit-baserow-images-run.txt
 
 permissions:
   contents: read
