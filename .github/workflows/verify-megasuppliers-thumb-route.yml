@@ -1,0 +1,44 @@
+name: Verify megasuppliers thumbnail route
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/verify_megasuppliers_thumb_route.py'
+      - '.github/workflows/verify-megasuppliers-thumb-route.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify route and hooks
+        run: python3 scripts/verify_megasuppliers_thumb_route.py
+      - name: Save report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/megasuppliers-thumb-route-verify.txt || echo "VERIFY_STATUS=FAILED_NO_REPORT" > .deploy-probe/megasuppliers-thumb-route-verify.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/megasuppliers-thumb-route-verify.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save megasuppliers thumbnail route verification [skip ci]"
+            git pull --rebase --autostash origin main || true
+            git push origin HEAD:main || true
+          fi
