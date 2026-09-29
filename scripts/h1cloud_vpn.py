@@ -272,6 +272,19 @@ def wgprobe(p):
         except Exception:
             html=""
     import re
+    # Search the panel HTML itself too: some H1 builds inline the frontend bundle.
+    low_html=html.lower()
+    for needle in ["wg_conf","wireguard","__wg__","wg_enabled","wg:","wg="]:
+        pos=0
+        while True:
+            i=low_html.find(needle.lower(),pos)
+            if i<0: break
+            sn=html[max(0,i-220):min(len(html),i+320)]
+            sn=re.sub(r'\s+',' ',sn)
+            if sn not in js_hits: js_hits.append(sn)
+            pos=i+len(needle)
+            if len(js_hits)>=25: break
+        if len(js_hits)>=25: break
     assets=re.findall(r'<script[^>]+src=["\']([^"\']+)["\']',html)
     for a in assets[-10:]:
         u=urllib.parse.urljoin(PANEL+"/panel/clients",a)
