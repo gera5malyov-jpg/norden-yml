@@ -65,6 +65,11 @@ echo "--- NEW LIST TEMPLATE ROWS ---"
 sed -n '1,220p' "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" || true
 echo "--- LEGACY PRODUCT LIST TEMPLATE ROWS ---"
 grep -RIn "product-list\|s-product-list\|product-image\|image_id\|thumb" "$ROOT/wa-apps/shop/templates/actions/products" "$ROOT/wa-apps/shop/templates/actions-legacy/products" 2>/dev/null | head -n 160 || true
+echo "--- NEW TABLE FIELD TEMPLATE EXACT ---"
+grep -n "component-products-table-field" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" | head -n 20 || true
+for L in $(grep -n "component-products-table-field" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" | head -n 4 | cut -d: -f1); do S=$((L-80)); E=$((L+180)); sed -n "${S},${E}p" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html"; done
+echo "--- NEW PRODUCT ROW TEMPLATE EXACT ---"
+grep -n "data-product-id\\|component-products-table-field" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" | head -n 80 || true
 echo "--- NEW IMAGE COLUMN JS EXACT ---"
 sed -n '3480,3575p' "$ROOT/wa-apps/shop/js/backend/products/main/main.list.js" || true
 sed -n '3860,4020p' "$ROOT/wa-apps/shop/js/backend/products/main/main.list.js" || true
