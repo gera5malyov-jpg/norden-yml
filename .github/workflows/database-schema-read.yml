@@ -1,0 +1,40 @@
+name: Database schema read
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/database-schema-read.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    env:
+      DB_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Read fields
+        run: |
+          python3 - <<'PY'
+          import json, os, requests
+          base='http://147.78.67.6'
+          headers={'Authorization':'Token '+os.environ['DB_TOKEN']}
+          for tid in (156,157):
+              f=requests.get(f'{base}/api/database/fields/table/{tid}/',headers=headers,timeout=30)
+              print('TABLE',tid,'FIELDS',f.status_code)
+              if f.ok:
+                  print(json.dumps([(x.get('id'),x.get('name'),x.get('type')) for x in f.json()],ensure_ascii=False))
+              r=requests.get(f'{base}/api/database/rows/table/{tid}/?user_field_names=true&size=2',headers=headers,timeout=30)
+              print('TABLE',tid,'ROWS',r.status_code)
+              if r.ok:
+                  j=r.json()
+                  print('COUNT',j.get('count'))
+                  print('SAMPLE',json.dumps(j.get('results',[]),ensure_ascii=False)[:10000])
+          PY
