@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: ozon-norden-to-kit-exact-article
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   sync:
