@@ -1,0 +1,88 @@
+name: H1Cloud VPN
+
+on:
+  issues:
+    types: [opened, edited]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Mode"
+        required: true
+        default: "inspect"
+        type: choice
+        options:
+          - inspect
+          - apply
+          - verify
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  h1cloud:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.issue.title, 'H1Cloud VPN:')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      H1CLOUD_PANEL_URL: http://pl3.h1cloud.net:25076
+      H1CLOUD_MCP_URL: https://my.h1cloud.net/api/v1/mcp
+      H1CLOUD_CLIENT_NAME: georgiy-vpn
+      H1CLOUD_CLIENT_DAYS: "3650"
+      H1CLOUD_PANEL_TOKEN: ${{ secrets.H1CLOUD_PANEL_TOKEN }}
+      H1CLOUD_MCP_TOKEN: ${{ secrets.H1CLOUD_MCP_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine mode
+        id: mode
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MODE="${{ inputs.mode }}"
+          else
+            MODE="$(printf '%s' "${{ github.event.issue.title }}" | sed -E 's/^H1Cloud VPN:[[:space:]]*//')"
+          fi
+          case "$MODE" in inspect|apply|verify) ;; *) echo "Invalid mode: $MODE" >&2; exit 1 ;; esac
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+
+      - name: Mask configured secrets
+        shell: bash
+        run: |
+          for value in "$H1CLOUD_PANEL_TOKEN" "$H1CLOUD_MCP_TOKEN"; do
+            if [ -n "$value" ]; then echo "::add-mask::$value"; fi
+          done
+
+      - name: Run H1Cloud manager
+        id: manager
+        continue-on-error: true
+        shell: bash
+        run: python3 scripts/h1cloud_vpn.py "${{ steps.mode.outputs.mode }}"
+
+      - name: Comment safe result
+        if: always() && github.event_name == 'issues'
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "### H1Cloud VPN — ${{ steps.mode.outputs.mode }}"
+            echo
+            echo '~~~json'
+            if [ -f h1cloud-safe-result.json ]; then
+              cat h1cloud-safe-result.json
+            else
+              echo '{"fatal":"workflow produced no safe result"}'
+            fi
+            echo
+            echo '~~~'
+          } > /tmp/h1-comment.md
+          gh issue comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --body-file /tmp/h1-comment.md
+
+      - name: Fail if manager failed
+        if: steps.manager.outcome != 'success'
+        shell: bash
+        run: exit 1
