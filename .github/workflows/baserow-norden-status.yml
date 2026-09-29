@@ -1,0 +1,62 @@
+name: Baserow Norden import status
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - baserow-norden-status.txt
+
+permissions:
+  contents: read
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Count source and target
+        run: |
+          python3 - <<'PY'
+          import os, sys, requests
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+
+          def s(v): return str(v or '').strip()
+          def listify(p,keys=()):
+              if isinstance(p,list): return [x for x in p if isinstance(x,dict)]
+              if not isinstance(p,dict): return []
+              for k in keys:
+                  v=p.get(k)
+                  if isinstance(v,list): return [x for x in v if isinstance(x,dict)]
+                  if isinstance(v,dict): return [x for x in v.values() if isinstance(x,dict)]
+              if p and all(isinstance(v,dict) for v in p.values()): return list(p.values())
+              return []
+
+          wa=WebasystClient(base_url=os.environ['WEBASYST_BASE_URL'], token=os.environ['WEBASYST_API_TOKEN'])
+          types=listify(wa.call('shop.type.getList'))
+          m=[x for x in types if s(x.get('name') or x.get('title')).casefold()=='norden-100']
+          tid=s(m[0]['id'])
+          first=wa.call('shop.product.search',params={'hash':f'type/{tid}','offset':0,'limit':1,'fields':'id,skus'})
+          products=listify(first,('products','items'))
+          total=(first.get('count') or first.get('total_count')) if isinstance(first,dict) else None
+          print('WEBASYST_PRODUCT_COUNT=',total)
+
+          h={'Authorization':'Token '+os.environ['BASEROW_DATABASE_TOKEN']}
+          r=requests.get('http://147.78.67.6/api/database/rows/table/156/?user_field_names=true&size=1',headers=h,timeout=30)
+          print('BASEROW_HTTP=',r.status_code)
+          if r.ok:
+              print('BASEROW_CATALOG_COUNT=',r.json().get('count'))
+          r2=requests.get('http://147.78.67.6/api/database/rows/table/157/?user_field_names=true&size=10',headers=h,timeout=30)
+          print('SUPPLIERS_HTTP=',r2.status_code)
+          if r2.ok:
+              print('SUPPLIERS=',[(x.get('id'),x.get('Поставщик')) for x in r2.json().get('results',[])])
+          PY
