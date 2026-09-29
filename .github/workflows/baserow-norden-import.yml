@@ -1,0 +1,46 @@
+name: Webasyst NORDEN-100 to Baserow
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - baserow-norden-import-run.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: webasyst-norden-baserow
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+      BASEROW_URL: http://147.78.67.6
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependency
+        run: pip install requests
+      - name: Import NORDEN-100
+        run: python baserow/sync_webasyst_norden.py
+      - name: Save report
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add baserow/last_webasyst_norden_to_baserow.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Webasyst Norden to Baserow report"
+            git push origin main
+          fi
