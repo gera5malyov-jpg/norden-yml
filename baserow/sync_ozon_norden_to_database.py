@@ -504,6 +504,9 @@ def safe_field_name(name, aid, collisions):
         base = base[:165].rstrip() + f"… [{aid}]"
     return base
 
+def field_key(value):
+    return re.sub(r"[^0-9a-zа-яё]+", "", norm(value))
+
 def write_report(report):
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -619,23 +622,54 @@ def main():
 
         collisions = {k: len(v) for k, v in name_to_ids.items()}
 
-        for field_name, (field_type, decimals) in BASE_FIELD_SPECS.items():
-            _, created = br.ensure_field(CATALOG_TABLE_ID, field_name, field_type, decimals)
-            if created:
-                report["base_fields_created"].append(field_name)
+        db_fields = br.fields(CATALOG_TABLE_ID)
+        existing_names = {s(x.get("name")) for x in db_fields}
+        existing_by_key = defaultdict(list)
+        for fld in db_fields:
+            if s(fld.get("name")):
+                existing_by_key[field_key(fld.get("name"))].append(fld)
+
+        schema_create = br.schema_session is not None
+        report["schema_mode"] = "jwt_create_fields" if schema_create else "existing_fields_only"
+        report["base_fields_used"] = []
+        report["technical_data_not_written_due_schema_permission"] = not schema_create
+
+        if schema_create:
+            for field_name, (field_type, decimals) in BASE_FIELD_SPECS.items():
+                _, created = br.ensure_field(CATALOG_TABLE_ID, field_name, field_type, decimals)
+                if created:
+                    report["base_fields_created"].append(field_name)
+                report["base_fields_used"].append(field_name)
+        else:
+            for field_name in ("Название", "Категория", "Цена Ozon"):
+                if field_name in existing_names:
+                    report["base_fields_used"].append(field_name)
 
         char_field_map = {}
         unique_chars = {}
         for chars in char_rows_by_pid.values():
-            for c in chars:
-                unique_chars[(int(c["id"]), norm(c["name"]))] = c["name"]
-        for (aid, _), name in sorted(unique_chars.items(), key=lambda x: (norm(x[1]), x[0][0])):
-            field_name = safe_field_name(name, aid, collisions)
-            _, created = br.ensure_field(CATALOG_TABLE_ID, field_name, "long_text")
-            char_field_map[(aid, norm(name))] = field_name
-            if created:
-                report["characteristic_fields_created"].append(field_name)
+            for item in chars:
+                unique_chars[(int(item["id"]), norm(item["name"]))] = item["name"]
+
+        if schema_create:
+            for (aid, _), name in sorted(unique_chars.items(), key=lambda x: (norm(x[1]), x[0][0])):
+                field_name = safe_field_name(name, aid, collisions)
+                _, created = br.ensure_field(CATALOG_TABLE_ID, field_name, "long_text")
+                char_field_map[(aid, norm(name))] = field_name
+                if created:
+                    report["characteristic_fields_created"].append(field_name)
+        else:
+            for (aid, _), name in sorted(unique_chars.items(), key=lambda x: (norm(x[1]), x[0][0])):
+                candidates = [
+                    x for x in existing_by_key.get(field_key(name), [])
+                    if s(x.get("type")) in ("text", "long_text", "number")
+                    and s(x.get("name")) not in {"Первое изображение", "Первое изображение URL", "Все изображения"}
+                ]
+                if len(candidates) == 1:
+                    char_field_map[(aid, norm(name))] = s(candidates[0].get("name"))
+
         report["characteristic_fields_total"] = len(char_field_map)
+        report["existing_characteristic_fields_used"] = sorted(set(char_field_map.values()))
         write_report(report)
 
         updates = []
@@ -670,43 +704,53 @@ def main():
             dc = int(card.get("description_category_id") or info.get("description_category_id") or 0)
             tid = int(card.get("type_id") or info.get("type_id") or 0)
             p = price_row.get("price") or {}
-            body = {
-                "id": row["id"],
-                "Ozon ID товара": pid,
-                "Ozon Название": s(card.get("name") or info.get("name") or offer_id),
-                "Ozon Бренд": " | ".join(brand_values(card)) or "Norden",
-                "Ozon Архив": pid in archived_ids,
-                "Ozon Категория": cat_paths.get(dc, ""),
-                "Ozon ID категории": dc or None,
-                "Ozon ID типа": tid or None,
-                "Ozon Описание": s(info.get("description") or info.get("description_text") or card.get("description") or card.get("description_text")),
-                "Ozon Штрихкоды": barcodes(info, card),
-                "Ozon Цена": num(p.get("price")),
-                "Ozon Старая цена": num(p.get("old_price")),
-                "Ozon Маркетинговая цена": num(p.get("marketing_seller_price")),
-                "Ozon Остаток": stock_total(stock_by_id.get(pid) or []),
-                "Ozon Статус": status_text(info),
-                "Ozon Видимость": visibility_text(list_row, info),
-                "Ozon Обновлено": updated_at,
-            }
+            if schema_create:
+                body = {
+                    "id": row["id"],
+                    "Ozon ID товара": pid,
+                    "Ozon Название": s(card.get("name") or info.get("name") or offer_id),
+                    "Ozon Бренд": " | ".join(brand_values(card)) or "Norden",
+                    "Ozon Архив": pid in archived_ids,
+                    "Ozon Категория": cat_paths.get(dc, ""),
+                    "Ozon ID категории": dc or None,
+                    "Ozon ID типа": tid or None,
+                    "Ozon Описание": s(info.get("description") or info.get("description_text") or card.get("description") or card.get("description_text")),
+                    "Ozon Штрихкоды": barcodes(info, card),
+                    "Ozon Цена": num(p.get("price")),
+                    "Ozon Старая цена": num(p.get("old_price")),
+                    "Ozon Маркетинговая цена": num(p.get("marketing_seller_price")),
+                    "Ozon Остаток": stock_total(stock_by_id.get(pid) or []),
+                    "Ozon Статус": status_text(info),
+                    "Ozon Видимость": visibility_text(list_row, info),
+                    "Ozon Обновлено": updated_at,
+                }
+            else:
+                body = {"id": row["id"]}
+                if "Название" in existing_names:
+                    body["Название"] = s(card.get("name") or info.get("name") or offer_id)
+                if "Категория" in existing_names and cat_paths.get(dc):
+                    body["Категория"] = cat_paths.get(dc)
+                if "Цена Ozon" in existing_names and num(p.get("price")) is not None:
+                    body["Цена Ozon"] = num(p.get("price"))
 
-            for c in char_rows_by_pid.get(pid) or []:
-                field_name = char_field_map.get((int(c["id"]), norm(c["name"])))
+            for item in char_rows_by_pid.get(pid) or []:
+                field_name = char_field_map.get((int(item["id"]), norm(item["name"])))
                 if field_name:
-                    body[field_name] = c["value"]
+                    body[field_name] = item["value"]
                     report["characteristic_values_written"] += 1
 
-            raw_no_images = {
-                "product_id": pid,
-                "offer_id": offer_id,
-                "archived": pid in archived_ids,
-                "product_list": strip_image_keys(list_row),
-                "attributes": strip_image_attributes(card, schema),
-                "info": strip_image_keys(info),
-                "price": strip_image_keys(price_row),
-                "stocks": strip_image_keys(stock_by_id.get(pid) or []),
-            }
-            body["Ozon данные без изображений (JSON)"] = json.dumps(raw_no_images, ensure_ascii=False, separators=(",", ":"))
+            if schema_create:
+                raw_no_images = {
+                    "product_id": pid,
+                    "offer_id": offer_id,
+                    "archived": pid in archived_ids,
+                    "product_list": strip_image_keys(list_row),
+                    "attributes": strip_image_attributes(card, schema),
+                    "info": strip_image_keys(info),
+                    "price": strip_image_keys(price_row),
+                    "stocks": strip_image_keys(stock_by_id.get(pid) or []),
+                }
+                body["Ozon данные без изображений (JSON)"] = json.dumps(raw_no_images, ensure_ascii=False, separators=(",", ":"))
 
             forbidden = [k for k in body if IMAGE_KEY_RE.search(k) or k in {"Первое изображение", "Первое изображение URL", "Все изображения"}]
             if forbidden:
