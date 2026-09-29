@@ -184,6 +184,10 @@ def verify_unrelated_features(before, after):
         if lost:
             raise RuntimeError("unrelated Webasyst features lost: " + ", ".join(lost[:20]))
 
+def extimg_urls(summary):
+    return re.findall(r"\\[extimg\\]\\s*(https?://[^\\s\\[\\]<>]+)\\s*\\[/extimg\\]", s(summary), flags=re.I)
+
+
 def sync_product(wa, kit, product, article, kit_row, file_cache):
     pid = s(product.get("id"))
     if not pid:
@@ -195,14 +199,34 @@ def sync_product(wa, kit, product, article, kit_row, file_cache):
         raise RuntimeError(f"KIT SKU mismatch: expected {article}, got {full.get('sku')!r}")
 
     kid = get_numeric_kit_id(full)
-    urls = kit_public_image_urls(kit, full, file_cache)
-    summary = extimgs(urls)
+    kit_media = [
+        m for m in (full.get("media") or [])
+        if isinstance(m, dict)
+        and s(m.get("type")).upper() == "IMAGE"
+        and s(m.get("image_id"))
+    ]
 
     before = wa.call("shop.product.getInfo", params={"id": pid})
     before_features = before.get("features") or {} if isinstance(before, dict) else {}
     old_kid = s(before_features.get("kit_id")) if isinstance(before_features, dict) else ""
     old_summary = s(before.get("summary")) if isinstance(before, dict) else ""
+    old_urls = extimg_urls(old_summary)
 
+    if old_kid == kid and len(old_urls) == len(kit_media) and (old_urls or not kit_media):
+        return {
+            "article": article,
+            "webasyst_product_id": pid,
+            "kit_variant_uuid": s(full.get("id")),
+            "kit_id": kid,
+            "images": len(old_urls),
+            "kit_id_changed": False,
+            "summary_changed": False,
+            "no_kit_images": not bool(kit_media),
+            "already_correct": True,
+        }
+
+    urls = kit_public_image_urls(kit, full, file_cache)
+    summary = extimgs(urls)
     data = {"features": {"kit_id": kid}}
     if summary:
         data["summary"] = summary
@@ -228,10 +252,12 @@ def sync_product(wa, kit, product, article, kit_row, file_cache):
         "kit_id_changed": old_kid != kid,
         "summary_changed": bool(summary) and old_summary.replace("\r\n", "\n").strip() != summary.replace("\r\n", "\n").strip(),
         "no_kit_images": not bool(urls),
+        "already_correct": False,
     }
 
+
 def main():
-    wa = WebasystClient(min_request_interval=0.45)
+    wa = WebasystClient(min_request_interval=0.18)
     kit = BRIDGE.KitClient()
     type_id, type_name = resolve_type(wa)
 
@@ -249,6 +275,7 @@ def main():
         "kit_id_changed": 0,
         "summary_changed": 0,
         "unchanged": 0,
+        "already_correct": 0,
         "missing_in_kit": 0,
         "missing_images": 0,
         "ambiguous": 0,
@@ -288,6 +315,7 @@ def main():
             report["kit_id_changed"] += int(result["kit_id_changed"])
             report["summary_changed"] += int(result["summary_changed"])
             report["missing_images"] += int(result["no_kit_images"])
+            report["already_correct"] += int(result.get("already_correct", False))
             if not result["kit_id_changed"] and not result["summary_changed"]:
                 report["unchanged"] += 1
             report["items"].append(result)
@@ -310,6 +338,7 @@ def main():
             report["kit_id_changed"] += int(result["kit_id_changed"])
             report["summary_changed"] += int(result["summary_changed"])
             report["missing_images"] += int(result["no_kit_images"])
+            report["already_correct"] += int(result.get("already_correct", False))
             if not result["kit_id_changed"] and not result["summary_changed"]:
                 report["unchanged"] += 1
             report["items"].append(result)
@@ -352,6 +381,7 @@ def main():
         "updated": report["updated"],
         "kit_id_changed": report["kit_id_changed"],
         "summary_changed": report["summary_changed"],
+        "already_correct": report["already_correct"],
         "missing_in_kit": report["missing_in_kit"],
         "missing_images": report["missing_images"],
         "ambiguous": report["ambiguous"],
