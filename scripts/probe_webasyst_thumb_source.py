@@ -59,6 +59,14 @@ rm -f /tmp/wa_thumb_probe.php
 echo "--- HOOK SOURCES ---"
 grep -RIn "backend_prod_list\|backend_products" "$ROOT/wa-apps/shop" "$ROOT/wa-system" 2>/dev/null | head -n 120 || true
 echo "--- HOOK SOURCES END ---"
+echo "--- NEW LIST ACTION EVENT ---"
+sed -n '165,225p' "$ROOT/wa-apps/shop/lib/actions/prod/main/shopProdList.action.php" || true
+echo "--- NEW LIST TEMPLATE ROWS ---"
+sed -n '1,220p' "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" || true
+echo "--- LEGACY PRODUCT LIST TEMPLATE ROWS ---"
+grep -RIn "product-list\|s-product-list\|product-image\|image_id\|thumb" "$ROOT/wa-apps/shop/templates/actions/products" "$ROOT/wa-apps/shop/templates/actions-legacy/products" 2>/dev/null | head -n 160 || true
+echo "--- LIST JS SELECTORS ---"
+grep -RIn "data-product-id\|s-product-item\|product_id\|image" "$ROOT/wa-apps/shop/js/backend/products" "$ROOT/wa-apps/shop/js/backend/prod" 2>/dev/null | head -n 200 || true
 '''
             p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no",
                 "-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=12",f"root@{VM_IP}","bash -s"],
