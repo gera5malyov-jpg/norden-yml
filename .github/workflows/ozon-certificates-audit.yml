@@ -1,0 +1,32 @@
+name: Ozon certificates audit
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ozon-certificates-audit.yml'
+      - 'ozon/certificates/audit.py'
+      - 'ozon/certificates/audit-trigger.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check Ozon credentials
+        shell: bash
+        run: |
+          test -n "$OZON_CLIENT_ID"
+          test -n "$OZON_API_KEY"
+      - name: Audit certificates and products
+        run: python ozon/certificates/audit.py
