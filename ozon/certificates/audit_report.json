@@ -105,6 +105,92 @@
       }
     ]
   },
+  "certification_params_declaration_ru": {
+    "params": [
+      {
+        "name": "CERTIFICATE_TYPE",
+        "required": true,
+        "variants": [
+          {
+            "value": "DECLARATION",
+            "name": "Декларация о соответствии"
+          },
+          {
+            "value": "CERTIFICATE_OF_CONFORMITY",
+            "name": "Сертификат соответствия"
+          },
+          {
+            "value": "REGISTRATION_CERTIFICATE",
+            "name": "Регистрационное удостоверение"
+          },
+          {
+            "value": "CERTIFICATE_OF_REGISTRATION",
+            "name": "Свидетельство о государственной регистрации"
+          },
+          {
+            "value": "REFUSED_LETTER",
+            "name": "Отказное письмо"
+          },
+          {
+            "value": "VETERINARY_COVER_DOCUMENT",
+            "name": "Ветеринарный сопроводительный документ"
+          },
+          {
+            "value": "SAFETY_DATA_SHEET",
+            "name": "Паспорт безопасности"
+          }
+        ]
+      },
+      {
+        "name": "CERTIFICATE_COUNTRY",
+        "required": true,
+        "variants": [
+          {
+            "value": "unknown",
+            "name": "RU"
+          },
+          {
+            "value": "unknown",
+            "name": "BY"
+          },
+          {
+            "value": "unknown",
+            "name": "KZ"
+          },
+          {
+            "value": "unknown",
+            "name": "KG"
+          },
+          {
+            "value": "unknown",
+            "name": "AM"
+          },
+          {
+            "value": "unknown",
+            "name": "NotEAEU"
+          }
+        ]
+      },
+      {
+        "name": "ACCORDANCE_TYPE",
+        "required": true,
+        "variants": [
+          {
+            "value": "NATIONAL",
+            "name": "Национальный"
+          },
+          {
+            "value": "EAEU",
+            "name": "ЕАЭС"
+          }
+        ]
+      }
+    ]
+  },
+  "certification_params_declaration_unknown": {
+    "__http_error__": 400,
+    "__body__": "{\"code\":3,\"message\":\"Request validation error: invalid ProductCertificateParamsRequest.Params: embedded message failed validation | caused by: invalid ProductCertificateParamsRequest_Params.CertificateCountry: value length must be at most 2 runes\"}"
+  },
   "accordance_types": {
     "result": {
       "base": [
