@@ -94,15 +94,6 @@ def patch_method(text, marker, old_return, new_return):
     part=part.replace(old_return,new_return,1)
     return text[:start]+part+text[nxt:], True
 
-new_endpoint=re.search(
-    r"    private function thumbnailEndpointUrl\(\)\n    \{.*?\n    \}\n+    private function thumbnailBootstrap",
-    snippet,
-    re.S
-)
-if not new_endpoint:
-    raise SystemExit("endpoint helper not found in snippet")
-endpoint_method=re.sub(r"\n+    private function thumbnailBootstrap$", "", new_endpoint.group(0))
-
 if "private function thumbnailEndpointUrl(" not in s:
     pos=s.rfind("\n}")
     if pos < 0:
@@ -110,27 +101,25 @@ if "private function thumbnailEndpointUrl(" not in s:
     s=s[:pos]+"\n"+snippet+s[pos:]
     print("THUMB_HELPERS=added")
 else:
-    pattern=r"    private function thumbnailEndpointUrl\(\)\n    \{.*?\n    \}\n(?=    private function thumbnailBootstrap)"
-    s2,n=re.subn(pattern,endpoint_method,s,count=1,flags=re.S)
-    if n != 1:
-        raise SystemExit("cannot replace thumbnailEndpointUrl")
-    s=s2
-    print("THUMB_ENDPOINT=updated")
+    print("THUMB_ENDPOINT=exists")
 
-new_bootstrap=re.search(
-    r"    private function thumbnailBootstrap\(\)\n    \{.*?\n    \}\n?$",
-    snippet,
-    re.S
-)
-if not new_bootstrap:
-    raise SystemExit("thumbnail bootstrap helper not found in snippet")
-bootstrap_method=new_bootstrap.group(0).rstrip()
-pattern_bootstrap=r"    private function thumbnailBootstrap\(\)\n    \{.*?\n    \}(?=\n\s*\})"
-s2,n=re.subn(pattern_bootstrap,bootstrap_method,s,count=1,flags=re.S)
-if n != 1:
-    raise SystemExit("cannot replace thumbnailBootstrap")
-s=s2
-print("THUMB_BOOTSTRAP=updated")
+old_ajax='$.getJSON(endpoint,{ids:need.join(",")}).done(function(r){'
+new_ajax='$.ajax({url:endpoint,data:{ids:need.join(",")},dataType:"json",global:false,timeout:8000}).done(function(r){'
+if old_ajax in s:
+    s=s.replace(old_ajax,new_ajax,1)
+    print("THUMB_BOOTSTRAP=ajax_guard_added")
+elif new_ajax in s:
+    print("THUMB_BOOTSTRAP=ajax_guard_exists")
+else:
+    raise SystemExit("thumbnail ajax block not found")
+
+# Ensure current route fallback is present; older broken direct app URL is replaced if found.
+old_route="return wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers&module=backend&action=thumbs';"
+if old_route in s:
+    s=s.replace(old_route, "return rtrim(wa()->getRootUrl(true), '/').'/'.trim(wa()->getConfig()->getBackendUrl(), '/').'/shop/?plugin=megasuppliers&action=thumbs';", 1)
+    print("THUMB_ROUTE=fallback_fixed")
+else:
+    print("THUMB_ROUTE=ok")
 
 s,changed_new=patch_method(
     s,
