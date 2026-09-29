@@ -655,9 +655,10 @@ def main():
                 existing_by_key[field_key(fld.get("name"))].append(fld)
 
         schema_create = br.schema_session is not None
+        full_base_fields_present = all(name in existing_names for name in BASE_FIELD_SPECS)
         report["schema_mode"] = "jwt_create_fields" if schema_create else "existing_fields_only"
         report["base_fields_used"] = []
-        report["technical_data_not_written_due_schema_permission"] = not schema_create
+        report["technical_data_not_written_due_schema_permission"] = False
 
         if schema_create:
             for field_name, (field_type, decimals) in BASE_FIELD_SPECS.items():
@@ -665,7 +666,17 @@ def main():
                 if created:
                     report["base_fields_created"].append(field_name)
                 report["base_fields_used"].append(field_name)
+            db_fields = br.fields(CATALOG_TABLE_ID)
+            existing_names = {s(x.get("name")) for x in db_fields}
+            existing_by_key = defaultdict(list)
+            for fld in db_fields:
+                if s(fld.get("name")):
+                    existing_by_key[field_key(fld.get("name"))].append(fld)
+            full_base_fields_present = all(name in existing_names for name in BASE_FIELD_SPECS)
+        elif full_base_fields_present:
+            report["base_fields_used"] = sorted(BASE_FIELD_SPECS)
         else:
+            report["technical_data_not_written_due_schema_permission"] = True
             for field_name in ("Название", "Категория", "Цена Ozon"):
                 if field_name in existing_names:
                     report["base_fields_used"].append(field_name)
@@ -706,6 +717,10 @@ def main():
             skip_exact_names = {norm("Механизм качания")}
             for (aid, _), name in sorted(unique_chars.items(), key=lambda x: (norm(x[1]), x[0][0])):
                 source_key = norm(name)
+                ozon_field = safe_field_name(name, aid, collisions)
+                if ozon_field in existing_names:
+                    char_field_map[(aid, source_key)] = ozon_field
+                    continue
                 target = safe_aliases.get(source_key)
                 if target and target in existing_names:
                     char_field_map[(aid, source_key)] = target
@@ -724,6 +739,10 @@ def main():
 
         report["characteristic_fields_total"] = len(char_field_map)
         report["existing_characteristic_fields_used"] = sorted(set(char_field_map.values()))
+        full_characteristic_fields_present = len(char_field_map) == len(unique_chars)
+        full_write = full_base_fields_present and full_characteristic_fields_present
+        report["full_ozon_write"] = full_write
+        report["technical_data_not_written_due_schema_permission"] = not full_write
         write_report(report)
 
         updates = []
