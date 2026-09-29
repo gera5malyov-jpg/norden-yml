@@ -295,11 +295,25 @@ def wgprobe(p):
             pass
         if len(js_hits)>=25: break
 
+    safe_client=None
+    if client:
+        safe_client={
+            "wg":bool(client.get("wg")),
+            "wg_conf_present":bool(client.get("wg_conf")),
+            "wg_conf_length":len(client.get("wg_conf") or ""),
+            "inbound_links":[
+                {"id":x.get("id"),"tag":x.get("tag"),"protocol":x.get("protocol"),"network":x.get("network"),"security":x.get("security"),"port":x.get("port")}
+                for x in (client.get("inbound_links") or []) if isinstance(x,dict)
+            ],
+            "links_keys":sorted(list((client.get("links") or {}).keys())) if isinstance(client.get("links"),dict) else []
+        }
     return {
         "mode":"wgprobe",
         "auth":p.auth,
+        "client_state":safe_client,
         "client_shape":shape(client) if client else None,
         "api_probes":probes,
+        "frontend_assets":assets[:30],
         "frontend_hits":js_hits[:25],
         "results":[]
     }, {"client":client}
