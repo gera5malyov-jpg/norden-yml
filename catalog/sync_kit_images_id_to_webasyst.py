@@ -100,20 +100,20 @@ def load_wa_products(wa, type_id):
         offset += len(batch)
     return out
 
-def scan_kit_norden(kit):
-    by_sku = defaultdict(list)
-    total = 0
-    norden = 0
-    for row in kit.scan_all_variants_parallel(workers=10):
-        total += 1
-        if norm(row.get("brand")) != norm(BRAND):
-            continue
-        sku = s(row.get("sku"))
-        if not sku:
-            continue
-        by_sku[sku].append(row)
-        norden += 1
-    return by_sku, total, norden
+def exact_kit_rows(kit, article, cache):
+    if article in cache:
+        return cache[article]
+    payload = kit.request(
+        "GET",
+        "/v1/variants",
+        params={"name": article, "page": 1, "per_page": 100},
+    )
+    rows = [
+        x for x in kit.items(payload)
+        if s(x.get("sku")) == article and norm(x.get("brand")) == norm(BRAND)
+    ]
+    cache[article] = rows
+    return rows
 
 def full_variant(kit, row):
     vid = s(row.get("id"))
@@ -154,11 +154,11 @@ def get_numeric_kit_id(variant):
 def product_articles(product):
     return list(dict.fromkeys(s(x.get("sku")) for x in skus(product) if s(x.get("sku"))))
 
-def choose_match(product, kit_by_sku):
+def choose_match(kit, product, kit_cache):
     articles = product_articles(product)
     hits = []
     for article in articles:
-        rows = kit_by_sku.get(article) or []
+        rows = exact_kit_rows(kit, article, kit_cache)
         if len(rows) > 1:
             raise RuntimeError(f"multiple KIT Norden variants for exact article {article}: {[s(x.get('id')) for x in rows]}")
         if len(rows) == 1:
@@ -243,8 +243,7 @@ def main():
         "webasyst_type_name": type_name,
         "pilot_article": PILOT_ARTICLE,
         "webasyst_products": 0,
-        "kit_variants_scanned": 0,
-        "kit_norden_variants": 0,
+        "kit_exact_queries": 0,
         "matched": 0,
         "updated": 0,
         "kit_id_changed": 0,
@@ -259,9 +258,7 @@ def main():
 
     products = load_wa_products(wa, type_id)
     report["webasyst_products"] = len(products)
-    kit_by_sku, total_kit, norden_kit = scan_kit_norden(kit)
-    report["kit_variants_scanned"] = total_kit
-    report["kit_norden_variants"] = norden_kit
+    kit_cache = {}
 
     by_article_wa = defaultdict(list)
     for p in products:
@@ -272,7 +269,7 @@ def main():
     pilot_products = by_article_wa.get(PILOT_ARTICLE) or []
     if not pilot_products:
         raise RuntimeError(f"Pilot {PILOT_ARTICLE}: no Webasyst product in type {type_name}")
-    pilot_rows = kit_by_sku.get(PILOT_ARTICLE) or []
+    pilot_rows = exact_kit_rows(kit, PILOT_ARTICLE, kit_cache)
     if len(pilot_rows) != 1:
         raise RuntimeError(f"Pilot {PILOT_ARTICLE}: expected 1 KIT Norden match, found {len(pilot_rows)}")
 
@@ -296,7 +293,7 @@ def main():
             report["items"].append(result)
             continue
         try:
-            article, row = choose_match(product, kit_by_sku)
+            article, row = choose_match(kit, product, kit_cache)
             if row is None:
                 report["missing_in_kit"] += 1
                 if len(report["errors"]) < 500:
@@ -338,6 +335,7 @@ def main():
                 "errors": len(report["errors"]),
             }, ensure_ascii=False), flush=True)
 
+    report["kit_exact_queries"] = len(kit_cache)
     report["finished_at"] = now()
     # Missing KIT matches mean the requested all-products scope is incomplete, but all resolvable products were processed.
     report["complete"] = report["missing_in_kit"] == 0 and report["ambiguous"] == 0 and not [
@@ -349,7 +347,7 @@ def main():
         "status": report["status"],
         "webasyst_type": type_name,
         "webasyst_products": report["webasyst_products"],
-        "kit_norden_variants": report["kit_norden_variants"],
+        "kit_exact_queries": report["kit_exact_queries"],
         "matched": report["matched"],
         "updated": report["updated"],
         "kit_id_changed": report["kit_id_changed"],
