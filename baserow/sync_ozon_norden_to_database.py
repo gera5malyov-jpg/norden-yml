@@ -587,16 +587,20 @@ def main():
             for x in br.fields(CATALOG_TABLE_ID)
         ]
         write_report(report)
-        by_article = defaultdict(list)
-        all_by_article = defaultdict(list)
+        match_fields = ("Артикул", "Артикул KIT", "Код для сайта", "Наименование артикула", "Артикул поставщика")
+        norden_indexes = {field: defaultdict(list) for field in match_fields}
+        all_indexes = {field: defaultdict(list) for field in match_fields}
         for r in catalog_rows:
-            key = norm(r.get("Наименование артикула"))
-            if key:
-                all_by_article[key].append(r)
+            for field in match_fields:
+                key = norm(r.get(field))
+                if key:
+                    all_indexes[field][key].append(r)
         for r in norden_rows:
-            key = norm(r.get("Наименование артикула"))
-            if key:
-                by_article[key].append(r)
+            for field in match_fields:
+                key = norm(r.get(field))
+                if key:
+                    norden_indexes[field][key].append(r)
+        report["matched_by_field"] = {field: 0 for field in match_fields}
 
         schema_cache = {}
         char_rows_by_pid = {}
@@ -660,10 +664,16 @@ def main():
                     report["characteristic_fields_created"].append(field_name)
         else:
             for (aid, _), name in sorted(unique_chars.items(), key=lambda x: (norm(x[1]), x[0][0])):
+                protected_fields = {
+                    "Название", "Категория", "Цена Ozon", "Артикул", "Артикул KIT",
+                    "Код для сайта", "Наименование артикула", "Артикул поставщика",
+                    "Поставщик", "Наличие", "Закупка Norden", "Остаток Norden",
+                    "Первое изображение", "Первое изображение URL", "Все изображения",
+                }
                 candidates = [
                     x for x in existing_by_key.get(field_key(name), [])
                     if s(x.get("type")) in ("text", "long_text", "number")
-                    and s(x.get("name")) not in {"Первое изображение", "Первое изображение URL", "Все изображения"}
+                    and s(x.get("name")) not in protected_fields
                 ]
                 if len(candidates) == 1:
                     char_field_map[(aid, norm(name))] = s(candidates[0].get("name"))
@@ -684,14 +694,38 @@ def main():
                 report["errors"].append({"stage": "match", "product_id": pid, "error": "offer_id missing"})
                 continue
             key = norm(offer_id)
-            matches = by_article.get(key) or []
+            matched_rows_by_id = {}
+            matched_fields = []
+            for field in match_fields:
+                for candidate in norden_indexes[field].get(key) or []:
+                    rid = int(candidate.get("id"))
+                    matched_rows_by_id[rid] = candidate
+                    if field not in matched_fields:
+                        matched_fields.append(field)
+            matches = list(matched_rows_by_id.values())
             if len(matches) > 1:
-                report["ambiguous_database_matches"].append({"offer_id": offer_id, "row_ids": [x.get("id") for x in matches]})
+                report["ambiguous_database_matches"].append({
+                    "offer_id": offer_id,
+                    "row_ids": [x.get("id") for x in matches],
+                    "fields": matched_fields,
+                })
                 continue
             if not matches:
-                other = all_by_article.get(key) or []
+                other_by_id = {}
+                other_fields = []
+                for field in match_fields:
+                    for candidate in all_indexes[field].get(key) or []:
+                        rid = int(candidate.get("id"))
+                        other_by_id[rid] = candidate
+                        if field not in other_fields:
+                            other_fields.append(field)
+                other = list(other_by_id.values())
                 if other:
-                    report["supplier_conflicts"].append({"offer_id": offer_id, "row_ids": [x.get("id") for x in other]})
+                    report["supplier_conflicts"].append({
+                        "offer_id": offer_id,
+                        "row_ids": [x.get("id") for x in other],
+                        "fields": other_fields,
+                    })
                 else:
                     report["unmatched_ozon"] += 1
                     if len(report["unmatched_offer_ids"]) < 500:
@@ -700,6 +734,12 @@ def main():
 
             report["matched_rows"] += 1
             row = matches[0]
+            primary_field = next(
+                (field for field in match_fields if any(int(x.get("id")) == int(row.get("id")) for x in (norden_indexes[field].get(key) or []))),
+                None,
+            )
+            if primary_field:
+                report["matched_by_field"][primary_field] += 1
             schema = schema_by_pid.get(pid) or {}
             dc = int(card.get("description_category_id") or info.get("description_category_id") or 0)
             tid = int(card.get("type_id") or info.get("type_id") or 0)
