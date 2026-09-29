@@ -110,6 +110,56 @@ class Baserow:
             "Content-Type": "application/json",
             "User-Agent": "megapolis-ozon-norden-to-baserow/1.0",
         })
+        self.schema_session = self._make_schema_session()
+
+    def _make_schema_session(self):
+        pairs = [
+            ("BASEROW_ADMIN_EMAIL", "BASEROW_ADMIN_PASSWORD"),
+            ("BASEROW_EMAIL", "BASEROW_PASSWORD"),
+            ("BASEROW_DB_EMAIL", "BASEROW_DB_PASSWORD"),
+            ("DATABASE_ADMIN_EMAIL", "DATABASE_ADMIN_PASSWORD"),
+            ("DATABASE_EMAIL", "DATABASE_PASSWORD"),
+            ("DATABASE_USER_EMAIL", "DATABASE_USER_PASSWORD"),
+            ("DB_EMAIL", "DB_PASSWORD"),
+        ]
+        for user_key, pass_key in pairs:
+            username = os.environ.get(user_key, "").strip()
+            password = os.environ.get(pass_key, "").strip()
+            if not username or not password:
+                continue
+            for login_key in ("username", "email"):
+                try:
+                    r = requests.post(
+                        BASEROW_URL + "/api/user/token-auth/",
+                        json={login_key: username, "password": password},
+                        timeout=30,
+                    )
+                    if not r.ok:
+                        continue
+                    data = r.json() if r.content else {}
+                    token = s(data.get("token") or data.get("access_token") or data.get("access"))
+                    if token:
+                        session = requests.Session()
+                        session.headers.update({
+                            "Authorization": f"JWT {token}",
+                            "Accept": "application/json",
+                            "Content-Type": "application/json",
+                            "User-Agent": "megapolis-ozon-norden-schema/1.0",
+                        })
+                        return session
+                except Exception:
+                    continue
+        return None
+
+    def schema_request(self, method, path, **kwargs):
+        if self.schema_session is None:
+            return self.request(method, path, **kwargs)
+        r = self.schema_session.request(method, BASEROW_URL + path, timeout=120, **kwargs)
+        if not r.ok:
+            raise RuntimeError(f"Baserow JWT {method} {path}: HTTP {r.status_code}: {r.text[:1500]}")
+        if r.status_code == 204 or not r.text:
+            return None
+        return r.json()
 
     def request(self, method, path, **kwargs):
         last = None
@@ -158,7 +208,7 @@ class Baserow:
                 "number_decimal_places": int(decimals or 0),
                 "number_negative": True,
             })
-        f = self.request(
+        f = self.schema_request(
             "POST",
             f"/api/database/fields/table/{table_id}/",
             data=json.dumps(body, ensure_ascii=False),
