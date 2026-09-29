@@ -1,0 +1,143 @@
+name: Verify Webasyst NORDEN-100 in Baserow
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - baserow-norden-verify.txt
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Compare every Norden row
+        run: |
+          python3 - <<'PY'
+          import os, sys, requests
+          from collections import defaultdict
+
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+
+          def s(v): return str(v or '').strip()
+          def listify(p,keys=()):
+              if isinstance(p,list): return [x for x in p if isinstance(x,dict)]
+              if not isinstance(p,dict): return []
+              for k in keys:
+                  v=p.get(k)
+                  if isinstance(v,list): return [x for x in v if isinstance(x,dict)]
+                  if isinstance(v,dict): return [x for x in v.values() if isinstance(x,dict)]
+              if p and all(isinstance(v,dict) for v in p.values()): return list(p.values())
+              return []
+          def skus(p):
+              v=p.get('skus') or {}
+              if isinstance(v,dict): return [x for x in v.values() if isinstance(x,dict)]
+              if isinstance(v,list): return [x for x in v if isinstance(x,dict)]
+              return []
+
+          wa=WebasystClient(base_url=os.environ['WEBASYST_BASE_URL'], token=os.environ['WEBASYST_API_TOKEN'])
+          types=listify(wa.call('shop.type.getList'))
+          mt=[x for x in types if s(x.get('name') or x.get('title')).casefold()=='norden-100']
+          assert len(mt)==1, len(mt)
+          tid=s(mt[0]['id'])
+
+          products=[]
+          off=0
+          while True:
+              p=wa.call('shop.product.search',params={
+                  'hash':f'type/{tid}','offset':off,'limit':1000,'fields':'*,skus,stock_counts'
+              })
+              batch=listify(p,('products','items'))
+              products.extend(batch)
+              total=(p.get('count') or p.get('total_count')) if isinstance(p,dict) else None
+              if not batch or len(batch)<1000: break
+              if total not in (None,'') and len(products)>=int(total): break
+              off += len(batch)
+
+          source={}
+          dups=[]
+          for p in products:
+              for sku in skus(p):
+                  article=s(sku.get('sku'))
+                  if not article: continue
+                  row=(s(p.get('name')),s(sku.get('name')))
+                  if article in source: dups.append(article)
+                  source[article]=row
+          if dups:
+              raise SystemExit('Duplicate Webasyst SKUs: '+repr(dups[:20]))
+
+          headers={'Authorization':'Token '+os.environ['BASEROW_DATABASE_TOKEN']}
+          rows=[]
+          page=1
+          while True:
+              r=requests.get(
+                  f'http://147.78.67.6/api/database/rows/table/156/?user_field_names=true&size=200&page={page}',
+                  headers=headers,timeout=60
+              )
+              r.raise_for_status()
+              data=r.json()
+              rows.extend(data.get('results',[]))
+              if not data.get('next'): break
+              page += 1
+
+          target=defaultdict(list)
+          for row in rows:
+              article=s(row.get('Артикул'))
+              if article: target[article].append(row)
+
+          missing=[]
+          duplicates=[]
+          mismatches=[]
+          for article,(name,article_name) in source.items():
+              rr=target.get(article,[])
+              if not rr:
+                  missing.append(article); continue
+              if len(rr)!=1:
+                  duplicates.append((article,len(rr))); continue
+              row=rr[0]
+              suppliers=row.get('Поставщик') or []
+              supplier_values=[
+                  s(x.get('value')) for x in suppliers if isinstance(x,dict)
+              ]
+              diffs={}
+              if s(row.get('Название'))!=name:
+                  diffs['Название']=(s(row.get('Название')),name)
+              if s(row.get('Наименование артикула'))!=article_name:
+                  diffs['Наименование артикула']=(s(row.get('Наименование артикула')),article_name)
+              if supplier_values!=['Norden']:
+                  diffs['Поставщик']=(supplier_values,['Norden'])
+              if diffs:
+                  mismatches.append((article,diffs))
+
+          extras=[a for a in target if a not in source]
+
+          print('WEBASYST_PRODUCTS=',len(products))
+          print('WEBASYST_SKUS=',len(source))
+          print('BASEROW_ROWS=',len(rows))
+          print('MISSING=',len(missing))
+          print('DUPLICATES=',len(duplicates))
+          print('MISMATCHES=',len(mismatches))
+          print('EXTRAS=',len(extras))
+          if missing: print('MISSING_SAMPLE=',missing[:20])
+          if duplicates: print('DUPLICATE_SAMPLE=',duplicates[:20])
+          if mismatches: print('MISMATCH_SAMPLE=',mismatches[:5])
+          if extras: print('EXTRA_SAMPLE=',extras[:20])
+
+          if missing or duplicates or mismatches or extras or len(source)!=len(rows):
+              raise SystemExit('Verification failed')
+          print('VERIFICATION_OK')
+          PY
