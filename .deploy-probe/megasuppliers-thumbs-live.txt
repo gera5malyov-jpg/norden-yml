@@ -1,4 +1,4 @@
-BACKUP=/home/web/backups/chatgpt-megasuppliers-thumbs/20260929-095358
+BACKUP=/home/web/backups/chatgpt-megasuppliers-thumbs/20260929-095458
 THUMB_ENDPOINT=exists
 THUMB_BOOTSTRAP=ajax_guard_exists
 THUMB_ROUTE=ok
@@ -21,17 +21,14 @@ METHOD_EXISTS=no
 INTERACTION_URL=http://localhost/tmp/index.php/webasyst/shop/?plugin=megasuppliers&action=thumbs
 OLD_HOOK=ok
 NEW_HOOK=ok
-ROUTE_HTTP=404
-ROUTE_VERIFY=failed
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
-<html><head>
-<title>404 Not Found</title>
-</head><body>
-<h1>Not Found</h1>
-<p>The requested URL was not found on this server.</p>
-<hr>
-<address>Apache/2.4.25 (Debian) Server at localhost Port 80</address>
-</body></html>
+ROUTE_HTTP=200
+ROUTE_VERIFY=ok
+opcache_reset=yes
+PLUGIN_THUMB_HELPERS=1
+PLUGIN_THUMB_BOOTSTRAPS=3
+CTRL_EXISTS=yes
+SITE_HTTP=200 SITE_TOTAL=0.601927
+THUMB_INSTALL_STATUS=SUCCESS
 
 STDERR
 Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
