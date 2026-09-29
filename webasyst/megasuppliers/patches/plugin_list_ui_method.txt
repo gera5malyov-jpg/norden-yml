@@ -64,5 +64,6 @@
             .'$(document).off("wa_megasuppliers_install").on("wa_megasuppliers_install",install);'
             .'})(jQuery);</script>';
 
+        $html .= $this->thumbnailBootstrap();
         return array('header_left' => $html);
     }
