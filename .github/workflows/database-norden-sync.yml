@@ -30,10 +30,5 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: Preflight on push, live on schedule/manual
-        run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            python baserow/sync_norden_database.py --dry-run
-          else
-            python baserow/sync_norden_database.py
-          fi
+      - name: Synchronize Norden to Database
+        run: python baserow/sync_norden_database.py
