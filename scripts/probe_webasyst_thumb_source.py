@@ -65,6 +65,16 @@ echo "--- NEW LIST TEMPLATE ROWS ---"
 sed -n '1,220p' "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" || true
 echo "--- LEGACY PRODUCT LIST TEMPLATE ROWS ---"
 grep -RIn "product-list\|s-product-list\|product-image\|image_id\|thumb" "$ROOT/wa-apps/shop/templates/actions/products" "$ROOT/wa-apps/shop/templates/actions-legacy/products" 2>/dev/null | head -n 160 || true
+echo "--- FORMAT PRODUCTS METHOD ---"
+grep -n "function formatProducts" "$ROOT/wa-apps/shop/lib/actions/prod/main/shopProdList.action.php" || true
+LINE=$(grep -n "function formatProducts" "$ROOT/wa-apps/shop/lib/actions/prod/main/shopProdList.action.php" | head -n1 | cut -d: -f1 || true)
+if [ -n "$LINE" ]; then START=$((LINE-10)); END=$((LINE+180)); sed -n "${START},${END}p" "$ROOT/wa-apps/shop/lib/actions/prod/main/shopProdList.action.php"; fi
+echo "--- NEW TEMPLATE PHOTO USAGE ---"
+grep -n "photos\|photo_url\|image_url\|dummy_image\|image_id\|s-photo-wrapper" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" | head -n 180 || true
+echo "--- LEGACY TABLE IMAGE TEMPLATE ---"
+sed -n '74,145p' "$ROOT/wa-apps/shop/templates/actions/products/product_list_table.html" || true
+echo "--- LEGACY THUMBS IMAGE TEMPLATE ---"
+sed -n '1,55p' "$ROOT/wa-apps/shop/templates/actions/products/product_list_thumbs.html" || true
 echo "--- LIST JS SELECTORS ---"
 grep -RIn "data-product-id\|s-product-item\|product_id\|image" "$ROOT/wa-apps/shop/js/backend/products" "$ROOT/wa-apps/shop/js/backend/prod" 2>/dev/null | head -n 200 || true
 '''
