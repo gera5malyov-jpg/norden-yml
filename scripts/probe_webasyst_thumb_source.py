@@ -65,6 +65,12 @@ echo "--- NEW LIST TEMPLATE ROWS ---"
 sed -n '1,220p' "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" || true
 echo "--- LEGACY PRODUCT LIST TEMPLATE ROWS ---"
 grep -RIn "product-list\|s-product-list\|product-image\|image_id\|thumb" "$ROOT/wa-apps/shop/templates/actions/products" "$ROOT/wa-apps/shop/templates/actions-legacy/products" 2>/dev/null | head -n 160 || true
+echo "--- NEW IMAGE COMPONENT MARKUP ---"
+grep -n "sku_mod_photo\|component-product-column-image\|dummy_image_url\|s-image-wrapper\|s-photo" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" | head -n 220 || true
+grep -n "component-product-column-image\|sku_mod_photo" "$ROOT/wa-apps/shop/js/backend/products/main/main.list.js" | head -n 80 || true
+for L in $(grep -n "sku_mod_photo" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" | head -n 5 | cut -d: -f1); do S=$((L-35)); E=$((L+55)); sed -n "${S},${E}p" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html"; done
+echo "--- OLD LOAD LIST CONTROLLER ---"
+sed -n '1,220p' "$ROOT/wa-apps/shop/lib/actions/products/shopProductsLoadList.controller.php" || true
 echo "--- FORMAT PRODUCT RETURN ---"
 sed -n '620,760p' "$ROOT/wa-apps/shop/lib/actions/prod/main/shopProdList.action.php" || true
 echo "--- NEW JS PHOTO COMPUTED ---"
