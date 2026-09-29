@@ -562,13 +562,7 @@ def main():
             body[FIELD_STOCK] = stock
             body["Наличие"] = bool(stock > 0)
 
-            chars = feature_values(item)
             char_written = 0
-            for name, value in chars.items():
-                if name in current_field_names:
-                    body[name] = value
-                    char_written += 1
-            report["characteristic_values_written"] += char_written
 
             if body:
                 changed = False
@@ -615,10 +609,6 @@ def main():
         if item.get("purchase") is not None:
             body[FIELD_PURCHASE] = item["purchase"]
         body[FIELD_STOCK] = stock
-        for name, value in feature_values(item).items():
-            if name in current_field_names:
-                body[name] = value
-                report["characteristic_values_written"] += 1
 
         if not args.dry_run:
             pending_creates.append(body)
