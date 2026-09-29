@@ -165,7 +165,31 @@ def is_norden(card):
 
 def description_from_ozon(card):
     vals = attr_values(card, DESCRIPTION_ATTR_ID)
-    return vals[0] if vals else ""
+    if not vals:
+        return ""
+    raw = vals[0]
+    stripped = raw.lstrip()
+    if not stripped.startswith(("{", "[")):
+        return raw
+    try:
+        obj = json.loads(raw)
+    except Exception:
+        return ""
+    texts = []
+    def walk(x):
+        if isinstance(x, dict):
+            for k, v in x.items():
+                if k == "content" and isinstance(v, str) and v.strip():
+                    t = v.strip()
+                    if t not in texts:
+                        texts.append(t)
+                else:
+                    walk(v)
+        elif isinstance(x, list):
+            for v in x:
+                walk(v)
+    walk(obj)
+    return "\n".join(texts)
 
 
 def image_urls(card):
@@ -181,6 +205,17 @@ def image_urls(card):
         if u and u not in vals:
             vals.append(u)
     return vals[:20]
+
+
+def looks_structured_json(value):
+    raw = s(value).lstrip()
+    if not raw.startswith(("{", "[")):
+        return False
+    try:
+        parsed = json.loads(raw)
+        return isinstance(parsed, (dict, list))
+    except Exception:
+        return False
 
 
 def price_patch(price_row):
@@ -298,6 +333,17 @@ def main():
     args = ap.parse_args()
     target_offer = s(args.offer_id) or s(os.environ.get("TARGET_OFFER_ID")) or load_trigger_offer()
 
+    resume_items = {}
+    if not target_offer and OUT.exists():
+        try:
+            previous = json.loads(OUT.read_text(encoding="utf-8"))
+            for item in previous.get("items") or []:
+                offer = s(item.get("offer_id"))
+                if offer and item.get("action") in ("created", "updated", "already_done") and not item.get("error"):
+                    resume_items[offer] = item
+        except Exception:
+            resume_items = {}
+
     report = {
         "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "target_offer_id": target_offer or None,
@@ -306,14 +352,15 @@ def main():
         "ozon_archived_norden": 0,
         "kit_variants_scanned": 0,
         "matched_existing": 0,
-        "created": 0,
-        "updated": 0,
-        "published": 0,
-        "price_updated": 0,
-        "images_filled": 0,
+        "created": sum(1 for x in resume_items.values() if x.get("action") == "created"),
+        "updated": sum(1 for x in resume_items.values() if x.get("action") in ("updated", "already_done")),
+        "published": len(resume_items),
+        "price_updated": sum(1 for x in resume_items.values() if x.get("price")),
+        "images_filled": sum(1 for x in resume_items.values() if int(x.get("images") or 0) > 0),
+        "resumed_already_done": len(resume_items),
         "ambiguous": 0,
         "errors": [],
-        "items": [],
+        "items": [dict(x, action="already_done") for x in resume_items.values()],
     }
 
     oz = Ozon()
@@ -336,14 +383,21 @@ def main():
         if len(norden) != 1:
             raise RuntimeError(f"Expected exactly one Norden Ozon item {target_offer}, found {len(norden)}")
 
+    full_norden = list(norden)
+    if not target_offer and resume_items:
+        norden = [x for x in norden if s(x.get("offer_id")) not in resume_items]
+
     norden_ids = [int(x.get("id") or x.get("product_id") or 0) for x in norden]
-    infos = oz.info(norden_ids)
-    prices = oz.prices(norden_ids)
+    infos = oz.info(norden_ids) if norden_ids else []
+    prices = oz.prices(norden_ids) if norden_ids else []
     info_by_id = {int(x.get("id") or x.get("product_id") or 0): x for x in infos}
     price_by_id = {int(x.get("product_id") or 0): x for x in prices}
 
-    report["ozon_norden_total"] = len(norden)
-    report["ozon_archived_norden"] = sum(1 for x in norden_ids if x in archived_ids)
+    report["ozon_norden_total"] = len(full_norden)
+    report["ozon_archived_norden"] = sum(
+        1 for x in full_norden
+        if int(x.get("id") or x.get("product_id") or 0) in archived_ids
+    )
 
     category_paths = ozon_category_paths(oz.category_tree())
 
@@ -415,7 +469,10 @@ def main():
                 schema_cache[key] = oz.schema(dc, tid)
             schema = schema_cache.get(key, {})
 
-            customer_values = POST.customer_attribute_values(card, schema)
+            customer_values = [
+                x for x in POST.customer_attribute_values(card, schema)
+                if not looks_structured_json(x.get("value"))
+            ]
             customer_titles = {norm(x["title"]) for x in customer_values}
             pricing = price_patch(price_by_id.get(pid) or {})
             desc = description_from_ozon(card)
@@ -541,7 +598,7 @@ def main():
 
         if idx % 25 == 0:
             OUT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            print(f"processed {idx}/{len(norden)} created={report['created']} updated={report['updated']} errors={len(report['errors'])}", flush=True)
+            print(f"processed remaining {idx}/{len(norden)} total_done={report['published']} created={report['created']} updated={report['updated']} errors={len(report['errors'])}", flush=True)
 
     report["status"] = "УСПЕШНО" if not report["errors"] else "ЗАВЕРШЕНО С ОШИБКАМИ"
     report["finished_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
