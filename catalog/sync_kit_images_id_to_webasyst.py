@@ -12,7 +12,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "catalog" / "kit_images_id_to_webasyst_report.json"
+SHARD_TOTAL = max(1, int(os.environ.get("SHARD_TOTAL", "1")))
+SHARD_INDEX = int(os.environ.get("SHARD_INDEX", "0"))
+if not 0 <= SHARD_INDEX < SHARD_TOTAL:
+    raise RuntimeError(f"Invalid shard {SHARD_INDEX}/{SHARD_TOTAL}")
+REPORT = ROOT / "catalog" / (
+    f"kit_images_id_to_webasyst_report_{SHARD_INDEX}.json"
+    if SHARD_TOTAL > 1 else "kit_images_id_to_webasyst_report.json"
+)
 PILOT_ARTICLE = os.environ.get("PILOT_ARTICLE", "AF-31662421").strip()
 BRAND = "Norden"
 TYPE_CANDIDATES = ("Norden", "NORDEN-100")
@@ -283,33 +290,41 @@ def main():
         "items": [],
     }
 
-    products = load_wa_products(wa, type_id)
-    report["webasyst_products"] = len(products)
+    all_products = load_wa_products(wa, type_id)
+    report["webasyst_products"] = len(all_products)
+    report["shard_total"] = SHARD_TOTAL
+    report["shard_index"] = SHARD_INDEX
+    products = [
+        p for p in all_products
+        if (int(s(p.get("id")) or "0") % SHARD_TOTAL) == SHARD_INDEX
+    ]
+    report["shard_products"] = len(products)
     kit_cache = {}
 
     by_article_wa = defaultdict(list)
-    for p in products:
+    for p in all_products:
         for a in product_articles(p):
             by_article_wa[a].append(p)
 
-    # Canary: exact user-provided example must be resolvable before mass write.
-    pilot_products = by_article_wa.get(PILOT_ARTICLE) or []
-    if not pilot_products:
-        raise RuntimeError(f"Pilot {PILOT_ARTICLE}: no Webasyst product in type {type_name}")
-    pilot_rows = exact_kit_rows(kit, PILOT_ARTICLE, kit_cache)
-    if len(pilot_rows) != 1:
-        raise RuntimeError(f"Pilot {PILOT_ARTICLE}: expected 1 KIT Norden match, found {len(pilot_rows)}")
-
     file_cache = {}
     done_products = set()
-    pilot_result = sync_product(wa, kit, pilot_products[0], PILOT_ARTICLE, pilot_rows[0], file_cache)
-    report["pilot_result"] = pilot_result
-    done_products.add(s(pilot_products[0].get("id")))
+    if SHARD_TOTAL == 1:
+        # Canary for non-sharded/manual runs.
+        pilot_products = by_article_wa.get(PILOT_ARTICLE) or []
+        if not pilot_products:
+            raise RuntimeError(f"Pilot {PILOT_ARTICLE}: no Webasyst product in type {type_name}")
+        pilot_rows = exact_kit_rows(kit, PILOT_ARTICLE, kit_cache)
+        if len(pilot_rows) != 1:
+            raise RuntimeError(f"Pilot {PILOT_ARTICLE}: expected 1 KIT Norden match, found {len(pilot_rows)}")
+        pilot_result = sync_product(wa, kit, pilot_products[0], PILOT_ARTICLE, pilot_rows[0], file_cache)
+        report["pilot_result"] = pilot_result
+        if (int(s(pilot_products[0].get("id")) or "0") % SHARD_TOTAL) == SHARD_INDEX:
+            done_products.add(s(pilot_products[0].get("id")))
 
     for idx, product in enumerate(products, 1):
         pid = s(product.get("id"))
         if pid in done_products:
-            result = pilot_result
+            result = report["pilot_result"]
             report["matched"] += 1
             report["updated"] += 1
             report["kit_id_changed"] += int(result["kit_id_changed"])
