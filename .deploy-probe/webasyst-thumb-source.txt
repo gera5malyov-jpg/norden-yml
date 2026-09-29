@@ -104,6 +104,555 @@ NATIVE_IMAGES=[{"id":"6549318","product_id":"1476554","ext":"jpg","original_file
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/layouts/BackendSidebar.html:113:                    {* @event backend_products.%plugin_id%.sidebar_section *}
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/layouts/BackendSidebar.html:114:                    {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.sidebar_section)}{/foreach}{/if}
 --- HOOK SOURCES END ---
+--- NEW LIST ACTION EVENT ---
+        $filter_model = new shopFilterModel();
+        $filters = array_values($filter_model->getTemplatesByUser($user_id, ['fields' => ['id', 'name']]));
+        $this->getRulesLabels($filter['rules'], $filter_options, $categories);
+
+        foreach($filter_options['features'] as &$f) {
+            if (!empty($f['id']) && empty($f['render_type'])) {
+                $f = [
+                    'id' => $f['id'],
+                    'code' => $f['code'],
+                    'name' => $f['name'],
+                ];
+            }
+        }
+        unset($f);
+
+        $products = $presentation->getProducts($collection, [
+            'offset' => $offset,
+            'limit' => $limit,
+            'format' => true,
+        ]);
+
+        /**
+         * @event backend_prod_list
+         * @since 9.4.1
+         */
+        $backend_prod_list = wa('shop')->event('backend_prod_list', ref([
+            "products"             => $products,
+            "products_total_count" => $products_total_count,
+            "current_page"         => $page,
+            "pages_count"          => $pages,
+        ]));
+
+        $this->view->assign([
+            "filter"               => $filter,
+            "filters"              => $filters,
+            "filter_options"       => $filter_options,
+            "presentations"        => $presentations,
+            "active_presentation"  => $active_presentation,
+            "stocks"               => $this->getProductStocks(),
+            "columns"              => $columns,
+            "products"             => $this->formatProducts($products),
+            "products_total_count" => $products_total_count,
+            'categories'           => $static_categories,
+            'categories_tree'      => $this->static_categories_tree,
+            'currencies_data'      => $this->getCurrenciesData(),
+            'action_rights'        => $this->getActionRights(),
+
+            "page"                 => $page,
+            "pages"                => $pages,
+
+            "mass_actions"         => $this->getMassActions(),
+            "backend_prod_list"    => $backend_prod_list,
+            "allowed_styles"       => shopHelper::getAllowedProdAiImageStyles(),
+        ]);
+        $this->setTemplate('templates/actions/prod/main/List.html');
+        $this->setLayout(new shopBackendProductsListSectionLayout());
+    }
+
+    protected function getFilterGroups($rules)
+    {
+        $groups = [];
+--- NEW LIST TEMPLATE ROWS ---
+{$_lang = substr($wa->locale(), 0, 2)}
+{$_sprite_url = "`$wa_url`wa-apps/shop/img/backend/products/product/icons.svg?v=`$wa->version()`"}
+
+{* КОМПОНЕНТЫ *}
+{$_components = []}
+
+{capture assign="_component_view_toggle"}
+    <div class="vue-component-view-toggle toggle small">
+        <div data-id="thumbs" data-tooltip-id="view_thumbs" v-bind:class="{ 'selected' : modelValue === 'thumbs' }">
+            <i class="icon"><i class="fas fa-th-large"></i></i>
+        </div>
+        <div data-id="table_extended" data-tooltip-id="view_table_extended" v-bind:class="{ 'selected' : modelValue === 'table_extended' }">
+            <i class="icon"><svg><use xlink:href="{$_sprite_url}#toggle-full"></use></svg></i>
+        </div>
+        <div data-id="table" data-tooltip-id="view_table" v-bind:class="{ 'selected' : modelValue === 'table' }">
+            <i class="icon"><svg><use xlink:href="{$_sprite_url}#toggle-thin"></use></svg></i>
+        </div>
+    </div>
+{/capture}
+{$_components["component-view-toggle"] = $_component_view_toggle|strip}
+
+{capture assign="_component_paging"}
+{literal}
+    <div class="vue-component-paging">
+        <div class="s-item">
+            <component class="s-toggle"
+                       v-on:click.prevent="set(1)"
+                       v-bind:is="(page > 1 ? 'a' : 'span')"
+                       v-bind:href="(page > 1 ? getHref(1) : null)"
+                       v-bind:title="1"
+                       v-bind:class="{ 'is-disabled' : page <= 1 }">
+                <span class="icon"><i class="fas fa-angle-double-left"></i></span>
+            </component>
+        </div>
+        <div class="s-item">
+            <component class="s-toggle"
+                       v-on:click.prevent="set(page-1)"
+                       v-bind:is="(page > 1 ? 'a' : 'span')"
+                       v-bind:href="(page > 1 ? getHref(page-1) : null)"
+                       v-bind:title="(page-1 > 0 ? page-1 : 1)"
+                       v-bind:class="{ 'is-disabled' : page <= 1 }">
+                <span class="icon"><i class="fas fa-angle-left"></i></span>
+            </component>
+        </div>
+        <div class="s-item">
+            <div class="s-field-wrapper">
+                <input class="s-field is-number" type="text"
+                       v-on:input="onInput"
+                       v-on:change="onChange"
+                       v-bind:value="page">
+                <span class="s-divider">[`of`]</span>
+                <span class="s-count" v-text="count"></span>
+            </div>
+        </div>
+        <div class="s-item">
+            <component class="s-toggle"
+                       v-on:click.prevent="set(page+1)"
+                       v-bind:is="(page < count ? 'a' : 'span')"
+                       v-bind:href="(page < count ? getHref(page+1) : null)"
+                       v-bind:title="(page+1 <= count ? page+1 : count)"
+                       v-bind:class="{ 'is-disabled' : page >= count }">
+                <span class="icon"><i class="fas fa-angle-right"></i></span>
+            </component>
+        </div>
+        <div class="s-item">
+            <component class="s-toggle"
+                       v-on:click.prevent="set(count)"
+                       v-bind:is="(page < count ? 'a' : 'span')"
+                       v-bind:href="(page < count ? getHref(count) : null)"
+                       v-bind:title="count"
+                       v-bind:class="{ 'is-disabled' : page >= count }">
+                <span class="icon"><i class="fas fa-angle-double-right"></i></span>
+            </component>
+        </div>
+    </div>
+{/literal}
+{/capture}
+{$_components["component-paging"] = $_component_paging|strip}
+
+{capture assign="_component_paging_dropdown"}
+{literal}
+    <div class="dropdown s-paging-dropdown">
+        <button class="dropdown-toggle button small no-indent outlined" type="button">{ { active_option ? active_option.name : modelValue } }</button>
+        <div class="dropdown-body">
+            <template v-for="option in options">
+                <div class="dropdown-item"
+                     v-bind:class="{ 'selected': (active_option ? (active_option.value === option.value) : false) }"
+                     v-bind:data-value="option.value">{ { option.name ? option.name : '&nbsp;' } }</div>
+            </template>
+        </div>
+    </div>
+{/literal}
+{/capture}
+{$_components["component-paging-dropdown"] = $_component_paging_dropdown|strip}
+
+{capture assign="_component_product_slider"}
+{literal}
+    <div class="s-slider-wrapper"
+         v-on:mouseenter="onMouseEnter"
+         v-on:mouseleave="onMouseLeave">
+        <div class="s-slider-list">
+            <div class="s-slide-wrapper" v-for="photo in photos" v-bind:key="photo.id">
+                {/literal}<a v-bind:href="'{$wa_app_url}' + product_url" class="js-iamge-link">{literal}
+                    <div class="s-photo-wrapper" v-bind:style="{ 'background-image': 'url('+photo.url+')'}"></div>
+                </a>
+            </div>
+        </div>
+        <div class="s-slider-actions" v-if="photos.length > 1">
+            <div class="s-action left"
+                 v-on:click.prevent="prev">
+                <span class="s-icon icon size-20"><i class="fas fa-chevron-left"></i></span>
+            </div>
+            <div class="s-action right"
+                 v-on:click.prevent="next">
+                <span class="s-icon icon size-20"><i class="fas fa-chevron-right"></i></span>
+            </div>
+        </div>
+        <div class="s-slider-controls" v-if="photos.length > 1">
+            <div class="s-control-list">
+                <div class="s-label" v-if="controls.before_count">{ { "+" + controls.before_count } }</div>
+                    <div class="s-control"
+                         v-for="photo in controls.photos"
+                         v-bind:key="photo.id"
+                         v-bind:class="{ 'is-active' : (active_photo === photo), 'is-main' : (photo_id && photo.id === photo_id) }"
+                         v-on:click.prevent="change(photo)"></div>
+                <div class="s-label" v-if="controls.after_count">{ { "+" + controls.after_count } }</div>
+            </div>
+        </div>
+    </div>
+{/literal}
+{/capture}
+{$_components["component-product-slider"] = $_component_product_slider|strip}
+
+{capture assign="_component_tree_menu"}
+    {literal}
+    <li
+        v-show="displayItem"
+        class="vue-component-tree-menu"
+        :class="{ 'selected': item.is_selected }"
+        @click.stop="onClick"
+    >
+        <span class="s-item item flexbox"
+            :class="itemClass"
+            :style="indent"
+        >
+            <div
+                v-if="item[childrenProp] && item[childrenProp].length"
+                class="s-caret-wrapper custom-ml-0 custom-mr-4"
+                @click.stop="toggleChildren"
+            >
+                <span v-if="showChildren" class="icon custom-m-0">
+                    <i class="fas fa-caret-down"></i>
+                </span>
+                <span v-else class="icon custom-m-0">
+                    <i class="fas fa-caret-right"></i>
+                </span>
+            </div>
+            <div v-else class="custom-mr-20"></div>
+
+            <div
+                v-if="$slots.icon"
+                class="s-icon-wrapper"
+            >
+                <slot
+                    name="icon"
+                    :item="item"
+                    :toggle-children="toggleChildren"
+                />
+            </div>
+
+            <div class="s-name-wrapper wide">
+                <span class="s-name"
+                    :class="[item.is_locked ? 'is-locked' : 'cursor-pointer', { 'link' : !item.is_locked }]"
+                >%item.name%</span>
+            </div>
+            <!-- <div class="count gray smaller">
+                %item.count%
+            </div> -->
+        </span>
+        <slot v-if="displayChildren" name="children">
+            <ul class="menu">
+                <component-tree-menu
+                    v-for="child of item[childrenProp]"
+                    :menu-id="menuId"
+                    :item="child"
+                    :children-prop="childrenProp"
+                    :search-string="searchString"
+                    :depth="depth + 1"
+                >
+                    <template v-for="(_, name) in $slots" v-slot:[name]="slotData">
+                        <slot :name="name" v-bind="slotData" />
+                    </template>
+                </component-tree-menu>
+            </ul>
+        </slot>
+    </li>
+    {/literal}
+{/capture}
+{$_components["component-tree-menu"] = $_component_tree_menu|strip}
+
+{capture assign="_component_sidebar_section"}
+    {literal}
+    <section
+        class="vue-component-sidebar-section"
+        :class="{ 'is-expanded': isExpanded }"
+    >
+        <header
+            class="heading cursor-pointer"
+            @click="isExpanded = !isExpanded;$emit('expand', isExpanded)"
+        >
+            <span class="flexbox middle space-4">
+                <span class="icon">
+                    <span v-if="isExpanded" class="caret">
+                        <i class="fas fa-caret-down"></i>
+                    </span>
+                    <span v-else class="caret">
+                        <i class="fas fa-caret-right"></i>
+                    </span>
+                </span>
+
+--- LEGACY PRODUCT LIST TEMPLATE ROWS ---
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_thumbs.html:1:<ul class="thumbs li250px" id="product-list">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_thumbs.html:3:    <script id="template-product-list-thumbs" type="text/html">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_thumbs.html:15:        <div class="s-product-image s-image">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_thumbs.html:21:                    <img src="{%#p.image.thumb_url%}" class="drag-handle">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_table.html:6:<div id="s-product-list-table-container" class="s-product-list-table-container">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_table.html:7:    <table class="zebra single-lined" id="product-list">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_table.html:67:                    <a href="javascript:void(0)" id="product-list-table-settings"><i class="icon16 settings"></i></a>
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_table.html:74:<script id="template-product-list-table" type="text/html">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_table.html:106:            <td class="min-width drag-handle s-product-list-image">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_table.html:200:<div class="dialog width500px height300px" id="product-list-settings-dialog">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_table.html:252:    var $dialog = $('#product-list-settings-dialog');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_table.html:253:    $dialog.length && $('#product-list-table-settings').click(function() {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_skus.html:13:<div id="s-product-list-skus-container" class="s-product-list-table-container">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_skus.html:14:    <table class="zebra single-lined" id="product-list">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_skus.html:65:    <div class="js-product-list-save-panel bordered-top bottombar sticky box flexbox middle" style="display:none;margin-inline:-2em;padding-inline:2em;">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_skus.html:74:<script id="template-product-list-skus" type="text/html">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_skus.html:245:        var product_list_container = $('#s-product-list-skus-container'),
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_skus.html:248:        var save_panel = product_list_container.find('.js-product-list-save-panel');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/product_list_skus.html:254:        $('#product-list').unbind('append_product_list.product_list_skus')
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:40:        <span {if $info.hash == 'category' || $info.hash == 'set'}class="editable"{/if} id="s-product-list-title">{if !empty($title)}{$title|escape}{else}[`Untitled`]{/if}</span>
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:47:            <span class="s-product-list-manage">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:48:                    <a href="#" id="s-product-list-settings" class="gray s-product-list-settings">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:51:                    <a href="#" id="s-product-list-delete" class="gray">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:60:            <li class="custom-mr-8 list-view-mode list-view-mode-thumbs{if $view == 'thumbs'} selected{/if}">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:61:                <a href="#/products/{if $collection_param}{$collection_param}&{/if}view=thumbs&sort={$sort}&order={$order}" title="[`Thumbs`]"><i class="fas fa-image larger text-light-gray"></i></a>
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:219:            <div class="dropdown-body right custom-py-16 js-product-list-toolbar">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:225:                    <ul class="menu thumbs-view-menu">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:258:                <ul class="menu thumbs-view-menu" id="organize-menu">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:371:                <div class="block pagination s-product-list-paginations">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:381:    <div class="dialog" id="s-product-list-delete-dialog">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:452:    <div class="dialog" id="s-product-list-duplicate-error-dialog">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_thumbs.html:1:<ul class="thumbs li250px" id="product-list">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_thumbs.html:3:    <script id="template-product-list-thumbs" type="text/html">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_thumbs.html:15:        <div class="s-product-image s-image">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_thumbs.html:21:                    <img src="{%#p.image.thumb_url%}" class="drag-handle">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_table.html:6:<div id="s-product-list-table-container" class="s-product-list-table-container">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_table.html:7:    <table class="zebra single-lined" id="product-list">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_table.html:67:                    <a href="javascript:void(0)" id="product-list-table-settings"><i class="icon16 settings"></i></a>
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_table.html:74:<script id="template-product-list-table" type="text/html">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_table.html:106:            <td class="min-width drag-handle s-product-list-image">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_table.html:200:<div class="dialog width500px height300px" id="product-list-settings-dialog">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_table.html:252:    var $dialog = $('#product-list-settings-dialog');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_table.html:253:    $dialog.length && $('#product-list-table-settings').click(function() {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_skus.html:13:<div id="s-product-list-skus-container" class="s-product-list-table-container">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_skus.html:14:    <table class="zebra single-lined" id="product-list">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_skus.html:56:    <div class="s-product-list-save-panel block bordered-top" style="display:none;">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_skus.html:65:<script id="template-product-list-skus" type="text/html">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_skus.html:222:        var product_list_container = $('#s-product-list-skus-container'),
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_skus.html:225:        var save_panel = product_list_container.find('.s-product-list-save-panel');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/product_list_skus.html:231:        $('#product-list').unbind('append_product_list.product_list_skus')
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:36:<div class="sidebar right200px" id="s-product-list-toolbar">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:43:        <ul class="menu-v with-icons compact p-no-photo-selected123 thumbs-view-menu">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:81:        <ul class="menu-v with-icons compact p-no-photo-selected123 thumbs-view-menu" id="organize-menu">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:160:            <span {if $info.hash == 'category' || $info.hash == 'set'}class="editable"{/if} id="s-product-list-title">{if !empty($title)}{$title|escape}{else}[`Untitled`]{/if}</span>
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:167:                <span class="s-product-list-manage">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:168:                    <a href="#" id="s-product-list-settings" class="gray s-product-list-settings">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:171:                    <a href="#" id="s-product-list-delete" class="gray">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:339:                <li class="list-view-mode list-view-mode-thumbs{if $view == 'thumbs'} selected{/if}">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:340:                    <a href="#/products/{if $collection_param}{$collection_param}&{/if}view=thumbs&sort={$sort}&order={$order}" title="[`Thumbs`]"><i
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:341:                                class="icon16 view-thumbs"></i></a>
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:345:                                class="icon16 view-thumb-list"></i></a>
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:409:                <div class="block pagination s-product-list-paginations">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:420:    <div class="dialog width400px height250px" id="s-product-list-delete-dialog">
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:484:    <div class="dialog width400px height200px" id="s-product-list-duplicate-error-dialog">
+--- LIST JS SELECTORS ---
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:2490:                                                imagePosition: true,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:2491:                                                imageResizable: true,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:2492:                                                imageFloatMargin: '1.5em',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:2494:                                                    /*'outdent', 'indent',*/ 'image', 'video', 'table', 'link', 'alignment',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:2497:                                                imageUpload: '?module=pages&action=uploadimage&r=2',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:2498:                                                imageUploadFields: {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:2508:                                                options['imageUploadFields'] = options.uploadFields || options.uploadImageFields;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:2514:                                                imageUploadError: function(json) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:2515:                                                    console.log('imageUploadError', json);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:3541:                                        result.image = "";
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:19:            that.dummy_image_url = options["dummy_image_url"];
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:944:                                product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:1870:                                                    with_image: 1
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:1920:                                            } else if (item.image_url) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:1921:                                                html = that.templates["autocomplete-product-with-image"]
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:1922:                                                    .replace("%image_url%", item.image_url)
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3450:                            image_hovered: function() {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3451:                                return this.product.states.image_hovered;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3490:                                    has_image_column: hasImageColumn()
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3496:                                return (columns.indexOf("image_crop_small") >= 0);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3522:                                        let hide_column_names = ["image_crop_small"],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3538:                                            case "image_crop_small":
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3765:                                            "image_crop_small", "image_count",
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3769:                                            "status", "type_id", "image_id", "video_url", "sku_id", "url",
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3781:                                            "sku", "name", "image_id", "price", "purchase_price", "compare_price", "base_price", "visibility",
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3790:                                                    // var white_list = ["image_crop_small", "name", "status", "badge", "currency"];
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3800:                                                // var black_list = ["image_crop_small", "status", "badge", "currency"];
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3882:                                        this.product.states.image_hovered = val;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3893:                                                if (self.product.image_id === photo.id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3904:                                            align_right_array = ['price', 'compare_price', 'purchase_price', 'total_sales', 'stock_worth', 'sales_30days', 'rating_count', 'sku_count', 'image_count'];
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3956:                                                    display_photo = !!presentation_columns["image_crop_small"];
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3961:                                                        if (photos[self.sku_mod.image_id]) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3962:                                                            result = photos[self.sku_mod.image_id];
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3963:                                                        // } else if (photos[self.product.image_id]) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3964:                                                        //     result = photos[self.product.image_id];
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3990:                                            image_hovered: function() {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3991:                                                return this.product.states.image_hovered;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:4030:                                                    product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:4078:                                                    product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:4264:                                                    product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:4594:                                                    product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:4739:                                                        product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:4847:                                                    product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:4875:                                                    product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:4904:                                                    product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:4998:                                                    product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:5153:                                                    product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:5241:                                                    product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:5953:                                                        product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6170:                                                product_id: self.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6297:                                    case "image_crop_small":
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6346:                                    blueimpFileupload.onUploaded((product_ids) => {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6349:                                        if (!product_ids) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6352:                                        product_ids = Object.values(product_ids);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6353:                                        if (!product_ids.length) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6359:                                        const selectAddedProductsTask = (product_ids) => {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6362:                                                    if (product_ids.includes(p.id)) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6370:                                            $.wa_shop_products.tasks_before_mounted.push(selectAddedProductsTask(product_ids));
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6956:                                var scroll_to_product_id = Number(sessionStorage.getItem("shop_products_table_scroll_product_id"));
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6957:                                if (scroll_to_product_id > 0) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6958:                                    sessionStorage.removeItem("shop_products_table_scroll_product_id");
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:6959:                                    var $product_section = $table_section.find('div[data-product-id="' + scroll_to_product_id + '"]');
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8228:            var product_ids = [],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8232:                product_ids = that.products.filter(product => !product.states.selected).map(product => product.id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8234:                product_ids = products.map(product => product.id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8237:            var dialog_data = { product_ids: product_ids };
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8243:                case "ai_generate_image":
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8245:                        product_ids: products.map(product => product.id)
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8249:                    $.post(that.urls["mass_ai_generate_image"], dialog_data, "json")
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8258:                                    title: that.locales["ai_generate_image_error"],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8266:                                html: that.templates["dialog_media_image"],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8281:                                            dummy_image_url: that.dummy_image_url
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8289:                                title: that.locales["ai_generate_image_error"],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8302:                        redirect_url = redirect_url + product_ids.join(",");
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8439:                        product_ids.unshift(that.presentation.id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8442:                    var href = redirect_url + product_ids.join(",");
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8475:                        if (submit_data.product_ids) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8476:                            products_hash += ','+submit_data.product_ids.join(",");
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:8479:                        products_hash = 'id/'+product_ids.join(",");
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:10294:                    product_ids: product_ids
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/create_product.dialog.js:527:        CreateProductDialog.prototype.submitPhotos = function(product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/create_product.dialog.js:537:                    await that.submitPhoto(file, product_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/create_product.dialog.js:545:        CreateProductDialog.prototype.submitPhoto = function(files, product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/create_product.dialog.js:547:            formData.append("product_id", product_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/create_product.dialog.js:551:                url: this.urls["upload_image"],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/category.sort_products.js:195:                            var product_ids = self.products.map( function(product) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/category.sort_products.js:199:                            request({ category_id: self.category.id, products: product_ids })
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/category.sort_products.js:345:                var product_id = "" + $product.attr("data-id"),
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/category.sort_products.js:346:                    product = getProduct(product_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/category.sort_products.js:356:                    product.states.moving = (product.id === product_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/category.sort_products.js:390:                var product_id = "" + $over.attr("data-id"),
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/category.sort_products.js:391:                    product = getProduct(product_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/category.sort_products.js:418:            function getProduct(product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/category.sort_products.js:423:                    if (product.id === product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/set.sort_products.js:192:                            var product_ids = self.products.map( function(product) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/set.sort_products.js:196:                            request({ set_id: self.set.id, products: product_ids })
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/set.sort_products.js:345:                var product_id = "" + $product.attr("data-id"),
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/set.sort_products.js:346:                    product = getProduct(product_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/set.sort_products.js:356:                    product.states.moving = (product.id === product_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/set.sort_products.js:390:                var product_id = "" + $over.attr("data-id"),
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/set.sort_products.js:391:                    product = getProduct(product_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/set.sort_products.js:416:            function getProduct(product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/dialogs/set.sort_products.js:421:                    if (product.id === product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.summary.js:19:            that.product_id = options["product_id"];
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.summary.js:41:                function updateURL(product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.summary.js:42:                    if (product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.summary.js:45:                            var url = location.href.replace("/new/", "/"+product_id+"/");
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.summary.js:47:                            that.$wrapper.trigger("product_created", [product_id]);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:14:            that.product_id = options["product_id"];
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:514:                    var data = { id: that.product_id, url: value }
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:846:                                        formData.append("product_id", that.product.id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:894:                                                product_id: that.product.id
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1094:                                onSuccess: function(image_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1095:                                    var photo_array = that.product.photos.filter( function(photo) { return (photo.id === image_id); });
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1108:                        sku_mod["image_id"] = photo.id;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1119:                                    sku_mod["image_id"] = null;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1126:                                    $.get(that.urls["delete_image"], { id: photo.id }, "json");
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1133:                                                _sku_mod["image_id"] = null;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1221:                            updateProductMainPhoto( sku_mod.image_id ? sku_mod.image_id : null );
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1309:                            updateProductMainPhoto( sku_mod.image_id ? sku_mod.image_id : null );
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1407:            function updateProductMainPhoto(image_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1410:                if (!image_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1411:                    image_id = (that.product.image_id ? that.product.image_id : that.product.photos[0].id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1414:                var photo_array = that.product.photos.filter( function(image) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:1415:                    return (image.id === image_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2397:                    name: "product_id",
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2398:                    value: that.product_id
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2572:                        imagePosition: true,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2573:                        imageResizable: true,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2574:                        imageFloatMargin: '1.5em',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2576:                            /*'outdent', 'indent',*/ 'image', 'video', 'table', 'link', 'alignment',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2579:                        imageUpload: '?module=pages&action=uploadimage&r=2',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2580:                        imageTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2581:                        imageUploadFields: {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2588:                        options['imageUploadFields'] = options.uploadFields || options.uploadImageFields;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2592:                        imageUploadError: function(json) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2593:                            console.log('imageUploadError', json);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2787:                                var product_id = server_data.id;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2788:                                if (product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2792:                                        var url = location.href.replace("/new/general/", "/"+product_id+"/general/");
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2794:                                        that.$wrapper.trigger("product_created", [product_id]);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2798:                                    var redirect_url = options.redirect_url.replace("/new/", "/"+product_id+"/");
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2960:                                        name: prefix + "[image_id]",
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:2961:                                        value: sku_mod.image_id
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3057:                        product_id: that.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3067:                 * Note that for new products, product_id may not be known at this time.
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3071:                        product_id: that.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3087:                        product_id: that.product.id || (server_data && server_data.data && server_data.data.id),
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3104:                        product_id: that.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3242:            var photo_id = sku_mod.image_id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3305:                                formData.append("product_id", that.product.id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3320:                                    url: that.urls["add_product_image"],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3361:                        var href = that.urls["change_image_description"],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3440:                            image_type = /^image\/(png|jpe?g|gif|webp)$/,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3441:                            is_image_type = (file.type.match(image_type)),
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3442:                            is_image = false;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3450:                        if (is_image_type && white_list.indexOf(ext) >= 0) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3451:                            is_image = true;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3454:                        if (!is_image) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.general.js:3455:                            renderError({ id: "not_image", text: "ERROR: NOT IMAGE" });
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:54:                function updateURL(product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:55:                    if (product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:58:                            var url = location.href.replace("/new/", "/"+product_id+"/");
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:60:                            that.$wrapper.trigger("product_created", [product_id]);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:212:                                product_id: that.product.id
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:321:                    product_id: that.product.id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:529:                                this.product_id = that.product.id;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:542:                                        product_id: this.product_id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:758:                                    product_id: that.product.id
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:910:                                imagePosition: true,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:911:                                imageResizable: true,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:912:                                imageFloatMargin: '1.5em',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:914:                                    /*'outdent', 'indent',*/ 'image', 'video', 'table', 'link', 'alignment',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:917:                                imageUpload: '?module=pages&action=uploadimage&r=2',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:918:                                imageUploadFields: {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:925:                                options['imageUploadFields'] = options.uploadFields || options.uploadImageFields;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:931:                                imageUploadError: function(json) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:932:                                    console.log('imageUploadError', json);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.pages.js:1109:                            "name" : "product_id",
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:18:            that.dummy_image_url = options["dummy_image_url"];
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:46:                function updateURL(product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:47:                    if (product_id) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:50:                            var url = location.href.replace("/new/", "/"+product_id+"/");
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:52:                            that.$wrapper.trigger("product_created", [product_id]);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:93:            var photo_id = that.product.image_id,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:170:                                formData.append("product_id", that.product.id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:185:                                    url: that.urls["add_product_image"],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:396:                            html: that.templates["dialog_media_image"],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:512:                            request_xhr = $.post(that.urls["delete_images"], data, "json")
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:557:                            // result = (photo.id === that.product.image_id);
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:585:                        var href = that.urls["change_image_description"],
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:664:                        if (!that.product.normal_mode || self.photos.length === 1) { that.product.image_id = self.photos[0].id; }
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:672:                            image_type = /^image\/(png|jpe?g|gif|webp)$/,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:673:                            is_image_type = (file.type.match(image_type)),
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:674:                            is_image = false;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:682:                        if (is_image_type && white_list.indexOf(ext) >= 0) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:683:                            is_image = true;
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:686:                        if (!is_image) {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:846:                    if (!vue_model.product.normal_mode) { vue_model.product.image_id = drag_data.move_photo.id; }
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/product/product.media.js:905:                        var product_id = server_data.product_id;
 
 STDERR
 Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
