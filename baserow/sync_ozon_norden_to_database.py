@@ -626,6 +626,27 @@ def main():
 
         collisions = {k: len(v) for k, v in name_to_ids.items()}
 
+        characteristic_summary = {}
+        for pid, chars in char_rows_by_pid.items():
+            for item in chars:
+                key = str(int(item["id"]))
+                row = characteristic_summary.setdefault(key, {
+                    "id": int(item["id"]),
+                    "name": item["name"],
+                    "products": 0,
+                    "sample_values": [],
+                })
+                row["products"] += 1
+                value = s(item.get("value"))
+                if value and value not in row["sample_values"] and len(row["sample_values"]) < 5:
+                    row["sample_values"].append(value)
+        report["ozon_characteristics_summary"] = sorted(
+            characteristic_summary.values(),
+            key=lambda x: (norm(x["name"]), x["id"]),
+        )
+        report["ozon_characteristics_unique"] = len(characteristic_summary)
+        write_report(report)
+
         db_fields = br.fields(CATALOG_TABLE_ID)
         existing_names = {s(x.get("name")) for x in db_fields}
         existing_by_key = defaultdict(list)
