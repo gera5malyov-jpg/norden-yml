@@ -14,7 +14,7 @@ permissions:
 
 concurrency:
   group: kit-norden-images-baserow
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   sync:
@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: Sync KIT Norden image links to existing Baserow products
+      - name: Sync KIT Norden image links and preview to existing Baserow products
         run: python baserow/sync_kit_norden_images.py
       - name: Upload sync report
         if: always()
