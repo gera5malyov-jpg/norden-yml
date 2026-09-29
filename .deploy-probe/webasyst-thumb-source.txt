@@ -452,6 +452,335 @@ NATIVE_IMAGES=[{"id":"6549318","product_id":"1476554","ext":"jpg","original_file
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:409:                <div class="block pagination s-product-list-paginations">
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:420:    <div class="dialog width400px height250px" id="s-product-list-delete-dialog">
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:484:    <div class="dialog width400px height200px" id="s-product-list-duplicate-error-dialog">
+--- FORMAT PRODUCTS METHOD ---
+460:    public function formatProducts($products) {
+                }
+            }
+        }
+        foreach (['importexport', 'setscategories', 'marketing', 'setup_marketing'] as $rule) {
+            $action_rights[$rule] = (bool)wa()->getUser()->getRights('shop', $rule);
+        }
+
+        return $action_rights;
+    }
+
+    public function formatProducts($products) {
+        $result = [];
+
+        $selected_selectable_feature_ids = self::getProductsFeatureIds(array_keys($products));
+        $features = self::getProductFeatures(array_column($products, 'type_id'), $products);
+        $this->product_features_model = new shopProductFeaturesModel();
+        foreach ($products as $_product) {
+            // Feature values saved for skus: sku_id => feature code => value
+            $product_features = isset($features[$_product['id']]) ? $features[$_product['id']] : [];
+            $skus_features_values = $this->product_features_model->getValuesMultiple($product_features, $_product['id'], array_keys($_product['skus']));
+            $result[] = $this->formatProduct($_product, $selected_selectable_feature_ids, $product_features, $skus_features_values);
+        }
+
+        // !!! TODO: hook that allows plugins to modify $result
+
+        return $result;
+    }
+
+    /**
+     * @throws waException
+     * @throws waDbException
+     */
+    public function formatProduct($product, $selected_selectable_feature_ids, $features, $skus_features_values)
+    {
+        // They should be in the same order as in $selected_selectable_feature_ids
+        $selectable_features = array_fill_keys($selected_selectable_feature_ids[$product['id']], null);
+        if (!empty($features)) {
+            foreach ($features as $feature) {
+                if (!empty($feature["available_for_sku"])) {
+                    if (in_array($feature["id"], $selected_selectable_feature_ids[$product['id']])) {
+                        $selectable_features[$feature["id"]] = [
+                            'code' => $feature['code']
+                        ];
+                    }
+                }
+            }
+        }
+
+        if (!empty($selectable_features)) {
+            foreach($selectable_features as $_feature_id => $_feature) {
+                $_feature_column_id = "feature_". $_feature_id;
+                if (!empty($product["columns"][$_feature_column_id])) {
+                    $product["columns"][$_feature_column_id]["editable"] = false;
+                    $product["columns"][$_feature_column_id]["feature_locked"] = true;
+                }
+            }
+        }
+
+        // Make sure there are no NULLs left after array_fill_keys() above
+        // also keys must start from 0
+        $selectable_features = array_values(array_filter($selectable_features));
+
+        // Параметры продукта
+        $getParams = function($product) {
+            $params = [];
+            // Получение параметров продукта для определения "сложного|простого" продукта
+            $product_object = new shopProduct($product);
+            if ($product_object->params) {
+                foreach ($product_object->params as $k => $v) {
+                    $params[$k] = $v;
+                }
+            }
+            return $params;
+        };
+        $product["params"] = $getParams($product);
+
+        $has_features_values = $this->product_features_model->checkProductFeaturesValues($product['id'], $product['type_id']);
+        $_normal_mode = count($product["skus"]) > 1 || $has_features_values || ifempty($product, 'params', 'multiple_sku', null) || $selected_selectable_feature_ids[$product['id']];
+
+        // Фотографии продукта
+        $getPhotos = function($product) {
+            $result = [];
+
+            $_images = $product["images"];
+
+            foreach ($_images as $_image) {
+                // Append file modification time to image URL
+                // in order to avoid browser caching issues
+                $last_modified = "";
+                $path = shopImage::getPath($_image);
+                if (file_exists($path)) {
+                    $last_modified = "?".filemtime($path);
+                }
+
+                $result[$_image["id"]] = [
+                    "id" => $_image["id"],
+                    "url" => $_image["url_thumb"].$last_modified,
+                    "description" => $_image["description"]
+                ];
+            }
+
+            return $result;
+        };
+        $photos = $getPhotos($product);
+
+        $skus = [];
+
+        foreach ($product["skus"] as $modification) {
+            $unit = null;
+            if ($this->fractional_config["stock_units_enabled"] && isset($this->formatted_units[$product["stock_unit_id"]])) {
+                $unit = $this->formatted_units[$product["stock_unit_id"]]["name_short"];
+            }
+
+            $modification["price_string"] = shopViewHelper::formatPrice($modification["price"], ["currency" => $product["currency"], "unit" => $unit]);
+
+            $names = shopProdSkuAction::explodeSkuName($modification, $skus_features_values, $selectable_features);
+            $modification_name = $names['modification_name'];
+            $modification["name_values"] = $names['features_name'];
+
+            // Не ко всякому наименованию артикула добавляются в конце значения характеристик.
+            // Но в табличном виде надо показывать характеристики всегда, поэтому впишем их сами.
+            if ($selectable_features && empty($modification["name_values"])) {
+                $mod_feature_values = ifset($skus_features_values, $modification['id'], []);
+                if ($mod_feature_values) {
+                    $modification["name_values"] = [];
+                    foreach($selectable_features as $f) {
+                        if (isset($f['code']) && isset($mod_feature_values[$f['code']])) {
+                            $modification["name_values"][] = $mod_feature_values[$f['code']];
+                        }
+                    }
+                    $modification["name_values"] = join(', ', $modification["name_values"]);
+                }
+                if (empty($modification["name_values"])) {
+                    $modification['force_empty_name_values'] = true;
+                }
+            }
+
+            // MODIFICATIONS
+            if ($modification["sku"] || $modification_name) {
+                $sku_key = $modification["sku"]."###".$modification_name;
+                if (empty($skus[$sku_key])) {
+                    $skus[$sku_key] = [
+                        "sku" => $modification["sku"],
+                        "name" => $modification_name,
+                        "sku_id" => null,
+                        "modifications" => [],
+                    ];
+                }
+                $skus[$sku_key]["modifications"][] = $modification;
+
+                if ($product["sku_id"] === $modification["id"]) {
+                    $skus[$sku_key]["sku_id"] = $modification["id"];
+                }
+
+            } else {
+                $_id = uniqid($modification["id"], true);
+                $skus[$_id] = [
+                    "sku" => $modification["sku"],
+                    "name" => $modification_name,
+                    "sku_id" => ($product["sku_id"] === $modification["id"] ? $modification["id"] : null),
+                    "modifications" => [$modification],
+                ];
+            }
+        }
+
+        // Корректируем названия модификаций, потому что они отличаются (баг) от названий артикулов.
+        foreach ($skus as &$sku) {
+            foreach ($sku["modifications"] as &$sku_mod) {
+                $sku_mod["sku"] = $sku["sku"];
+                $sku_mod["name"] = $sku["name"];
+            }
+        }
+
+        if (!empty($product["badge"])) {
+            switch ($product["badge"]) {
+                case "new":
+                    $product["badge"] = '<div class="badge"><i class="fas fa-bolt"></i> '._w("New!").'</div>';
+                    break;
+                case "lowprice":
+                    $product["badge"] = '<div class="badge"><i class="fas fa-piggy-bank"></i> '._w("Low price!").'</div>';
+                    break;
+                case "bestseller":
+                    $product["badge"] = '<div class="badge"><i class="fas fa-chart-line"></i> '._w("Bestseller!").'</div>';
+                    break;
+            }
+        }
+
+        return [
+            "id"                       => $product["id"],
+            "name"                     => $product["name"],
+            "status"                   => $product["status"],
+--- NEW TEMPLATE PHOTO USAGE ---
+102:            <div class="s-slide-wrapper" v-for="photo in photos" v-bind:key="photo.id">
+104:                    <div class="s-photo-wrapper" v-bind:style="{ 'background-image': 'url('+photo.url+')'}"></div>
+108:        <div class="s-slider-actions" v-if="photos.length > 1">
+118:        <div class="s-slider-controls" v-if="photos.length > 1">
+122:                         v-for="photo in controls.photos"
+556:                    dummy_image_url      : "{$wa_url}wa-content/img/wa-ai/webasyst-wand-ai-light.svg",
+--- LEGACY TABLE IMAGE TEMPLATE ---
+<script id="template-product-list-table" type="text/html">
+    {$link_edit = shopHelper::getBackendEditorUrl('@s')}
+    {literal}
+    {% var current_editor = '{/literal}{$wa->whichUI()}{literal}'; %}
+    {% for (var i = 0, n = o.products.length, p = o.products[0]; i < n; p = o.products[++i]) { %}
+    <tr class="product {% if (i == n-1) { %}last{% } %}
+        {% if (p.status != '1') { %}gray{% } %}
+        {% if (o.check_all) { %}selected{% } %}
+        {% if (p.alien) { %}s-alien{% } %}"
+        data-product-id="{%#p.id%}"
+        data-edit-rights="{%#p.edit_rights%}"
+        data-sku-count="{%#p.sku_count%}"
+        data-min-price="{%#p.min_price%}"
+        data-max-price="{%#p.max_price%}"
+        data-currency="{%#p.currency%}"
+        {% if (p.alien) { %}title="([`This is a subcategory product`]) {%#p.name%}"{% } %}
+        {% if (p.status == '0' && !p.alien) { %}title="([`Hidden product`]) {%#p.name%}"{% } %}
+        {% if (p.status != '0' && !p.alien) { %}title="{%#p.name%}"{% } %}
+    >
+        {/literal}
+        {if $manual && $sort == 'sort'}
+            {literal}
+                <td class="min-width drag-handle">{% if (!p.alien) { %}<i class="icon16 sort"></i>{% } %}</td>
+            {/literal}
+        {/if}
+        {literal}
+        <td class="min-width drag-handle">
+            <input type="checkbox" {% if (o.check_all) { %}checked{% } %}>
+        </td>
+        {/literal}
+        {if !empty($enabled_columns.image_crop_small)}
+            {literal}
+            <td class="min-width drag-handle s-product-list-image">
+                <div class="s-image">
+                    <a href="{%#'{/literal}{$link_edit}{literal}'.replace('/edit/', '/').replace('@s', p.id)%}{% if (current_editor === '2.0' && !p.edit_rights) { %}prices/{% } %}">
+                        {% if (p.badge) { %}
+                            <div class="s-image-corner">{%#p.badge%}</div>
+                        {% } %}
+                        <img src="{%#p.image_crop_small || '{/literal}{$wa_app_static_url}{literal}img/image-dummy-small.png'%}" width="48" height="48" class="drag-handle {% if (!p.image_crop_small) { %}is-empty{% } %}">
+                    </a>
+                </div>
+            </td>
+            {/literal}
+        {/if}
+        {if !empty($enabled_columns.sku)}
+            <td class="s-product-col-sku" title="{$enabled_columns.sku.name|escape}">{literal}{%#p.{/literal}sku_html || p.sku{literal}%}{/literal}</td>
+        {/if}
+        {literal}
+        <td class="drag-handle s-product-name">
+            <a href="{%#'{/literal}{$link_edit}{literal}'.replace('/edit/', '/').replace('@s', p.id)%}{% if (current_editor === '2.0' && !p.edit_rights) { %}prices/{% } %}"><div>{%#p.name%}<i class="shortener"></i></div></a>
+        </td>
+        <td class="short nowrap align-right s-product-price" title="[`Price`]">
+            <span class="editable">{%#p.price_range%}{% if (p.stock_unit) { %}/{%#p.stock_unit.name_short%}{% } %}</span>
+        </td>
+        {/literal}
+        {if shopUnits::baseUnitsEnabled() || $sort == 'base_price'}
+            {literal}
+            <td class="short nowrap align-right s-product-base-price" title="[`Base price`]">
+                <span class="not-editable">{%#p.base_price_range%}{% if (p.base_unit) { %}/{%#p.base_unit.name_short%}{% } %}</span>
+            </td>
+            {/literal}
+        {/if}
+        {literal}
+        <td class="short nowrap align-right s-product-stock" title="[`In stock`]">
+            <span class="editable">{%#((p.count === null)?'<span class="gray">∞</span>': String(p.count))%}</span>
+        </td>
+        {/literal}
+        {foreach $enabled_columns as $c}
+            {if $c.id != 'image_crop_small' && $c.id != 'sku'}
+                {capture assign="_value"}{literal}{%#p.{/literal}{$c.id}_html || p.{$c.id}{literal}%}{/literal}{/capture}
+
+                <td class="s-product-col-{$c.id} align-center" title="{$c.name|escape}">
+--- LEGACY THUMBS IMAGE TEMPLATE ---
+<ul class="thumbs li250px" id="product-list">
+    <li style="display:none" class="hidden header"><input type="checkbox" class="s-select-all"></li>
+    <script id="template-product-list-thumbs" type="text/html">
+    {$link_edit = shopHelper::getBackendEditorUrl('@s')}
+    {literal}
+    {% var current_editor = '{/literal}{$wa->whichUI()}{literal}'; %}
+    {% for (var i = 0, n = o.products.length, p = o.products[0]; i < n; p = o.products[++i]) { %}
+    <li class="product
+        {% if (i == n-1) { %}last{% } %}
+        {% if (p.status != '1') { %}gray{% } %}
+        {% if (p.alien) { %}s-alien{% } %}"
+        data-product-id="{%#p.id%}"
+        {% if (p.alien) { %}title="[`This is a subcategory product`]"{% } %}
+    >
+        <div class="s-product-image s-image">
+            <a href="{%#'{/literal}{$link_edit}{literal}'.replace('@s', p.id).replace('edit/', '')%}{% if (current_editor === '2.0' && !p.edit_rights) { %}prices/{% } %}">
+                {% if (p.badge) { %}
+                    <div class="s-image-corner top right">{%#p.badge%}</div>
+                {% } %}
+                {% if (p.image) { %}
+                    <img src="{%#p.image.thumb_url%}" class="drag-handle">
+                {% } else { %}
+                    <img src="{/literal}{$wa_app_static_url}{literal}img/image-dummy.png" class="drag-handle not-found is-empty">
+                {% } %}
+            </a>
+        </div>
+        <div class="s-product-details">
+            <input type="checkbox" id="s-product-checkbox-{%#p.id%}">
+            <label for="s-product-checkbox-{%#p.id%}">
+                <strong>{%#p.name%}</strong>
+            </label>
+            <span class="small nowrap">{%#p.price_range%}{% if (p.stock_unit) { %}/{%#p.stock_unit.name_short%}{% } %}</span>
+            <!-- extend info according to sorting method -->
+            {% if (o.sort == 'rating') { %}
+                <span class="rate nowrap" title="{%#'[`Average user rating: %s / 5`]'.replace('%s', p.rating)%}">
+                    {%#p.rating_str%}
+                </span>
+            {% } else if (o.sort == 'base_price') { %}
+                <span class="hint base-price nowrap">
+                    [`Base price`]: <strong>{%#p.base_price_range%}</strong>
+                </span>
+            {% } else if (o.sort == 'total_sales') { %}
+                <span class="hint total-sales nowrap">
+                    [`Total sales`]: <strong>{%#p.total_sales_str%}</strong>
+                </span>
+            {% } else if (o.sort == 'stock_worth') { %}
+                <span class="hint stock-worth nowrap">
+                    [`Stock net worth`]: <strong>{%#p.stock_worth_html%}</strong>
+                </span>
+            {% } else if (o.sort == 'count') { %}
+                <span class="small stock nowrap">
+                    {%#p.icon%} {%#((p.count === null)?'<span class="gray">∞</span>':''+p.count)%}
+                </span>
+            {% } else if (o.sort == 'create_datetime') { %}
+                <a class="small show-on-hover nowrap" href="{%#'{/literal}{$link_edit}{literal}'.replace('@s', p.id)%}{% if (current_editor === '2.0' && !p.edit_rights) { %}prices/{% } %}"><i class="icon10 edit s-instant-edit"></i> [`edit`]</a>
 --- LIST JS SELECTORS ---
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:2490:                                                imagePosition: true,
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.categories.js:2491:                                                imageResizable: true,
