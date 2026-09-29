@@ -1,0 +1,38 @@
+name: Check KIT Baserow image progress
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - kit-baserow-images-status.txt
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Count image fields
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          h={'Authorization':'Token '+os.environ['BASEROW_DATABASE_TOKEN']}
+          rows=[]; page=1
+          while True:
+              r=requests.get(f'http://147.78.67.6/api/database/rows/table/156/?user_field_names=true&size=200&page={page}',headers=h,timeout=60)
+              r.raise_for_status()
+              d=r.json(); rows.extend(d.get('results',[]))
+              if not d.get('next'): break
+              page += 1
+          first=sum(1 for x in rows if str(x.get('Первое изображение') or '').strip())
+          alls=sum(1 for x in rows if str(x.get('Все изображения') or '').strip())
+          print('ROWS=',len(rows),'FIRST_IMAGE_FILLED=',first,'ALL_IMAGES_FILLED=',alls)
+          PY
