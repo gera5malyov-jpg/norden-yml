@@ -93,13 +93,13 @@ def patch_method(text, marker, old_return, new_return):
     return text[:start]+part+text[nxt:], True
 
 new_endpoint=re.search(
-    r"    private function thumbnailEndpointUrl\(\)\n    \{.*?\n    \}\n\n    private function thumbnailBootstrap",
+    r"    private function thumbnailEndpointUrl\(\)\n    \{.*?\n    \}\n+    private function thumbnailBootstrap",
     snippet,
     re.S
 )
 if not new_endpoint:
     raise SystemExit("endpoint helper not found in snippet")
-endpoint_method=new_endpoint.group(0).rsplit("\n\n    private function thumbnailBootstrap",1)[0]
+endpoint_method=re.sub(r"\n+    private function thumbnailBootstrap$", "", new_endpoint.group(0))
 
 if "private function thumbnailEndpointUrl(" not in s:
     pos=s.rfind("\n}")
@@ -108,7 +108,7 @@ if "private function thumbnailEndpointUrl(" not in s:
     s=s[:pos]+"\n"+snippet+s[pos:]
     print("THUMB_HELPERS=added")
 else:
-    pattern=r"    private function thumbnailEndpointUrl\(\)\n    \{.*?\n    \}\n(?=\n    private function thumbnailBootstrap)"
+    pattern=r"    private function thumbnailEndpointUrl\(\)\n    \{.*?\n    \}\n(?=    private function thumbnailBootstrap)"
     s2,n=re.subn(pattern,endpoint_method,s,count=1,flags=re.S)
     if n != 1:
         raise SystemExit("cannot replace thumbnailEndpointUrl")
@@ -123,7 +123,7 @@ new_bootstrap=re.search(
 if not new_bootstrap:
     raise SystemExit("thumbnail bootstrap helper not found in snippet")
 bootstrap_method=new_bootstrap.group(0).rstrip()
-pattern_bootstrap=r"    private function thumbnailBootstrap\(\)\n    \{.*?\n    \}(?=\n\})"
+pattern_bootstrap=r"    private function thumbnailBootstrap\(\)\n    \{.*?\n    \}(?=\n\s*\})"
 s2,n=re.subn(pattern_bootstrap,bootstrap_method,s,count=1,flags=re.S)
 if n != 1:
     raise SystemExit("cannot replace thumbnailBootstrap")
