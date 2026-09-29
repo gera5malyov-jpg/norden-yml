@@ -129,4 +129,4 @@ out={
  "supplier_hits":{k:{"count":len(v),"sample":v[:20]} for k,v in supplier_hits.items()},
 }
 print("===CERTIFICATE_AUDIT_JSON===")
-print(json.dumps(out,ensure_ascii=False,indent=2))
+open("ozon/certificates/audit_report.json","w",encoding="utf-8").write(json.dumps(out,ensure_ascii=False,indent=2)+"\\n")\nprint(json.dumps({"certificate_count":len(certs),"product_count":len(by_id),"supplier_counts":{k:len(v) for k,v in supplier_hits.items()}},ensure_ascii=False))
