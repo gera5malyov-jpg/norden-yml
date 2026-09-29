@@ -239,25 +239,35 @@ class KitClient:
 
         def get_page(page):
             # Separate session per worker avoids shared Session contention.
+            # Retry transport-level failures too (chunked response truncation,
+            # remote disconnects, timeouts), not only HTTP 429/5xx.
             headers = dict(self.headers)
-            for attempt in range(12):
-                r = requests.get(
-                    KIT_BASE + "/v1/variants",
-                    headers=headers,
-                    params={"page": page, "per_page": 100},
-                    timeout=120,
-                )
-                if r.status_code == 429:
-                    time.sleep(float(r.headers.get("Retry-After") or min(20, 1 + attempt)))
+            last_error = None
+            for attempt in range(16):
+                try:
+                    r = requests.get(
+                        KIT_BASE + "/v1/variants",
+                        headers=headers,
+                        params={"page": page, "per_page": 100},
+                        timeout=120,
+                    )
+                    if r.status_code == 429:
+                        time.sleep(float(r.headers.get("Retry-After") or min(20, 1 + attempt)))
+                        continue
+                    if r.status_code >= 500:
+                        time.sleep(min(20, 2 ** attempt))
+                        continue
+                    if r.status_code >= 400:
+                        raise RuntimeError(f"KIT scan page {page}: HTTP {r.status_code}")
+                    data = r.json()
+                    return page, self.items(data)
+                except (requests.RequestException, ValueError) as exc:
+                    last_error = exc
+                    if attempt + 1 >= 16:
+                        break
+                    time.sleep(min(20, 1 + attempt * 2))
                     continue
-                if r.status_code >= 500:
-                    time.sleep(min(15, 2 ** attempt))
-                    continue
-                if r.status_code >= 400:
-                    raise RuntimeError(f"KIT scan page {page}: HTTP {r.status_code}")
-                data = r.json()
-                return page, self.items(data)
-            raise RuntimeError(f"KIT scan page {page}: retries exhausted")
+            raise RuntimeError(f"KIT scan page {page}: retries exhausted: {last_error}")
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
             futures = [pool.submit(get_page, p) for p in range(2, pages + 1)]
