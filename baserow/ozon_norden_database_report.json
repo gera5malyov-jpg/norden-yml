@@ -1,0 +1,28 @@
+{
+  "started_at": "2026-09-29T20:49:48.779157+00:00",
+  "source": "Ozon Seller API",
+  "filter": "brand=Norden",
+  "matching": "Ozon offer_id -> Database Наименование артикула + Поставщик=Norden",
+  "images_written": 0,
+  "ozon_total_unique": 16336,
+  "ozon_norden_total": 537,
+  "ozon_norden_archived": 537,
+  "database_norden_rows": 4914,
+  "matched_rows": 0,
+  "updated_rows": 0,
+  "unmatched_ozon": 0,
+  "unmatched_offer_ids": [],
+  "ambiguous_database_matches": [],
+  "supplier_conflicts": [],
+  "base_fields_created": [],
+  "characteristic_fields_created": [],
+  "characteristic_fields_total": 0,
+  "characteristic_values_written": 0,
+  "errors": [
+    {
+      "stage": "fatal",
+      "error": "Baserow POST /api/database/fields/table/156/: HTTP 401: {\"error\":\"ERROR_NO_PERMISSION_TO_TABLE\",\"detail\":\"The token does not have permissions to the table.\"}"
+    }
+  ],
+  "finished_at": "2026-09-29T20:50:36.013260+00:00"
+}
