@@ -1,11 +1,6 @@
 name: Install megasuppliers lazy thumbnails live
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/install_megasuppliers_thumbs_live.py'
-      - '.github/workflows/install-megasuppliers-thumbs-live.yml'
   workflow_dispatch:
 
 permissions:
