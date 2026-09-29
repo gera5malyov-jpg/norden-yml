@@ -65,6 +65,16 @@ echo "--- NEW LIST TEMPLATE ROWS ---"
 sed -n '1,220p' "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" || true
 echo "--- LEGACY PRODUCT LIST TEMPLATE ROWS ---"
 grep -RIn "product-list\|s-product-list\|product-image\|image_id\|thumb" "$ROOT/wa-apps/shop/templates/actions/products" "$ROOT/wa-apps/shop/templates/actions-legacy/products" 2>/dev/null | head -n 160 || true
+echo "--- FORMAT PRODUCT RETURN ---"
+sed -n '620,760p' "$ROOT/wa-apps/shop/lib/actions/prod/main/shopProdList.action.php" || true
+echo "--- NEW JS PHOTO COMPUTED ---"
+sed -n '3925,3985p' "$ROOT/wa-apps/shop/js/backend/products/main/main.list.js" || true
+echo "--- PRESENTATION GETPRODUCTS SUMMARY ---"
+grep -RIn "function getProducts" "$ROOT/wa-apps/shop/lib" 2>/dev/null | grep -i presentation | head -n 20 || true
+grep -RIn "summary" "$ROOT/wa-apps/shop/lib/classes" "$ROOT/wa-apps/shop/lib/model" 2>/dev/null | grep -i presentation | head -n 80 || true
+echo "--- LEGACY LIST ACTION DATA ---"
+grep -RIn "class shopProducts.*List\|function execute" "$ROOT/wa-apps/shop/lib/actions/products" 2>/dev/null | head -n 80 || true
+ls "$ROOT/wa-apps/shop/lib/actions/products" | grep -i list || true
 echo "--- FORMAT PRODUCTS METHOD ---"
 grep -n "function formatProducts" "$ROOT/wa-apps/shop/lib/actions/prod/main/shopProdList.action.php" || true
 LINE=$(grep -n "function formatProducts" "$ROOT/wa-apps/shop/lib/actions/prod/main/shopProdList.action.php" | head -n1 | cut -d: -f1 || true)
