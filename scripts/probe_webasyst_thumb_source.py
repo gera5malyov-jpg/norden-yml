@@ -65,6 +65,11 @@ echo "--- NEW LIST TEMPLATE ROWS ---"
 sed -n '1,220p' "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" || true
 echo "--- LEGACY PRODUCT LIST TEMPLATE ROWS ---"
 grep -RIn "product-list\|s-product-list\|product-image\|image_id\|thumb" "$ROOT/wa-apps/shop/templates/actions/products" "$ROOT/wa-apps/shop/templates/actions-legacy/products" 2>/dev/null | head -n 160 || true
+echo "--- NEW IMAGE COLUMN JS EXACT ---"
+sed -n '3480,3575p' "$ROOT/wa-apps/shop/js/backend/products/main/main.list.js" || true
+sed -n '3860,4020p' "$ROOT/wa-apps/shop/js/backend/products/main/main.list.js" || true
+echo "--- NEW PRODUCT COLUMN TEMPLATES ---"
+grep -n "component-product-column" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" | head -n 120 || true
 echo "--- NEW IMAGE COMPONENT MARKUP ---"
 grep -n "sku_mod_photo\|component-product-column-image\|dummy_image_url\|s-image-wrapper\|s-photo" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" | head -n 220 || true
 grep -n "component-product-column-image\|sku_mod_photo" "$ROOT/wa-apps/shop/js/backend/products/main/main.list.js" | head -n 80 || true
