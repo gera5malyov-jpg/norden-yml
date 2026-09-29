@@ -56,6 +56,9 @@ PHP
 chown web:web /tmp/wa_thumb_probe.php
 timeout 20s su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/wa_thumb_probe.php'
 rm -f /tmp/wa_thumb_probe.php
+echo "--- HOOK SOURCES ---"
+grep -RIn "backend_prod_list\|backend_products" "$ROOT/wa-apps/shop" "$ROOT/wa-system" 2>/dev/null | head -n 120 || true
+echo "--- HOOK SOURCES END ---"
 '''
             p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no",
                 "-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=12",f"root@{VM_IP}","bash -s"],
