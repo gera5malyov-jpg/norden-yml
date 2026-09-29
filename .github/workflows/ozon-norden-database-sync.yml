@@ -41,6 +41,20 @@ jobs:
           OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
           OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
           BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+          BASEROW_ADMIN_EMAIL: ${{ secrets.BASEROW_ADMIN_EMAIL }}
+          BASEROW_ADMIN_PASSWORD: ${{ secrets.BASEROW_ADMIN_PASSWORD }}
+          BASEROW_EMAIL: ${{ secrets.BASEROW_EMAIL }}
+          BASEROW_PASSWORD: ${{ secrets.BASEROW_PASSWORD }}
+          BASEROW_DB_EMAIL: ${{ secrets.BASEROW_DB_EMAIL }}
+          BASEROW_DB_PASSWORD: ${{ secrets.BASEROW_DB_PASSWORD }}
+          DATABASE_ADMIN_EMAIL: ${{ secrets.DATABASE_ADMIN_EMAIL }}
+          DATABASE_ADMIN_PASSWORD: ${{ secrets.DATABASE_ADMIN_PASSWORD }}
+          DATABASE_EMAIL: ${{ secrets.DATABASE_EMAIL }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_USER_EMAIL: ${{ secrets.DATABASE_USER_EMAIL }}
+          DATABASE_USER_PASSWORD: ${{ secrets.DATABASE_USER_PASSWORD }}
+          DB_EMAIL: ${{ secrets.DB_EMAIL }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: python baserow/sync_ozon_norden_to_database.py
 
       - name: Save report
