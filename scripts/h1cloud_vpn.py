@@ -712,11 +712,82 @@ def replacewg(p):
     return safe,private
 
 
+def restorewg(p):
+    safe={"mode":"restorewg","auth":p.auth,"results":[]}
+    private={}
+    try:
+        private["backup"]=p.post("/backups",{})
+        safe["backup"]="created"
+    except Exception as e:
+        safe["backup"]="warning: "+str(e)[:160]
+
+    ib=inbounds(p.get("/inbounds"))
+    ss=find(ib,"shadowsocks","gh-shadowsocks")
+    port=int((ss or {}).get("port") or 25078)
+
+    c,cs=client_state(p)
+    if not c:
+        raise E("client not found")
+    keep_ids=[
+        str(x.get("id")) for x in (c.get("inbound_links") or [])
+        if isinstance(x,dict) and x.get("id") and str(x.get("id")) != str((ss or {}).get("id"))
+    ]
+    safe["before"]={"client":cs,"shadowsocks_present":bool(ss),"target_port":port}
+
+    if ss:
+        p.req("DELETE","/inbounds/"+urllib.parse.quote(str(ss.get("id")),safe=""))
+        time.sleep(4)
+
+    al=p.get("/allocations")
+    available=[int(x) for x in (al.get("available",[]) if isinstance(al,dict) else []) if str(x).isdigit()]
+    if port not in available:
+        time.sleep(5)
+        al=p.get("/allocations")
+        available=[int(x) for x in (al.get("available",[]) if isinstance(al,dict) else []) if str(x).isdigit()]
+    if port not in available:
+        raise E("Port did not become available after removing Shadowsocks")
+
+    create_resp=p.post("/inbounds",{"protocol":"wireguard","port":port})
+    private["wireguard_create_response"]=create_resp
+    time.sleep(4)
+
+    ib2=inbounds(p.get("/inbounds"))
+    wg=find(ib2,"wireguard",None)
+    if not wg:
+        raise E("WireGuard inbound was not created")
+
+    p.patch("/clients/"+urllib.parse.quote(CLIENT,safe=""),{"wg":True,"inbound_ids":keep_ids})
+    time.sleep(5)
+
+    c2,cs2=client_state(p)
+    sub=subscription_flags(c2)
+    ib3=inbounds(p.get("/inbounds"))
+    safe["after"]={
+        "client":cs2,
+        "subscription":sub,
+        "wireguard":{
+            "port":wg.get("port"),
+            "enabled":wg.get("enabled"),
+            "protocol":wg.get("protocol"),
+            "network":wg.get("network"),
+            "security":wg.get("security")
+        }
+    }
+    safe["results"]=[
+        {"protocol":"vless","state":"present" if find(ib3,"vless","gh-vless-reality") else "missing","port":25077},
+        {"protocol":"wireguard","state":"present" if find(ib3,"wireguard",None) else "missing","port":port},
+        {"protocol":"hysteria2","state":"present" if find(ib3,"hysteria2","gh-hysteria2") else "missing","port":25079}
+    ]
+    safe["wireguard_inbound_ready"]=bool(wg and wg.get("enabled"))
+    safe["wireguard_client_config_ready"]=bool(cs2.get("wg") and cs2.get("wg_conf_present"))
+    return safe,private
+
+
 def main():
     mode=(sys.argv[1] if len(sys.argv)>1 else "inspect").lower()
-    if mode not in ("inspect","apply","verify","wgprobe","wgfix","wgtest","restartrepair","replacewg"): raise E("bad mode")
+    if mode not in ("inspect","apply","verify","wgprobe","wgfix","wgtest","restartrepair","replacewg","restorewg"): raise E("bad mode")
     p=Panel(); p.login()
-    safe,private={"inspect":inspect,"apply":apply,"verify":verify,"wgprobe":wgprobe,"wgfix":wgfix,"wgtest":wgtest,"restartrepair":restartrepair,"replacewg":replacewg}[mode](p)
+    safe,private={"inspect":inspect,"apply":apply,"verify":verify,"wgprobe":wgprobe,"wgfix":wgfix,"wgtest":wgtest,"restartrepair":restartrepair,"replacewg":replacewg,"restorewg":restorewg}[mode](p)
     save(safe,private)
     print(json.dumps(safe,ensure_ascii=False,indent=2))
 
