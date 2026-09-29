@@ -115,6 +115,21 @@ else:
     s=s2
     print("THUMB_ENDPOINT=updated")
 
+new_bootstrap=re.search(
+    r"    private function thumbnailBootstrap\(\)\n    \{.*?\n    \}\n?$",
+    snippet,
+    re.S
+)
+if not new_bootstrap:
+    raise SystemExit("thumbnail bootstrap helper not found in snippet")
+bootstrap_method=new_bootstrap.group(0).rstrip()
+pattern_bootstrap=r"    private function thumbnailBootstrap\(\)\n    \{.*?\n    \}(?=\n\})"
+s2,n=re.subn(pattern_bootstrap,bootstrap_method,s,count=1,flags=re.S)
+if n != 1:
+    raise SystemExit("cannot replace thumbnailBootstrap")
+s=s2
+print("THUMB_BOOTSTRAP=updated")
+
 s,changed_new=patch_method(
     s,
     "    public function backendProdList(",
@@ -134,14 +149,16 @@ print("OLD_UI_BOOTSTRAP="+("added" if changed_old else "exists"))
 plugin.write_text(s,encoding='utf-8')
 
 c=cfg.read_text(encoding='utf-8')
-c2=re.sub(r"'version'\s*=>\s*'1\.0\.9'", "'version' => '1.0.10'", c, count=1)
+c2=re.sub(r"'version'\s*=>\s*'1\.0\.10'", "'version' => '1.0.11'", c, count=1)
 if c2==c:
-    c2=re.sub(r"'version'\s*=>\s*'1\.0\.8'", "'version' => '1.0.10'", c, count=1)
+    c2=re.sub(r"'version'\s*=>\s*'1\.0\.9'", "'version' => '1.0.11'", c, count=1)
 if c2==c:
-    c2=re.sub(r"'version'\s*=>\s*'1\.0\.7'", "'version' => '1.0.10'", c, count=1)
+    c2=re.sub(r"'version'\s*=>\s*'1\.0\.8'", "'version' => '1.0.11'", c, count=1)
+if c2==c:
+    c2=re.sub(r"'version'\s*=>\s*'1\.0\.7'", "'version' => '1.0.11'", c, count=1)
 if c2!=c:
     cfg.write_text(c2,encoding='utf-8')
-    print("VERSION=1.0.10")
+    print("VERSION=1.0.11")
 else:
     m=re.search(r"'version'\s*=>\s*'([^']+)'",c)
     print("VERSION="+(m.group(1) if m else "unknown"))
