@@ -676,6 +676,7 @@ def main():
             for item in chars:
                 unique_chars[(int(item["id"]), norm(item["name"]))] = item["name"]
 
+        char_transform_map = {}
         if schema_create:
             for (aid, _), name in sorted(unique_chars.items(), key=lambda x: (norm(x[1]), x[0][0])):
                 field_name = safe_field_name(name, aid, collisions)
@@ -684,20 +685,42 @@ def main():
                 if created:
                     report["characteristic_fields_created"].append(field_name)
         else:
+            protected_fields = {
+                "Название", "Категория", "Цена Ozon", "Артикул", "Артикул KIT",
+                "Код для сайта", "Наименование артикула", "Артикул поставщика",
+                "Поставщик", "Наличие", "Закупка Norden", "Остаток Norden",
+                "Первое изображение", "Первое изображение URL", "Все изображения",
+            }
+            safe_aliases = {
+                norm("Макс. высота сиденья, см"): "Высота от пола до сиденья максимум, см",
+                norm("Мин. высота сиденья, см"): "Высота от пола до сиденья минимум, см",
+                norm("Максимальная высота, см"): "Высота кресла максимум, см",
+                norm("Минимальная высота, см"): "Высота кресла минимум, см",
+                norm("Тип механизма качания"): "Механизм качания",
+                norm("Назначение (помещение)"): "Назначение",
+                norm("Особенности"): "Особенности модели",
+                norm("Материал наполнителя"): "Наполнение сиденья",
+                norm("Глубина, см"): "Глубина",
+                norm("Вес товара, г"): "Вес, кг",
+            }
+            skip_exact_names = {norm("Механизм качания")}
             for (aid, _), name in sorted(unique_chars.items(), key=lambda x: (norm(x[1]), x[0][0])):
-                protected_fields = {
-                    "Название", "Категория", "Цена Ozon", "Артикул", "Артикул KIT",
-                    "Код для сайта", "Наименование артикула", "Артикул поставщика",
-                    "Поставщик", "Наличие", "Закупка Norden", "Остаток Norden",
-                    "Первое изображение", "Первое изображение URL", "Все изображения",
-                }
+                source_key = norm(name)
+                target = safe_aliases.get(source_key)
+                if target and target in existing_names:
+                    char_field_map[(aid, source_key)] = target
+                    if source_key == norm("Вес товара, г"):
+                        char_transform_map[(aid, source_key)] = "grams_to_kg"
+                    continue
+                if source_key in skip_exact_names:
+                    continue
                 candidates = [
                     x for x in existing_by_key.get(field_key(name), [])
                     if s(x.get("type")) in ("text", "long_text", "number")
                     and s(x.get("name")) not in protected_fields
                 ]
                 if len(candidates) == 1:
-                    char_field_map[(aid, norm(name))] = s(candidates[0].get("name"))
+                    char_field_map[(aid, source_key)] = s(candidates[0].get("name"))
 
         report["characteristic_fields_total"] = len(char_field_map)
         report["existing_characteristic_fields_used"] = sorted(set(char_field_map.values()))
@@ -795,9 +818,21 @@ def main():
                     body["Цена Ozon"] = num(p.get("price"))
 
             for item in char_rows_by_pid.get(pid) or []:
-                field_name = char_field_map.get((int(item["id"]), norm(item["name"])))
+                map_key = (int(item["id"]), norm(item["name"]))
+                field_name = char_field_map.get(map_key)
                 if field_name:
-                    body[field_name] = item["value"]
+                    value = item["value"]
+                    if char_transform_map.get(map_key) == "grams_to_kg":
+                        grams = num(value)
+                        if grams is not None:
+                            value = str(round(grams / 1000.0, 3)).rstrip("0").rstrip(".")
+                    if field_name in body and s(body[field_name]) and s(body[field_name]) != s(value):
+                        existing_value = s(body[field_name])
+                        parts = [x.strip() for x in existing_value.split(" | ") if x.strip()]
+                        if s(value) not in parts:
+                            body[field_name] = existing_value + " | " + s(value)
+                    else:
+                        body[field_name] = value
                     report["characteristic_values_written"] += 1
 
             if schema_create:
