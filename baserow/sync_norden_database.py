@@ -157,6 +157,34 @@ class Baserow:
             data=json.dumps(body, ensure_ascii=False),
         )
 
+    def batch_create_rows(self, table_id, bodies, batch_size=100):
+        for start in range(0, len(bodies), batch_size):
+            batch = bodies[start:start + batch_size]
+            try:
+                self.request(
+                    "POST",
+                    f"/api/database/rows/table/{table_id}/batch/?user_field_names=true",
+                    data=json.dumps({"items": batch}, ensure_ascii=False),
+                )
+            except Exception:
+                for body in batch:
+                    self.create_row(table_id, body)
+
+    def batch_update_rows(self, table_id, bodies, batch_size=100):
+        for start in range(0, len(bodies), batch_size):
+            batch = bodies[start:start + batch_size]
+            try:
+                self.request(
+                    "PATCH",
+                    f"/api/database/rows/table/{table_id}/batch/?user_field_names=true",
+                    data=json.dumps({"items": batch}, ensure_ascii=False),
+                )
+            except Exception:
+                for body in batch:
+                    row_id = body["id"]
+                    single = {k: v for k, v in body.items() if k != "id"}
+                    self.update_row(table_id, row_id, single)
+
 def request_with_retry(url, *, headers=None, params=None, timeout=120, attempts=6):
     last = None
     for attempt in range(attempts):
@@ -388,6 +416,9 @@ def main():
         for k, rows in list(duplicate_db.items())[:200]
     ]
 
+    pending_updates = []
+    pending_creates = []
+
     for k, item in source.items():
         excluded, reason = is_excluded(item)
         if excluded:
@@ -437,7 +468,7 @@ def main():
                                 changed = True
                 if changed:
                     if not args.dry_run:
-                        br.update_row(CATALOG_TABLE_ID, row["id"], body)
+                        pending_updates.append({"id": row["id"], **body})
                     report["existing_price_stock_updates"] += 1
                     if stock == 0:
                         report["existing_out_of_stock_updates"] += 1
@@ -460,9 +491,14 @@ def main():
             body[FIELD_STOCK] = stock
 
         if not args.dry_run:
-            created = br.create_row(CATALOG_TABLE_ID, body)
-            by_code[k] = [created]
+            pending_creates.append(body)
         report["new_rows_created"] += 1
+
+    if not args.dry_run:
+        if pending_updates:
+            br.batch_update_rows(CATALOG_TABLE_ID, pending_updates)
+        if pending_creates:
+            br.batch_create_rows(CATALOG_TABLE_ID, pending_creates)
 
     report["finished_at"] = now_iso()
     print(json.dumps(report, ensure_ascii=False, indent=2))
