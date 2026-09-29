@@ -323,15 +323,6 @@ def load_source():
         if len(source) < 1000:
             raise RuntimeError(f"Safety stop: API returned only {len(source)} unique products")
         source_kind = "api"
-        # Official price XML is used only to fill supplier RRP when available.
-        try:
-            prices, _ = load_price_xml()
-            for k, item in source.items():
-                p = prices.get(k)
-                if p and item.get("rrp") is None:
-                    item["rrp"] = p.get("rrp")
-        except Exception:
-            pass
         return source, duplicates, source_kind, None
     except Exception as exc:
         api_error = str(exc)
