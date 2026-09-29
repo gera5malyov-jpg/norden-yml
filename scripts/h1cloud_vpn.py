@@ -308,12 +308,41 @@ def wgprobe(p):
             pass
         if len(js_hits)>=25: break
 
+    sub_probe=None
+    if client:
+        suburl=client.get("sub_url") or client.get("subscription_url") or client.get("link")
+        if suburl:
+            try:
+                req=urllib.request.Request(suburl,headers={"Accept":"*/*"})
+                with urllib.request.urlopen(req,timeout=25) as r:
+                    body=r.read().decode("utf-8","replace")
+                import base64
+                decoded=body
+                try:
+                    pad="="*((4-len(body.strip())%4)%4)
+                    cand=base64.b64decode(body.strip()+pad).decode("utf-8","replace")
+                    if cand.strip(): decoded=cand
+                except Exception:
+                    pass
+                low=decoded.lower()
+                sub_probe={
+                    "http_status":"ok",
+                    "length":len(decoded),
+                    "has_wireguard_scheme":("wireguard://" in low or "wg://" in low),
+                    "has_wireguard_conf":("[interface]" in low and "[peer]" in low),
+                    "has_vless":("vless://" in low),
+                    "has_hysteria2":("hysteria2://" in low or "hy2://" in low),
+                    "line_count":len([x for x in decoded.splitlines() if x.strip()])
+                }
+            except Exception as e:
+                sub_probe={"http_status":"error","error":str(e)[:160]}
     safe_client=None
     if client:
         safe_client={
             "wg":bool(client.get("wg")),
             "wg_conf_present":bool(client.get("wg_conf")),
             "wg_conf_length":len(client.get("wg_conf") or ""),
+            "subscription_probe":sub_probe,
             "inbound_links":[
                 {"id":x.get("id"),"tag":x.get("tag"),"protocol":x.get("protocol"),"network":x.get("network"),"security":x.get("security"),"port":x.get("port")}
                 for x in (client.get("inbound_links") or []) if isinstance(x,dict)
