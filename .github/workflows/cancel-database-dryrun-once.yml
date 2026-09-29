@@ -1,0 +1,21 @@
+name: Cancel Database dry run once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-database-dryrun-once.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel old dry run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: gh api --method POST "repos/$REPO/actions/runs/36587017471/cancel" || true
