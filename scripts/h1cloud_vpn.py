@@ -426,11 +426,199 @@ def wgtest(p):
     return {"mode":"wgtest","auth":p.auth,"create_response_shape":create_shape,"create_response_wg_conf_present":create_wg_conf,"create_response_wg_conf_length":create_wg_len,"stored_client":after,"deleted":True,"results":[]},{"created":created}
 
 
+def mcp_open():
+    if not MCP_TOKEN:
+        raise E("MCP token is not configured")
+    init={"jsonrpc":"2.0","id":101,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"github-h1cloud-repair","version":"1.0"}}}
+    obj,h=mcp_http(init)
+    if isinstance(obj,dict) and obj.get("error"):
+        raise E("MCP initialize failed: "+str(obj.get("error"))[:200])
+    session=h.get("mcp-session-id")
+    try:
+        mcp_http({"jsonrpc":"2.0","method":"notifications/initialized","params":{}},session)
+    except Exception:
+        pass
+    return session
+
+def mcp_tool(name,args=None,session=None,req_id=102):
+    if session is None: session=mcp_open()
+    obj,_=mcp_http({"jsonrpc":"2.0","id":req_id,"method":"tools/call","params":{"name":name,"arguments":args or {}}},session)
+    if isinstance(obj,dict) and obj.get("error"):
+        raise E("MCP tool "+name+" failed: "+str(obj.get("error"))[:300])
+    result=(obj or {}).get("result") if isinstance(obj,dict) else obj
+    # Convert text content to JSON when possible.
+    if isinstance(result,dict):
+        content=result.get("content")
+        if isinstance(content,list):
+            texts=[]
+            for item in content:
+                if isinstance(item,dict) and isinstance(item.get("text"),str):
+                    texts.append(item["text"])
+            if texts:
+                joined="\n".join(texts).strip()
+                for candidate in (joined, texts[-1].strip()):
+                    try:
+                        return json.loads(candidate)
+                    except Exception:
+                        pass
+                return {"text":joined}
+    return result
+
+def walk_dicts(v):
+    out=[]
+    if isinstance(v,dict):
+        out.append(v)
+        for x in v.values(): out.extend(walk_dicts(x))
+    elif isinstance(v,list):
+        for x in v: out.extend(walk_dicts(x))
+    return out
+
+def choose_server_id(v):
+    candidates=[]
+    for d in walk_dicts(v):
+        sid=d.get("id") if isinstance(d,dict) else None
+        if isinstance(sid,bool): continue
+        if isinstance(sid,(int,str)) and str(sid).isdigit():
+            blob=" ".join(str(d.get(k) or "") for k in ("name","server_name","domain","host","hostname","node","location")).lower()
+            score=0
+            if "pl3.h1cloud.net" in blob: score+=10
+            if "pl3" in blob: score+=5
+            if "h1cloud" in blob: score+=1
+            candidates.append((score,int(sid),blob))
+    if not candidates:
+        raise E("Could not determine H1Cloud server id")
+    candidates.sort(reverse=True)
+    if candidates[0][0]>0: return candidates[0][1]
+    unique=sorted(set(x[1] for x in candidates))
+    if len(unique)==1: return unique[0]
+    raise E("Multiple H1Cloud servers found and none matched pl3.h1cloud.net")
+
+def wait_panel(seconds=300):
+    deadline=time.time()+seconds
+    last=""
+    while time.time()<deadline:
+        try:
+            p=Panel(); p.login()
+            st=p.get("/status")
+            return p,st
+        except Exception as e:
+            last=str(e)
+            time.sleep(10)
+    raise E("Panel did not recover after restart: "+last[:180])
+
+def client_state(p):
+    c=next((x for x in clients(p.get("/clients")) if x.get("name")==CLIENT),None)
+    return c,{
+        "exists":bool(c),
+        "wg":bool((c or {}).get("wg")),
+        "wg_conf_present":bool((c or {}).get("wg_conf")),
+        "wg_conf_length":len((c or {}).get("wg_conf") or ""),
+        "inbounds":[
+            {"id":x.get("id"),"tag":x.get("tag"),"protocol":x.get("protocol"),"port":x.get("port")}
+            for x in ((c or {}).get("inbound_links") or []) if isinstance(x,dict)
+        ]
+    }
+
+def restartrepair(p):
+    safe={"mode":"restartrepair","auth":p.auth,"results":[]}
+    private={}
+    try:
+        private["backup_before_restart"]=p.post("/backups",{})
+        safe["backup"]="created"
+    except Exception as e:
+        safe["backup"]="warning: "+str(e)[:160]
+
+    before_ib=inbounds(p.get("/inbounds"))
+    wg_before=find(before_ib,"wireguard",None)
+    wg_port=int((wg_before or {}).get("port") or 25078)
+    safe["before_inbounds"]=[
+        {"protocol":x.get("protocol"),"tag":x.get("tag"),"port":x.get("port"),"enabled":x.get("enabled")}
+        for x in before_ib
+    ]
+
+    session=mcp_open()
+    servers=mcp_tool("list_servers",{},session,103)
+    private["server_list_shape"]=shape(servers)
+    server_id=choose_server_id(servers)
+    safe["server_id"]=server_id
+
+    mcp_tool("server_power",{"server_id":server_id,"action":"restart"},session,104)
+    safe["restart"]="requested"
+    time.sleep(12)
+
+    p2,st=wait_panel(300)
+    safe["panel_recovered"]=True
+    safe["node"]={k:st.get(k) for k in ("node_name","domain","version","xray_version") if isinstance(st,dict) and k in st}
+
+    ib=inbounds(p2.get("/inbounds"))
+    for proto,tag in [("vless","gh-vless-reality"),("wireguard",None),("hysteria2","gh-hysteria2")]:
+        x=find(ib,proto,tag)
+        safe["results"].append({"protocol":proto,"state":"present" if x else "missing","port":x.get("port") if x else None,"enabled":x.get("enabled") if x else None})
+
+    c,state=client_state(p2)
+    safe["client_after_restart"]=state
+    if state["wg_conf_present"]:
+        safe["wireguard_repair"]="not needed"
+        return safe,private
+
+    # Recreate only WireGuard inbound on the same allocated port.
+    safe["wireguard_repair"]="started"
+    if wg_before:
+        wg_id=str(wg_before.get("id") or "__wg__")
+        try:
+            p2.req("DELETE","/inbounds/"+urllib.parse.quote(wg_id,safe=""))
+            safe["wireguard_deleted"]=True
+        except Exception as e:
+            safe["wireguard_deleted"]="warning: "+str(e)[:160]
+    time.sleep(3)
+
+    allocations=p2.get("/allocations")
+    available=[int(x) for x in (allocations.get("available",[]) if isinstance(allocations,dict) else []) if str(x).isdigit()]
+    if wg_port not in available:
+        # The host can need a short delay to release the UDP allocation.
+        time.sleep(5)
+        allocations=p2.get("/allocations")
+        available=[int(x) for x in (allocations.get("available",[]) if isinstance(allocations,dict) else []) if str(x).isdigit()]
+    if wg_port not in available:
+        raise E("WireGuard port was not released after deleting inbound")
+
+    p2.post("/inbounds",{"protocol":"wireguard","port":wg_port})
+    time.sleep(3)
+    safe["wireguard_recreated"]=True
+
+    # Restart panel/Xray service so the host-side WG state is reloaded too.
+    try:
+        p2.post("/server/restart",{})
+        safe["service_restart"]="requested"
+        time.sleep(8)
+        p2,_=wait_panel(120)
+    except Exception as e:
+        safe["service_restart"]="warning: "+str(e)[:160]
+
+    c,state=client_state(p2)
+    ids=[str(x.get("id")) for x in ((c or {}).get("inbound_links") or []) if isinstance(x,dict) and x.get("id")]
+    if c:
+        p2.patch("/clients/"+urllib.parse.quote(CLIENT,safe=""),{"wg":False,"inbound_ids":ids})
+        time.sleep(2)
+        p2.patch("/clients/"+urllib.parse.quote(CLIENT,safe=""),{"wg":True,"inbound_ids":ids})
+        time.sleep(5)
+
+    c2,state2=client_state(p2)
+    safe["client_after_repair"]=state2
+    ib2=inbounds(p2.get("/inbounds"))
+    safe["final_inbounds"]=[
+        {"protocol":x.get("protocol"),"tag":x.get("tag"),"port":x.get("port"),"network":x.get("network"),"security":x.get("security"),"enabled":x.get("enabled")}
+        for x in ib2
+    ]
+    safe["wireguard_ready"]=bool(state2["wg"] and state2["wg_conf_present"])
+    return safe,private
+
+
 def main():
     mode=(sys.argv[1] if len(sys.argv)>1 else "inspect").lower()
-    if mode not in ("inspect","apply","verify","wgprobe","wgfix","wgtest"): raise E("bad mode")
+    if mode not in ("inspect","apply","verify","wgprobe","wgfix","wgtest","restartrepair"): raise E("bad mode")
     p=Panel(); p.login()
-    safe,private={"inspect":inspect,"apply":apply,"verify":verify,"wgprobe":wgprobe,"wgfix":wgfix,"wgtest":wgtest}[mode](p)
+    safe,private={"inspect":inspect,"apply":apply,"verify":verify,"wgprobe":wgprobe,"wgfix":wgfix,"wgtest":wgtest,"restartrepair":restartrepair}[mode](p)
     save(safe,private)
     print(json.dumps(safe,ensure_ascii=False,indent=2))
 
