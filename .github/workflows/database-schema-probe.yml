@@ -1,0 +1,49 @@
+name: Database schema probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/database-schema-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Read database schema and sample
+        run: |
+          python3 - <<'PY'
+          import json, os, requests
+          base='http://147.78.67.6'
+          h={'Authorization':'Token '+os.environ['BASEROW_DATABASE_TOKEN']}
+          out={}
+          for table_id in (156,157):
+              f=requests.get(f'{base}/api/database/fields/table/{table_id}/',headers=h,timeout=30)
+              r=requests.get(f'{base}/api/database/rows/table/{table_id}/?user_field_names=true&size=5',headers=h,timeout=30)
+              out[str(table_id)]={
+                  'fields_http':f.status_code,
+                  'fields':f.json() if f.ok else f.text[:1000],
+                  'rows_http':r.status_code,
+                  'count':r.json().get('count') if r.ok else None,
+                  'sample':r.json().get('results',[]) if r.ok else r.text[:1000],
+              }
+          open('baserow/database_schema_probe.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit probe
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add baserow/database_schema_probe.json
+          git commit -m "Probe database schema" || exit 0
+          git push origin HEAD:main
