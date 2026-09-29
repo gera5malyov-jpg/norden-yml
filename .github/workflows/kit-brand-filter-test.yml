@@ -1,0 +1,43 @@
+name: Test KIT brand filter
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - kit-brand-filter-test.txt
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Test filter
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          h={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+          base='https://api.kit.yandex.net/v1/variants'
+          for params in [
+              {'brand':'Norden','page':1,'per_page':100},
+              {'brand[]':'Norden','page':1,'per_page':100},
+              {'brands':'Norden','page':1,'per_page':100},
+          ]:
+              r=requests.get(base,headers=h,params=params,timeout=60)
+              print('PARAMS',params,'HTTP',r.status_code)
+              if r.ok:
+                  d=r.json()
+                  rows=d.get('items') or d.get('results') or d.get('variants') or d.get('data') or []
+                  if isinstance(rows,dict): rows=rows.get('items') or []
+                  brands=sorted(set(str(x.get('brand') or '') for x in rows if isinstance(x,dict)))
+                  total=d.get('total') or d.get('total_count') or (d.get('meta') or {}).get('total') or (d.get('meta') or {}).get('total_count')
+                  print('TOTAL',total,'ROWS',len(rows),'BRANDS_SAMPLE',brands[:20])
+          PY
