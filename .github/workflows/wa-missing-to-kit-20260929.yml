@@ -1,0 +1,53 @@
+name: WA missing to KIT 20260929
+
+on:
+  push:
+    paths:
+      - 'catalog/wa_missing_to_kit_trigger.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wa-missing-to-kit-20260929
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 420
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: pip install --disable-pip-version-check requests
+      - name: Compile
+        run: python -m py_compile catalog/wa_missing_to_kit_20260929.py
+      - name: Import missing items to KIT
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: python catalog/wa_missing_to_kit_20260929.py
+      - name: Save report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog/wa_missing_to_kit_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save WA missing to KIT report"
+            for i in 1 2 3 4 5 6; do
+              git push origin HEAD:main && break
+              git fetch origin main
+              git rebase origin/main || git rebase --abort
+              sleep $((i*4))
+            done
+          fi
