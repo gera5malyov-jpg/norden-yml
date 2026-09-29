@@ -37,6 +37,74 @@
       }
     ]
   },
+  "certification_params_declaration": {
+    "params": [
+      {
+        "name": "CERTIFICATE_TYPE",
+        "required": true,
+        "variants": [
+          {
+            "value": "DECLARATION",
+            "name": "Декларация о соответствии"
+          },
+          {
+            "value": "CERTIFICATE_OF_CONFORMITY",
+            "name": "Сертификат соответствия"
+          },
+          {
+            "value": "REGISTRATION_CERTIFICATE",
+            "name": "Регистрационное удостоверение"
+          },
+          {
+            "value": "CERTIFICATE_OF_REGISTRATION",
+            "name": "Свидетельство о государственной регистрации"
+          },
+          {
+            "value": "REFUSED_LETTER",
+            "name": "Отказное письмо"
+          },
+          {
+            "value": "VETERINARY_COVER_DOCUMENT",
+            "name": "Ветеринарный сопроводительный документ"
+          },
+          {
+            "value": "SAFETY_DATA_SHEET",
+            "name": "Паспорт безопасности"
+          }
+        ]
+      },
+      {
+        "name": "CERTIFICATE_COUNTRY",
+        "required": true,
+        "variants": [
+          {
+            "value": "unknown",
+            "name": "RU"
+          },
+          {
+            "value": "unknown",
+            "name": "BY"
+          },
+          {
+            "value": "unknown",
+            "name": "KZ"
+          },
+          {
+            "value": "unknown",
+            "name": "KG"
+          },
+          {
+            "value": "unknown",
+            "name": "AM"
+          },
+          {
+            "value": "unknown",
+            "name": "NotEAEU"
+          }
+        ]
+      }
+    ]
+  },
   "accordance_types": {
     "result": {
       "base": [
@@ -101,14 +169,413 @@
       }
     ]
   },
-  "certificate_count": 0,
-  "certificate_errors": [
+  "certificate_count": 31,
+  "certificate_errors": [],
+  "certificates": [
     {
-      "__http_error__": 400,
-      "__body__": "{\"code\":3,\"message\":\"Request validation error: invalid ProductCertificateListRequest.PageSize: value must be inside range (0, 100]\"}"
+      "certificate_id": 4670619,
+      "certificate_name": "Декларация о соответствии",
+      "certificate_number": "ЕАЭС N RU Д-CN.РА06.В.58347/26",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2026-07-30T00:00:00Z",
+      "expire_date": "2031-07-28T00:00:00Z",
+      "products_count": 16,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3192111,
+      "certificate_name": "ПРАКТИК",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА02.В.33927/26",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2026-03-05T00:00:00Z",
+      "expire_date": "2028-03-04T00:00:00Z",
+      "products_count": 38,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3191889,
+      "certificate_name": "Приоритет",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА10.В.29748/23",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2023-12-05T00:00:00Z",
+      "expire_date": "2028-12-03T00:00:00Z",
+      "products_count": 30,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3191579,
+      "certificate_name": "Доски магнитные ",
+      "certificate_number": "2874/Ц",
+      "type_code": "refused_letter",
+      "status_code": "awaiting_verification",
+      "accordance_type_code": "",
+      "rejection_reason_code": "",
+      "issue_date": "2026-03-24T00:00:00Z",
+      "expire_date": null,
+      "products_count": 147,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3191204,
+      "certificate_name": "Кресл Брабикс",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА06.В.12424/25",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2025-07-18T00:00:00Z",
+      "expire_date": "2026-09-16T00:00:00Z",
+      "products_count": 351,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3191162,
+      "certificate_name": "Стул-сиденье  ТИТАН для купания в душе",
+      "certificate_number": "ЕАЭС N RU Д-CN.РА08.В.92808/22",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2022-12-12T00:00:00Z",
+      "expire_date": "2027-12-07T00:00:00Z",
+      "products_count": 2,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3191105,
+      "certificate_name": "Арго",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА10.В.29748/23",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2023-12-05T00:00:00Z",
+      "expire_date": "2028-12-03T00:00:00Z",
+      "products_count": 82,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3191055,
+      "certificate_name": "Монолит",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА01.В.19480/24",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2024-01-25T00:00:00Z",
+      "expire_date": "2029-01-16T00:00:00Z",
+      "products_count": 114,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3191028,
+      "certificate_name": "Канц",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА01.В.19480/24",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2024-01-25T00:00:00Z",
+      "expire_date": "2029-01-16T00:00:00Z",
+      "products_count": 140,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3190988,
+      "certificate_name": "фея",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА05.В.76210/22",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2022-08-19T00:00:00Z",
+      "expire_date": "2027-08-18T00:00:00Z",
+      "products_count": 32,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3188303,
+      "certificate_name": "самсон стеллаж",
+      "certificate_number": "ЕАЭС KZ.7500533.01.01.10522",
+      "type_code": "certificate_of_conformity",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2026-06-10T00:00:00Z",
+      "expire_date": "2031-06-09T00:00:00Z",
+      "products_count": 1,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3127498,
+      "certificate_name": "рива кресла",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА07.В.76166/24",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2024-09-25T00:00:00Z",
+      "expire_date": "2029-09-24T00:00:00Z",
+      "products_count": 0,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3126377,
+      "certificate_name": "Everprof",
+      "certificate_number": "ЕАЭС N RU Д-CN.РА07.В.86736/25",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2025-09-05T00:00:00Z",
+      "expire_date": "2030-09-03T00:00:00Z",
+      "products_count": 409,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3123534,
+      "certificate_name": "Norden кресла",
+      "certificate_number": "ЕАЭС N RU Д-CN.PA05.B.22429/25",
+      "type_code": "declaration",
+      "status_code": "awaiting_verification",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2025-06-11T00:00:00Z",
+      "expire_date": "2030-06-17T00:00:00Z",
+      "products_count": 520,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3121895,
+      "certificate_name": "ловер мебель ",
+      "certificate_number": "ЕАЭС N RU Д-VN.РА07.В.20747/22",
+      "type_code": "declaration",
+      "status_code": "awaiting_verification",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2022-10-07T00:00:00Z",
+      "expire_date": "2027-10-06T00:00:00Z",
+      "products_count": 110,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3121840,
+      "certificate_name": "ловер освещение",
+      "certificate_number": "ЕАЭС KG 417/043.CN.02.10832",
+      "type_code": "certificate_of_conformity",
+      "status_code": "awaiting_verification",
+      "accordance_type_code": "EAEU",
+      "rejection_reason_code": "",
+      "issue_date": "2025-05-20T00:00:00Z",
+      "expire_date": "2030-05-19T00:00:00Z",
+      "products_count": 174,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 3121591,
+      "certificate_name": "ловер зеркала",
+      "certificate_number": "10644",
+      "type_code": "refused_letter",
+      "status_code": "awaiting_verification",
+      "accordance_type_code": "",
+      "rejection_reason_code": "",
+      "issue_date": "2024-07-23T00:00:00Z",
+      "expire_date": null,
+      "products_count": 266,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 2061248,
+      "certificate_name": "Бюрократ",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА01.В.84046/21",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "gost",
+      "rejection_reason_code": "",
+      "issue_date": "2021-08-15T00:00:00Z",
+      "expire_date": "2026-08-16T00:00:00Z",
+      "products_count": 1,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 2061016,
+      "certificate_name": "Riva",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА03.В.50218/25",
+      "type_code": "declaration",
+      "status_code": "awaiting_verification",
+      "accordance_type_code": "gost",
+      "rejection_reason_code": "",
+      "issue_date": "2025-04-09T00:00:00Z",
+      "expire_date": "2030-05-15T00:00:00Z",
+      "products_count": 0,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 2060724,
+      "certificate_name": "Norden",
+      "certificate_number": "EАЭС N RU Д-СN.РА01.В.41842/21",
+      "type_code": "declaration",
+      "status_code": "awaiting_verification",
+      "accordance_type_code": "gost",
+      "rejection_reason_code": "",
+      "issue_date": "2024-04-27T00:00:00Z",
+      "expire_date": "2026-04-27T00:00:00Z",
+      "products_count": 507,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 1639222,
+      "certificate_name": "Стендмебель столы",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА04.В.70282/24",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "technical_regulations_cu",
+      "rejection_reason_code": "",
+      "issue_date": "2024-05-30T00:00:00Z",
+      "expire_date": "2029-05-28T00:00:00Z",
+      "products_count": 3,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 1639194,
+      "certificate_name": "СТЕНДМЕБЕЛЬ Шкафы",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА04.В.70261/24",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "technical_regulations_cu",
+      "rejection_reason_code": "",
+      "issue_date": "2024-05-30T00:00:00Z",
+      "expire_date": "2029-05-28T00:00:00Z",
+      "products_count": 102,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 1627767,
+      "certificate_name": "Тележки уборочные",
+      "certificate_number": "Ист. No 090123-03 от 09.01.2023",
+      "type_code": "refused_letter",
+      "status_code": "approved",
+      "accordance_type_code": "",
+      "rejection_reason_code": "",
+      "issue_date": "2023-01-09T00:00:00Z",
+      "expire_date": null,
+      "products_count": 20,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 1503564,
+      "certificate_name": "ВИТАЛФАРМ аптечки",
+      "certificate_number": "РОСС RU.НЕ07.Н25971",
+      "type_code": "certificate_of_conformity",
+      "status_code": "approved",
+      "accordance_type_code": "gost",
+      "rejection_reason_code": "",
+      "issue_date": "2024-07-12T00:00:00Z",
+      "expire_date": "2027-07-11T00:00:00Z",
+      "products_count": 9,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 1497018,
+      "certificate_name": "Лого стулья",
+      "certificate_number": "ЕАЭС N RU Д-CN.РА04.В.48822/23",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "technical_regulations_cu",
+      "rejection_reason_code": "",
+      "issue_date": "2023-06-07T00:00:00Z",
+      "expire_date": "2028-06-06T00:00:00Z",
+      "products_count": 295,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 1482413,
+      "certificate_name": "Dobrin",
+      "certificate_number": "ЕАЭС N RU Д-CN.РА04.В.45780/23",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "technical_regulations_cu",
+      "rejection_reason_code": "",
+      "issue_date": "2023-06-07T00:00:00Z",
+      "expire_date": "2028-06-05T00:00:00Z",
+      "products_count": 364,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 1455908,
+      "certificate_name": "ЕВРАЗИЙСКИЙ ЭКОНОМИЧЕСКИЙ СОЮЗ ДЕКЛАРАЦИЯ О СООТВЕТСТВИИ",
+      "certificate_number": "ЕАЭС N RU Д-CN.РА03.В.87467/25",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "technical_regulations_cu",
+      "rejection_reason_code": "",
+      "issue_date": "2025-04-23T00:00:00Z",
+      "expire_date": "2027-02-14T00:00:00Z",
+      "products_count": 541,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 1455823,
+      "certificate_name": "РУ аптечки",
+      "certificate_number": "ФСР 2008/03331",
+      "type_code": "registration_certificate",
+      "status_code": "approved",
+      "accordance_type_code": "",
+      "rejection_reason_code": "",
+      "issue_date": "2016-08-25T00:00:00Z",
+      "expire_date": null,
+      "products_count": 31,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 1455804,
+      "certificate_name": "РУ",
+      "certificate_number": "РЗН 2021/16211",
+      "type_code": "registration_certificate",
+      "status_code": "approved",
+      "accordance_type_code": "",
+      "rejection_reason_code": "",
+      "issue_date": "2021-12-30T00:00:00Z",
+      "expire_date": null,
+      "products_count": 1,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 1359085,
+      "certificate_name": "ЕВРАЗИЙСКИЙ ЭКОНОМИЧЕСКИЙ СОЮЗ ДЕКЛАРАЦИЯ О СООТВЕТСтвии",
+      "certificate_number": "ЕАЭС N RU Д-RU.РА03.В.78389/23",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "technical_regulations_cu",
+      "rejection_reason_code": "",
+      "issue_date": "2023-05-11T00:00:00Z",
+      "expire_date": "2028-05-10T00:00:00Z",
+      "products_count": 2,
+      "verification_comment": ""
+    },
+    {
+      "certificate_id": 1255552,
+      "certificate_name": "",
+      "certificate_number": "ЕАЭС N RU Д-RU.НВ29.В.07243/20",
+      "type_code": "declaration",
+      "status_code": "approved",
+      "accordance_type_code": "technical_regulations_cu",
+      "rejection_reason_code": "",
+      "issue_date": "2020-12-25T00:00:00Z",
+      "expire_date": "2025-12-24T00:00:00Z",
+      "products_count": 68,
+      "verification_comment": ""
     }
   ],
-  "certificates": [],
   "product_count": 7703,
   "brand_counts": {
     "Профи": 2732,
@@ -2030,4 +2497,4 @@
       ]
     }
   }
-}\n
+}
