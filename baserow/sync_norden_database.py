@@ -26,9 +26,44 @@ PRICE_XML_URL = "https://norden.group/index.php?dispatch=sw_user_prices.get_file
 FULL_XML_URL = "https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.xml"
 NORDEN_CATEGORIES_API = "https://norden.group/api-categories/"
 
-FIELD_PURCHASE = "Закупка"
-FIELD_RRP = "РРЦ поставщика"
-FIELD_STOCK = "Остаток"
+FIELD_PURCHASE = "Закупка Norden"
+FIELD_STOCK = "Остаток Norden"
+
+TECHNICAL_XML_TAGS = {
+    "Ссылка", "Код", "Наименование", "Группа", "Артикул",
+    "ВесЕдиницаИзмерения", "ВесЗнаменатель", "ВесИспользовать",
+    "ВесМожноУказыватьВДокументах", "ВесЧислитель", "ВестиУчетПоГТД",
+    "ВидНоменклатуры", "ЕдиницаИзмерения", "ДлинаЕдиницаИзмерения",
+    "ДлинаЗнаменатель", "ДлинаИспользовать", "ДлинаМожноУказыватьВДокументах",
+    "ДлинаЧислитель", "КодДляПоиска", "Марка", "НаборУпаковок",
+    "НаименованиеПолное", "ОбъемДАЛ", "Производитель", "СтавкаНДС",
+    "ТипНоменклатуры", "ОбъемЕдиницаИзмерения", "СезоннаяГруппа",
+    "КоллекцияНоменклатуры", "АртикулДляПоиска", "ОбъемЕдиницаИзмерения1",
+    "ОбъемЗнаменатель", "ОбъемИспользовать", "ОбъемЧислитель",
+}
+
+FRIENDLY_TITLES = {
+    "Вескг": "Вес, кг", "Длинасм": "Длина, см", "Ширинасм": "Ширина, см",
+    "Высотасм": "Высота, см", "РазмерупаковкиДШВ": "Размер упаковки Д×Ш×В",
+    "Материалкрестовины": "Материал крестовины", "Материалкаркаса": "Материал каркаса",
+    "Механизмкачания": "Механизм качания", "Цветкрестовины": "Цвет крестовины",
+    "Цветкаркаса": "Цвет каркаса", "Сиденьематериал": "Материал сиденья",
+    "Сиденьецвет": "Цвет сиденья", "Сиденьенаполнение": "Наполнение сиденья",
+    "Подлокотникиматериал": "Материал подлокотников", "Подлокотникицвет": "Цвет подлокотников",
+    "Подлокотникрегулировка": "Регулировка подлокотников", "Спинкаматериал": "Материал спинки",
+    "Спинкацвет": "Цвет спинки", "Спинкарегулировка": "Регулировка спинки",
+    "Подголовникналичие": "Наличие подголовника", "Подголовникрегулировка": "Регулировка подголовника",
+    "Особенностимодели": "Особенности модели", "Высотакресламинимум": "Высота кресла минимум, см",
+    "Высотакресламаксимум": "Высота кресла максимум, см", "Ширинакресла": "Ширина кресла, см",
+    "Глубинакресла": "Глубина кресла, см", "Высотаспинки": "Высота спинки, см",
+    "Глубинасиденья": "Глубина сиденья, см", "Ширинасиденья": "Ширина сиденья, см",
+    "Высотаотполадосиденьямин": "Высота от пола до сиденья минимум, см",
+    "Высотаотполадосиденьямакс": "Высота от пола до сиденья максимум, см",
+    "Высотаотполадоподлокотникамин": "Высота от пола до подлокотника минимум, см",
+    "Высотаотполадоподлокотникамакс": "Высота от пола до подлокотника максимум, см",
+    "Регулировкасиденияпоглубине": "Регулировка сиденья по глубине",
+    "Диаметркрестовины": "Диаметр крестовины, см",
+}
 
 def s(v):
     return str(v or "").strip()
@@ -281,8 +316,8 @@ def load_api():
             "category": " | ".join(category_parts) or s(raw.get("category")),
             "description": s(raw.get("description")),
             "purchase": dec(raw.get("price")),
-            "rrp": dec(raw.get("price_rrc")),
             "stock": stock_num(raw.get("qty")),
+            "norden_code": s(raw.get("Kod")),
             "images": [s(x) for x in (raw.get("images") or []) if s(x)],
             "features": [
                 {"name": s(x.get("name")), "value": s(x.get("value"))}
@@ -327,11 +362,11 @@ def load_price_xml():
                 continue
             if tag.startswith("Ссылканафото"):
                 images.append(value)
-            elif tag not in {
-                "Ссылка", "Код", "Наименование", "НаименованиеПолное", "Группа",
-                "Артикул", "Особенностимодели"
-            }:
-                features.append({"name": tag, "value": value})
+            elif tag not in TECHNICAL_XML_TAGS:
+                features.append({"name": FRIENDLY_TITLES.get(tag, tag), "value": value})
+        code_norden = s(n.findtext("Код"))
+        if code_norden:
+            features.append({"name": "Код Norden", "value": code_norden})
         content_by_article[norm(article)] = {
             "name": s(n.findtext("НаименованиеПолное")) or s(n.findtext("Наименование")) or article,
             "group": s(n.findtext("Группа")),
@@ -366,8 +401,8 @@ def load_price_xml():
             "group": content.get("group") or s(n.findtext("Группа")),
             "description": content.get("description") or "",
             "purchase": prices.get("опт"),
-            "rrp": prices.get("ррц"),
             "stock": stock,
+            "norden_code": s(n.findtext("Код")),
             "images": content.get("images") or [],
             "features": content.get("features") or [],
             "source": "price_xml+full_xml",
@@ -380,8 +415,6 @@ def load_price_xml():
                 old["stock"] = item.get("stock")
             if old.get("purchase") is None and item.get("purchase") is not None:
                 old["purchase"] = item.get("purchase")
-            if old.get("rrp") is None and item.get("rrp") is not None:
-                old["rrp"] = item.get("rrp")
         else:
             products[k] = item
     return products, duplicates
@@ -420,7 +453,11 @@ def main():
         "excluded_without_images": 0,
         "existing_matches": 0,
         "existing_price_stock_updates": 0,
+        "existing_characteristic_rows_updated": 0,
+        "characteristic_values_written": 0,
         "existing_out_of_stock_updates": 0,
+        "missing_source_set_zero": 0,
+        "supplier_code_conflicts": 0,
         "new_rows_created": 0,
         "database_duplicate_keys": [],
         "skipped_ambiguous": 0,
@@ -437,21 +474,13 @@ def main():
 
     br = Baserow(BASEROW_URL, BASEROW_TOKEN)
 
-    numeric_specs = {
-        FIELD_PURCHASE: 2,
-        FIELD_RRP: 2,
-        FIELD_STOCK: 0,
-    }
-    if not args.dry_run:
-        for field_name, decimals in numeric_specs.items():
-            try:
-                br.ensure_number_field(CATALOG_TABLE_ID, field_name, decimals)
-            except Exception as exc:
-                report["schema_warnings"].append(f"{field_name}: {exc}")
-
+    numeric_specs = {FIELD_PURCHASE: 2, FIELD_STOCK: 0}
     current_field_names = {s(f.get("name")) for f in br.fields(CATALOG_TABLE_ID)}
     numeric_available = {name for name in numeric_specs if name in current_field_names}
     report["numeric_fields_available"] = sorted(numeric_available)
+    missing_core = [name for name in numeric_specs if name not in current_field_names]
+    if missing_core:
+        raise RuntimeError(f"Database schema is missing Norden core fields: {missing_core}")
 
     supplier_rows = br.all_rows(SUPPLIERS_TABLE_ID)
     norden_suppliers = [r for r in supplier_rows if norm(r.get("Поставщик")) == norm(SUPPLIER_NAME)]
@@ -472,8 +501,32 @@ def main():
         for k, rows in list(duplicate_db.items())[:200]
     ]
 
+    def supplier_ids(row):
+        out = set()
+        for x in row.get("Поставщик") or []:
+            if isinstance(x, dict) and x.get("id") is not None:
+                try:
+                    out.add(int(x["id"]))
+                except Exception:
+                    pass
+        return out
+
+    def feature_values(item):
+        out = {}
+        for x in item.get("features") or []:
+            if not isinstance(x, dict):
+                continue
+            name, value = s(x.get("name")), s(x.get("value"))
+            if name and value:
+                out[name] = value
+        code = s(item.get("norden_code"))
+        if code:
+            out.setdefault("Код Norden", code)
+        return out
+
     pending_updates = []
     pending_creates = []
+    seen_source_keys = set(source.keys())
 
     for k, item in source.items():
         excluded, reason = is_excluded(item)
@@ -485,27 +538,37 @@ def main():
             continue
 
         stock = item.get("stock")
-        in_stock = stock is not None and stock > 0
+        if stock is None:
+            stock = 0
+        in_stock = stock > 0
         if in_stock:
             report["eligible_in_stock"] += 1
 
-        existing = by_code.get(k, [])
+        all_existing = by_code.get(k, [])
+        existing = [r for r in all_existing if supplier_id in supplier_ids(r)]
         if len(existing) > 1:
             report["skipped_ambiguous"] += 1
+            continue
+        if not existing and all_existing:
+            report["supplier_code_conflicts"] += 1
             continue
 
         if existing:
             report["existing_matches"] += 1
             row = existing[0]
             body = {}
-            if FIELD_PURCHASE in numeric_available and item.get("purchase") is not None:
+            if item.get("purchase") is not None:
                 body[FIELD_PURCHASE] = item["purchase"]
-            if FIELD_RRP in numeric_available and item.get("rrp") is not None:
-                body[FIELD_RRP] = item["rrp"]
-            if stock is not None:
-                if FIELD_STOCK in numeric_available:
-                    body[FIELD_STOCK] = stock
-                body["Наличие"] = bool(stock > 0)
+            body[FIELD_STOCK] = stock
+            body["Наличие"] = bool(stock > 0)
+
+            chars = feature_values(item)
+            char_written = 0
+            for name, value in chars.items():
+                if name in current_field_names:
+                    body[name] = value
+                    char_written += 1
+            report["characteristic_values_written"] += char_written
 
             if body:
                 changed = False
@@ -526,7 +589,10 @@ def main():
                 if changed:
                     if not args.dry_run:
                         pending_updates.append({"id": row["id"], **body})
-                    report["existing_price_stock_updates"] += 1
+                    if any(field in body for field in (FIELD_PURCHASE, FIELD_STOCK, "Наличие")):
+                        report["existing_price_stock_updates"] += 1
+                    if char_written:
+                        report["existing_characteristic_rows_updated"] += 1
                     if stock == 0:
                         report["existing_out_of_stock_updates"] += 1
             continue
@@ -546,16 +612,38 @@ def main():
             "Наличие": True,
             "Первое изображение": images[0],
         }
-        if FIELD_PURCHASE in numeric_available and item.get("purchase") is not None:
+        if item.get("purchase") is not None:
             body[FIELD_PURCHASE] = item["purchase"]
-        if FIELD_RRP in numeric_available and item.get("rrp") is not None:
-            body[FIELD_RRP] = item["rrp"]
-        if FIELD_STOCK in numeric_available and stock is not None:
-            body[FIELD_STOCK] = stock
+        body[FIELD_STOCK] = stock
+        for name, value in feature_values(item).items():
+            if name in current_field_names:
+                body[name] = value
+                report["characteristic_values_written"] += 1
 
         if not args.dry_run:
             pending_creates.append(body)
         report["new_rows_created"] += 1
+
+    # If an existing Norden product disappears from the source altogether,
+    # keep the row but force supplier stock to zero as requested.
+    for row in catalog_rows:
+        if supplier_id not in supplier_ids(row):
+            continue
+        code = norm(row.get("Наименование артикула"))
+        if not code or code in seen_source_keys:
+            continue
+        body = {"id": row["id"], FIELD_STOCK: 0, "Наличие": False}
+        current_stock = row.get(FIELD_STOCK)
+        current_available = bool(row.get("Наличие"))
+        changed = current_available
+        try:
+            changed = changed or float(current_stock or 0) != 0
+        except Exception:
+            changed = changed or s(current_stock) not in ("", "0", "0.0")
+        if changed:
+            report["missing_source_set_zero"] += 1
+            if not args.dry_run:
+                pending_updates.append(body)
 
     if not args.dry_run:
         if pending_updates:
