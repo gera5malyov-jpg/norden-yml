@@ -452,6 +452,11 @@ NATIVE_IMAGES=[{"id":"6549318","product_id":"1476554","ext":"jpg","original_file
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:409:                <div class="block pagination s-product-list-paginations">
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:420:    <div class="dialog width400px height250px" id="s-product-list-delete-dialog">
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:484:    <div class="dialog width400px height200px" id="s-product-list-duplicate-error-dialog">
+--- INTERACTION URL METHOD ---
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/payment/waPayment.class.php:1501:    public function getInteractionUrl($action = 'default', $module = 'backend')
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/shipping/waShipping.class.php:1682:    public function getInteractionUrl($action = 'default', $module = 'backend')
+/home/web/vm-23f9aff9.na4u.ru/www/wa-system/plugin/waSystemPlugin.class.php:1013:    abstract public function getInteractionUrl($action = 'default', $module = 'backend');
+--- INTERACTION URL METHOD END ---
 --- LOCATE TABLE FIELD COMPONENT ---
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3539:                                                result.push("s-column-photo");
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/js/backend/products/main/main.list.js:3723:                            "component-products-table-field": {
