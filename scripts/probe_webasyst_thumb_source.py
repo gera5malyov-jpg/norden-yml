@@ -65,6 +65,9 @@ echo "--- NEW LIST TEMPLATE ROWS ---"
 sed -n '1,220p' "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" || true
 echo "--- LEGACY PRODUCT LIST TEMPLATE ROWS ---"
 grep -RIn "product-list\|s-product-list\|product-image\|image_id\|thumb" "$ROOT/wa-apps/shop/templates/actions/products" "$ROOT/wa-apps/shop/templates/actions-legacy/products" 2>/dev/null | head -n 160 || true
+echo "--- LOCATE TABLE FIELD COMPONENT ---"
+grep -RIn "component-products-table-field\|s-column-photo" "$ROOT/wa-apps/shop" 2>/dev/null | head -n 160 || true
+echo "--- LOCATE TABLE FIELD COMPONENT END ---"
 echo "--- NEW TABLE FIELD TEMPLATE EXACT ---"
 grep -n "component-products-table-field" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" | head -n 20 || true
 for L in $(grep -n "component-products-table-field" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" | head -n 4 | cut -d: -f1); do S=$((L-80)); E=$((L+180)); sed -n "${S},${E}p" "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html"; done
