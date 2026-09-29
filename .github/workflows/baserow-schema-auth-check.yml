@@ -1,0 +1,29 @@
+name: Baserow schema auth check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/baserow-schema-auth-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check configured schema credentials
+        env:
+          BASEROW_EMAIL: ${{ secrets.BASEROW_EMAIL }}
+          BASEROW_PASSWORD: ${{ secrets.BASEROW_PASSWORD }}
+          BASEROW_USER_EMAIL: ${{ secrets.BASEROW_USER_EMAIL }}
+          BASEROW_USER_PASSWORD: ${{ secrets.BASEROW_USER_PASSWORD }}
+          BASEROW_JWT: ${{ secrets.BASEROW_JWT }}
+          BASEROW_ACCESS_TOKEN: ${{ secrets.BASEROW_ACCESS_TOKEN }}
+          BASEROW_API_TOKEN: ${{ secrets.BASEROW_API_TOKEN }}
+        run: |
+          for v in BASEROW_EMAIL BASEROW_PASSWORD BASEROW_USER_EMAIL BASEROW_USER_PASSWORD BASEROW_JWT BASEROW_ACCESS_TOKEN BASEROW_API_TOKEN; do
+            if [ -n "${!v:-}" ]; then echo "$v=PRESENT"; else echo "$v=MISSING"; fi
+          done
