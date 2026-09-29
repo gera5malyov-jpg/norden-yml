@@ -579,6 +579,11 @@ def main():
         catalog_rows = br.all_rows(CATALOG_TABLE_ID)
         norden_rows = [r for r in catalog_rows if supplier_id in supplier_ids(r)]
         report["database_norden_rows"] = len(norden_rows)
+        report["database_fields"] = [
+            {"name": s(x.get("name")), "type": s(x.get("type")), "id": x.get("id")}
+            for x in br.fields(CATALOG_TABLE_ID)
+        ]
+        write_report(report)
         by_article = defaultdict(list)
         all_by_article = defaultdict(list)
         for r in catalog_rows:
