@@ -1,25 +1,13 @@
-name: Cancel old KIT assets run 20260929
+name: Cancel old KIT assets run 20260929 (disabled)
 
 on:
-  push:
-    paths:
-      - 'catalog/cancel_old_kit_assets_trigger.txt'
   workflow_dispatch:
-  issues:
-    types: [opened]
 
 permissions:
-  actions: write
   contents: read
 
 jobs:
-  cancel:
-    if: github.event_name != 'issues' || startsWith(github.event.issue.title, '[CANCEL-KIT-ASSETS]')
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel old run
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-        run: |
-          gh api --method POST "repos/$REPO/actions/runs/36573966774/cancel" || true
+      - run: echo "Disabled after old run cancellation completed"
