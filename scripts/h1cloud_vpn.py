@@ -331,11 +331,35 @@ def wgprobe(p):
         "results":[]
     }, {"client":client}
 
+def wgfix(p):
+    # Preserve all non-WireGuard inbound assignments and only toggle WG off/on,
+    # matching the panel's own edit-client flow.
+    cl=clients(p.get("/clients"))
+    client=next((x for x in cl if x.get("name")==CLIENT),None)
+    if not client:
+        raise E("client not found")
+    ids=[str(x.get("id")) for x in (client.get("inbound_links") or []) if isinstance(x,dict) and x.get("id")]
+    before={"wg":bool(client.get("wg")),"wg_conf_present":bool(client.get("wg_conf")),"wg_conf_length":len(client.get("wg_conf") or ""),"inbound_ids":ids}
+    try:
+        backup=p.post("/backups",{})
+        backup_state="created"
+    except Exception as e:
+        backup_state="warning: "+str(e)[:160]
+    p.patch("/clients/"+urllib.parse.quote(CLIENT,safe=""),{"wg":False,"inbound_ids":ids})
+    time.sleep(2)
+    p.patch("/clients/"+urllib.parse.quote(CLIENT,safe=""),{"wg":True,"inbound_ids":ids})
+    time.sleep(4)
+    cl2=clients(p.get("/clients"))
+    c2=next((x for x in cl2 if x.get("name")==CLIENT),None)
+    after={"wg":bool(c2.get("wg")) if c2 else False,"wg_conf_present":bool(c2.get("wg_conf")) if c2 else False,"wg_conf_length":len((c2 or {}).get("wg_conf") or ""),"inbound_links":[{"id":x.get("id"),"tag":x.get("tag"),"protocol":x.get("protocol"),"port":x.get("port")} for x in ((c2 or {}).get("inbound_links") or []) if isinstance(x,dict)]}
+    return {"mode":"wgfix","auth":p.auth,"backup":backup_state,"before":before,"after":after,"results":[]},{"client":c2}
+
+
 def main():
     mode=(sys.argv[1] if len(sys.argv)>1 else "inspect").lower()
-    if mode not in ("inspect","apply","verify","wgprobe"): raise E("bad mode")
+    if mode not in ("inspect","apply","verify","wgprobe","wgfix"): raise E("bad mode")
     p=Panel(); p.login()
-    safe,private={"inspect":inspect,"apply":apply,"verify":verify,"wgprobe":wgprobe}[mode](p)
+    safe,private={"inspect":inspect,"apply":apply,"verify":verify,"wgprobe":wgprobe,"wgfix":wgfix}[mode](p)
     save(safe,private)
     print(json.dumps(safe,ensure_ascii=False,indent=2))
 
