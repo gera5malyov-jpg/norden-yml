@@ -26,6 +26,84 @@ SKU=AF-31655692 PID=1476554 IMAGE_ID=6549318
 SUMMARY=
 DESCRIPTION=«Модена»  -  это воплощение изысканного стиля и непревзойденного комфорта, созданное для истинных ценителей качественного отдыха.\n\nШезлонг отличается продуманной конструкцией и вниманием к каждой детали. Регулируемая раскладная спинка позволяет настроить его под любой удобный угол, превращая в идеальное место для отдыха в
 NATIVE_IMAGES=[{"id":"6549318","product_id":"1476554","ext":"jpg","original_filename":"042432032382038452042302037372034-001.jpg","sort":"0"},{"id":"6549320","product_id":"1476554","ext":"jpg","original_filename":"142432032382038452042302037372034-002.jpg","sort":"1"},{"id":"6549322","product_id":"1476554","ext":"jpg","original_filename":"242432032382038452042302037372034-003.jpg","sort":"2"}]
+--- HOOK SOURCES ---
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProducts.action.php:31:         * @event backend_products
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/products/shopProducts.action.php:35:        $this->view->assign('backend_products', wa()->event('backend_products', $event_params));
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/prod/main/shopProdList.action.php:187:         * @event backend_prod_list
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/prod/main/shopProdList.action.php:190:        $backend_prod_list = wa('shop')->event('backend_prod_list', ref([
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/prod/main/shopProdList.action.php:216:            "backend_prod_list"    => $backend_prod_list,
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/backend/shopBackendProducts.action.php:63:         * @event backend_products
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/backend/shopBackendProducts.action.php:68:        $this->view->assign('backend_products', wa()->event('backend_products'));
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/yml/lib/config/plugin.php:11:			  'backend_products'        => 'backendProducts',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/cml1c/lib/shopCml1c.plugin.php:262:     * UI hook for backend_products
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/xml/lib/config/plugin.php:11:			  'backend_products'        => 'backendProducts',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/lostproducts/lib/config/plugin.php:15:        'backend_products' => 'backendProducts',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/bwsimplesearch/lib/config/plugin.php:12:        'backend_products' => 'backendProducts',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/nullcat/lib/config/plugin.php:10:            'backend_products' => 'noCategories',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/tips/lib/config/plugin.php:18:            'backend_products' => 'hookBackendProducts',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/tips/lib/shopTipsPlugin.class.php:48:     * @EventHandler backend_products
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/yandexmarket/lib/config/plugin.php:14:        'backend_products'         => 'backendProductsEvent',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/plugin.php:13:        'backend_products' => 'backendProducts',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/plugin.php:16:        'backend_prod_list' => 'backendProdList',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/productfeatures/lib/config/plugin.php:15:        'backend_products' => 'backendProducts',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/join/lib/config/plugin.php:10:            'backend_products' => 'getHtmlForBackendProducts'
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/undelete/lib/config/plugin.php:10:            'backend_products' => 'backendProducts',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/massedit/lib/config/plugin.php:11:        'backend_products' => 'backendProductsEvent',
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:42:        <!-- plugin hook: 'backend_products.title_suffix' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:43:        {* @event backend_products.%plugin_id%.title_suffix *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:44:        {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.title_suffix)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:70:            <!-- plugin hook: 'backend_products.viewmode_li' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:71:            {* @event backend_products.%plugin_id%.viewmode_li *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:72:            {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.viewmode_li)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:228:                        <!-- plugin hook: 'backend_products.toolbar_export_li' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:229:                        {* @event backend_products.%plugin_id%.toolbar_export_li *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:230:                        {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.toolbar_export_li)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:260:                    <!-- plugin hook: 'backend_products.toolbar_organize_li' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:261:                    {* @event backend_products.%plugin_id%.toolbar_organize_li *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:262:                    {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.toolbar_organize_li)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:327:                <!-- plugin hook: 'backend_products.toolbar_section' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:328:                {* @event backend_products.%plugin_id%.toolbar_section *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/products/Products.html:329:                {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.toolbar_section)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:372:                            <!-- plugin hook: 'backend_prod_list.header_left' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:373:                            {* @event backend_prod_list.%plugin_id%.header_left *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:374:                            {if !empty($backend_prod_list)}{foreach $backend_prod_list as $_}{ifset($_, 'header_left', '')}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:380:                            <!-- plugin hook: 'backend_prod_list.header_right' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:381:                            {* @event backend_prod_list.%plugin_id%.header_right *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:382:                            {if !empty($backend_prod_list)}{foreach $backend_prod_list as $_}{ifset($_, 'header_right', '')}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:443:                            <!-- plugin hook: 'backend_prod_list.footer_left' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:444:                            {* @event backend_prod_list.%plugin_id%.footer_left *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:445:                            {if !empty($backend_prod_list)}{foreach $backend_prod_list as $_}{ifset($_, 'footer_left', '')}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:451:                            <!-- plugin hook: 'backend_prod_list.footer_right' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:452:                            {* @event backend_prod_list.%plugin_id%.footer_right *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions/prod/main/List.html:453:                            {if !empty($backend_prod_list)}{foreach $backend_prod_list as $_}{ifset($_, 'footer_right', '')}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:46:            <!-- plugin hook: 'backend_products.toolbar_export_li' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:47:            {* @event backend_products.%plugin_id%.toolbar_export_li *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:48:            {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.toolbar_export_li)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:83:            <!-- plugin hook: 'backend_products.toolbar_organize_li' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:84:            {* @event backend_products.%plugin_id%.toolbar_organize_li *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:85:            {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.toolbar_organize_li)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:151:    <!-- plugin hook: 'backend_products.toolbar_section' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:152:    {* @event backend_products.%plugin_id%.toolbar_section *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:153:    {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.toolbar_section)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:162:            <!-- plugin hook: 'backend_products.title_suffix' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:163:            {* @event backend_products.%plugin_id%.title_suffix *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:164:            {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.title_suffix)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:352:                <!-- plugin hook: 'backend_products.viewmode_li' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:353:                {* @event backend_products.%plugin_id%.viewmode_li *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:354:                {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.viewmode_li)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/backend/BackendProducts.html:129:            <!-- plugin hook: 'backend_products.sidebar_top_li' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/backend/BackendProducts.html:130:            {* @event backend_products.%plugin_id%.sidebar_top_li *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/backend/BackendProducts.html:131:            {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.sidebar_top_li)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/backend/BackendProducts.html:136:    <!-- plugin hook: 'backend_products.sidebar_section' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/backend/BackendProducts.html:137:    {* @event backend_products.%plugin_id%.sidebar_section *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/backend/BackendProducts.html:138:    {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.sidebar_section)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/layouts/BackendSidebar.html:80:    <!-- plugin hook: 'backend_products.sidebar_top_li' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/layouts/BackendSidebar.html:81:    {* @event backend_products.%plugin_id%.sidebar_top_li *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/layouts/BackendSidebar.html:82:    {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.sidebar_top_li)}{/foreach}{/if}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/layouts/BackendSidebar.html:112:                    <!-- plugin hook: 'backend_products.sidebar_section' -->
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/layouts/BackendSidebar.html:113:                    {* @event backend_products.%plugin_id%.sidebar_section *}
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/layouts/BackendSidebar.html:114:                    {if !empty($backend_products)}{foreach $backend_products as $_}{ifset($_.sidebar_section)}{/foreach}{/if}
+--- HOOK SOURCES END ---
 
 STDERR
 Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
