@@ -1,0 +1,30 @@
+name: Database auth presence
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/database-auth-presence.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      DB_DATABASE: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      DB_ADMIN: ${{ secrets.BASEROW_ADMIN_TOKEN }}
+      DB_USER: ${{ secrets.BASEROW_USER_TOKEN }}
+      DB_JWT: ${{ secrets.BASEROW_JWT }}
+      DB_API: ${{ secrets.BASEROW_API_TOKEN }}
+      DB_GENERIC: ${{ secrets.BASEROW_TOKEN }}
+    steps:
+      - name: Check configured auth names
+        run: |
+          [ -n "$DB_DATABASE" ] && echo "BASEROW_DATABASE_TOKEN=PRESENT" || echo "BASEROW_DATABASE_TOKEN=MISSING"
+          [ -n "$DB_ADMIN" ] && echo "BASEROW_ADMIN_TOKEN=PRESENT" || echo "BASEROW_ADMIN_TOKEN=MISSING"
+          [ -n "$DB_USER" ] && echo "BASEROW_USER_TOKEN=PRESENT" || echo "BASEROW_USER_TOKEN=MISSING"
+          [ -n "$DB_JWT" ] && echo "BASEROW_JWT=PRESENT" || echo "BASEROW_JWT=MISSING"
+          [ -n "$DB_API" ] && echo "BASEROW_API_TOKEN=PRESENT" || echo "BASEROW_API_TOKEN=MISSING"
+          [ -n "$DB_GENERIC" ] && echo "BASEROW_TOKEN=PRESENT" || echo "BASEROW_TOKEN=MISSING"
