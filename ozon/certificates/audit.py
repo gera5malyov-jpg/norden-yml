@@ -97,6 +97,7 @@ options=post("/v2/product/certification/options",{})
 cert_params=post("/v2/product/certification/params",{"params":{"certificate_type":"DECLARATION"}})
 cert_params_ru=post("/v2/product/certification/params",{"params":{"certificate_type":"DECLARATION","certificate_country":"RU"}})
 cert_params_unknown=post("/v2/product/certification/params",{"params":{"certificate_type":"DECLARATION","certificate_country":"unknown"}})
+cert_params_eaeu=post("/v2/product/certification/params",{"params":{"certificate_type":"DECLARATION","certificate_country":"RU","accordance_type":"EAEU"}})
 accord=get("/v2/product/certificate/accordance-types/list")
 types=get("/v1/product/certificate/types")
 certs,cert_errors=list_certs()
@@ -124,6 +125,7 @@ out={
  "certification_params_declaration":cert_params,
  "certification_params_declaration_ru":cert_params_ru,
  "certification_params_declaration_unknown":cert_params_unknown,
+ "certification_params_declaration_eaeu":cert_params_eaeu,
  "accordance_types":accord,
  "certificate_types":types,
  "certificate_count":len(certs),
