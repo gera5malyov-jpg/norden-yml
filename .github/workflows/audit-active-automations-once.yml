@@ -1,0 +1,56 @@
+name: Audit active automations once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/audit-active-automations-once.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: List active workflows and schedules
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --paginate "repos/$REPO/actions/workflows?per_page=100" > /tmp/workflows-pages.jsonl
+          python3 - <<'PY'
+          import json, os, re, pathlib
+          raw=pathlib.Path('/tmp/workflows-pages.jsonl').read_text()
+          decoder=json.JSONDecoder()
+          pos=0; pages=[]
+          while pos < len(raw):
+              while pos < len(raw) and raw[pos].isspace(): pos+=1
+              if pos>=len(raw): break
+              obj,end=decoder.raw_decode(raw,pos); pages.append(obj); pos=end
+          workflows=[]
+          for page in pages:
+              workflows.extend(page.get('workflows',[]))
+          active=[]
+          for w in workflows:
+              if w.get('state')!='active':
+                  continue
+              p=w.get('path') or ''
+              entry={'id':w.get('id'),'name':w.get('name'),'path':p,'state':w.get('state'),'crons':[],'triggers':[]}
+              fp=pathlib.Path(p)
+              if fp.exists():
+                  text=fp.read_text(errors='replace')
+                  entry['crons']=[m.group(1).strip() for m in re.finditer(r"cron:\s*['\"]?([^'\"\n]+)",text)]
+                  for trig in ('schedule','workflow_dispatch','push','pull_request','repository_dispatch'):
+                      if re.search(r'^\s*'+re.escape(trig)+r'\s*:',text,re.M):
+                          entry['triggers'].append(trig)
+              active.append(entry)
+          active.sort(key=lambda x:(x['name'] or '').casefold())
+          print('ACTIVE_WORKFLOWS_JSON='+json.dumps(active,ensure_ascii=False))
+          print('ACTIVE_COUNT='+str(len(active)))
+          print('SCHEDULED_ACTIVE_COUNT='+str(sum(bool(x['crons']) for x in active)))
+          PY
