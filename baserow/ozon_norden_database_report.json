@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-29T21:01:18.393598+00:00",
+  "started_at": "2026-09-29T21:04:04.101117+00:00",
   "source": "Ozon Seller API",
   "filter": "brand=Norden",
   "matching": "Ozon offer_id -> Database Наименование артикула + Поставщик=Norden",
@@ -476,6 +476,612 @@
     "Наименование артикула": 0,
     "Артикул поставщика": 0
   },
+  "ozon_characteristics_summary": [
+    {
+      "id": 23171,
+      "name": "#Хештеги",
+      "products": 417,
+      "sample_values": [
+        "#офисноекресло #эргономичноекресло #креслодляработы #креслосеткасподголовником #креслосподдержкойспины #офиснаямебель #креслоNorden #креслоRight #креслосинхромеханизм #креслодлядома #креслодляофиса #2Dподлокотники #сетчатаяспинка #эргономика #дизайнинтерьера #стильныйофис #комфортнаяработа #креслоизтканиисетки #поворотныекресла #креслодлякомпьютера",
+        "#офисноекресло #компьютерноекресло #креслодляофиса #офиснаямебель #рабочееместо #кожноекресло #регулировкаповысоте #креслосподголовником #креслосподлокотниками",
+        "#офисноекресло #компьютерноекресло #креслодляофиса #офиснаямебель #рабочееместо #тканевоекресло #креслоссеткой #креслонаколесиках",
+        "#кресло #офисноекресло #компьютерноекресло #креслодляперсонала #креслодляофиса #креслодляработы #рабочеекресло #креслосеткой #сетчатоекресло #креслосподголовником #креслосподлокотниками #креслоспоясничнойподдержкой #креслоскачанием #креслонаколесах #эргономичноекресло #черноекресло #креслочерное #креслосвысокойспинкой #креслодлякомпьютера #креслодлякабинета #креслодлясотрудника #креслодлярабочегоместа #креслотопган #креслосрегулировкойвысоты #креслоспрорезиненнымиколесами #офиснаямебель #мебельдляофиса #креслосетка #креслоткань #кресло100кг",
+        "#кресло #компьютерноекресло #офискресло #креслопино #pinogrey #креслонорден #norden #креслодляофиса #креслодлядома #креслодляработы #эргономичноекресло #креслосеткой #креслосетчатое #креслосподдержкойспины #креслосmemoryfoam #креслосгазлифтом #креслосрегулировкойвысоты #креслосколесиками #креслосерое #креслосовременное #офиснаямебель #креслокомфорт #креслодляпк #креслонадежное #креслодлядолгойработы #креслодо120кг #рабочеекресло #креслодляперсонала #креслостильное #креслоудобное"
+      ]
+    },
+    {
+      "id": 11254,
+      "name": "Rich-контент JSON",
+      "products": 10,
+      "sample_values": [
+        "{\n  \"content\": [\n    {\n      \"widgetName\": \"raTextBlock\",\n      \"title\": {\n        \"items\": [],\n        \"size\": \"size5\",\n        \"color\": \"color1\"\n      },\n      \"theme\": \"primary\",\n      \"padding\": \"type2\",\n      \"gapSize\": \"m\",\n      \"text\": {\n        \"size\": \"size2\",\n        \"align\": \"left\",\n        \"color\": \"color1\",\n        \"items\": [\n          {\n            \"type\": \"text\",\n            \"content\": \"Итальянский стиль, оригинальный дизайн и высокая надежность. Кресло оснащено механизмом топ-ган с фиксацией в рабочем положении. Подлокотники современной эргономичной формы. Спинка кресла выполнена из сверхпрочной сетки Yida и оснащена упругой поясничной опорой, а сиденье с наполнителем memory foam. Кресло оснащено Газ-лифтом - BIFMA SGS. Усиленная база из нейлона. Максимальная нагрузка до 120 кг. Гарантия производителя 3 года.\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Вид номенклатуры\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Кресла\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сиденье материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ткань\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сиденье наполнение\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"ППУ\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сиденье цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Серый\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина сиденья\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"50\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Регулировка сидения по глубине\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Материал каркаса\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Пластик\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Цвет каркаса\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Серый\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Материал крестовины\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Пластик\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Цвет крестовины\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Серый\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Механизм качания\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Топ-Ган\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ткань\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка наполнение\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"ППУ\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Серый\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сетка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Серый\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка регулировка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотники материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Пластик\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотники цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Серый\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотник регулировка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подголовник наличие\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота кресла максимум\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"123.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота кресла минимум\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"100.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до подлокотника макс\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"74.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до подлокотника мин\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"63\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до сиденья макс\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"55\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до сиденья мин\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"43.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота спинки\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"59\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подголовник регулировка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Глубина кресла\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"50.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина Сиденья\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"50\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина кресла\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"56.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Глубина сиденья\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"50.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Общие характеристики\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Размер упаковки Д/Ш/В\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"44.5/66/59\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Акция\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Вес, кг\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"12.15\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Объем,м3\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"0.0835\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Количество мест\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"1\"\n          }\n        ]\n      }\n    }\n  ],\n  \"version\": 0.3\n}",
+        "{\n  \"content\": [\n    {\n      \"widgetName\": \"raTextBlock\",\n      \"title\": {\n        \"items\": [],\n        \"size\": \"size5\",\n        \"color\": \"color1\"\n      },\n      \"theme\": \"primary\",\n      \"padding\": \"type2\",\n      \"gapSize\": \"m\",\n      \"text\": {\n        \"size\": \"size2\",\n        \"align\": \"left\",\n        \"color\": \"color1\",\n        \"items\": [\n          {\n            \"type\": \"text\",\n            \"content\": \"Итальянский стиль, оригинальный дизайн и высокая надежность. Подлокотники современной эргономичной формы. Спинка кресла выполнена из сверхпрочной сетки Yida и оснащена упругой поясничной опорой, а сиденье с наполнителем memory foam. Максимальная нагрузка до 100 кг. Гарантия производителя 3 года.\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Вид номенклатуры\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Кресла\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сиденье материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ткань\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сиденье наполнение\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"ППУ\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сиденье цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Черный\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина сиденья\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"48.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Регулировка сидения по глубине\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Материал каркаса\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Пластик\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Цвет каркаса\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Черный\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Материал крестовины\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Металл\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Цвет крестовины\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Черный\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Механизм качания\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ткань\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка наполнение\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"ППУ\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Черный\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сетка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Черный\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка регулировка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотники материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Пластик\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотники цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Черный\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотник регулировка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подголовник наличие\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота кресла максимум\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"102.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота кресла минимум\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"102.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до подлокотника макс\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"67\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до подлокотника мин\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"67\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до сиденья макс\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"48\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до сиденья мин\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"48\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота спинки\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"59\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подголовник регулировка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Глубина кресла\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"62\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина Сиденья\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"48.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина кресла\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"56\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Глубина сиденья\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"50.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Общие характеристики\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Размер упаковки Д/Ш/В\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"46.5/66/59\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Акция\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Вес, кг\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"11.1\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Объем,м3\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"0.0905\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Количество мест\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"1\"\n          }\n        ]\n      }\n    }\n  ],\n  \"version\": 0.3\n}",
+        "{\n  \"content\": [\n    {\n      \"widgetName\": \"raTextBlock\",\n      \"title\": {\n        \"items\": [],\n        \"size\": \"size5\",\n        \"color\": \"color1\"\n      },\n      \"theme\": \"primary\",\n      \"padding\": \"type2\",\n      \"gapSize\": \"m\",\n      \"text\": {\n        \"size\": \"size2\",\n        \"align\": \"left\",\n        \"color\": \"color1\",\n        \"items\": [\n          {\n            \"type\": \"text\",\n            \"content\": \"Выдерживает вес: 135\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Регулировка высоты сидения системой газлифт: Да\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Особенности модели: Итальянский стиль, оригинальный дизайн и высокая надежность. Кресло оснащено механизмом топ-ган с фиксацией в рабочем положении. Подлокотники современной эргономичной формы. Спинка кресла выполнена из сверхпрочной сетки Yida и оснащена упругой поясничной опорой, а сиденье с наполнителем memory foam. Регулируемый подголовник по высоте будет поддерживать шею и голову в правильном положении, предотвращая напряжение в этой области. Кресло оснащено Газ-лифтом - BIFMA SGS. Усиленная база из нейлона. Максимальная нагрузка до 135 кг. Гарантия производителя 3 года\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Регулировка сидения по глубине: Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Материал каркаса: Пластик\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Цвет каркаса: Серый\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Материал крестовины: Нейлон\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Цвет крестовины: Серый\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Механизм качания: Топ-Ган\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка материал: Ткань\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка наполнение: ППУ\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка цвет: Серый\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка материал: Сетка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка цвет: Серый\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка регулировка: Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотники материал: Пластик\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотники цвет: Серый\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотник регулировка: Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подголовник наличие: Да\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота кресла максимум: 142\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота кресла минимум: 119\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до подлокотника макс: 74.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до подлокотника мин: 63\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до сиденья макс: 55\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до сиденья мин: 43.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота спинки: 59\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подголовник регулировка: Да\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Глубина кресла: 50.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Вес,кг: 9.2\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Объем,м3: 0,087\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Количество мест: 1\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Механизм качания топган с фиксацией в рабочем положении: Да\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина Сиденья: 50\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина кресла: 56.5\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Глубина сиденья: 50.5\"\n          }\n        ]\n      }\n    }\n  ],\n  \"version\": 0.3\n}",
+        "{\n  \"content\": [\n    {\n      \"widgetName\": \"raTextBlock\",\n      \"title\": {\n        \"items\": [],\n        \"size\": \"size5\",\n        \"color\": \"color1\"\n      },\n      \"theme\": \"primary\",\n      \"padding\": \"type2\",\n      \"gapSize\": \"m\",\n      \"text\": {\n        \"size\": \"size2\",\n        \"align\": \"left\",\n        \"color\": \"color1\",\n        \"items\": [\n          {\n            \"type\": \"text\",\n            \"content\": \"Кресло для руководителя Хельмут является одним из ярчайших образцов современного дизайна. Если Вы хотите сделать Ваш офис или рабочее место дома еще более стильным, респектабельным, то кресло Хельмут, пожалуй, оптимальный выбор. Его отличают высокопрочная, эластичная «дышащая» сетка, хромированные металлические подлокотники со съемными накладками из сетки и надежная крестовина из хромированного металла. Наличие механизма качания с возможностью фиксации кресла в рабочем положении позволяет снять нагрузку с позвоночника, занять максимально удобную для вас позу как при работе, так и во время отдыха.\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Свойства модели:\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Обивка\\t\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сетка. Цвет серый.\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Особенности\\t\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Обычно аналоги данной модели комплектуются более дешевыми крестовинами. В нашей модели крестовина дизайнерская, хромированные лучи переменного сечения сужаются к концам. Это придает креслу изысканный оригинальный вид. Подлокотники защищены съемными сетчатыми чехлами на молниях. Это особенно удобно для тех, кто не любит соприкосновения руками с металлическими подлокотниками. Данная модель выглядит дороже своих аналогов.\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотники\\tХромированные с накладками\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Механизм качания\\tМеханизм качания с возможностью фиксации в рабочем положении и регулировкой жесткости качания.\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Крестовина\\tХромированный металл\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Газпатрон\\t3 категории по стандарту Germany DIN 4550\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Максимальная нагрузка\\t120 кг\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Гарантия\\t12 месяцев\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Вес, объем и размер коробки\\t15,35 кг / 0,131 куб.м / 51*86*60 см\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Производство\\tКитай\"\n          }\n        ]\n      }\n    }\n  ],\n  \"version\": 0.3\n}",
+        "{\n  \"content\": [\n    {\n      \"widgetName\": \"raTextBlock\",\n      \"title\": {\n        \"items\": [],\n        \"size\": \"size5\",\n        \"color\": \"color1\"\n      },\n      \"theme\": \"primary\",\n      \"padding\": \"type2\",\n      \"gapSize\": \"m\",\n      \"text\": {\n        \"size\": \"size2\",\n        \"align\": \"left\",\n        \"color\": \"color1\",\n        \"items\": [\n          {\n            \"type\": \"text\",\n            \"content\": \"Кресло для руководителя Хельмут является одним из ярчайших образцов современного дизайна. Если Вы хотите сделать Ваш офис или рабочее место дома еще более стильным, респектабельным, то кресло Хельмут, пожалуй, оптимальный выбор. Его отличают высокопрочная, эластичная «дышащая» сетка, хромированные металлические подлокотники со съемными накладками из сетки и надежная хромированная крестовина. Наличие механизма качания с возможностью фиксации кресла в рабочем положении позволяет снять нагрузку с позвоночника, занять максимально удобную для вас позу как при работе, так и во время отдыха. Обычно аналоги данной модели комплектуются более дешевыми крестовинами. В нашей модели крестовина дизайнерская, хромированные лучи переменного сечения сужаются к концам. Это придает креслу изысканный оригинальный вид. Подлокотники защищены съемными сетчатыми чехлами на молниях. Это особенно удобно для тех, кто не любит соприкосновения руками с металлическими подлокотниками. Данная модель выглядит дороже\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Вид номенклатуры\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Кресла\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сиденье материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сетка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сиденье наполнение\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сиденье цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Бронза\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина сиденья\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"48\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Регулировка сидения по глубине\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Длина см\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"56\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота см\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"103\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина см\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"69\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Материал каркаса\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Хром\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Цвет каркаса\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Хром\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Материал крестовины\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Хром\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Цвет крестовины\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Хром\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Механизм качания\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Топ-Ган\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сетка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка наполнение\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сидушка цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Бронза\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Сетка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Бронза\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Спинка регулировка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотники материал\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Хром/сетка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотники цвет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Хром/бронза\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подлокотник регулировка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подголовник наличие\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Да\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота кресла максимум\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"114\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота кресла минимум\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"106\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до сиденья макс\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"54\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота от пола до сиденья мин\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"46\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Высота спинки\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"65\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Подголовник регулировка\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Глубина кресла\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"68\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина Сиденья\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"48\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Ширина кресла\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"54\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Глубина сиденья\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"50\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Общие характеристики\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Размер упаковки Д/Ш/В\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"51/89/59\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Акция\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Нет\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Вес, кг\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"13.4\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Объем,м3\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"0.134\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"Количество мест\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"br\"\n          },\n          {\n            \"type\": \"text\",\n            \"content\": \"1\"\n          }\n        ]\n      }\n    }\n  ],\n  \"version\": 0.3\n}"
+      ]
+    },
+    {
+      "id": 4191,
+      "name": "Аннотация",
+      "products": 537,
+      "sample_values": [
+        "Особенности модели: Офисное кресло Right - эргономичная и современная модель, идеально подходящая для повседневной офисной работы. Лаконичный дизайн в черном цвете органично впишется в любой рабочий интерьер. Сиденье выполнено из износостойкой ткани с наполнением из Memory foam, что обеспечивает комфорт даже при длительном использовании. Спинка из сетки поддерживает оптимальную вентиляцию, а регулируемый подголовник помогает снизить нагрузку на шею. 2D подлокотники позволяют настроить высоту и угол для удобства рук. Прочная хромированная крестовина обеспечивает устойчивость конструкции. Благодаря синхромеханизму со слайдером кресло легко настраивается под разный рост и позволяет выбирать удобный угол наклона спинки с возможностью фиксации. Максимальная нагрузка - 130 кг. Гарантия производителя - 5 лет. Объем,м3: 0,164 Количество мест: 1",
+        "Офисное кресло Right — эргономичная и современная модель, идеально подходящая для повседневной офисной работы. Лаконичный дизайн в черном цвете органично впишется в любой рабочий интерьер. Сиденье выполнено из износостойкой ткани с наполнением из Memory foam, что обеспечивает комфорт даже при длительном использовании. Спинка из сетки поддерживает оптимальную вентиляцию, а регулируемый подголовник помогает снизить нагрузку на шею. 2D подлокотники позволяют настроить высоту и угол для удобства рук. Прочная хромированная крестовина обеспечивает устойчивость конструкции. Благодаря синхромеханизму со слайдером кресло легко настраивается под разный рост и позволяет выбирать удобный угол наклона спинки с возможностью фиксации. Максимальная нагрузка — 130 кг. Гарантия производителя — 5 лет.<br/><br/>Регулировка сидения по глубине<br/><br/>Да<br/><br/>Материал крестовины<br/><br/>Хром<br/><br/>Цвет крестовины<br/><br/>Хром<br/><br/>Механизм качания<br/><br/>Синхро<br/><br/>Сидушка материал<br/><br/>Ткань<br/><br/>Сидушка наполнение<br/><br/>Memory foam<br/><br/>Сидушка цвет<br/><br/>Черный<br/><br/>Спинка материал<br/><br/>Сетка<br/><br/>Спинка цвет<br/><br/>Черный<br/><br/>Спинка регулировка<br/><br/>Нет<br/><br/>Подлокотники материал<br/><br/>Пластик<br/><br/>Подлокотники цвет<br/><br/>Черный<br/><br/>Подлокотник регулировка<br/><br/>2 D<br/><br/>Подголовник наличие<br/><br/>Да<br/><br/>Подголовник регулировка<br/><br/>Да<br/><br/>Общие характеристики<br/><br/>Акция<br/><br/>Нет<br/><br/>Объем,м3<br/><br/>0,14<br/><br/>Количество мест<br/><br/>1",
+        "Кресло Michelin — это эргономичное и стильное решение для современного рабочего пространства. Элегантный силуэт, нейтральная серая палитра и продуманная конструкция делают его отличным выбором как для офиса, так и для домашнего кабинета. Мягкое сиденье обито износостойкой тканью и наполнено пеной Memory foam для комфортной посадки в течение всего дня. Спинка и подголовник из воздухопроницаемой сетки способствуют естественной вентиляции и поддерживают комфортную температуру. Регулируемые в четырёх направлениях пластиковые подлокотники позволяют настроить кресло под индивидуальные предпочтения. Хромированная крестовина придаёт креслу современный вид и обеспечивает надёжность конструкции. Механизм качания мультиблок со слайдером позволяет регулировать глубину сиденья, угол наклона и фиксировать положение спинки. Максимальная нагрузка — 130 кг. Гарантия производителя — 5 лет.<br/><br/>Регулировка сидения по глубине<br/><br/>Да<br/><br/>Материал крестовины<br/><br/>Хром<br/><br/>Цвет крестовины<br/><br/>Хром<br/><br/>Механизм качания<br/><br/>Мультиблок<br/><br/>Сидушка материал<br/><br/>Ткань<br/><br/>Сидушка наполнение<br/><br/>Memory foam<br/><br/>Сидушка цвет<br/><br/>Серый<br/><br/>Спинка материал<br/><br/>Сетка<br/><br/>Спинка цвет<br/><br/>Серый<br/><br/>Спинка регулировка<br/><br/>Нет<br/><br/>Подлокотники материал<br/><br/>Пластик<br/><br/>Подлокотники цвет<br/><br/>Серый<br/><br/>Подлокотник регулировка<br/><br/>4 D<br/><br/>Подголовник наличие<br/><br/>Да<br/><br/>Подголовник регулировка<br/><br/>Да<br/><br/>Общие характеристики<br/><br/>Акция<br/><br/>Нет<br/><br/>Объем,м3<br/><br/>0,237<br/><br/>Количество мест<br/><br/>1",
+        "Кресло Cross — это функциональное и современное решение для тех, кто ценит комфорт и продуманный эргономичный дизайн. Чёрный цвет и лаконичные формы делают кресло универсальным для любого офисного интерьера. Сиденье обито прочной тканью и наполнено пеной Memory foam, обеспечивающей комфорт при длительной работе. Спинка из сетки с пластиковой рамой дополнена регулируемой поясничной опорой. Подголовник настраивается по высоте и углу наклона для поддержки шеи. 2D подлокотники с полиуретановыми накладками регулируются по высоте и обеспечивают дополнительное удобство. Нейлоновая крестовина и ролики диаметром 60 мм обеспечивают стабильность и лёгкое передвижение. Синхромеханизм со слайдером позволяет адаптировать кресло под рост сидящего и фиксировать спинку в трех положениях. Максимальная нагрузка — 130 кг. Гарантия производителя — 5 лет.<br/><br/>Регулировка сидения по глубине<br/><br/>Да<br/><br/>Материал крестовины<br/><br/>Нейлон<br/><br/>Цвет крестовины<br/><br/>Черный<br/><br/>Механизм качания<br/><br/>Синхро<br/><br/>Сидушка материал<br/><br/>Ткань<br/><br/>Сидушка наполнение<br/><br/>Memory foam<br/><br/>Сидушка цвет<br/><br/>Черный<br/><br/>Спинка материал<br/><br/>Сетка<br/><br/>Спинка цвет<br/><br/>Черный<br/><br/>Спинка регулировка<br/><br/>Нет<br/><br/>Подлокотники материал<br/><br/>Пластик<br/><br/>Подлокотники цвет<br/><br/>Черный<br/><br/>Подлокотник регулировка<br/><br/>2 D<br/><br/>Подголовник наличие<br/><br/>Да<br/><br/>Подголовник регулировка<br/><br/>Да<br/><br/>Общие характеристики<br/><br/>Акция<br/><br/>Нет<br/><br/>Объем,м3<br/><br/>0,172<br/><br/>Количество мест<br/><br/>1",
+        "<br/>Выдерживает вес: 120<br>Регулировка высоты сидения системой газлифт: Да<br>Особенности модели: Кресло руководителя York - это превосходное сочетание элегантности и комфорта. Изготовлено из натуральной кожи. Сиденье и спинка кресла выполнены из формованного PPU, обеспечивая дополнительный комфорт. В подлокотники интегрирован механизм регулировки качания и высоты кресла. Крестовина и подлокотники выполнены из полированного алюминия. Современный механизм качания с возможностью фиксации в 4х положениях с регулировкой сидения по глубине (слайдер). Регулировка высоты кресла. Кресло сертифицировано по стандарту BIFMA. Максимальная нагрузка 120 кг. Гарантия 5 лет.<br>Регулировка сидения по глубине: Да<br>Длина см: 58<br>Высота см: 129<br>Ширина см: 71<br>Материал крестовины: Алюминий<br>Цвет крестовины: Алюминий<br>Механизм качания: Donati<br>Сидушка материал: Кожа<br>Сидушка наполнение: ППУ<br>Сидушка цвет: Светло коричневый<br>Спинка материал: Кожа<br>Спинка цвет: Светло коричневый<br>Спинка регулировка: Нет<br>Подлокотники материал: Аллюминий/кожа<br>Подлокотники цвет: Аллюминий/светло-коричневый<br>Подлокотник регулировка: Нет<br>Подголовник наличие: Да<br>Высота кресла максимум: 1290<br>Высота кресла минимум: 1130<br>Высота от пола до сиденья макс: 51<br>Высота от пола до сиденья мин: 42<br>Высота спинки: 80<br>Подголовник регулировка: Да<br>Глубина кресла: 58<br>Ширина Сиденья: 50<br>Ширина кресла: 71<br>Глубина сиденья: 50<br>Вес,кг: 26.7<br>Объем,м3: 0,509<br>Количество мест: 1<br>Механизм качания с возможностью фиксации в рабочем положении: Да<br>Высота от пола до подлокотника макс: 72<br>Высота от пола до подлокотника мин: 62<br>Механизм регулировки глубины сидения: Да"
+      ]
+    },
+    {
+      "id": 85,
+      "name": "Бренд",
+      "products": 537,
+      "sample_values": [
+        "Norden"
+      ]
+    },
+    {
+      "id": 4497,
+      "name": "Вес с упаковкой, г",
+      "products": 537,
+      "sample_values": [
+        "65000",
+        "31000",
+        "50000",
+        "31001"
+      ]
+    },
+    {
+      "id": 4383,
+      "name": "Вес товара, г",
+      "products": 191,
+      "sample_values": [
+        "15800",
+        "310000",
+        "31000",
+        "22800",
+        "16200"
+      ]
+    },
+    {
+      "id": 22270,
+      "name": "Вид выпуска товара",
+      "products": 523,
+      "sample_values": [
+        "Фабричное производство"
+      ]
+    },
+    {
+      "id": 6663,
+      "name": "Высота сиденья, см",
+      "products": 3,
+      "sample_values": [
+        "45",
+        "47"
+      ]
+    },
+    {
+      "id": 6667,
+      "name": "Высота спинки, см",
+      "products": 371,
+      "sample_values": [
+        "72",
+        "65",
+        "59",
+        "60.5",
+        "74"
+      ]
+    },
+    {
+      "id": 10174,
+      "name": "Высота, см",
+      "products": 537,
+      "sample_values": [
+        "100",
+        "120",
+        "110",
+        "129",
+        "125"
+      ]
+    },
+    {
+      "id": 10400,
+      "name": "Гарантия",
+      "products": 525,
+      "sample_values": [
+        "7 дней",
+        "8 дней",
+        "1 год",
+        "12 месяцев"
+      ]
+    },
+    {
+      "id": 6666,
+      "name": "Глубина сиденья, см",
+      "products": 480,
+      "sample_values": [
+        "50",
+        "51",
+        "50.5",
+        "47",
+        "49"
+      ]
+    },
+    {
+      "id": 10176,
+      "name": "Глубина, см",
+      "products": 537,
+      "sample_values": [
+        "100",
+        "60",
+        "58",
+        "47",
+        "57"
+      ]
+    },
+    {
+      "id": 6651,
+      "name": "Исполнение",
+      "products": 208,
+      "sample_values": [
+        "Металлическое",
+        "Деревянное",
+        "Пластиковое"
+      ]
+    },
+    {
+      "id": 9024,
+      "name": "Код продавца",
+      "products": 537,
+      "sample_values": [
+        "AF-31391082",
+        "AF-31391081",
+        "AF-31395058",
+        "AF-31391079",
+        "AF-31383327"
+      ]
+    },
+    {
+      "id": 10119,
+      "name": "Количество в комплекте, шт.",
+      "products": 419,
+      "sample_values": [
+        "1"
+      ]
+    },
+    {
+      "id": 11650,
+      "name": "Количество заводских упаковок",
+      "products": 415,
+      "sample_values": [
+        "1"
+      ]
+    },
+    {
+      "id": 23249,
+      "name": "Количество товара в УЕИ",
+      "products": 514,
+      "sample_values": [
+        "1"
+      ]
+    },
+    {
+      "id": 6673,
+      "name": "Комната",
+      "products": 512,
+      "sample_values": [
+        "Кабинет, Мастерская, Офис, Торговый зал",
+        "Офис, Студия, Торговый зал, Мастерская, Кабинет",
+        "Офис, Кабинет",
+        "Офис, Мастерская, Студия, Торговый зал, Холл",
+        "Офис"
+      ]
+    },
+    {
+      "id": 4384,
+      "name": "Комплектация",
+      "products": 396,
+      "sample_values": [
+        "инструкция по сборке",
+        "Фурнитура, инструкция по сборке.",
+        "Крестовина;Подлокотники;Газлифт;Механизм качания;Сиденье;Спинка;Крепёж;Инструкция",
+        "Крестовина;Подлокотники;Газлифт;Сиденье;Спинка;Механизм качания;Инструкция;Крепёж",
+        "фурнитура, инструкция по сборке."
+      ]
+    },
+    {
+      "id": 11280,
+      "name": "Макс. высота сиденья, см",
+      "products": 367,
+      "sample_values": [
+        "54",
+        "56",
+        "58",
+        "55",
+        "47"
+      ]
+    },
+    {
+      "id": 7915,
+      "name": "Макс. нагрузка, кг",
+      "products": 346,
+      "sample_values": [
+        "130",
+        "150",
+        "120",
+        "100",
+        "135"
+      ]
+    },
+    {
+      "id": 10906,
+      "name": "Максимальная высота, см",
+      "products": 379,
+      "sample_values": [
+        "123",
+        "113",
+        "132.5",
+        "123.5",
+        "110"
+      ]
+    },
+    {
+      "id": 6656,
+      "name": "Материал корпуса",
+      "products": 535,
+      "sample_values": [
+        "ЛДСП",
+        "Хромированная сталь",
+        "Металл",
+        "Металл, Дерево",
+        "Пластик"
+      ]
+    },
+    {
+      "id": 10035,
+      "name": "Материал крестовины",
+      "products": 361,
+      "sample_values": [
+        "Металл",
+        "Нейлон",
+        "Пластик",
+        "Алюминий",
+        "Сталь"
+      ]
+    },
+    {
+      "id": 6643,
+      "name": "Материал наполнителя",
+      "products": 398,
+      "sample_values": [
+        "Memory Foam",
+        "Пенополиуретан",
+        "Поролон",
+        "Без наполнителя",
+        "Холлофайбер"
+      ]
+    },
+    {
+      "id": 6654,
+      "name": "Материал обивки",
+      "products": 5,
+      "sample_values": [
+        "Ткань",
+        "Без обивки"
+      ]
+    },
+    {
+      "id": 21909,
+      "name": "Материал обивки",
+      "products": 521,
+      "sample_values": [
+        "Ткань, Сетка",
+        "Натуральная кожа",
+        "Экокожа",
+        "Ткань",
+        "Сетка"
+      ]
+    },
+    {
+      "id": 10344,
+      "name": "Механизм качания",
+      "products": 386,
+      "sample_values": [
+        "Да",
+        "Нет"
+      ]
+    },
+    {
+      "id": 6664,
+      "name": "Мин. высота сиденья, см",
+      "products": 362,
+      "sample_values": [
+        "45",
+        "47",
+        "43.5",
+        "42",
+        "48"
+      ]
+    },
+    {
+      "id": 10905,
+      "name": "Минимальная высота, см",
+      "products": 374,
+      "sample_values": [
+        "114",
+        "96",
+        "115.5",
+        "100.5",
+        "110"
+      ]
+    },
+    {
+      "id": 23518,
+      "name": "Минимальное количество оптом",
+      "products": 513,
+      "sample_values": [
+        "100"
+      ]
+    },
+    {
+      "id": 4180,
+      "name": "Название",
+      "products": 537,
+      "sample_values": [
+        "Кресло Right grey 842-297 grey fabric",
+        "Кресло Right black 842-297 черная сетка / черная ткань /хром база",
+        "Кресло Michelin grey 872-7 серая сетка/серая ткань/ алюминиевая база",
+        "Кресло Cross 846C-1 черная сетка/черная ткань/нейлоновая база",
+        "Кресло York-3 CH-336-3A light brown leather"
+      ]
+    },
+    {
+      "id": 9048,
+      "name": "Название модели (для объединения в одну карточку)",
+      "products": 537,
+      "sample_values": [
+        "Right",
+        "Michelin",
+        "Cross",
+        "York",
+        "Гарда"
+      ]
+    },
+    {
+      "id": 12141,
+      "name": "Название модели для шаблона наименования",
+      "products": 537,
+      "sample_values": [
+        "Кресло Right grey 842-297 grey fabric",
+        "Кресло Right black 842-297 черная сетка / черная ткань /хром база",
+        "Кресло Michelin grey 872-7 серая сетка/серая ткань/ база хром",
+        "Кресло Cross 846C-1 черная сетка/черная ткань/нейлоновая база",
+        "Кресло York-3 CH-336-3A light brown leather"
+      ]
+    },
+    {
+      "id": 10097,
+      "name": "Название цвета",
+      "products": 520,
+      "sample_values": [
+        "серая сетка/ серая ткань /хром база",
+        "черная сетка / черная ткань /хром база",
+        "серая сетка/серая ткань/ база хром",
+        "черная сетка/черная ткань/нейлоновая база",
+        "светло коричневая кожа-CH-336-3A light brown leather"
+      ]
+    },
+    {
+      "id": 6650,
+      "name": "Назначение (помещение)",
+      "products": 415,
+      "sample_values": [
+        "Для дачи, Для дома, Для кухни, Для общественных мест, Для офиса, Для школы",
+        "Для дома, Для офиса, Для общественных мест, Для школы",
+        "Для дома, Для дачи, Для общественных мест, Для офиса, Для школы",
+        "Для офиса",
+        "Для дома"
+      ]
+    },
+    {
+      "id": 23536,
+      "name": "Нужен код маркировки",
+      "products": 523,
+      "sample_values": [
+        "false"
+      ]
+    },
+    {
+      "id": 22390,
+      "name": "Объединить в похожие товары",
+      "products": 532,
+      "sample_values": [
+        "Right",
+        "Кресло офисное",
+        "Cross",
+        "York",
+        "max"
+      ]
+    },
+    {
+      "id": 10131,
+      "name": "Особенности",
+      "products": 409,
+      "sample_values": [
+        "На колесиках",
+        "Механизм качания, Регулировка по высоте, Регулируемая спинка, С подголовником, С подлокотниками",
+        "Регулируемые подлокотники, Регулируемый подголовник, Без подголовника, С подлокотниками",
+        "Механизм качания, Регулируемые подлокотники, Регулируемый подголовник, Без подголовника, С подлокотниками",
+        "Механизм качания, Регулируемые подлокотники, Регулируемый подголовник, С подголовником, С подлокотниками"
+      ]
+    },
+    {
+      "id": 10155,
+      "name": "Особенности",
+      "products": 3,
+      "sample_values": [
+        "С подлокотниками",
+        "На ножках"
+      ]
+    },
+    {
+      "id": 22073,
+      "name": "Планирую доставлять товар в нескольких упаковках",
+      "products": 389,
+      "sample_values": [
+        "false"
+      ]
+    },
+    {
+      "id": 6657,
+      "name": "Покрытие корпуса",
+      "products": 206,
+      "sample_values": [
+        "Матовое",
+        "Хромированное",
+        "Без покрытия",
+        "Лакированное",
+        "Пластиковое"
+      ]
+    },
+    {
+      "id": 12570,
+      "name": "Размер газлифта",
+      "products": 2,
+      "sample_values": [
+        "M"
+      ]
+    },
+    {
+      "id": 11256,
+      "name": "Регулировка",
+      "products": 401,
+      "sample_values": [
+        "Высоты сиденья",
+        "Высоты сиденья, Жесткости качания, Угла наклона спинки",
+        "Высоты подлокотников, Высоты подголовника",
+        "Высоты сиденья, Жесткости качания, Высоты подлокотников, Высоты подголовника, Угла наклона спинки",
+        "Без регулировки"
+      ]
+    },
+    {
+      "id": 6655,
+      "name": "Рисунок на обивке",
+      "products": 212,
+      "sample_values": [
+        "Без рисунка",
+        "Однотонный"
+      ]
+    },
+    {
+      "id": 9546,
+      "name": "Стиль дизайна",
+      "products": 531,
+      "sample_values": [
+        "Современный"
+      ]
+    },
+    {
+      "id": 4389,
+      "name": "Страна-изготовитель",
+      "products": 537,
+      "sample_values": [
+        "Китай",
+        "Россия"
+      ]
+    },
+    {
+      "id": 10036,
+      "name": "Тип механизма качания",
+      "products": 394,
+      "sample_values": [
+        "Синхронный",
+        "Мультиблок",
+        "Топ-ган",
+        "Без механизма качания",
+        "Асинхронный"
+      ]
+    },
+    {
+      "id": 22232,
+      "name": "ТН ВЭД коды ЕАЭС",
+      "products": 517,
+      "sample_values": [
+        "9401310000 - Прочая мебель для сидения, вращающаяся с регулирующими высоту приспособлениями - - из древесины",
+        "9401390000 - Мебель для сидения вращающаяся с регулирующими высоту приспособлениями, прочая",
+        "9401710009 - Мебель для сидения обитая с металлическим каркасом, прочая: прочая",
+        "9401610000 - Мебель для сидения обитая с деревянным каркасом прочая"
+      ]
+    },
+    {
+      "id": 11260,
+      "name": "Фиксация спинки",
+      "products": 280,
+      "sample_values": [
+        "В нескольких положениях",
+        "В любом положении",
+        "В рабочем положении"
+      ]
+    },
+    {
+      "id": 10596,
+      "name": "Форма поставки",
+      "products": 534,
+      "sample_values": [
+        "В разобранном виде"
+      ]
+    },
+    {
+      "id": 10096,
+      "name": "Цвет товара",
+      "products": 519,
+      "sample_values": [
+        "серый",
+        "черный",
+        "светло-коричневый",
+        "слоновая кость",
+        "темно-коричневый"
+      ]
+    },
+    {
+      "id": 6665,
+      "name": "Ширина сиденья, см",
+      "products": 369,
+      "sample_values": [
+        "53",
+        "51",
+        "50",
+        "49",
+        "48"
+      ]
+    },
+    {
+      "id": 6668,
+      "name": "Ширина спинки, см",
+      "products": 172,
+      "sample_values": [
+        "52",
+        "51",
+        "56.5",
+        "56",
+        "49"
+      ]
+    },
+    {
+      "id": 10175,
+      "name": "Ширина, см",
+      "products": 537,
+      "sample_values": [
+        "100",
+        "60",
+        "71",
+        "65",
+        "59.5"
+      ]
+    }
+  ],
+  "ozon_characteristics_unique": 56,
   "schema_mode": "existing_fields_only",
   "base_fields_used": [
     "Название",
@@ -492,5 +1098,5 @@
     "Ширина сиденья, см",
     "Ширина, см"
   ],
-  "finished_at": "2026-09-29T21:02:51.682171+00:00"
+  "finished_at": "2026-09-29T21:05:25.891170+00:00"
 }
