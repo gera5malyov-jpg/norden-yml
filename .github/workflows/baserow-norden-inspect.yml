@@ -1,0 +1,91 @@
+name: Inspect Norden Webasyst to Baserow mapping
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - baserow-norden-inspect.txt
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependency
+        run: pip install requests
+      - name: Inspect source and target fields
+        run: |
+          python3 - <<'PY'
+          import os, json, requests, sys
+          sys.path.insert(0, 'webasyst')
+          from client import WebasystClient
+
+          def s(v):
+              return str(v or '').strip()
+
+          def listify(payload, keys=()):
+              if isinstance(payload, list):
+                  return [x for x in payload if isinstance(x, dict)]
+              if not isinstance(payload, dict):
+                  return []
+              for key in keys:
+                  value = payload.get(key)
+                  if isinstance(value, list):
+                      return [x for x in value if isinstance(x, dict)]
+                  if isinstance(value, dict):
+                      return [x for x in value.values() if isinstance(x, dict)]
+              if payload and all(isinstance(v, dict) for v in payload.values()):
+                  return list(payload.values())
+              return []
+
+          wa = WebasystClient(
+              base_url=os.environ['WEBASYST_BASE_URL'],
+              token=os.environ['WEBASYST_API_TOKEN']
+          )
+          types = listify(wa.call('shop.type.getList'))
+          matches = [x for x in types if s(x.get('name') or x.get('title')).casefold() == 'norden-100']
+          if len(matches) != 1:
+              raise SystemExit(f'NORDEN-100 type matches={len(matches)}')
+          type_id = s(matches[0].get('id'))
+          payload = wa.call('shop.product.search', params={
+              'hash': f'type/{type_id}',
+              'offset': 0,
+              'limit': 1,
+              'fields': '*,skus,stock_counts',
+          })
+          products = listify(payload, ('products','items'))
+          if not products:
+              raise SystemExit('No NORDEN-100 products')
+          p = products[0]
+          skus = p.get('skus') or {}
+          if isinstance(skus, dict):
+              skus = list(skus.values())
+          sku = skus[0] if isinstance(skus, list) and skus else {}
+
+          print('WEBASYST_PRODUCT_KEYS=', sorted(p.keys()))
+          print('WEBASYST_SKU_KEYS=', sorted(sku.keys()) if isinstance(sku, dict) else [])
+          print('SAMPLE_NAME=', s(p.get('name')))
+          print('SAMPLE_SKU=', s(sku.get('sku')) if isinstance(sku, dict) else '')
+          print('SAMPLE_SKU_NAME=', s(sku.get('name')) if isinstance(sku, dict) else '')
+
+          headers={'Authorization':'Token '+os.environ['BASEROW_DATABASE_TOKEN']}
+          r=requests.get('http://147.78.67.6/api/database/fields/table/156/',headers=headers,timeout=30)
+          print('BASEROW_FIELDS_HTTP=', r.status_code)
+          if r.ok:
+              fields=r.json()
+              print('BASEROW_FIELDS=', [(f.get('name'),f.get('type'),f.get('id')) for f in fields])
+          else:
+              print('BASEROW_FIELDS_ERROR=', r.text[:500])
+          PY
