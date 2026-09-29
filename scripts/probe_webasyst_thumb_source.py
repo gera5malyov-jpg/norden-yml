@@ -65,6 +65,10 @@ echo "--- NEW LIST TEMPLATE ROWS ---"
 sed -n '1,220p' "$ROOT/wa-apps/shop/templates/actions/prod/main/List.html" || true
 echo "--- LEGACY PRODUCT LIST TEMPLATE ROWS ---"
 grep -RIn "product-list\|s-product-list\|product-image\|image_id\|thumb" "$ROOT/wa-apps/shop/templates/actions/products" "$ROOT/wa-apps/shop/templates/actions-legacy/products" 2>/dev/null | head -n 160 || true
+echo "--- WA PLUGIN INTERACTION IMPLEMENTATION ---"
+grep -RIn "function getInteractionUrl" "$ROOT/wa-system/plugin" 2>/dev/null | head -n 80 || true
+grep -RIn "getInteractionUrl" "$ROOT/wa-system/plugin" 2>/dev/null | head -n 120 || true
+echo "--- WA PLUGIN INTERACTION IMPLEMENTATION END ---"
 echo "--- SHOP PLUGIN INTERACTION IMPLEMENTATION ---"
 grep -RIn "class shopPlugin" "$ROOT/wa-apps/shop" 2>/dev/null | head -n 20 || true
 grep -RIn "getInteractionUrl" "$ROOT/wa-apps/shop" 2>/dev/null | head -n 80 || true
