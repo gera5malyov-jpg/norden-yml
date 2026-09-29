@@ -191,6 +191,113 @@
     "__http_error__": 400,
     "__body__": "{\"code\":3,\"message\":\"Request validation error: invalid ProductCertificateParamsRequest.Params: embedded message failed validation | caused by: invalid ProductCertificateParamsRequest_Params.CertificateCountry: value length must be at most 2 runes\"}"
   },
+  "certification_params_declaration_eaeu": {
+    "params": [
+      {
+        "name": "CERTIFICATE_TYPE",
+        "required": true,
+        "variants": [
+          {
+            "value": "DECLARATION",
+            "name": "Декларация о соответствии"
+          },
+          {
+            "value": "CERTIFICATE_OF_CONFORMITY",
+            "name": "Сертификат соответствия"
+          },
+          {
+            "value": "CERTIFICATE_OF_REGISTRATION",
+            "name": "Свидетельство о государственной регистрации"
+          },
+          {
+            "value": "REGISTRATION_CERTIFICATE",
+            "name": "Регистрационное удостоверение"
+          },
+          {
+            "value": "REFUSED_LETTER",
+            "name": "Отказное письмо"
+          },
+          {
+            "value": "SAFETY_DATA_SHEET",
+            "name": "Паспорт безопасности"
+          },
+          {
+            "value": "VETERINARY_COVER_DOCUMENT",
+            "name": "Ветеринарный сопроводительный документ"
+          }
+        ]
+      },
+      {
+        "name": "CERTIFICATE_COUNTRY",
+        "required": true,
+        "variants": [
+          {
+            "value": "unknown",
+            "name": "RU"
+          },
+          {
+            "value": "unknown",
+            "name": "KZ"
+          },
+          {
+            "value": "unknown",
+            "name": "AM"
+          },
+          {
+            "value": "unknown",
+            "name": "KG"
+          },
+          {
+            "value": "unknown",
+            "name": "BY"
+          },
+          {
+            "value": "unknown",
+            "name": "NotEAEU"
+          }
+        ]
+      },
+      {
+        "name": "ACCORDANCE_TYPE",
+        "required": true,
+        "variants": [
+          {
+            "value": "NATIONAL",
+            "name": "Национальный"
+          },
+          {
+            "value": "EAEU",
+            "name": "ЕАЭС"
+          }
+        ]
+      },
+      {
+        "name": "NAME",
+        "required": false,
+        "variants": []
+      },
+      {
+        "name": "NUMBER",
+        "required": true,
+        "variants": []
+      },
+      {
+        "name": "ISSUE_DATE",
+        "required": true,
+        "variants": []
+      },
+      {
+        "name": "EXPIRED_DATE",
+        "required": true,
+        "variants": []
+      },
+      {
+        "name": "SKUS",
+        "required": false,
+        "variants": []
+      }
+    ]
+  },
   "accordance_types": {
     "result": {
       "base": [
