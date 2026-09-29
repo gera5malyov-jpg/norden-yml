@@ -9,7 +9,6 @@ extra='''                for snippet_path, method_marker in [
                     ("webasyst/megasuppliers/patches/plugin_ui_methods.txt", "public function backendProductEdit("),
                     ("webasyst/megasuppliers/patches/plugin_filter_method.txt", "public function productsCollectionFilter("),
                     ("webasyst/megasuppliers/patches/plugin_list_ui_method.txt", "public function backendProdList("),
-                    ("webasyst/megasuppliers/patches/plugin_thumb_ui.txt", "private function thumbnailEndpointUrl("),
                 ]:
                     if method_marker not in text_data:
                         snippet=Path(snippet_path).read_text(encoding="utf-8")
@@ -169,22 +168,6 @@ s=s.replace(
 p.write_text(s,encoding="utf-8")
 
 
-# Enable lazy external thumbnails in legacy catalog too.
-s=p.read_text(encoding="utf-8")
-s=s.replace(
-    """        return array('sidebar_section' => $html);
-    }
-
-    public function backendProdFilters""",
-    """        $html .= $this->thumbnailBootstrap();
-        return array('sidebar_section' => $html);
-    }
-
-    public function backendProdFilters""",
-    1
-)
-p.write_text(s,encoding="utf-8")
-
 # Package both lightweight backend controllers.
 s=p.read_text(encoding="utf-8")
 old='''        controller_path=Path("webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendAssignSupplier.controller.php")
@@ -196,7 +179,6 @@ old='''        controller_path=Path("webasyst/megasuppliers/lib/actions/backend/
 '''
 new='''        for controller_path in [
             Path("webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendAssignSupplier.controller.php"),
-            Path("webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendThumbs.controller.php"),
         ]:
             if controller_path.exists():
                 zout.writestr(
