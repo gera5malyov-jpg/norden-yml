@@ -1,0 +1,47 @@
+name: Database Norden schema init
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/database-norden-schema-init.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Ensure Norden core fields
+        run: |
+          python3 - <<'PY'
+          import os, requests, json
+          base='http://147.78.67.6'
+          table=156
+          h={'Authorization':'Token '+os.environ['BASEROW_DATABASE_TOKEN'],'Content-Type':'application/json'}
+          r=requests.get(f'{base}/api/database/fields/table/{table}/',headers=h,timeout=30)
+          r.raise_for_status()
+          fields={x.get('name'):x for x in r.json()}
+          specs=[
+              ('Закупка Norden', {'name':'Закупка Norden','type':'number','number_decimal_places':2,'number_negative':False}),
+              ('Остаток Norden', {'name':'Остаток Norden','type':'number','number_decimal_places':0,'number_negative':False}),
+          ]
+          for name,payload in specs:
+              if name in fields:
+                  print('EXISTS',name,fields[name].get('id'))
+                  continue
+              x=requests.post(f'{base}/api/database/fields/table/{table}/',headers=h,json=payload,timeout=30)
+              print('CREATE',name,'HTTP',x.status_code)
+              print(x.text[:1200])
+              if not x.ok:
+                  raise SystemExit(2)
+          PY
