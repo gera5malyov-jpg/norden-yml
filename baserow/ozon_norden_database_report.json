@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-29T21:04:04.101117+00:00",
+  "started_at": "2026-09-29T21:07:26.101589+00:00",
   "source": "Ozon Seller API",
   "filter": "brand=Norden",
   "matching": "Ozon offer_id -> Database Наименование артикула + Поставщик=Norden",
@@ -19,8 +19,8 @@
   "supplier_conflicts": [],
   "base_fields_created": [],
   "characteristic_fields_created": [],
-  "characteristic_fields_total": 7,
-  "characteristic_values_written": 3035,
+  "characteristic_fields_total": 17,
+  "characteristic_values_written": 6477,
   "errors": [],
   "database_fields": [
     {
@@ -1090,13 +1090,22 @@
   ],
   "technical_data_not_written_due_schema_permission": true,
   "existing_characteristic_fields_used": [
+    "Вес, кг",
+    "Высота кресла максимум, см",
+    "Высота кресла минимум, см",
+    "Высота от пола до сиденья максимум, см",
+    "Высота от пола до сиденья минимум, см",
     "Высота спинки, см",
     "Высота, см",
+    "Глубина",
     "Глубина сиденья, см",
     "Материал крестовины",
     "Механизм качания",
+    "Назначение",
+    "Наполнение сиденья",
+    "Особенности модели",
     "Ширина сиденья, см",
     "Ширина, см"
   ],
-  "finished_at": "2026-09-29T21:05:25.891170+00:00"
+  "finished_at": "2026-09-29T21:08:53.673872+00:00"
 }
