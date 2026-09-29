@@ -452,6 +452,265 @@ NATIVE_IMAGES=[{"id":"6549318","product_id":"1476554","ext":"jpg","original_file
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:409:                <div class="block pagination s-product-list-paginations">
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:420:    <div class="dialog width400px height250px" id="s-product-list-delete-dialog">
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:484:    <div class="dialog width400px height200px" id="s-product-list-duplicate-error-dialog">
+--- NEW IMAGE COLUMN JS EXACT ---
+                            }
+                        }
+                    },
+                    "component-products-table": {
+                        props: ["products"],
+                        data: function() {
+                            return {
+                                columns : that.columns,
+                                presentation : that.presentation,
+                                states: {
+                                    has_image_column: hasImageColumn()
+                                }
+                            }
+
+                            function hasImageColumn() {
+                                var columns = that.presentation.columns.map( function(column) { return column.column_type; });
+                                return (columns.indexOf("image_crop_small") >= 0);
+                            }
+                        },
+                        template: that.components["component-products-table"],
+                        delimiters: ['{ { ', ' } }'],
+                        components: {
+                            "component-checkbox": that.vue_components["component-checkbox"],
+                            "component-products-table-header": {
+                                props: ["column", "columns", "presentation"],
+                                template: that.components["component-products-table-header"],
+                                delimiters: ['{ { ', ' } }'],
+                                computed: {
+                                    is_stock: function() {
+                                        return (this.column.column_type.indexOf('stocks_') === 0);
+                                    },
+                                    is_virtual_stock: function() {
+                                        return (this.column.column_type.indexOf('stocks_v') === 0);
+                                    },
+                                    is_feature: function() {
+                                        return (this.column.column_type.indexOf('feature_') === 0);
+                                    },
+                                    column_name: function() {
+                                        var self = this,
+                                            column = self.column,
+                                            result = "";
+
+                                        let hide_column_names = ["image_crop_small"],
+                                            hide_name = (hide_column_names.indexOf(column.column_type) >= 0);
+
+                                        if (!hide_name) {
+                                            result = (self.columns[column.column_type] ? self.columns[column.column_type].name : "COLUMN NOT EXIST")
+                                        }
+
+                                        return result;
+                                    },
+                                    column_class_name: function() {
+                                        const result = [];
+
+                                        switch (this.column.column_type) {
+                                            case "name":
+                                                result.push("s-column-name");
+                                                break;
+                                            case "image_crop_small":
+                                                result.push("s-column-photo");
+                                                break;
+                                        }
+
+                                        return result.join(" ");
+                                    },
+                                    column_sortable: function() {
+                                        var self = this;
+                                        return (self.columns[self.column.column_type] ? self.columns[self.column.column_type].sortable : false);
+                                    },
+                                    column_available_for_sku: function() {
+                                        var self = this,
+                                            column_info = that.columns[self.column.column_type];
+
+                                        return column_info.available_for_sku;
+                                    },
+                                    column_width: function() {
+                                        let self = this,
+                                            result = "";
+
+                                        if (self.column.width > 0) {
+                                            result = self.column.width + "px";
+
+                                        } else {
+                                            var column_info = that.columns[self.column.column_type];
+                                            if (column_info.min_width) {
+                                                result = column_info.min_width + "px";
+                                            };
+                                        }
+
+                                        return result;
+                                    },
+                                },
+                                methods: {
+                                    onMouseEnter: function() {
+                                        var self = this,
+                                            column = self.column;
+
+                                                    // Всё остальное
+                                                    } else {
+                                                        column_data.value = sku_mod_data.value;
+                                                    }
+                                                    name = "["+self.product.id+"]["+self.sku_mod.id+"]["+self.column.column_type+"]";
+                                                    delete column_data.skus;
+                                                } else {
+                                                    console.error("ERROR: sku_mod_data isn't found");
+                                                }
+                                            }
+
+                                            that.model_data[name] = column_data;
+                                        }
+
+                                        return column_data;
+                                    }
+                                },
+                                template: that.components["component-products-table-field"],
+                                delimiters: ['{ { ', ' } }'],
+                                watch: {
+                                    'states.is_hovered': function(val) {
+                                        this.product.states.image_hovered = val;
+                                    }
+                                },
+                                computed: {
+                                    product_photo: function() {
+                                        var self = this,
+                                            result = null;
+
+                                        if (self.product.photos.length) {
+                                            result = self.product.photos[0];
+                                            $.each(self.product.photos, function(i, photo) {
+                                                if (self.product.image_id === photo.id) {
+                                                    result = photo;
+                                                    return false;
+                                                }
+                                            });
+                                        }
+
+                                        return result;
+                                    },
+                                    align_right: function() {
+                                        var self = this,
+                                            align_right_array = ['price', 'compare_price', 'purchase_price', 'total_sales', 'stock_worth', 'sales_30days', 'rating_count', 'sku_count', 'image_count'];
+                                        return (align_right_array.indexOf(self.column.column_type) >= 0);
+                                    },
+                                    product_url: function() {
+                                        return "products/" + this.product.id + "/?presentation=" + that.presentation.id;
+                                    },
+                                },
+                                components: {
+                                    "component-input": that.vue_components["component-input"],
+                                    "component-textarea": that.vue_components["component-textarea"],
+                                    "component-product-column-tags": that.vue_components["component-product-column-tags"],
+                                    "component-product-column-name": {
+                                        props: ["product", "column", "column_info", "column_data", "sku", "sku_mod"],
+                                        data: function() {
+                                            var self = this;
+
+                                            const is_product_col = !self.sku,
+                                                  is_sku_col     = (self.sku && !self.sku_mod),
+                                                  is_sku_mod_col = (self.sku && self.sku_mod),
+                                                  is_feature_col = (self.column.column_type.indexOf('feature_') >= 0);
+
+                                            const is_normal_mode = self.product.normal_mode,
+                                                  is_extended = (that.presentation.view === "table_extended");
+
+                                            return {
+                                                states: {
+                                                    edit_key: 0,
+                                                    is_edit: false,
+                                                    is_locked: false,
+                                                    name_on_focus: self.column_data.value,
+
+                                                    is_extended   : is_extended,
+                                                    is_product_col: is_product_col,
+                                                    is_sku_col    : is_sku_col,
+                                                    is_sku_mod_col: is_sku_mod_col
+                                                }
+                                            };
+                                        },
+                                        template: that.components["component-product-column-name"],
+                                        delimiters: ['{ { ', ' } }'],
+                                        components: {
+                                            "component-textarea": that.vue_components["component-textarea"]
+                                        },
+                                        computed: {
+                                            product_url: function() {
+                                                return this.$parent.product_url;
+                                            },
+                                            sku_mod_photo: function() {
+                                                var self = this,
+                                                    result = null;
+
+                                                var presentation_columns = $.wa.construct(that.presentation.columns, "column_type"),
+                                                    display_photo = !!presentation_columns["image_crop_small"];
+
+                                                if (display_photo) {
+                                                    if (self.product.photos.length) {
+                                                        var photos = $.wa.construct(self.product.photos, "id");
+                                                        if (photos[self.sku_mod.image_id]) {
+                                                            result = photos[self.sku_mod.image_id];
+                                                        // } else if (photos[self.product.image_id]) {
+                                                        //     result = photos[self.product.image_id];
+                                                        } else {
+                                                            result = {};
+                                                        }
+                                                    } else {
+                                                        result = {};
+                                                    }
+                                                }
+
+                                                return result;
+                                            },
+                                            name_class: function() {
+                                                let result = [];
+
+                                                var name_column = that.columns["name"],
+                                                    settings = name_column?.settings;
+
+                                                if (settings) {
+                                                    var name_format = (settings.long_name_format ? settings.long_name_format : "");
+                                                    if (name_format === "hide_end") {
+                                                        result.push("one-line");
+                                                    }
+                                                }
+
+                                                return result.join(" ");
+                                            },
+                                            image_hovered: function() {
+                                                return this.product.states.image_hovered;
+                                            }
+                                        },
+                                        methods: {
+                                            toggle: function(edit) {
+                                                var self = this,
+                                                    is_edit = (typeof edit === "boolean" ? edit : !self.states.is_edit);
+
+                                                if (is_edit) { self.edit_key += 1; }
+
+                                                self.states.is_edit = is_edit;
+                                            },
+
+                                            onFocus: function() {
+                                                const self = this;
+                                                self.states.name_on_focus = self.column_data.value;
+                                            },
+                                            onCancel: function() {
+                                                var self = this;
+                                                self.toggle(false);
+                                            },
+                                            onChange: function(value) {
+                                                var self = this;
+
+                                                if (typeof value === "undefined") {
+                                                    console.error("ERROR: value isn't exist");
+                                                    return false;
+
+                                                } else if ($.trim(value) === "") {
+                                                    self.column_data.value = self.states.name_on_focus;
+--- NEW PRODUCT COLUMN TEMPLATES ---
 --- NEW IMAGE COMPONENT MARKUP ---
 104:                    <div class="s-photo-wrapper" v-bind:style="{ 'background-image': 'url('+photo.url+')'}"></div>
 556:                    dummy_image_url      : "{$wa_url}wa-content/img/wa-ai/webasyst-wand-ai-light.svg",
