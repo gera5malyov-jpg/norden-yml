@@ -94,7 +94,8 @@ aliases={
 }
 
 options=post("/v2/product/certification/options",{})
-cert_params=post("/v2/product/certification/params",{"params":{"certificate_type":"DECLARATION"}})\naccord=get("/v2/product/certificate/accordance-types/list")
+cert_params=post("/v2/product/certification/params",{"params":{"certificate_type":"DECLARATION"}})
+accord=get("/v2/product/certificate/accordance-types/list")
 types=get("/v1/product/certificate/types")
 certs,cert_errors=list_certs()
 pl=list_products()
@@ -118,7 +119,8 @@ for pid,p in by_id.items():
 
 out={
  "options":options,
- "certification_params_declaration":cert_params,\n "accordance_types":accord,
+ "certification_params_declaration":cert_params,
+ "accordance_types":accord,
  "certificate_types":types,
  "certificate_count":len(certs),
  "certificate_errors":cert_errors,
