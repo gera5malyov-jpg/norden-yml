@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: kit-assets-webasyst-20260929
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   sync:
