@@ -41,6 +41,13 @@ echo "BACKUP=$BACK"
 echo "STALE_PROCESSES_BEGIN"
 ps -eo pid,ppid,etime,cmd | grep -E 'ms_(db|perf|backfill|register|event)|deploy_megasuppliers|ALTER TABLE shop_megasuppliers' | grep -v grep || true
 echo "STALE_PROCESSES_END"
+pkill -TERM -f '/tmp/ms_db_init.php' 2>/dev/null || true
+pkill -TERM -f '/tmp/ms_perf.php' 2>/dev/null || true
+sleep 1
+pkill -KILL -f '/tmp/ms_db_init.php' 2>/dev/null || true
+pkill -KILL -f '/tmp/ms_perf.php' 2>/dev/null || true
+echo "STALE_PROCESSES_AFTER="
+ps -eo pid,ppid,etime,cmd | grep -E '/tmp/ms_(db_init|perf)\.php' | grep -v grep || true
 
 python3 - "$FILE" "$CFG" <<'PY'
 import sys
