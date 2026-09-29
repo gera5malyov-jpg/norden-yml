@@ -1,0 +1,39 @@
+name: Database Norden sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/database-norden-sync.yml'
+      - 'baserow/sync_norden_database.py'
+  workflow_dispatch:
+  schedule:
+    - cron: '23 */6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: database-norden-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Preflight on push, live on schedule/manual
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python baserow/sync_norden_database.py --dry-run
+          else
+            python baserow/sync_norden_database.py
+          fi
