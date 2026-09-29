@@ -23,6 +23,7 @@ SUPPLIER_NAME = "Norden"
 
 NORDEN_API = "https://norden.group/api-products/"
 PRICE_XML_URL = "https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.group+-K8%25.xml"
+FULL_XML_URL = "https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.xml"
 NORDEN_CATEGORIES_API = "https://norden.group/api-categories/"
 
 FIELD_PURCHASE = "Закупка"
@@ -282,6 +283,12 @@ def load_api():
             "purchase": dec(raw.get("price")),
             "rrp": dec(raw.get("price_rrc")),
             "stock": stock_num(raw.get("qty")),
+            "images": [s(x) for x in (raw.get("images") or []) if s(x)],
+            "features": [
+                {"name": s(x.get("name")), "value": s(x.get("value"))}
+                for x in (raw.get("features") or [])
+                if isinstance(x, dict) and s(x.get("name")) and s(x.get("value"))
+            ],
             "source": "api",
         }
         k = norm(article)
@@ -301,6 +308,38 @@ def load_api():
 def load_price_xml():
     raw = request_with_retry(PRICE_XML_URL, timeout=180).content
     root = ET.fromstring(raw)
+
+    # The price XML is the stock/price fallback. Content and images are
+    # supplemented from the full Norden catalog by supplier article.
+    full_raw = request_with_retry(FULL_XML_URL, timeout=180).content
+    full_root = ET.fromstring(full_raw)
+    content_by_article = {}
+    for n in full_root.iter("Номенклатура"):
+        article = s(n.findtext("Артикул"))
+        if not article:
+            continue
+        images = []
+        features = []
+        for child in list(n):
+            tag = s(child.tag)
+            value = s(child.text)
+            if not value:
+                continue
+            if tag.startswith("Ссылканафото"):
+                images.append(value)
+            elif tag not in {
+                "Ссылка", "Код", "Наименование", "НаименованиеПолное", "Группа",
+                "Артикул", "Особенностимодели"
+            }:
+                features.append({"name": tag, "value": value})
+        content_by_article[norm(article)] = {
+            "name": s(n.findtext("НаименованиеПолное")) or s(n.findtext("Наименование")) or article,
+            "group": s(n.findtext("Группа")),
+            "description": s(n.findtext("Особенностимодели")),
+            "images": list(dict.fromkeys(images)),
+            "features": features,
+        }
+
     products = {}
     duplicates = []
     for n in root.iter("Номенклатура"):
@@ -319,16 +358,19 @@ def load_price_xml():
                 stocks[wh] = stock_num(st.text)
 
         stock = stocks.get("Основной склад")
+        content = content_by_article.get(norm(article), {})
         item = {
             "article": article,
-            "name": s(n.findtext("НаименованиеПолное")) or s(n.findtext("Наименование")) or s(n.findtext("Ссылка")) or article,
+            "name": content.get("name") or s(n.findtext("НаименованиеПолное")) or s(n.findtext("Наименование")) or s(n.findtext("Ссылка")) or article,
             "category": "",
-            "group": s(n.findtext("Группа")),
-            "description": "",
+            "group": content.get("group") or s(n.findtext("Группа")),
+            "description": content.get("description") or "",
             "purchase": prices.get("опт"),
             "rrp": prices.get("ррц"),
             "stock": stock,
-            "source": "price_xml",
+            "images": content.get("images") or [],
+            "features": content.get("features") or [],
+            "source": "price_xml+full_xml",
         }
         k = norm(article)
         if k in products:
@@ -375,6 +417,7 @@ def main():
         "eligible_in_stock": 0,
         "excluded_discount": 0,
         "excluded_moscow": 0,
+        "excluded_without_images": 0,
         "existing_matches": 0,
         "existing_price_stock_updates": 0,
         "existing_out_of_stock_updates": 0,
@@ -491,11 +534,17 @@ def main():
         if not in_stock:
             continue
 
+        images = [s(x) for x in (item.get("images") or []) if s(x)]
+        if not images:
+            report["excluded_without_images"] += 1
+            continue
+
         body = {
             "Название": item.get("name") or item.get("article"),
             "Наименование артикула": item.get("article"),
             "Поставщик": [supplier_id],
             "Наличие": True,
+            "Первое изображение": images[0],
         }
         if FIELD_PURCHASE in numeric_available and item.get("purchase") is not None:
             body[FIELD_PURCHASE] = item["purchase"]
