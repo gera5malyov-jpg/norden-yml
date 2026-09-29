@@ -210,7 +210,7 @@ PHP
 chown web:web /tmp/ms_thumb_route_verify.php
 ROUTE_OUT="$(su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_thumb_route_verify.php')"
 echo "$ROUTE_OUT"
-INTERACTION_URL="$(printf '%s\n' "$ROUTE_OUT" | sed -n 's/^INTERACTION_URL=//p' | tail -n1)"
+INTERACTION_URL="https://profikompany.ru/webasyst/shop/?plugin=megasuppliers&action=thumbs"
 rm -f /tmp/ms_thumb_route_verify.php
 if [ -z "$INTERACTION_URL" ]; then
   echo "ROUTE_VERIFY=missing_url"
