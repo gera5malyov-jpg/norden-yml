@@ -38,7 +38,7 @@ waSystem::getInstance(null,new SystemConfig());
 wa('shop');
 $m=new waModel();
 $p=wa('shop')->getPlugin('megasuppliers',true);
-echo "INTERACTION_URL_RUNTIME=".$p->getInteractionUrl('thumbs')."\\n";
+echo "INTERACTION_METHOD=no\\n";
 $skus=array('DEEP-59179','DEEP-59180','DEEP-59176','DEEP-59177','DEEP-61461','AF-31662421','AF-31655692');
 foreach($skus as $sku){
   $r=$m->query(
