@@ -382,6 +382,8 @@ def main():
         "database_duplicate_keys": [],
         "skipped_ambiguous": 0,
         "errors": [],
+        "schema_warnings": [],
+        "numeric_fields_available": [],
     }
 
     source, source_duplicates, source_kind, api_error = load_source()
@@ -392,10 +394,21 @@ def main():
 
     br = Baserow(BASEROW_URL, BASEROW_TOKEN)
 
+    numeric_specs = {
+        FIELD_PURCHASE: 2,
+        FIELD_RRP: 2,
+        FIELD_STOCK: 0,
+    }
     if not args.dry_run:
-        br.ensure_number_field(CATALOG_TABLE_ID, FIELD_PURCHASE, 2)
-        br.ensure_number_field(CATALOG_TABLE_ID, FIELD_RRP, 2)
-        br.ensure_number_field(CATALOG_TABLE_ID, FIELD_STOCK, 0)
+        for field_name, decimals in numeric_specs.items():
+            try:
+                br.ensure_number_field(CATALOG_TABLE_ID, field_name, decimals)
+            except Exception as exc:
+                report["schema_warnings"].append(f"{field_name}: {exc}")
+
+    current_field_names = {s(f.get("name")) for f in br.fields(CATALOG_TABLE_ID)}
+    numeric_available = {name for name in numeric_specs if name in current_field_names}
+    report["numeric_fields_available"] = sorted(numeric_available)
 
     supplier_rows = br.all_rows(SUPPLIERS_TABLE_ID)
     norden_suppliers = [r for r in supplier_rows if norm(r.get("Поставщик")) == norm(SUPPLIER_NAME)]
@@ -442,12 +455,13 @@ def main():
             report["existing_matches"] += 1
             row = existing[0]
             body = {}
-            if item.get("purchase") is not None:
+            if FIELD_PURCHASE in numeric_available and item.get("purchase") is not None:
                 body[FIELD_PURCHASE] = item["purchase"]
-            if item.get("rrp") is not None:
+            if FIELD_RRP in numeric_available and item.get("rrp") is not None:
                 body[FIELD_RRP] = item["rrp"]
             if stock is not None:
-                body[FIELD_STOCK] = stock
+                if FIELD_STOCK in numeric_available:
+                    body[FIELD_STOCK] = stock
                 body["Наличие"] = bool(stock > 0)
 
             if body:
@@ -483,11 +497,11 @@ def main():
             "Поставщик": [supplier_id],
             "Наличие": True,
         }
-        if item.get("purchase") is not None:
+        if FIELD_PURCHASE in numeric_available and item.get("purchase") is not None:
             body[FIELD_PURCHASE] = item["purchase"]
-        if item.get("rrp") is not None:
+        if FIELD_RRP in numeric_available and item.get("rrp") is not None:
             body[FIELD_RRP] = item["rrp"]
-        if stock is not None:
+        if FIELD_STOCK in numeric_available and stock is not None:
             body[FIELD_STOCK] = stock
 
         if not args.dry_run:
