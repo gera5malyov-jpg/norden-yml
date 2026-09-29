@@ -614,11 +614,109 @@ def restartrepair(p):
     return safe,private
 
 
+def subscription_flags(client):
+    suburl=(client or {}).get("sub_url") or (client or {}).get("subscription_url") or (client or {}).get("link")
+    out={"reachable":False,"line_count":0,"vless":False,"hysteria2":False,"shadowsocks":False,"wireguard":False}
+    if not suburl: return out
+    try:
+        req=urllib.request.Request(suburl,headers={"Accept":"*/*"})
+        with urllib.request.urlopen(req,timeout=25) as r:
+            body=r.read().decode("utf-8","replace")
+        import base64
+        decoded=body
+        try:
+            pad="="*((4-len(body.strip())%4)%4)
+            cand=base64.b64decode(body.strip()+pad).decode("utf-8","replace")
+            if cand.strip(): decoded=cand
+        except Exception:
+            pass
+        low=decoded.lower()
+        out.update({
+            "reachable":True,
+            "line_count":len([x for x in decoded.splitlines() if x.strip()]),
+            "vless":"vless://" in low,
+            "hysteria2":("hysteria2://" in low or "hy2://" in low),
+            "shadowsocks":"ss://" in low,
+            "wireguard":("wireguard://" in low or "wg://" in low or ("[interface]" in low and "[peer]" in low))
+        })
+    except Exception as e:
+        out["error"]=str(e)[:160]
+    return out
+
+def replacewg(p):
+    safe={"mode":"replacewg","auth":p.auth,"results":[]}
+    private={}
+    try:
+        private["backup"]=p.post("/backups",{})
+        safe["backup"]="created"
+    except Exception as e:
+        safe["backup"]="warning: "+str(e)[:160]
+
+    ib=inbounds(p.get("/inbounds"))
+    wg=find(ib,"wireguard",None)
+    if not wg:
+        raise E("WireGuard inbound not found")
+    port=int(wg.get("port") or 25078)
+    c,cs=client_state(p)
+    if not c:
+        raise E("client not found")
+    keep_ids=[str(x.get("id")) for x in (c.get("inbound_links") or []) if isinstance(x,dict) and x.get("id")]
+    safe["before"]={"wireguard_port":port,"client":cs,"subscription":subscription_flags(c)}
+
+    wg_id=str(wg.get("id") or "__wg__")
+    p.req("DELETE","/inbounds/"+urllib.parse.quote(wg_id,safe=""))
+    time.sleep(4)
+
+    al=p.get("/allocations")
+    available=[int(x) for x in (al.get("available",[]) if isinstance(al,dict) else []) if str(x).isdigit()]
+    if port not in available:
+        time.sleep(5)
+        al=p.get("/allocations")
+        available=[int(x) for x in (al.get("available",[]) if isinstance(al,dict) else []) if str(x).isdigit()]
+    if port not in available:
+        raise E("WireGuard port did not become available")
+
+    created=p.post("/inbounds",{
+        "protocol":"shadowsocks",
+        "port":port,
+        "network":"tcp",
+        "security":"none",
+        "tag":"gh-shadowsocks",
+        "method":"2022-blake3-aes-256-gcm"
+    })
+    private["create_shadowsocks"]=created
+    time.sleep(4)
+
+    ib2=inbounds(p.get("/inbounds"))
+    ss=find(ib2,"shadowsocks","gh-shadowsocks")
+    if not ss:
+        raise E("Shadowsocks inbound was not created")
+    ssid=str(ss.get("id"))
+    ids=list(dict.fromkeys(keep_ids+[ssid]))
+    p.patch("/clients/"+urllib.parse.quote(CLIENT,safe=""),{"wg":False,"inbound_ids":ids})
+    time.sleep(5)
+
+    c2,cs2=client_state(p)
+    sub=subscription_flags(c2)
+    safe["after"]={
+        "client":cs2,
+        "subscription":sub,
+        "shadowsocks":{"port":ss.get("port"),"enabled":ss.get("enabled"),"method":ss.get("method"),"tag":ss.get("tag")}
+    }
+    safe["results"]=[
+        {"protocol":"vless","state":"present" if find(ib2,"vless","gh-vless-reality") else "missing","port":25077},
+        {"protocol":"shadowsocks","state":"present" if ss else "missing","port":port},
+        {"protocol":"hysteria2","state":"present" if find(ib2,"hysteria2","gh-hysteria2") else "missing","port":25079}
+    ]
+    safe["ready"]=bool(sub.get("vless") and sub.get("hysteria2") and sub.get("shadowsocks"))
+    return safe,private
+
+
 def main():
     mode=(sys.argv[1] if len(sys.argv)>1 else "inspect").lower()
-    if mode not in ("inspect","apply","verify","wgprobe","wgfix","wgtest","restartrepair"): raise E("bad mode")
+    if mode not in ("inspect","apply","verify","wgprobe","wgfix","wgtest","restartrepair","replacewg"): raise E("bad mode")
     p=Panel(); p.login()
-    safe,private={"inspect":inspect,"apply":apply,"verify":verify,"wgprobe":wgprobe,"wgfix":wgfix,"wgtest":wgtest,"restartrepair":restartrepair}[mode](p)
+    safe,private={"inspect":inspect,"apply":apply,"verify":verify,"wgprobe":wgprobe,"wgfix":wgfix,"wgtest":wgtest,"restartrepair":restartrepair,"replacewg":replacewg}[mode](p)
     save(safe,private)
     print(json.dumps(safe,ensure_ascii=False,indent=2))
 
