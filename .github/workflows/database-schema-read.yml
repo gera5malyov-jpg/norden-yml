@@ -38,3 +38,5 @@ jobs:
                   print('COUNT',j.get('count'))
                   print('SAMPLE',json.dumps(j.get('results',[]),ensure_ascii=False)[:10000])
           PY
+
+# cleanup-check
