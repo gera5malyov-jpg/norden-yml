@@ -23,6 +23,7 @@ SUPPLIER_NAME = "Norden"
 
 NORDEN_API = "https://norden.group/api-products/"
 PRICE_XML_URL = "https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.group+-K8%25.xml"
+NORDEN_CATEGORIES_API = "https://norden.group/api-categories/"
 
 FIELD_PURCHASE = "Закупка"
 FIELD_RRP = "РРЦ поставщика"
@@ -172,9 +173,41 @@ def request_with_retry(url, *, headers=None, params=None, timeout=120, attempts=
             time.sleep(min(5 * (attempt + 1), 30))
     raise RuntimeError(f"GET failed for {url}: {last}")
 
+def load_category_paths():
+    r = request_with_retry(
+        NORDEN_CATEGORIES_API,
+        headers={"secret": NORDEN_SECRET} if NORDEN_SECRET else None,
+        timeout=60,
+    )
+    rows = r.json()
+    by_id = {s(x.get("category_id")): x for x in rows if isinstance(x, dict)}
+    cache = {}
+    def chain(cid):
+        cid = s(cid)
+        if cid in cache:
+            return cache[cid]
+        out, seen = [], set()
+        cur = cid
+        while cur and cur not in seen and cur in by_id:
+            seen.add(cur)
+            row = by_id[cur]
+            title = s(row.get("name"))
+            if title:
+                out.append(title)
+            parent = s(row.get("parent_id"))
+            cur = "" if parent in ("", "0") else parent
+        out.reverse()
+        cache[cid] = out
+        return out
+    return chain
+
 def load_api():
     if not NORDEN_SECRET:
         raise RuntimeError("NORDEN_SECRET is missing")
+    try:
+        category_chain = load_category_paths()
+    except Exception:
+        category_chain = None
     rows = []
     page = 1
     last_call = 0.0
@@ -206,13 +239,20 @@ def load_api():
         article = s(raw.get("product_code"))
         if not article:
             continue
+        raw_categories = [s(x) for x in s(raw.get("category")).split(",") if s(x)]
+        category_parts = []
+        if category_chain:
+            for cid in raw_categories:
+                path_parts = category_chain(cid)
+                if path_parts:
+                    category_parts.append(" > ".join(path_parts))
         item = {
             "article": article,
             "name": s(raw.get("name")) or article,
-            "category": s(raw.get("category")),
+            "category": " | ".join(category_parts) or s(raw.get("category")),
             "description": s(raw.get("description")),
             "purchase": dec(raw.get("price")),
-            "rrp": None,
+            "rrp": dec(raw.get("price_rrc")),
             "stock": stock_num(raw.get("qty")),
             "source": "api",
         }
