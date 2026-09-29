@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-29T21:07:26.101589+00:00",
+  "started_at": "2026-09-29T21:37:14.220329+00:00",
   "source": "Ozon Seller API",
   "filter": "brand=Norden",
   "matching": "Ozon offer_id -> Database Наименование артикула + Поставщик=Norden",
@@ -19,8 +19,8 @@
   "supplier_conflicts": [],
   "base_fields_created": [],
   "characteristic_fields_created": [],
-  "characteristic_fields_total": 17,
-  "characteristic_values_written": 6477,
+  "characteristic_fields_total": 56,
+  "characteristic_values_written": 22326,
   "errors": [],
   "database_fields": [
     {
@@ -467,6 +467,371 @@
       "name": "Ширинатопа",
       "type": "text",
       "id": 3141
+    },
+    {
+      "name": "Ozon ID товара",
+      "type": "number",
+      "id": 4752
+    },
+    {
+      "name": "Ozon Название",
+      "type": "text",
+      "id": 4753
+    },
+    {
+      "name": "Ozon Бренд",
+      "type": "text",
+      "id": 4754
+    },
+    {
+      "name": "Ozon Архив",
+      "type": "boolean",
+      "id": 4755
+    },
+    {
+      "name": "Ozon Категория",
+      "type": "text",
+      "id": 4756
+    },
+    {
+      "name": "Ozon ID категории",
+      "type": "number",
+      "id": 4757
+    },
+    {
+      "name": "Ozon ID типа",
+      "type": "number",
+      "id": 4758
+    },
+    {
+      "name": "Ozon Описание",
+      "type": "long_text",
+      "id": 4759
+    },
+    {
+      "name": "Ozon Штрихкоды",
+      "type": "long_text",
+      "id": 4760
+    },
+    {
+      "name": "Ozon Цена",
+      "type": "number",
+      "id": 4761
+    },
+    {
+      "name": "Ozon Старая цена",
+      "type": "number",
+      "id": 4762
+    },
+    {
+      "name": "Ozon Маркетинговая цена",
+      "type": "number",
+      "id": 4763
+    },
+    {
+      "name": "Ozon Остаток",
+      "type": "number",
+      "id": 4764
+    },
+    {
+      "name": "Ozon Статус",
+      "type": "text",
+      "id": 4765
+    },
+    {
+      "name": "Ozon Видимость",
+      "type": "text",
+      "id": 4766
+    },
+    {
+      "name": "Ozon Обновлено",
+      "type": "text",
+      "id": 4767
+    },
+    {
+      "name": "Ozon данные без изображений (JSON)",
+      "type": "long_text",
+      "id": 4768
+    },
+    {
+      "name": "Ozon | #Хештеги",
+      "type": "long_text",
+      "id": 4769
+    },
+    {
+      "name": "Ozon | Rich-контент JSON",
+      "type": "long_text",
+      "id": 4770
+    },
+    {
+      "name": "Ozon | Аннотация",
+      "type": "long_text",
+      "id": 4771
+    },
+    {
+      "name": "Ozon | Бренд",
+      "type": "long_text",
+      "id": 4772
+    },
+    {
+      "name": "Ozon | Вес с упаковкой, г",
+      "type": "long_text",
+      "id": 4773
+    },
+    {
+      "name": "Ozon | Вес товара, г",
+      "type": "long_text",
+      "id": 4774
+    },
+    {
+      "name": "Ozon | Вид выпуска товара",
+      "type": "long_text",
+      "id": 4775
+    },
+    {
+      "name": "Ozon | Высота сиденья, см",
+      "type": "long_text",
+      "id": 4776
+    },
+    {
+      "name": "Ozon | Высота спинки, см",
+      "type": "long_text",
+      "id": 4777
+    },
+    {
+      "name": "Ozon | Высота, см",
+      "type": "long_text",
+      "id": 4778
+    },
+    {
+      "name": "Ozon | Гарантия",
+      "type": "long_text",
+      "id": 4779
+    },
+    {
+      "name": "Ozon | Глубина сиденья, см",
+      "type": "long_text",
+      "id": 4780
+    },
+    {
+      "name": "Ozon | Глубина, см",
+      "type": "long_text",
+      "id": 4781
+    },
+    {
+      "name": "Ozon | Исполнение",
+      "type": "long_text",
+      "id": 4782
+    },
+    {
+      "name": "Ozon | Код продавца",
+      "type": "long_text",
+      "id": 4783
+    },
+    {
+      "name": "Ozon | Количество в комплекте, шт.",
+      "type": "long_text",
+      "id": 4784
+    },
+    {
+      "name": "Ozon | Количество заводских упаковок",
+      "type": "long_text",
+      "id": 4785
+    },
+    {
+      "name": "Ozon | Количество товара в УЕИ",
+      "type": "long_text",
+      "id": 4786
+    },
+    {
+      "name": "Ozon | Комната",
+      "type": "long_text",
+      "id": 4787
+    },
+    {
+      "name": "Ozon | Комплектация",
+      "type": "long_text",
+      "id": 4788
+    },
+    {
+      "name": "Ozon | Макс. высота сиденья, см",
+      "type": "long_text",
+      "id": 4789
+    },
+    {
+      "name": "Ozon | Макс. нагрузка, кг",
+      "type": "long_text",
+      "id": 4790
+    },
+    {
+      "name": "Ozon | Максимальная высота, см",
+      "type": "long_text",
+      "id": 4791
+    },
+    {
+      "name": "Ozon | Материал корпуса",
+      "type": "long_text",
+      "id": 4792
+    },
+    {
+      "name": "Ozon | Материал крестовины",
+      "type": "long_text",
+      "id": 4793
+    },
+    {
+      "name": "Ozon | Материал наполнителя",
+      "type": "long_text",
+      "id": 4794
+    },
+    {
+      "name": "Ozon | Материал обивки [6654]",
+      "type": "long_text",
+      "id": 4795
+    },
+    {
+      "name": "Ozon | Материал обивки [21909]",
+      "type": "long_text",
+      "id": 4796
+    },
+    {
+      "name": "Ozon | Механизм качания",
+      "type": "long_text",
+      "id": 4797
+    },
+    {
+      "name": "Ozon | Мин. высота сиденья, см",
+      "type": "long_text",
+      "id": 4798
+    },
+    {
+      "name": "Ozon | Минимальная высота, см",
+      "type": "long_text",
+      "id": 4799
+    },
+    {
+      "name": "Ozon | Минимальное количество оптом",
+      "type": "long_text",
+      "id": 4800
+    },
+    {
+      "name": "Ozon | Название",
+      "type": "long_text",
+      "id": 4801
+    },
+    {
+      "name": "Ozon | Название модели (для объединения в одну карточку)",
+      "type": "long_text",
+      "id": 4802
+    },
+    {
+      "name": "Ozon | Название модели для шаблона наименования",
+      "type": "long_text",
+      "id": 4803
+    },
+    {
+      "name": "Ozon | Название цвета",
+      "type": "long_text",
+      "id": 4804
+    },
+    {
+      "name": "Ozon | Назначение (помещение)",
+      "type": "long_text",
+      "id": 4805
+    },
+    {
+      "name": "Ozon | Нужен код маркировки",
+      "type": "long_text",
+      "id": 4806
+    },
+    {
+      "name": "Ozon | Объединить в похожие товары",
+      "type": "long_text",
+      "id": 4807
+    },
+    {
+      "name": "Ozon | Особенности [10131]",
+      "type": "long_text",
+      "id": 4808
+    },
+    {
+      "name": "Ozon | Особенности [10155]",
+      "type": "long_text",
+      "id": 4809
+    },
+    {
+      "name": "Ozon | Планирую доставлять товар в нескольких упаковках",
+      "type": "long_text",
+      "id": 4810
+    },
+    {
+      "name": "Ozon | Покрытие корпуса",
+      "type": "long_text",
+      "id": 4811
+    },
+    {
+      "name": "Ozon | Размер газлифта",
+      "type": "long_text",
+      "id": 4812
+    },
+    {
+      "name": "Ozon | Регулировка",
+      "type": "long_text",
+      "id": 4813
+    },
+    {
+      "name": "Ozon | Рисунок на обивке",
+      "type": "long_text",
+      "id": 4814
+    },
+    {
+      "name": "Ozon | Стиль дизайна",
+      "type": "long_text",
+      "id": 4815
+    },
+    {
+      "name": "Ozon | Страна-изготовитель",
+      "type": "long_text",
+      "id": 4816
+    },
+    {
+      "name": "Ozon | Тип механизма качания",
+      "type": "long_text",
+      "id": 4817
+    },
+    {
+      "name": "Ozon | ТН ВЭД коды ЕАЭС",
+      "type": "long_text",
+      "id": 4818
+    },
+    {
+      "name": "Ozon | Фиксация спинки",
+      "type": "long_text",
+      "id": 4819
+    },
+    {
+      "name": "Ozon | Форма поставки",
+      "type": "long_text",
+      "id": 4820
+    },
+    {
+      "name": "Ozon | Цвет товара",
+      "type": "long_text",
+      "id": 4821
+    },
+    {
+      "name": "Ozon | Ширина сиденья, см",
+      "type": "long_text",
+      "id": 4822
+    },
+    {
+      "name": "Ozon | Ширина спинки, см",
+      "type": "long_text",
+      "id": 4823
+    },
+    {
+      "name": "Ozon | Ширина, см",
+      "type": "long_text",
+      "id": 4824
     }
   ],
   "matched_by_field": {
@@ -1084,28 +1449,83 @@
   "ozon_characteristics_unique": 56,
   "schema_mode": "existing_fields_only",
   "base_fields_used": [
-    "Название",
-    "Категория",
-    "Цена Ozon"
+    "Ozon ID категории",
+    "Ozon ID типа",
+    "Ozon ID товара",
+    "Ozon Архив",
+    "Ozon Бренд",
+    "Ozon Видимость",
+    "Ozon Категория",
+    "Ozon Маркетинговая цена",
+    "Ozon Название",
+    "Ozon Обновлено",
+    "Ozon Описание",
+    "Ozon Остаток",
+    "Ozon Старая цена",
+    "Ozon Статус",
+    "Ozon Цена",
+    "Ozon Штрихкоды",
+    "Ozon данные без изображений (JSON)"
   ],
-  "technical_data_not_written_due_schema_permission": true,
+  "technical_data_not_written_due_schema_permission": false,
   "existing_characteristic_fields_used": [
-    "Вес, кг",
-    "Высота кресла максимум, см",
-    "Высота кресла минимум, см",
-    "Высота от пола до сиденья максимум, см",
-    "Высота от пола до сиденья минимум, см",
-    "Высота спинки, см",
-    "Высота, см",
-    "Глубина",
-    "Глубина сиденья, см",
-    "Материал крестовины",
-    "Механизм качания",
-    "Назначение",
-    "Наполнение сиденья",
-    "Особенности модели",
-    "Ширина сиденья, см",
-    "Ширина, см"
+    "Ozon | #Хештеги",
+    "Ozon | Rich-контент JSON",
+    "Ozon | Аннотация",
+    "Ozon | Бренд",
+    "Ozon | Вес с упаковкой, г",
+    "Ozon | Вес товара, г",
+    "Ozon | Вид выпуска товара",
+    "Ozon | Высота сиденья, см",
+    "Ozon | Высота спинки, см",
+    "Ozon | Высота, см",
+    "Ozon | Гарантия",
+    "Ozon | Глубина сиденья, см",
+    "Ozon | Глубина, см",
+    "Ozon | Исполнение",
+    "Ozon | Код продавца",
+    "Ozon | Количество в комплекте, шт.",
+    "Ozon | Количество заводских упаковок",
+    "Ozon | Количество товара в УЕИ",
+    "Ozon | Комната",
+    "Ozon | Комплектация",
+    "Ozon | Макс. высота сиденья, см",
+    "Ozon | Макс. нагрузка, кг",
+    "Ozon | Максимальная высота, см",
+    "Ozon | Материал корпуса",
+    "Ozon | Материал крестовины",
+    "Ozon | Материал наполнителя",
+    "Ozon | Материал обивки [21909]",
+    "Ozon | Материал обивки [6654]",
+    "Ozon | Механизм качания",
+    "Ozon | Мин. высота сиденья, см",
+    "Ozon | Минимальная высота, см",
+    "Ozon | Минимальное количество оптом",
+    "Ozon | Название",
+    "Ozon | Название модели (для объединения в одну карточку)",
+    "Ozon | Название модели для шаблона наименования",
+    "Ozon | Название цвета",
+    "Ozon | Назначение (помещение)",
+    "Ozon | Нужен код маркировки",
+    "Ozon | Объединить в похожие товары",
+    "Ozon | Особенности [10131]",
+    "Ozon | Особенности [10155]",
+    "Ozon | Планирую доставлять товар в нескольких упаковках",
+    "Ozon | Покрытие корпуса",
+    "Ozon | Размер газлифта",
+    "Ozon | Регулировка",
+    "Ozon | Рисунок на обивке",
+    "Ozon | Стиль дизайна",
+    "Ozon | Страна-изготовитель",
+    "Ozon | ТН ВЭД коды ЕАЭС",
+    "Ozon | Тип механизма качания",
+    "Ozon | Фиксация спинки",
+    "Ozon | Форма поставки",
+    "Ozon | Цвет товара",
+    "Ozon | Ширина сиденья, см",
+    "Ozon | Ширина спинки, см",
+    "Ozon | Ширина, см"
   ],
-  "finished_at": "2026-09-29T21:08:53.673872+00:00"
+  "full_ozon_write": true,
+  "finished_at": "2026-09-29T21:39:28.725693+00:00"
 }
