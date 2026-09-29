@@ -15,6 +15,10 @@ concurrency:
 
 jobs:
   sync:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
     runs-on: ubuntu-latest
     timeout-minutes: 420
     steps:
@@ -35,17 +39,19 @@ jobs:
           WEBASYST_BASE_URL: https://profikompany.ru
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
           PILOT_ARTICLE: AF-31662421
+          SHARD_TOTAL: "4"
+          SHARD_INDEX: ${{ matrix.shard }}
         run: python catalog/sync_kit_images_id_to_webasyst.py
-      - name: Save report
+      - name: Save shard report
         if: always()
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add catalog/kit_images_id_to_webasyst_report.json 2>/dev/null || true
+          git add "catalog/kit_images_id_to_webasyst_report_${{ matrix.shard }}.json" 2>/dev/null || true
           if ! git diff --cached --quiet; then
-            git commit -m "Save KIT assets to Webasyst report"
-            for i in 1 2 3 4 5; do
+            git commit -m "Save KIT assets Webasyst shard ${{ matrix.shard }}"
+            for i in 1 2 3 4 5 6; do
               git push origin HEAD:main && break
               git fetch origin main
               git rebase origin/main || git rebase --abort
