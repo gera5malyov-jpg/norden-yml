@@ -384,11 +384,53 @@ def wgfix(p):
     return {"mode":"wgfix","auth":p.auth,"backup":backup_state,"before":before,"after":after,"results":[]},{"client":c2}
 
 
+def wgtest(p):
+    name="wg-probe-temp"
+    # Clean stale probe if any.
+    try:
+        p.req("DELETE","/clients/"+urllib.parse.quote(name,safe=""))
+    except Exception:
+        pass
+    created=None
+    create_shape=None
+    create_wg_conf=False
+    create_wg_len=0
+    try:
+        created=p.post("/create",{"name":name,"days":1,"manual":1,"inbound_ids":[],"wg":True})
+        create_shape=shape(created)
+        # Inspect only presence/length, never expose config material.
+        def find_conf(v):
+            if isinstance(v,dict):
+                for k,x in v.items():
+                    if k=="wg_conf" and isinstance(x,str):
+                        return x
+                    y=find_conf(x)
+                    if y: return y
+            elif isinstance(v,list):
+                for x in v:
+                    y=find_conf(x)
+                    if y: return y
+            return ""
+        conf=find_conf(created)
+        create_wg_conf=bool(conf)
+        create_wg_len=len(conf)
+        time.sleep(2)
+        cl=clients(p.get("/clients"))
+        c=next((x for x in cl if x.get("name")==name),None)
+        after={"exists":bool(c),"wg":bool((c or {}).get("wg")),"wg_conf_present":bool((c or {}).get("wg_conf")),"wg_conf_length":len((c or {}).get("wg_conf") or "")}
+    finally:
+        try:
+            p.req("DELETE","/clients/"+urllib.parse.quote(name,safe=""))
+        except Exception:
+            pass
+    return {"mode":"wgtest","auth":p.auth,"create_response_shape":create_shape,"create_response_wg_conf_present":create_wg_conf,"create_response_wg_conf_length":create_wg_len,"stored_client":after,"deleted":True,"results":[]},{"created":created}
+
+
 def main():
     mode=(sys.argv[1] if len(sys.argv)>1 else "inspect").lower()
-    if mode not in ("inspect","apply","verify","wgprobe","wgfix"): raise E("bad mode")
+    if mode not in ("inspect","apply","verify","wgprobe","wgfix","wgtest"): raise E("bad mode")
     p=Panel(); p.login()
-    safe,private={"inspect":inspect,"apply":apply,"verify":verify,"wgprobe":wgprobe,"wgfix":wgfix}[mode](p)
+    safe,private={"inspect":inspect,"apply":apply,"verify":verify,"wgprobe":wgprobe,"wgfix":wgfix,"wgtest":wgtest}[mode](p)
     save(safe,private)
     print(json.dumps(safe,ensure_ascii=False,indent=2))
 

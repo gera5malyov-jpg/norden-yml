@@ -47,7 +47,7 @@ jobs:
           else
             MODE="$(printf '%s' "${{ github.event.issue.title }}" | sed -E 's/^H1Cloud VPN:[[:space:]]*//')"
           fi
-          case "$MODE" in inspect|apply|verify|wgprobe|wgfix) ;; *) echo "Invalid mode: $MODE" >&2; exit 1 ;; esac
+          case "$MODE" in inspect|apply|verify|wgprobe|wgfix|wgtest) ;; *) echo "Invalid mode: $MODE" >&2; exit 1 ;; esac
           echo "mode=$MODE" >> "$GITHUB_OUTPUT"
 
       - name: Mask configured secrets
