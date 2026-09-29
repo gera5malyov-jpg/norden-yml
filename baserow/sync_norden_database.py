@@ -193,6 +193,13 @@ class Baserow:
             data=json.dumps(body, ensure_ascii=False),
         )
 
+    def upload_via_url(self, url):
+        return self.request(
+            "POST",
+            "/api/user-files/upload-via-url/",
+            data=json.dumps({"url": url}, ensure_ascii=False),
+        )
+
     def batch_create_rows(self, table_id, bodies, batch_size=100):
         for start in range(0, len(bodies), batch_size):
             batch = bodies[start:start + batch_size]
@@ -604,13 +611,37 @@ def main():
             "Наименование артикула": item.get("article"),
             "Поставщик": [supplier_id],
             "Наличие": True,
-            "Первое изображение": images[0],
+            "Первое изображение URL": images[0],
+            "Все изображения": "\n".join(images),
         }
         if item.get("purchase") is not None:
             body[FIELD_PURCHASE] = item["purchase"]
         body[FIELD_STOCK] = stock
 
+        # Characteristics belong only to newly created cards. Existing cards
+        # are intentionally left unchanged except for price/stock/availability.
+        for name, value in feature_values(item).items():
+            if name in current_field_names:
+                body[name] = value
+                report["characteristic_values_written"] += 1
+
         if not args.dry_run:
+            try:
+                uploaded = br.upload_via_url(images[0])
+                file_name = s((uploaded or {}).get("name"))
+                if not file_name:
+                    raise RuntimeError("Baserow upload returned no file name")
+                body["Первое изображение"] = [{
+                    "name": file_name,
+                    "visible_name": f"{item.get('article')}.jpg",
+                }]
+            except Exception as exc:
+                report["errors"].append({
+                    "stage": "new_product_first_image_upload",
+                    "article": item.get("article"),
+                    "message": str(exc)[:700],
+                })
+                continue
             pending_creates.append(body)
         report["new_rows_created"] += 1
 
