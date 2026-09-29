@@ -17,6 +17,7 @@ BASEROW_URL = os.environ.get("BASEROW_URL", "http://147.78.67.6").rstrip("/")
 BASEROW_TABLE_ID = 156
 BRAND = "Norden"
 REPORT = Path("baserow/last_kit_norden_images_sync.json")
+MAPPING = Path("norden-kit/kit_mapping.json")
 
 KIT_TOKEN = os.environ.get("YANDEX_KIT_TOKEN", "").strip()
 BASEROW_TOKEN = os.environ.get("BASEROW_DATABASE_TOKEN", "").strip()
@@ -27,17 +28,27 @@ def s(v):
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
+def supplier_is_norden(row):
+    value = row.get("Поставщик")
+    if not value:
+        return True
+    if isinstance(value, list):
+        return any(
+            isinstance(x, dict) and s(x.get("value")).casefold() == BRAND.casefold()
+            for x in value
+        )
+    return s(value).casefold() == BRAND.casefold()
+
 class KitClient:
     def __init__(self, token):
         if not token:
             raise RuntimeError("YANDEX_KIT_TOKEN is missing")
-        self.token = token
         self.headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
         self.session = requests.Session()
         self._lock = threading.Lock()
         self._last = 0.0
 
-    def _pace(self, delay=0.42):
+    def _pace(self, delay=0.46):
         with self._lock:
             wait = delay - (time.monotonic() - self._last)
             if wait > 0:
@@ -46,16 +57,13 @@ class KitClient:
 
     def request(self, method, path, params=None, timeout=90, paced=True):
         last = None
-        for attempt in range(10):
+        for attempt in range(12):
             if paced:
                 self._pace()
             try:
                 r = self.session.request(
-                    method,
-                    KIT_BASE + path,
-                    headers=self.headers,
-                    params=params,
-                    timeout=timeout,
+                    method, KIT_BASE + path, headers=self.headers,
+                    params=params, timeout=timeout
                 )
             except requests.RequestException as exc:
                 last = exc
@@ -63,7 +71,7 @@ class KitClient:
                 continue
             if r.status_code == 429:
                 last = RuntimeError("KIT rate limited")
-                time.sleep(float(r.headers.get("Retry-After") or min(30, 2 + attempt * 2)))
+                time.sleep(float(r.headers.get("Retry-After") or min(45, 3 + 2 * attempt)))
                 continue
             if r.status_code >= 500:
                 last = RuntimeError(f"KIT HTTP {r.status_code}")
@@ -91,42 +99,25 @@ class KitClient:
             return [x for x in data["items"] if isinstance(x, dict)]
         return []
 
-    @staticmethod
-    def total(payload):
-        if not isinstance(payload, dict):
-            return None
-        for key in ("total", "total_count"):
-            if isinstance(payload.get(key), int):
-                return payload[key]
-        meta = payload.get("meta")
-        if isinstance(meta, dict):
-            for key in ("total", "total_count"):
-                if isinstance(meta.get(key), int):
-                    return meta[key]
-        return None
+    def get_variant(self, variant_id):
+        return self.request("GET", f"/v1/variants/{variant_id}")
 
-    def variants_for_skus(self, wanted):
-        found = defaultdict(list)
-        page = 1
-        seen = 0
-        while True:
-            payload = self.request("GET", "/v1/variants", params={"page": page, "per_page": 100})
-            rows = self.items(payload)
-            if not rows:
-                break
-            for row in rows:
-                seen += 1
-                sku = s(row.get("sku"))
-                if sku in wanted and s(row.get("brand")).casefold() == BRAND.casefold():
-                    found[sku].append(row)
-            total = self.total(payload)
-            if page % 25 == 0:
-                print(f"KIT scan page={page}, seen={seen}, matched_skus={len(found)}", flush=True)
-            if (total is not None and seen >= total) or (total is None and len(rows) < 100):
-                break
-            page += 1
-        print(f"KIT scan complete: pages={page}, seen={seen}, matched_skus={len(found)}", flush=True)
-        return found
+    def find_variant_by_sku(self, sku):
+        payload = self.request(
+            "GET", "/v1/variants",
+            params={"name": sku, "page": 1, "per_page": 100}
+        )
+        rows = [
+            x for x in self.items(payload)
+            if s(x.get("sku")) == sku and s(x.get("brand")).casefold() == BRAND.casefold()
+        ]
+        if not rows:
+            return None, None
+        published = [x for x in rows if s(x.get("status")).upper() == "PUBLISHED"]
+        candidates = published or rows
+        if len(candidates) != 1:
+            return None, f"{len(candidates)} exact KIT variants"
+        return candidates[0], None
 
     def file_url(self, file_id):
         payload = self.request("GET", f"/v1/files/{file_id}", paced=False)
@@ -149,7 +140,7 @@ class BaserowClient:
 
     def request(self, method, path, **kwargs):
         last = None
-        for attempt in range(8):
+        for attempt in range(10):
             try:
                 r = self.session.request(method, self.base + path, timeout=60, **kwargs)
             except requests.RequestException as exc:
@@ -161,23 +152,32 @@ class BaserowClient:
                 time.sleep(min(15, 2 ** attempt))
                 continue
             if not r.ok:
-                raise RuntimeError(f"Baserow {method} {path} -> HTTP {r.status_code}: {r.text[:800]}")
+                raise RuntimeError(f"Baserow {method} {path} -> HTTP {r.status_code}: {r.text[:1000]}")
             return r.json() if r.content else {}
         raise RuntimeError(f"Baserow retries exhausted: {last}")
 
     def rows(self):
-        out = []
+        by_id = {}
         page = 1
+        expected = None
         while True:
             data = self.request(
                 "GET",
                 f"/api/database/rows/table/{BASEROW_TABLE_ID}/?user_field_names=true&size=200&page={page}",
             )
-            out.extend(data.get("results", []))
+            if expected is None:
+                expected = data.get("count")
+            for row in data.get("results", []):
+                if isinstance(row, dict) and row.get("id") is not None:
+                    by_id[row["id"]] = row
+            if expected is not None and len(by_id) >= int(expected):
+                break
             if not data.get("next"):
                 break
             page += 1
-        return out
+            if page > 500:
+                raise RuntimeError("Baserow pagination exceeded 500 pages")
+        return list(by_id.values()), expected
 
     def update(self, row_id, data):
         return self.request(
@@ -186,154 +186,222 @@ class BaserowClient:
             data=json.dumps(data, ensure_ascii=False),
         )
 
-def choose_variant(rows):
-    if not rows:
-        return None, None
-    published = [r for r in rows if s(r.get("status")).upper() == "PUBLISHED"]
-    if len(published) == 1:
-        return published[0], None
-    if len(published) > 1:
-        return None, f"multiple PUBLISHED variants ({len(published)})"
-    active = [r for r in rows if s(r.get("status")).upper() != "ARCHIVED"]
-    if len(active) == 1:
-        return active[0], None
-    if len(active) > 1:
-        return None, f"multiple non-archived variants ({len(active)})"
-    if len(rows) == 1:
-        return rows[0], None
-    return None, f"multiple archived/other variants ({len(rows)})"
+    def upload_via_url(self, url):
+        return self.request(
+            "POST",
+            "/api/user-files/upload-via-url/",
+            data=json.dumps({"url": url}, ensure_ascii=False),
+        )
+
+def mapping_index():
+    by_sku = defaultdict(list)
+    if not MAPPING.exists():
+        return by_sku
+    try:
+        data = json.loads(MAPPING.read_text(encoding="utf-8"))
+    except Exception:
+        return by_sku
+    variants = data.get("variants") if isinstance(data, dict) else None
+    if not isinstance(variants, dict):
+        return by_sku
+    for key, rows in variants.items():
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            vid = s(row.get("variant_id"))
+            sku = s(row.get("sku"))
+            if vid and sku:
+                by_sku[sku].append(vid)
+            if vid and s(key).startswith("AF-"):
+                by_sku[s(key)].append(vid)
+    return by_sku
+
+def media_ids(variant):
+    media = [
+        x for x in (variant.get("media") or [])
+        if isinstance(x, dict)
+        and s(x.get("type")).upper() == "IMAGE"
+        and s(x.get("image_id"))
+    ]
+    media.sort(key=lambda x: (
+        x.get("display_sequence") is None,
+        x.get("display_sequence") if x.get("display_sequence") is not None else 0
+    ))
+    return list(dict.fromkeys(s(x.get("image_id")) for x in media))
 
 def main():
     report = {
         "started_at": now_iso(),
         "brand": BRAND,
-        "baserow_rows": 0,
+        "baserow_api_count": None,
+        "baserow_unique_rows": 0,
+        "baserow_norden_rows": 0,
         "kit_matched": 0,
         "kit_missing": 0,
         "kit_ambiguous": 0,
-        "with_images": 0,
-        "without_images": 0,
-        "unique_image_ids": 0,
-        "resolved_image_urls": 0,
+        "rows_with_images": 0,
+        "rows_without_images": 0,
         "updated_rows": 0,
         "unchanged_rows": 0,
+        "uploaded_first_images": 0,
         "errors": [],
-        "ambiguous": [],
-        "missing_sample": [],
         "complete": False,
     }
 
     br = BaserowClient(BASEROW_URL, BASEROW_TOKEN)
     kit = KitClient(KIT_TOKEN)
 
-    rows = br.rows()
-    report["baserow_rows"] = len(rows)
-    by_sku = {}
-    duplicates = []
-    for row in rows:
-        sku = s(row.get("Артикул"))
-        if not sku:
-            continue
-        if sku in by_sku:
-            duplicates.append(sku)
-        by_sku[sku] = row
-    if duplicates:
-        raise RuntimeError(f"Duplicate Baserow articles: {duplicates[:20]}")
+    all_rows, expected = br.rows()
+    report["baserow_api_count"] = expected
+    report["baserow_unique_rows"] = len(all_rows)
 
-    wanted = set(by_sku)
-    kit_rows = kit.variants_for_skus(wanted)
+    target_rows = [
+        row for row in all_rows
+        if s(row.get("Артикул")) and supplier_is_norden(row)
+    ]
+    report["baserow_norden_rows"] = len(target_rows)
 
-    selected = {}
-    image_ids = set()
-    for sku in sorted(wanted):
-        rows_for_sku = kit_rows.get(sku, [])
-        variant, reason = choose_variant(rows_for_sku)
-        if reason:
-            report["kit_ambiguous"] += 1
-            if len(report["ambiguous"]) < 100:
-                report["ambiguous"].append({"sku": sku, "reason": reason})
-            continue
-        if variant is None:
-            report["kit_missing"] += 1
-            if len(report["missing_sample"]) < 100:
-                report["missing_sample"].append(sku)
-            continue
-        report["kit_matched"] += 1
-        media = [
-            m for m in (variant.get("media") or [])
-            if isinstance(m, dict)
-            and s(m.get("type")).upper() == "IMAGE"
-            and s(m.get("image_id"))
-        ]
-        media.sort(key=lambda m: (m.get("display_sequence") is None, m.get("display_sequence") or 0))
-        ids = [s(m.get("image_id")) for m in media]
-        selected[sku] = ids
-        image_ids.update(ids)
+    rows_by_sku = defaultdict(list)
+    for row in target_rows:
+        rows_by_sku[s(row.get("Артикул"))].append(row)
 
-    report["unique_image_ids"] = len(image_ids)
-    print(
-        f"Matched KIT={report['kit_matched']}; missing={report['kit_missing']}; "
-        f"ambiguous={report['kit_ambiguous']}; unique image ids={len(image_ids)}",
-        flush=True,
-    )
+    map_idx = mapping_index()
+
+    variants = {}
+    missing = []
+    ambiguous = []
+
+    for idx, sku in enumerate(sorted(rows_by_sku), 1):
+        chosen = None
+        mapped_ids = list(dict.fromkeys(map_idx.get(sku, [])))
+        if len(mapped_ids) == 1:
+            try:
+                candidate = kit.get_variant(mapped_ids[0])
+                if s(candidate.get("sku")) == sku and s(candidate.get("brand")).casefold() == BRAND.casefold():
+                    chosen = candidate
+            except Exception:
+                chosen = None
+        if chosen is None:
+            chosen, reason = kit.find_variant_by_sku(sku)
+            if reason:
+                ambiguous.append((sku, reason))
+                continue
+        if chosen is None:
+            missing.append(sku)
+            continue
+        variants[sku] = chosen
+        if idx % 100 == 0:
+            print(f"KIT product lookup {idx}/{len(rows_by_sku)} matched={len(variants)}", flush=True)
+
+    report["kit_matched"] = len(variants)
+    report["kit_missing"] = len(missing)
+    report["kit_ambiguous"] = len(ambiguous)
+
+    all_file_ids = set()
+    ids_by_sku = {}
+    for sku, variant in variants.items():
+        ids = media_ids(variant)
+        ids_by_sku[sku] = ids
+        all_file_ids.update(ids)
 
     url_by_id = {}
     def resolve(fid):
         local = KitClient(KIT_TOKEN)
         return fid, local.file_url(fid)
 
-    if image_ids:
-        with ThreadPoolExecutor(max_workers=6) as pool:
-            futures = {pool.submit(resolve, fid): fid for fid in image_ids}
-            done = 0
-            for fut in as_completed(futures):
-                fid = futures[fut]
-                try:
-                    key, url = fut.result()
-                    url_by_id[key] = url
-                except Exception as exc:
-                    report["errors"].append({"file_id": fid, "stage": "resolve_file", "message": str(exc)[:700]})
-                done += 1
-                if done % 250 == 0 or done == len(image_ids):
-                    print(f"Resolved KIT image URLs {done}/{len(image_ids)}", flush=True)
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futures = {pool.submit(resolve, fid): fid for fid in all_file_ids}
+        done = 0
+        for fut in as_completed(futures):
+            fid = futures[fut]
+            try:
+                key, url = fut.result()
+                url_by_id[key] = url
+            except Exception as exc:
+                report["errors"].append({
+                    "stage": "kit_file_url",
+                    "file_id": fid,
+                    "message": str(exc)[:700],
+                })
+            done += 1
+            if done % 250 == 0 or done == len(all_file_ids):
+                print(f"KIT image URLs {done}/{len(all_file_ids)}", flush=True)
 
-    report["resolved_image_urls"] = len(url_by_id)
-
-    for index, (sku, ids) in enumerate(selected.items(), 1):
-        row = by_sku[sku]
-        urls = [url_by_id[fid] for fid in ids if fid in url_by_id]
-        # Keep order and remove accidental duplicate URLs.
-        urls = list(dict.fromkeys(urls))
-        first = urls[0] if urls else ""
-        all_images = "\n".join(urls)
-
-        if urls:
-            report["with_images"] += 1
-        else:
-            report["without_images"] += 1
-
-        current_first = s(row.get("Первое изображение"))
-        current_all = s(row.get("Все изображения"))
-        if current_first == first and current_all == all_images:
-            report["unchanged_rows"] += 1
+    for n, (sku, rows) in enumerate(rows_by_sku.items(), 1):
+        if sku not in variants:
             continue
+        urls = [url_by_id[x] for x in ids_by_sku.get(sku, []) if x in url_by_id]
+        urls = list(dict.fromkeys(urls))
+        first_url = urls[0] if urls else ""
+        all_urls = "\n".join(urls)
 
-        br.update(row["id"], {
-            "Первое изображение": first,
-            "Все изображения": all_images,
-        })
-        report["updated_rows"] += 1
+        for row in rows:
+            current_first_url = s(row.get("Первое изображение URL"))
+            current_all = s(row.get("Все изображения"))
+            current_file = row.get("Первое изображение") or []
 
-        if index % 100 == 0:
+            body = {}
+            if current_all != all_urls:
+                body["Все изображения"] = all_urls
+            if current_first_url != first_url:
+                body["Первое изображение URL"] = first_url
+
+            if first_url:
+                report["rows_with_images"] += 1
+                if current_first_url != first_url or not current_file:
+                    try:
+                        uploaded = br.upload_via_url(first_url)
+                        name = s(uploaded.get("name"))
+                        if not name:
+                            raise RuntimeError("Baserow upload returned no file name")
+                        body["Первое изображение"] = [
+                            {"name": name, "visible_name": f"{sku}.jpg"}
+                        ]
+                        report["uploaded_first_images"] += 1
+                    except Exception as exc:
+                        report["errors"].append({
+                            "stage": "baserow_upload_first_image",
+                            "sku": sku,
+                            "message": str(exc)[:700],
+                        })
+            else:
+                report["rows_without_images"] += 1
+                if current_file:
+                    body["Первое изображение"] = []
+
+            if body:
+                try:
+                    br.update(row["id"], body)
+                    report["updated_rows"] += 1
+                except Exception as exc:
+                    report["errors"].append({
+                        "stage": "baserow_update",
+                        "sku": sku,
+                        "row_id": row.get("id"),
+                        "message": str(exc)[:700],
+                    })
+            else:
+                report["unchanged_rows"] += 1
+
+        if n % 100 == 0:
             print(
-                f"Baserow progress {index}/{len(selected)} updated={report['updated_rows']} unchanged={report['unchanged_rows']}",
+                f"Baserow sync {n}/{len(rows_by_sku)} updated={report['updated_rows']} "
+                f"uploaded_previews={report['uploaded_first_images']}",
                 flush=True,
             )
 
+    report["missing_sample"] = missing[:100]
+    report["ambiguous_sample"] = ambiguous[:100]
     report["finished_at"] = now_iso()
-    report["complete"] = report["kit_ambiguous"] == 0 and not report["errors"]
+    report["complete"] = len(report["errors"]) == 0 and len(ambiguous) == 0
+
     REPORT.parent.mkdir(parents=True, exist_ok=True)
-    REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    REPORT.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
     print(json.dumps(report, ensure_ascii=False, indent=2), flush=True)
     return 0 if report["complete"] else 1
 
