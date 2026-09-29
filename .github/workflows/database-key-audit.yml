@@ -1,0 +1,49 @@
+name: Database article key audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/database-key-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      DB_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Audit article keys
+        run: |
+          python3 - <<'PY'
+          import os, requests, unicodedata
+          from collections import defaultdict
+          def n(v): return unicodedata.normalize('NFKC',str(v or '').strip()).casefold()
+          h={'Authorization':'Token '+os.environ['DB_TOKEN']}
+          base='http://147.78.67.6'
+          rows=[]; page=1
+          while True:
+              r=requests.get(f'{base}/api/database/rows/table/156/?user_field_names=true&size=200&page={page}',headers=h,timeout=30)
+              r.raise_for_status(); j=r.json(); rows += j.get('results',[])
+              if not j.get('next'): break
+              page += 1
+          by=defaultdict(list)
+          norden=0
+          for row in rows:
+              k=n(row.get('Наименование артикула'))
+              if k: by[k].append(row.get('id'))
+              suppliers=row.get('Поставщик') or []
+              if any(n(x.get('value'))=='norden' for x in suppliers if isinstance(x,dict)): norden+=1
+          dup={k:v for k,v in by.items() if len(v)>1}
+          print('ROWS',len(rows))
+          print('NORDEN_LINKED_ROWS',norden)
+          print('UNIQUE_ARTICLE_NAMES',len(by))
+          print('DUPLICATE_KEYS',len(dup))
+          print('DUPLICATE_SAMPLE',list(dup.items())[:50])
+          PY
