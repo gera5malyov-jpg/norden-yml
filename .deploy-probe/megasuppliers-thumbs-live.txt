@@ -1,5 +1,13 @@
-BACKUP=/home/web/backups/chatgpt-megasuppliers-thumbs/20260929-095118
+BACKUP=/home/web/backups/chatgpt-megasuppliers-thumbs/20260929-095238
+THUMB_ENDPOINT=exists
+THUMB_BOOTSTRAP=ajax_guard_exists
+THUMB_ROUTE=ok
+NEW_UI_BOOTSTRAP=exists
+OLD_UI_BOOTSTRAP=exists
+VERSION=1.0.11
+
+Parse error: syntax error, unexpected '\' (T_NS_SEPARATOR), expecting function (T_FUNCTION) or const (T_CONST) in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php on line 466
+Errors parsing /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php
 
 STDERR
 Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
-cannot replace thumbnailEndpointUrl
