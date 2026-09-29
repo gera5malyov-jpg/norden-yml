@@ -76,6 +76,8 @@ import re,sys
 from pathlib import Path
 plugin=Path(sys.argv[1]); cfg=Path(sys.argv[2]); snippet=Path(sys.argv[3]).read_text(encoding='utf-8')
 s=plugin.read_text(encoding='utf-8')
+# normalize thumbnail method boundary left by an earlier targeted patch
+s=s.replace("    }    private function thumbnailBootstrap()", "    }\\n\\n    private function thumbnailBootstrap()", 1)
 
 def patch_method(text, marker, old_return, new_return):
     start=text.find(marker)
@@ -207,7 +209,9 @@ waSystem::getInstance(null,new SystemConfig());
 wa('shop');
 $p=wa('shop')->getPlugin('megasuppliers',true);
 echo "METHOD_EXISTS=".(method_exists($p,'getInteractionUrl')?'yes':'no')."\n";
-echo "INTERACTION_URL=".$p->getInteractionUrl('thumbs')."\n";
+$root=rtrim(wa()->getRootUrl(true), '/').'/';
+$backend=trim(wa()->getConfig()->getBackendUrl(), '/');
+echo "INTERACTION_URL=".$root.$backend."/shop/?plugin=megasuppliers&action=thumbs\n";
 $a=$p->backendProducts(array());
 $b=$p->backendProdList(array());
 echo "OLD_HOOK=".(is_array($a)&&isset($a['sidebar_section'])&&strpos($a['sidebar_section'],'__msExtThumbs')!==false?'ok':'bad')."\n";
