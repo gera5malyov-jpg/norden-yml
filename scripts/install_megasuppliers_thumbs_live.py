@@ -77,7 +77,8 @@ from pathlib import Path
 plugin=Path(sys.argv[1]); cfg=Path(sys.argv[2]); snippet=Path(sys.argv[3]).read_text(encoding='utf-8')
 s=plugin.read_text(encoding='utf-8')
 # normalize thumbnail method boundary left by an earlier targeted patch
-s=s.replace("    }    private function thumbnailBootstrap()", "    }\\n\\n    private function thumbnailBootstrap()", 1)
+s=s.replace(r"    }\n\n    private function thumbnailBootstrap()", "    }\n\n    private function thumbnailBootstrap()", 1)
+s=s.replace("    }    private function thumbnailBootstrap()", "    }\n\n    private function thumbnailBootstrap()", 1)
 
 def patch_method(text, marker, old_return, new_return):
     start=text.find(marker)
