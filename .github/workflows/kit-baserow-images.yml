@@ -1,0 +1,42 @@
+name: Sync KIT Norden images to Baserow
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+  push:
+    branches: [main]
+    paths:
+      - kit-baserow-images-run.txt
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kit-norden-images-baserow
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      BASEROW_URL: http://147.78.67.6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Sync KIT Norden image links to existing Baserow products
+        run: python baserow/sync_kit_norden_images.py
+      - name: Upload sync report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kit-norden-baserow-images-report
+          path: baserow/last_kit_norden_images_sync.json
+          if-no-files-found: ignore
+          retention-days: 14
