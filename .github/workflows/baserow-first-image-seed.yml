@@ -1,0 +1,61 @@
+name: Seed Baserow visual first image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - baserow-first-image-seed.txt
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Seed AF-31662421 preview
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          h={'Authorization':'Token '+os.environ['BASEROW_DATABASE_TOKEN'],'Accept':'application/json','Content-Type':'application/json'}
+          base='http://147.78.67.6'
+          found=None
+          page=1
+          while True:
+              r=requests.get(f'{base}/api/database/rows/table/156/?user_field_names=true&size=200&page={page}',headers=h,timeout=60)
+              r.raise_for_status()
+              d=r.json()
+              for row in d.get('results',[]):
+                  if str(row.get('Артикул') or '').strip()=='AF-31662421':
+                      found=row
+                      break
+              if found or not d.get('next'): break
+              page += 1
+          if not found: raise SystemExit('row not found')
+          url=str(found.get('Первое изображение URL') or '').strip()
+          if not url: raise SystemExit('first image URL is empty')
+          up=requests.post(base+'/api/user-files/upload-via-url/',headers=h,json={'url':url},timeout=90)
+          up.raise_for_status()
+          name=up.json().get('name')
+          if not name: raise SystemExit('upload returned no name')
+          p=requests.patch(
+              f"{base}/api/database/rows/table/156/{found['id']}/?user_field_names=true",
+              headers=h,
+              json={'Первое изображение':[{'name':name,'visible_name':'AF-31662421.jpg'}]},
+              timeout=60
+          )
+          p.raise_for_status()
+          out=p.json().get('Первое изображение') or []
+          print('ROW_ID=',found['id'])
+          print('PREVIEW_FILES=',len(out))
+          if not out: raise SystemExit('preview field stayed empty')
+          print('IS_IMAGE=',out[0].get('is_image'))
+          print('THUMBNAIL=',(out[0].get('thumbnails') or {}).get('small',{}).get('url'))
+          PY
