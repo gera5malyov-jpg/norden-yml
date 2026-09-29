@@ -452,6 +452,15 @@ NATIVE_IMAGES=[{"id":"6549318","product_id":"1476554","ext":"jpg","original_file
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:409:                <div class="block pagination s-product-list-paginations">
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:420:    <div class="dialog width400px height250px" id="s-product-list-delete-dialog">
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/templates/actions-legacy/products/Products.html:484:    <div class="dialog width400px height200px" id="s-product-list-duplicate-error-dialog">
+--- SHOP PLUGIN INTERACTION IMPLEMENTATION ---
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/classes/plugins/shopPlugin.class.php:3:abstract class shopPlugin extends waPlugin
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/plugins/shopPlugins.actions.php:3:class shopPluginsActions extends waPluginsActions {
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/model/shopPlugin.model.php:3:class shopPluginModel extends shopSortableModel
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/model/shopPluginSettings.model.php:2:class shopPluginSettingsModel extends waModel implements waiPluginSettings
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/plugincontrol/lib/actions/backend/shopPlugincontrolPluginBackend.controller.php:3:class shopPlugincontrolPluginBackendController extends waJsonController
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/plugincontrol/lib/actions/shopPlugincontrolPluginSettings.action.php:3:class shopPlugincontrolPluginSettingsAction extends waViewAction
+/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/plugincontrol/lib/shopPlugincontrol.plugin.php:3:class shopPlugincontrolPlugin extends shopPlugin
+--- SHOP PLUGIN INTERACTION IMPLEMENTATION END ---
 --- INTERACTION URL METHOD ---
 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/payment/waPayment.class.php:1501:    public function getInteractionUrl($action = 'default', $module = 'backend')
 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/shipping/waShipping.class.php:1682:    public function getInteractionUrl($action = 'default', $module = 'backend')
