@@ -1,0 +1,50 @@
+name: One-off Norden repair rows 667+
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'baserow/norden_repair_667_trigger.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: norden-one-off-repair-667
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Repair existing Norden rows 667 and below in the grid
+        run: |
+          python baserow/sync_norden_database.py \
+            --repair-from-row 667 \
+            --force-price-xml \
+            --report-file baserow/norden_repair_from_667_report.json
+      - name: Save repair report
+        if: always()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add baserow/norden_repair_from_667_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Norden rows 667+ repair report"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
