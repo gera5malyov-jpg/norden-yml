@@ -14,6 +14,9 @@ from typing import Any, Dict, List, Optional
 import requests
 
 HERE = Path(__file__).resolve().parent
+RUNTIME = HERE / "runtime"
+RUNTIME.mkdir(parents=True, exist_ok=True)
+REPORT_FILE = RUNTIME / "marketplace_order_sync_report.json"
 sys.path.insert(0, str(HERE))
 from client import WebasystClient
 
@@ -1317,6 +1320,10 @@ def main():
     if "ozon" in SYNC_SOURCES:
         run_source("ozon", load_ozon)
     report["finished_at"] = iso(datetime.now(timezone.utc))
+    REPORT_FILE.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 2 if report["errors"] else 0
 
