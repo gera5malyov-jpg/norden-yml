@@ -1,0 +1,174 @@
+{
+  "started_at": "2026-09-30T09:35:47.289782+00:00",
+  "dry_run": false,
+  "source": "price_xml_forced",
+  "api_error": null,
+  "source_unique": 8249,
+  "source_duplicate_codes": 5,
+  "eligible_in_stock": 4524,
+  "excluded_discount": 12,
+  "excluded_moscow": 0,
+  "excluded_without_images": 0,
+  "existing_matches": 4557,
+  "existing_price_stock_updates": 4214,
+  "existing_characteristic_rows_updated": 4214,
+  "existing_full_rows_repaired": 4214,
+  "existing_image_rows_repaired": 4046,
+  "repair_from_row": 667,
+  "control_article": {
+    "article": "RF.104L.PGDA.DA",
+    "row_id": 3139,
+    "full_repair": true,
+    "images_found": 1,
+    "features_found": 2,
+    "source": "price_xml+full_xml"
+  },
+  "characteristic_values_written": 21080,
+  "existing_out_of_stock_updates": 163,
+  "missing_source_set_zero": 0,
+  "supplier_code_conflicts": 0,
+  "new_rows_created": 0,
+  "database_duplicate_keys": [],
+  "skipped_ambiguous": 0,
+  "errors": [
+    {
+      "stage": "repair_first_image_upload",
+      "article": "OL-20-20.GN.GR",
+      "row_id": 2765,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "OL-20-22.GN.GR",
+      "row_id": 2770,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "OL-20-20.DT.GR",
+      "row_id": 3893,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.188.WH",
+      "row_id": 4858,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.188.OL",
+      "row_id": 4859,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.188.OD",
+      "row_id": 4860,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.185.OD",
+      "row_id": 4867,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.185.OL",
+      "row_id": 4866,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.185.WH",
+      "row_id": 4868,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.184.WH",
+      "row_id": 4875,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.187.OL",
+      "row_id": 4873,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.187.WH",
+      "row_id": 4872,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.187.OD",
+      "row_id": 4874,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.184.OD",
+      "row_id": 4876,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "MX.184.OL",
+      "row_id": 4877,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "SG.323.SH",
+      "row_id": 4906,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "QR.109.AR.AN",
+      "row_id": 1029,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "QR.108.WH.WH",
+      "row_id": 1019,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "QR.108.WH.AR",
+      "row_id": 1020,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "QR.108.WH.AN",
+      "row_id": 1021,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "QR.110.WH.AR",
+      "row_id": 1023,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    },
+    {
+      "stage": "repair_first_image_upload",
+      "article": "QR.109.WH.WH",
+      "row_id": 1028,
+      "message": "Baserow POST /api/user-files/upload-via-url/ -> HTTP 400: {\"error\":\"ERROR_FILE_URL_COULD_NOT_BE_REACHED\",\"detail\":\"The provided URL could not be reached.\"}"
+    }
+  ],
+  "schema_warnings": [],
+  "numeric_fields_available": [
+    "Закупка Norden",
+    "Остаток Norden"
+  ],
+  "image_jobs_queued": 4068,
+  "finished_at": "2026-09-30T10:40:06.109551+00:00"
+}
