@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
 import os
 import re
@@ -550,6 +551,7 @@ def main():
 
     pending_updates = []
     pending_creates = []
+    pending_image_jobs = []
     seen_source_keys = set(source.keys())
 
     for k, item in source.items():
@@ -581,6 +583,8 @@ def main():
             report["existing_matches"] += 1
             row = existing[0]
             row_id = int(row["id"])
+            if args.repair_from_row is not None and row_id < args.repair_from_row:
+                continue
             body = {}
             if item.get("purchase") is not None:
                 body[FIELD_PURCHASE] = item["purchase"]
@@ -614,30 +618,13 @@ def main():
                         body["Первое изображение URL"] = images[0]
                     if "Все изображения" in current_field_names:
                         body["Все изображения"] = "\n".join(images)
-                    if not args.dry_run and "Первое изображение" in current_field_names:
-                        try:
-                            uploaded = br.upload_via_url(images[0])
-                            file_name = s((uploaded or {}).get("name"))
-                            if file_name:
-                                body["Первое изображение"] = [{
-                                    "name": file_name,
-                                    "visible_name": f"{item.get('article')}.jpg",
-                                }]
-                                report["existing_image_rows_repaired"] += 1
-                            else:
-                                report["errors"].append({
-                                    "stage": "repair_first_image_upload",
-                                    "article": item.get("article"),
-                                    "row_id": row_id,
-                                    "message": "Baserow upload returned no file name",
-                                })
-                        except Exception as exc:
-                            report["errors"].append({
-                                "stage": "repair_first_image_upload",
-                                "article": item.get("article"),
-                                "row_id": row_id,
-                                "message": str(exc)[:700],
-                            })
+                    if (not args.dry_run and "Первое изображение" in current_field_names
+                            and not row.get("Первое изображение")):
+                        pending_image_jobs.append({
+                            "row_id": row_id,
+                            "article": item.get("article"),
+                            "url": images[0],
+                        })
 
                 for name, value in feature_values(item).items():
                     if name in current_field_names:
@@ -683,6 +670,10 @@ def main():
                         report["existing_price_stock_updates"] += 1
                     if stock == 0:
                         report["existing_out_of_stock_updates"] += 1
+            continue
+
+        if args.repair_from_row is not None:
+            # One-off repair modifies only already existing rows in the requested range.
             continue
 
         if not in_stock:
@@ -732,33 +723,70 @@ def main():
             pending_creates.append(body)
         report["new_rows_created"] += 1
 
-    # If an existing Norden product disappears from the source altogether,
-    # keep the row but force supplier stock to zero as requested.
-    for row in catalog_rows:
-        if supplier_id not in supplier_ids(row):
-            continue
-        code = norm(row.get("Наименование артикула"))
-        if not code or code in seen_source_keys:
-            continue
-        body = {"id": row["id"], FIELD_STOCK: 0, "Наличие": False}
-        current_stock = row.get(FIELD_STOCK)
-        current_available = bool(row.get("Наличие"))
-        changed = current_available
-        try:
-            changed = changed or float(current_stock or 0) != 0
-        except Exception:
-            changed = changed or s(current_stock) not in ("", "0", "0.0")
-        if changed:
-            report["missing_source_set_zero"] += 1
-            if not args.dry_run:
-                pending_updates.append(body)
+    # Scheduled mode keeps stock synchronized for disappeared products.
+    # The one-off repair is strictly scoped to existing rows >= repair_from_row.
+    if args.repair_from_row is None:
+        for row in catalog_rows:
+            if supplier_id not in supplier_ids(row):
+                continue
+            code = norm(row.get("Наименование артикула"))
+            if not code or code in seen_source_keys:
+                continue
+            body = {"id": row["id"], FIELD_STOCK: 0, "Наличие": False}
+            current_stock = row.get(FIELD_STOCK)
+            current_available = bool(row.get("Наличие"))
+            changed = current_available
+            try:
+                changed = changed or float(current_stock or 0) != 0
+            except Exception:
+                changed = changed or s(current_stock) not in ("", "0", "0.0")
+            if changed:
+                report["missing_source_set_zero"] += 1
+                if not args.dry_run:
+                    pending_updates.append(body)
 
     if not args.dry_run:
+        # Write supplier text/numeric data first so rows become useful immediately.
         if pending_updates:
             br.batch_update_rows(CATALOG_TABLE_ID, pending_updates)
         if pending_creates:
             br.batch_create_rows(CATALOG_TABLE_ID, pending_creates)
 
+        # First-image file uploads are the slowest operation. Run them in parallel
+        # only for repaired rows that still have no native Baserow image.
+        if pending_image_jobs:
+            def upload_repair_image(job):
+                local_br = Baserow(BASEROW_URL, BASEROW_TOKEN)
+                uploaded = local_br.upload_via_url(job["url"])
+                file_name = s((uploaded or {}).get("name"))
+                if not file_name:
+                    raise RuntimeError("Baserow upload returned no file name")
+                local_br.update_row(
+                    CATALOG_TABLE_ID,
+                    job["row_id"],
+                    {"Первое изображение": [{
+                        "name": file_name,
+                        "visible_name": f"{job['article']}.jpg",
+                    }]},
+                )
+                return job
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+                future_map = {pool.submit(upload_repair_image, job): job for job in pending_image_jobs}
+                for future in concurrent.futures.as_completed(future_map):
+                    job = future_map[future]
+                    try:
+                        future.result()
+                        report["existing_image_rows_repaired"] += 1
+                    except Exception as exc:
+                        report["errors"].append({
+                            "stage": "repair_first_image_upload",
+                            "article": job.get("article"),
+                            "row_id": job.get("row_id"),
+                            "message": str(exc)[:700],
+                        })
+
+    report["image_jobs_queued"] = len(pending_image_jobs)
     report["finished_at"] = now_iso()
     if args.report_file:
         os.makedirs(os.path.dirname(args.report_file) or ".", exist_ok=True)
