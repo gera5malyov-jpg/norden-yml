@@ -208,6 +208,7 @@ def ozon_commissions(offer_ids):
                 "sales_percent": sales_rfbs,
                 "acquiring_percent": acquiring_percent,
                 "total_percent": round(sales_rfbs + acquiring_percent, 2),
+                "sale_price": sale_price,
                 "category": "",
             }
 
@@ -324,6 +325,7 @@ def yandex_offer_data(offer_ids):
                 "fee_percent": pct(fee, price),
                 "acquiring_percent": pct(acquiring, price),
                 "total_percent": round(pct(fee + acquiring, price), 2),
+                "sale_price": price,
                 "category": s(mp.get("marketCategoryName")),
             }
     return result
@@ -368,6 +370,8 @@ def main():
     updates = []
     oz_changed = ya_changed = 0
     oz_category_changed = ya_category_changed = 0
+    significant_commission_changes = []
+    low_margin_items = []
     for offer, matched_rows in by_offer.items():
         for row in matched_rows:
             body = {"id": row["id"]}
@@ -375,13 +379,41 @@ def main():
             if offer in oz:
                 value = oz[offer]["total_percent"]
                 try:
-                    same = round(float(row.get(FIELD_OZON) or 0), 2) == value
+                    old_value = round(float(row.get(FIELD_OZON) or 0), 2)
+                    same = old_value == value
                 except Exception:
+                    old_value = 0.0
                     same = False
                 if not same:
                     body[FIELD_OZON] = value
                     oz_changed += 1
                     changed = True
+                    if old_value > 0 and abs(value - old_value) >= 1.0:
+                        significant_commission_changes.append({
+                            "marketplace": "Ozon",
+                            "offer": offer,
+                            "old": old_value,
+                            "new": value,
+                        })
+
+                sale_price = num(oz[offer].get("sale_price"))
+                purchase = num(row.get("Закупка Norden"))
+                if sale_price > 0 and purchase > 0:
+                    margin = round(
+                        ((sale_price * (1 - value / 100.0)) - purchase)
+                        / sale_price
+                        * 100.0,
+                        2,
+                    )
+                    if margin < 18.0:
+                        low_margin_items.append({
+                            "marketplace": "Ozon",
+                            "offer": offer,
+                            "margin": margin,
+                            "sale_price": sale_price,
+                            "purchase": purchase,
+                            "commission": value,
+                        })
 
                 category = s(oz[offer].get("category"))
                 if category and s(row.get(FIELD_OZON_CATEGORY)) != category:
@@ -392,13 +424,41 @@ def main():
             if offer in ya:
                 value = ya[offer]["total_percent"]
                 try:
-                    same = round(float(row.get(FIELD_YANDEX) or 0), 2) == value
+                    old_value = round(float(row.get(FIELD_YANDEX) or 0), 2)
+                    same = old_value == value
                 except Exception:
+                    old_value = 0.0
                     same = False
                 if not same:
                     body[FIELD_YANDEX] = value
                     ya_changed += 1
                     changed = True
+                    if old_value > 0 and abs(value - old_value) >= 1.0:
+                        significant_commission_changes.append({
+                            "marketplace": "Яндекс",
+                            "offer": offer,
+                            "old": old_value,
+                            "new": value,
+                        })
+
+                sale_price = num(ya[offer].get("sale_price"))
+                purchase = num(row.get("Закупка Norden"))
+                if sale_price > 0 and purchase > 0:
+                    margin = round(
+                        ((sale_price * (1 - value / 100.0)) - purchase)
+                        / sale_price
+                        * 100.0,
+                        2,
+                    )
+                    if margin < 18.0:
+                        low_margin_items.append({
+                            "marketplace": "Яндекс",
+                            "offer": offer,
+                            "margin": margin,
+                            "sale_price": sale_price,
+                            "purchase": purchase,
+                            "commission": value,
+                        })
 
                 category = s(ya[offer].get("category"))
                 if category and s(row.get(FIELD_YANDEX_CATEGORY)) != category:
@@ -424,6 +484,8 @@ def main():
         "ozon_category_rows_updated": oz_category_changed,
         "yandex_category_rows_updated": ya_category_changed,
         "rows_updated": len(updates),
+        "significant_commission_changes": significant_commission_changes[:500],
+        "low_margin_items": low_margin_items[:1000],
         "fields": {
             FIELD_OZON: "sales_percent_rfbs + acquiring_percent",
             FIELD_YANDEX: "DBS FEE + AGENCY_COMMISSION/PAYMENT_TRANSFER",
