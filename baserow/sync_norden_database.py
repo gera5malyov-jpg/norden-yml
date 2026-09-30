@@ -447,6 +447,8 @@ def main():
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--repair-from-row", type=int, default=None,
                         help="One-off full supplier-data repair for existing Baserow row IDs >= this value")
+    parser.add_argument("--force-price-xml", action="store_true",
+                        help="Use Norden supplier price XML + full XML as the source")
     parser.add_argument("--report-file", default="",
                         help="Optional JSON report output path")
     args = parser.parse_args()
@@ -481,7 +483,14 @@ def main():
         "numeric_fields_available": [],
     }
 
-    source, source_duplicates, source_kind, api_error = load_source()
+    if args.force_price_xml:
+        source, source_duplicates = load_price_xml()
+        if len(source) < 1000:
+            raise RuntimeError(f"Safety stop: supplier price XML returned only {len(source)} unique products")
+        source_kind = "price_xml_forced"
+        api_error = None
+    else:
+        source, source_duplicates, source_kind, api_error = load_source()
     report["source"] = source_kind
     report["api_error"] = api_error
     report["source_unique"] = len(source)
@@ -589,10 +598,11 @@ def main():
                 for article_field in ("Артикул", "Наименование артикула", "Артикул поставщика", "Код для сайта"):
                     if article_field in current_field_names:
                         body[article_field] = item.get("article")
-                if "Категория" in current_field_names and item.get("category"):
-                    body["Категория"] = item.get("category")
-                if "Категория Norden" in current_field_names and item.get("category"):
-                    body["Категория Norden"] = item.get("category")
+                supplier_category = item.get("category") or item.get("group")
+                if "Категория" in current_field_names and supplier_category:
+                    body["Категория"] = supplier_category
+                if "Категория Norden" in current_field_names and supplier_category:
+                    body["Категория Norden"] = supplier_category
                 if "Группа Norden" in current_field_names and item.get("group"):
                     body["Группа Norden"] = item.get("group")
                 if "Описание Norden" in current_field_names and item.get("description"):
