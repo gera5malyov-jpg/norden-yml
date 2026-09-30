@@ -345,6 +345,7 @@ def webasyst_active_rows(wa: WebasystClient, sku_names: dict[str, str]) -> dict[
     states = settings.get("order_states") if isinstance(settings, dict) else []
     states = listify(states)
 
+    state_names = {s(st.get("id")): s(st.get("name")) for st in states if s(st.get("id"))}
     active_states = []
     for st in states:
         sid = s(st.get("id"))
@@ -407,6 +408,7 @@ def webasyst_active_rows(wa: WebasystClient, sku_names: dict[str, str]) -> dict[
                     "source": source,
                     "code": SOURCE_CODE.get(source, "П"),
                     "order_no": ext,
+                    "platform_status": state_names.get(state_id, state_id),
                     "deadline": normalize_date(deadline),
                     "items": products,
                     "quantity": qty,
@@ -452,7 +454,6 @@ def direct_marketplace_rows(sku_names: dict[str, str]) -> tuple[dict[str, dict],
                 target = "completed"
             if target in TERMINAL_TARGETS:
                 terminal_keys.add(k)
-                continue
             products, qty = item_text(o.get("items"), sku_names)
             buyer = o.get("buyer") if isinstance(o.get("buyer"), dict) else {}
             fio = s(o.get("recipient_name")) or person_name(buyer)
@@ -461,6 +462,7 @@ def direct_marketplace_rows(sku_names: dict[str, str]) -> tuple[dict[str, dict],
                 "source": source,
                 "code": SOURCE_CODE[source],
                 "order_no": ext,
+                "platform_status": s(o.get("status_raw") or o.get("target_state")),
                 "deadline": normalize_date(o.get("delivery_to") or o.get("delivery_from")),
                 "items": products,
                 "quantity": qty,
@@ -657,6 +659,8 @@ def merge_rows(base: dict[str, dict], fresh: dict[str, dict], terminal: set[str]
     for k in terminal:
         base.pop(k, None)
     for k, new in fresh.items():
+        if k in terminal:
+            continue
         old = base.get(k, {})
         merged = dict(old)
         for field, value in new.items():
