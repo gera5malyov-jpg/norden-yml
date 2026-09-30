@@ -1,0 +1,90 @@
+name: Заказы → Baserow
+
+on:
+  schedule:
+    - cron: '25 */3 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'orders-baserow/sync_orders_baserow.py'
+      - 'orders-sheet/sync_orders_sheet.py'
+      - '.github/workflows/orders-baserow.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orders-baserow
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: pip install --disable-pip-version-check requests "gspread>=6.1,<7" "google-auth>=2.35,<3"
+
+      - name: Проверить синтаксис
+        run: python -m py_compile orders-baserow/sync_orders_baserow.py orders-sheet/sync_orders_sheet.py
+
+      - name: Синхронизировать активные заказы в Baserow
+        env:
+          BASEROW_URL: 'http://147.78.67.6'
+          BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+          BASEROW_JWT: ${{ secrets.BASEROW_JWT }}
+          BASEROW_ACCESS_TOKEN: ${{ secrets.BASEROW_ACCESS_TOKEN }}
+          BASEROW_API_TOKEN: ${{ secrets.BASEROW_API_TOKEN }}
+          BASEROW_EMAIL: ${{ secrets.BASEROW_EMAIL }}
+          BASEROW_PASSWORD: ${{ secrets.BASEROW_PASSWORD }}
+          BASEROW_USER_EMAIL: ${{ secrets.BASEROW_USER_EMAIL }}
+          BASEROW_USER_PASSWORD: ${{ secrets.BASEROW_USER_PASSWORD }}
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: 'https://profikompany.ru'
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
+          OZON_ORDER_IMPORT_CUTOFF: '2026-08-25T00:00:00Z'
+          DRY_RUN: '1'
+        run: python orders-baserow/sync_orders_baserow.py
+
+      - name: Итог
+        if: always()
+        shell: bash
+        run: |
+          if [ -f orders-baserow/runtime/last_report.json ]; then
+            echo '## Заказы в Baserow' >> "$GITHUB_STEP_SUMMARY"
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          d=json.loads(Path("orders-baserow/runtime/last_report.json").read_text(encoding="utf-8"))
+          print(f"- Активных заказов: **{d.get('orders_total', 0)}**")
+          print(f"- Источники: **{d.get('counts_by_source', {})}**")
+          print(f"- Таблица Baserow ID: **{d.get('table_id', '')}**")
+          print(f"- Создано: **{d.get('created', 0)}**, обновлено: **{d.get('updated', 0)}**, удалено: **{d.get('deleted', 0)}**")
+          for w in d.get("warnings") or []:
+              print(f"- Предупреждение: {w}")
+          PY
+          else
+            echo 'Отчёт не создан.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Сохранить отчёт запуска
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: orders-baserow-${{ github.run_id }}
+          path: orders-baserow/runtime/last_report.json
+          if-no-files-found: warn
+          retention-days: 30
