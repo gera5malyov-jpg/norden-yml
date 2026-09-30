@@ -475,6 +475,7 @@ def main():
         "characteristic_values_written": 0,
         "existing_out_of_stock_updates": 0,
         "missing_source_set_zero": 0,
+        "missing_source_without_supplier_code_set_zero": 0,
         "supplier_code_conflicts": 0,
         "new_rows_created": 0,
         "database_duplicate_keys": [],
@@ -513,19 +514,6 @@ def main():
         raise RuntimeError(f"Expected exactly one supplier Norden row, found {len(norden_suppliers)}")
     supplier_id = int(norden_suppliers[0]["id"])
 
-    catalog_rows = br.all_rows(CATALOG_TABLE_ID)
-    by_code = defaultdict(list)
-    for row in catalog_rows:
-        code = norm(row.get("Наименование артикула"))
-        if code:
-            by_code[code].append(row)
-
-    duplicate_db = {k: rows for k, rows in by_code.items() if len(rows) > 1}
-    report["database_duplicate_keys"] = [
-        {"code": k, "row_ids": [r.get("id") for r in rows]}
-        for k, rows in list(duplicate_db.items())[:200]
-    ]
-
     def supplier_ids(row):
         out = set()
         for x in row.get("Поставщик") or []:
@@ -535,6 +523,44 @@ def main():
                 except Exception:
                     pass
         return out
+
+    def row_is_norden(row):
+        # Some older imported rows can be missing the supplier link even though
+        # they are Norden cards. Treat the brand as a safe fallback so such rows
+        # are still protected by the stock sync.
+        return (
+            supplier_id in supplier_ids(row)
+            or norm(row.get("Бренд")) == norm(SUPPLIER_NAME)
+        )
+
+    def row_supplier_keys(row):
+        # Supplier stock is keyed by Norden's own article, not by our internal
+        # AF-xxxx article. Older rows used several different fields for that
+        # supplier article, so check all known supplier-code locations.
+        keys = []
+        for field in ("Наименование артикула", "Артикул поставщика", "Код для сайта"):
+            key = norm(row.get(field))
+            if key and key not in keys:
+                keys.append(key)
+
+        # Historical imports sometimes stored the supplier article directly in
+        # "Артикул". Use it only when it is not our internal AF-xxxx identifier.
+        article_key = norm(row.get("Артикул"))
+        if article_key and not re.fullmatch(r"af-\d+", article_key) and article_key not in keys:
+            keys.append(article_key)
+        return keys
+
+    catalog_rows = br.all_rows(CATALOG_TABLE_ID)
+    by_code = defaultdict(list)
+    for row in catalog_rows:
+        for code in row_supplier_keys(row):
+            by_code[code].append(row)
+
+    duplicate_db = {k: rows for k, rows in by_code.items() if len(rows) > 1}
+    report["database_duplicate_keys"] = [
+        {"code": k, "row_ids": [r.get("id") for r in rows]}
+        for k, rows in list(duplicate_db.items())[:200]
+    ]
 
     def feature_values(item):
         out = {}
@@ -571,7 +597,7 @@ def main():
             report["eligible_in_stock"] += 1
 
         all_existing = by_code.get(k, [])
-        existing = [r for r in all_existing if supplier_id in supplier_ids(r)]
+        existing = [r for r in all_existing if row_is_norden(r)]
         if len(existing) > 1:
             report["skipped_ambiguous"] += 1
             continue
@@ -724,14 +750,19 @@ def main():
         report["new_rows_created"] += 1
 
     # Scheduled mode keeps stock synchronized for disappeared products.
+    # If a Norden row cannot be found in the current supplier stock source,
+    # its stock must be 0. This also covers older rows with a missing supplier
+    # link/code, because an unverified supplier item must never keep stale stock.
     # The one-off repair is strictly scoped to existing rows >= repair_from_row.
     if args.repair_from_row is None:
         for row in catalog_rows:
-            if supplier_id not in supplier_ids(row):
+            if not row_is_norden(row):
                 continue
-            code = norm(row.get("Наименование артикула"))
-            if not code or code in seen_source_keys:
+
+            row_keys = row_supplier_keys(row)
+            if row_keys and any(code in seen_source_keys for code in row_keys):
                 continue
+
             body = {"id": row["id"], FIELD_STOCK: 0, "Наличие": False}
             current_stock = row.get(FIELD_STOCK)
             current_available = bool(row.get("Наличие"))
@@ -740,8 +771,11 @@ def main():
                 changed = changed or float(current_stock or 0) != 0
             except Exception:
                 changed = changed or s(current_stock) not in ("", "0", "0.0")
+
             if changed:
                 report["missing_source_set_zero"] += 1
+                if not row_keys:
+                    report["missing_source_without_supplier_code_set_zero"] += 1
                 if not args.dry_run:
                     pending_updates.append(body)
 
