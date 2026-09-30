@@ -327,10 +327,9 @@ def main():
             br.create_row(table_id, body)
             created += 1
 
-    for key, old in existing_by_key.items():
-        if key not in active_by_key:
-            br.delete_row(table_id, int(old["id"]))
-            deleted += 1
+    # Historical orders are intentionally retained in Baserow.
+    # When an order disappears from the active marketplace/Webasyst feed,
+    # leave the existing Baserow row untouched instead of deleting it.
 
     counts = {}
     for row in active:
@@ -347,7 +346,7 @@ def main():
         "counts_by_source": counts,
         "created": created,
         "updated": updated,
-        "deleted": deleted,
+        "deleted": 0,
         "warnings": warnings,
     }
     REPORT_FILE.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
