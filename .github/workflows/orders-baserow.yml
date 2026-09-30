@@ -34,6 +34,7 @@ jobs:
       - name: Проверить синтаксис
         run: python -m py_compile orders-baserow/sync_orders_baserow.py orders-sheet/sync_orders_sheet.py
       - name: Синхронизировать активные заказы в Baserow
+        id: sync_orders_baserow
         env:
           BASEROW_URL: 'http://147.78.67.6'
           BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
@@ -69,6 +70,27 @@ jobs:
           else
             echo 'Отчёт не создан.' >> "$GITHUB_STEP_SUMMARY"
           fi
+      - name: Создать уведомления по заказам
+        if: always()
+        env:
+          BASEROW_URL: 'http://147.78.67.6'
+          BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+        run: python baserow/evaluate_orders_baserow_notifications.py || true
+
+      - name: Уведомить о полном сбое синхронизации заказов
+        if: always() && steps.sync_orders_baserow.outcome == 'failure'
+        env:
+          BASEROW_URL: 'http://147.78.67.6'
+          BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+        run: |
+          python baserow/notify_baserow.py \
+            --severity red \
+            --code orders_baserow_sync_failed \
+            --title "Ошибка загрузки заказов в Baserow" \
+            --message "Синхронизация заказов из Webasyst/маркетплейсов в таблицу Заказы завершилась ошибкой." \
+            --dedupe-key "orders:baserow:workflow-failed" \
+            --target-url "/database/49/table/494" || true
+
       - name: Сохранить отчёт запуска
         if: always()
         uses: actions/upload-artifact@v4
