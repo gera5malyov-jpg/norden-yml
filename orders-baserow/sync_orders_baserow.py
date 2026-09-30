@@ -29,6 +29,8 @@ BASEROW_URL = os.getenv("BASEROW_URL", "http://147.78.67.6").rstrip("/")
 BASEROW_TOKEN = os.getenv("BASEROW_DATABASE_TOKEN", "").strip()
 REFERENCE_TABLE_ID = int(os.getenv("BASEROW_REFERENCE_TABLE_ID", "156"))
 ORDERS_TABLE_NAME = os.getenv("BASEROW_ORDERS_TABLE_NAME", "Заказы").strip() or "Заказы"
+ORDERS_TABLE_ID = int(os.getenv("BASEROW_ORDERS_TABLE_ID", "0") or "0")
+ORDERS_DATABASE_ID = int(os.getenv("BASEROW_ORDERS_DATABASE_ID", "49") or "49")
 
 
 def s(v: Any) -> str:
@@ -293,8 +295,13 @@ def make_body(row: dict, primary_name: str) -> dict:
 def main():
     started = datetime.now(timezone.utc).isoformat()
     br = Baserow()
-    table_id, database_id = br.ensure_orders_table()
-    primary_name = br.ensure_schema(table_id)
+    if ORDERS_TABLE_ID:
+        table_id = ORDERS_TABLE_ID
+        database_id = ORDERS_DATABASE_ID
+        primary_name = "Заказ"
+    else:
+        table_id, database_id = br.ensure_orders_table()
+        primary_name = br.ensure_schema(table_id)
 
     active, warnings = gather_active_orders()
     active_bodies = [make_body(row, primary_name) for row in active]
