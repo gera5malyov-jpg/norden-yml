@@ -30,6 +30,7 @@ jobs:
       - name: Проверить синтаксис синхронизации
         run: python -m py_compile webasyst/marketplace_order_sync.py
       - name: Перенести заказы маркетплейсов в Webasyst
+        id: sync_orders
         env:
           DRY_RUN: '0'
           CHAT_AUTOMATION_START: '2026-09-23T19:35:00Z'
@@ -43,3 +44,24 @@ jobs:
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
           WEBASYST_BASE_URL: https://profikompany.ru
         run: python webasyst/marketplace_order_sync.py
+
+      - name: Проверить проблемы заказов и уведомить в Baserow
+        if: always()
+        env:
+          BASEROW_URL: http://147.78.67.6
+          BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+        run: python baserow/evaluate_order_sync_notifications.py || true
+
+      - name: Уведомить, если синхронизация упала до создания отчёта
+        if: always() && steps.sync_orders.outcome == 'failure'
+        env:
+          BASEROW_URL: http://147.78.67.6
+          BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+        run: |
+          python baserow/notify_baserow.py \
+            --severity red \
+            --code order_sync_failed \
+            --title "Синхронизация заказов в Webasyst завершилась ошибкой" \
+            --message "Один из источников Ozon/Яндекс/KIT не обработан. Проверь GitHub Actions." \
+            --dedupe-key "orders:webasyst:workflow-failed" \
+            --target-url "/database/49/table/494" || true
