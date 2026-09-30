@@ -34,10 +34,31 @@ jobs:
           python-version: '3.12'
       - run: pip install requests
       - name: Synchronize Norden to Database
-        run: python baserow/sync_norden_database.py
+        run: python baserow/sync_norden_database.py --report-file baserow/norden_sync_report.json
 
       - name: Update Norden marketplace commissions in Database
         run: python baserow/sync_norden_marketplace_commissions.py
 
       - name: Publish Norden stocks from Database to Webasyst and KIT
         run: python baserow/publish_norden_stocks.py
+
+      - name: Create useful Baserow notifications
+        if: success()
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python baserow/evaluate_norden_notifications.py --manual
+          else
+            python baserow/evaluate_norden_notifications.py
+          fi
+
+      - name: Notify about synchronization failure
+        if: failure()
+        continue-on-error: true
+        run: |
+          python baserow/notify_baserow.py \
+            --severity red \
+            --code norden_sync_error \
+            --title "Ошибка синхронизации Norden" \
+            --message "Один из этапов обновления Database, комиссий, Webasyst или KIT завершился ошибкой. Проверь GitHub Actions." \
+            --dedupe-key "norden:sync:error" \
+            --target-url "/database/49/table/156/609" || true
