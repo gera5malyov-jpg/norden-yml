@@ -1,15 +1,7 @@
 name: Заказы → Baserow
 
 on:
-  schedule:
-    - cron: '25 */3 * * *'
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'orders-baserow/sync_orders_baserow.py'
-      - 'orders-sheet/sync_orders_sheet.py'
-      - '.github/workflows/orders-baserow.yml'
 
 permissions:
   contents: read
