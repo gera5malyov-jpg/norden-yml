@@ -1,0 +1,35 @@
+name: Baserow orders token probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/baserow-orders-token-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - name: Check table 494 access
+        shell: bash
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /tmp/orders.json -w "%{http_code}" \
+            -H "Authorization: Token $BASEROW_DATABASE_TOKEN" \
+            "http://147.78.67.6/api/database/rows/table/494/?user_field_names=true&size=1")
+          echo "HTTP=$code"
+          if [ "$code" != "200" ]; then
+            cat /tmp/orders.json
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/orders.json'))
+          print("ACCESS_OK")
+          print("COUNT", d.get("count"))
+          PY
