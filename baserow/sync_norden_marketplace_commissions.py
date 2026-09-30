@@ -24,6 +24,8 @@ SUPPLIERS_TABLE_ID = 157
 SUPPLIER_NAME = "Norden"
 FIELD_OZON = "Комиссия Ozon"
 FIELD_YANDEX = "Комиссия Яндекс"
+FIELD_OZON_CATEGORY = "Категория Ozon"
+FIELD_YANDEX_CATEGORY = "Категория Яндекс"
 REPORT_PATH = Path("baserow/norden_marketplace_commissions_report.json")
 
 OZON = "https://api-seller.ozon.ru"
@@ -100,6 +102,19 @@ class Baserow:
         body = {"name": name, "type": "number", "number_decimal_places": 2, "number_negative": False}
         self.request("POST", f"/api/database/fields/table/{table_id}/", body=body)
 
+    def ensure_text_field(self, table_id, name):
+        fields = self.fields(table_id)
+        found = [x for x in fields if s(x.get("name")) == name]
+        if found:
+            if found[0].get("type") not in ("text", "long_text"):
+                raise RuntimeError(f"Field {name!r} exists but is not text")
+            return
+        self.request(
+            "POST",
+            f"/api/database/fields/table/{table_id}/",
+            body={"name": name, "type": "text"},
+        )
+
     def rows(self, table_id):
         out = []
         page = 1
@@ -133,7 +148,37 @@ def ozon_commissions(offer_ids):
         "Content-Type": "application/json",
         "Accept": "application/json",
     })
+
+    # Category tree gives the marketplace category name/path for each
+    # description_category_id returned by product attributes.
+    category_paths = {}
+    tree = api_call(
+        session,
+        "POST",
+        OZON + "/v1/description-category/tree",
+        body={"language": "DEFAULT"},
+    )
+
+    def walk(nodes, prefix):
+        for node in nodes or []:
+            if not isinstance(node, dict):
+                continue
+            name = s(node.get("category_name"))
+            path = prefix + ([name] if name else [])
+            cid = node.get("description_category_id")
+            if cid not in (None, ""):
+                try:
+                    category_paths[int(cid)] = " > ".join(path)
+                except Exception:
+                    pass
+            walk(node.get("children") or [], path)
+
+    walk(tree.get("result") or [], [])
+
     result = {}
+    product_ids = []
+    offer_by_pid = {}
+
     for batch in chunks(offer_ids, 100):
         d = api_call(
             session,
@@ -151,11 +196,45 @@ def ozon_commissions(offer_ids):
             sales_rfbs = num(commissions.get("sales_percent_rfbs"))
             acquiring_amount = num(x.get("acquiring"))
             acquiring_percent = pct(acquiring_amount, sale_price)
+            pid = x.get("product_id")
+            if pid not in (None, ""):
+                try:
+                    pid = int(pid)
+                    product_ids.append(pid)
+                    offer_by_pid[pid] = offer
+                except Exception:
+                    pass
             result[offer] = {
                 "sales_percent": sales_rfbs,
                 "acquiring_percent": acquiring_percent,
                 "total_percent": round(sales_rfbs + acquiring_percent, 2),
+                "category": "",
             }
+
+    # Product attributes contain description_category_id. Resolve it to a
+    # readable Ozon category path and store it next to the commission.
+    for batch in chunks(sorted(set(product_ids)), 1000):
+        d = api_call(
+            session,
+            "POST",
+            OZON + "/v4/product/info/attributes",
+            body={"filter": {"product_id": batch, "visibility": "ALL"}, "limit": 1000},
+        )
+        for x in d.get("result") or []:
+            try:
+                pid = int(x.get("id") or x.get("product_id") or 0)
+            except Exception:
+                pid = 0
+            offer = offer_by_pid.get(pid) or s(x.get("offer_id"))
+            if not offer or offer not in result:
+                continue
+            try:
+                cid = int(x.get("description_category_id") or 0)
+            except Exception:
+                cid = 0
+            if cid:
+                result[offer]["category"] = category_paths.get(cid, "") or str(cid)
+
     return result
 
 
@@ -240,10 +319,12 @@ def yandex_offer_data(offer_ids):
             )
             off = offers[oid]
             price = num((off.get("campaignPrice") or {}).get("value") or (off.get("basicPrice") or {}).get("value"))
+            mp = mappings.get(oid) or {}
             result[oid] = {
                 "fee_percent": pct(fee, price),
                 "acquiring_percent": pct(acquiring, price),
                 "total_percent": round(pct(fee + acquiring, price), 2),
+                "category": s(mp.get("marketCategoryName")),
             }
     return result
 
@@ -253,6 +334,8 @@ def main():
     br = Baserow()
     br.ensure_number_field(CATALOG_TABLE_ID, FIELD_OZON)
     br.ensure_number_field(CATALOG_TABLE_ID, FIELD_YANDEX)
+    br.ensure_text_field(CATALOG_TABLE_ID, FIELD_OZON_CATEGORY)
+    br.ensure_text_field(CATALOG_TABLE_ID, FIELD_YANDEX_CATEGORY)
 
     suppliers = br.rows(SUPPLIERS_TABLE_ID)
     norden = [x for x in suppliers if norm(x.get("Поставщик")) == norm(SUPPLIER_NAME)]
@@ -284,6 +367,7 @@ def main():
 
     updates = []
     oz_changed = ya_changed = 0
+    oz_category_changed = ya_category_changed = 0
     for offer, matched_rows in by_offer.items():
         for row in matched_rows:
             body = {"id": row["id"]}
@@ -298,6 +382,13 @@ def main():
                     body[FIELD_OZON] = value
                     oz_changed += 1
                     changed = True
+
+                category = s(oz[offer].get("category"))
+                if category and s(row.get(FIELD_OZON_CATEGORY)) != category:
+                    body[FIELD_OZON_CATEGORY] = category
+                    oz_category_changed += 1
+                    changed = True
+
             if offer in ya:
                 value = ya[offer]["total_percent"]
                 try:
@@ -307,6 +398,12 @@ def main():
                 if not same:
                     body[FIELD_YANDEX] = value
                     ya_changed += 1
+                    changed = True
+
+                category = s(ya[offer].get("category"))
+                if category and s(row.get(FIELD_YANDEX_CATEGORY)) != category:
+                    body[FIELD_YANDEX_CATEGORY] = category
+                    ya_category_changed += 1
                     changed = True
             if changed:
                 updates.append(body)
@@ -324,10 +421,14 @@ def main():
         "yandex_found": len(ya),
         "ozon_rows_updated": oz_changed,
         "yandex_rows_updated": ya_changed,
+        "ozon_category_rows_updated": oz_category_changed,
+        "yandex_category_rows_updated": ya_category_changed,
         "rows_updated": len(updates),
         "fields": {
             FIELD_OZON: "sales_percent_rfbs + acquiring_percent",
             FIELD_YANDEX: "DBS FEE + AGENCY_COMMISSION/PAYMENT_TRANSFER",
+            FIELD_OZON_CATEGORY: "Ozon description category path",
+            FIELD_YANDEX_CATEGORY: "Yandex Market marketCategoryName",
         },
     }
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
