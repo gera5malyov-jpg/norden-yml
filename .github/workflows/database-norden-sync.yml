@@ -19,6 +19,11 @@ jobs:
     env:
       BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
       NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+      YANDEX_MARKET_BUSINESS_ID: '20806099'
+      YANDEX_MARKET_CAMPAIGN_ID: '89405839'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,3 +32,6 @@ jobs:
       - run: pip install requests
       - name: Synchronize Norden to Database
         run: python baserow/sync_norden_database.py
+
+      - name: Update Norden marketplace commissions in Database
+        run: python baserow/sync_norden_marketplace_commissions.py
