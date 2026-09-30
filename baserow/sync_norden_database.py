@@ -11,6 +11,7 @@ import unicodedata
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from datetime import datetime, timezone
+from pathlib import Path
 
 import requests
 
@@ -29,6 +30,8 @@ NORDEN_CATEGORIES_API = "https://norden.group/api-categories/"
 
 FIELD_PURCHASE = "Закупка Norden"
 FIELD_STOCK = "Остаток Norden"
+FIELD_KIT_ARTICLE = "Артикул КИТ"
+KIT_MAPPING_PATH = Path(__file__).resolve().parents[1] / "norden-kit" / "kit_mapping.json"
 
 TECHNICAL_XML_TAGS = {
     "Ссылка", "Код", "Наименование", "Группа", "Артикул",
@@ -427,6 +430,45 @@ def load_price_xml():
             products[k] = item
     return products, duplicates
 
+def load_kit_id_mapping():
+    """Return Norden supplier article -> numeric KIT kit_id from the canonical KIT map."""
+    by_article = {}
+    ambiguous = {}
+    if not KIT_MAPPING_PATH.exists():
+        return by_article, ambiguous, "missing"
+
+    try:
+        payload = json.loads(KIT_MAPPING_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return by_article, ambiguous, "invalid"
+
+    variants = payload.get("variants") if isinstance(payload, dict) else None
+    if not isinstance(variants, dict):
+        return by_article, ambiguous, "invalid"
+
+    for article, rows in variants.items():
+        key = norm(article)
+        if not key or not isinstance(rows, list):
+            continue
+        ids = []
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            raw_id = row.get("kit_id")
+            try:
+                kit_id = int(str(raw_id).strip())
+            except Exception:
+                continue
+            if kit_id > 0 and kit_id not in ids:
+                ids.append(kit_id)
+        if len(ids) == 1:
+            by_article[key] = ids[0]
+        elif len(ids) > 1:
+            ambiguous[key] = ids
+
+    return by_article, ambiguous, s(payload.get("updated_at")) or "unknown"
+
+
 def load_source():
     api_error = None
     try:
@@ -476,6 +518,10 @@ def main():
         "existing_out_of_stock_updates": 0,
         "missing_source_set_zero": 0,
         "missing_source_without_supplier_code_set_zero": 0,
+        "kit_mapping_updated_at": None,
+        "kit_ids_available": 0,
+        "kit_mapping_ambiguous": 0,
+        "kit_id_updates": 0,
         "supplier_code_conflicts": 0,
         "new_rows_created": 0,
         "database_duplicate_keys": [],
@@ -498,9 +544,18 @@ def main():
     report["source_unique"] = len(source)
     report["source_duplicate_codes"] = len(set(norm(x) for x in source_duplicates))
 
+    kit_ids_by_article, kit_mapping_ambiguous, kit_mapping_updated_at = load_kit_id_mapping()
+    report["kit_mapping_updated_at"] = kit_mapping_updated_at
+    report["kit_ids_available"] = len(kit_ids_by_article)
+    report["kit_mapping_ambiguous"] = len(kit_mapping_ambiguous)
+
     br = Baserow(BASEROW_URL, BASEROW_TOKEN)
 
-    numeric_specs = {FIELD_PURCHASE: 2, FIELD_STOCK: 0}
+    # "Артикул КИТ" is a numeric KIT kit_id, e.g. 1597886.
+    # Create it automatically if this installation does not have the field yet.
+    br.ensure_number_field(CATALOG_TABLE_ID, FIELD_KIT_ARTICLE, 0)
+
+    numeric_specs = {FIELD_PURCHASE: 2, FIELD_STOCK: 0, FIELD_KIT_ARTICLE: 0}
     current_field_names = {s(f.get("name")) for f in br.fields(CATALOG_TABLE_ID)}
     numeric_available = {name for name in numeric_specs if name in current_field_names}
     report["numeric_fields_available"] = sorted(numeric_available)
@@ -617,6 +672,10 @@ def main():
             body[FIELD_STOCK] = stock
             body["Наличие"] = bool(stock > 0)
 
+            kit_id = kit_ids_by_article.get(k)
+            if kit_id is not None:
+                body[FIELD_KIT_ARTICLE] = kit_id
+
             char_written = 0
             full_repair = args.repair_from_row is not None and row_id >= args.repair_from_row
 
@@ -694,6 +753,14 @@ def main():
                         pending_updates.append({"id": row_id, **body})
                     if any(field in body for field in (FIELD_PURCHASE, FIELD_STOCK, "Наличие")):
                         report["existing_price_stock_updates"] += 1
+                    if FIELD_KIT_ARTICLE in body:
+                        current_kit = row.get(FIELD_KIT_ARTICLE)
+                        try:
+                            kit_changed = int(float(current_kit)) != int(body[FIELD_KIT_ARTICLE])
+                        except Exception:
+                            kit_changed = s(current_kit) != s(body[FIELD_KIT_ARTICLE])
+                        if kit_changed:
+                            report["kit_id_updates"] += 1
                     if stock == 0:
                         report["existing_out_of_stock_updates"] += 1
             continue
@@ -718,6 +785,9 @@ def main():
             "Первое изображение URL": images[0],
             "Все изображения": "\n".join(images),
         }
+        kit_id = kit_ids_by_article.get(k)
+        if kit_id is not None:
+            body[FIELD_KIT_ARTICLE] = kit_id
         if item.get("purchase") is not None:
             body[FIELD_PURCHASE] = item["purchase"]
         body[FIELD_STOCK] = stock
@@ -772,10 +842,35 @@ def main():
             except Exception:
                 changed = changed or s(current_stock) not in ("", "0", "0.0")
 
+            # Even if the item disappeared from the current Norden stock source,
+            # preserve/backfill its numeric KIT article when the KIT map knows it.
+            row_kit_id = None
+            for row_key in row_keys:
+                if row_key in kit_ids_by_article:
+                    row_kit_id = kit_ids_by_article[row_key]
+                    break
+            if row_kit_id is not None:
+                body[FIELD_KIT_ARTICLE] = row_kit_id
+                current_kit = row.get(FIELD_KIT_ARTICLE)
+                try:
+                    kit_changed = int(float(current_kit)) != int(row_kit_id)
+                except Exception:
+                    kit_changed = s(current_kit) != s(row_kit_id)
+                changed = changed or kit_changed
+                if kit_changed:
+                    report["kit_id_updates"] += 1
+
             if changed:
-                report["missing_source_set_zero"] += 1
-                if not row_keys:
-                    report["missing_source_without_supplier_code_set_zero"] += 1
+                # Count stock-zero actions only when stock/availability actually needed correction.
+                stock_needed_zero = current_available
+                try:
+                    stock_needed_zero = stock_needed_zero or float(current_stock or 0) != 0
+                except Exception:
+                    stock_needed_zero = stock_needed_zero or s(current_stock) not in ("", "0", "0.0")
+                if stock_needed_zero:
+                    report["missing_source_set_zero"] += 1
+                    if not row_keys:
+                        report["missing_source_without_supplier_code_set_zero"] += 1
                 if not args.dry_run:
                     pending_updates.append(body)
 
