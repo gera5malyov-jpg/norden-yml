@@ -1,0 +1,138 @@
+name: Diagnose marketplace order sync 2026-09-29
+
+on:
+  push:
+    paths:
+      - '.github/workflows/diagnose-order-sync-20260929.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Diagnose recent marketplace orders without writing to Webasyst
+        env:
+          DRY_RUN: '1'
+          OZON_ORDER_IMPORT_CUTOFF: '2026-09-22T11:08:40Z'
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, sys, smtplib
+          from datetime import datetime, timedelta, timezone
+          from email.message import EmailMessage
+
+          sys.path.insert(0, "webasyst")
+          import marketplace_order_sync as m
+
+          now = datetime.now(timezone.utc)
+          cutoff = now - timedelta(days=3)
+          report = {
+              "generated_at": m.iso(now),
+              "cutoff": m.iso(cutoff),
+              "orders": [],
+              "source_errors": [],
+          }
+
+          sources = [
+              ("yandex_market", m.load_yandex_market),
+              ("yandex_kit", m.load_kit),
+              ("ozon", m.load_ozon),
+              ("wildberries", m.load_wb),
+          ]
+
+          for source, loader in sources:
+              try:
+                  rows = loader()
+              except Exception as e:
+                  report["source_errors"].append({
+                      "source": source,
+                      "error": f"{type(e).__name__}: {str(e)[:500]}",
+                  })
+                  continue
+
+              for o in rows:
+                  created = m.dt(o.get("created_at"))
+                  if not created or created < cutoff:
+                      continue
+                  ext = m.s(o.get("external_id"))
+                  items = o.get("items") or []
+                  sku_rows = []
+                  unmatched = []
+                  for item in items:
+                      sku = m.s(item.get("sku"))
+                      match = m.wa_sku(sku) if sku else None
+                      sku_rows.append({"sku": sku, "matched": bool(match)})
+                      if sku and not match:
+                          unmatched.append(sku)
+
+                  old = None
+                  try:
+                      if ext:
+                          old = m.existing_order(source, ext)
+                      if not old and source == "wildberries":
+                          old = m.existing_order_by_param("mp_wb_order_id", m.s(o.get("wb_order_id")))
+                      if not old and source == "wildberries":
+                          old = m.existing_order_by_param("mp_wb_rid", m.s(o.get("wb_rid")))
+                  except Exception as e:
+                      report["source_errors"].append({
+                          "source": source,
+                          "external_id": ext,
+                          "error": f"Webasyst lookup: {type(e).__name__}: {str(e)[:300]}",
+                      })
+
+                  if not ext or not items:
+                      diagnosis = "SKIPPED_NO_ITEMS_OR_ID"
+                  elif unmatched:
+                      diagnosis = "SKIPPED_UNMATCHED_SKU"
+                  elif old:
+                      diagnosis = "PRESENT_IN_WEBASYST"
+                  else:
+                      diagnosis = "ELIGIBLE_BUT_MISSING_IN_WEBASYST"
+
+                  report["orders"].append({
+                      "source": source,
+                      "external_id": ext,
+                      "created_at": o.get("created_at"),
+                      "status": o.get("status_raw"),
+                      "target_state": o.get("target_state"),
+                      "diagnosis": diagnosis,
+                      "webasyst_order_id": m.s((old or {}).get("id")),
+                      "items": sku_rows,
+                  })
+
+          report["orders"].sort(key=lambda x: x.get("created_at") or "", reverse=True)
+          body = json.dumps(report, ensure_ascii=False, indent=2)
+
+          print(body)
+
+          user = os.environ.get("GMAIL_SMTP_USER", "").strip()
+          password = os.environ.get("GMAIL_APP_PASSWORD", "").strip()
+          if user and password:
+              msg = EmailMessage()
+              msg["From"] = user
+              msg["To"] = user
+              msg["Subject"] = "[ORDER-SYNC-DIAG] 2026-09-29"
+              msg.set_content(body)
+              with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as smtp:
+                  smtp.starttls()
+                  smtp.login(user, password)
+                  smtp.send_message(msg)
+          PY
