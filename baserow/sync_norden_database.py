@@ -445,6 +445,10 @@ def load_source():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--repair-from-row", type=int, default=None,
+                        help="One-off full supplier-data repair for existing Baserow row IDs >= this value")
+    parser.add_argument("--report-file", default="",
+                        help="Optional JSON report output path")
     args = parser.parse_args()
 
     report = {
@@ -461,6 +465,10 @@ def main():
         "existing_matches": 0,
         "existing_price_stock_updates": 0,
         "existing_characteristic_rows_updated": 0,
+        "existing_full_rows_repaired": 0,
+        "existing_image_rows_repaired": 0,
+        "repair_from_row": args.repair_from_row,
+        "control_article": {},
         "characteristic_values_written": 0,
         "existing_out_of_stock_updates": 0,
         "missing_source_set_zero": 0,
@@ -563,6 +571,7 @@ def main():
         if existing:
             report["existing_matches"] += 1
             row = existing[0]
+            row_id = int(row["id"])
             body = {}
             if item.get("purchase") is not None:
                 body[FIELD_PURCHASE] = item["purchase"]
@@ -570,30 +579,98 @@ def main():
             body["Наличие"] = bool(stock > 0)
 
             char_written = 0
+            full_repair = args.repair_from_row is not None and row_id >= args.repair_from_row
+
+            if full_repair:
+                # ONE-OFF repair only. The scheduled/default mode below never
+                # rewrites existing card content (title/images/characteristics).
+                if "Название" in current_field_names:
+                    body["Название"] = item.get("name") or item.get("article")
+                for article_field in ("Артикул", "Наименование артикула", "Артикул поставщика", "Код для сайта"):
+                    if article_field in current_field_names:
+                        body[article_field] = item.get("article")
+                if "Категория" in current_field_names and item.get("category"):
+                    body["Категория"] = item.get("category")
+                if "Категория Norden" in current_field_names and item.get("category"):
+                    body["Категория Norden"] = item.get("category")
+                if "Группа Norden" in current_field_names and item.get("group"):
+                    body["Группа Norden"] = item.get("group")
+                if "Описание Norden" in current_field_names and item.get("description"):
+                    body["Описание Norden"] = item.get("description")
+
+                images = [s(x) for x in (item.get("images") or []) if s(x)]
+                if images:
+                    if "Первое изображение URL" in current_field_names:
+                        body["Первое изображение URL"] = images[0]
+                    if "Все изображения" in current_field_names:
+                        body["Все изображения"] = "\n".join(images)
+                    if not args.dry_run and "Первое изображение" in current_field_names:
+                        try:
+                            uploaded = br.upload_via_url(images[0])
+                            file_name = s((uploaded or {}).get("name"))
+                            if file_name:
+                                body["Первое изображение"] = [{
+                                    "name": file_name,
+                                    "visible_name": f"{item.get('article')}.jpg",
+                                }]
+                                report["existing_image_rows_repaired"] += 1
+                            else:
+                                report["errors"].append({
+                                    "stage": "repair_first_image_upload",
+                                    "article": item.get("article"),
+                                    "row_id": row_id,
+                                    "message": "Baserow upload returned no file name",
+                                })
+                        except Exception as exc:
+                            report["errors"].append({
+                                "stage": "repair_first_image_upload",
+                                "article": item.get("article"),
+                                "row_id": row_id,
+                                "message": str(exc)[:700],
+                            })
+
+                for name, value in feature_values(item).items():
+                    if name in current_field_names:
+                        body[name] = value
+                        char_written += 1
+                        report["characteristic_values_written"] += 1
+
+                if char_written:
+                    report["existing_characteristic_rows_updated"] += 1
+                report["existing_full_rows_repaired"] += 1
+
+            if norm(item.get("article")) == norm("RF.104L.PGDA.DA"):
+                report["control_article"] = {
+                    "article": item.get("article"),
+                    "row_id": row_id,
+                    "full_repair": full_repair,
+                    "images_found": len(item.get("images") or []),
+                    "features_found": len(feature_values(item)),
+                    "source": item.get("source"),
+                }
 
             if body:
-                changed = False
-                for field, value in body.items():
-                    current = row.get(field)
-                    if field == "Наличие":
-                        if bool(current) != bool(value):
+                changed = full_repair
+                if not changed:
+                    for field, value in body.items():
+                        current = row.get(field)
+                        if field == "Наличие":
+                            if bool(current) != bool(value):
+                                changed = True
+                        elif current in (None, ""):
                             changed = True
-                    elif current in (None, ""):
-                        changed = True
-                    else:
-                        try:
-                            if float(current) != float(value):
-                                changed = True
-                        except Exception:
-                            if s(current) != s(value):
-                                changed = True
+                        else:
+                            try:
+                                if float(current) != float(value):
+                                    changed = True
+                            except Exception:
+                                if s(current) != s(value):
+                                    changed = True
                 if changed:
                     if not args.dry_run:
-                        pending_updates.append({"id": row["id"], **body})
+                        pending_updates.append({"id": row_id, **body})
                     if any(field in body for field in (FIELD_PURCHASE, FIELD_STOCK, "Наличие")):
                         report["existing_price_stock_updates"] += 1
-                    if char_written:
-                        report["existing_characteristic_rows_updated"] += 1
                     if stock == 0:
                         report["existing_out_of_stock_updates"] += 1
             continue
@@ -673,6 +750,11 @@ def main():
             br.batch_create_rows(CATALOG_TABLE_ID, pending_creates)
 
     report["finished_at"] = now_iso()
+    if args.report_file:
+        os.makedirs(os.path.dirname(args.report_file) or ".", exist_ok=True)
+        with open(args.report_file, "w", encoding="utf-8") as fh:
+            json.dump(report, fh, ensure_ascii=False, indent=2)
+            fh.write("\n")
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if report["skipped_ambiguous"]:
         print("WARNING: ambiguous duplicate Database keys were skipped", flush=True)
