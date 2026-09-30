@@ -31,6 +31,7 @@ REFERENCE_TABLE_ID = int(os.getenv("BASEROW_REFERENCE_TABLE_ID", "156"))
 ORDERS_TABLE_NAME = os.getenv("BASEROW_ORDERS_TABLE_NAME", "Заказы").strip() or "Заказы"
 ORDERS_TABLE_ID = int(os.getenv("BASEROW_ORDERS_TABLE_ID", "0") or "0")
 ORDERS_DATABASE_ID = int(os.getenv("BASEROW_ORDERS_DATABASE_ID", "49") or "49")
+ORDERS_START_AT = os.getenv("BASEROW_ORDERS_START_AT", "2026-09-30T00:00:00Z").strip()
 
 
 def s(v: Any) -> str:
@@ -259,13 +260,21 @@ class Baserow:
         )
 
 
-def gather_active_orders() -> tuple[list[dict], list[str]]:
+def gather_orders() -> tuple[list[dict], dict[str, dict], set[str], list[str]]:
     wa = source.WebasystClient(min_request_interval=0.20)
     sku_names = source.build_sku_names(wa)
     base = source.webasyst_active_rows(wa, sku_names)
     fresh, terminal, warnings = source.direct_marketplace_rows(sku_names)
-    rows = source.merge_rows(base, fresh, terminal)
-    return rows, warnings
+    active = source.merge_rows(base, fresh, terminal)
+    return active, fresh, terminal, warnings
+
+
+def started_on_or_after(row: dict) -> bool:
+    created = source.dt(row.get("created_at"))
+    start = source.dt(ORDERS_START_AT)
+    if created is None or start is None:
+        return False
+    return created >= start
 
 
 def make_body(row: dict, primary_name: str) -> dict:
@@ -278,6 +287,7 @@ def make_body(row: dict, primary_name: str) -> dict:
         "Ключ": source.order_key(src, order_no),
         "Маркетплейс": code,
         "Номер заказа": order_no,
+        "Статус площадки": s(row.get("platform_status")),
         "Крайняя дата доставки": s(row.get("deadline")),
         "Что в заказе": s(row.get("items")),
         "Количество": int(row.get("quantity") or 0),
@@ -303,7 +313,7 @@ def main():
         table_id, database_id = br.ensure_orders_table()
         primary_name = br.ensure_schema(table_id)
 
-    active, warnings = gather_active_orders()
+    active, fresh, terminal_keys, warnings = gather_orders()
     active_bodies = [make_body(row, primary_name) for row in active]
     active_by_key = {s(body.get("Ключ")): body for body in active_bodies if s(body.get("Ключ"))}
 
@@ -317,6 +327,8 @@ def main():
     created = 0
     updated = 0
     deleted = 0
+    terminal_updated = 0
+    terminal_created_today = 0
 
     for key, body in active_by_key.items():
         old = existing_by_key.get(key)
@@ -324,12 +336,32 @@ def main():
             br.update_row(table_id, int(old["id"]), body)
             updated += 1
         else:
-            br.create_row(table_id, body)
+            created_row = br.create_row(table_id, body)
             created += 1
+            if isinstance(created_row, dict):
+                existing_by_key[key] = created_row
 
-    # Historical orders are intentionally retained in Baserow.
-    # When an order disappears from the active marketplace/Webasyst feed,
-    # leave the existing Baserow row untouched instead of deleting it.
+    # Keep historical orders, but continue refreshing their marketplace status.
+    # Terminal orders from before the migration start are not backfilled unless
+    # they already exist in Baserow.
+    for key in terminal_keys:
+        row = fresh.get(key)
+        if not row:
+            continue
+        body = make_body(row, primary_name)
+        old = existing_by_key.get(key)
+        if old:
+            br.update_row(table_id, int(old["id"]), body)
+            terminal_updated += 1
+        elif started_on_or_after(row):
+            created_row = br.create_row(table_id, body)
+            terminal_created_today += 1
+            created += 1
+            if isinstance(created_row, dict):
+                existing_by_key[key] = created_row
+
+    # No Baserow status is ever written back to any marketplace.
+    # This job only reads marketplace/Webasyst data and writes Baserow rows.
 
     counts = {}
     for row in active:
@@ -346,6 +378,8 @@ def main():
         "counts_by_source": counts,
         "created": created,
         "updated": updated,
+        "terminal_status_updated": terminal_updated,
+        "terminal_created_from_start_date": terminal_created_today,
         "deleted": 0,
         "warnings": warnings,
     }
