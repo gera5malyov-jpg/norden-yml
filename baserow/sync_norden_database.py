@@ -507,6 +507,7 @@ def main():
         "excluded_discount": 0,
         "excluded_moscow": 0,
         "excluded_without_images": 0,
+        "eligible_without_characteristics": 0,
         "existing_matches": 0,
         "existing_price_stock_updates": 0,
         "existing_characteristic_rows_updated": 0,
@@ -543,6 +544,14 @@ def main():
     report["api_error"] = api_error
     report["source_unique"] = len(source)
     report["source_duplicate_codes"] = len(set(norm(x) for x in source_duplicates))
+    report["eligible_without_characteristics"] = sum(
+        1
+        for item in source.values()
+        if (item.get("stock") or 0) > 0
+        and not is_excluded(item)[0]
+        and bool(item.get("images"))
+        and not bool(item.get("features"))
+    )
 
     kit_ids_by_article, kit_mapping_ambiguous, kit_mapping_updated_at = load_kit_id_mapping()
     report["kit_mapping_updated_at"] = kit_mapping_updated_at
