@@ -24,6 +24,9 @@ jobs:
       YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
       YANDEX_MARKET_BUSINESS_ID: '20806099'
       YANDEX_MARKET_CAMPAIGN_ID: '89405839'
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,3 +38,6 @@ jobs:
 
       - name: Update Norden marketplace commissions in Database
         run: python baserow/sync_norden_marketplace_commissions.py
+
+      - name: Publish Norden stocks from Database to Webasyst and KIT
+        run: python baserow/publish_norden_stocks.py
