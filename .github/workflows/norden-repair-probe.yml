@@ -1,0 +1,103 @@
+name: Probe RF104 Norden row
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'baserow/probe_rf104_trigger.txt'
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      BASEROW_URL: http://147.78.67.6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Read RF.104L.PGDA.DA
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+
+          base=os.environ["BASEROW_URL"].rstrip("/")
+          token=os.environ["BASEROW_DATABASE_TOKEN"]
+          headers={"Authorization":"Token "+token,"Accept":"application/json"}
+          def get(path):
+              req=urllib.request.Request(base+path,headers=headers)
+              with urllib.request.urlopen(req,timeout=60) as r:
+                  return json.load(r)
+
+          rows=[]
+          page=1
+          while True:
+              d=get(f"/api/database/rows/table/156/?user_field_names=true&size=200&page={page}")
+              rows.extend(d.get("results",[]))
+              if not d.get("next"): break
+              page+=1
+
+          target=None
+          needle="rf.104l.pgda.da"
+          for row in rows:
+              vals=[
+                  row.get("Артикул"), row.get("Артикул KIT"), row.get("Код для сайта"),
+                  row.get("Наименование артикула"), row.get("Артикул поставщика")
+              ]
+              if any(str(v or "").strip().casefold()==needle for v in vals):
+                  target=row
+                  break
+
+          if target is None:
+              out={"found":False}
+          else:
+              core={
+                  "id","order","Название","Артикул","Артикул KIT","Яндекс SKU","WB nmID",
+                  "Категория","Артикул поставщика","Код для сайта","Цена Webasyst","Цена Ozon",
+                  "Наличие","Первое изображение URL","Тип товара Webasyst","Дата создания в KIT",
+                  "Дата изменения","Последняя синхронизация","Наименование артикула","Поставщик",
+                  "Все изображения","Первое изображение","Закупка Norden","Остаток Norden",
+                  "Категория Norden","Группа Norden","Описание Norden"
+              }
+              nonempty_chars={}
+              for k,v in target.items():
+                  if k in core or str(k).startswith("Ozon"):
+                      continue
+                  if v not in (None,"",[],False):
+                      nonempty_chars[k]=v
+              images=target.get("Все изображения") or ""
+              out={
+                  "found":True,
+                  "row_id":target.get("id"),
+                  "name":target.get("Название"),
+                  "article":target.get("Артикул"),
+                  "supplier_article":target.get("Наименование артикула"),
+                  "purchase":target.get("Закупка Norden"),
+                  "stock":target.get("Остаток Norden"),
+                  "available":target.get("Наличие"),
+                  "first_image_url":target.get("Первое изображение URL"),
+                  "first_image_file_count":len(target.get("Первое изображение") or []),
+                  "all_image_count":len([x for x in str(images).splitlines() if x.strip()]),
+                  "category_norden":target.get("Категория Norden"),
+                  "group_norden":target.get("Группа Norden"),
+                  "description_norden_present":bool(target.get("Описание Norden")),
+                  "nonempty_characteristic_count":len(nonempty_chars),
+                  "nonempty_characteristics":nonempty_chars,
+              }
+          with open("baserow/rf104_probe_report.json","w",encoding="utf-8") as f:
+              json.dump(out,f,ensure_ascii=False,indent=2); f.write("\n")
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Save probe
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add baserow/rf104_probe_report.json
+          git commit -m "Save RF104 Norden row probe" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
