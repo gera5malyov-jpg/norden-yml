@@ -1,0 +1,59 @@
+name: Inspect RED-Black1 used stocks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-redblack-used-stocks.yml'
+
+permissions: {contents: read}
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - run: |
+          python3 - <<'PY'
+          import json,sys
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+          wa=WebasystClient(min_request_interval=0.3)
+          def listify(p,keys=()):
+              if isinstance(p,list): return [x for x in p if isinstance(x,dict)]
+              if not isinstance(p,dict): return []
+              for k in keys:
+                  v=p.get(k)
+                  if isinstance(v,list): return [x for x in v if isinstance(x,dict)]
+                  if isinstance(v,dict): return [x for x in v.values() if isinstance(x,dict)]
+              if p and all(isinstance(v,dict) for v in p.values()): return list(p.values())
+              return []
+          types=listify(wa.call('shop.type.getList'))
+          tid=str([x for x in types if str(x.get('name') or '').casefold()=='red-black1'.casefold()][0]['id'])
+          stocks=listify(wa.call('shop.stock.getList'))
+          names={str(x.get('id')):x.get('name') or x.get('title') for x in stocks}
+          used=set(); count=0; off=0
+          while True:
+              d=wa.call('shop.product.search',params={'hash':f'type/{tid}','offset':off,'limit':1000,'fields':'id,skus'})
+              b=listify(d,('products','items'))
+              for p in b:
+                  for sk in listify(p.get('skus') or [],()):
+                      count+=1
+                      st=sk.get('stocks') or []
+                      if isinstance(st,dict):
+                          used.update(str(k) for k in st)
+                      elif isinstance(st,list):
+                          for x in st:
+                              if isinstance(x,dict) and (x.get('id') is not None or x.get('stock_id') is not None):
+                                  used.add(str(x.get('id') if x.get('id') is not None else x.get('stock_id')))
+              if not b or len(b)<1000: break
+              off+=len(b)
+          print(json.dumps({'sku_count':count,'used_stock_ids':sorted(used),'used_stocks':[{'id':x,'name':names.get(x)} for x in sorted(used)]},ensure_ascii=False))
+          PY
