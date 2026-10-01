@@ -124,9 +124,12 @@ jobs:
                       "Поставщик":[sid],
                   })
 
-          for start in range(0,len(updates),20):
-              req("PATCH",f"/api/database/rows/table/{CAT}/batch/?user_field_names=true",
-                  {"items":updates[start:start+20]})
+          for idx,item in enumerate(updates,1):
+              row_id=item["id"]
+              body={k:v for k,v in item.items() if k!="id"}
+              req("PATCH",f"/api/database/rows/table/{CAT}/{row_id}/?user_field_names=true",body)
+              if idx % 100 == 0:
+                  print(f"UPDATED {idx}/{len(updates)}", flush=True)
 
           verified=rows(CAT, "liga-")
           after_candidates=[]
