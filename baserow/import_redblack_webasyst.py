@@ -144,7 +144,9 @@ class BR:
     def __init__(self):
         self.ses=requests.Session()
         self.ses.headers.update({"Accept":"application/json","Content-Type":"application/json"})
-        if BASEROW_EMAIL and BASEROW_PASSWORD:
+        if BASEROW_TOKEN:
+            self.ses.headers["Authorization"]="Token "+BASEROW_TOKEN
+        elif BASEROW_EMAIL and BASEROW_PASSWORD:
             auth=self.ses.post(
                 BASEROW_URL+"/api/user/token-auth/",
                 json={"username":BASEROW_EMAIL,"password":BASEROW_PASSWORD},
@@ -159,8 +161,6 @@ class BR:
             if not auth.ok:
                 raise RuntimeError(f"Baserow login failed: HTTP {auth.status_code}: {auth.text[:1000]}")
             self.ses.headers["Authorization"]="JWT "+auth.json()["token"]
-        elif BASEROW_TOKEN:
-            self.ses.headers["Authorization"]="Token "+BASEROW_TOKEN
         else:
             raise RuntimeError("BASEROW credentials missing")
         self._fields={}
@@ -182,7 +182,13 @@ class BR:
         rows=self.req("GET",f"/api/database/fields/table/{CATALOG_TABLE}/") or []
         self._fields={s(x.get("name")):x for x in rows}
     def ensure(self,name,kind="text",decimals=None):
-        if name in self._fields:return self._fields[name]
+        if name in self._fields:
+            return self._fields[name]
+        # The initial RED-Black transfer intentionally does not mutate schema
+        # with the database token. Core/dynamic fields were prepared separately
+        # with admin credentials. Missing optional fields stay preserved in RAW JSON.
+        if os.environ.get("RED_BLACK_ALLOW_SCHEMA_CREATE","0").strip() != "1":
+            return None
         body={"name":name,"type":kind}
         if kind=="number":
             body["number_decimal_places"]=int(decimals or 0); body["number_negative"]=False
@@ -274,6 +280,7 @@ def main():
     created=[]; updated=[]
     errors=[]; processed=0; images_rows=0; feature_values=0
     fields_created_before=len(br._fields)
+    missing_optional_fields=set()
 
     def flush():
         nonlocal created,updated
@@ -326,8 +333,10 @@ def main():
                     if k in ("features","skus","images","categories","description","summary","name","url","status"): continue
                     if isinstance(v,(dict,list,tuple)): continue
                     fname=safe_field_name("Webasyst товар — ",k)
-                    br.ensure(fname,"text",None)
-                    body[fname]=scalar_text(v)
+                    if br.ensure(fname,"text",None) is not None:
+                        body[fname]=scalar_text(v)
+                    else:
+                        missing_optional_fields.add(fname)
 
                 # Every scalar SKU field gets its own technical column.
                 for k,v in sk.items():
@@ -361,9 +370,11 @@ def main():
                     if not title:
                         continue
                     fname=safe_field_name("",title)
-                    br.ensure(fname,"long_text",None)
                     txt=flatten_feature_value(val)
-                    body[fname]=txt
+                    if br.ensure(fname,"long_text",None) is not None:
+                        body[fname]=txt
+                    else:
+                        missing_optional_fields.add(fname)
                     if txt: feature_values+=1
                     if norm(code)=="artikul" or norm(title)=="артикул":
                         if txt:
@@ -423,6 +434,8 @@ def main():
         "rows_with_image_links":images_rows,
         "feature_values_written":feature_values,
         "fields_created":fields_created,
+        "missing_optional_fields_count":len(missing_optional_fields),
+        "missing_optional_fields_sample":sorted(missing_optional_fields)[:100],
         "errors_count":len(errors),
         "errors_sample":errors[:100],
         "image_policy":"Only URL links from Webasyst summary/description/images; no image files uploaded to Baserow.",
