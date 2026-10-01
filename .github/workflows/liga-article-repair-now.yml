@@ -1,0 +1,165 @@
+name: Liga Database article repair now
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/liga-article-repair-now.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: liga-database-article-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BASEROW_URL: http://147.78.67.6
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Repair and verify Liga articles
+        run: |
+          python3 - <<'PY'
+          import json, os, re, requests, unicodedata
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          BASE=os.environ["BASEROW_URL"].rstrip("/")
+          TOKEN=os.environ["BASEROW_DATABASE_TOKEN"].strip()
+          H={"Authorization":"Token "+TOKEN,"Accept":"application/json","Content-Type":"application/json"}
+          CAT=156
+          SUP=157
+          SUPPLIER="Лига диванов"
+
+          def s(v): return str(v or "").strip()
+          def norm(v): return unicodedata.normalize("NFKC",s(v)).casefold()
+
+          def req(method,path,body=None):
+              r=requests.request(method,BASE+path,headers=H,json=body,timeout=90)
+              if not r.ok:
+                  raise RuntimeError(f"{method} {path} -> {r.status_code}: {r.text[:1000]}")
+              return r.json() if r.content else {}
+
+          def rows(table):
+              out=[]; page=1
+              while True:
+                  j=req("GET",f"/api/database/rows/table/{table}/?user_field_names=true&size=200&page={page}")
+                  out += [x for x in j.get("results",[]) if isinstance(x,dict)]
+                  if not j.get("next"): break
+                  page += 1
+              return out
+
+          def supplier_ids(row):
+              out=set()
+              for x in row.get("Поставщик") or []:
+                  if isinstance(x,dict) and x.get("id") is not None:
+                      try: out.add(int(x["id"]))
+                      except: pass
+              return out
+
+          def canonical(vendor):
+              code=s(vendor)
+              if norm(code).startswith("liga-"):
+                  code=code.split("-",1)[1].strip()
+              if not code:
+                  return ""
+              return "Liga-"+code
+
+          suppliers=rows(SUP)
+          sm=[r for r in suppliers if norm(r.get("Поставщик"))==norm(SUPPLIER)]
+          if len(sm)!=1:
+              raise RuntimeError(f"Expected exactly one Liga supplier, found {len(sm)}")
+          sid=int(sm[0]["id"])
+
+          all_rows=rows(CAT)
+          candidates=[]
+          for row in all_rows:
+              article=s(row.get("Артикул"))
+              if sid in supplier_ids(row) or norm(article).startswith("liga-"):
+                  candidates.append(row)
+
+          before_bad=[]
+          updates=[]
+          sample_before=None
+          for row in candidates:
+              vendor=s(row.get("Артикул поставщика") or row.get("Наименование артикула"))
+              if not vendor:
+                  continue
+              expected=canonical(vendor)
+              actual=s(row.get("Артикул"))
+              if vendor=="109775":
+                  sample_before={"id":row.get("id"),"article":actual,"expected":expected}
+              if actual!=expected or s(row.get("Код для сайта"))!=expected or sid not in supplier_ids(row):
+                  before_bad.append({
+                      "id":row.get("id"),"vendor_code":vendor,
+                      "article_before":actual,"site_code_before":s(row.get("Код для сайта")),
+                      "expected":expected,"supplier_link_ok":sid in supplier_ids(row)
+                  })
+                  updates.append({
+                      "id":row["id"],
+                      "Артикул":expected,
+                      "Код для сайта":expected,
+                      "Поставщик":[sid],
+                  })
+
+          for start in range(0,len(updates),100):
+              req("PATCH",f"/api/database/rows/table/{CAT}/batch/?user_field_names=true",
+                  {"items":updates[start:start+100]})
+
+          verified=rows(CAT)
+          after_candidates=[]
+          after_bad=[]
+          sample_after=None
+          for row in verified:
+              article=s(row.get("Артикул"))
+              if sid in supplier_ids(row) or norm(article).startswith("liga-"):
+                  after_candidates.append(row)
+                  vendor=s(row.get("Артикул поставщика") or row.get("Наименование артикула"))
+                  if not vendor:
+                      continue
+                  expected=canonical(vendor)
+                  if vendor=="109775":
+                      sample_after={"id":row.get("id"),"article":article,"expected":expected}
+                  if article!=expected or s(row.get("Код для сайта"))!=expected or sid not in supplier_ids(row):
+                      after_bad.append({
+                          "id":row.get("id"),"vendor_code":vendor,
+                          "article":article,"site_code":s(row.get("Код для сайта")),
+                          "expected":expected,"supplier_link_ok":sid in supplier_ids(row)
+                      })
+
+          report={
+              "finished_at":datetime.now(timezone.utc).isoformat(),
+              "supplier":SUPPLIER,
+              "candidate_rows":len(candidates),
+              "rows_changed":len(updates),
+              "bad_before":len(before_bad),
+              "bad_after":len(after_bad),
+              "sample_109775_before":sample_before,
+              "sample_109775_after":sample_after,
+              "before_sample":before_bad[:30],
+              "after_sample":after_bad[:30],
+              "complete":len(after_bad)==0,
+          }
+          p=Path("baserow/liga_article_repair_report.json")
+          p.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          if after_bad:
+              raise SystemExit(1)
+          PY
+
+      - name: Save verification report
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add baserow/liga_article_repair_report.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Verify Liga Database article repair"
+            git push
+          fi
