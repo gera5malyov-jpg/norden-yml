@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json, os, traceback, math
+import json, os, traceback
 from datetime import datetime, timezone
 import requests
 
@@ -15,96 +15,97 @@ try:
 
     s=requests.Session()
     s.headers.update({"User-Agent":"megapolis-cdek-quote/1.0","Accept":"application/json"})
+
     r=s.post(BASE+"/oauth/token", data={
         "grant_type":"client_credentials",
         "client_id":CLIENT_ID,
         "client_secret":CLIENT_SECRET,
     }, timeout=60)
-    r.raise_for_status()
-    token=r.json()["access_token"]
-    s.headers.update({"Authorization":"Bearer "+token,"Content-Type":"application/json"})
+    if not r.ok:
+        raise RuntimeError(f"OAuth HTTP {r.status_code}: {r.text[:1000]}")
+    token=r.json().get("access_token")
+    if not token:
+        raise RuntimeError("OAuth response has no access_token")
+    s.headers.update({"Authorization":"Bearer "+token})
 
     def get_city(name):
         rr=s.get(BASE+"/location/cities", params={"city":name,"country_codes":"RU","size":100}, timeout=60)
-        rr.raise_for_status()
+        if not rr.ok:
+            raise RuntimeError(f"Cities HTTP {rr.status_code}: {rr.text[:1000]}")
         data=rr.json()
         exact=[x for x in data if str(x.get("city","")).casefold()==name.casefold()]
-        if exact: return exact[0]
-        if data: return data[0]
+        if exact:
+            return exact[0]
+        if data:
+            return data[0]
         raise RuntimeError("City not found: "+name)
 
-    spb=get_city("Санкт-Петербург")
     moscow=get_city("Москва")
+    tolyatti=get_city("Тольятти")
 
-    packages=[{"weight":132,"length":5,"width":14,"height":11} for _ in range(12)]
-    base_body={
-      "type":1,
-      "from_location":{"code":spb["code"]},
-      "to_location":{"code":moscow["code"]},
-      "packages":packages,
-      "lang":"rus",
-      "currency":1
-    }
-
-    rr=s.post(BASE+"/calculator/tarifflist", json=base_body, timeout=60)
-    rr.raise_for_status()
-    payload=rr.json()
-    wh=[t for t in (payload.get("tariff_codes") or []) if t.get("delivery_mode")==4]
-
-    tariffs=[]
-    for t in wh:
-        body=dict(base_body)
-        body["tariff_code"]=t["tariff_code"]
-        body["services"]=[{"code":"INSURANCE","parameter":"2100"}]
-        tr=s.post(BASE+"/calculator/tariff", json=body, timeout=60)
-        try:
-            detail=tr.json()
-        except Exception:
-            detail={"raw":tr.text[:2000]}
-        tariffs.append({
-          "tariff_code":t.get("tariff_code"),
-          "tariff_name":t.get("tariff_name"),
-          "tariff_description":t.get("tariff_description"),
-          "delivery_mode":t.get("delivery_mode"),
-          "list_delivery_sum":t.get("delivery_sum"),
-          "list_period_min":t.get("period_min"),
-          "list_period_max":t.get("period_max"),
-          "http":tr.status_code,
-          "delivery_sum":detail.get("delivery_sum") if isinstance(detail,dict) else None,
-          "total_sum":detail.get("total_sum") if isinstance(detail,dict) else None,
-          "period_min":detail.get("period_min") if isinstance(detail,dict) else None,
-          "period_max":detail.get("period_max") if isinstance(detail,dict) else None,
-          "weight_calc":detail.get("weight_calc") if isinstance(detail,dict) else None,
-          "services":detail.get("services") if isinstance(detail,dict) else None,
-          "errors":detail.get("errors") if isinstance(detail,dict) else None,
-          "warnings":detail.get("warnings") if isinstance(detail,dict) else None,
-        })
-
-    tariffs.sort(key=lambda x: (
-      x.get("total_sum") is None,
-      x.get("total_sum") if x.get("total_sum") is not None else 10**18,
-      x.get("delivery_sum") if x.get("delivery_sum") is not None else 10**18
-    ))
+    scenarios=[
+      ("working_053",58,60,152,64000),
+      ("conservative_0643",58,60,185,64000),
+    ]
 
     result={
       "generated_at":datetime.now(timezone.utc).isoformat(),
       "status":"УСПЕШНО",
       "route":{
-        "from":{"code":spb.get("code"),"city":spb.get("city"),"region":spb.get("region")},
-        "to":{"code":moscow.get("code"),"city":moscow.get("city"),"region":moscow.get("region")},
-        "mode":"склад-склад"
+        "from":{"code":moscow.get("code"),"city":moscow.get("city"),"region":moscow.get("region")},
+        "to":{"code":tolyatti.get("code"),"city":tolyatti.get("city"),"region":tolyatti.get("region")},
       },
       "cargo":{
-        "places":12,
-        "each_original_cm":[4.2,13.9,10.9],
-        "each_sent_to_api_cm":[5,14,11],
-        "each_weight_kg":0.132,
-        "total_weight_kg":1.584,
-        "declared_value_rub":2100,
-        "cod_rub":0
+        "chairs":30,
+        "places":3,
+        "chairs_per_place":10,
+        "weight_per_chair_kg":6.4,
+        "weight_per_place_kg":64,
+        "total_weight_kg":192,
       },
-      "tariffs":tariffs
+      "quotes":[]
     }
+
+    for name,l,w,h,weight in scenarios:
+        packages=[{"weight":weight,"length":l,"width":w,"height":h} for _ in range(3)]
+        body={
+          "type":1,
+          "from_location":{"code":moscow["code"]},
+          "to_location":{"code":tolyatti["code"]},
+          "packages":packages,
+          "lang":"rus",
+        }
+        rr=s.post(BASE+"/calculator/tarifflist", json=body, timeout=60)
+        try:
+            payload=rr.json()
+        except Exception:
+            payload={"raw":rr.text[:2000]}
+        entry={
+          "scenario":name,
+          "http":rr.status_code,
+          "package_cm":[l,w,h],
+          "package_weight_kg":weight/1000,
+          "total_volume_m3":round((l*w*h/1_000_000)*3,3),
+          "tariffs":[]
+        }
+        if rr.ok and isinstance(payload,dict):
+            tariffs=payload.get("tariff_codes") or []
+            for t in tariffs:
+                entry["tariffs"].append({
+                  "tariff_code":t.get("tariff_code"),
+                  "tariff_name":t.get("tariff_name"),
+                  "tariff_description":t.get("tariff_description"),
+                  "delivery_mode":t.get("delivery_mode"),
+                  "delivery_sum":t.get("delivery_sum"),
+                  "period_min":t.get("period_min"),
+                  "period_max":t.get("period_max"),
+                  "calendar_min":t.get("calendar_min"),
+                  "calendar_max":t.get("calendar_max"),
+                  "services":t.get("services"),
+                })
+        else:
+            entry["error"]=payload
+        result["quotes"].append(entry)
 
 except Exception as e:
     result["status"]="ОШИБКА"
