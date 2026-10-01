@@ -1,0 +1,32 @@
+name: Repair Norden stocks now v2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-norden-stocks-now-v2.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      BASEROW_URL: http://147.78.67.6
+      NORDEN_RESUME_APPROVED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Reconcile Norden stocks and fill missing zeroes
+        run: python baserow/sync_norden_database.py --report-file baserow/norden_sync_report.json
+      - name: Show report
+        if: always()
+        run: cat baserow/norden_sync_report.json 2>/dev/null || true
