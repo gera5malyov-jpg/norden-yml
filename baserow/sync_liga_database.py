@@ -28,6 +28,7 @@ SUPPLIER_NAME = "Лига диванов"
 FIELD_PRICE_OLD = "Цена KIT до скидки"
 FIELD_PRICE_SALE = "Цена KIT со скидкой"
 FIELD_STOCK = "Остаток поставщика"
+FIELD_STOCK_ALT = "Остаток Поставщика"
 FIELD_STOCK_LEGACY = "Остаток Norden"
 FIELD_PAYLOAD = "Ozon данные без изображений (JSON)"
 REPORT = ROOT / "baserow" / "last_liga_database_sync.json"
@@ -188,7 +189,10 @@ def main():
 
     br = Baserow()
     fields = {s(x.get("name")): x for x in br.fields(CATALOG_TABLE_ID)}
-    stock_field = FIELD_STOCK if FIELD_STOCK in fields else FIELD_STOCK_LEGACY if FIELD_STOCK_LEGACY in fields else None
+    stock_field = next(
+        (name for name in (FIELD_STOCK, FIELD_STOCK_ALT, FIELD_STOCK_LEGACY) if name in fields),
+        None,
+    )
     required = {
         "Название", "Артикул", "Артикул KIT", "Категория", "Артикул поставщика",
         "Код для сайта", "Наличие", "Первое изображение URL", "Наименование артикула",
