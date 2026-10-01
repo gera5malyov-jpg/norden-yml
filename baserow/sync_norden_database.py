@@ -29,7 +29,8 @@ FULL_XML_URL = "https://norden.group/index.php?dispatch=sw_user_prices.get_file&
 NORDEN_CATEGORIES_API = "https://norden.group/api-categories/"
 
 FIELD_PURCHASE = "Закупка Norden"
-FIELD_STOCK = "Остаток Norden"\nFIELD_MSK = "Norden MSK"
+FIELD_STOCK = "Остаток Norden"
+FIELD_MSK = "Norden MSK"
 FIELD_KIT_ARTICLE = "Артикул KIT"
 KIT_MAPPING_PATH = Path(__file__).resolve().parents[1] / "norden-kit" / "kit_mapping.json"
 
@@ -691,7 +692,8 @@ def main():
             body = {}
             if item.get("purchase") is not None:
                 body[FIELD_PURCHASE] = item["purchase"]
-            body[FIELD_STOCK] = stock\n            body[FIELD_MSK] = stock
+            body[FIELD_STOCK] = stock
+            body[FIELD_MSK] = stock
             body["Наличие"] = bool(stock > 0)
 
             kit_id = kit_ids_by_article.get(k)
@@ -814,7 +816,8 @@ def main():
             body[FIELD_KIT_ARTICLE] = kit_id
         if item.get("purchase") is not None:
             body[FIELD_PURCHASE] = item["purchase"]
-        body[FIELD_STOCK] = stock\n            body[FIELD_MSK] = stock
+        body[FIELD_STOCK] = stock
+            body[FIELD_MSK] = stock
 
         # Characteristics belong only to newly created cards. Existing cards
         # are intentionally left unchanged except for price/stock/availability.
