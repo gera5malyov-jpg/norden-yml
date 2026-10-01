@@ -115,9 +115,8 @@ def load_snapshot():
         vendor_code = s(row.get("Артикул поставщика") or row.get("Наименование артикула"))
         if not vendor_code:
             continue
-        sku = s(row.get("Артикул")) or to_kit_sku(vendor_code)
-        if not sku.casefold().startswith("liga-"):
-            sku = to_kit_sku(vendor_code)
+        # Database article is capitalized as Liga-..., but KIT keeps its established liga-... SKU.
+        sku = to_kit_sku(vendor_code)
 
         payload = load_payload(row)
         category_path = s(row.get("Категория"))
