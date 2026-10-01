@@ -38,6 +38,91 @@ def s(v: Any) -> str:
     return str(v or "").strip()
 
 
+STATUS_TRANSLATIONS = {
+    # Yandex Market
+    "PLACING": "Оформляется",
+    "RESERVED": "Зарезервирован",
+    "UNPAID": "Ожидает оплаты",
+    "PROCESSING": "В обработке",
+    "DELIVERY": "Доставка",
+    "PICKUP": "В пункте выдачи",
+    "DELIVERED": "Доставлен",
+    "CANCELLED": "Отменён",
+    "PENDING": "Ожидает обработки",
+    "PARTIALLY_RETURNED": "Частичный возврат",
+    "RETURNED": "Возвращён",
+    "READY_TO_SHIP": "Готов к отгрузке",
+    "SHIPPED": "Отгружен",
+    "STARTED": "Начат",
+    "DELIVERY_SERVICE_RECEIVED": "Получен службой доставки",
+    "DELIVERY_SERVICE_DELIVERED": "Доставлен службой доставки",
+    "DELIVERY_SERVICE_UNDELIVERED": "Не доставлен службой доставки",
+    "USER_RECEIVED": "Получен покупателем",
+
+    # Ozon
+    "AWAITING_REGISTRATION": "Ожидает регистрации",
+    "ACCEPTANCE_IN_PROGRESS": "Приёмка",
+    "AWAITING_APPROVE": "Ожидает подтверждения",
+    "AWAITING_PACKAGING": "Ожидает сборки",
+    "AWAITING_DELIVER": "Ожидает передачи в доставку",
+    "ARBITRATION": "Арбитраж",
+    "CLIENT_ARBITRATION": "Арбитраж с покупателем",
+    "DELIVERING": "В доставке",
+    "DRIVER_PICKUP": "У курьера",
+    "POSTING_CREATED": "Заказ создан",
+    "POSTING_READY_TO_SHIP": "Готов к отгрузке",
+    "POSTING_TRANSFERRING_TO_DELIVERY": "Передаётся в доставку",
+    "POSTING_ACCEPTANCE_IN_PROGRESS": "Приёмка заказа",
+    "POSTING_IN_CARRIAGE": "Передан перевозчику",
+    "POSTING_NOT_IN_CARRIAGE": "Не передан перевозчику",
+    "POSTING_ON_WAY_TO_CITY": "В пути в город назначения",
+    "POSTING_ON_WAY_TO_PICKUP_POINT": "В пути в пункт выдачи",
+    "POSTING_IN_PICKUP_POINT": "В пункте выдачи",
+    "POSTING_RECEIVED_BY_CUSTOMER": "Получен покупателем",
+    "POSTING_CANCELED": "Заказ отменён",
+    "POSTING_CANCELLED": "Заказ отменён",
+
+    # Wildberries
+    "ORDERED": "Заказ оформлен",
+    "SOLD": "Реализован",
+
+    # Yandex KIT
+    "PENDING_PAYMENT": "Ожидает оплаты",
+    "NEW": "Новый",
+    "ORDER_PLACED": "Заказ оформлен",
+    "WAIT_FOR_CONFIRMATION": "Ожидает подтверждения",
+    "CREATING_INITIAL_RECEIPT": "Формируется чек",
+    "SETUP_DELIVERY": "Оформляется доставка",
+    "WAIT_FOR_DELIVERY": "Ожидает доставки",
+    "CREATING_FINAL_RECEIPTS": "Формируется итоговый чек",
+    "COMPLETED": "Завершён",
+    "CANCELLATION_IN_PROGRESS": "Отмена оформляется",
+    "DELIVERY_CANCELLED": "Доставка отменена",
+    "FULL_REFUND": "Полный возврат",
+    "PARTIAL_REFUND": "Частичный возврат",
+}
+
+
+def translate_platform_status(value: Any) -> str:
+    raw = s(value)
+    if not raw:
+        return ""
+    # Already human-readable Russian status: keep it unchanged.
+    if any("а" <= ch.lower() <= "я" or ch.lower() == "ё" for ch in raw):
+        return raw
+
+    parts = [part.strip() for part in raw.split("/") if part.strip()]
+    translated = []
+    for part in parts:
+        key = part.upper().replace("-", "_").replace(" ", "_")
+        text = STATUS_TRANSLATIONS.get(key)
+        if text is None:
+            # Keep an unknown API value readable instead of showing snake_case.
+            text = part.replace("_", " ").strip().capitalize()
+        translated.append(text)
+    return " — ".join(translated) if translated else raw
+
+
 class Baserow:
     def __init__(self):
         if not BASEROW_TOKEN:
@@ -291,7 +376,7 @@ def make_body(row: dict, primary_name: str) -> dict:
         "Ключ": source.order_key(src, order_no),
         "Маркетплейс": code,
         "Номер заказа": order_no,
-        "Статус площадки": s(row.get("platform_status")),
+        "Статус площадки": translate_platform_status(row.get("platform_status")),
         "Крайняя дата доставки": s(row.get("deadline")),
         "Что в заказе": s(row.get("items")),
         "Количество": int(row.get("quantity") or 0),
