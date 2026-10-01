@@ -33,3 +33,20 @@ jobs:
           for v in BASEROW_ADMIN_TOKEN BASEROW_USER_TOKEN BASEROW_JWT BASEROW_API_TOKEN BASEROW_TOKEN BASEROW_ACCESS_TOKEN BASEROW_EMAIL BASEROW_PASSWORD BASEROW_USER_EMAIL BASEROW_USER_PASSWORD BASEROW_ADMIN_EMAIL BASEROW_ADMIN_PASSWORD BASEROW_DATABASE_TOKEN; do
             if [ -n "${!v:-}" ]; then echo "$v=PRESENT"; else echo "$v=MISSING"; fi
           done
+
+      - name: Print relevant existing Database fields
+        env:
+          DB_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          u='http://147.78.67.6/api/database/fields/table/156/'
+          r=urllib.request.Request(u,headers={'Authorization':'Token '+os.environ['DB_TOKEN'],'Accept':'application/json'})
+          with urllib.request.urlopen(r,timeout=30) as x:
+              data=json.load(x)
+          needles=('цена','закуп','остат','склад','kit','артикул','бренд','опис','штрих','вес','габар','категор','изображ','поставщик')
+          for f in data:
+              n=str(f.get('name') or '')
+              if any(k in n.casefold() for k in needles):
+                  print(f.get('id'), '|', n, '|', f.get('type'))
+          PY
