@@ -1,0 +1,59 @@
+name: Inspect RED-Black1 Webasyst for Baserow import
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-redblack-webasyst.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Inspect type, product schema and sample
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+          wa=WebasystClient(min_request_interval=0.35)
+          def listify(p,keys=()):
+              if isinstance(p,list): return [x for x in p if isinstance(x,dict)]
+              if not isinstance(p,dict): return []
+              for k in keys:
+                  v=p.get(k)
+                  if isinstance(v,list): return [x for x in v if isinstance(x,dict)]
+                  if isinstance(v,dict): return [x for x in v.values() if isinstance(x,dict)]
+              if p and all(isinstance(v,dict) for v in p.values()): return list(p.values())
+              return []
+          types=listify(wa.call('shop.type.getList'))
+          m=[x for x in types if str(x.get('name') or x.get('title') or '').strip().casefold()=='red-black1'.casefold()]
+          if len(m)!=1: raise SystemExit(f'RED-Black1 type count={len(m)}')
+          tid=str(m[0]['id'])
+          p=wa.call('shop.product.search',params={'hash':f'type/{tid}','limit':5,'offset':0,'fields':'*'})
+          rows=listify(p,('products','items'))
+          print('TYPE='+json.dumps(m[0],ensure_ascii=False))
+          print('COUNT_HINT='+str((p.get('count') if isinstance(p,dict) else None) or (p.get('total_count') if isinstance(p,dict) else None)))
+          print('SEARCH_KEYS='+json.dumps(sorted(p.keys()) if isinstance(p,dict) else [],ensure_ascii=False))
+          print('PRODUCT_KEYS='+json.dumps(sorted(rows[0].keys()) if rows else [],ensure_ascii=False))
+          if rows:
+              pid=str(rows[0].get('id'))
+              info=wa.call('shop.product.getInfo',params={'id':pid})
+              print('INFO_KEYS='+json.dumps(sorted(info.keys()) if isinstance(info,dict) else [],ensure_ascii=False))
+              print('FEATURE_KEYS='+json.dumps(sorted((info.get('features') or {}).keys()) if isinstance(info.get('features'),dict) else [],ensure_ascii=False))
+              print('SKUS='+json.dumps(info.get('skus'),ensure_ascii=False)[:12000])
+              print('IMAGES='+json.dumps(info.get('images'),ensure_ascii=False)[:12000])
+              sample={k:info.get(k) for k in info if k not in ('description','summary','features','skus','images')}
+              print('INFO_SAMPLE='+json.dumps(sample,ensure_ascii=False,default=str)[:12000])
+          PY
