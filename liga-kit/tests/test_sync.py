@@ -14,7 +14,7 @@ def offer(code='109775', available=True, price='87990'):
     return LigaOffer(
         source_id='115615',
         vendor_code=code,
-        kit_sku='liga-' + code,
+        kit_sku='Liga-' + code,
         available=available,
         category_id='6632',
         name='Диван ' + code,
@@ -28,6 +28,7 @@ def offer(code='109775', available=True, price='87990'):
         source_url='https://example.test/' + code,
         images=[],
         params={},
+        old_price=(Decimal(price) * Decimal('1.30')) if price is not None else None,
     )
 
 
@@ -35,21 +36,21 @@ WAREHOUSES = {'СПБ':'spb-id', 'МСК':'msk-id'}
 
 
 class LigaSyncRuleTests(unittest.TestCase):
-    def test_price_update_uses_feed_price_without_markup_or_discount(self):
+    def test_price_update_uses_database_before_discount_and_sale_prices(self):
         update = build_price_update(
             offer(),
             {'id':'v1','pricing':{'price':'90000','manual_discount_price':'85000'}},
         )
         self.assertEqual(update, {
             'variant_id':'v1',
-            'price':'87990.00',
+            'price':'114387.00',
             'manual_discount_price':'87990.00',
         })
 
     def test_unchanged_price_produces_no_write(self):
         self.assertIsNone(build_price_update(
             offer(),
-            {'id':'v1','pricing':{'price':'87990','manual_discount_price':'87990'}},
+            {'id':'v1','pricing':{'price':'114387','manual_discount_price':'87990'}},
         ))
 
     def test_invalid_price_leaves_existing_price_unchanged(self):
@@ -227,9 +228,9 @@ class LigaSyncRunnerTests(unittest.TestCase):
         runner = SyncRunner(self.snapshot([offer()]), kit, None, dry_run=False)
         report = runner.run()
         payload = kit.created_variant
-        self.assertEqual(payload['sku'], 'liga-109775')
+        self.assertEqual(payload['sku'], 'Liga-109775')
         self.assertEqual(payload['pricing'], {
-            'price':'87990.00',
+            'price':'114387.00',
             'manual_discount_price':'87990.00',
         })
         self.assertEqual(
