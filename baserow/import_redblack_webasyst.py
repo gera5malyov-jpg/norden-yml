@@ -354,10 +354,13 @@ def main():
                     if fname in br._fields:
                         body[fname]=max(0,val or 0)
 
-                # Webasyst characteristics: readable Red-Black-specific columns.
+                # Webasyst characteristics are written exactly as named in Webasyst:
+                # "Название цвета", "Серия", "Высота", etc. No supplier prefix.
                 for code,val in features.items():
-                    title=feature_by_code.get(s(code),s(code))
-                    fname=safe_field_name("Red-Black — ",title)
+                    title=s(feature_by_code.get(s(code),s(code)))
+                    if not title:
+                        continue
+                    fname=safe_field_name("",title)
                     br.ensure(fname,"long_text",None)
                     txt=flatten_feature_value(val)
                     body[fname]=txt
