@@ -1,0 +1,39 @@
+name: Fill KIT and marketplace commissions now
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fill-kit-commissions-now.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+      YANDEX_MARKET_BUSINESS_ID: '20806099'
+      YANDEX_MARKET_CAMPAIGN_ID: '89405839'
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      BASEROW_URL: http://147.78.67.6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Fill current KIT IDs
+        run: python baserow/sync_kit_ids_to_baserow.py
+      - name: Fill Ozon and Yandex commissions
+        run: python baserow/sync_norden_marketplace_commissions.py
+      - name: Show reports
+        if: always()
+        run: |
+          cat baserow/kit_id_sync_report.json 2>/dev/null || true
+          cat baserow/norden_marketplace_commissions_report.json 2>/dev/null || true
