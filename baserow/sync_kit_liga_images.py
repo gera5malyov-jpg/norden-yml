@@ -169,8 +169,8 @@ def main():
         sku = s(row.get("Артикул"))
         vendor = s(row.get("Артикул поставщика") or row.get("Наименование артикула"))
         if not sku and vendor:
-            sku = "liga-" + vendor
-        variant = index.get(sku)
+            sku = "Liga-" + vendor
+        variant = index.get(sku.casefold())
         if variant is None:
             report["missing_in_kit"].append(sku or vendor)
             continue
