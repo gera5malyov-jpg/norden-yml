@@ -64,7 +64,7 @@ class LigaFeedTests(unittest.TestCase):
         self.assertEqual(snapshot.categories['6632'].name, 'Прямые диваны')
         self.assertEqual(snapshot.categories['6632'].parent_id, '5317')
         offer = snapshot.offers[0]
-        self.assertEqual(offer.kit_sku, 'liga-109775')
+        self.assertEqual(offer.kit_sku, 'Liga-109775')
         self.assertEqual(offer.vendor_code, '109775')
         self.assertEqual(offer.images, [
             'https://img/1.jpg',
