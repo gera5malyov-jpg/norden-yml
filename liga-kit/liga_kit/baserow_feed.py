@@ -17,6 +17,7 @@ SUPPLIERS_TABLE_ID = 157
 SUPPLIER_NAME = "Лига диванов"
 
 FIELD_PRICE = "Цена KIT со скидкой"
+FIELD_OLD_PRICE = "Цена KIT до скидки"
 FIELD_PAYLOAD = "Ozon данные без изображений (JSON)"
 
 
@@ -115,7 +116,7 @@ def load_snapshot():
         if not vendor_code:
             continue
         sku = s(row.get("Артикул")) or to_kit_sku(vendor_code)
-        if not sku.startswith("liga-"):
+        if not sku.casefold().startswith("liga-"):
             sku = to_kit_sku(vendor_code)
 
         payload = load_payload(row)
@@ -149,6 +150,7 @@ def load_snapshot():
             manufacturer_warranty=bool(payload.get("manufacturer_warranty")),
             images=images,
             params=params,
+            old_price=dec(row.get(FIELD_OLD_PRICE)),
         ))
 
     return FeedSnapshot(categories=categories, offers=offers, complete=True)
