@@ -1,0 +1,17 @@
+name: Cancel old Liga repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-old-liga-repair.yml'
+
+concurrency:
+  group: liga-database-article-repair
+  cancel-in-progress: true
+
+jobs:
+  cancel-old:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Old Liga repair concurrency slot released"
