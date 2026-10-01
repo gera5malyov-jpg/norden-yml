@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: liga-database-article-repair
+  group: liga-database-article-repair-row-v2
   cancel-in-progress: true
 
 jobs:
