@@ -1,0 +1,49 @@
+name: Backfill Norden MSK and calculate prices now
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/backfill-norden-msk-calc-now.yml'
+permissions:
+  contents: read
+jobs:
+  calc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      BASEROW_URL: http://147.78.67.6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Backfill Norden MSK from current Norden stock
+        run: |
+          python3 - <<'PY'
+          import os, requests
+          base=os.environ['BASEROW_URL'].rstrip('/')
+          s=requests.Session(); s.headers.update({'Authorization':'Token '+os.environ['BASEROW_DATABASE_TOKEN'],'Content-Type':'application/json','Accept':'application/json'})
+          def rows(tid):
+              out=[]; p=1
+              while True:
+                  r=s.get(base+f'/api/database/rows/table/{tid}/?user_field_names=true&size=200&page={p}',timeout=90); r.raise_for_status(); d=r.json()
+                  out += d.get('results') or []
+                  if not d.get('next'): return out
+                  p+=1
+          sups=rows(157); ns=[x for x in sups if str(x.get('Поставщик') or '').strip().casefold()=='norden']
+          sid=int(ns[0]['id'])
+          cat=rows(156)
+          items=[]
+          for r in cat:
+              linked={int(x['id']) for x in (r.get('Поставщик') or []) if isinstance(x,dict) and x.get('id') is not None}
+              if sid in linked or str(r.get('Бренд') or '').strip().casefold()=='norden':
+                  try:q=max(0,int(float(r.get('Остаток Norden') or 0)))
+                  except:q=0
+                  items.append({'id':r['id'],'Norden MSK':q})
+          for i in range(0,len(items),100):
+              r=s.patch(base+'/api/database/rows/table/156/batch/?user_field_names=true',json={'items':items[i:i+100]},timeout=90); r.raise_for_status()
+          print({'updated':len(items)})
+          PY
+      - name: Calculate price fields
+        run: python baserow/calculate_norden_prices.py
