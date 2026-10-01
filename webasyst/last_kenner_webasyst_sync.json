@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-30T10:32:52.151778+00:00",
+  "started_at": "2026-10-01T11:03:52.469243+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=334",
   "type_name": "kennermebel-334",
@@ -8,25 +8,69 @@
   "webasyst_stock_id": "66",
   "kit_stock": "МСК",
   "kit_stock_id": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
-  "kit_variants_scanned": 93,
-  "kit_webasyst_334_variants": 75,
+  "kit_variants_scanned": 96,
+  "kit_webasyst_334_variants": 78,
   "kit_duplicate_skus": 0,
   "webasyst_products": 75,
   "webasyst_duplicate_skus": 0,
-  "processed": 75,
-  "created": 0,
-  "updated_prices_stock": 6,
+  "processed": 78,
+  "created": 3,
+  "updated_prices_stock": 11,
   "summaries_updated_from_kit": 0,
   "kit_variants_without_images": 0,
-  "unchanged": 69,
+  "unchanged": 64,
   "features_created": 0,
-  "feature_values_written": 0,
-  "file_urls_resolved": 1223,
+  "feature_values_written": 63,
+  "file_urls_resolved": 1264,
   "image_source": "Yandex KIT media only",
   "webasyst_routing": "Webasyst=334",
   "errors": [],
-  "sample_new": [],
+  "sample_new": [
+    {
+      "sku": "334-323471",
+      "product_id": "1483357",
+      "name": "Стол Kenner DO1200, белый/керамика TOP ALPINE WHITE арт.170118",
+      "url": "stol-kenner-do1200-belyy-keramika-top-alpine-white-art-170118-334-323471",
+      "price": "42050.00",
+      "compare_price": "42050.00",
+      "stock": 1,
+      "features": 21,
+      "images_in_summary": 19
+    },
+    {
+      "sku": "334-324794",
+      "product_id": "1483358",
+      "name": "Стол Kenner DO1100, белый/керамика TOP ALPINE WHITE арт.170118",
+      "url": "stol-kenner-do1100-belyy-keramika-top-alpine-white-art-170118-334-324794",
+      "price": "42190.00",
+      "compare_price": "64500.00",
+      "stock": 30,
+      "features": 21,
+      "images_in_summary": 18
+    },
+    {
+      "sku": "334-325185",
+      "product_id": "1483359",
+      "name": "Стол Kenner DO1300, белый/керамика TOP ALPINE WHITE арт.170118",
+      "url": "stol-kenner-do1300-belyy-keramika-top-alpine-white-art-170118-334-325185",
+      "price": "42170.00",
+      "compare_price": "64500.00",
+      "stock": 15,
+      "features": 21,
+      "images_in_summary": 19
+    }
+  ],
   "sample_updates": [
+    {
+      "sku": "334-320825",
+      "fields": [
+        "stock"
+      ],
+      "price": "19760.00",
+      "compare_price": "19760.00",
+      "stock": 16,
+      "images_in_summary": 20
+    },
     {
       "sku": "334-320826",
       "fields": [
@@ -34,28 +78,68 @@
       ],
       "price": "19760.00",
       "compare_price": "19760.00",
-      "stock": 12,
+      "stock": 18,
       "images_in_summary": 19
     },
     {
-      "sku": "334-320850",
+      "sku": "334-320849",
       "fields": [
         "stock"
       ],
-      "price": "17340.00",
-      "compare_price": "17340.00",
-      "stock": 18,
-      "images_in_summary": 16
+      "price": "26280.00",
+      "compare_price": "26280.00",
+      "stock": 24,
+      "images_in_summary": 13
     },
     {
-      "sku": "334-320852",
+      "sku": "334-322305",
       "fields": [
         "stock"
       ],
-      "price": "17340.00",
-      "compare_price": "17340.00",
-      "stock": 64,
-      "images_in_summary": 13
+      "price": "42210.00",
+      "compare_price": "96367.00",
+      "stock": 1,
+      "images_in_summary": 28
+    },
+    {
+      "sku": "334-322383",
+      "fields": [
+        "stock"
+      ],
+      "price": "12240.00",
+      "compare_price": "12240.00",
+      "stock": 23,
+      "images_in_summary": 11
+    },
+    {
+      "sku": "334-323229",
+      "fields": [
+        "stock"
+      ],
+      "price": "37360.00",
+      "compare_price": "37360.00",
+      "stock": 2,
+      "images_in_summary": 26
+    },
+    {
+      "sku": "334-323230",
+      "fields": [
+        "stock"
+      ],
+      "price": "37360.00",
+      "compare_price": "37360.00",
+      "stock": 2,
+      "images_in_summary": 25
+    },
+    {
+      "sku": "334-323467",
+      "fields": [
+        "stock"
+      ],
+      "price": "47710.00",
+      "compare_price": "47710.00",
+      "stock": 2,
+      "images_in_summary": 21
     },
     {
       "sku": "334-323468",
@@ -64,33 +148,33 @@
       ],
       "price": "46270.00",
       "compare_price": "46270.00",
-      "stock": 10,
+      "stock": 9,
       "images_in_summary": 29
     },
     {
-      "sku": "334-324433",
+      "sku": "334-323716",
       "fields": [
         "stock"
       ],
-      "price": "44700.00",
-      "compare_price": "67867.00",
-      "stock": 1,
-      "images_in_summary": 9
+      "price": "12240.00",
+      "compare_price": "12240.00",
+      "stock": 29,
+      "images_in_summary": 11
     },
     {
-      "sku": "334-325174",
+      "sku": "334-324878",
       "fields": [
         "stock"
       ],
-      "price": "42590.00",
+      "price": "42440.00",
       "compare_price": "64500.00",
-      "stock": 8,
-      "images_in_summary": 28
+      "stock": 12,
+      "images_in_summary": 21
     }
   ],
   "complete": true,
   "webasyst_routing_feature_code": "kenner_f93046718124",
   "webasyst_334_products": 75,
-  "finished_at": "2026-09-30T10:53:20.260522+00:00",
+  "finished_at": "2026-10-01T11:30:51.353234+00:00",
   "status": "ok"
 }
