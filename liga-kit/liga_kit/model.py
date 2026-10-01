@@ -30,6 +30,7 @@ class LigaOffer:
     manufacturer_warranty: bool = False
     images: list[str] = field(default_factory=list)
     params: dict[str, list[str]] = field(default_factory=dict)
+    old_price: Optional[Decimal] = None
 
 
 @dataclass(frozen=True)
