@@ -1,0 +1,52 @@
+name: Repair Norden row AF-31366023
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-norden-af31366023.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      BASEROW_URL: http://147.78.67.6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect and repair exact row
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          base=os.environ['BASEROW_URL'].rstrip('/')
+          token=os.environ['BASEROW_DATABASE_TOKEN']
+          headers={'Authorization':'Token '+token,'Accept':'application/json','Content-Type':'application/json'}
+          def req(method,path,data=None):
+              body=None if data is None else json.dumps(data,ensure_ascii=False).encode()
+              r=urllib.request.Request(base+path,data=body,headers=headers,method=method)
+              with urllib.request.urlopen(r,timeout=60) as x:
+                  raw=x.read().decode()
+                  return json.loads(raw) if raw else None
+          found=None
+          page=1
+          while True:
+              d=req('GET',f'/api/database/rows/table/156/?user_field_names=true&size=200&page={page}')
+              for row in d.get('results',[]):
+                  if str(row.get('Артикул') or '').strip()=='AF-31366023':
+                      found=row; break
+              if found or not d.get('next'): break
+              page+=1
+          if not found:
+              raise SystemExit('AF-31366023_NOT_FOUND')
+          keep={k:v for k,v in found.items() if k in ['id','Название','Артикул','Наименование артикула','Артикул поставщика','Код для сайта','Бренд','Поставщик','Остаток Norden','Наличие','Артикул КИТ']}
+          print('BEFORE='+json.dumps(keep,ensure_ascii=False))
+          upd={'Остаток Norden':0,'Наличие':False}
+          req('PATCH',f"/api/database/rows/table/156/{found['id']}/?user_field_names=true",upd)
+          after=req('GET',f"/api/database/rows/table/156/{found['id']}/?user_field_names=true")
+          keep2={k:v for k,v in after.items() if k in keep}
+          print('AFTER='+json.dumps(keep2,ensure_ascii=False))
+          PY
