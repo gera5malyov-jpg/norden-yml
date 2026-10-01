@@ -26,7 +26,7 @@ jobs:
       - name: Repair and verify Liga articles
         run: |
           python3 - <<'PY'
-          import json, os, re, requests, unicodedata
+          import json, os, re, requests, unicodedata, time
           from urllib.parse import quote
           from datetime import datetime, timezone
           from pathlib import Path
@@ -42,10 +42,22 @@ jobs:
           def norm(v): return unicodedata.normalize("NFKC",s(v)).casefold()
 
           def req(method,path,body=None):
-              r=requests.request(method,BASE+path,headers=H,json=body,timeout=90)
-              if not r.ok:
-                  raise RuntimeError(f"{method} {path} -> {r.status_code}: {r.text[:1000]}")
-              return r.json() if r.content else {}
+              last=None
+              for attempt in range(6):
+                  try:
+                      r=requests.request(method,BASE+path,headers=H,json=body,timeout=90)
+                  except requests.RequestException as exc:
+                      last=exc
+                      time.sleep(min(20,2**attempt))
+                      continue
+                  if r.status_code >= 500:
+                      last=RuntimeError(f"{method} {path} -> {r.status_code}: {r.text[:300]}")
+                      time.sleep(min(20,2**attempt))
+                      continue
+                  if not r.ok:
+                      raise RuntimeError(f"{method} {path} -> {r.status_code}: {r.text[:1000]}")
+                  return r.json() if r.content else {}
+              raise RuntimeError(f"Retries exhausted: {last}")
 
           def rows(table, search=None):
               out=[]; page=1
@@ -112,9 +124,9 @@ jobs:
                       "Поставщик":[sid],
                   })
 
-          for start in range(0,len(updates),100):
+          for start in range(0,len(updates),20):
               req("PATCH",f"/api/database/rows/table/{CAT}/batch/?user_field_names=true",
-                  {"items":updates[start:start+100]})
+                  {"items":updates[start:start+20]})
 
           verified=rows(CAT, "liga-")
           after_candidates=[]
