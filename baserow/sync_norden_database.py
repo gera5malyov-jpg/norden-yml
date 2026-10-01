@@ -30,6 +30,7 @@ NORDEN_CATEGORIES_API = "https://norden.group/api-categories/"
 
 FIELD_PURCHASE = "Закупка Norden"
 FIELD_STOCK = "Остаток поставщика"
+FIELD_STOCK_ALT = "Остаток Поставщика"
 FIELD_STOCK_LEGACY = "Остаток Norden"
 FIELD_MSK = "Norden MSK"
 FIELD_KIT_ARTICLE = "Артикул KIT"
@@ -569,8 +570,9 @@ def main():
     field_by_name = {s(f.get("name")): f for f in field_rows}
     current_field_names = set(field_by_name)
 
-    stock_field = FIELD_STOCK if FIELD_STOCK in current_field_names else (
-        FIELD_STOCK_LEGACY if FIELD_STOCK_LEGACY in current_field_names else None
+    stock_field = next(
+        (name for name in (FIELD_STOCK, FIELD_STOCK_ALT, FIELD_STOCK_LEGACY) if name in current_field_names),
+        None,
     )
     numeric_specs = {FIELD_PURCHASE: 2}
     if stock_field:
