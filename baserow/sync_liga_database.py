@@ -227,16 +227,18 @@ def main():
 
         path = category_path(offer.category_id, snapshot.categories)
         price = float(offer.price) if offer.price is not None else None
+        old_price = round(price * 1.30, 2) if price is not None else None
+        article = "Liga-" + offer.vendor_code
         body = {
             "Название": offer.name,
-            "Артикул": offer.kit_sku,
+            "Артикул": article,
             "Наименование артикула": offer.vendor_code,
             "Артикул поставщика": offer.vendor_code,
-            "Код для сайта": offer.kit_sku,
+            "Код для сайта": article,
             "Поставщик": [supplier_id],
             "Наличие": bool(offer.available),
             "Категория": path,
-            FIELD_PRICE_OLD: price,
+            FIELD_PRICE_OLD: old_price,
             FIELD_PRICE_SALE: price,
             FIELD_PAYLOAD: json.dumps(feed_payload(offer), ensure_ascii=False, separators=(",", ":")),
         }
