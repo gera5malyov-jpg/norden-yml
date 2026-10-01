@@ -1,0 +1,46 @@
+name: Inspect RED-Black1 image schema
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-redblack-images.yml'
+
+permissions: {contents: read}
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - run: |
+          python3 - <<'PY'
+          import json,re,sys
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+          wa=WebasystClient(min_request_interval=0.3)
+          def listify(p,keys=()):
+              if isinstance(p,list): return p
+              if not isinstance(p,dict): return []
+              for k in keys:
+                  if isinstance(p.get(k),list): return p[k]
+                  if isinstance(p.get(k),dict): return list(p[k].values())
+              return []
+          types=listify(wa.call('shop.type.getList'))
+          tid=str([x for x in types if str(x.get('name') or '').casefold()=='red-black1'.casefold()][0]['id'])
+          p=wa.call('shop.product.search',params={'hash':f'type/{tid}','limit':100,'offset':0,'fields':'id,name,summary,skus,image_id,image_filename'})
+          for row in listify(p,('products','items')):
+              info=wa.call('shop.product.getInfo',params={'id':str(row.get('id'))})
+              urls=re.findall(r'https?://[^\s\[\]<>"]+',str(info.get('summary') or '')+' '+str(info.get('description') or ''))
+              imgs=info.get('images') or []
+              if imgs or urls:
+                  print('PRODUCT='+json.dumps({'id':info.get('id'),'name':info.get('name'),'summary_urls':urls[:10],'images':imgs},ensure_ascii=False)[:15000])
+                  break
+          PY
