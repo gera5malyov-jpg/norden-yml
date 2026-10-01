@@ -1,0 +1,1885 @@
+{
+  "timestamp_utc": "2026-10-01T15:39:02.320425+00:00",
+  "table_id": 156,
+  "prefixes": [
+    "Webasyst товар — ",
+    "Webasyst SKU — ",
+    "Red-Black — "
+  ],
+  "matched": 170,
+  "deleted": 0,
+  "errors": [
+    {
+      "field": {
+        "id": 8432,
+        "name": "Webasyst товар — badge"
+      },
+      "error": "DELETE /api/database/fields/8432/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8433,
+        "name": "Webasyst товар — base_price"
+      },
+      "error": "DELETE /api/database/fields/8433/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8434,
+        "name": "Webasyst товар — base_price_selectable"
+      },
+      "error": "DELETE /api/database/fields/8434/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8435,
+        "name": "Webasyst товар — base_unit_id"
+      },
+      "error": "DELETE /api/database/fields/8435/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8436,
+        "name": "Webasyst товар — category_id"
+      },
+      "error": "DELETE /api/database/fields/8436/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8437,
+        "name": "Webasyst товар — compare_price"
+      },
+      "error": "DELETE /api/database/fields/8437/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8438,
+        "name": "Webasyst товар — compare_price_selectable"
+      },
+      "error": "DELETE /api/database/fields/8438/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8439,
+        "name": "Webasyst товар — contact_id"
+      },
+      "error": "DELETE /api/database/fields/8439/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8440,
+        "name": "Webasyst товар — count"
+      },
+      "error": "DELETE /api/database/fields/8440/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8441,
+        "name": "Webasyst товар — count_denominator"
+      },
+      "error": "DELETE /api/database/fields/8441/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8442,
+        "name": "Webasyst товар — create_datetime"
+      },
+      "error": "DELETE /api/database/fields/8442/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8443,
+        "name": "Webasyst товар — cross_selling"
+      },
+      "error": "DELETE /api/database/fields/8443/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8444,
+        "name": "Webasyst товар — currency"
+      },
+      "error": "DELETE /api/database/fields/8444/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8445,
+        "name": "Webasyst товар — edit_datetime"
+      },
+      "error": "DELETE /api/database/fields/8445/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8446,
+        "name": "Webasyst товар — ext"
+      },
+      "error": "DELETE /api/database/fields/8446/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8447,
+        "name": "Webasyst товар — id"
+      },
+      "error": "DELETE /api/database/fields/8447/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8448,
+        "name": "Webasyst товар — id_1c"
+      },
+      "error": "DELETE /api/database/fields/8448/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8449,
+        "name": "Webasyst товар — image_filename"
+      },
+      "error": "DELETE /api/database/fields/8449/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8450,
+        "name": "Webasyst товар — image_id"
+      },
+      "error": "DELETE /api/database/fields/8450/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8451,
+        "name": "Webasyst товар — max_base_price"
+      },
+      "error": "DELETE /api/database/fields/8451/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8452,
+        "name": "Webasyst товар — max_price"
+      },
+      "error": "DELETE /api/database/fields/8452/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8453,
+        "name": "Webasyst товар — meta_description"
+      },
+      "error": "DELETE /api/database/fields/8453/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8454,
+        "name": "Webasyst товар — meta_keywords"
+      },
+      "error": "DELETE /api/database/fields/8454/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8455,
+        "name": "Webasyst товар — meta_title"
+      },
+      "error": "DELETE /api/database/fields/8455/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8456,
+        "name": "Webasyst товар — min_base_price"
+      },
+      "error": "DELETE /api/database/fields/8456/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8457,
+        "name": "Webasyst товар — min_price"
+      },
+      "error": "DELETE /api/database/fields/8457/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8458,
+        "name": "Webasyst товар — order_count_min"
+      },
+      "error": "DELETE /api/database/fields/8458/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8459,
+        "name": "Webasyst товар — order_count_step"
+      },
+      "error": "DELETE /api/database/fields/8459/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8460,
+        "name": "Webasyst товар — order_multiplicity_factor"
+      },
+      "error": "DELETE /api/database/fields/8460/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8461,
+        "name": "Webasyst товар — price"
+      },
+      "error": "DELETE /api/database/fields/8461/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8462,
+        "name": "Webasyst товар — purchase_price_selectable"
+      },
+      "error": "DELETE /api/database/fields/8462/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8463,
+        "name": "Webasyst товар — rating"
+      },
+      "error": "DELETE /api/database/fields/8463/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8464,
+        "name": "Webasyst товар — rating_count"
+      },
+      "error": "DELETE /api/database/fields/8464/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8465,
+        "name": "Webasyst товар — rating_html"
+      },
+      "error": "DELETE /api/database/fields/8465/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8466,
+        "name": "Webasyst товар — sku_count"
+      },
+      "error": "DELETE /api/database/fields/8466/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8467,
+        "name": "Webasyst товар — sku_id"
+      },
+      "error": "DELETE /api/database/fields/8467/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8468,
+        "name": "Webasyst товар — sku_type"
+      },
+      "error": "DELETE /api/database/fields/8468/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8469,
+        "name": "Webasyst товар — stock_base_ratio"
+      },
+      "error": "DELETE /api/database/fields/8469/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8470,
+        "name": "Webasyst товар — stock_unit_id"
+      },
+      "error": "DELETE /api/database/fields/8470/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8471,
+        "name": "Webasyst товар — tax_id"
+      },
+      "error": "DELETE /api/database/fields/8471/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8472,
+        "name": "Webasyst товар — total_sales"
+      },
+      "error": "DELETE /api/database/fields/8472/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8473,
+        "name": "Webasyst товар — total_sales_html"
+      },
+      "error": "DELETE /api/database/fields/8473/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8474,
+        "name": "Webasyst товар — type_id"
+      },
+      "error": "DELETE /api/database/fields/8474/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8475,
+        "name": "Webasyst товар — upselling"
+      },
+      "error": "DELETE /api/database/fields/8475/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8476,
+        "name": "Webasyst товар — video_url"
+      },
+      "error": "DELETE /api/database/fields/8476/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8477,
+        "name": "Webasyst товар — xml_id"
+      },
+      "error": "DELETE /api/database/fields/8477/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8478,
+        "name": "Webasyst товар — xml_profile_id"
+      },
+      "error": "DELETE /api/database/fields/8478/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8479,
+        "name": "Webasyst товар — xml_updated"
+      },
+      "error": "DELETE /api/database/fields/8479/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8480,
+        "name": "Webasyst товар — yml_id"
+      },
+      "error": "DELETE /api/database/fields/8480/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8481,
+        "name": "Webasyst товар — yml_profile_id"
+      },
+      "error": "DELETE /api/database/fields/8481/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8482,
+        "name": "Webasyst товар — yml_updated"
+      },
+      "error": "DELETE /api/database/fields/8482/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8483,
+        "name": "Webasyst SKU — available"
+      },
+      "error": "DELETE /api/database/fields/8483/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8484,
+        "name": "Webasyst SKU — count"
+      },
+      "error": "DELETE /api/database/fields/8484/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8485,
+        "name": "Webasyst SKU — dimension_id"
+      },
+      "error": "DELETE /api/database/fields/8485/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8486,
+        "name": "Webasyst SKU — file_description"
+      },
+      "error": "DELETE /api/database/fields/8486/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8487,
+        "name": "Webasyst SKU — file_name"
+      },
+      "error": "DELETE /api/database/fields/8487/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8488,
+        "name": "Webasyst SKU — file_size"
+      },
+      "error": "DELETE /api/database/fields/8488/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8489,
+        "name": "Webasyst SKU — id_1c"
+      },
+      "error": "DELETE /api/database/fields/8489/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8490,
+        "name": "Webasyst SKU — image_id"
+      },
+      "error": "DELETE /api/database/fields/8490/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8491,
+        "name": "Webasyst SKU — name"
+      },
+      "error": "DELETE /api/database/fields/8491/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8492,
+        "name": "Webasyst SKU — order_count_min"
+      },
+      "error": "DELETE /api/database/fields/8492/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8493,
+        "name": "Webasyst SKU — order_count_step"
+      },
+      "error": "DELETE /api/database/fields/8493/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8494,
+        "name": "Webasyst SKU — primary_price"
+      },
+      "error": "DELETE /api/database/fields/8494/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8495,
+        "name": "Webasyst SKU — product_id"
+      },
+      "error": "DELETE /api/database/fields/8495/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8496,
+        "name": "Webasyst SKU — sort"
+      },
+      "error": "DELETE /api/database/fields/8496/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8497,
+        "name": "Webasyst SKU — status"
+      },
+      "error": "DELETE /api/database/fields/8497/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8498,
+        "name": "Webasyst SKU — stock_base_ratio"
+      },
+      "error": "DELETE /api/database/fields/8498/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8499,
+        "name": "Webasyst SKU — virtual"
+      },
+      "error": "DELETE /api/database/fields/8499/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8500,
+        "name": "Webasyst SKU — xml_up"
+      },
+      "error": "DELETE /api/database/fields/8500/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8501,
+        "name": "Webasyst SKU — yml_up"
+      },
+      "error": "DELETE /api/database/fields/8501/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8502,
+        "name": "Red-Black — KIT ID"
+      },
+      "error": "DELETE /api/database/fields/8502/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8503,
+        "name": "Red-Black — Направляющие"
+      },
+      "error": "DELETE /api/database/fields/8503/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8504,
+        "name": "Red-Black — Количество ящиков"
+      },
+      "error": "DELETE /api/database/fields/8504/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8505,
+        "name": "Red-Black — Конструкция"
+      },
+      "error": "DELETE /api/database/fields/8505/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8506,
+        "name": "Red-Black — Материал фасада"
+      },
+      "error": "DELETE /api/database/fields/8506/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8507,
+        "name": "Red-Black — Расположение"
+      },
+      "error": "DELETE /api/database/fields/8507/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8508,
+        "name": "Red-Black — Тип Яндекс"
+      },
+      "error": "DELETE /api/database/fields/8508/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8509,
+        "name": "Red-Black — Тип WB"
+      },
+      "error": "DELETE /api/database/fields/8509/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8510,
+        "name": "Red-Black — Внешняя картинка"
+      },
+      "error": "DELETE /api/database/fields/8510/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8511,
+        "name": "Red-Black — nmId от WB"
+      },
+      "error": "DELETE /api/database/fields/8511/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8512,
+        "name": "Red-Black — Баркод от WB"
+      },
+      "error": "DELETE /api/database/fields/8512/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8513,
+        "name": "Red-Black — Материал крестовины"
+      },
+      "error": "DELETE /api/database/fields/8513/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8514,
+        "name": "Red-Black — Тип механизма качания"
+      },
+      "error": "DELETE /api/database/fields/8514/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8515,
+        "name": "Red-Black — Максимальная высота, см"
+      },
+      "error": "DELETE /api/database/fields/8515/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8516,
+        "name": "Red-Black — Минимальная высота, см"
+      },
+      "error": "DELETE /api/database/fields/8516/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8517,
+        "name": "Red-Black — Ширина сиденья, см"
+      },
+      "error": "DELETE /api/database/fields/8517/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8518,
+        "name": "Red-Black — Высота спинки, см"
+      },
+      "error": "DELETE /api/database/fields/8518/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8519,
+        "name": "Red-Black — Ширина спинки, см"
+      },
+      "error": "DELETE /api/database/fields/8519/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8520,
+        "name": "Red-Black — Минимальная высота сиденья, см"
+      },
+      "error": "DELETE /api/database/fields/8520/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8521,
+        "name": "Red-Black — Максимальная высота сиденья, см"
+      },
+      "error": "DELETE /api/database/fields/8521/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8522,
+        "name": "Red-Black — ТН ВЭД коды ЕАЭС"
+      },
+      "error": "DELETE /api/database/fields/8522/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8523,
+        "name": "Red-Black — Общие. Комната использования"
+      },
+      "error": "DELETE /api/database/fields/8523/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8524,
+        "name": "Red-Black — Газлифт"
+      },
+      "error": "DELETE /api/database/fields/8524/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8525,
+        "name": "Red-Black — Фиксация спинки"
+      },
+      "error": "DELETE /api/database/fields/8525/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8526,
+        "name": "Red-Black — Максимальная нагрузка, кг"
+      },
+      "error": "DELETE /api/database/fields/8526/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8527,
+        "name": "Red-Black — #Хештеги"
+      },
+      "error": "DELETE /api/database/fields/8527/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8528,
+        "name": "Red-Black — Зеркало"
+      },
+      "error": "DELETE /api/database/fields/8528/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8529,
+        "name": "Red-Black — Особенности OZON"
+      },
+      "error": "DELETE /api/database/fields/8529/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8530,
+        "name": "Red-Black — Размеры, мм"
+      },
+      "error": "DELETE /api/database/fields/8530/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8531,
+        "name": "Red-Black — Ориентация"
+      },
+      "error": "DELETE /api/database/fields/8531/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8532,
+        "name": "Red-Black — Тип направляющих"
+      },
+      "error": "DELETE /api/database/fields/8532/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8533,
+        "name": "Red-Black — Покрытие фасада"
+      },
+      "error": "DELETE /api/database/fields/8533/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8534,
+        "name": "Red-Black — Вес товара, г"
+      },
+      "error": "DELETE /api/database/fields/8534/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8535,
+        "name": "Red-Black — целевая аудитория"
+      },
+      "error": "DELETE /api/database/fields/8535/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8536,
+        "name": "Red-Black — ключевые слова"
+      },
+      "error": "DELETE /api/database/fields/8536/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8537,
+        "name": "Red-Black — Количество полок"
+      },
+      "error": "DELETE /api/database/fields/8537/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8538,
+        "name": "Red-Black — Количество дверей"
+      },
+      "error": "DELETE /api/database/fields/8538/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8539,
+        "name": "Red-Black — Тип открывания дверей"
+      },
+      "error": "DELETE /api/database/fields/8539/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8540,
+        "name": "Red-Black — Назначение (помещение)"
+      },
+      "error": "DELETE /api/database/fields/8540/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8541,
+        "name": "Red-Black — Название цвета"
+      },
+      "error": "DELETE /api/database/fields/8541/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8542,
+        "name": "Red-Black — Рисунок на обивке"
+      },
+      "error": "DELETE /api/database/fields/8542/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8543,
+        "name": "Red-Black — Материал наполнителя"
+      },
+      "error": "DELETE /api/database/fields/8543/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8544,
+        "name": "Red-Black — Покрытие корпуса"
+      },
+      "error": "DELETE /api/database/fields/8544/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8545,
+        "name": "Red-Black — Серия"
+      },
+      "error": "DELETE /api/database/fields/8545/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8546,
+        "name": "Red-Black — Механизм качания"
+      },
+      "error": "DELETE /api/database/fields/8546/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8547,
+        "name": "Red-Black — Наличие подголовника"
+      },
+      "error": "DELETE /api/database/fields/8547/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8548,
+        "name": "Red-Black — объединение в одну карточку"
+      },
+      "error": "DELETE /api/database/fields/8548/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8549,
+        "name": "Red-Black — Объем, л"
+      },
+      "error": "DELETE /api/database/fields/8549/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8550,
+        "name": "Red-Black — Основание"
+      },
+      "error": "DELETE /api/database/fields/8550/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8551,
+        "name": "Red-Black — Подъемный механизм"
+      },
+      "error": "DELETE /api/database/fields/8551/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8552,
+        "name": "Red-Black — Длина спального места"
+      },
+      "error": "DELETE /api/database/fields/8552/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8553,
+        "name": "Red-Black — Ширина спального места"
+      },
+      "error": "DELETE /api/database/fields/8553/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8554,
+        "name": "Red-Black — матрас в комплекте"
+      },
+      "error": "DELETE /api/database/fields/8554/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8555,
+        "name": "Red-Black — Тип ozon"
+      },
+      "error": "DELETE /api/database/fields/8555/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8556,
+        "name": "Red-Black — высота упаковки"
+      },
+      "error": "DELETE /api/database/fields/8556/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8557,
+        "name": "Red-Black — ширина упаковки"
+      },
+      "error": "DELETE /api/database/fields/8557/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8558,
+        "name": "Red-Black — глубина упаковки"
+      },
+      "error": "DELETE /api/database/fields/8558/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8559,
+        "name": "Red-Black — Вес упаковки"
+      },
+      "error": "DELETE /api/database/fields/8559/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8560,
+        "name": "Red-Black — Высота"
+      },
+      "error": "DELETE /api/database/fields/8560/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8561,
+        "name": "Red-Black — Глубина"
+      },
+      "error": "DELETE /api/database/fields/8561/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8562,
+        "name": "Red-Black — Ширина"
+      },
+      "error": "DELETE /api/database/fields/8562/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8563,
+        "name": "Red-Black — Производитель"
+      },
+      "error": "DELETE /api/database/fields/8563/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8564,
+        "name": "Red-Black — Материал корпуса"
+      },
+      "error": "DELETE /api/database/fields/8564/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8565,
+        "name": "Red-Black — Материал обивки"
+      },
+      "error": "DELETE /api/database/fields/8565/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8566,
+        "name": "Red-Black — Комплектация"
+      },
+      "error": "DELETE /api/database/fields/8566/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8567,
+        "name": "Red-Black — Страна"
+      },
+      "error": "DELETE /api/database/fields/8567/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8568,
+        "name": "Red-Black — Цвет товара"
+      },
+      "error": "DELETE /api/database/fields/8568/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8569,
+        "name": "Red-Black — Ящик для хранения"
+      },
+      "error": "DELETE /api/database/fields/8569/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8570,
+        "name": "Red-Black — Подлокотники"
+      },
+      "error": "DELETE /api/database/fields/8570/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8571,
+        "name": "Red-Black — Гарантийный срок"
+      },
+      "error": "DELETE /api/database/fields/8571/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8572,
+        "name": "Red-Black — Регулируемая спинка"
+      },
+      "error": "DELETE /api/database/fields/8572/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8573,
+        "name": "Red-Black — Стиль"
+      },
+      "error": "DELETE /api/database/fields/8573/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8574,
+        "name": "Red-Black — Назначение"
+      },
+      "error": "DELETE /api/database/fields/8574/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8575,
+        "name": "Red-Black — Форма поставки"
+      },
+      "error": "DELETE /api/database/fields/8575/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8576,
+        "name": "Red-Black — Исполнение"
+      },
+      "error": "DELETE /api/database/fields/8576/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8577,
+        "name": "Red-Black — Количество упаковок"
+      },
+      "error": "DELETE /api/database/fields/8577/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8578,
+        "name": "Red-Black — Вид выпуска товара"
+      },
+      "error": "DELETE /api/database/fields/8578/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8579,
+        "name": "Red-Black — Штрихкод"
+      },
+      "error": "DELETE /api/database/fields/8579/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8580,
+        "name": "Red-Black — Цвет"
+      },
+      "error": "DELETE /api/database/fields/8580/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8581,
+        "name": "Red-Black — Количество в упаковке"
+      },
+      "error": "DELETE /api/database/fields/8581/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8582,
+        "name": "Red-Black — Максимальная высота сиденья"
+      },
+      "error": "DELETE /api/database/fields/8582/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8583,
+        "name": "Red-Black — Спинка стула"
+      },
+      "error": "DELETE /api/database/fields/8583/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8584,
+        "name": "Red-Black — Тип основания"
+      },
+      "error": "DELETE /api/database/fields/8584/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8585,
+        "name": "Red-Black — Мягкость сиденья"
+      },
+      "error": "DELETE /api/database/fields/8585/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8586,
+        "name": "Red-Black — Регулировка высоты"
+      },
+      "error": "DELETE /api/database/fields/8586/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8587,
+        "name": "Red-Black — Х а р а к т е р и с т и к и"
+      },
+      "error": "DELETE /api/database/fields/8587/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8588,
+        "name": "Red-Black — Форма стола"
+      },
+      "error": "DELETE /api/database/fields/8588/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8589,
+        "name": "Red-Black — Материал столешницы"
+      },
+      "error": "DELETE /api/database/fields/8589/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8590,
+        "name": "Red-Black — Материал каркаса"
+      },
+      "error": "DELETE /api/database/fields/8590/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8591,
+        "name": "Red-Black — Раскладная столешница"
+      },
+      "error": "DELETE /api/database/fields/8591/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8592,
+        "name": "Red-Black — Ширина стола в раздвинутом (разложенном) состоянии"
+      },
+      "error": "DELETE /api/database/fields/8592/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8593,
+        "name": "Red-Black — Вес"
+      },
+      "error": "DELETE /api/database/fields/8593/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8594,
+        "name": "Red-Black — Объём упаковки"
+      },
+      "error": "DELETE /api/database/fields/8594/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8595,
+        "name": "Red-Black — Размер"
+      },
+      "error": "DELETE /api/database/fields/8595/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8596,
+        "name": "Red-Black — Материал"
+      },
+      "error": "DELETE /api/database/fields/8596/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8597,
+        "name": "Red-Black — Наполнитель"
+      },
+      "error": "DELETE /api/database/fields/8597/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8598,
+        "name": "Red-Black — Ткань"
+      },
+      "error": "DELETE /api/database/fields/8598/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8599,
+        "name": "Red-Black — ПОСТАВЩИК 1"
+      },
+      "error": "DELETE /api/database/fields/8599/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8600,
+        "name": "Red-Black — Объём упаковок"
+      },
+      "error": "DELETE /api/database/fields/8600/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    },
+    {
+      "field": {
+        "id": 8601,
+        "name": "Red-Black — Съёмный чехол"
+      },
+      "error": "DELETE /api/database/fields/8601/: HTTP 401: {\"detail\":\"Authentication credentials were not provided.\"}"
+    }
+  ],
+  "remaining": [
+    {
+      "id": 8432,
+      "name": "Webasyst товар — badge"
+    },
+    {
+      "id": 8433,
+      "name": "Webasyst товар — base_price"
+    },
+    {
+      "id": 8434,
+      "name": "Webasyst товар — base_price_selectable"
+    },
+    {
+      "id": 8435,
+      "name": "Webasyst товар — base_unit_id"
+    },
+    {
+      "id": 8436,
+      "name": "Webasyst товар — category_id"
+    },
+    {
+      "id": 8437,
+      "name": "Webasyst товар — compare_price"
+    },
+    {
+      "id": 8438,
+      "name": "Webasyst товар — compare_price_selectable"
+    },
+    {
+      "id": 8439,
+      "name": "Webasyst товар — contact_id"
+    },
+    {
+      "id": 8440,
+      "name": "Webasyst товар — count"
+    },
+    {
+      "id": 8441,
+      "name": "Webasyst товар — count_denominator"
+    },
+    {
+      "id": 8442,
+      "name": "Webasyst товар — create_datetime"
+    },
+    {
+      "id": 8443,
+      "name": "Webasyst товар — cross_selling"
+    },
+    {
+      "id": 8444,
+      "name": "Webasyst товар — currency"
+    },
+    {
+      "id": 8445,
+      "name": "Webasyst товар — edit_datetime"
+    },
+    {
+      "id": 8446,
+      "name": "Webasyst товар — ext"
+    },
+    {
+      "id": 8447,
+      "name": "Webasyst товар — id"
+    },
+    {
+      "id": 8448,
+      "name": "Webasyst товар — id_1c"
+    },
+    {
+      "id": 8449,
+      "name": "Webasyst товар — image_filename"
+    },
+    {
+      "id": 8450,
+      "name": "Webasyst товар — image_id"
+    },
+    {
+      "id": 8451,
+      "name": "Webasyst товар — max_base_price"
+    },
+    {
+      "id": 8452,
+      "name": "Webasyst товар — max_price"
+    },
+    {
+      "id": 8453,
+      "name": "Webasyst товар — meta_description"
+    },
+    {
+      "id": 8454,
+      "name": "Webasyst товар — meta_keywords"
+    },
+    {
+      "id": 8455,
+      "name": "Webasyst товар — meta_title"
+    },
+    {
+      "id": 8456,
+      "name": "Webasyst товар — min_base_price"
+    },
+    {
+      "id": 8457,
+      "name": "Webasyst товар — min_price"
+    },
+    {
+      "id": 8458,
+      "name": "Webasyst товар — order_count_min"
+    },
+    {
+      "id": 8459,
+      "name": "Webasyst товар — order_count_step"
+    },
+    {
+      "id": 8460,
+      "name": "Webasyst товар — order_multiplicity_factor"
+    },
+    {
+      "id": 8461,
+      "name": "Webasyst товар — price"
+    },
+    {
+      "id": 8462,
+      "name": "Webasyst товар — purchase_price_selectable"
+    },
+    {
+      "id": 8463,
+      "name": "Webasyst товар — rating"
+    },
+    {
+      "id": 8464,
+      "name": "Webasyst товар — rating_count"
+    },
+    {
+      "id": 8465,
+      "name": "Webasyst товар — rating_html"
+    },
+    {
+      "id": 8466,
+      "name": "Webasyst товар — sku_count"
+    },
+    {
+      "id": 8467,
+      "name": "Webasyst товар — sku_id"
+    },
+    {
+      "id": 8468,
+      "name": "Webasyst товар — sku_type"
+    },
+    {
+      "id": 8469,
+      "name": "Webasyst товар — stock_base_ratio"
+    },
+    {
+      "id": 8470,
+      "name": "Webasyst товар — stock_unit_id"
+    },
+    {
+      "id": 8471,
+      "name": "Webasyst товар — tax_id"
+    },
+    {
+      "id": 8472,
+      "name": "Webasyst товар — total_sales"
+    },
+    {
+      "id": 8473,
+      "name": "Webasyst товар — total_sales_html"
+    },
+    {
+      "id": 8474,
+      "name": "Webasyst товар — type_id"
+    },
+    {
+      "id": 8475,
+      "name": "Webasyst товар — upselling"
+    },
+    {
+      "id": 8476,
+      "name": "Webasyst товар — video_url"
+    },
+    {
+      "id": 8477,
+      "name": "Webasyst товар — xml_id"
+    },
+    {
+      "id": 8478,
+      "name": "Webasyst товар — xml_profile_id"
+    },
+    {
+      "id": 8479,
+      "name": "Webasyst товар — xml_updated"
+    },
+    {
+      "id": 8480,
+      "name": "Webasyst товар — yml_id"
+    },
+    {
+      "id": 8481,
+      "name": "Webasyst товар — yml_profile_id"
+    },
+    {
+      "id": 8482,
+      "name": "Webasyst товар — yml_updated"
+    },
+    {
+      "id": 8483,
+      "name": "Webasyst SKU — available"
+    },
+    {
+      "id": 8484,
+      "name": "Webasyst SKU — count"
+    },
+    {
+      "id": 8485,
+      "name": "Webasyst SKU — dimension_id"
+    },
+    {
+      "id": 8486,
+      "name": "Webasyst SKU — file_description"
+    },
+    {
+      "id": 8487,
+      "name": "Webasyst SKU — file_name"
+    },
+    {
+      "id": 8488,
+      "name": "Webasyst SKU — file_size"
+    },
+    {
+      "id": 8489,
+      "name": "Webasyst SKU — id_1c"
+    },
+    {
+      "id": 8490,
+      "name": "Webasyst SKU — image_id"
+    },
+    {
+      "id": 8491,
+      "name": "Webasyst SKU — name"
+    },
+    {
+      "id": 8492,
+      "name": "Webasyst SKU — order_count_min"
+    },
+    {
+      "id": 8493,
+      "name": "Webasyst SKU — order_count_step"
+    },
+    {
+      "id": 8494,
+      "name": "Webasyst SKU — primary_price"
+    },
+    {
+      "id": 8495,
+      "name": "Webasyst SKU — product_id"
+    },
+    {
+      "id": 8496,
+      "name": "Webasyst SKU — sort"
+    },
+    {
+      "id": 8497,
+      "name": "Webasyst SKU — status"
+    },
+    {
+      "id": 8498,
+      "name": "Webasyst SKU — stock_base_ratio"
+    },
+    {
+      "id": 8499,
+      "name": "Webasyst SKU — virtual"
+    },
+    {
+      "id": 8500,
+      "name": "Webasyst SKU — xml_up"
+    },
+    {
+      "id": 8501,
+      "name": "Webasyst SKU — yml_up"
+    },
+    {
+      "id": 8502,
+      "name": "Red-Black — KIT ID"
+    },
+    {
+      "id": 8503,
+      "name": "Red-Black — Направляющие"
+    },
+    {
+      "id": 8504,
+      "name": "Red-Black — Количество ящиков"
+    },
+    {
+      "id": 8505,
+      "name": "Red-Black — Конструкция"
+    },
+    {
+      "id": 8506,
+      "name": "Red-Black — Материал фасада"
+    },
+    {
+      "id": 8507,
+      "name": "Red-Black — Расположение"
+    },
+    {
+      "id": 8508,
+      "name": "Red-Black — Тип Яндекс"
+    },
+    {
+      "id": 8509,
+      "name": "Red-Black — Тип WB"
+    },
+    {
+      "id": 8510,
+      "name": "Red-Black — Внешняя картинка"
+    },
+    {
+      "id": 8511,
+      "name": "Red-Black — nmId от WB"
+    },
+    {
+      "id": 8512,
+      "name": "Red-Black — Баркод от WB"
+    },
+    {
+      "id": 8513,
+      "name": "Red-Black — Материал крестовины"
+    },
+    {
+      "id": 8514,
+      "name": "Red-Black — Тип механизма качания"
+    },
+    {
+      "id": 8515,
+      "name": "Red-Black — Максимальная высота, см"
+    },
+    {
+      "id": 8516,
+      "name": "Red-Black — Минимальная высота, см"
+    },
+    {
+      "id": 8517,
+      "name": "Red-Black — Ширина сиденья, см"
+    },
+    {
+      "id": 8518,
+      "name": "Red-Black — Высота спинки, см"
+    },
+    {
+      "id": 8519,
+      "name": "Red-Black — Ширина спинки, см"
+    },
+    {
+      "id": 8520,
+      "name": "Red-Black — Минимальная высота сиденья, см"
+    },
+    {
+      "id": 8521,
+      "name": "Red-Black — Максимальная высота сиденья, см"
+    },
+    {
+      "id": 8522,
+      "name": "Red-Black — ТН ВЭД коды ЕАЭС"
+    },
+    {
+      "id": 8523,
+      "name": "Red-Black — Общие. Комната использования"
+    },
+    {
+      "id": 8524,
+      "name": "Red-Black — Газлифт"
+    },
+    {
+      "id": 8525,
+      "name": "Red-Black — Фиксация спинки"
+    },
+    {
+      "id": 8526,
+      "name": "Red-Black — Максимальная нагрузка, кг"
+    },
+    {
+      "id": 8527,
+      "name": "Red-Black — #Хештеги"
+    },
+    {
+      "id": 8528,
+      "name": "Red-Black — Зеркало"
+    },
+    {
+      "id": 8529,
+      "name": "Red-Black — Особенности OZON"
+    },
+    {
+      "id": 8530,
+      "name": "Red-Black — Размеры, мм"
+    },
+    {
+      "id": 8531,
+      "name": "Red-Black — Ориентация"
+    },
+    {
+      "id": 8532,
+      "name": "Red-Black — Тип направляющих"
+    },
+    {
+      "id": 8533,
+      "name": "Red-Black — Покрытие фасада"
+    },
+    {
+      "id": 8534,
+      "name": "Red-Black — Вес товара, г"
+    },
+    {
+      "id": 8535,
+      "name": "Red-Black — целевая аудитория"
+    },
+    {
+      "id": 8536,
+      "name": "Red-Black — ключевые слова"
+    },
+    {
+      "id": 8537,
+      "name": "Red-Black — Количество полок"
+    },
+    {
+      "id": 8538,
+      "name": "Red-Black — Количество дверей"
+    },
+    {
+      "id": 8539,
+      "name": "Red-Black — Тип открывания дверей"
+    },
+    {
+      "id": 8540,
+      "name": "Red-Black — Назначение (помещение)"
+    },
+    {
+      "id": 8541,
+      "name": "Red-Black — Название цвета"
+    },
+    {
+      "id": 8542,
+      "name": "Red-Black — Рисунок на обивке"
+    },
+    {
+      "id": 8543,
+      "name": "Red-Black — Материал наполнителя"
+    },
+    {
+      "id": 8544,
+      "name": "Red-Black — Покрытие корпуса"
+    },
+    {
+      "id": 8545,
+      "name": "Red-Black — Серия"
+    },
+    {
+      "id": 8546,
+      "name": "Red-Black — Механизм качания"
+    },
+    {
+      "id": 8547,
+      "name": "Red-Black — Наличие подголовника"
+    },
+    {
+      "id": 8548,
+      "name": "Red-Black — объединение в одну карточку"
+    },
+    {
+      "id": 8549,
+      "name": "Red-Black — Объем, л"
+    },
+    {
+      "id": 8550,
+      "name": "Red-Black — Основание"
+    },
+    {
+      "id": 8551,
+      "name": "Red-Black — Подъемный механизм"
+    },
+    {
+      "id": 8552,
+      "name": "Red-Black — Длина спального места"
+    },
+    {
+      "id": 8553,
+      "name": "Red-Black — Ширина спального места"
+    },
+    {
+      "id": 8554,
+      "name": "Red-Black — матрас в комплекте"
+    },
+    {
+      "id": 8555,
+      "name": "Red-Black — Тип ozon"
+    },
+    {
+      "id": 8556,
+      "name": "Red-Black — высота упаковки"
+    },
+    {
+      "id": 8557,
+      "name": "Red-Black — ширина упаковки"
+    },
+    {
+      "id": 8558,
+      "name": "Red-Black — глубина упаковки"
+    },
+    {
+      "id": 8559,
+      "name": "Red-Black — Вес упаковки"
+    },
+    {
+      "id": 8560,
+      "name": "Red-Black — Высота"
+    },
+    {
+      "id": 8561,
+      "name": "Red-Black — Глубина"
+    },
+    {
+      "id": 8562,
+      "name": "Red-Black — Ширина"
+    },
+    {
+      "id": 8563,
+      "name": "Red-Black — Производитель"
+    },
+    {
+      "id": 8564,
+      "name": "Red-Black — Материал корпуса"
+    },
+    {
+      "id": 8565,
+      "name": "Red-Black — Материал обивки"
+    },
+    {
+      "id": 8566,
+      "name": "Red-Black — Комплектация"
+    },
+    {
+      "id": 8567,
+      "name": "Red-Black — Страна"
+    },
+    {
+      "id": 8568,
+      "name": "Red-Black — Цвет товара"
+    },
+    {
+      "id": 8569,
+      "name": "Red-Black — Ящик для хранения"
+    },
+    {
+      "id": 8570,
+      "name": "Red-Black — Подлокотники"
+    },
+    {
+      "id": 8571,
+      "name": "Red-Black — Гарантийный срок"
+    },
+    {
+      "id": 8572,
+      "name": "Red-Black — Регулируемая спинка"
+    },
+    {
+      "id": 8573,
+      "name": "Red-Black — Стиль"
+    },
+    {
+      "id": 8574,
+      "name": "Red-Black — Назначение"
+    },
+    {
+      "id": 8575,
+      "name": "Red-Black — Форма поставки"
+    },
+    {
+      "id": 8576,
+      "name": "Red-Black — Исполнение"
+    },
+    {
+      "id": 8577,
+      "name": "Red-Black — Количество упаковок"
+    },
+    {
+      "id": 8578,
+      "name": "Red-Black — Вид выпуска товара"
+    },
+    {
+      "id": 8579,
+      "name": "Red-Black — Штрихкод"
+    },
+    {
+      "id": 8580,
+      "name": "Red-Black — Цвет"
+    },
+    {
+      "id": 8581,
+      "name": "Red-Black — Количество в упаковке"
+    },
+    {
+      "id": 8582,
+      "name": "Red-Black — Максимальная высота сиденья"
+    },
+    {
+      "id": 8583,
+      "name": "Red-Black — Спинка стула"
+    },
+    {
+      "id": 8584,
+      "name": "Red-Black — Тип основания"
+    },
+    {
+      "id": 8585,
+      "name": "Red-Black — Мягкость сиденья"
+    },
+    {
+      "id": 8586,
+      "name": "Red-Black — Регулировка высоты"
+    },
+    {
+      "id": 8587,
+      "name": "Red-Black — Х а р а к т е р и с т и к и"
+    },
+    {
+      "id": 8588,
+      "name": "Red-Black — Форма стола"
+    },
+    {
+      "id": 8589,
+      "name": "Red-Black — Материал столешницы"
+    },
+    {
+      "id": 8590,
+      "name": "Red-Black — Материал каркаса"
+    },
+    {
+      "id": 8591,
+      "name": "Red-Black — Раскладная столешница"
+    },
+    {
+      "id": 8592,
+      "name": "Red-Black — Ширина стола в раздвинутом (разложенном) состоянии"
+    },
+    {
+      "id": 8593,
+      "name": "Red-Black — Вес"
+    },
+    {
+      "id": 8594,
+      "name": "Red-Black — Объём упаковки"
+    },
+    {
+      "id": 8595,
+      "name": "Red-Black — Размер"
+    },
+    {
+      "id": 8596,
+      "name": "Red-Black — Материал"
+    },
+    {
+      "id": 8597,
+      "name": "Red-Black — Наполнитель"
+    },
+    {
+      "id": 8598,
+      "name": "Red-Black — Ткань"
+    },
+    {
+      "id": 8599,
+      "name": "Red-Black — ПОСТАВЩИК 1"
+    },
+    {
+      "id": 8600,
+      "name": "Red-Black — Объём упаковок"
+    },
+    {
+      "id": 8601,
+      "name": "Red-Black — Съёмный чехол"
+    }
+  ]
+}
