@@ -241,9 +241,8 @@ def main():
 
     stocks=listify(wa.call("shop.stock.getList"))
     stock_name={s(x.get("id")):s(x.get("name") or x.get("title") or x.get("id")) for x in stocks if s(x.get("id"))}
-    for title in stock_name.values():
-        br.ensure(safe_field_name("Webasyst остаток — ",title),"number",0)
-
+    # Stock columns are prepared separately with admin permissions. Only Red МСК
+    # is expected for this supplier; all raw stock data is also preserved in JSON.
     feature_defs=listify(wa.call("shop.feature.getList"),("features","items"))
     feature_by_code={s(x.get("code")):s(x.get("name") or x.get("title") or x.get("code")) for x in feature_defs if s(x.get("code"))}
 
@@ -351,9 +350,9 @@ def main():
                     sid=s(st.get("id") or st.get("stock_id"))
                     title=stock_name.get(sid,sid or "без ID")
                     fname=safe_field_name("Webasyst остаток — ",title)
-                    br.ensure(fname,"number",0)
                     val=as_float(st.get("count") if "count" in st else st.get("quantity"))
-                    body[fname]=max(0,val or 0)
+                    if fname in br._fields:
+                        body[fname]=max(0,val or 0)
 
                 # Webasyst characteristics: readable Red-Black-specific columns.
                 for code,val in features.items():
