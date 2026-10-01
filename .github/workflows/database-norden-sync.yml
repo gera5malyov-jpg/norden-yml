@@ -37,6 +37,9 @@ jobs:
       - name: Synchronize Norden to Database
         run: python baserow/sync_norden_database.py --report-file baserow/norden_sync_report.json
 
+      - name: Refresh live KIT IDs in Database
+        run: python baserow/sync_kit_ids_to_baserow.py
+
       - name: Update Norden marketplace commissions in Database
         run: python baserow/sync_norden_marketplace_commissions.py
 

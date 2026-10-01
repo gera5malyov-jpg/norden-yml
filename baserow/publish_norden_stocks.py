@@ -35,6 +35,7 @@ FIELD_STOCK = "Остаток Norden"
 FIELD_KIT_ID = "Артикул KIT"
 REPORT_PATH = HERE / "norden_stock_publish_report.json"
 KIT_MAPPING_PATH = ROOT / "norden-kit" / "kit_mapping.json"
+KIT_LIVE_INDEX_PATH = HERE / "kit_live_index.json"
 
 
 def s(v):
@@ -149,6 +150,28 @@ def supplier_ids(row):
 
 
 def load_kit_id_index():
+    by_kit_id = defaultdict(list)
+    if KIT_LIVE_INDEX_PATH.exists():
+        payload = json.loads(KIT_LIVE_INDEX_PATH.read_text(encoding="utf-8"))
+        if isinstance(payload, dict):
+            for raw_kit_id, rows in payload.items():
+                try:
+                    kit_id = int(str(raw_kit_id).strip())
+                except Exception:
+                    continue
+                for row in rows or []:
+                    if not isinstance(row, dict):
+                        continue
+                    variant_id = s(row.get("variant_id"))
+                    if variant_id:
+                        by_kit_id[kit_id].append({
+                            "variant_id": variant_id,
+                            "supplier_article": "",
+                            "sku": s(row.get("sku")),
+                        })
+            if by_kit_id:
+                return by_kit_id
+
     if not KIT_MAPPING_PATH.exists():
         raise RuntimeError(f"KIT mapping is missing: {KIT_MAPPING_PATH}")
     payload = json.loads(KIT_MAPPING_PATH.read_text(encoding="utf-8"))
@@ -156,7 +179,6 @@ def load_kit_id_index():
     if not isinstance(variants, dict):
         raise RuntimeError("KIT mapping has invalid format")
 
-    by_kit_id = defaultdict(list)
     for supplier_article, rows in variants.items():
         for row in rows or []:
             if not isinstance(row, dict):
