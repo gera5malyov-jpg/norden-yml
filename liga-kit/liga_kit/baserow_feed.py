@@ -19,6 +19,7 @@ SUPPLIER_NAME = "Лига диванов"
 FIELD_PRICE = "Цена KIT со скидкой"
 FIELD_OLD_PRICE = "Цена KIT до скидки"
 FIELD_STOCK = "Остаток поставщика"
+FIELD_STOCK_ALT = "Остаток Поставщика"
 FIELD_STOCK_LEGACY = "Остаток Norden"
 FIELD_PAYLOAD = "Ozon данные без изображений (JSON)"
 
@@ -133,6 +134,8 @@ def load_snapshot():
         images = [s(x) for x in (payload.get("source_images") or []) if s(x)]
 
         stock_value = row.get(FIELD_STOCK)
+        if stock_value in (None, ""):
+            stock_value = row.get(FIELD_STOCK_ALT)
         if stock_value in (None, ""):
             stock_value = row.get(FIELD_STOCK_LEGACY)
         try:
