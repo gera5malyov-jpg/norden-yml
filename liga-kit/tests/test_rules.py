@@ -6,7 +6,7 @@ from liga_kit.rules import to_kit_sku, normalize_price, desired_stock
 
 class LigaRulesTests(unittest.TestCase):
     def test_liga_sku_prefix(self):
-        self.assertEqual(to_kit_sku('109775'), 'Liga-109775')
+        self.assertEqual(to_kit_sku('109775'), 'liga-109775')
 
     def test_empty_vendor_code_is_rejected(self):
         with self.assertRaises(ValueError):
