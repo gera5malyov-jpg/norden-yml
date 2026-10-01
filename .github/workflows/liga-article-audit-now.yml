@@ -1,0 +1,63 @@
+name: Liga Database article audit now
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/liga-article-audit-now.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASEROW_URL: http://147.78.67.6
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit live Liga articles
+        run: |
+          python3 - <<'PY'
+          import json, os, requests, unicodedata
+          from urllib.parse import quote
+          from pathlib import Path
+          BASE=os.environ["BASEROW_URL"].rstrip("/")
+          H={"Authorization":"Token "+os.environ["BASEROW_DATABASE_TOKEN"],"Accept":"application/json"}
+          def s(v): return str(v or "").strip()
+          def n(v): return unicodedata.normalize("NFKC",s(v)).casefold()
+          def canonical(v):
+              code=s(v)
+              if n(code).startswith("liga-"): code=code.split("-",1)[1].strip()
+              return "Liga-"+code if code else ""
+          rows=[]; page=1
+          while True:
+              url=f"{BASE}/api/database/rows/table/156/?user_field_names=true&size=200&page={page}&search={quote('liga-')}"
+              r=requests.get(url,headers=H,timeout=90); r.raise_for_status(); j=r.json()
+              rows += [x for x in j.get("results",[]) if isinstance(x,dict)]
+              if not j.get("next"): break
+              page += 1
+          liga=[r for r in rows if n(r.get("Артикул")).startswith("liga-")]
+          bad=[]; sample=[]
+          for row in liga:
+              vendor=s(row.get("Артикул поставщика") or row.get("Наименование артикула"))
+              if not vendor: continue
+              expected=canonical(vendor); actual=s(row.get("Артикул"))
+              if actual!=expected:
+                  bad.append({"id":row.get("id"),"vendor":vendor,"article":actual,"expected":expected})
+              if vendor=="109775":
+                  sample.append({"id":row.get("id"),"article":actual,"expected":expected})
+          report={"liga_rows":len(liga),"bad_articles":len(bad),"sample_109775":sample,"bad_sample":bad[:30]}
+          Path("baserow/liga_article_audit_report.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+      - name: Save audit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add baserow/liga_article_audit_report.json
+          git commit -m "Save live Liga article audit" || exit 0
+          git pull --rebase origin main
+          git push
