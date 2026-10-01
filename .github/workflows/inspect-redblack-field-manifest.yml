@@ -1,0 +1,53 @@
+name: Inspect RED-Black1 field manifest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-redblack-field-manifest.yml'
+
+permissions: {contents: read}
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - run: |
+          python3 - <<'PY'
+          import json,sys
+          sys.path.insert(0,'webasyst')
+          from client import WebasystClient
+          wa=WebasystClient(min_request_interval=0.3)
+          def listify(p,keys=()):
+              if isinstance(p,list): return [x for x in p if isinstance(x,dict)]
+              if not isinstance(p,dict): return []
+              for k in keys:
+                  v=p.get(k)
+                  if isinstance(v,list): return [x for x in v if isinstance(x,dict)]
+                  if isinstance(v,dict): return [x for x in v.values() if isinstance(x,dict)]
+              if p and all(isinstance(v,dict) for v in p.values()): return list(p.values())
+              return []
+          types=listify(wa.call('shop.type.getList'))
+          t=[x for x in types if str(x.get('name') or x.get('title') or '').strip().casefold()=='red-black1'.casefold()][0]
+          tid=str(t['id'])
+          feats=listify(wa.call('shop.feature.getList',params={'type_id':tid}),('features','items'))
+          stocks=listify(wa.call('shop.stock.getList'))
+          p=wa.call('shop.product.search',params={'hash':f'type/{tid}','limit':10,'offset':0,'fields':'*'})
+          rows=listify(p,('products','items'))
+          product_keys=sorted({k for r in rows for k,v in r.items() if not isinstance(v,(dict,list,tuple))})
+          info=wa.call('shop.product.getInfo',params={'id':str(rows[0]['id'])}) if rows else {}
+          sku_rows=listify(info.get('skus') or [],())
+          sku_keys=sorted({k for r in sku_rows for k,v in r.items() if not isinstance(v,(dict,list,tuple))})
+          print('FEATURES='+json.dumps([{'code':x.get('code'),'name':x.get('name') or x.get('title'),'type':x.get('type')} for x in feats],ensure_ascii=False))
+          print('STOCKS='+json.dumps([{'id':x.get('id'),'name':x.get('name') or x.get('title')} for x in stocks],ensure_ascii=False))
+          print('PRODUCT_KEYS='+json.dumps(product_keys,ensure_ascii=False))
+          print('SKU_KEYS='+json.dumps(sku_keys,ensure_ascii=False))
+          PY
