@@ -1,0 +1,26 @@
+name: Validate Norden Baserow pricing pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/validate-norden-baserow-pricing.yml'
+      - 'baserow/calculate_norden_prices.py'
+      - 'baserow/publish_norden_channels.py'
+      - 'baserow/sync_norden_database.py'
+      - 'catalog/publish_approved_norden_marketplaces.py'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Compile
+        run: |
+          python -m py_compile             baserow/calculate_norden_prices.py             baserow/publish_norden_channels.py             baserow/sync_norden_database.py             catalog/publish_approved_norden_marketplaces.py
