@@ -7,6 +7,7 @@ import os
 import sys
 import tempfile
 import unicodedata
+import time
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -73,10 +74,22 @@ class Baserow:
         })
 
     def request(self, method, path, **kwargs):
-        r = self.session.request(method, BASEROW_URL + path, timeout=90, **kwargs)
-        if not r.ok:
-            raise RuntimeError(f"Baserow {method} {path} -> HTTP {r.status_code}: {r.text[:1200]}")
-        return r.json() if r.content else {}
+        last = None
+        for attempt in range(6):
+            try:
+                r = self.session.request(method, BASEROW_URL + path, timeout=90, **kwargs)
+            except requests.RequestException as exc:
+                last = exc
+                time.sleep(min(20, 2 ** attempt))
+                continue
+            if r.status_code >= 500:
+                last = RuntimeError(f"Baserow {method} {path} -> HTTP {r.status_code}: {r.text[:300]}")
+                time.sleep(min(20, 2 ** attempt))
+                continue
+            if not r.ok:
+                raise RuntimeError(f"Baserow {method} {path} -> HTTP {r.status_code}: {r.text[:1200]}")
+            return r.json() if r.content else {}
+        raise RuntimeError(f"Baserow retries exhausted for {method} {path}: {last}")
 
     def fields(self, table_id):
         return self.request("GET", f"/api/database/fields/table/{table_id}/") or []
@@ -103,19 +116,19 @@ class Baserow:
         )
 
     def batch_create(self, table_id, items):
-        for start in range(0, len(items), 100):
+        for start in range(0, len(items), 20):
             self.request(
                 "POST",
                 f"/api/database/rows/table/{table_id}/batch/?user_field_names=true",
-                data=json.dumps({"items": items[start:start+100]}, ensure_ascii=False),
+                data=json.dumps({"items": items[start:start+20]}, ensure_ascii=False),
             )
 
     def batch_update(self, table_id, items):
-        for start in range(0, len(items), 100):
+        for start in range(0, len(items), 20):
             self.request(
                 "PATCH",
                 f"/api/database/rows/table/{table_id}/batch/?user_field_names=true",
-                data=json.dumps({"items": items[start:start+100]}, ensure_ascii=False),
+                data=json.dumps({"items": items[start:start+20]}, ensure_ascii=False),
             )
 
 
