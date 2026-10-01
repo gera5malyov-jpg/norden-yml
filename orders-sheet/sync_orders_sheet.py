@@ -408,7 +408,7 @@ def webasyst_active_rows(wa: WebasystClient, sku_names: dict[str, str]) -> dict[
                     "source": source,
                     "code": SOURCE_CODE.get(source, "П"),
                     "order_no": ext,
-                    "platform_status": state_names.get(state_id, state_id),
+                    "platform_status": s(params.get("mp_status")) or state_names.get(state_id, state_id),
                     "deadline": normalize_date(deadline),
                     "items": products,
                     "quantity": qty,
