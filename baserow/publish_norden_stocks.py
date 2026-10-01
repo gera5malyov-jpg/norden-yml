@@ -31,7 +31,8 @@ SUPPLIER_NAME = "Norden"
 WEBASYST_TYPE = "NORDEN-100"
 WEBASYST_MAIN_STOCK = "Основной склад"
 KIT_TARGET_STOCKS = ("МСК", "СПБ привозной")
-FIELD_STOCK = "Остаток Norden"
+FIELD_STOCK = "Остаток поставщика"
+FIELD_STOCK_LEGACY = "Остаток Norden"
 FIELD_KIT_ID = "Артикул KIT"
 REPORT_PATH = HERE / "norden_stock_publish_report.json"
 KIT_MAPPING_PATH = ROOT / "norden-kit" / "kit_mapping.json"
@@ -44,6 +45,13 @@ def s(v):
 
 def norm(v):
     return unicodedata.normalize("NFKC", s(v)).casefold()
+
+
+def supplier_stock_value(row):
+    value = supplier_stock_value(row)
+    if value in (None, ""):
+        value = row.get(FIELD_STOCK_LEGACY)
+    return value
 
 
 def as_int(v):
@@ -329,7 +337,7 @@ def main():
                 continue
 
             report["webasyst"]["matched"] += 1
-            qty = as_int(matches[0].get(FIELD_STOCK))
+            qty = as_int(supplier_stock_value(matches[0]))
 
             desired = {
                 stock_id: str(qty if stock_id == main_stock_id else 0)
@@ -388,7 +396,7 @@ def main():
 
         report["kit"]["mapped"] += 1
         variant_id = unique_variant_ids[0]
-        qty = as_int(row.get(FIELD_STOCK))
+        qty = as_int(supplier_stock_value(row))
         for warehouse_id in target_warehouse_ids.values():
             stock_rows.append({
                 "variant_id": variant_id,
