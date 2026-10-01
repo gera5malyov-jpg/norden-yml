@@ -328,23 +328,8 @@ def main():
                     "Webasyst изображения JSON":json.dumps(info.get("images") or [],ensure_ascii=False,separators=(",",":"),default=str),
                 }
 
-                # Every scalar product field gets its own technical column.
-                for k,v in info.items():
-                    if k in ("features","skus","images","categories","description","summary","name","url","status"): continue
-                    if isinstance(v,(dict,list,tuple)): continue
-                    fname=safe_field_name("Webasyst товар — ",k)
-                    if br.ensure(fname,"text",None) is not None:
-                        body[fname]=scalar_text(v)
-                    else:
-                        missing_optional_fields.add(fname)
-
-                # Every scalar SKU field gets its own technical column.
-                for k,v in sk.items():
-                    if k in ("stocks","sku","id","price","purchase_price","compare_price"): continue
-                    if isinstance(v,(dict,list,tuple)): continue
-                    fname=safe_field_name("Webasyst SKU — ",k)
-                    br.ensure(fname,"text",None)
-                    body[fname]=scalar_text(v)
+                # Do not create or populate Webasyst technical scalar columns.
+                # The complete source payload is retained below in "Webasyst RAW JSON".
 
                 # Warehouse stock columns.
                 raw_stocks=sk.get("stocks") or []
