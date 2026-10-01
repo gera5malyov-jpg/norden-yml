@@ -1,0 +1,32 @@
+name: Mark existing marketplace products in Baserow
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/mark-existing-marketplace-products.yml'
+      - 'baserow/bootstrap_marketplace_flags.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      BASEROW_URL: http://147.78.67.6
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+      YANDEX_MARKET_CAMPAIGN_ID: '89405839'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Mark products already present on Ozon and Yandex
+        run: python baserow/bootstrap_marketplace_flags.py
