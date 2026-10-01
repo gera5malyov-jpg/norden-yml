@@ -100,7 +100,7 @@ class Baserow:
         while True:
             data = self.request(
                 "GET",
-                f"/api/database/rows/table/{table_id}/?user_field_names=true&size=200&page={page}",
+                f"/api/database/rows/table/{table_id}/?user_field_names=true&size=50&page={page}",
             )
             out.extend(x for x in data.get("results", []) if isinstance(x, dict))
             if not data.get("next"):
