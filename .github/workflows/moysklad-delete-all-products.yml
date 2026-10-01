@@ -1,0 +1,136 @@
+name: Delete all MoySklad products
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: moysklad-delete-all-products
+  cancel-in-progress: false
+
+jobs:
+  delete-products:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Delete all products and variants
+        env:
+          MOYSKLAD_TOKEN: ${{ secrets.MOYSKLAD_TOKEN }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          BASE = "https://api.moysklad.ru/api/remap/1.2"
+          TOKEN = os.environ.get("MOYSKLAD_TOKEN", "").strip()
+          if not TOKEN:
+              raise SystemExit("MOYSKLAD_TOKEN secret is not configured")
+
+          HEADERS = {
+              "Authorization": f"Bearer {TOKEN}",
+              "Accept": "application/json;charset=utf-8",
+              "Content-Type": "application/json",
+              "User-Agent": "github-actions-moysklad-cleanup/1.0",
+          }
+
+          def request(method, path, data=None):
+              body = None if data is None else json.dumps(data, ensure_ascii=False).encode("utf-8")
+              last_error = None
+              for attempt in range(8):
+                  req = urllib.request.Request(BASE + path, data=body, headers=HEADERS, method=method)
+                  try:
+                      with urllib.request.urlopen(req, timeout=90) as resp:
+                          raw = resp.read()
+                          if not raw:
+                              return None
+                          return json.loads(raw.decode("utf-8"))
+                  except urllib.error.HTTPError as exc:
+                      payload = exc.read().decode("utf-8", "replace")
+                      last_error = RuntimeError(f"{method} {path}: HTTP {exc.code}: {payload[:2000]}")
+                      if exc.code in (429, 500, 502, 503, 504):
+                          retry_after = exc.headers.get("Retry-After")
+                          try:
+                              delay = float(retry_after) if retry_after else min(30, 2 ** attempt)
+                          except ValueError:
+                              delay = min(30, 2 ** attempt)
+                          time.sleep(delay)
+                          continue
+                      raise last_error
+                  except Exception as exc:
+                      last_error = exc
+                      time.sleep(min(30, 2 ** attempt))
+              raise RuntimeError(f"{method} {path} failed after retries: {last_error}")
+
+          def count(entity):
+              data = request("GET", f"/entity/{entity}?limit=1")
+              return int((data.get("meta") or {}).get("size") or 0)
+
+          def delete_all(entity, label):
+              initial = count(entity)
+              print(f"{label}: before={initial}")
+              previous = initial
+
+              while previous > 0:
+                  page = request("GET", f"/entity/{entity}?limit=200&offset=0")
+                  rows = page.get("rows") or []
+                  if not rows:
+                      break
+
+                  payload = [{"meta": row["meta"]} for row in rows]
+                  result = request("POST", f"/entity/{entity}/delete", payload)
+
+                  embedded_errors = []
+                  if isinstance(result, list):
+                      for item in result:
+                          if isinstance(item, dict) and item.get("errors"):
+                              embedded_errors.extend(item["errors"])
+                  for err in embedded_errors[:10]:
+                      print(f"{label} batch error: {err}")
+
+                  current = count(entity)
+                  print(f"{label}: remaining={current}")
+
+                  if current >= previous:
+                      print(f"{label}: bulk delete made no progress; trying individual DELETE for current page")
+                      failures = []
+                      for row in rows:
+                          try:
+                              request("DELETE", f"/entity/{entity}/{row['id']}")
+                          except Exception as exc:
+                              failures.append((row.get("id"), row.get("name"), str(exc)))
+                      after_individual = count(entity)
+                      print(f"{label}: remaining_after_individual={after_individual}")
+                      if after_individual >= current:
+                          for item in failures[:30]:
+                              print(f"{label} FAILED id={item[0]} name={item[1]!r}: {item[2]}")
+                          raise RuntimeError(
+                              f"Unable to delete remaining {after_individual} {label.lower()}; "
+                              "see errors above"
+                          )
+                      current = after_individual
+
+                  previous = current
+
+              final = count(entity)
+              print(f"{label}: after={final}")
+              return initial, final
+
+          # Variants are deleted first so they cannot block deletion of parent products.
+          try:
+              delete_all("variant", "Variants")
+          except Exception as exc:
+              print(f"Variant cleanup warning: {exc}")
+
+          before_products, after_products = delete_all("product", "Products")
+          remaining_variants = count("variant")
+          print(f"FINAL products_before={before_products} products_after={after_products} variants_after={remaining_variants}")
+
+          if after_products != 0:
+              raise SystemExit(f"Deletion incomplete: {after_products} products remain")
+          PY
