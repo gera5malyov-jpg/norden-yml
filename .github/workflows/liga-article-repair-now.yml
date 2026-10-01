@@ -27,6 +27,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re, requests, unicodedata
+          from urllib.parse import quote
           from datetime import datetime, timezone
           from pathlib import Path
 
@@ -46,10 +47,11 @@ jobs:
                   raise RuntimeError(f"{method} {path} -> {r.status_code}: {r.text[:1000]}")
               return r.json() if r.content else {}
 
-          def rows(table):
+          def rows(table, search=None):
               out=[]; page=1
               while True:
-                  j=req("GET",f"/api/database/rows/table/{table}/?user_field_names=true&size=200&page={page}")
+                  suffix=f"&search={quote(search)}" if search else ""
+                  j=req("GET",f"/api/database/rows/table/{table}/?user_field_names=true&size=200&page={page}{suffix}")
                   out += [x for x in j.get("results",[]) if isinstance(x,dict)]
                   if not j.get("next"): break
                   page += 1
@@ -77,11 +79,13 @@ jobs:
               raise RuntimeError(f"Expected exactly one Liga supplier, found {len(sm)}")
           sid=int(sm[0]["id"])
 
-          all_rows=rows(CAT)
+          # Fast path: legacy/current Liga articles are searchable by the stable liga- prefix.
+          # The normal full supplier sync still performs a full supplier-linked verification.
+          all_rows=rows(CAT, "liga-")
           candidates=[]
           for row in all_rows:
               article=s(row.get("Артикул"))
-              if sid in supplier_ids(row) or norm(article).startswith("liga-"):
+              if norm(article).startswith("liga-"):
                   candidates.append(row)
 
           before_bad=[]
@@ -112,7 +116,7 @@ jobs:
               req("PATCH",f"/api/database/rows/table/{CAT}/batch/?user_field_names=true",
                   {"items":updates[start:start+100]})
 
-          verified=rows(CAT)
+          verified=rows(CAT, "liga-")
           after_candidates=[]
           after_bad=[]
           sample_after=None
