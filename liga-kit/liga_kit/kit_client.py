@@ -64,9 +64,10 @@ def index_liga_variants(rows):
         if not isinstance(row, dict):
             continue
         sku = str(row.get('sku', '')).strip()
-        if not sku.startswith('liga-'):
+        key = sku.casefold()
+        if not key.startswith('liga-'):
             continue
-        buckets.setdefault(sku, []).append(row)
+        buckets.setdefault(key, []).append(row)
     return (
         {sku: values[0] for sku, values in buckets.items() if len(values) == 1},
         {sku: values for sku, values in buckets.items() if len(values) > 1},
