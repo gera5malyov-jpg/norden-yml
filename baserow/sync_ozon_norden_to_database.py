@@ -34,9 +34,8 @@ BASE_FIELD_SPECS = {
     "Ozon ID типа": ("number", 0),
     "Ozon Описание": ("long_text", None),
     "Ozon Штрихкоды": ("long_text", None),
-    "Ozon Цена": ("number", 2),
-    "Ozon Старая цена": ("number", 2),
-    "Ozon Маркетинговая цена": ("number", 2),
+    "Ozon Предельная цена без акций": ("number", 2),
+    "Ozon Зачёркнутая цена": ("number", 2),
     "Ozon Остаток": ("number", 0),
     "Ozon Статус": ("text", None),
     "Ozon Видимость": ("text", None),
@@ -677,7 +676,7 @@ def main():
             report["base_fields_used"] = sorted(BASE_FIELD_SPECS)
         else:
             report["technical_data_not_written_due_schema_permission"] = True
-            for field_name in ("Название", "Категория", "Цена Ozon"):
+            for field_name in ("Название", "Категория", "Ограничение для акций и стратегий"):
                 if field_name in existing_names:
                     report["base_fields_used"].append(field_name)
 
@@ -697,7 +696,7 @@ def main():
                     report["characteristic_fields_created"].append(field_name)
         else:
             protected_fields = {
-                "Название", "Категория", "Цена Ozon", "Артикул", "Артикул KIT",
+                "Название", "Категория", "Ограничение для акций и стратегий", "Артикул", "Артикул KIT",
                 "Код для сайта", "Наименование артикула", "Артикул поставщика",
                 "Поставщик", "Наличие", "Закупка Norden", "Остаток Norden",
                 "Первое изображение", "Первое изображение URL", "Все изображения",
@@ -819,9 +818,8 @@ def main():
                     "Ozon ID типа": tid or None,
                     "Ozon Описание": s(info.get("description") or info.get("description_text") or card.get("description") or card.get("description_text")),
                     "Ozon Штрихкоды": barcodes(info, card),
-                    "Ozon Цена": num(p.get("price")),
-                    "Ozon Старая цена": num(p.get("old_price")),
-                    "Ozon Маркетинговая цена": num(p.get("marketing_seller_price")),
+                    "Ozon Предельная цена без акций": num(p.get("price")),
+                    "Ozon Зачёркнутая цена": num(p.get("old_price")),
                     "Ozon Остаток": stock_total(stock_by_id.get(pid) or []),
                     "Ozon Статус": status_text(info),
                     "Ozon Видимость": visibility_text(list_row, info),
@@ -833,8 +831,9 @@ def main():
                     body["Название"] = s(card.get("name") or info.get("name") or offer_id)
                 if "Категория" in existing_names and cat_paths.get(dc):
                     body["Категория"] = cat_paths.get(dc)
-                if "Цена Ozon" in existing_names and num(p.get("price")) is not None:
-                    body["Цена Ozon"] = num(p.get("price"))
+                # "Ограничение для акций и стратегий" is intentionally not
+                # populated from the current marketplace price. It is reserved
+                # for our own calculated pricing rule.
 
             for item in char_rows_by_pid.get(pid) or []:
                 map_key = (int(item["id"]), norm(item["name"]))
