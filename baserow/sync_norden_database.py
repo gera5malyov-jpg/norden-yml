@@ -29,7 +29,8 @@ FULL_XML_URL = "https://norden.group/index.php?dispatch=sw_user_prices.get_file&
 NORDEN_CATEGORIES_API = "https://norden.group/api-categories/"
 
 FIELD_PURCHASE = "Закупка Norden"
-FIELD_STOCK = "Остаток Norden"
+FIELD_STOCK = "Остаток поставщика"
+FIELD_STOCK_LEGACY = "Остаток Norden"
 FIELD_MSK = "Norden MSK"
 FIELD_KIT_ARTICLE = "Артикул KIT"
 KIT_MAPPING_PATH = Path(__file__).resolve().parents[1] / "norden-kit" / "kit_mapping.json"
@@ -568,14 +569,22 @@ def main():
     field_by_name = {s(f.get("name")): f for f in field_rows}
     current_field_names = set(field_by_name)
 
-    numeric_specs = {FIELD_PURCHASE: 2, FIELD_STOCK: 0}
+    stock_field = FIELD_STOCK if FIELD_STOCK in current_field_names else (
+        FIELD_STOCK_LEGACY if FIELD_STOCK_LEGACY in current_field_names else None
+    )
+    numeric_specs = {FIELD_PURCHASE: 2}
+    if stock_field:
+        numeric_specs[stock_field] = 0
     numeric_available = {
         name for name in numeric_specs
         if name in field_by_name and s(field_by_name[name].get("type")) == "number"
     }
     report["numeric_fields_available"] = sorted(numeric_available)
+    report["supplier_stock_field"] = stock_field
 
-    missing_core = [name for name in (FIELD_PURCHASE, FIELD_STOCK, FIELD_MSK, FIELD_KIT_ARTICLE) if name not in current_field_names]
+    missing_core = [name for name in (FIELD_PURCHASE, FIELD_MSK, FIELD_KIT_ARTICLE) if name not in current_field_names]
+    if stock_field is None:
+        missing_core.append(FIELD_STOCK)
     if missing_core:
         raise RuntimeError(f"Database schema is missing Norden core fields: {missing_core}")
 
@@ -692,7 +701,7 @@ def main():
             body = {}
             if item.get("purchase") is not None:
                 body[FIELD_PURCHASE] = item["purchase"]
-            body[FIELD_STOCK] = stock
+            body[stock_field] = stock
             body[FIELD_MSK] = stock
             body["Наличие"] = bool(stock > 0)
 
@@ -777,7 +786,7 @@ def main():
                 if changed:
                     if not args.dry_run:
                         pending_updates.append({"id": row_id, **body})
-                    if any(field in body for field in (FIELD_PURCHASE, FIELD_STOCK, "Наличие")):
+                    if any(field in body for field in (FIELD_PURCHASE, stock_field, "Наличие")):
                         report["existing_price_stock_updates"] += 1
                     if FIELD_KIT_ARTICLE in body:
                         current_kit = row.get(FIELD_KIT_ARTICLE)
@@ -816,7 +825,7 @@ def main():
             body[FIELD_KIT_ARTICLE] = kit_id
         if item.get("purchase") is not None:
             body[FIELD_PURCHASE] = item["purchase"]
-        body[FIELD_STOCK] = stock
+        body[stock_field] = stock
         body[FIELD_MSK] = stock
 
         # Characteristics belong only to newly created cards. Existing cards
@@ -860,8 +869,8 @@ def main():
             if row_keys and any(code in seen_source_keys for code in row_keys):
                 continue
 
-            body = {"id": row["id"], FIELD_STOCK: 0, FIELD_MSK: 0, "Наличие": False}
-            current_stock = row.get(FIELD_STOCK)
+            body = {"id": row["id"], stock_field: 0, FIELD_MSK: 0, "Наличие": False}
+            current_stock = row.get(stock_field)
             current_available = bool(row.get("Наличие"))
             changed = current_available
             try:
