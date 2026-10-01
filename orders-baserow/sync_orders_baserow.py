@@ -262,7 +262,9 @@ class Baserow:
 
 def gather_orders() -> tuple[list[dict], dict[str, dict], set[str], list[str]]:
     wa = source.WebasystClient(min_request_interval=0.20)
-    sku_names = source.build_sku_names(wa)
+    # Webasyst order items already contain their product names, so do not scan
+    # the full product catalogue on every orders sync.
+    sku_names: dict[str, str] = {}
     base = source.webasyst_active_rows(wa, sku_names)
     # Baserow reads active orders from Webasyst only. Webasyst already stores
     # the original marketplace status in mp_status, so we avoid slow duplicate
