@@ -46,6 +46,21 @@ def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 
+def canonical_article(vendor_code):
+    code = s(vendor_code)
+    if norm(code).startswith("liga-"):
+        code = code.split("-", 1)[1].strip()
+    if not code:
+        raise ValueError("Liga vendor code is missing")
+    return "Liga-" + code
+
+
+def is_liga_row(row, supplier_id):
+    if supplier_id in supplier_ids(row):
+        return True
+    return norm(row.get("Артикул")).startswith("liga-")
+
+
 class Baserow:
     def __init__(self):
         if not TOKEN:
@@ -213,7 +228,10 @@ def main():
     supplier_id = int(matches[0]["id"])
 
     rows = br.rows(CATALOG_TABLE_ID)
-    liga_rows = [r for r in rows if supplier_id in supplier_ids(r)]
+    # Include legacy Liga rows even if the supplier link was missing or broken.
+    # This prevents duplicate creation and guarantees old lowercase liga-* articles
+    # are normalized to the canonical Database form Liga-*.
+    liga_rows = [r for r in rows if is_liga_row(r, supplier_id)]
     by_vendor = defaultdict(list)
     for row in liga_rows:
         key = norm(row.get("Артикул поставщика") or row.get("Наименование артикула"))
@@ -238,7 +256,7 @@ def main():
         price = float(offer.price) if offer.price is not None else None
         old_price = round(price * 1.30, 2) if price is not None else None
         supplier_stock = int(offer.supplier_stock) if offer.supplier_stock is not None else (100 if offer.available else 0)
-        article = "Liga-" + offer.vendor_code
+        article = canonical_article(offer.vendor_code)
         body = {
             "Название": offer.name,
             "Артикул": article,
@@ -275,7 +293,7 @@ def main():
             key = norm(row.get("Артикул поставщика") or row.get("Наименование артикула"))
             if key and key not in seen:
                 vendor_code = s(row.get("Артикул поставщика") or row.get("Наименование артикула"))
-                article = "Liga-" + vendor_code
+                article = canonical_article(vendor_code)
                 updates.append({
                     "id": row["id"],
                     "Артикул": article,
@@ -290,6 +308,32 @@ def main():
             br.batch_create(CATALOG_TABLE_ID, creates)
         if updates:
             br.batch_update(CATALOG_TABLE_ID, updates)
+
+    if not args.dry_run:
+        verify_rows = br.rows(CATALOG_TABLE_ID)
+        verify_liga = [r for r in verify_rows if is_liga_row(r, supplier_id)]
+        mismatches = []
+        for row in verify_liga:
+            vendor_code = s(row.get("Артикул поставщика") or row.get("Наименование артикула"))
+            if not vendor_code:
+                continue
+            expected = canonical_article(vendor_code)
+            actual = s(row.get("Артикул"))
+            if actual != expected:
+                mismatches.append({
+                    "id": row.get("id"),
+                    "vendor_code": vendor_code,
+                    "actual": actual,
+                    "expected": expected,
+                })
+        report["verified_liga_rows"] = len(verify_liga)
+        report["article_mismatches"] = mismatches[:100]
+        if mismatches:
+            report["errors"].append({
+                "stage": "article_verification",
+                "count": len(mismatches),
+                "sample": mismatches[:20],
+            })
 
     report["finished_at"] = now_iso()
     report["complete"] = not report["errors"]
