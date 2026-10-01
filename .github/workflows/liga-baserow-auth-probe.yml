@@ -50,3 +50,37 @@ jobs:
               if any(k in n.casefold() for k in needles):
                   print(f.get('id'), '|', n, '|', f.get('type'))
           PY
+
+      - name: Count Liga rows
+        env:
+          DB_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, requests, unicodedata
+          h={'Authorization':'Token '+os.environ['DB_TOKEN']}
+          base='http://147.78.67.6'
+          def n(v): return unicodedata.normalize('NFKC',str(v or '').strip()).casefold()
+          s=requests.get(base+'/api/database/rows/table/157/?user_field_names=true&size=200',headers=h,timeout=30)
+          s.raise_for_status()
+          matches=[r for r in s.json().get('results',[]) if n(r.get('Поставщик'))==n('Лига диванов')]
+          print('SUPPLIER_MATCHES',len(matches))
+          sid=matches[0]['id'] if len(matches)==1 else None
+          rows=[]; page=1
+          while True:
+              r=requests.get(f'{base}/api/database/rows/table/156/?user_field_names=true&size=200&page={page}',headers=h,timeout=30)
+              r.raise_for_status(); j=r.json(); rows.extend(j.get('results',[]))
+              if not j.get('next'): break
+              page += 1
+          def supplier_ids(row):
+              out=set()
+              for x in row.get('Поставщик') or []:
+                  if isinstance(x,dict) and x.get('id') is not None:
+                      try: out.add(int(x['id']))
+                      except: pass
+              return out
+          liga=[r for r in rows if sid is not None and int(sid) in supplier_ids(r)]
+          print('CATALOG_ROWS',len(rows))
+          print('LIGA_ROWS',len(liga))
+          print('LIGA_WITH_KIT_ID',sum(bool(str(r.get('Артикул KIT') or '').strip()) for r in liga))
+          print('LIGA_SAMPLE',[(r.get('id'),r.get('Артикул'),r.get('Артикул KIT')) for r in liga[:5]])
+          PY
