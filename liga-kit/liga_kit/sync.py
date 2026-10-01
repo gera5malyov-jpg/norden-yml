@@ -53,11 +53,20 @@ def build_price_update(offer, variant):
     }
 
 
+def _desired_quantity(offer):
+    if getattr(offer, 'supplier_stock', None) is not None:
+        try:
+            return max(0, int(offer.supplier_stock))
+        except Exception:
+            pass
+    return desired_stock(offer.available)
+
+
 def build_stock_updates(offer, variant, warehouse_ids):
     variant_id = str(variant.get('id', '')).strip()
     if not variant_id:
         return []
-    quantity = desired_stock(offer.available)
+    quantity = _desired_quantity(offer)
     out = []
     for title in ('СПБ', 'МСК'):
         warehouse_id = str(warehouse_ids[title])
@@ -267,7 +276,7 @@ class SyncRunner:
         desired_sale = f'{offer.price:.2f}'
         old_price = offer.old_price if offer.old_price is not None else offer.price
         desired_old = f'{old_price:.2f}'
-        quantity = desired_stock(offer.available)
+        quantity = _desired_quantity(offer)
         payload = {
             'sku': offer.kit_sku,
             'name': offer.name,
