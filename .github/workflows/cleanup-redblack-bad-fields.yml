@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   cleanup:
@@ -22,10 +22,33 @@ jobs:
       BASEROW_PASSWORD: ${{ secrets.BASEROW_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install --disable-pip-version-check requests
       - run: python -m py_compile baserow/cleanup_redblack_bad_fields.py
       - name: Delete incorrect columns and verify
+        id: cleanup
+        continue-on-error: true
         run: python baserow/cleanup_redblack_bad_fields.py
+      - name: Save cleanup report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add baserow/cleanup_redblack_bad_fields_report.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Red-Black Baserow cleanup report"
+            for i in 1 2 3 4 5; do
+              git push origin HEAD:main && break
+              git fetch origin main
+              git rebase origin/main || git rebase --abort
+              sleep $((i*3))
+            done
+          fi
+      - name: Fail if cleanup failed
+        if: always()
+        run: test "${{ steps.cleanup.outcome }}" = "success"
