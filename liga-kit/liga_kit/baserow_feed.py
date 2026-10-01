@@ -18,6 +18,8 @@ SUPPLIER_NAME = "Лига диванов"
 
 FIELD_PRICE = "Цена KIT со скидкой"
 FIELD_OLD_PRICE = "Цена KIT до скидки"
+FIELD_STOCK = "Остаток поставщика"
+FIELD_STOCK_LEGACY = "Остаток Norden"
 FIELD_PAYLOAD = "Ozon данные без изображений (JSON)"
 
 
@@ -130,11 +132,19 @@ def load_snapshot():
         }
         images = [s(x) for x in (payload.get("source_images") or []) if s(x)]
 
+        stock_value = row.get(FIELD_STOCK)
+        if stock_value in (None, ""):
+            stock_value = row.get(FIELD_STOCK_LEGACY)
+        try:
+            supplier_stock = max(0, int(Decimal(str(stock_value or "0").replace(",", "."))))
+        except Exception:
+            supplier_stock = None
+
         offers.append(LigaOffer(
             source_id=s(payload.get("source_id") or row.get("id")),
             vendor_code=vendor_code,
             kit_sku=sku,
-            available=bool(row.get("Наличие")),
+            available=bool(supplier_stock > 0) if supplier_stock is not None else bool(row.get("Наличие")),
             category_id=category_id,
             name=s(row.get("Название")) or vendor_code,
             description=s(payload.get("description")),
@@ -150,6 +160,7 @@ def load_snapshot():
             images=images,
             params=params,
             old_price=dec(row.get(FIELD_OLD_PRICE)),
+            supplier_stock=supplier_stock,
         ))
 
     return FeedSnapshot(categories=categories, offers=offers, complete=True)
