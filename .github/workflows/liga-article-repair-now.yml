@@ -63,7 +63,7 @@ jobs:
               out=[]; page=1
               while True:
                   suffix=f"&search={quote(search)}" if search else ""
-                  j=req("GET",f"/api/database/rows/table/{table}/?user_field_names=true&size=200&page={page}{suffix}")
+                  j=req("GET",f"/api/database/rows/table/{table}/?user_field_names=true&size=50&page={page}{suffix}")
                   out += [x for x in j.get("results",[]) if isinstance(x,dict)]
                   if not j.get("next"): break
                   page += 1
