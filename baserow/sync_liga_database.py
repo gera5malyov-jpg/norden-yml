@@ -27,6 +27,8 @@ SUPPLIERS_TABLE_ID = 157
 SUPPLIER_NAME = "Лига диванов"
 FIELD_PRICE_OLD = "Цена KIT до скидки"
 FIELD_PRICE_SALE = "Цена KIT со скидкой"
+FIELD_STOCK = "Остаток поставщика"
+FIELD_STOCK_LEGACY = "Остаток Norden"
 FIELD_PAYLOAD = "Ozon данные без изображений (JSON)"
 REPORT = ROOT / "baserow" / "last_liga_database_sync.json"
 
@@ -186,12 +188,15 @@ def main():
 
     br = Baserow()
     fields = {s(x.get("name")): x for x in br.fields(CATALOG_TABLE_ID)}
+    stock_field = FIELD_STOCK if FIELD_STOCK in fields else FIELD_STOCK_LEGACY if FIELD_STOCK_LEGACY in fields else None
     required = {
         "Название", "Артикул", "Артикул KIT", "Категория", "Артикул поставщика",
         "Код для сайта", "Наличие", "Первое изображение URL", "Наименование артикула",
         "Поставщик", "Все изображения", FIELD_PRICE_OLD, FIELD_PRICE_SALE, FIELD_PAYLOAD,
     }
     missing = sorted(required - set(fields))
+    if stock_field is None:
+        missing.append(FIELD_STOCK)
     if missing:
         raise RuntimeError(f"Database is missing required existing fields: {missing}")
 
@@ -228,6 +233,7 @@ def main():
         path = category_path(offer.category_id, snapshot.categories)
         price = float(offer.price) if offer.price is not None else None
         old_price = round(price * 1.30, 2) if price is not None else None
+        supplier_stock = int(offer.supplier_stock) if offer.supplier_stock is not None else (100 if offer.available else 0)
         article = "Liga-" + offer.vendor_code
         body = {
             "Название": offer.name,
@@ -236,7 +242,8 @@ def main():
             "Артикул поставщика": offer.vendor_code,
             "Код для сайта": article,
             "Поставщик": [supplier_id],
-            "Наличие": bool(offer.available),
+            "Наличие": bool(supplier_stock > 0),
+            stock_field: supplier_stock,
             "Категория": path,
             FIELD_PRICE_OLD: old_price,
             FIELD_PRICE_SALE: price,
@@ -270,6 +277,7 @@ def main():
                     "Артикул": article,
                     "Код для сайта": article,
                     "Наличие": False,
+                    stock_field: 0,
                 })
                 report["zeroed_absent"] += 1
 
