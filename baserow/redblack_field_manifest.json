@@ -1,0 +1,917 @@
+{
+  "source_type": "RED-Black1",
+  "supplier": "Red-Black",
+  "core_fields": {
+    "Название": {
+      "type": "text"
+    },
+    "Артикул": {
+      "type": "text"
+    },
+    "Наименование артикула": {
+      "type": "text"
+    },
+    "Артикул поставщика": {
+      "type": "text"
+    },
+    "Закупка Red-Black": {
+      "type": "number",
+      "decimals": 2
+    },
+    "Остаток Red-Black": {
+      "type": "number",
+      "decimals": 0
+    },
+    "Цена продажи Webasyst": {
+      "type": "number",
+      "decimals": 2
+    },
+    "Цена зачеркнутая Webasyst": {
+      "type": "number",
+      "decimals": 2
+    },
+    "Первое изображение URL": {
+      "type": "url"
+    },
+    "Все изображения": {
+      "type": "long_text"
+    },
+    "Webasyst ID товара": {
+      "type": "text"
+    },
+    "Webasyst ID SKU": {
+      "type": "text"
+    },
+    "Webasyst тип": {
+      "type": "text"
+    },
+    "Webasyst URL": {
+      "type": "url"
+    },
+    "Webasyst статус": {
+      "type": "text"
+    },
+    "Webasyst описание": {
+      "type": "long_text"
+    },
+    "Webasyst краткое описание": {
+      "type": "long_text"
+    },
+    "Webasyst категории JSON": {
+      "type": "long_text"
+    },
+    "Webasyst SKU склады JSON": {
+      "type": "long_text"
+    },
+    "Webasyst изображения JSON": {
+      "type": "long_text"
+    },
+    "Webasyst RAW JSON": {
+      "type": "long_text"
+    }
+  },
+  "product_scalar_keys": [
+    "badge",
+    "base_price",
+    "base_price_selectable",
+    "base_unit_id",
+    "category_id",
+    "compare_price",
+    "compare_price_selectable",
+    "contact_id",
+    "count",
+    "count_denominator",
+    "create_datetime",
+    "cross_selling",
+    "currency",
+    "edit_datetime",
+    "ext",
+    "id",
+    "id_1c",
+    "image_filename",
+    "image_id",
+    "max_base_price",
+    "max_price",
+    "meta_description",
+    "meta_keywords",
+    "meta_title",
+    "min_base_price",
+    "min_price",
+    "order_count_min",
+    "order_count_step",
+    "order_multiplicity_factor",
+    "price",
+    "purchase_price_selectable",
+    "rating",
+    "rating_count",
+    "rating_html",
+    "sku_count",
+    "sku_id",
+    "sku_type",
+    "stock_base_ratio",
+    "stock_unit_id",
+    "tax_id",
+    "total_sales",
+    "total_sales_html",
+    "type_id",
+    "upselling",
+    "video_url",
+    "xml_id",
+    "xml_profile_id",
+    "xml_updated",
+    "yml_id",
+    "yml_profile_id",
+    "yml_updated"
+  ],
+  "sku_scalar_keys": [
+    "available",
+    "count",
+    "dimension_id",
+    "file_description",
+    "file_name",
+    "file_size",
+    "id_1c",
+    "image_id",
+    "name",
+    "order_count_min",
+    "order_count_step",
+    "primary_price",
+    "product_id",
+    "sort",
+    "status",
+    "stock_base_ratio",
+    "virtual",
+    "xml_up",
+    "yml_up"
+  ],
+  "features": [
+    {
+      "code": "kit_id",
+      "name": "KIT ID",
+      "type": "varchar"
+    },
+    {
+      "code": "napravlyayushchie",
+      "name": "Направляющие",
+      "type": "varchar"
+    },
+    {
+      "code": "kolichestvo_yashchikov",
+      "name": "Количество ящиков",
+      "type": "varchar"
+    },
+    {
+      "code": "konstruktsiya",
+      "name": "Конструкция",
+      "type": "varchar"
+    },
+    {
+      "code": "material_fasada",
+      "name": "Материал фасада",
+      "type": "varchar"
+    },
+    {
+      "code": "raspolozhenie",
+      "name": "Расположение",
+      "type": "varchar"
+    },
+    {
+      "code": "tip_yandex",
+      "name": "Тип Яндекс",
+      "type": "varchar"
+    },
+    {
+      "code": "tip_wb",
+      "name": "Тип WB",
+      "type": "varchar"
+    },
+    {
+      "code": "vneshnyaya_kartinka",
+      "name": "Внешняя картинка",
+      "type": "text"
+    },
+    {
+      "code": "nmid_ot_wb",
+      "name": "nmId от WB",
+      "type": "varchar"
+    },
+    {
+      "code": "barkod_ot_wb",
+      "name": "Баркод от WB",
+      "type": "varchar"
+    },
+    {
+      "code": "material_krestoviny",
+      "name": "Материал крестовины",
+      "type": "varchar"
+    },
+    {
+      "code": "tip_mekhanizma_kachaniya",
+      "name": "Тип механизма качания",
+      "type": "varchar"
+    },
+    {
+      "code": "maksimalnaya_vysota_sm",
+      "name": "Максимальная высота, см",
+      "type": "double"
+    },
+    {
+      "code": "minimalnaya_vysota_sm",
+      "name": "Минимальная высота, см",
+      "type": "double"
+    },
+    {
+      "code": "shirina_sidenya_sm",
+      "name": "Ширина сиденья, см",
+      "type": "double"
+    },
+    {
+      "code": "vysota_spinki_sm",
+      "name": "Высота спинки, см",
+      "type": "double"
+    },
+    {
+      "code": "shirina_spinki",
+      "name": " Ширина спинки, см",
+      "type": "double"
+    },
+    {
+      "code": "minimalnaya_vysota_sidenya_sm",
+      "name": "Минимальная высота сиденья, см",
+      "type": "double"
+    },
+    {
+      "code": "maksimalnaya_vysota_sidenya_sm",
+      "name": "Максимальная высота сиденья, см",
+      "type": "double"
+    },
+    {
+      "code": "tn_ved_kody_yeaes",
+      "name": "ТН ВЭД коды ЕАЭС",
+      "type": "varchar"
+    },
+    {
+      "code": "obshchie_komnata_ispolzovaniya",
+      "name": "Общие. Комната использования",
+      "type": "varchar"
+    },
+    {
+      "code": "gazlift",
+      "name": "Газлифт",
+      "type": "varchar"
+    },
+    {
+      "code": "fiksatsiya_spinki",
+      "name": "Фиксация спинки",
+      "type": "varchar"
+    },
+    {
+      "code": "maksimalnaya_nagruzka_kg",
+      "name": "Максимальная нагрузка, кг",
+      "type": "double"
+    },
+    {
+      "code": "kheshtegi",
+      "name": "#Хештеги",
+      "type": "varchar"
+    },
+    {
+      "code": "s_zerkalom",
+      "name": "Зеркало",
+      "type": "varchar"
+    },
+    {
+      "code": "osobennosti_ozon",
+      "name": "Особенности OZON",
+      "type": "varchar"
+    },
+    {
+      "code": "gabaritnyy_razmer_dshv",
+      "name": "Размеры, мм",
+      "type": "varchar"
+    },
+    {
+      "code": "orientatsiya",
+      "name": "Ориентация",
+      "type": "varchar"
+    },
+    {
+      "code": "tip_napravlyayushchikh",
+      "name": "Тип направляющих",
+      "type": "varchar"
+    },
+    {
+      "code": "pokrytie_fasada",
+      "name": "Покрытие фасада",
+      "type": "varchar"
+    },
+    {
+      "code": "ves_kg1",
+      "name": "Вес товара, г",
+      "type": "double"
+    },
+    {
+      "code": "tselevaya_auditoriya",
+      "name": "целевая аудитория",
+      "type": "varchar"
+    },
+    {
+      "code": "klyuchevye_slova",
+      "name": "ключевые слова",
+      "type": "varchar"
+    },
+    {
+      "code": "kolichestvo_polok",
+      "name": "Количество полок",
+      "type": "varchar"
+    },
+    {
+      "code": "kolichestvo_dverey",
+      "name": "Количество дверей",
+      "type": "varchar"
+    },
+    {
+      "code": "tip_otkryvaniya_dverey",
+      "name": "Тип открывания дверей",
+      "type": "varchar"
+    },
+    {
+      "code": "naznachenie_pomeshchenie",
+      "name": " Назначение (помещение)",
+      "type": "varchar"
+    },
+    {
+      "code": "nazvanie_tsveta",
+      "name": "Название цвета",
+      "type": "varchar"
+    },
+    {
+      "code": "risunok",
+      "name": "Рисунок на обивке",
+      "type": "varchar"
+    },
+    {
+      "code": "material_napolnitelya",
+      "name": "Материал наполнителя",
+      "type": "varchar"
+    },
+    {
+      "code": "pokrytie_korpusa",
+      "name": "Покрытие корпуса",
+      "type": "varchar"
+    },
+    {
+      "code": "seriya",
+      "name": "Серия",
+      "type": "varchar"
+    },
+    {
+      "code": "mekhanizm_kachaniya",
+      "name": "Механизм качания",
+      "type": "varchar"
+    },
+    {
+      "code": "nalichie_podgolovnika",
+      "name": "Наличие подголовника",
+      "type": "varchar"
+    },
+    {
+      "code": "obedinenie_v_odnu_kartochku",
+      "name": "объединение в одну карточку",
+      "type": "varchar"
+    },
+    {
+      "code": "obem_l",
+      "name": " Объем, л",
+      "type": "double"
+    },
+    {
+      "code": "osnovanie",
+      "name": "Основание",
+      "type": "varchar"
+    },
+    {
+      "code": "podemnyy_mekhanizm",
+      "name": "Подъемный механизм",
+      "type": "varchar"
+    },
+    {
+      "code": "dlina_spalnogo_mesta",
+      "name": " Длина спального места",
+      "type": "varchar"
+    },
+    {
+      "code": "shirina_spalnogo_mesta",
+      "name": "Ширина спального места",
+      "type": "varchar"
+    },
+    {
+      "code": "matras_v_komplekte",
+      "name": "матрас в комплекте",
+      "type": "boolean"
+    },
+    {
+      "code": "tip_ozon",
+      "name": "Тип ozon",
+      "type": "varchar"
+    },
+    {
+      "code": "vysota_upakovki1",
+      "name": "высота упаковки",
+      "type": "double"
+    },
+    {
+      "code": "shirina_upakovki1",
+      "name": "ширина упаковки",
+      "type": "double"
+    },
+    {
+      "code": "glubina_upakovki1",
+      "name": "глубина упаковки",
+      "type": "double"
+    },
+    {
+      "code": "ves_upakovki",
+      "name": "Вес упаковки",
+      "type": "double"
+    },
+    {
+      "code": "vysota",
+      "name": "Высота",
+      "type": "double"
+    },
+    {
+      "code": "glubina",
+      "name": "Глубина",
+      "type": "double"
+    },
+    {
+      "code": "shirina",
+      "name": "Ширина",
+      "type": "double"
+    },
+    {
+      "code": "vendor",
+      "name": "Производитель",
+      "type": "varchar"
+    },
+    {
+      "code": "material_korpusa",
+      "name": "Материал корпуса",
+      "type": "varchar"
+    },
+    {
+      "code": "material_obivki",
+      "name": "Материал обивки",
+      "type": "varchar"
+    },
+    {
+      "code": "komplektatsiya",
+      "name": "Комплектация",
+      "type": "varchar"
+    },
+    {
+      "code": "strana",
+      "name": "Страна",
+      "type": "varchar"
+    },
+    {
+      "code": "tsvet_tovara",
+      "name": "Цвет товара",
+      "type": "color"
+    },
+    {
+      "code": "yashchik_dlya_khraneniya",
+      "name": "Ящик для хранения",
+      "type": "varchar"
+    },
+    {
+      "code": "podlokotniki",
+      "name": "Подлокотники",
+      "type": "varchar"
+    },
+    {
+      "code": "garantiynyy_srok",
+      "name": "Гарантийный срок",
+      "type": "varchar"
+    },
+    {
+      "code": "reguliruemaya_spinka",
+      "name": "Регулируемая спинка",
+      "type": "boolean"
+    },
+    {
+      "code": "stil",
+      "name": "Стиль",
+      "type": "varchar"
+    },
+    {
+      "code": "naznachenie",
+      "name": "Назначение",
+      "type": "varchar"
+    },
+    {
+      "code": "forma_postavki",
+      "name": "Форма поставки",
+      "type": "varchar"
+    },
+    {
+      "code": "ispolnenie",
+      "name": "Исполнение",
+      "type": "varchar"
+    },
+    {
+      "code": "box_count",
+      "name": "Количество упаковок",
+      "type": "varchar"
+    },
+    {
+      "code": "vid_vypuska_tovara",
+      "name": "Вид выпуска товара",
+      "type": "varchar"
+    },
+    {
+      "code": "barcode",
+      "name": "Штрихкод",
+      "type": "varchar"
+    },
+    {
+      "code": "color",
+      "name": "Цвет",
+      "type": "varchar"
+    },
+    {
+      "code": "step_quantity",
+      "name": "Количество в упаковке",
+      "type": "varchar"
+    },
+    {
+      "code": "maksimalnaya_vysota_sidenya",
+      "name": "Максимальная высота сиденья",
+      "type": "double"
+    },
+    {
+      "code": "spinka",
+      "name": "Спинка стула",
+      "type": "varchar"
+    },
+    {
+      "code": "tip_osnovaniya",
+      "name": "Тип основания",
+      "type": "varchar"
+    },
+    {
+      "code": "myagkost_sidenya",
+      "name": "Мягкость сиденья",
+      "type": "varchar"
+    },
+    {
+      "code": "regulirovka_vysoty",
+      "name": "Регулировка высоты",
+      "type": "varchar"
+    },
+    {
+      "code": "kharakristiki",
+      "name": "Х а р а к т е р и с т и к и",
+      "type": "varchar"
+    },
+    {
+      "code": "forma_stola",
+      "name": "Форма стола",
+      "type": "varchar"
+    },
+    {
+      "code": "material_stoleshnitsy",
+      "name": "Материал столешницы",
+      "type": "varchar"
+    },
+    {
+      "code": "material_karkasa",
+      "name": "Материал каркаса",
+      "type": "varchar"
+    },
+    {
+      "code": "raskladnaya_stoleshnitsa",
+      "name": "Раскладная столешница",
+      "type": "varchar"
+    },
+    {
+      "code": "dlina_stola_v_razdvinutom_razlozhennom_sostoyanii",
+      "name": "Ширина стола в раздвинутом (разложенном) состоянии",
+      "type": "double"
+    },
+    {
+      "code": "weight",
+      "name": "Вес",
+      "type": "double"
+    },
+    {
+      "code": "obyom_upakovki",
+      "name": "Объём упаковки",
+      "type": "double"
+    },
+    {
+      "code": "razmer",
+      "name": "Размер",
+      "type": "varchar"
+    },
+    {
+      "code": "material",
+      "name": "Материал",
+      "type": "varchar"
+    },
+    {
+      "code": "napolnitel",
+      "name": "Наполнитель",
+      "type": "varchar"
+    },
+    {
+      "code": "tkan",
+      "name": "Ткань",
+      "type": "varchar"
+    },
+    {
+      "code": "postavshchik_1",
+      "name": "ПОСТАВЩИК 1",
+      "type": "varchar"
+    },
+    {
+      "code": "obyom_upakovok",
+      "name": "Объём упаковок",
+      "type": "varchar"
+    },
+    {
+      "code": "syomnyy_chekhol",
+      "name": "Съёмный чехол",
+      "type": "varchar"
+    }
+  ],
+  "primary_stock_columns": [
+    {
+      "id": "12",
+      "name": "Red МСК"
+    }
+  ],
+  "all_webasyst_stocks": [
+    {
+      "id": "6",
+      "name": "Riva СПБ"
+    },
+    {
+      "id": "7",
+      "name": "Riva МСК"
+    },
+    {
+      "id": "8",
+      "name": "Riva Рязань центральный"
+    },
+    {
+      "id": "9",
+      "name": "Louvrehome"
+    },
+    {
+      "id": "10",
+      "name": "ТД Андрей МСК"
+    },
+    {
+      "id": "11",
+      "name": "Этажерка"
+    },
+    {
+      "id": "12",
+      "name": "Red МСК"
+    },
+    {
+      "id": "13",
+      "name": "Samson"
+    },
+    {
+      "id": "14",
+      "name": "Norden"
+    },
+    {
+      "id": "15",
+      "name": "Tetchair"
+    },
+    {
+      "id": "16",
+      "name": "ТД Андрей СПБ"
+    },
+    {
+      "id": "17",
+      "name": "Dobrin SPB"
+    },
+    {
+      "id": "18",
+      "name": "Everprof"
+    },
+    {
+      "id": "19",
+      "name": "Signal-Halmar наличие"
+    },
+    {
+      "id": "20",
+      "name": "Signal-Halmar заказной"
+    },
+    {
+      "id": "21",
+      "name": "Stoolgroup"
+    },
+    {
+      "id": "22",
+      "name": "Roomers"
+    },
+    {
+      "id": "23",
+      "name": "Barcelonadesign"
+    },
+    {
+      "id": "24",
+      "name": "4sis"
+    },
+    {
+      "id": "25",
+      "name": "Deephouse"
+    },
+    {
+      "id": "26",
+      "name": "weekend-billiard"
+    },
+    {
+      "id": "27",
+      "name": "montre-vip"
+    },
+    {
+      "id": "28",
+      "name": "mebelik"
+    },
+    {
+      "id": "29",
+      "name": "reehouse"
+    },
+    {
+      "id": "30",
+      "name": "r-home.ru"
+    },
+    {
+      "id": "31",
+      "name": "rotang.spb"
+    },
+    {
+      "id": "32",
+      "name": "tothome"
+    },
+    {
+      "id": "33",
+      "name": "mebwill"
+    },
+    {
+      "id": "34",
+      "name": "afinalux"
+    },
+    {
+      "id": "35",
+      "name": "art-zerkalo"
+    },
+    {
+      "id": "36",
+      "name": "Артикул"
+    },
+    {
+      "id": "37",
+      "name": "treez"
+    },
+    {
+      "id": "38",
+      "name": "championtool"
+    },
+    {
+      "id": "39",
+      "name": "demimebel"
+    },
+    {
+      "id": "40",
+      "name": "zip-mebel"
+    },
+    {
+      "id": "41",
+      "name": "mdehouse"
+    },
+    {
+      "id": "42",
+      "name": "Бюрократ"
+    },
+    {
+      "id": "43",
+      "name": "Тайпит"
+    },
+    {
+      "id": "44",
+      "name": "Натур-мебель"
+    },
+    {
+      "id": "45",
+      "name": "z3k.ru"
+    },
+    {
+      "id": "46",
+      "name": "neopoliscasa"
+    },
+    {
+      "id": "47",
+      "name": "avalonmebel"
+    },
+    {
+      "id": "48",
+      "name": "sheffilton"
+    },
+    {
+      "id": "49",
+      "name": "Промет"
+    },
+    {
+      "id": "50",
+      "name": "sonum"
+    },
+    {
+      "id": "51",
+      "name": "bradexhome"
+    },
+    {
+      "id": "52",
+      "name": "alavann"
+    },
+    {
+      "id": "53",
+      "name": "Новый склад"
+    },
+    {
+      "id": "54",
+      "name": "leomebel"
+    },
+    {
+      "id": "55",
+      "name": "m-city"
+    },
+    {
+      "id": "56",
+      "name": "Garda Decor"
+    },
+    {
+      "id": "57",
+      "name": "Фабрика Аврора"
+    },
+    {
+      "id": "58",
+      "name": "blago-mebel.ru"
+    },
+    {
+      "id": "59",
+      "name": "UTFC"
+    },
+    {
+      "id": "60",
+      "name": "rattan-mebel"
+    },
+    {
+      "id": "61",
+      "name": "finedesigngroup"
+    },
+    {
+      "id": "62",
+      "name": "idcollection"
+    },
+    {
+      "id": "63",
+      "name": "Podstolia"
+    },
+    {
+      "id": "64",
+      "name": "Трия"
+    },
+    {
+      "id": "65",
+      "name": "lidamebel"
+    },
+    {
+      "id": "66",
+      "name": "Основной склад"
+    },
+    {
+      "id": "68",
+      "name": "33кровати"
+    },
+    {
+      "id": "69",
+      "name": "Riva все товары"
+    },
+    {
+      "id": "71",
+      "name": "Inmedix"
+    },
+    {
+      "id": "72",
+      "name": "Dobrin MSK"
+    }
+  ]
+}
