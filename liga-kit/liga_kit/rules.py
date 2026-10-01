@@ -7,7 +7,7 @@ def to_kit_sku(vendor_code):
     code = str(vendor_code or '').strip()
     if not code:
         raise ValueError('Liga vendorCode is missing')
-    return 'Liga-' + code
+    return 'liga-' + code
 
 
 def normalize_price(value):
