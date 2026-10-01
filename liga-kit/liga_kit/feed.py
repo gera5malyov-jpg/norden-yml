@@ -1,3 +1,4 @@
+from decimal import Decimal
 import xml.etree.ElementTree as ET
 
 from .model import FeedSnapshot, LigaCategory, LigaOffer
@@ -45,6 +46,10 @@ def _offer_from_element(node):
     if not vendor_code:
         raise ValueError('Liga vendorCode is missing')
     category_id = _text(node, 'categoryId') or None
+    try:
+        supplier_stock = max(0, int(Decimal(_text(node, 'count', '0') or '0')))
+    except Exception:
+        supplier_stock = None
     return LigaOffer(
         source_id=str(node.attrib.get('id') or '').strip(),
         vendor_code=vendor_code,
@@ -64,6 +69,7 @@ def _offer_from_element(node):
         manufacturer_warranty=_boolish(_text(node, 'manufacturer_warranty')),
         images=_split_images(node),
         params=_params(node),
+        supplier_stock=supplier_stock,
     )
 
 
