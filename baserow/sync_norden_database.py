@@ -560,17 +560,30 @@ def main():
 
     br = Baserow(BASEROW_URL, BASEROW_TOKEN)
 
-    # "Артикул КИТ" is a numeric KIT kit_id, e.g. 1597886.
-    # Create it automatically if this installation does not have the field yet.
-    br.ensure_number_field(CATALOG_TABLE_ID, FIELD_KIT_ARTICLE, 0)
+    # Existing database uses "Артикул KIT" as a text field. This is valid:
+    # KIT kit_id is an identifier, not a value we calculate with. Do not try to
+    # recreate/convert the field on every sync.
+    field_rows = br.fields(CATALOG_TABLE_ID)
+    field_by_name = {s(f.get("name")): f for f in field_rows}
+    current_field_names = set(field_by_name)
 
-    numeric_specs = {FIELD_PURCHASE: 2, FIELD_STOCK: 0, FIELD_KIT_ARTICLE: 0}
-    current_field_names = {s(f.get("name")) for f in br.fields(CATALOG_TABLE_ID)}
-    numeric_available = {name for name in numeric_specs if name in current_field_names}
+    numeric_specs = {FIELD_PURCHASE: 2, FIELD_STOCK: 0}
+    numeric_available = {
+        name for name in numeric_specs
+        if name in field_by_name and s(field_by_name[name].get("type")) == "number"
+    }
     report["numeric_fields_available"] = sorted(numeric_available)
-    missing_core = [name for name in numeric_specs if name not in current_field_names]
+
+    missing_core = [name for name in (FIELD_PURCHASE, FIELD_STOCK, FIELD_KIT_ARTICLE) if name not in current_field_names]
     if missing_core:
         raise RuntimeError(f"Database schema is missing Norden core fields: {missing_core}")
+
+    kit_field_type = s(field_by_name[FIELD_KIT_ARTICLE].get("type"))
+    if kit_field_type not in ("text", "long_text", "number"):
+        raise RuntimeError(
+            f"Field {FIELD_KIT_ARTICLE!r} has unsupported type {kit_field_type!r}"
+        )
+    report["kit_field_type"] = kit_field_type
 
     supplier_rows = br.all_rows(SUPPLIERS_TABLE_ID)
     norden_suppliers = [r for r in supplier_rows if norm(r.get("Поставщик")) == norm(SUPPLIER_NAME)]
@@ -683,7 +696,9 @@ def main():
 
             kit_id = kit_ids_by_article.get(k)
             if kit_id is not None:
-                body[FIELD_KIT_ARTICLE] = kit_id
+                body[FIELD_KIT_ARTICLE] = (
+                    int(kit_id) if kit_field_type == "number" else str(int(kit_id))
+                )
 
             char_written = 0
             full_repair = args.repair_from_row is not None and row_id >= args.repair_from_row
