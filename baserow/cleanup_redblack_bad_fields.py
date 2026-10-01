@@ -95,6 +95,10 @@ def main():
         "errors": errors,
         "remaining": remaining,
     }
+    report_path = os.path.join(os.path.dirname(__file__), "cleanup_redblack_bad_fields_report.json")
+    with open(report_path, "w", encoding="utf-8") as fh:
+        json.dump(report, fh, ensure_ascii=False, indent=2)
+        fh.write("\n")
     print("CLEANUP_REPORT=" + json.dumps(report, ensure_ascii=False))
     if errors or remaining:
         raise SystemExit(1)
