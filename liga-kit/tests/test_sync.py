@@ -14,7 +14,7 @@ def offer(code='109775', available=True, price='87990'):
     return LigaOffer(
         source_id='115615',
         vendor_code=code,
-        kit_sku='Liga-' + code,
+        kit_sku='liga-' + code,
         available=available,
         category_id='6632',
         name='Диван ' + code,
@@ -228,7 +228,7 @@ class LigaSyncRunnerTests(unittest.TestCase):
         runner = SyncRunner(self.snapshot([offer()]), kit, None, dry_run=False)
         report = runner.run()
         payload = kit.created_variant
-        self.assertEqual(payload['sku'], 'Liga-109775')
+        self.assertEqual(payload['sku'], 'liga-109775')
         self.assertEqual(payload['pricing'], {
             'price':'114387.00',
             'manual_discount_price':'87990.00',
