@@ -1,0 +1,30 @@
+name: Inspect Baserow marketplace fields once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-baserow-marketplace-fields-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      BASEROW_URL: http://147.78.67.6
+    steps:
+      - name: Inspect selected fields
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          u=os.environ['BASEROW_URL'].rstrip('/')+'/api/database/fields/table/156/'
+          r=urllib.request.Request(u,headers={'Authorization':'Token '+os.environ['BASEROW_DATABASE_TOKEN'],'Accept':'application/json'})
+          with urllib.request.urlopen(r,timeout=30) as x: data=json.load(x)
+          keys=('kit','кит','комисс','ozon','озон','яндекс','yandex','категория')
+          out=[{'id':f.get('id'),'name':f.get('name'),'type':f.get('type')} for f in data if any(k in str(f.get('name') or '').casefold() for k in keys)]
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
