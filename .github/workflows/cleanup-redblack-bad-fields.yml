@@ -1,0 +1,31 @@
+name: Cleanup bad Red-Black Baserow fields
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cleanup-redblack-bad-fields.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BASEROW_URL: http://147.78.67.6
+      BASEROW_CATALOG_TABLE_ID: '156'
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      BASEROW_EMAIL: ${{ secrets.BASEROW_EMAIL }}
+      BASEROW_PASSWORD: ${{ secrets.BASEROW_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check requests
+      - run: python -m py_compile baserow/cleanup_redblack_bad_fields.py
+      - name: Delete incorrect columns and verify
+        run: python baserow/cleanup_redblack_bad_fields.py
