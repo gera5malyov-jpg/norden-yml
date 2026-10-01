@@ -61,9 +61,13 @@ jobs:
 
           def rows(table, search=None):
               out=[]; page=1
+              if table == SUP:
+                  include = quote("Поставщик")
+              else:
+                  include = quote("Артикул,Артикул поставщика,Наименование артикула,Код для сайта,Поставщик")
               while True:
                   suffix=f"&search={quote(search)}" if search else ""
-                  j=req("GET",f"/api/database/rows/table/{table}/?user_field_names=true&size=50&page={page}{suffix}")
+                  j=req("GET",f"/api/database/rows/table/{table}/?user_field_names=true&size=50&page={page}&include={include}{suffix}")
                   out += [x for x in j.get("results",[]) if isinstance(x,dict)]
                   if not j.get("next"): break
                   page += 1
