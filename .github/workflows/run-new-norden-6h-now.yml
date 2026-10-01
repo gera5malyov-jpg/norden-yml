@@ -1,0 +1,51 @@
+name: Run new Norden 6h pipeline now
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/run-new-norden-6h-now.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: database-norden-sync
+  cancel-in-progress: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
+      YANDEX_MARKET_BUSINESS_ID: '20806099'
+      YANDEX_MARKET_CAMPAIGN_ID: '89405839'
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      NORDEN_RESUME_APPROVED: '1'
+      OZON_NORDEN_MSK_WAREHOUSE_ID: '1020005029910180'
+      YANDEX_NORDEN_MSK_WAREHOUSE_ID: '1274413'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Compile
+        run: |
+          python -m py_compile             baserow/sync_norden_database.py             baserow/sync_kit_ids_to_baserow.py             baserow/sync_norden_marketplace_commissions.py             baserow/calculate_norden_prices.py             baserow/publish_norden_channels.py
+      - name: Supplier to Baserow
+        run: python baserow/sync_norden_database.py --report-file baserow/norden_sync_report.json
+      - name: KIT IDs
+        run: python baserow/sync_kit_ids_to_baserow.py
+      - name: Marketplace commissions
+        run: python baserow/sync_norden_marketplace_commissions.py
+      - name: Calculate prices
+        run: python baserow/calculate_norden_prices.py
+      - name: Publish prices and stocks
+        run: python baserow/publish_norden_channels.py
