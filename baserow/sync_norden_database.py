@@ -30,7 +30,7 @@ NORDEN_CATEGORIES_API = "https://norden.group/api-categories/"
 
 FIELD_PURCHASE = "Закупка Norden"
 FIELD_STOCK = "Остаток Norden"
-FIELD_KIT_ARTICLE = "Артикул КИТ"
+FIELD_KIT_ARTICLE = "Артикул KIT"
 KIT_MAPPING_PATH = Path(__file__).resolve().parents[1] / "norden-kit" / "kit_mapping.json"
 
 TECHNICAL_XML_TAGS = {

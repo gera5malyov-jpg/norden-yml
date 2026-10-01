@@ -32,7 +32,7 @@ WEBASYST_TYPE = "NORDEN-100"
 WEBASYST_MAIN_STOCK = "Основной склад"
 KIT_TARGET_STOCKS = ("МСК", "СПБ привозной")
 FIELD_STOCK = "Остаток Norden"
-FIELD_KIT_ID = "Артикул КИТ"
+FIELD_KIT_ID = "Артикул KIT"
 REPORT_PATH = HERE / "norden_stock_publish_report.json"
 KIT_MAPPING_PATH = ROOT / "norden-kit" / "kit_mapping.json"
 

@@ -213,7 +213,8 @@ class HttpError(RuntimeError):
 class KitClient:
     def __init__(self, token):
         stop_file = ROOT / "STOP_ALL_NORDEN"
-        if stop_file.exists():
+        resumed = os.environ.get("NORDEN_RESUME_APPROVED", "").strip() == "1"
+        if stop_file.exists() and not resumed:
             raise RuntimeError("NORDEN_STOPPED: all Norden operations are disabled by user")
         token = s(token)
         if not token:

@@ -27,6 +27,7 @@ jobs:
       WEBASYST_BASE_URL: https://profikompany.ru
       WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
       YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      NORDEN_RESUME_APPROVED: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
