@@ -263,7 +263,14 @@ def main():
         for row in liga_rows:
             key = norm(row.get("Артикул поставщика") or row.get("Наименование артикула"))
             if key and key not in seen:
-                updates.append({"id": row["id"], "Наличие": False})
+                vendor_code = s(row.get("Артикул поставщика") or row.get("Наименование артикула"))
+                article = "Liga-" + vendor_code
+                updates.append({
+                    "id": row["id"],
+                    "Артикул": article,
+                    "Код для сайта": article,
+                    "Наличие": False,
+                })
                 report["zeroed_absent"] += 1
 
     if not args.dry_run:
