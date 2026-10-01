@@ -264,9 +264,11 @@ def gather_orders() -> tuple[list[dict], dict[str, dict], set[str], list[str]]:
     wa = source.WebasystClient(min_request_interval=0.20)
     sku_names = source.build_sku_names(wa)
     base = source.webasyst_active_rows(wa, sku_names)
-    fresh, terminal, warnings = source.direct_marketplace_rows(sku_names)
-    active = source.merge_rows(base, fresh, terminal)
-    return active, fresh, terminal, warnings
+    # Baserow reads active orders from Webasyst only. Webasyst already stores
+    # the original marketplace status in mp_status, so we avoid slow duplicate
+    # marketplace API scans here.
+    active = list(base.values())
+    return active, {}, set(), []
 
 
 def started_on_or_after(row: dict) -> bool:
