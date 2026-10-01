@@ -22,6 +22,11 @@ on:
       - 'baserow/sync_kit_liga_images.py'
       - 'liga-kit/liga_kit/baserow_feed.py'
       - 'liga-kit/liga_kit/cli_baserow.py'
+      - 'liga-kit/liga_kit/model.py'
+      - 'liga-kit/liga_kit/rules.py'
+      - 'liga-kit/liga_kit/kit_client.py'
+      - 'liga-kit/liga_kit/sync.py'
+      - 'liga-kit/tests/**'
       - '.github/workflows/liga-kit-sync.yml'
 
 permissions:
