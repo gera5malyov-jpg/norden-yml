@@ -1,20 +1,28 @@
-name: Liga Divanov to Yandex KIT
+name: Liga Divanov feed -> Database -> Yandex KIT
 
 on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run: do not write to KIT'
+        description: 'Dry run: do not write to Database/KIT'
         required: true
-        default: true
+        default: false
         type: boolean
       max_items:
         description: 'Offer limit for safe validation; 0 means full feed'
         required: true
-        default: '20'
+        default: '0'
         type: string
   schedule:
     - cron: '0 7 * * 1'
+  push:
+    branches: [main]
+    paths:
+      - 'baserow/sync_liga_database.py'
+      - 'baserow/sync_kit_liga_images.py'
+      - 'liga-kit/liga_kit/baserow_feed.py'
+      - 'liga-kit/liga_kit/cli_baserow.py'
+      - '.github/workflows/liga-kit-sync.yml'
 
 permissions:
   contents: read
@@ -27,23 +35,27 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     timeout-minutes: 300
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      BASEROW_URL: http://147.78.67.6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
       - name: Install dependencies
         run: pip install -r requirements.txt
+
       - name: Run Liga tests
         run: PYTHONPATH=liga-kit python -m unittest discover -s liga-kit/tests -v
-      - name: Run Liga sync
-        env:
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+
+      - name: Supplier feed to Database
         shell: bash
         run: |
           set -euo pipefail
-          args=(--report liga-kit/state/last_sync.json)
-
+          args=()
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "${{ inputs.dry_run }}" == "true" ]]; then
               args+=(--dry-run)
@@ -52,8 +64,35 @@ jobs:
               args+=(--max-items "${{ inputs.max_items }}")
             fi
           fi
+          python baserow/sync_liga_database.py "${args[@]}"
 
-          PYTHONPATH=liga-kit python -m liga_kit.cli "${args[@]}"
-      - name: Print compact report
+      - name: Database to Yandex KIT
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--report liga-kit/state/last_database_to_kit.json)
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+              args+=(--dry-run)
+            fi
+            if [[ "${{ inputs.max_items }}" != "0" ]]; then
+              args+=(--max-items "${{ inputs.max_items }}")
+            fi
+          fi
+          PYTHONPATH=liga-kit python -m liga_kit.cli_baserow "${args[@]}"
+
+      - name: KIT IDs and KIT image URLs back to Database
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run != true }}
+        run: python baserow/sync_kit_liga_images.py
+
+      - name: Upload reports
         if: always()
-        run: cat liga-kit/state/last_sync.json || true
+        uses: actions/upload-artifact@v4
+        with:
+          name: liga-database-kit-reports
+          path: |
+            baserow/last_liga_database_sync.json
+            liga-kit/state/last_database_to_kit.json
+            baserow/last_kit_liga_images_sync.json
+          if-no-files-found: ignore
+          retention-days: 14
