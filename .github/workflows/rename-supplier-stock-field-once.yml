@@ -31,6 +31,7 @@ jobs:
           r=requests.get(base+'/api/database/fields/table/156/',headers=h,timeout=30)
           r.raise_for_status()
           fields=r.json()
+          print('STOCK_FIELDS',[(f.get('id'),f.get('name'),f.get('type')) for f in fields if 'остат' in str(f.get('name') or '').casefold()])
           new=[f for f in fields if f.get('name')=='Остаток поставщика']
           old=[f for f in fields if f.get('name')=='Остаток Norden']
           if new:
