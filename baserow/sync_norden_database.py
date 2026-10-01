@@ -29,7 +29,7 @@ FULL_XML_URL = "https://norden.group/index.php?dispatch=sw_user_prices.get_file&
 NORDEN_CATEGORIES_API = "https://norden.group/api-categories/"
 
 FIELD_PURCHASE = "Закупка Norden"
-FIELD_STOCK = "Остаток Norden"
+FIELD_STOCK = "Остаток Norden"\nFIELD_MSK = "Norden MSK"
 FIELD_KIT_ARTICLE = "Артикул KIT"
 KIT_MAPPING_PATH = Path(__file__).resolve().parents[1] / "norden-kit" / "kit_mapping.json"
 
@@ -574,7 +574,7 @@ def main():
     }
     report["numeric_fields_available"] = sorted(numeric_available)
 
-    missing_core = [name for name in (FIELD_PURCHASE, FIELD_STOCK, FIELD_KIT_ARTICLE) if name not in current_field_names]
+    missing_core = [name for name in (FIELD_PURCHASE, FIELD_STOCK, FIELD_MSK, FIELD_KIT_ARTICLE) if name not in current_field_names]
     if missing_core:
         raise RuntimeError(f"Database schema is missing Norden core fields: {missing_core}")
 
@@ -691,7 +691,7 @@ def main():
             body = {}
             if item.get("purchase") is not None:
                 body[FIELD_PURCHASE] = item["purchase"]
-            body[FIELD_STOCK] = stock
+            body[FIELD_STOCK] = stock\n            body[FIELD_MSK] = stock
             body["Наличие"] = bool(stock > 0)
 
             kit_id = kit_ids_by_article.get(k)
@@ -814,7 +814,7 @@ def main():
             body[FIELD_KIT_ARTICLE] = kit_id
         if item.get("purchase") is not None:
             body[FIELD_PURCHASE] = item["purchase"]
-        body[FIELD_STOCK] = stock
+        body[FIELD_STOCK] = stock\n            body[FIELD_MSK] = stock
 
         # Characteristics belong only to newly created cards. Existing cards
         # are intentionally left unchanged except for price/stock/availability.
@@ -857,7 +857,7 @@ def main():
             if row_keys and any(code in seen_source_keys for code in row_keys):
                 continue
 
-            body = {"id": row["id"], FIELD_STOCK: 0, "Наличие": False}
+            body = {"id": row["id"], FIELD_STOCK: 0, FIELD_MSK: 0, "Наличие": False}
             current_stock = row.get(FIELD_STOCK)
             current_available = bool(row.get("Наличие"))
             changed = current_available

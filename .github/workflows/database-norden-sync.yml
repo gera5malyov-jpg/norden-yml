@@ -43,8 +43,11 @@ jobs:
       - name: Update Norden marketplace commissions in Database
         run: python baserow/sync_norden_marketplace_commissions.py
 
-      - name: Publish Norden stocks from Database to Webasyst and KIT
-        run: python baserow/publish_norden_stocks.py
+      - name: Calculate all Norden channel prices in Database
+        run: python baserow/calculate_norden_prices.py
+
+      - name: Publish Norden prices and stocks to all existing channels
+        run: python baserow/publish_norden_channels.py
 
       - name: Create useful Baserow notifications
         if: success()

@@ -40,6 +40,8 @@ jobs:
           YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
           YANDEX_MARKET_BUSINESS_ID: '20806099'
           YANDEX_MARKET_CAMPAIGN_ID: '89405839'
+          BASEROW_URL: http://147.78.67.6
+          BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
           TARGET_ARTICLES: ${{ inputs.target_articles }}
         run: python catalog/publish_approved_norden_marketplaces.py
       - name: Save report

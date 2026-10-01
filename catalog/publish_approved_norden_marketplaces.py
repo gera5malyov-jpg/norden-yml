@@ -17,6 +17,9 @@ OUT=ROOT/"catalog"/"norden_marketplace_publish_report.json"
 TARGETS={x.strip() for x in os.environ.get("TARGET_ARTICLES","").split(",") if x.strip()}
 OZON_BASE="https://api-seller.ozon.ru"
 YANDEX_BASE="https://api.partner.market.yandex.ru"
+BASEROW_URL=os.environ.get("BASEROW_URL","http://147.78.67.6").rstrip("/")
+BASEROW_TOKEN=os.environ.get("BASEROW_DATABASE_TOKEN","").strip()
+
 
 def load(path,name):
     p=ROOT/path; spec=importlib.util.spec_from_file_location(name,p)
@@ -87,7 +90,11 @@ selected=[]
 for rn,row in enumerate(vals[1:],2):
     art=cell(row,"Артикул")
     if not art or (TARGETS and art not in TARGETS): continue
-    if not truth(cell(row,"Проверено — загрузить в Ozon и Яндекс.Маркет")): continue
+    gate=_baserow_flags.get(art) or {}
+    # New products are created only when Moscow stock is positive and the
+    # corresponding Baserow checkbox is enabled.
+    if int(gate.get("stock") or 0) <= 0: continue
+    if not (gate.get("ozon") or gate.get("yandex")): continue
     # Approval remains TRUE as an audit trail. Once both new marketplace cards were successfully
     # created by this pipeline, scheduled checks must never update them again.
     oz_status=cell(row,"Ozon статус")
@@ -95,7 +102,7 @@ for rn,row in enumerate(vals[1:],2):
     if oz_status.startswith("CREATED_BY_PIPELINE") and ya_status.startswith("CREATED_BY_PIPELINE"):
         continue
     if not cell(row,"KIT variant_id") or not cell(row,"KIT ID") or not cell(row,"Webasyst product_id"): continue
-    selected.append({"rn":rn,"row":row,"article":art})
+    selected.append({"rn":rn,"row":row,"article":art,"allow_ozon":bool(gate.get("ozon")),"allow_yandex":bool(gate.get("yandex"))})
 
 # KIT helpers
 char_meta={s(x.get("id")):s(x.get("title")) for x in kit.characteristics()}
@@ -418,8 +425,11 @@ for r in selected:
         purchase=nfloat(cell(row,"Закупочная цена Webasyst"))
         if purchase<=0:raise RuntimeError("Purchase price missing")
 
-        # OZON old-card protection / creation
-        existing=oz_existing(art)
+        # OZON old-card protection / creation. Checkbox controls only NEW-card publication;
+        # existing-card prices/stocks are maintained by the 6h Baserow sync.
+        if not r.get("allow_ozon"):
+            item["ozon"]={"status":"ПРОПУЩЕНО_ГАЛОЧКА_ВЫКЛ"}
+        existing=oz_existing(art) if r.get("allow_ozon") else []
         prior_status=cell(row,"Ozon статус"); prior_pid=cell(row,"Ozon product_id")
         if existing:
             ep=str(existing[0].get("product_id") or "")
@@ -451,9 +461,11 @@ for r in selected:
         # Refresh KIT after Ozon post-publish cleanup, but keep the pre-publication
         # mapping in memory for the Yandex step. KIT itself now exposes only plain customer characteristics.
         v=exact_variant(art,vid)
-        # Yandex old-card protection / creation
-        existing_y=ya_mapping(art); prior_ys=cell(row,"Yandex статус")
-        if existing_y and not (prior_ys.startswith("CREATE_STARTED") or prior_ys.startswith("CREATED_BY_PIPELINE")):
+        # Yandex NEW-card publication is controlled by its own Baserow checkbox.
+        existing_y=ya_mapping(art) if r.get("allow_yandex") else []; prior_ys=cell(row,"Yandex статус")
+        if not r.get("allow_yandex"):
+            item["yandex"]={"status":"ПРОПУЩЕНО_ГАЛОЧКА_ВЫКЛ"}
+        elif existing_y and not (prior_ys.startswith("CREATE_STARTED") or prior_ys.startswith("CREATED_BY_PIPELINE")):
             item["yandex"]={"status":"ПРОПУЩЕНО_СТАРАЯ_КАРТОЧКА"}
         elif existing_y:
             cat,catname=yandex_category(v); box=(v.get("cargo_boxes") or [None])[0]
