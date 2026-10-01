@@ -693,7 +693,7 @@ def main():
             if item.get("purchase") is not None:
                 body[FIELD_PURCHASE] = item["purchase"]
             body[FIELD_STOCK] = stock
-        body[FIELD_MSK] = stock
+            body[FIELD_MSK] = stock
             body["Наличие"] = bool(stock > 0)
 
             kit_id = kit_ids_by_article.get(k)
@@ -817,7 +817,7 @@ def main():
         if item.get("purchase") is not None:
             body[FIELD_PURCHASE] = item["purchase"]
         body[FIELD_STOCK] = stock
-            body[FIELD_MSK] = stock
+        body[FIELD_MSK] = stock
 
         # Characteristics belong only to newly created cards. Existing cards
         # are intentionally left unchanged except for price/stock/availability.
