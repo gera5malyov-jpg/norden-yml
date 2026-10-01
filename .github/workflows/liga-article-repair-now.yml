@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: liga-database-article-repair
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   repair:
