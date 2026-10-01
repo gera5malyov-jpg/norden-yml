@@ -31,6 +31,7 @@ class LigaOffer:
     images: list[str] = field(default_factory=list)
     params: dict[str, list[str]] = field(default_factory=dict)
     old_price: Optional[Decimal] = None
+    supplier_stock: Optional[int] = None
 
 
 @dataclass(frozen=True)
