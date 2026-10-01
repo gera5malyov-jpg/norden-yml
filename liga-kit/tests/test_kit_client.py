@@ -7,7 +7,7 @@ from liga_kit.kit_client import KitClient, index_liga_variants, resolve_exact_wa
 class LigaKitClientTests(unittest.TestCase):
     def test_index_only_claims_liga_prefix(self):
         rows = [
-            {'id':'l1','sku':'liga-109775'},
+            {'id':'l1','sku':'Liga-109775'},
             {'id':'s1','sku':'SAMS-109775'},
             {'id':'n1','sku':'NORMAL-1'},
         ]
