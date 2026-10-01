@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-09-29T11:45:01.944944+00:00",
+  "started_at": "2026-10-01T11:53:24.399950+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=336",
   "type_name": "deephouse-336",
@@ -8,21 +8,21 @@
   "webasyst_stock_id": "66",
   "kit_stock": "МСК",
   "kit_stock_id": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
-  "kit_variants_scanned": 1131,
-  "kit_webasyst_336_variants": 1101,
+  "kit_variants_scanned": 1136,
+  "kit_webasyst_336_variants": 1106,
   "kit_duplicate_skus": 0,
-  "webasyst_products": 1889,
+  "webasyst_products": 1890,
   "webasyst_duplicate_skus": 0,
-  "processed": 4,
+  "processed": 5,
   "created": 0,
-  "updated_prices_stock": 4,
-  "updated_full_content": 4,
-  "summaries_updated_from_kit": 0,
+  "updated_prices_stock": 5,
+  "updated_full_content": 5,
+  "summaries_updated_from_kit": 1,
   "kit_variants_without_images": 0,
   "unchanged": 0,
   "features_created": 0,
-  "feature_values_written": 28,
-  "file_urls_resolved": 4,
+  "feature_values_written": 35,
+  "file_urls_resolved": 5,
   "image_source": "Yandex KIT media only",
   "webasyst_routing": "Webasyst=336",
   "errors": [
@@ -264,6 +264,16 @@
     {
       "sku": "DEEP-57114",
       "variant_id": "01a0ce56-ef10-7679-99da-7ea7e9b6136c",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-57115",
+      "variant_id": "01a0f747-44ad-7456-ae34-53ac6649e9da",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-57119",
+      "variant_id": "01a0f747-f9aa-7afe-8f15-7e4fac6e6a0b",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
@@ -2062,6 +2072,11 @@
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
+      "sku": "DEEP-63271",
+      "variant_id": "01a0f1ef-640b-74b2-99c4-6ce58c0e2568",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
       "sku": "DEEP-63369",
       "variant_id": "01a0c88e-5b3f-764c-b85f-d8c0e7d880ff",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
@@ -3679,6 +3694,11 @@
     {
       "sku": "DEEP-64275",
       "variant_id": "01a0c88d-c2cc-7dc4-aa3b-2396296bd4e3",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-64277",
+      "variant_id": "01a0f74b-ac81-7e7f-b64e-af248389647d",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
@@ -5527,7 +5547,7 @@
       ],
       "price": "2990.00",
       "compare_price": "4485.00",
-      "stock": 24,
+      "stock": 23,
       "images_in_summary": 1
     },
     {
@@ -5543,7 +5563,7 @@
       ],
       "price": "2990.00",
       "compare_price": "4485.00",
-      "stock": 21,
+      "stock": 20,
       "images_in_summary": 1
     },
     {
@@ -5577,11 +5597,27 @@
       "compare_price": "4485.00",
       "stock": 16,
       "images_in_summary": 1
+    },
+    {
+      "sku": "DEEP-67158",
+      "fields": [
+        "name",
+        "description",
+        "features",
+        "summary",
+        "price",
+        "compare_price",
+        "stock"
+      ],
+      "price": "2990.00",
+      "compare_price": "4485.00",
+      "stock": 0,
+      "images_in_summary": 1
     }
   ],
   "complete": false,
   "webasyst_routing_feature_code": "kenner_f93046718124",
-  "webasyst_336_products": 1889,
-  "finished_at": "2026-09-29T11:57:56.277455+00:00",
+  "webasyst_336_products": 1890,
+  "finished_at": "2026-10-01T12:07:05.337969+00:00",
   "status": "degraded"
 }
