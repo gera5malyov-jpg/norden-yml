@@ -20,6 +20,8 @@ from client import WebasystClient
 
 BASEROW_URL=os.environ.get("BASEROW_URL","http://147.78.67.6").rstrip("/")
 BASEROW_TOKEN=os.environ.get("BASEROW_DATABASE_TOKEN","").strip()
+BASEROW_EMAIL=os.environ.get("BASEROW_EMAIL","").strip()
+BASEROW_PASSWORD=os.environ.get("BASEROW_PASSWORD","").strip()
 WEBASYST_BASE=os.environ.get("WEBASYST_BASE_URL","https://profikompany.ru").rstrip("/")
 WEBASYST_TOKEN=os.environ.get("WEBASYST_API_TOKEN","").strip()
 CATALOG_TABLE=156
@@ -140,9 +142,27 @@ def sku_stock(sku):
 
 class BR:
     def __init__(self):
-        if not BASEROW_TOKEN: raise RuntimeError("BASEROW_DATABASE_TOKEN missing")
         self.ses=requests.Session()
-        self.ses.headers.update({"Authorization":"Token "+BASEROW_TOKEN,"Accept":"application/json","Content-Type":"application/json"})
+        self.ses.headers.update({"Accept":"application/json","Content-Type":"application/json"})
+        if BASEROW_EMAIL and BASEROW_PASSWORD:
+            auth=self.ses.post(
+                BASEROW_URL+"/api/user/token-auth/",
+                json={"username":BASEROW_EMAIL,"password":BASEROW_PASSWORD},
+                timeout=60,
+            )
+            if not auth.ok:
+                auth=self.ses.post(
+                    BASEROW_URL+"/api/user/token-auth/",
+                    json={"email":BASEROW_EMAIL,"password":BASEROW_PASSWORD},
+                    timeout=60,
+                )
+            if not auth.ok:
+                raise RuntimeError(f"Baserow login failed: HTTP {auth.status_code}: {auth.text[:1000]}")
+            self.ses.headers["Authorization"]="JWT "+auth.json()["token"]
+        elif BASEROW_TOKEN:
+            self.ses.headers["Authorization"]="Token "+BASEROW_TOKEN
+        else:
+            raise RuntimeError("BASEROW credentials missing")
         self._fields={}
         self.refresh_fields()
     def req(self,m,p,body=None):
