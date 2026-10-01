@@ -239,7 +239,7 @@ def oz_import_item(art,prep,v,purchase):
     if not urls:raise RuntimeError("KIT public images missing")
     # Initial Ozon office-chair rate; exact rate is read back and price corrected immediately after creation.
     commission=51.0; acquiring=2.0
-    price=ceil(purchase*1.21/(1-commission/100-acquiring/100));old=ceil(price*1.6)
+    denom=1-commission/100-acquiring/100\n    price=ceil(purchase*1.21/denom);old=ceil(purchase*1.60/denom)
     item={"attributes":attrs,"barcode":"","description_category_id":dc,"new_description_category_id":0,"type_id":tid,
           "color_image":"","complex_attributes":[],"currency_code":"RUB","depth":L*10,"width":W*10,"height":H*10,"dimension_unit":"mm",
           "weight":weight,"weight_unit":"g","images":urls,"images360":[],"name":ozval(prep,4180) or s(v.get("name")),
@@ -288,7 +288,7 @@ def oz_commission_and_price(art,purchase,pid):
             break
         time.sleep(3)
     acquiring=2.0
-    price=ceil(purchase*1.21/(1-commission/100-acquiring/100));old=ceil(price*1.6);minp=ceil(purchase*1.18/(1-commission/100-acquiring/100))
+    denom=1-commission/100-acquiring/100\n    price=ceil(purchase*1.21/denom);old=ceil(purchase*1.60/denom);minp=ceil(purchase*1.18/denom)
     d=api.req("oz","POST","/v1/product/import/prices",{"prices":[{"product_id":pid,"offer_id":art,"price":str(price),"old_price":str(old),"min_price":str(minp),"currency_code":"RUB","min_price_for_auto_actions_enabled":True,"price_strategy_enabled":"DISABLED"}]})
     rr=(d.get("result") or [{}])[0]
     if not rr.get("updated") or rr.get("errors"):raise RuntimeError("Ozon price update failed: "+json.dumps(rr,ensure_ascii=False))
@@ -331,7 +331,7 @@ def yandex_tariff(category,purchase,box):
             if s(params.get("valueType")).casefold()=="relative":pay+=nfloat(params.get("value"))
             else:pay+=nfloat(t.get("amount"))/provisional*100
     if fee<=0:raise RuntimeError("Yandex FEE tariff not resolved")
-    sale=ceil(purchase*1.21/(1-fee/100-pay/100));old=ceil(sale*1.6)
+    denom=1-fee/100-pay/100\n    sale=ceil(purchase*1.21/denom);old=ceil(purchase*1.60/denom)
     return tariffs,fee,pay,sale,old
 def yparam_values(category,prep):
     ps=ycat_schema(category); out=[]
