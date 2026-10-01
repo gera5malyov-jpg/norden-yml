@@ -34,19 +34,22 @@ def build_price_update(offer, variant):
     if offer.price is None:
         return None
     pricing = variant.get('pricing') or {}
+    old_price = offer.old_price if offer.old_price is not None else offer.price
     if (
-        _kit_money(pricing.get('price')) == _kit_money(offer.price)
+        _kit_money(pricing.get('price')) == _kit_money(old_price)
         and _kit_money(pricing.get('manual_discount_price')) == _kit_money(offer.price)
     ):
         return None
     variant_id = str(variant.get('id', '')).strip()
     if not variant_id:
         return None
-    desired = f'{offer.price:.2f}'
+    desired_sale = f'{offer.price:.2f}'
+    old_price = offer.old_price if offer.old_price is not None else offer.price
+    desired_old = f'{old_price:.2f}'
     return {
         'variant_id': variant_id,
-        'price': desired,
-        'manual_discount_price': desired,
+        'price': desired_old,
+        'manual_discount_price': desired_sale,
     }
 
 
@@ -261,7 +264,9 @@ class SyncRunner:
     def _new_payload(self, offer, product_id, warehouse_ids, characteristics, media):
         if offer.price is None:
             raise RuntimeError(f'invalid price for {offer.kit_sku}')
-        desired_price = f'{offer.price:.2f}'
+        desired_sale = f'{offer.price:.2f}'
+        old_price = offer.old_price if offer.old_price is not None else offer.price
+        desired_old = f'{old_price:.2f}'
         quantity = desired_stock(offer.available)
         payload = {
             'sku': offer.kit_sku,
@@ -270,8 +275,8 @@ class SyncRunner:
             'status': 'PUBLISHED',
             'product_id': str(product_id),
             'pricing': {
-                'price': desired_price,
-                'manual_discount_price': desired_price,
+                'price': desired_old,
+                'manual_discount_price': desired_sale,
             },
             'stocks': [
                 {
@@ -322,18 +327,18 @@ class SyncRunner:
             offers = offers[:self.max_items]
 
         for offer in offers:
-            seen.add(offer.kit_sku)
+            seen.add(_lower(offer.kit_sku))
             self.report['offers_seen'] += 1
             if offer.available:
                 self.report['active_offers'] += 1
             else:
                 self.report['unavailable_offers'] += 1
 
-            if offer.kit_sku in duplicates:
+            if _lower(offer.kit_sku) in duplicates:
                 self._warn(f'duplicate KIT Liga SKU skipped: {offer.kit_sku}')
                 continue
 
-            variant = kit_index.get(offer.kit_sku)
+            variant = kit_index.get(_lower(offer.kit_sku))
             if variant is not None:
                 price_update = build_price_update(offer, variant)
                 if offer.price is None:
