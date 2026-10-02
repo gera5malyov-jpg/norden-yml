@@ -1,0 +1,35 @@
+name: Supplier engine dry-run
+
+on:
+  workflow_dispatch:
+    inputs:
+      config:
+        description: Supplier config path
+        required: true
+        default: supplier_engine/supplier.example.json
+
+permissions:
+  contents: read
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install openpyxl requests
+      - name: Validate engine
+        run: |
+          python -m py_compile supplier_engine/*.py
+          python - <<'PY'
+          import json, os
+          p=os.environ["CFG"]
+          c=json.load(open(p,encoding="utf-8"))
+          print("supplier=",c["name"],"enabled=",c["enabled"])
+          print("format=",c["source"]["format"],"dry_run_required=",c["safety"]["dry_run_required"])
+          PY
+        env:
+          CFG: ${{ inputs.config }}
