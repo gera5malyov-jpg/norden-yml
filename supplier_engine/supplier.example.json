@@ -1,0 +1,44 @@
+{
+  "code": "EXAMPLE",
+  "name": "Новый поставщик",
+  "enabled": false,
+  "source": {
+    "kind": "url",
+    "format": "xlsx",
+    "location": "",
+    "sheet": null
+  },
+  "identity": {
+    "supplier_sku_field": "",
+    "sku_prefix": "",
+    "brand": ""
+  },
+  "mapping": {
+    "name": "",
+    "purchase_price": "",
+    "price": "",
+    "compare_price": "",
+    "stock": "",
+    "category": "",
+    "images": [],
+    "characteristics": {}
+  },
+  "rules": {
+    "create_new": false,
+    "update_prices": true,
+    "update_stock": true,
+    "update_images": false,
+    "update_characteristics": false,
+    "zero_if_missing": true,
+    "only_create_in_stock": false,
+    "price_formulas": {},
+    "warehouses": []
+  },
+  "safety": {
+    "dry_run_required": true,
+    "min_source_count_ratio": 0.6,
+    "max_price_change_pct": 100,
+    "block_duplicate_sku": true,
+    "pdf_requires_review": true
+  }
+}
