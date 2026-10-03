@@ -95,7 +95,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
                 'type_id' => waRequest::post('type_id', 0, waRequest::TYPE_INT) ?: null,
                 'stock_id' => waRequest::post('stock_id', 0, waRequest::TYPE_INT) ?: null,
                 'category_id' => waRequest::post('category_id', 0, waRequest::TYPE_INT) ?: null,
-                'feature_ids' => array(),
+                'feature_codes' => array(),
             ),
             'safety' => array(
                 'dry_run_required' => true,
@@ -119,7 +119,11 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
         if (trim((string)ifset($config['identity']['supplier_sku_field'])) === '' || trim((string)ifset($config['mapping']['name'])) === '') {
             return false;
         }
-        if (trim((string)ifset($config['source']['location'])) === '' && trim((string)ifset($config['source']['location_secret'])) === '') {
+        $source_secret = trim((string)ifset($config['source']['location_secret']));
+        if (trim((string)ifset($config['source']['location'])) === '' && $source_secret === '') {
+            return false;
+        }
+        if ($source_secret !== '' && !preg_match('/^MEGASUPPLIERS_SOURCE_[A-Z0-9_]+$/', $source_secret)) {
             return false;
         }
         return true;
