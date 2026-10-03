@@ -94,6 +94,13 @@ def build(base_zip, repo_root, output, expected_sha=EXPECTED_BASE_SHA256):
                 'megasuppliers-bridge/' => 'frontend/bridge',
             );
         }
+        if (wa()->getEnv() === 'backend') {
+            return array(
+                'megasuppliers/import-config/' => 'backend/importConfig',
+                'megasuppliers/import-run/' => 'backend/importRun',
+                'megasuppliers/import-status/' => 'backend/importStatus',
+            );
+        }
         return array();
     }
 """,
