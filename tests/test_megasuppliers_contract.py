@@ -5,6 +5,7 @@ WORKFLOW = ROOT / ".github/workflows/supplier-engine-dry-run.yml"
 RUN_CONTROLLER = ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportRun.controller.php"
 DEPLOY_WORKFLOW = ROOT / ".github/workflows/deploy-megasuppliers.yml"
 BUILDER = ROOT / "scripts/build_megasuppliers_package.py"
+DEPLOY_SCRIPT = ROOT / "scripts/deploy_megasuppliers.py"
 
 
 def test_webasyst_dispatch_inputs_are_declared_by_workflow():
@@ -77,3 +78,19 @@ def test_autoimport_ui_exposes_guarded_apply_and_feature_codes_are_consistent():
     assert "feature_codes" in controller
     assert "feature_codes" in example
     assert "feature_ids" not in example
+
+
+def test_deployer_uses_the_same_release_builder_as_ci():
+    deploy_script = DEPLOY_SCRIPT.read_text(encoding="utf-8")
+    assert "scripts/build_megasuppliers_package.py" in deploy_script
+    assert "release_builder=yes" in deploy_script
+
+
+def test_legacy_import_cannot_create_untyped_products():
+    backend = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php").read_text(encoding="utf-8")
+    api = (ROOT / "webasyst/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php").read_text(encoding="utf-8")
+    builder = BUILDER.read_text(encoding="utf-8")
+    assert "create_missing' => false" in backend
+    assert "CREATE_MISSING_REQUIRES_PROFILE" in api
+    assert "creation new" not in builder.lower()
+    assert "legacy_create" in builder
