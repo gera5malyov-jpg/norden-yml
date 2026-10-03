@@ -116,6 +116,9 @@ def build(base_zip, repo_root, output, expected_sha=EXPECTED_BASE_SHA256):
             if marker not in t:
                 raise RuntimeError("Backend.html insertion marker not found")
             t = t.replace(marker, panel.read_text(encoding="utf-8").rstrip() + "\n\n" + marker, 1)
+        legacy_create = '<label><input type="checkbox" name="create_missing" value="1"> создавать новые товары, если артикул не найден</label>'
+        safe_create = '<label><input type="checkbox" disabled> создание новых через старый импорт отключено — используйте автоматический профиль</label>'
+        t = t.replace(legacy_create, safe_create)
         template.write_text(t, encoding="utf-8")
 
         output.parent.mkdir(parents=True, exist_ok=True)
