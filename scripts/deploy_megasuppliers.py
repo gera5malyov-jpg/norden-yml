@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import io, json, os, subprocess, tempfile, time, urllib.parse, urllib.request, zipfile, hashlib, shlex
+import io, json, os, subprocess, tempfile, time, urllib.parse, urllib.request, zipfile, hashlib, shlex, shutil
 from pathlib import Path
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -58,6 +58,8 @@ def main():
         if not names or any((not n.startswith("megasuppliers/")) or ".." in Path(n).parts for n in names):
             raise RuntimeError("unsafe package layout")
     log("package_verified=yes")
+    base_pkg="/tmp/megasuppliers-1.0.1.base.zip"
+    shutil.copy2(pkg, base_pkg)
 
     # Ensure the public API route is registered through Shop-Script's routing hook.
     # The source package is checksum-verified above; this deterministic compatibility
@@ -292,6 +294,18 @@ def main():
             )
     os.replace(patched, pkg)
     log("compatibility_patches=yes")
+
+    # Rebuild from the checksum-pinned untouched base through the same release
+    # builder used by CI. This makes the deploy payload identical in structure
+    # to the package that passed tests, regardless of legacy compatibility code above.
+    release_pkg=pkg+".release"
+    subprocess.run([
+        "python3","scripts/build_megasuppliers_package.py",
+        "--base",base_pkg,
+        "--output",release_pkg,
+    ],check=True)
+    os.replace(release_pkg,pkg)
+    log("release_builder=yes")
 
     # Temporary SSH key through NetAngels API.
     token_body=urllib.parse.urlencode({"api_key":API_KEY}).encode()
