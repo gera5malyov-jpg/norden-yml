@@ -8,7 +8,7 @@ Version target: **1.1.0**.
 - Heavy parsing runs in GitHub Actions.
 - Every supplier profile is checked with a mandatory dry-run before any future write mode.
 - Duplicate final SKUs, negative prices/stock, feed-collapse guards and abnormal price changes block a run.
-- Generic PDF import is intentionally blocked until supplier-specific extraction rules exist.
+- Text-based tabular PDF import is supported and still passes the mandatory dry-run. Scanned/image-only or non-tabular PDFs are intentionally blocked until supplier-specific extraction rules exist.
 - Production deployment is **manual only**. The deploy workflow no longer runs on push to main.
 - The 1.1.0 bridge supports dry-run and a guarded apply mode. Apply remains disabled by default and requires the Webasyst `enable_writes` setting, a fresh successful dry-run of the same config, and an unchanged source SHA-256.
 
@@ -16,7 +16,7 @@ Version target: **1.1.0**.
 
 The plugin UI stores per-supplier source format, URL or GitHub Secret name, supplier article field, SKU prefix, brand, field mappings, price formulas, image fields and catalog rules.
 
-Supported source formats: YML/XML, XLSX and CSV. PDF requires a supplier-specific adapter.
+Supported source formats: YML/XML, XLSX, CSV and text-based tabular PDF. For PDF, the configured supplier SKU and name columns must be present in a detected table. Scanned/image-only or non-tabular PDFs are blocked and require a supplier-specific extractor.
 
 Private source URLs should be stored in a GitHub Actions secret. Webasyst passes only the secret name through workflow inputs. The workflow resolves the secret in GitHub.
 
