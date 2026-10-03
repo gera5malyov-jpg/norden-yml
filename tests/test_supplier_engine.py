@@ -269,19 +269,19 @@ def test_tabular_pdf_parser_extracts_configured_columns():
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=A4)
     table = Table([
-        ["Артикул", "Название", "Цена"],
-        ["109775", "Диван Атланта", "10000"],
-        ["109776", "Кресло", "5000"],
+        ["SKU", "Name", "Price"],
+        ["109775", "Sofa Atlanta", "10000"],
+        ["109776", "Armchair", "5000"],
     ])
     table.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 1, colors.black),
     ]))
     doc.build([table])
 
-    rows = load_pdf(buf.getvalue(), required_headers=["Артикул", "Название"])
-    assert rows[0]["Артикул"] == "109775"
-    assert rows[0]["Название"] == "Диван Атланта"
-    assert rows[0]["Цена"] == "10000"
+    rows = load_pdf(buf.getvalue(), required_headers=["SKU", "Name"])
+    assert rows[0]["SKU"] == "109775"
+    assert rows[0]["Name"] == "Sofa Atlanta"
+    assert rows[0]["Price"] == "10000"
     assert len(rows) == 2
 
 
