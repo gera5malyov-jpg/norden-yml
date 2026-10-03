@@ -1,0 +1,11 @@
+{
+  "code":"LIGA",
+  "name":"Лига Диванов",
+  "enabled":false,
+  "source":{"kind":"url","format":"xlsx","location":"","sheet":null},
+  "identity":{"supplier_sku_field":"Артикул","sku_prefix":"Liga-","brand":"Лига Диванов"},
+  "mapping":{"name":"Наименование","purchase_price":"","price":"Цена","compare_price":"","stock":"Остаток","category":"","images":[],"characteristics":{}},
+  "rules":{"create_new":true,"update_prices":true,"update_stock":true,"update_images":true,"update_characteristics":true,"zero_if_missing":true,"only_create_in_stock":false,"price_formulas":{"price":"supplier_price","compare_price":"supplier_price * 1.30"},"warehouses":[]},
+  "webasyst":{"type":"","category":"","stock":""},
+  "safety":{"dry_run_required":true,"min_source_count_ratio":0.60,"max_price_change_pct":100,"block_duplicate_sku":true,"pdf_requires_review":true}
+}
