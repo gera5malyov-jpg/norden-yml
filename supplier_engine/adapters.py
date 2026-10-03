@@ -10,6 +10,57 @@ def load_csv(data: bytes, delimiter=None):
     return list(csv.DictReader(io.StringIO(text), dialect=dialect))
 
 
+def _clean_xml_text(value):
+    return (value or "").replace("\xa0", " ").strip()
+
+
+def _norden_stock_value(value):
+    text = _clean_xml_text(value).replace(" ", "").replace(",", ".")
+    if not text:
+        return 0.0
+    if text.startswith(">"):
+        text = text[1:]
+    try:
+        return max(0.0, float(text))
+    except ValueError:
+        return 0.0
+
+
+def _load_norden_nomenclature(root):
+    rows = []
+    for item in root.findall(".//Номенклатура"):
+        row = dict(item.attrib)
+        free_stock_total = 0.0
+        has_free_stock = False
+        for child in item:
+            tag = child.tag
+            text = _clean_xml_text(child.text)
+            if tag == "Цена":
+                price_type = _clean_xml_text(child.attrib.get("ВидЦен"))
+                key = "Цена_" + price_type if price_type else "Цена"
+                row[key] = text
+            elif tag in {"ОбщийОстаток", "СвободныйОстаток"}:
+                warehouse = _clean_xml_text(child.attrib.get("Склад"))
+                key = tag + ("_" + warehouse if warehouse else "")
+                row[key] = text
+                if tag == "СвободныйОстаток":
+                    free_stock_total += _norden_stock_value(text)
+                    has_free_stock = True
+            elif tag == "Заказано":
+                month = _clean_xml_text(child.attrib.get("Месяц"))
+                row["Заказано_" + month if month else "Заказано"] = text
+            elif tag:
+                if tag in row:
+                    previous = row[tag]
+                    row[tag] = previous + [text] if isinstance(previous, list) else [previous, text]
+                else:
+                    row[tag] = text
+        if has_free_stock:
+            row["СвободныйОстаток_Итого"] = free_stock_total
+        rows.append(row)
+    return rows
+
+
 def load_xml_yml(data: bytes):
     root = ET.fromstring(data)
     rows = []
@@ -25,7 +76,9 @@ def load_xml_yml(data: bytes):
             else:
                 row[child.tag] = (child.text or "").strip()
         rows.append(row)
-    return rows
+    if rows:
+        return rows
+    return _load_norden_nomenclature(root)
 
 
 def load_xlsx(data: bytes, sheet=None):
