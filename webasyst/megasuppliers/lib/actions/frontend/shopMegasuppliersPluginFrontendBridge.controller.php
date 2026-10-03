@@ -10,6 +10,10 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
         }
 
         $body = file_get_contents('php://input');
+        if (strlen($body) > 2097152) {
+            $this->fail('payload_too_large', 413);
+            return;
+        }
         $plugin = wa('shop')->getPlugin('megasuppliers');
         $secret = trim((string)$plugin->getSettings('callback_secret'));
         $provided = trim((string)waRequest::server('HTTP_X_MEGASUPPLIERS_SIGNATURE', ''));
@@ -94,17 +98,34 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
             return;
         }
         $model = new shopMegasuppliersProductModel();
-        $updated = 0;
+        $sku_model = new shopProductSkusModel();
+        $validated = array();
         foreach ($items as $item) {
             if (!is_array($item)) {
-                continue;
+                $this->fail('invalid_mapping', 422);
+                return;
             }
             $supplier_sku = trim((string)ifset($item['supplier_sku']));
             $product_id = (int)ifset($item['product_id']);
             $sku_id = (int)ifset($item['sku_id']);
-            if ($supplier_sku === '' || !$product_id || !$sku_id) {
-                continue;
+            if ($supplier_sku === '' || mb_strlen($supplier_sku, 'UTF-8') > 255 || !$product_id || !$sku_id) {
+                $this->fail('invalid_mapping', 422);
+                return;
             }
+            $sku = $sku_model->getById($sku_id);
+            if (!$sku || (int)ifset($sku['product_id']) !== $product_id) {
+                $this->fail('invalid_product_sku_mapping', 422);
+                return;
+            }
+            $validated[] = array($item, $supplier_sku, $product_id, $sku_id);
+        }
+
+        $updated = 0;
+        foreach ($validated as $row) {
+            $item = $row[0];
+            $supplier_sku = $row[1];
+            $product_id = $row[2];
+            $sku_id = $row[3];
             $data = array(
                 'supplier_id' => (int)$supplier_id,
                 'product_id' => $product_id,
