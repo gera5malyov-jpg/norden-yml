@@ -10,7 +10,7 @@ Version target: **1.1.0**.
 - Duplicate final SKUs, negative prices/stock, feed-collapse guards and abnormal price changes block a run.
 - Generic PDF import is intentionally blocked until supplier-specific extraction rules exist.
 - Production deployment is **manual only**. The deploy workflow no longer runs on push to main.
-- The current 1.1.0 bridge dispatches dry-run only; it cannot write the production catalog.
+- The 1.1.0 bridge supports dry-run and a guarded apply mode. Apply remains disabled by default and requires the Webasyst `enable_writes` setting, a fresh successful dry-run of the same config, and an unchanged source SHA-256.
 
 ## Supplier profile
 
@@ -55,7 +55,7 @@ Webasyst plugin settings:
 GitHub repository secrets:
 
 - `MEGASUPPLIERS_CALLBACK_SECRET` — same value as Webasyst callback secret.
-- Supplier source URL secrets such as `LIGA_FEED_URL` when the feed URL is private.
+- Supplier source URL secrets must use the `MEGASUPPLIERS_SOURCE_*` namespace, for example `MEGASUPPLIERS_SOURCE_LIGA`.
 - `GOOGLE_SERVICE_ACCOUNT_JSON` is used only by CI to build the exact installable package from the checksum-pinned original package.
 
 ## Package build
