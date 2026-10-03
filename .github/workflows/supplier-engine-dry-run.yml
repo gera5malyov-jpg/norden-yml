@@ -1,55 +1,148 @@
-name: Supplier engine dry-run
+name: Supplier engine validation
 
 on:
+  pull_request:
+    paths:
+      - 'supplier_engine/**'
+      - 'tests/test_supplier_engine.py'
+      - '.github/workflows/supplier-engine-dry-run.yml'
+      - 'webasyst/megasuppliers/**'
+      - 'scripts/build_megasuppliers_package.py'
   workflow_dispatch:
     inputs:
       config:
-        description: Supplier config path in repository
+        description: Supplier config path in repository (used when config_b64 is empty)
         required: false
         default: supplier_engine/supplier.example.json
+      config_b64:
+        description: Base64 supplier config sent by Webasyst
+        required: false
+        default: ''
       supplier_id:
-        description: Webasyst supplier id (reserved for plugin bridge)
+        description: Webasyst supplier id
         required: false
-        default: ""
+        default: ''
+      request_id:
+        description: Unique Webasyst request id
+        required: false
+        default: ''
       previous_count:
-        description: Previous successful source count (optional)
+        description: Previous successful source count
         required: false
-        default: ""
+        default: ''
+      callback_url:
+        description: Webasyst callback URL
+        required: false
+        default: ''
+      source_secret:
+        description: GitHub secret name containing private supplier source URL
+        required: false
+        default: ''
 
 permissions:
   contents: read
 
 jobs:
-  dry-run:
+  tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.3'
+          coverage: none
       - run: pip install openpyxl pytest
-      - name: Engine tests
+      - name: Supplier engine tests
         run: pytest -q tests/test_supplier_engine.py
-      - name: Resolve config
+      - name: PHP 7.3 syntax check
+        run: find webasyst/megasuppliers/lib -name '*.php' -type f -print0 | xargs -0 -n1 php -l
+
+  dry-run:
+    if: github.event_name == 'workflow_dispatch'
+    needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPPLIER_SOURCE_URL: ${{ secrets[inputs.source_secret] }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install openpyxl
+      - name: Resolve supplier config
         id: cfg
-        shell: bash
+        env:
+          CONFIG_B64: ${{ inputs.config_b64 }}
+          CONFIG_PATH: ${{ inputs.config }}
         run: |
-          cfg="${{ inputs.config }}"
-          case "${{ inputs.supplier_id }}" in
-            "") ;;
-            *) echo "Plugin bridge supplier_id=${{ inputs.supplier_id }}";;
-          esac
-          echo "path=$cfg" >> "$GITHUB_OUTPUT"
+          python - <<'PY'
+          import base64, os
+          from pathlib import Path
+          raw=os.environ.get('CONFIG_B64','').strip()
+          if raw:
+              data=base64.b64decode(raw, validate=True)
+              if len(data)>40000:
+                  raise SystemExit('decoded config is too large')
+              Path('/tmp/supplier-config.json').write_bytes(data)
+              path='/tmp/supplier-config.json'
+          else:
+              path=os.environ.get('CONFIG_PATH','').strip()
+              if not path or not Path(path).is_file():
+                  raise SystemExit('supplier config not found')
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as fh:
+              fh.write('path='+path+'\n')
+          PY
       - name: Supplier dry-run
+        id: engine
         shell: bash
         run: |
+          set +e
           args=( "${{ steps.cfg.outputs.path }}" --output supplier-dry-run.json )
           if [ -n "${{ inputs.previous_count }}" ]; then args+=( --previous-count "${{ inputs.previous_count }}" ); fi
           python -m supplier_engine.runner "${args[@]}"
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: supplier-dry-run
+          name: supplier-dry-run-${{ inputs.request_id || github.run_id }}
           path: supplier-dry-run.json
-          if-no-files-found: warn
+          if-no-files-found: error
+      - name: Send signed result to Webasyst
+        if: always() && inputs.callback_url != '' && hashFiles('supplier-dry-run.json') != ''
+        env:
+          CALLBACK_URL: ${{ inputs.callback_url }}
+          CALLBACK_SECRET: ${{ secrets.MEGASUPPLIERS_CALLBACK_SECRET }}
+          SUPPLIER_ID: ${{ inputs.supplier_id }}
+          REQUEST_ID: ${{ inputs.request_id }}
+        run: |
+          python - <<'PY'
+          import hashlib, hmac, json, os, urllib.request
+          secret=os.environ.get('CALLBACK_SECRET','')
+          if not secret:
+              raise SystemExit('MEGASUPPLIERS_CALLBACK_SECRET is not configured')
+          report=json.load(open('supplier-dry-run.json',encoding='utf-8'))
+          payload=json.dumps({
+              'supplier_id': int(os.environ['SUPPLIER_ID']),
+              'request_id': os.environ['REQUEST_ID'],
+              'report': report,
+          },ensure_ascii=False,separators=(',',':')).encode('utf-8')
+          signature='sha256='+hmac.new(secret.encode('utf-8'),payload,hashlib.sha256).hexdigest()
+          req=urllib.request.Request(os.environ['CALLBACK_URL'],data=payload,method='POST',headers={
+              'Content-Type':'application/json; charset=utf-8',
+              'X-Megasuppliers-Signature':signature,
+              'User-Agent':'Megasuppliers-GitHub-Bridge/1.1',
+          })
+          with urllib.request.urlopen(req,timeout=30) as response:
+              if response.status//100 != 2:
+                  raise SystemExit('callback HTTP %s' % response.status)
+          PY
+      - name: Enforce dry-run result
+        if: always()
+        run: exit "${{ steps.engine.outputs.exit_code || '1' }}"
