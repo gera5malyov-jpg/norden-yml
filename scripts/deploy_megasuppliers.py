@@ -586,6 +586,103 @@ chmod 644 "$API_DIR/index.php"
 php -l "$API_DIR/index.php"
 echo "api_bridge=yes"
 
+# Stable signed callback endpoint for GitHub Actions. The storefront router on
+# this installation does not expose plugin frontend routes reliably.
+CALLBACK_DIR="$ROOT/megasuppliers-callback"
+if [ -e "$CALLBACK_DIR" ]; then
+  tar -C "$ROOT" -czf "$BACK/megasuppliers-callback.before.tgz" "megasuppliers-callback"
+fi
+mkdir -p "$CALLBACK_DIR"
+cat >"$CALLBACK_DIR/index.php" <<'PHP'
+<?php
+header('Content-Type: application/json; charset=utf-8');
+
+function ms_callback_json($status, $payload)
+{
+    http_response_code($status);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+if (strtolower(isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : '') !== 'post') {
+    ms_callback_json(405, array('errors' => array('method_not_allowed')));
+}
+
+$root = dirname(__DIR__);
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null, new SystemConfig());
+wa('shop');
+$plugin = wa('shop')->getPlugin('megasuppliers', true);
+
+$body = file_get_contents('php://input');
+if (strlen($body) > 2097152) {
+    ms_callback_json(413, array('errors' => array('payload_too_large')));
+}
+$secret = trim((string)$plugin->getSettings('callback_secret'));
+$provided = isset($_SERVER['HTTP_X_MEGASUPPLIERS_SIGNATURE']) ? trim((string)$_SERVER['HTTP_X_MEGASUPPLIERS_SIGNATURE']) : '';
+$expected = $secret === '' ? '' : 'sha256='.hash_hmac('sha256', $body, $secret);
+if ($secret === '' || $provided === '' || !hash_equals($expected, $provided)) {
+    ms_callback_json(401, array('errors' => array('unauthorized')));
+}
+
+$payload = json_decode($body, true);
+if (!is_array($payload)) {
+    ms_callback_json(400, array('errors' => array('invalid_json')));
+}
+$supplier_id = isset($payload['supplier_id']) ? (int)$payload['supplier_id'] : 0;
+$request_id = isset($payload['request_id']) ? trim((string)$payload['request_id']) : '';
+$report = isset($payload['report']) ? $payload['report'] : null;
+if (!$supplier_id || $request_id === '' || !is_array($report)) {
+    ms_callback_json(422, array('errors' => array('invalid_report')));
+}
+
+$dir = wa()->getDataPath('plugins/megasuppliers/import-status', false, 'shop', true);
+waFiles::create($dir);
+$path = $dir.'/'.$supplier_id.'.json';
+$pending = file_exists($path) ? json_decode(file_get_contents($path), true) : null;
+if (!is_array($pending) || empty($pending['request_id']) || !hash_equals((string)$pending['request_id'], $request_id)) {
+    ms_callback_json(409, array('errors' => array('stale_or_unknown_request')));
+}
+
+$report_mode = isset($report['mode']) ? (string)$report['mode'] : '';
+if ($report_mode !== '' && $report_mode !== (string)(isset($pending['mode']) ? $pending['mode'] : '')) {
+    ms_callback_json(409, array('errors' => array('mode_mismatch')));
+}
+$report_config_sha = isset($report['config_sha256']) ? trim((string)$report['config_sha256']) : '';
+$pending_config_sha = isset($pending['config_sha256']) ? trim((string)$pending['config_sha256']) : '';
+if ($report_config_sha !== '' && $pending_config_sha !== '' && !hash_equals($pending_config_sha, $report_config_sha)) {
+    ms_callback_json(409, array('errors' => array('config_mismatch')));
+}
+
+$report_status = isset($report['status']) ? (string)$report['status'] : '';
+if ($report_status === 'ok' && empty($report['blocked'])) {
+    $pending['status'] = 'completed';
+} elseif ($report_status === 'failed') {
+    $pending['status'] = 'failed';
+} else {
+    $pending['status'] = 'blocked';
+}
+$pending['finished_at'] = date('c');
+$pending['report'] = $report;
+if ((string)(isset($pending['mode']) ? $pending['mode'] : '') === 'dry-run' && $pending['status'] === 'completed') {
+    $pending['last_dry_run'] = array(
+        'config_sha256' => isset($pending['config_sha256']) ? (string)$pending['config_sha256'] : '',
+        'finished_at' => $pending['finished_at'],
+        'report' => $report,
+    );
+}
+if (waFiles::write($path, json_encode($pending, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT)) === false) {
+    ms_callback_json(500, array('errors' => array('status_write_failed')));
+}
+ms_callback_json(200, array('status' => 'ok'));
+PHP
+chown -R web:web "$CALLBACK_DIR"
+chmod 755 "$CALLBACK_DIR"
+chmod 644 "$CALLBACK_DIR/index.php"
+php -l "$CALLBACK_DIR/index.php"
+echo "callback_bridge=yes"
+
 # Functional API guard check without exposing the key.
 cat >/tmp/ms_api_key.php <<'PHP'
 <?php
