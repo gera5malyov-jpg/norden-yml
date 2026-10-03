@@ -74,6 +74,7 @@ def build(base_zip, repo_root, output, expected_sha=EXPECTED_BASE_SHA256):
             "<?php\nreturn array(\n"
             "    'megasuppliers-api/' => 'frontend/api',\n"
             "    'megasuppliers-callback/' => 'frontend/importCallback',\n"
+            "    'megasuppliers-bridge/' => 'frontend/bridge',\n"
             ");\n",
             encoding="utf-8",
         )
@@ -90,6 +91,7 @@ def build(base_zip, repo_root, output, expected_sha=EXPECTED_BASE_SHA256):
             return array(
                 'megasuppliers-api/' => 'frontend/api',
                 'megasuppliers-callback/' => 'frontend/importCallback',
+                'megasuppliers-bridge/' => 'frontend/bridge',
             );
         }
         return array();
