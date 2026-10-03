@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       config:
-        description: Supplier config path
-        required: true
+        description: Supplier config path in repository
+        required: false
         default: supplier_engine/supplier.example.json
+      supplier_id:
+        description: Webasyst supplier id (reserved for plugin bridge)
+        required: false
+        default: ""
       previous_count:
         description: Previous successful source count (optional)
         required: false
@@ -27,13 +31,21 @@ jobs:
       - run: pip install openpyxl pytest
       - name: Engine tests
         run: pytest -q tests/test_supplier_engine.py
+      - name: Resolve config
+        id: cfg
+        shell: bash
+        run: |
+          cfg="${{ inputs.config }}"
+          case "${{ inputs.supplier_id }}" in
+            "") ;;
+            *) echo "Plugin bridge supplier_id=${{ inputs.supplier_id }}";;
+          esac
+          echo "path=$cfg" >> "$GITHUB_OUTPUT"
       - name: Supplier dry-run
         shell: bash
         run: |
-          args=( "${{ inputs.config }}" --output supplier-dry-run.json )
-          if [ -n "${{ inputs.previous_count }}" ]; then
-            args+=( --previous-count "${{ inputs.previous_count }}" )
-          fi
+          args=( "${{ steps.cfg.outputs.path }}" --output supplier-dry-run.json )
+          if [ -n "${{ inputs.previous_count }}" ]; then args+=( --previous-count "${{ inputs.previous_count }}" ); fi
           python -m supplier_engine.runner "${args[@]}"
       - uses: actions/upload-artifact@v4
         if: always()
