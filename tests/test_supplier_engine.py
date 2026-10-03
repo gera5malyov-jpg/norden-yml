@@ -7,6 +7,7 @@ from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256
 from supplier_engine.validators import validate_run
+from supplier_engine.webasyst_sync import apply_plan, build_plan, validate_apply_plan
 
 
 def test_duplicate_blocks():
@@ -70,3 +71,170 @@ def test_config_requires_identity_field(tmp_path):
     p.write_text(json.dumps({"code":"X","name":"X","source":{},"identity":{},"mapping":{"name":"name"},"rules":{},"safety":{}}),encoding="utf-8")
     with pytest.raises(ValueError):
         load_config(p)
+
+
+class _FakeWebasyst:
+    def __init__(self):
+        self.calls = []
+
+    def call(self, method, *, http_method="GET", params=None, data=None, files=None):
+        self.calls.append({
+            "method": method,
+            "http_method": http_method,
+            "params": params or {},
+            "data": data or {},
+        })
+        if method == "shop.product.add":
+            return {"id": "101"}
+        if method == "shop.product.skus.getList":
+            return {"skus": [{"id": "202"}]}
+        return {}
+
+
+def test_build_plan_zeroes_missing_link_and_skips_out_of_stock_create():
+    products = [
+        Product("A", "X-A", "Existing", stock=5),
+        Product("B", "X-B", "No stock", stock=0),
+    ]
+    existing = {
+        "X-A": [({"id": 11, "name": "Existing"}, {"id": 21, "sku": "X-A"})],
+    }
+    links = [
+        {"supplier_sku": "OLD", "product_id": 12, "sku_id": 22},
+    ]
+    plan = build_plan(
+        products,
+        existing,
+        links,
+        {
+            "create_new": True,
+            "only_create_in_stock": True,
+            "zero_if_missing": True,
+            "update_stock": True,
+        },
+    )
+    assert len(plan["update"]) == 1
+    assert plan["skipped"] == [{"sku": "X-B", "reason": "not_in_stock"}]
+    assert plan["zero"] == [{"supplier_sku": "OLD", "sku_id": 22, "product_id": 12}]
+
+
+def test_validate_apply_plan_requires_explicit_type_and_stock():
+    plan = {
+        "create": [{"sku": "X-1", "desired": {"stock": 1, "characteristics": {}}}],
+        "update": [],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    errors = validate_apply_plan(
+        plan,
+        {
+            "rules": {"update_stock": True},
+            "webasyst": {"type_id": None, "stock_id": None, "feature_codes": {}},
+        },
+    )
+    assert any("type_id" in x for x in errors)
+    assert any("stock_id" in x for x in errors)
+
+
+def test_apply_plan_updates_existing_prices_and_stock():
+    wa = _FakeWebasyst()
+    plan = {
+        "create": [],
+        "update": [{
+            "sku": "X-1",
+            "supplier_sku": "1",
+            "product_id": 11,
+            "sku_id": 21,
+            "current_product": {"id": 11},
+            "current_sku": {"id": 21},
+            "desired": {
+                "supplier_sku": "1",
+                "sku": "X-1",
+                "name": "Chair",
+                "purchase_price": 100,
+                "price": 125,
+                "compare_price": 160,
+                "stock": 3,
+                "brand": "",
+                "category": "",
+                "images": [],
+                "characteristics": {},
+            },
+        }],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    result = apply_plan(
+        wa,
+        plan,
+        {
+            "rules": {
+                "update_prices": True,
+                "update_stock": True,
+                "update_name": False,
+                "update_images": False,
+                "update_characteristics": False,
+            },
+            "webasyst": {"stock_id": 1, "type_id": 5},
+        },
+    )
+    assert result["updated"] == 1
+    sku_call = next(x for x in wa.calls if x["method"] == "shop.product.skus.update")
+    assert sku_call["data"]["price"] == "125"
+    assert sku_call["data"]["compare_price"] == "160"
+    assert sku_call["data"]["purchase_price"] == "100"
+    assert sku_call["data"]["stock"] == {"1": "3"}
+
+
+def test_apply_plan_creates_product_then_sets_final_sku():
+    wa = _FakeWebasyst()
+    desired = {
+        "supplier_sku": "1",
+        "sku": "X-1",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "",
+        "category": "",
+        "images": ["https://img/1.jpg"],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [{"sku": "X-1", "supplier_sku": "1", "desired": desired}],
+        "update": [],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    result = apply_plan(
+        wa,
+        plan,
+        {
+            "rules": {
+                "update_prices": True,
+                "update_stock": True,
+                "update_images": True,
+                "update_characteristics": False,
+            },
+            "webasyst": {
+                "stock_id": 1,
+                "type_id": 5,
+                "category_id": 9,
+                "currency": "RUB",
+                "new_product_status": 0,
+            },
+        },
+    )
+    assert result["created"] == 1
+    add_call = next(x for x in wa.calls if x["method"] == "shop.product.add")
+    assert add_call["data"]["type_id"] == 5
+    assert add_call["data"]["categories"] == [9]
+    assert "[extimg]" in add_call["data"]["summary"]
+    sku_calls = [x for x in wa.calls if x["method"] == "shop.product.skus.update"]
+    assert sku_calls[-1]["data"]["sku"] == "X-1"
+    assert result["mappings"][0]["product_id"] == 101
+    assert result["mappings"][0]["sku_id"] == 202
