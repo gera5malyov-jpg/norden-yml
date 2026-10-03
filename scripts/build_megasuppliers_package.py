@@ -81,6 +81,14 @@ def build(base_zip, repo_root, output, expected_sha=EXPECTED_BASE_SHA256):
 
         cls = plugin / "lib/shopMegasuppliers.plugin.php"
         text = cls.read_text(encoding="utf-8")
+        bootstrap_marker = "MEGASUPPLIERS_BACKEND_CONTROLLER_BOOTSTRAP"
+        if bootstrap_marker not in text:
+            bootstrap = """// MEGASUPPLIERS_BACKEND_CONTROLLER_BOOTSTRAP
+require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php';
+require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportRun.controller.php';
+require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportStatus.controller.php';
+"""
+            text = text.replace("<?php", "<?php\n" + bootstrap, 1)
         text = text.replace("public function routing($route)", "public function routing($route = array())")
         if "public function routing(" not in text:
             text = insert_before_class_end(
