@@ -4,23 +4,24 @@
   "enabled": false,
   "source": {
     "kind": "url",
-    "format": "xlsx",
+    "format": "yml",
     "location": "",
+    "location_secret": "SUPPLIER_FEED_URL",
     "sheet": null
   },
   "identity": {
-    "supplier_sku_field": "",
+    "supplier_sku_field": "vendorCode",
     "sku_prefix": "",
     "brand": ""
   },
   "mapping": {
-    "name": "",
+    "name": "name",
     "purchase_price": "",
-    "price": "",
+    "price": "price",
     "compare_price": "",
-    "stock": "",
-    "category": "",
-    "images": [],
+    "stock": "available",
+    "category": "categoryId",
+    "images": ["pictures"],
     "characteristics": {}
   },
   "rules": {
@@ -33,6 +34,12 @@
     "only_create_in_stock": false,
     "price_formulas": {},
     "warehouses": []
+  },
+  "webasyst": {
+    "type_id": null,
+    "stock_id": null,
+    "category_id": null,
+    "feature_ids": {}
   },
   "safety": {
     "dry_run_required": true,
