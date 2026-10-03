@@ -32,6 +32,7 @@ def ssh(key, command, stdin=None, check=True, timeout=120):
 
 def main():
     REPORT.parent.mkdir(exist_ok=True)
+    REPORT.write_text("", encoding="utf-8")
     lines=[]
     def log(s):
         s=str(s); lines.append(s); print(s)
