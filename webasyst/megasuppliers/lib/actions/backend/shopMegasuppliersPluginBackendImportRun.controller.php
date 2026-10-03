@@ -53,6 +53,10 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
 
         $approved_source_sha = '';
         if ($mode === 'apply') {
+            if (empty($config['enabled'])) {
+                $this->errors[] = 'PROFILE_DISABLED';
+                return;
+            }
             if (!$plugin->getSettings('enable_writes')) {
                 $this->errors[] = 'WRITES_DISABLED';
                 return;
