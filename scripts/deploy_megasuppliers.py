@@ -32,6 +32,7 @@ def ssh(key, command, stdin=None, check=True, timeout=120):
 
 def main():
     REPORT.parent.mkdir(exist_ok=True)
+    REPORT.write_text("", encoding="utf-8")
     lines=[]
     def log(s):
         s=str(s); lines.append(s); print(s)
@@ -561,7 +562,7 @@ try {
     $stats = $service->importRows((int)$supplier['id'], $items, array(
         'source' => 'api',
         'filename' => '',
-        'create_missing' => !empty($payload['create_missing']),
+        'create_missing' => false,
         'update_catalog' => !array_key_exists('update_catalog', $payload) || !empty($payload['update_catalog']),
         'field_map' => isset($payload['field_map']) && is_array($payload['field_map']) ? $payload['field_map'] : array(),
     ));
