@@ -611,6 +611,85 @@ test "$API_TEST_STATUS" = "422"
 # Remove Shop-Script cache only; it is regenerated automatically.
 rm -rf "$ROOT/wa-cache/apps/shop" || true
 
+# One-time safe Norden dry-run profile seed. This writes plugin configuration only,
+# never catalog products, and only when the profile does not already exist.
+cat >/tmp/ms_seed_norden_profile.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$dir=wa()->getDataPath('plugins/megasuppliers/import-config', false, 'shop', true);
+waFiles::create($dir);
+$path=$dir.'/1.json';
+if (file_exists($path)) {
+    echo "norden_profile_seed=skipped_existing\n";
+    exit(0);
+}
+$config=array(
+    'code'=>'NORDEN',
+    'name'=>'Norden',
+    'enabled'=>false,
+    'source'=>array(
+        'kind'=>'url',
+        'format'=>'xml',
+        'location'=>'https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.group+-K8%25.xml',
+        'location_secret'=>'',
+        'sheet'=>'',
+    ),
+    'identity'=>array(
+        'supplier_sku_field'=>'Артикул',
+        'sku_prefix'=>'',
+        'brand'=>'Norden',
+    ),
+    'mapping'=>array(
+        'name'=>'Наименование',
+        'purchase_price'=>'Цена_Опт',
+        'price'=>'Цена_РРЦ',
+        'compare_price'=>'',
+        'stock'=>'',
+        'category'=>'',
+        'images'=>array(),
+        'characteristics'=>array(),
+    ),
+    'rules'=>array(
+        'create_new'=>false,
+        'update_prices'=>true,
+        'update_stock'=>false,
+        'update_images'=>false,
+        'update_characteristics'=>false,
+        'zero_if_missing'=>false,
+        'only_create_in_stock'=>true,
+        'price_formulas'=>array(),
+        'warehouses'=>array(),
+    ),
+    'webasyst'=>array(
+        'type_id'=>null,
+        'stock_id'=>null,
+        'category_id'=>null,
+        'feature_codes'=>array(),
+    ),
+    'safety'=>array(
+        'dry_run_required'=>true,
+        'min_source_count_ratio'=>0.60,
+        'max_price_change_pct'=>100,
+        'block_duplicate_sku'=>true,
+        'pdf_requires_review'=>true,
+    ),
+);
+$json=json_encode($config, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+if ($json === false || waFiles::write($path, $json) === false) {
+    fwrite(STDERR, "norden profile seed failed\n");
+    exit(2);
+}
+echo "norden_profile_seed=created\n";
+PHP
+chown web:web /tmp/ms_seed_norden_profile.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_seed_norden_profile.php'
+rm -f /tmp/ms_seed_norden_profile.php
+
+
 # Verify that Webasyst autoload sees the AJAX controllers after cache regeneration.
 cat >/tmp/ms_controller_probe.php <<'PHP'
 <?php
