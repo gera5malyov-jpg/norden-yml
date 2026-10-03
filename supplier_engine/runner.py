@@ -102,7 +102,11 @@ def parse_source(c, data):
     if fmt in ("xml", "yml"):
         return load_xml_yml(data)
     if fmt == "pdf":
-        return load_pdf(data)
+        required = [
+            c.get("identity", {}).get("supplier_sku_field"),
+            c.get("mapping", {}).get("name"),
+        ]
+        return load_pdf(data, required_headers=[x for x in required if x])
     raise ValueError("Unsupported format: %s" % fmt)
 
 
