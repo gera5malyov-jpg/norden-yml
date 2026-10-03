@@ -1,6 +1,10 @@
 name: Supplier engine validation
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.ci-trigger/supplier-engine'
   pull_request:
     paths:
       - 'supplier_engine/**'
