@@ -89,6 +89,10 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
         $callback = $root.'/megasuppliers-callback/';
         $bridge = $root.'/megasuppliers-bridge/';
         $source_secret = trim((string)ifset($config['source']['location_secret']));
+        if ($source_secret !== '' && !preg_match('/^MEGASUPPLIERS_SOURCE_[A-Z0-9_]+$/', $source_secret)) {
+            $this->errors[] = 'INVALID_SOURCE_SECRET';
+            return;
+        }
 
         $pending = array(
             'status' => 'queued',
