@@ -33,6 +33,7 @@ class shopMegasuppliersPluginFrontendImportCallbackController extends waJsonCont
             $this->getResponse()->setStatus(422);
             return;
         }
+
         $dir = wa()->getDataPath('plugins/megasuppliers/import-status', false, 'shop', true);
         waFiles::create($dir);
         $path = $dir.'/'.$supplier_id.'.json';
@@ -42,10 +43,31 @@ class shopMegasuppliersPluginFrontendImportCallbackController extends waJsonCont
             $this->getResponse()->setStatus(409);
             return;
         }
-        $pending['status'] = !empty($report['blocked']) ? 'blocked' : 'completed';
+
+        $report_status = (string)ifset($report['status'], '');
+        if ($report_status === 'ok' && empty($report['blocked'])) {
+            $pending['status'] = 'completed';
+        } elseif ($report_status === 'failed') {
+            $pending['status'] = 'failed';
+        } else {
+            $pending['status'] = 'blocked';
+        }
         $pending['finished_at'] = date('c');
         $pending['report'] = $report;
-        waFiles::write($path, json_encode($pending, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));
+
+        if ((string)ifset($pending['mode']) === 'dry-run' && $pending['status'] === 'completed') {
+            $pending['last_dry_run'] = array(
+                'config_sha256' => (string)ifset($pending['config_sha256']),
+                'finished_at' => $pending['finished_at'],
+                'report' => $report,
+            );
+        }
+
+        if (waFiles::write($path, json_encode($pending, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT)) === false) {
+            $this->errors = array('status_write_failed');
+            $this->getResponse()->setStatus(500);
+            return;
+        }
         $this->response = array('status' => 'ok');
     }
 }
