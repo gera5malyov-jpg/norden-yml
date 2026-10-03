@@ -137,6 +137,7 @@ jobs:
       MEGASUPPLIERS_CALLBACK_SECRET: ${{ secrets.MEGASUPPLIERS_CALLBACK_SECRET }}
       WEBASYST_BASE_URL: ${{ inputs.webasyst_base_url }}
       WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+      NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
