@@ -69,11 +69,28 @@ def fetch_source(c):
     loc = s.get("location", "") or os.getenv("SUPPLIER_SOURCE_URL", "")
     if not loc:
         raise ValueError("source.location is empty and SUPPLIER_SOURCE_URL is not set")
+    max_bytes = int(s.get("max_bytes") or 100 * 1024 * 1024)
+    if max_bytes < 1024 or max_bytes > 250 * 1024 * 1024:
+        raise ValueError("source.max_bytes must be between 1 KB and 250 MB")
     if s.get("kind") == "url":
         req = urllib.request.Request(loc, headers={"User-Agent": "Megasuppliers-Supplier-Engine/1.1"})
-        with urllib.request.urlopen(req, timeout=90) as r:
-            return r.read()
-    return Path(loc).read_bytes()
+        try:
+            with urllib.request.urlopen(req, timeout=90) as r:
+                length = r.headers.get("Content-Length")
+                if length and int(length) > max_bytes:
+                    raise ValueError("Supplier source exceeds configured size limit")
+                data = r.read(max_bytes + 1)
+        except ValueError:
+            raise
+        except Exception as exc:
+            raise RuntimeError("Unable to download supplier source (%s)" % type(exc).__name__) from exc
+        if len(data) > max_bytes:
+            raise ValueError("Supplier source exceeds configured size limit")
+        return data
+    path = Path(loc)
+    if path.stat().st_size > max_bytes:
+        raise ValueError("Supplier source exceeds configured size limit")
+    return path.read_bytes()
 
 
 def parse_source(c, data):
