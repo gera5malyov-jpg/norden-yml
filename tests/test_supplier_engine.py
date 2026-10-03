@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from supplier_engine.adapters import load_xml_yml
+from supplier_engine.adapters import load_pdf, load_xml_yml
 from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source
@@ -258,3 +258,44 @@ def test_source_download_error_does_not_echo_private_url(monkeypatch):
         fetch_source({"source": {"kind": "url", "location": private_url}})
     assert private_url not in str(exc.value)
     assert "secret" not in str(exc.value)
+
+
+def test_tabular_pdf_parser_extracts_configured_columns():
+    import io
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4)
+    table = Table([
+        ["Артикул", "Название", "Цена"],
+        ["109775", "Диван Атланта", "10000"],
+        ["109776", "Кресло", "5000"],
+    ])
+    table.setStyle(TableStyle([
+        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    doc.build([table])
+
+    rows = load_pdf(buf.getvalue(), required_headers=["Артикул", "Название"])
+    assert rows[0]["Артикул"] == "109775"
+    assert rows[0]["Название"] == "Диван Атланта"
+    assert rows[0]["Цена"] == "10000"
+    assert len(rows) == 2
+
+
+def test_pdf_parser_rejects_table_without_required_columns():
+    import io
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4)
+    table = Table([["Код", "Описание"], ["1", "Test"]])
+    table.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 1, colors.black)]))
+    doc.build([table])
+
+    with pytest.raises(RuntimeError, match="required columns"):
+        load_pdf(buf.getvalue(), required_headers=["Артикул", "Название"])
