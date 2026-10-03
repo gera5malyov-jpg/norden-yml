@@ -7,13 +7,17 @@ on:
         description: Type DEPLOY to confirm a production deployment
         required: true
         default: ''
+  push:
+    branches: [main]
+    paths:
+      - '.deploy-trigger/megasuppliers-install'
 
 permissions:
   contents: write
 
 jobs:
   deploy:
-    if: inputs.confirm_production == 'DEPLOY'
+    if: github.event_name == 'push' || inputs.confirm_production == 'DEPLOY'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
