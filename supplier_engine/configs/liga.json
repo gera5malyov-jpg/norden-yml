@@ -1,18 +1,18 @@
 {
-  "code": "EXAMPLE",
-  "name": "Новый поставщик",
+  "code": "LIGA",
+  "name": "Лига Диванов",
   "enabled": false,
   "source": {
     "kind": "url",
     "format": "yml",
     "location": "",
-    "location_secret": "MEGASUPPLIERS_SOURCE_EXAMPLE",
+    "location_secret": "MEGASUPPLIERS_SOURCE_LIGA",
     "sheet": null
   },
   "identity": {
     "supplier_sku_field": "vendorCode",
-    "sku_prefix": "",
-    "brand": ""
+    "sku_prefix": "Liga-",
+    "brand": "Лига Диванов"
   },
   "mapping": {
     "name": "name",
@@ -25,14 +25,17 @@
     "characteristics": {}
   },
   "rules": {
-    "create_new": false,
+    "create_new": true,
     "update_prices": true,
     "update_stock": true,
-    "update_images": false,
-    "update_characteristics": false,
+    "update_images": true,
+    "update_characteristics": true,
     "zero_if_missing": true,
     "only_create_in_stock": false,
-    "price_formulas": {},
+    "price_formulas": {
+      "price": "supplier_price",
+      "compare_price": "supplier_price * 1.30"
+    },
     "warehouses": []
   },
   "webasyst": {
@@ -43,7 +46,7 @@
   },
   "safety": {
     "dry_run_required": true,
-    "min_source_count_ratio": 0.6,
+    "min_source_count_ratio": 0.60,
     "max_price_change_pct": 100,
     "block_duplicate_sku": true,
     "pdf_requires_review": true
