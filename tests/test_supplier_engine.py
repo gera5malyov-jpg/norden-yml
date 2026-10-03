@@ -5,7 +5,7 @@ import pytest
 from supplier_engine.adapters import load_xml_yml
 from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
-from supplier_engine.runner import load_config, normalize, config_sha256
+from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source
 from supplier_engine.validators import validate_run
 from supplier_engine.webasyst_sync import apply_plan, build_plan, validate_apply_plan
 
@@ -238,3 +238,23 @@ def test_apply_plan_creates_product_then_sets_final_sku():
     assert sku_calls[-1]["data"]["sku"] == "X-1"
     assert result["mappings"][0]["product_id"] == 101
     assert result["mappings"][0]["sku_id"] == 202
+
+
+def test_source_size_limit_blocks_oversized_local_file(tmp_path):
+    p = tmp_path / "feed.csv"
+    p.write_bytes(b"x" * 2048)
+    with pytest.raises(ValueError, match="size limit"):
+        fetch_source({"source": {"kind": "file", "location": str(p), "max_bytes": 1024}})
+
+
+def test_source_download_error_does_not_echo_private_url(monkeypatch):
+    private_url = "https://user:secret@example.invalid/feed.xlsx"
+
+    def fail(*args, **kwargs):
+        raise OSError("network unavailable")
+
+    monkeypatch.setattr("supplier_engine.runner.urllib.request.urlopen", fail)
+    with pytest.raises(RuntimeError) as exc:
+        fetch_source({"source": {"kind": "url", "location": private_url}})
+    assert private_url not in str(exc.value)
+    assert "secret" not in str(exc.value)
