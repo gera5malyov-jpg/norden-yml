@@ -1,18 +1,19 @@
 name: Deploy Webasyst megasuppliers
+
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/deploy-megasuppliers.yml'
-      - 'scripts/deploy_megasuppliers.py'
-      - 'scripts/augment_deploy_megasuppliers.py'
-      - 'webasyst/megasuppliers/**'
-      - 'scripts/wait_netangels_ready.py'
   workflow_dispatch:
+    inputs:
+      confirm_production:
+        description: Type DEPLOY to confirm a production deployment
+        required: true
+        default: ''
+
 permissions:
   contents: write
+
 jobs:
   deploy:
+    if: inputs.confirm_production == 'DEPLOY'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -48,11 +49,3 @@ jobs:
             git pull --rebase origin main || true
             git push origin HEAD:main
           fi
-
-# trigger install retry 2026-09-28
-
-# trigger direct install retry 2026-09-28
-
-# fresh deploy after NetAngels key check
-
-# trigger after temporary SSH cleanup
