@@ -132,6 +132,20 @@ def _features_to_dict(features):
     return out
 
 
+
+def _dedupe_rows(rows):
+    by_article = {}
+    duplicates = []
+    for row in rows:
+        article = _s((row or {}).get("product_code"))
+        if not article:
+            continue
+        if article in by_article:
+            duplicates.append(article)
+        by_article[article] = row
+    return list(by_article.values()), sorted(set(duplicates))
+
+
 def _api_rows(secret):
     products = _api_products(secret)
     try:
@@ -160,6 +174,7 @@ def _api_rows(secret):
             "images": [_s(x) for x in (raw.get("images") or []) if _s(x)],
             "features": _features_to_dict(raw.get("features")),
         })
+    rows, _ = _dedupe_rows(rows)
     if not rows:
         raise RuntimeError("Norden API returned no products")
     return rows
@@ -220,6 +235,7 @@ def _fallback_rows():
             "images": list(dict.fromkeys(images)),
             "features": features,
         })
+    rows, _ = _dedupe_rows(rows)
     if not rows:
         raise RuntimeError("Norden fallback XML returned no products")
     return rows
