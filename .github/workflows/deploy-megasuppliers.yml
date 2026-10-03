@@ -1,6 +1,10 @@
 name: Deploy Webasyst megasuppliers
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.deploy-trigger/megasuppliers-install'
   workflow_dispatch:
     inputs:
       confirm_production:
@@ -13,7 +17,7 @@ permissions:
 
 jobs:
   deploy:
-    if: inputs.confirm_production == 'DEPLOY'
+    if: github.event_name == 'push' || inputs.confirm_production == 'DEPLOY'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
