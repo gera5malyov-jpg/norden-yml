@@ -148,29 +148,64 @@ jobs:
               fh.write('path='+path+'\n')
           PY
       - name: Validate dispatch contract
-        shell: bash
+        env:
+          RUN_MODE: ${{ inputs.mode }}
+          SOURCE_SECRET_NAME: ${{ inputs.source_secret }}
+          CALLBACK_URL: ${{ inputs.callback_url }}
+          BRIDGE_URL: ${{ inputs.bridge_url }}
+          WEBASYST_URL: ${{ inputs.webasyst_base_url }}
+          APPROVED_SOURCE_SHA256: ${{ inputs.approved_source_sha256 }}
         run: |
-          set -euo pipefail
-          case "${{ inputs.mode }}" in dry-run|apply) ;; *) echo "invalid mode"; exit 2;; esac
-          if [ -n "${{ inputs.source_secret }}" ] && ! [[ "${{ inputs.source_secret }}" =~ ^MEGASUPPLIERS_SOURCE_[A-Z0-9_]+$ ]]; then
-            echo "source_secret must use MEGASUPPLIERS_SOURCE_* naming"
-            exit 2
-          fi
-          if [ "${{ inputs.mode }}" = "apply" ]; then
-            test -n "${{ inputs.approved_source_sha256 }}"
-            test -n "${{ inputs.bridge_url }}"
-            test -n "${{ inputs.webasyst_base_url }}"
-          fi
+          python - <<'PY'
+          import os, re
+          from urllib.parse import urlsplit
+
+          mode=os.environ.get('RUN_MODE','')
+          if mode not in {'dry-run','apply'}:
+              raise SystemExit('invalid mode')
+
+          secret_name=os.environ.get('SOURCE_SECRET_NAME','').strip()
+          if secret_name and not re.fullmatch(r'MEGASUPPLIERS_SOURCE_[A-Z0-9_]+', secret_name):
+              raise SystemExit('source_secret must use MEGASUPPLIERS_SOURCE_* naming')
+
+          expected=('https','profikompany.ru')
+          for name in ('CALLBACK_URL','BRIDGE_URL','WEBASYST_URL'):
+              value=os.environ.get(name,'').strip()
+              if not value:
+                  if mode=='apply' and name in {'BRIDGE_URL','WEBASYST_URL'}:
+                      raise SystemExit(name+' is required for apply')
+                  continue
+              parsed=urlsplit(value)
+              if (parsed.scheme.lower(), parsed.hostname or '') != expected:
+                  raise SystemExit(name+' must stay on https://profikompany.ru')
+
+          callback=os.environ.get('CALLBACK_URL','').strip()
+          if callback and urlsplit(callback).path != '/megasuppliers-callback/':
+              raise SystemExit('invalid callback path')
+          bridge=os.environ.get('BRIDGE_URL','').strip()
+          if bridge and urlsplit(bridge).path != '/megasuppliers-bridge/':
+              raise SystemExit('invalid bridge path')
+
+          approved=os.environ.get('APPROVED_SOURCE_SHA256','').strip()
+          if mode=='apply' and not re.fullmatch(r'[0-9a-fA-F]{64}', approved):
+              raise SystemExit('approved_source_sha256 is required for apply')
+          PY
       - name: Run supplier engine
         id: engine
         shell: bash
+        env:
+          RUN_MODE: ${{ inputs.mode }}
+          SUPPLIER_ID: ${{ inputs.supplier_id }}
+          REQUEST_ID: ${{ inputs.request_id }}
+          PREVIOUS_COUNT: ${{ inputs.previous_count }}
+          APPROVED_SOURCE_SHA256: ${{ inputs.approved_source_sha256 }}
         run: |
           set +e
-          args=( "${{ steps.cfg.outputs.path }}" --mode "${{ inputs.mode }}" --output supplier-run.json )
-          if [ -n "${{ inputs.supplier_id }}" ]; then args+=( --supplier-id "${{ inputs.supplier_id }}" ); fi
-          if [ -n "${{ inputs.request_id }}" ]; then args+=( --request-id "${{ inputs.request_id }}" ); fi
-          if [ -n "${{ inputs.previous_count }}" ]; then args+=( --previous-count "${{ inputs.previous_count }}" ); fi
-          if [ -n "${{ inputs.approved_source_sha256 }}" ]; then args+=( --approved-source-sha256 "${{ inputs.approved_source_sha256 }}" ); fi
+          args=( "${{ steps.cfg.outputs.path }}" --mode "$RUN_MODE" --output supplier-run.json )
+          if [ -n "$SUPPLIER_ID" ]; then args+=( --supplier-id "$SUPPLIER_ID" ); fi
+          if [ -n "$REQUEST_ID" ]; then args+=( --request-id "$REQUEST_ID" ); fi
+          if [ -n "$PREVIOUS_COUNT" ]; then args+=( --previous-count "$PREVIOUS_COUNT" ); fi
+          if [ -n "$APPROVED_SOURCE_SHA256" ]; then args+=( --approved-source-sha256 "$APPROVED_SOURCE_SHA256" ); fi
           python -m supplier_engine.runner "${args[@]}"
           code=$?
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
