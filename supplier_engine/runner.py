@@ -6,9 +6,19 @@ import urllib.request
 from pathlib import Path
 
 from .adapters import load_csv, load_xlsx, load_xml_yml, load_pdf
+from .bridge import MegasuppliersBridge
 from .formulas import apply_price_formulas
 from .models import Product
 from .validators import validate_run
+from .webasyst_sync import (
+    ApplyError,
+    apply_plan,
+    build_plan,
+    index_by_sku,
+    previous_prices,
+    validate_apply_plan,
+)
+from webasyst.client import WebasystClient
 
 
 def _num(v):
@@ -89,14 +99,14 @@ def normalize(c, rows):
         ss = str(_get(row, ident.get("supplier_sku_field"), "")).strip()
         sku = "%s%s" % (prefix, ss) if ss else ""
         imgs = []
-        for f in m.get("images", []):
-            v = _get(row, f, [])
-            if isinstance(v, list):
-                imgs.extend(str(x).strip() for x in v if x)
-            elif v:
-                imgs.append(str(v).strip())
+        for field in m.get("images", []):
+            value = _get(row, field, [])
+            if isinstance(value, list):
+                imgs.extend(str(x).strip() for x in value if x)
+            elif value:
+                imgs.append(str(value).strip())
         chars = {dst: _get(row, src) for dst, src in m.get("characteristics", {}).items() if src}
-        p = Product(
+        product = Product(
             supplier_sku=ss,
             sku=sku,
             name=str(_get(row, m.get("name"), "")).strip(),
@@ -109,22 +119,35 @@ def normalize(c, rows):
             images=imgs,
             characteristics=chars,
         )
-        out.append(apply_price_formulas(p, formulas))
+        out.append(apply_price_formulas(product, formulas))
     return out
 
 
-def build_payload(c, rows, products, report, mode="dry-run"):
+def _plan_summary(plan):
     return {
+        "create": len(plan.get("create") or []),
+        "update": len(plan.get("update") or []),
+        "zero_stock": len(plan.get("zero") or []),
+        "skipped": len(plan.get("skipped") or []),
+        "blocked": len(plan.get("blocked") or []),
+        "blocked_sample": (plan.get("blocked") or [])[:20],
+        "skipped_sample": (plan.get("skipped") or [])[:20],
+    }
+
+
+def build_payload(c, rows, products, report, source_sha, mode, plan=None):
+    payload = {
         "status": "blocked" if report.blocked else "ok",
         "mode": mode,
         "supplier": c["name"],
         "code": c["code"],
         "config_sha256": config_sha256(c),
+        "source_sha256": source_sha,
         "source_rows": len(rows),
         "products": len(products),
         "blocked": report.blocked,
-        "errors": report.errors,
-        "warnings": report.warnings,
+        "errors": list(report.errors),
+        "warnings": list(report.warnings),
         "sample": [
             {
                 "supplier_sku": p.supplier_sku,
@@ -139,28 +162,113 @@ def build_payload(c, rows, products, report, mode="dry-run"):
             for p in products[:20]
         ],
     }
+    if plan is not None:
+        payload["plan"] = _plan_summary(plan)
+    return payload
+
+
+def _write_payload(path, payload):
+    Path(path).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps(payload, ensure_ascii=False, indent=2))
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("config")
+    ap.add_argument("--mode", choices=("dry-run", "apply"), default="dry-run")
+    ap.add_argument("--supplier-id", type=int)
+    ap.add_argument("--request-id", default="")
     ap.add_argument("--previous-count", type=int)
-    ap.add_argument("--output", default="supplier-dry-run.json")
-    a = ap.parse_args()
-    c = load_config(a.config)
-    rows = parse_source(c, fetch_source(c))
-    products = normalize(c, rows)
-    s = c["safety"]
-    r = validate_run(
-        products,
-        a.previous_count,
-        s.get("max_price_change_pct", 100),
-        s.get("min_source_count_ratio", 0.6),
-    )
-    payload = build_payload(c, rows, products, r)
-    Path(a.output).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps(payload, ensure_ascii=False, indent=2))
-    raise SystemExit(2 if r.blocked else 0)
+    ap.add_argument("--approved-source-sha256", default="")
+    ap.add_argument("--output", default="supplier-run.json")
+    args = ap.parse_args()
+
+    try:
+        config = load_config(args.config)
+        source_data = fetch_source(config)
+        source_sha = hashlib.sha256(source_data).hexdigest()
+        if args.mode == "apply":
+            approved = args.approved_source_sha256.strip().lower()
+            if not approved or source_sha.lower() != approved:
+                raise ValueError("Источник изменился после dry-run; применение заблокировано.")
+
+        rows = parse_source(config, source_data)
+        products = normalize(config, rows)
+        safety = config["safety"]
+
+        wa = None
+        existing = {}
+        links = []
+        bridge = None
+        catalog_warning = None
+        if os.getenv("WEBASYST_API_TOKEN", "").strip():
+            wa = WebasystClient()
+            existing = index_by_sku(wa)
+        elif args.mode == "apply":
+            raise ValueError("WEBASYST_API_TOKEN is required for apply")
+        else:
+            catalog_warning = "Webasyst API token недоступен: dry-run выполнен без сверки с текущим каталогом."
+
+        if args.supplier_id and args.request_id and os.getenv("MEGASUPPLIERS_BRIDGE_URL", "").strip() and os.getenv("MEGASUPPLIERS_CALLBACK_SECRET", "").strip():
+            bridge = MegasuppliersBridge()
+            links = bridge.get_links(args.supplier_id, args.request_id)
+        elif args.mode == "apply":
+            raise ValueError("Signed Megasuppliers bridge is required for apply")
+
+        report = validate_run(
+            products,
+            args.previous_count,
+            safety.get("max_price_change_pct", 100),
+            safety.get("min_source_count_ratio", 0.6),
+            previous_by_sku=previous_prices(existing),
+        )
+        if catalog_warning:
+            report.warnings.append(catalog_warning)
+
+        plan = build_plan(products, existing, links, config.get("rules") or {})
+        for error in validate_apply_plan(plan, config):
+            if error not in report.errors:
+                report.errors.append(error)
+        report.blocked = bool(report.errors)
+
+        payload = build_payload(config, rows, products, report, source_sha, args.mode, plan)
+
+        if args.mode == "apply" and not report.blocked:
+            try:
+                result = apply_plan(wa, plan, config)
+                synced = bridge.sync_links(args.supplier_id, args.request_id, result.get("mappings") or [])
+                payload["apply"] = {
+                    "status": "ok",
+                    "created": result["created"],
+                    "updated": result["updated"],
+                    "zeroed": result["zeroed"],
+                    "links_synced": synced,
+                }
+            except ApplyError as exc:
+                payload["status"] = "failed"
+                payload["blocked"] = True
+                payload["errors"].append(str(exc))
+                payload["apply"] = dict(exc.result, status="partial_failure")
+            except Exception as exc:
+                payload["status"] = "failed"
+                payload["blocked"] = True
+                payload["errors"].append(str(exc))
+                payload["apply"] = {"status": "failed"}
+
+        _write_payload(args.output, payload)
+        raise SystemExit(0 if payload["status"] == "ok" else 2)
+
+    except SystemExit:
+        raise
+    except Exception as exc:
+        payload = {
+            "status": "failed",
+            "mode": args.mode,
+            "blocked": True,
+            "errors": [str(exc)],
+        }
+        _write_payload(args.output, payload)
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":
