@@ -562,7 +562,7 @@ try {
     $stats = $service->importRows((int)$supplier['id'], $items, array(
         'source' => 'api',
         'filename' => '',
-        'create_missing' => !empty($payload['create_missing']),
+        'create_missing' => false,
         'update_catalog' => !array_key_exists('update_catalog', $payload) || !empty($payload['update_catalog']),
         'field_map' => isset($payload['field_map']) && is_array($payload['field_map']) ? $payload['field_map'] : array(),
     ));
