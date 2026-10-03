@@ -6,6 +6,7 @@ from supplier_engine.adapters import load_pdf, load_xml_yml
 from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source
+from supplier_engine import norden
 from supplier_engine.validators import validate_run
 from supplier_engine.webasyst_sync import apply_plan, build_plan, validate_apply_plan
 
@@ -70,6 +71,79 @@ def test_normalize_accepts_php_empty_array_mappings():
     assert p.price == 18600
     assert p.characteristics == {}
 
+
+
+def test_norden_dynamic_characteristics_are_normalized():
+    c = {
+        "identity": {"supplier_sku_field": "product_code", "sku_prefix": "", "brand": "Norden"},
+        "mapping": {
+            "name": "name",
+            "purchase_price": "price",
+            "price": "",
+            "compare_price": "",
+            "stock": "qty",
+            "category": "category",
+            "images": ["images"],
+            "characteristics": {},
+            "dynamic_characteristics": "features",
+        },
+        "rules": {"price_formulas": {}},
+    }
+    rows = [{
+        "product_code": "H-051",
+        "name": "Кресло",
+        "price": "11960",
+        "qty": "7",
+        "category": "Norden > Кресла",
+        "images": ["https://x/1.jpg"],
+        "features": {"Цвет": "Черный", "Материал": "Сетка"},
+    }]
+    p = normalize(c, rows)[0]
+    assert p.sku == "H-051"
+    assert p.purchase_price == 11960
+    assert p.stock == 7
+    assert p.images == ["https://x/1.jpg"]
+    assert p.characteristics == {"Цвет": "Черный", "Материал": "Сетка"}
+
+
+def test_norden_source_falls_back_to_xml(monkeypatch):
+    monkeypatch.setenv("NORDEN_SECRET", "configured")
+    monkeypatch.setattr(norden, "_api_rows", lambda secret: (_ for _ in ()).throw(RuntimeError("api down")))
+    fallback_rows = [{
+        "product_code": "H-051",
+        "name": "Кресло",
+        "price": "11960",
+        "qty": 3,
+        "category": "Norden",
+        "images": [],
+        "features": {},
+    }]
+    monkeypatch.setattr(norden, "_fallback_rows", lambda: fallback_rows)
+    rows, source_bytes, meta = norden.load_norden_source()
+    assert rows == fallback_rows
+    assert source_bytes == norden.canonical_bytes(fallback_rows)
+    assert meta["origin"] == "xml_fallback"
+    assert meta["fallback_used"] is True
+    assert "api down" in meta["api_error"]
+
+
+def test_norden_source_prefers_api(monkeypatch):
+    monkeypatch.setenv("NORDEN_SECRET", "configured")
+    api_rows = [{
+        "product_code": "H-051",
+        "name": "Кресло",
+        "price": "11960",
+        "qty": 5,
+        "category": "Norden",
+        "images": [],
+        "features": {},
+    }]
+    monkeypatch.setattr(norden, "_api_rows", lambda secret: api_rows)
+    monkeypatch.setattr(norden, "_fallback_rows", lambda: (_ for _ in ()).throw(AssertionError("fallback must not run")))
+    rows, _, meta = norden.load_norden_source()
+    assert rows == api_rows
+    assert meta["origin"] == "api"
+    assert meta["fallback_used"] is False
 
 def test_formula_rejects_code_execution():
     with pytest.raises(ValueError):
