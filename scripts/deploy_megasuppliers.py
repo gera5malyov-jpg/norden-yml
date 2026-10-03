@@ -683,6 +683,179 @@ chmod 644 "$CALLBACK_DIR/index.php"
 php -l "$CALLBACK_DIR/index.php"
 echo "callback_bridge=yes"
 
+# Stable signed bridge endpoint for GitHub Actions. As with callback, use a
+# physical endpoint because this installation does not reliably expose plugin
+# frontend routes through the storefront router.
+BRIDGE_DIR="$ROOT/megasuppliers-bridge"
+if [ -e "$BRIDGE_DIR" ]; then
+  tar -C "$ROOT" -czf "$BACK/megasuppliers-bridge.before.tgz" "megasuppliers-bridge"
+fi
+mkdir -p "$BRIDGE_DIR"
+cat >"$BRIDGE_DIR/index.php" <<'PHP'
+<?php
+header('Content-Type: application/json; charset=utf-8');
+
+function ms_bridge_json($status, $payload)
+{
+    http_response_code($status);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+if (strtolower(isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : '') !== 'post') {
+    ms_bridge_json(405, array('errors' => array('method_not_allowed')));
+}
+
+$root = dirname(__DIR__);
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null, new SystemConfig());
+wa('shop');
+$plugin = wa('shop')->getPlugin('megasuppliers', true);
+
+$body = file_get_contents('php://input');
+if (strlen($body) > 2097152) {
+    ms_bridge_json(413, array('errors' => array('payload_too_large')));
+}
+$secret = trim((string)$plugin->getSettings('callback_secret'));
+$provided = isset($_SERVER['HTTP_X_MEGASUPPLIERS_SIGNATURE']) ? trim((string)$_SERVER['HTTP_X_MEGASUPPLIERS_SIGNATURE']) : '';
+$expected = $secret === '' ? '' : 'sha256='.hash_hmac('sha256', $body, $secret);
+if ($secret === '' || $provided === '' || !hash_equals($expected, $provided)) {
+    ms_bridge_json(401, array('errors' => array('unauthorized')));
+}
+
+$payload = json_decode($body, true);
+if (!is_array($payload)) {
+    ms_bridge_json(400, array('errors' => array('invalid_json')));
+}
+$supplier_id = isset($payload['supplier_id']) ? (int)$payload['supplier_id'] : 0;
+$request_id = isset($payload['request_id']) ? trim((string)$payload['request_id']) : '';
+$action = isset($payload['action']) ? trim((string)$payload['action']) : '';
+if (!$supplier_id || $request_id === '' || $action === '') {
+    ms_bridge_json(422, array('errors' => array('invalid_request')));
+}
+
+$supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
+if (!$supplier || empty($supplier['active'])) {
+    ms_bridge_json(422, array('errors' => array('supplier_not_found')));
+}
+
+$status_dir = wa()->getDataPath('plugins/megasuppliers/import-status', false, 'shop', true);
+waFiles::create($status_dir);
+$status_path = $status_dir.'/'.$supplier_id.'.json';
+$pending = file_exists($status_path) ? json_decode(file_get_contents($status_path), true) : null;
+if (!is_array($pending) || empty($pending['request_id']) || !hash_equals((string)$pending['request_id'], $request_id)) {
+    ms_bridge_json(409, array('errors' => array('stale_or_unknown_request')));
+}
+
+if ($action === 'links') {
+    $limit = isset($payload['limit']) ? (int)$payload['limit'] : 1000;
+    $limit = min(2000, max(1, $limit));
+    $offset = isset($payload['offset']) ? max(0, (int)$payload['offset']) : 0;
+    $model = new shopMegasuppliersProductModel();
+    $sql = 'SELECT supplier_sku,product_id,sku_id,purchase_price,stock '
+        .'FROM shop_megasuppliers_product WHERE supplier_id='.(int)$supplier_id
+        .' ORDER BY id LIMIT '.$limit.' OFFSET '.$offset;
+    $rows = $model->query($sql)->fetchAll();
+    ms_bridge_json(200, array(
+        'status' => 'ok',
+        'items' => array_values($rows),
+        'offset' => $offset,
+        'limit' => $limit,
+    ));
+}
+
+if ($action === 'sync_links') {
+    if ((string)(isset($pending['mode']) ? $pending['mode'] : '') !== 'apply') {
+        ms_bridge_json(409, array('errors' => array('apply_request_required')));
+    }
+    if (!$plugin->getSettings('enable_writes')) {
+        ms_bridge_json(403, array('errors' => array('writes_disabled')));
+    }
+    $items = isset($payload['items']) ? $payload['items'] : array();
+    if (!is_array($items)) {
+        ms_bridge_json(422, array('errors' => array('items_required')));
+    }
+    if (count($items) > 500) {
+        ms_bridge_json(413, array('errors' => array('too_many_items')));
+    }
+
+    $model = new shopMegasuppliersProductModel();
+    $sku_model = new shopProductSkusModel();
+    $validated = array();
+    foreach ($items as $item) {
+        if (!is_array($item)) {
+            ms_bridge_json(422, array('errors' => array('invalid_mapping')));
+        }
+        $supplier_sku = isset($item['supplier_sku']) ? trim((string)$item['supplier_sku']) : '';
+        $product_id = isset($item['product_id']) ? (int)$item['product_id'] : 0;
+        $sku_id = isset($item['sku_id']) ? (int)$item['sku_id'] : 0;
+        if ($supplier_sku === '' || mb_strlen($supplier_sku, 'UTF-8') > 255 || !$product_id || !$sku_id) {
+            ms_bridge_json(422, array('errors' => array('invalid_mapping')));
+        }
+        $sku = $sku_model->getById($sku_id);
+        if (!$sku || (int)(isset($sku['product_id']) ? $sku['product_id'] : 0) !== $product_id) {
+            ms_bridge_json(422, array('errors' => array('invalid_product_sku_mapping')));
+        }
+        $validated[] = array($item, $supplier_sku, $product_id, $sku_id);
+    }
+
+    $updated = 0;
+    foreach ($validated as $row) {
+        $item = $row[0];
+        $supplier_sku = $row[1];
+        $product_id = $row[2];
+        $sku_id = $row[3];
+
+        $purchase = isset($item['purchase_price']) ? $item['purchase_price'] : null;
+        $stock = isset($item['stock']) ? $item['stock'] : null;
+        foreach (array('purchase' => &$purchase, 'stock' => &$stock) as &$value) {
+            if ($value === null || $value === '') {
+                $value = null;
+            } else {
+                $normalized = str_replace(array("\xc2\xa0", ' ', ','), array('', '', '.'), trim((string)$value));
+                $value = is_numeric($normalized) ? (float)$normalized : null;
+            }
+        }
+        unset($value);
+
+        $data = array(
+            'supplier_id' => (int)$supplier_id,
+            'product_id' => $product_id,
+            'sku_id' => $sku_id,
+            'supplier_sku' => $supplier_sku,
+            'external_id' => '',
+            'purchase_price' => $purchase,
+            'stock' => $stock,
+            'raw_json' => null,
+            'updated_at' => date('Y-m-d H:i:s'),
+        );
+        $existing = $model->getByField(array(
+            'supplier_id' => (int)$supplier_id,
+            'supplier_sku' => $supplier_sku,
+        ));
+        if ($existing) {
+            $model->updateById($existing['id'], $data);
+        } else {
+            $model->insert($data);
+        }
+        $updated++;
+    }
+    ms_bridge_json(200, array('status' => 'ok', 'updated' => $updated));
+}
+
+ms_bridge_json(422, array('errors' => array('unknown_action')));
+PHP
+chown -R web:web "$BRIDGE_DIR"
+chmod 755 "$BRIDGE_DIR"
+chmod 644 "$BRIDGE_DIR/index.php"
+php -l "$BRIDGE_DIR/index.php"
+BRIDGE_TEST_STATUS="$(curl -ksS -o /tmp/ms_bridge_guard_body.txt -w '%{http_code}' "https://profikompany.ru/megasuppliers-bridge/" || true)"
+echo "bridge_method_guard_status=$BRIDGE_TEST_STATUS"
+rm -f /tmp/ms_bridge_guard_body.txt
+test "$BRIDGE_TEST_STATUS" = "405"
+echo "signed_bridge=yes"
+
 # Functional API guard check without exposing the key.
 cat >/tmp/ms_api_key.php <<'PHP'
 <?php
