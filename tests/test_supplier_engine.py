@@ -61,6 +61,28 @@ def test_yml_parser_preserves_vendor_code_pictures_and_available():
     assert row["pictures"]==["https://x/1.jpg","https://x/2.jpg"]
 
 
+def test_norden_xml_parser_extracts_prices_and_sums_free_stock():
+    data = """<?xml version="1.0" encoding="UTF-8"?>
+<Файл ТипФайла="Номенклатура">
+  <Номенклатура>
+    <Наименование>Кресло офисное</Наименование>
+    <Артикул>H-051 black frame</Артикул>
+    <Цена ВидЦен="РРЦ">18 600</Цена>
+    <Цена ВидЦен="Опт">11 960</Цена>
+    <СвободныйОстаток Склад="Основной склад">64</СвободныйОстаток>
+    <СвободныйОстаток Склад="Питер Основной склад">3</СвободныйОстаток>
+  </Номенклатура>
+</Файл>""".encode("utf-8")
+    row = load_xml_yml(data)[0]
+    assert row["Артикул"] == "H-051 black frame"
+    assert row["Наименование"] == "Кресло офисное"
+    assert row["Цена_РРЦ"] == "18 600"
+    assert row["Цена_Опт"] == "11 960"
+    assert row["СвободныйОстаток_Основной склад"] == "64"
+    assert row["СвободныйОстаток_Питер Основной склад"] == "3"
+    assert row["СвободныйОстаток_Итого"] == 67.0
+
+
 def test_config_hash_is_stable():
     c={"b":2,"a":1}
     assert config_sha256(c)==config_sha256({"a":1,"b":2})
