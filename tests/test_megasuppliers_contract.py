@@ -6,6 +6,7 @@ RUN_CONTROLLER = ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasupp
 DEPLOY_WORKFLOW = ROOT / ".github/workflows/deploy-megasuppliers.yml"
 BUILDER = ROOT / "scripts/build_megasuppliers_package.py"
 DEPLOY_SCRIPT = ROOT / "scripts/deploy_megasuppliers.py"
+META_MODEL = ROOT / "webasyst/megasuppliers/lib/models/shopMegasuppliersMeta.model.php"
 
 
 def test_webasyst_dispatch_inputs_are_declared_by_workflow():
@@ -94,3 +95,15 @@ def test_legacy_import_cannot_create_untyped_products():
     assert "CREATE_MISSING_REQUIRES_PROFILE" in api
     assert "creation new" not in builder.lower()
     assert "legacy_create" in builder
+
+
+def test_meta_model_uses_name_as_primary_key():
+    model = META_MODEL.read_text(encoding="utf-8")
+    assert "protected $table = 'shop_megasuppliers_meta';" in model
+    assert "protected $id = 'name';" in model
+
+
+def test_deployer_disables_legacy_create_missing_and_resets_report():
+    deploy_script = DEPLOY_SCRIPT.read_text(encoding="utf-8")
+    assert "'create_missing' => false" in deploy_script
+    assert 'REPORT.write_text("", encoding="utf-8")' in deploy_script
