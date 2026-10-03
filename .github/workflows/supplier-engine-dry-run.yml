@@ -83,6 +83,11 @@ jobs:
           find /tmp/megasuppliers-built/megasuppliers -name '*.php' -type f -print0 | xargs -0 -n1 php -l
           grep -q "'version' => '1.1.0'" /tmp/megasuppliers-built/megasuppliers/lib/config/plugin.php
           grep -q "megasuppliers-callback/" /tmp/megasuppliers-built/megasuppliers/lib/config/routing.php
+      - uses: actions/upload-artifact@v4
+        with:
+          name: megasuppliers-1.1.0
+          path: /tmp/megasuppliers-1.1.0.zip
+          if-no-files-found: error
 
   dry-run:
     if: github.event_name == 'workflow_dispatch'
