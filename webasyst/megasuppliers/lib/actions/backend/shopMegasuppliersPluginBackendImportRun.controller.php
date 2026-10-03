@@ -8,17 +8,17 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
         }
         $supplier_id = waRequest::post('supplier_id', 0, waRequest::TYPE_INT);
         $mode = waRequest::post('mode', 'dry-run', waRequest::TYPE_STRING_TRIM);
-        if (!$supplier_id || $mode !== 'dry-run') {
-            $this->errors[] = 'DRY_RUN_ONLY';
+        if (!$supplier_id || !in_array($mode, array('dry-run', 'apply'), true)) {
+            $this->errors[] = 'INVALID_RUN_MODE';
             return;
         }
-        $dir = wa()->getDataPath('plugins/megasuppliers/import-config', false, 'shop', true);
-        $path = $dir.'/'.$supplier_id.'.json';
-        if (!file_exists($path)) {
+
+        $config_path = wa()->getDataPath('plugins/megasuppliers/import-config', false, 'shop', true).'/'.$supplier_id.'.json';
+        if (!file_exists($config_path)) {
             $this->errors[] = 'CONFIG_NOT_FOUND';
             return;
         }
-        $config = json_decode(file_get_contents($path), true);
+        $config = json_decode(file_get_contents($config_path), true);
         if (!is_array($config)) {
             $this->errors[] = 'INVALID_CONFIG';
             return;
@@ -42,34 +42,87 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
             $this->errors[] = 'CONFIG_TOO_LARGE';
             return;
         }
+        $config_sha = hash('sha256', json_encode($this->sortRecursive($config), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+
+        $status_dir = wa()->getDataPath('plugins/megasuppliers/import-status', false, 'shop', true);
+        waFiles::create($status_dir);
+        $status_path = $status_dir.'/'.$supplier_id.'.json';
+        $previous = file_exists($status_path) ? json_decode(file_get_contents($status_path), true) : array();
+        if (!is_array($previous)) $previous = array();
+        $last_dry = !empty($previous['last_dry_run']) && is_array($previous['last_dry_run']) ? $previous['last_dry_run'] : null;
+
+        $approved_source_sha = '';
+        if ($mode === 'apply') {
+            if (!$plugin->getSettings('enable_writes')) {
+                $this->errors[] = 'WRITES_DISABLED';
+                return;
+            }
+            if (!$last_dry || empty($last_dry['config_sha256']) || !hash_equals((string)$last_dry['config_sha256'], $config_sha)) {
+                $this->errors[] = 'FRESH_DRY_RUN_REQUIRED';
+                return;
+            }
+            if (empty($last_dry['report']['source_sha256']) || !empty($last_dry['report']['blocked']) || (string)ifset($last_dry['report']['status']) !== 'ok') {
+                $this->errors[] = 'SUCCESSFUL_DRY_RUN_REQUIRED';
+                return;
+            }
+            $finished = strtotime((string)ifset($last_dry['finished_at']));
+            $window = max(10, min(1440, (int)$plugin->getSettings('apply_window_minutes')));
+            if (!$finished || (time() - $finished) > $window * 60) {
+                $this->errors[] = 'DRY_RUN_EXPIRED';
+                return;
+            }
+            $approved_source_sha = trim((string)$last_dry['report']['source_sha256']);
+        }
+
         try {
             $request_id = date('YmdHis').'-'.bin2hex(random_bytes(8));
         } catch (Exception $e) {
             $request_id = date('YmdHis').'-'.sha1(uniqid('', true));
         }
-        $config_sha = hash('sha256', json_encode($this->sortRecursive($config), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
-        $status_dir = wa()->getDataPath('plugins/megasuppliers/import-status', false, 'shop', true);
-        waFiles::create($status_dir);
-        $status_path = $status_dir.'/'.$supplier_id.'.json';
-        $previous = file_exists($status_path) ? json_decode(file_get_contents($status_path), true) : array();
-        $previous_count = (!empty($previous['report']['blocked']) || empty($previous['report']['products'])) ? '' : (string)(int)$previous['report']['products'];
+
+        $previous_count = '';
+        if ($last_dry && empty($last_dry['report']['blocked']) && !empty($last_dry['report']['products'])) {
+            $previous_count = (string)(int)$last_dry['report']['products'];
+        }
 
         $root = rtrim(wa()->getRootUrl(true), '/');
         $callback = $root.'/megasuppliers-callback/';
+        $bridge = $root.'/megasuppliers-bridge/';
         $source_secret = trim((string)ifset($config['source']['location_secret']));
+
+        $pending = array(
+            'status' => 'queued',
+            'supplier_id' => $supplier_id,
+            'request_id' => $request_id,
+            'mode' => $mode,
+            'config_sha256' => $config_sha,
+            'requested_at' => date('c'),
+            'report' => null,
+            'last_dry_run' => $last_dry,
+        );
+        if (waFiles::write($status_path, json_encode($pending, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT)) === false) {
+            $this->errors[] = 'STATUS_WRITE_FAILED';
+            return;
+        }
+
         $parts = explode('/', $repo, 2);
         if (count($parts) !== 2) {
+            $this->markDispatchFailure($status_path, $pending, 'INVALID_GITHUB_REPO');
             $this->errors[] = 'INVALID_GITHUB_REPO';
             return;
         }
         $url = 'https://api.github.com/repos/'.rawurlencode($parts[0]).'/'.rawurlencode($parts[1]).'/actions/workflows/supplier-engine-dry-run.yml/dispatches';
         $payload = json_encode(array('ref' => $ref, 'inputs' => array(
+            'mode' => $mode,
             'supplier_id' => (string)$supplier_id,
             'request_id' => $request_id,
             'config_b64' => $config_b64,
             'callback_url' => $callback,
+            'bridge_url' => $bridge,
+            'webasyst_base_url' => $root,
             'source_secret' => $source_secret,
             'previous_count' => $previous_count,
+            'approved_source_sha256' => $approved_source_sha,
         )));
         $ch = curl_init($url);
         curl_setopt_array($ch, array(
@@ -89,26 +142,33 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
         $error = curl_error($ch);
         curl_close($ch);
         if ($code !== 204) {
-            $this->errors[] = 'GITHUB_DISPATCH_FAILED_'.$code.($error ? '_'.$error : '');
+            $message = 'GITHUB_DISPATCH_FAILED_'.$code.($error ? '_'.$error : '');
+            $this->markDispatchFailure($status_path, $pending, $message);
+            $this->errors[] = $message;
             return;
         }
-        $pending = array(
-            'status' => 'queued',
+
+        $this->response = array(
+            'status' => 'ok',
+            'mode' => $mode,
             'supplier_id' => $supplier_id,
             'request_id' => $request_id,
-            'mode' => 'dry-run',
-            'config_sha256' => $config_sha,
-            'requested_at' => date('c'),
-            'report' => null,
         );
-        waFiles::write($status_path, json_encode($pending, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));
-        $this->response = array('status' => 'ok', 'mode' => 'dry-run', 'supplier_id' => $supplier_id, 'request_id' => $request_id);
+    }
+
+    private function markDispatchFailure($path, array $pending, $message)
+    {
+        $pending['status'] = 'dispatch_failed';
+        $pending['finished_at'] = date('c');
+        $pending['report'] = array('status' => 'failed', 'blocked' => true, 'errors' => array($message));
+        waFiles::write($path, json_encode($pending, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));
     }
 
     private function sortRecursive($value)
     {
         if (!is_array($value)) return $value;
-        $assoc = array_keys($value) !== range(0, count($value) - 1);
+        $keys = array_keys($value);
+        $assoc = $keys !== array_keys($keys);
         if ($assoc) ksort($value);
         foreach ($value as $k => $v) $value[$k] = $this->sortRecursive($v);
         return $value;
