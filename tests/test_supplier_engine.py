@@ -48,6 +48,29 @@ def test_safe_price_formulas_are_applied():
     assert p.images==["https://x/1.jpg","https://x/2.jpg"]
 
 
+def test_normalize_accepts_php_empty_array_mappings():
+    c = {
+        "identity": {"supplier_sku_field": "Артикул", "sku_prefix": "", "brand": "Norden"},
+        "mapping": {
+            "name": "Наименование",
+            "purchase_price": "Цена_Опт",
+            "price": "Цена_РРЦ",
+            "compare_price": "",
+            "stock": "",
+            "category": "",
+            "images": [],
+            "characteristics": [],
+        },
+        "rules": {"price_formulas": []},
+    }
+    rows = [{"Артикул": "H-051", "Наименование": "Кресло", "Цена_Опт": "11960", "Цена_РРЦ": "18600"}]
+    p = normalize(c, rows)[0]
+    assert p.sku == "H-051"
+    assert p.purchase_price == 11960
+    assert p.price == 18600
+    assert p.characteristics == {}
+
+
 def test_formula_rejects_code_execution():
     with pytest.raises(ValueError):
         evaluate_formula("__import__('os').system('id')", {"supplier_price":100})
