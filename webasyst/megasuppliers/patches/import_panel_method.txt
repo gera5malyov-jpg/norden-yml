@@ -1,0 +1,16 @@
+    public function backendProducts()
+    {
+        $url = wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers&module=backend&action=importRun';
+        $status = wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers&module=backend&action=importStatus';
+        $html = '<div class="box s-megasuppliers-import-panel"><h5>Импорт поставщиков</h5>'
+            .'<p class="hint">Сначала выполняется только безопасный dry-run. Запись товаров здесь не запускается.</p>'
+            .'<button type="button" class="button light-gray s-ms-dry-run">Проверить прайс</button> '
+            .'<span class="s-ms-run-status hint"></span></div>'
+            .'<script>(function($){var p=$(".s-megasuppliers-import-panel").last();'
+            .'p.find(".s-ms-dry-run").on("click",function(){var id=prompt("ID поставщика");if(!id)return;'
+            .'var st=p.find(".s-ms-run-status");st.text("запуск…");$.post("'.htmlspecialchars($url,ENT_QUOTES,'UTF-8').'",'
+            .'{supplier_id:id,mode:"dry-run",_csrf:$("input[name=_csrf]").first().val()||""},function(r){'
+            .'st.text(r&&r.status==="ok"?"проверка запущена":"ошибка запуска");},"json").fail(function(){st.text("ошибка запуска");});});'
+            .'})(jQuery);</script>';
+        return array('sidebar_top_li' => $html);
+    }
