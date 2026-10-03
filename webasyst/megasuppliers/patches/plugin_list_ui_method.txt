@@ -63,5 +63,5 @@
             .'var tries=0;var timer=setInterval(function(){tries++;if(install()||tries>80){clearInterval(timer);}},125);'
             .'$(document).off("wa_megasuppliers_install").on("wa_megasuppliers_install",install);'
             .'})(jQuery);</script>';
-        return array('header_left' => $html);
+        if (method_exists($this, 'thumbnailBootstrap')) {\n            $html .= $this->thumbnailBootstrap();\n        }\n        return array('header_left' => $html);
     }
