@@ -9,6 +9,7 @@ from .adapters import load_csv, load_xlsx, load_xml_yml, load_pdf
 from .bridge import MegasuppliersBridge
 from .formulas import apply_price_formulas
 from .models import Product
+from .norden import load_norden_source
 from .validators import validate_run
 from .webasyst_sync import (
     ApplyError,
@@ -132,6 +133,13 @@ def normalize(c, rows):
             elif value:
                 imgs.append(str(value).strip())
         chars = {dst: _get(row, src) for dst, src in characteristic_map.items() if src}
+        dynamic_characteristics = m.get("dynamic_characteristics")
+        if dynamic_characteristics:
+            raw_chars = _get(row, dynamic_characteristics, {})
+            if isinstance(raw_chars, dict):
+                for key, value in raw_chars.items():
+                    if key and value not in (None, ""):
+                        chars[str(key)] = value
         product = Product(
             supplier_sku=ss,
             sku=sku,
@@ -161,7 +169,7 @@ def _plan_summary(plan):
     }
 
 
-def build_payload(c, rows, products, report, source_sha, mode, plan=None):
+def build_payload(c, rows, products, report, source_sha, mode, plan=None, source_meta=None):
     payload = {
         "status": "blocked" if report.blocked else "ok",
         "mode": mode,
@@ -188,6 +196,8 @@ def build_payload(c, rows, products, report, source_sha, mode, plan=None):
             for p in products[:20]
         ],
     }
+    if source_meta:
+        payload["source"] = source_meta
     if plan is not None:
         payload["plan"] = _plan_summary(plan)
     return payload
@@ -211,14 +221,18 @@ def main():
 
     try:
         config = load_config(args.config)
-        source_data = fetch_source(config)
+        source_meta = None
+        if config.get("source", {}).get("format", "").lower() == "norden":
+            rows, source_data, source_meta = load_norden_source()
+        else:
+            source_data = fetch_source(config)
+            rows = parse_source(config, source_data)
         source_sha = hashlib.sha256(source_data).hexdigest()
         if args.mode == "apply":
             approved = args.approved_source_sha256.strip().lower()
             if not approved or source_sha.lower() != approved:
                 raise ValueError("Источник изменился после dry-run; применение заблокировано.")
 
-        rows = parse_source(config, source_data)
         products = normalize(config, rows)
         safety = config["safety"]
 
@@ -250,6 +264,8 @@ def main():
         )
         if catalog_warning:
             report.warnings.append(catalog_warning)
+        if source_meta and source_meta.get("fallback_used"):
+            report.warnings.append("Norden API недоступен; использован резервный XML-источник.")
 
         plan = build_plan(products, existing, links, config.get("rules") or {})
         for error in validate_apply_plan(plan, config):
@@ -257,7 +273,7 @@ def main():
                 report.errors.append(error)
         report.blocked = bool(report.errors)
 
-        payload = build_payload(config, rows, products, report, source_sha, args.mode, plan)
+        payload = build_payload(config, rows, products, report, source_sha, args.mode, plan, source_meta)
 
         if args.mode == "apply" and not report.blocked:
             try:
