@@ -1,0 +1,79 @@
+name: Diagnose Megasuppliers Webasyst IDs once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-megasuppliers-webasyst-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip -q install requests
+      - name: Read type and stock IDs
+        run: |
+          python - <<'PY'
+          import json, os
+          from webasyst.client import WebasystClient
+
+          wa = WebasystClient(min_request_interval=0)
+          types = wa.call('shop.type.getList')
+          stocks = wa.call('shop.stock.getList')
+
+          def rows(payload):
+              if isinstance(payload, list):
+                  return payload
+              if isinstance(payload, dict):
+                  for key in ('types','stocks','data','result'):
+                      value=payload.get(key)
+                      if isinstance(value,list):
+                          return value
+                  return [v for v in payload.values() if isinstance(v,dict)]
+              return []
+
+          type_rows=rows(types)
+          stock_rows=rows(stocks)
+          type_matches=[
+              {'id':str(x.get('id') or ''),'name':str(x.get('name') or x.get('title') or '')}
+              for x in type_rows
+              if str(x.get('name') or x.get('title') or '').strip().casefold() == 'norden-100'.casefold()
+          ]
+          stock_matches=[
+              {'id':str(x.get('id') or ''),'name':str(x.get('name') or x.get('title') or '')}
+              for x in stock_rows
+              if str(x.get('name') or x.get('title') or '').strip().casefold() == 'основной склад'.casefold()
+          ]
+          out={'type_matches':type_matches,'stock_matches':stock_matches,'type_count':len(type_rows),'stock_count':len(stock_rows)}
+          os.makedirs('diagnostics',exist_ok=True)
+          with open('diagnostics/megasuppliers_webasyst_ids.json','w',encoding='utf-8') as f:
+              json.dump(out,f,ensure_ascii=False,indent=2)
+          print(json.dumps(out,ensure_ascii=False))
+          if len(type_matches)!=1 or len(stock_matches)!=1:
+              raise SystemExit(2)
+          PY
+      - name: Commit diagnostic result
+        if: always()
+        run: |
+          if [ -f diagnostics/megasuppliers_webasyst_ids.json ]; then
+            git config user.name github-actions
+            git config user.email actions@github.com
+            git add diagnostics/megasuppliers_webasyst_ids.json
+            git commit -m "Save Webasyst IDs diagnostic [skip ci]" || exit 0
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
