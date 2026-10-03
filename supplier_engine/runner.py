@@ -114,7 +114,12 @@ def normalize(c, rows):
     m = c["mapping"]
     ident = c["identity"]
     prefix = ident.get("sku_prefix", "")
-    formulas = c.get("rules", {}).get("price_formulas", {})
+    formulas = c.get("rules", {}).get("price_formulas") or {}
+    if not isinstance(formulas, dict):
+        formulas = {}
+    characteristic_map = m.get("characteristics") or {}
+    if not isinstance(characteristic_map, dict):
+        characteristic_map = {}
     out = []
     for row in rows:
         ss = str(_get(row, ident.get("supplier_sku_field"), "")).strip()
@@ -126,7 +131,7 @@ def normalize(c, rows):
                 imgs.extend(str(x).strip() for x in value if x)
             elif value:
                 imgs.append(str(value).strip())
-        chars = {dst: _get(row, src) for dst, src in m.get("characteristics", {}).items() if src}
+        chars = {dst: _get(row, src) for dst, src in characteristic_map.items() if src}
         product = Product(
             supplier_sku=ss,
             sku=sku,
