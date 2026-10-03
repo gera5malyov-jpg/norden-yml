@@ -48,14 +48,14 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
 
     private function fromForm($supplier)
     {
-        $images = preg_split('/\s*,\s*/', (string)waRequest::post('images', '', waRequest::TYPE_STRING_TRIM), -1, PREG_SPLIT_NO_EMPTY);
+        $images = preg_split('/\\s*,\\s*/', (string)waRequest::post('images', '', waRequest::TYPE_STRING_TRIM), -1, PREG_SPLIT_NO_EMPTY);
         $format = strtolower((string)waRequest::post('format', 'yml', waRequest::TYPE_STRING_TRIM));
-        return array(
+        $config = array(
             'code' => (string)$supplier['code'],
             'name' => (string)$supplier['name'],
             'enabled' => (bool)waRequest::post('enabled', 0, waRequest::TYPE_INT),
             'source' => array(
-                'kind' => 'url',
+                'kind' => $format === 'norden' ? 'norden' : 'url',
                 'format' => $format,
                 'location' => (string)waRequest::post('source_location', '', waRequest::TYPE_STRING_TRIM),
                 'location_secret' => (string)waRequest::post('location_secret', '', waRequest::TYPE_STRING_TRIM),
@@ -105,6 +105,24 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
                 'pdf_requires_review' => true,
             ),
         );
+
+        if ($format === 'norden') {
+            $config['source']['location'] = '';
+            $config['source']['location_secret'] = '';
+            $config['identity']['supplier_sku_field'] = 'product_code';
+            $config['identity']['sku_prefix'] = '';
+            $config['identity']['brand'] = 'Norden';
+            $config['mapping']['name'] = 'name';
+            $config['mapping']['purchase_price'] = 'price';
+            $config['mapping']['price'] = '';
+            $config['mapping']['compare_price'] = '';
+            $config['mapping']['stock'] = 'qty';
+            $config['mapping']['category'] = 'category';
+            $config['mapping']['images'] = array('images');
+            $config['mapping']['dynamic_characteristics'] = 'features';
+        }
+
+        return $config;
     }
 
     private function validConfig($config)
@@ -113,14 +131,14 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
             return false;
         }
         $format = strtolower((string)ifset($config['source']['format']));
-        if (!in_array($format, array('yml', 'xml', 'csv', 'xlsx', 'pdf'), true)) {
+        if (!in_array($format, array('yml', 'xml', 'csv', 'xlsx', 'pdf', 'norden'), true)) {
             return false;
         }
         if (trim((string)ifset($config['identity']['supplier_sku_field'])) === '' || trim((string)ifset($config['mapping']['name'])) === '') {
             return false;
         }
         $source_secret = trim((string)ifset($config['source']['location_secret']));
-        if (trim((string)ifset($config['source']['location'])) === '' && $source_secret === '') {
+        if ($format !== 'norden' && trim((string)ifset($config['source']['location'])) === '' && $source_secret === '') {
             return false;
         }
         if ($source_secret !== '' && !preg_match('/^MEGASUPPLIERS_SOURCE_[A-Z0-9_]+$/', $source_secret)) {
