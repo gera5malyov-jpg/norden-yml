@@ -611,6 +611,32 @@ test "$API_TEST_STATUS" = "422"
 # Remove Shop-Script cache only; it is regenerated automatically.
 rm -rf "$ROOT/wa-cache/apps/shop" || true
 
+# Verify that Webasyst autoload sees the AJAX controllers after cache regeneration.
+cat >/tmp/ms_controller_probe.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$classes=array(
+  'shopMegasuppliersPluginBackendImportConfigController',
+  'shopMegasuppliersPluginBackendImportRunController',
+  'shopMegasuppliersPluginBackendImportStatusController'
+);
+foreach ($classes as $class) {
+    $ok=class_exists($class);
+    echo 'controller_'.$class.'='.($ok?'yes':'no')."\n";
+    if ($ok) {
+        $rc=new ReflectionClass($class);
+        echo 'controller_file_'.$class.'='.$rc->getFileName()."\n";
+    }
+}
+PHP
+chown web:web /tmp/ms_controller_probe.php
+su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_controller_probe.php'
+rm -f /tmp/ms_controller_probe.php
+
 cat >/tmp/ms_verify.php <<'PHP'
 <?php
 $root = '/home/web/vm-23f9aff9.na4u.ru/www';
