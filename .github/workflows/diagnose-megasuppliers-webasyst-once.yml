@@ -39,7 +39,7 @@ jobs:
               if isinstance(payload, list):
                   return payload
               if isinstance(payload, dict):
-                  for key in ('types','stocks','data','result'):
+                  for key in ('types','stocks','products','items','data','result'):
                       value=payload.get(key)
                       if isinstance(value,list):
                           return value
