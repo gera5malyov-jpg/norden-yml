@@ -58,7 +58,32 @@ jobs:
               for x in stock_rows
               if str(x.get('name') or x.get('title') or '').strip().casefold() == 'основной склад'.casefold()
           ]
-          out={'type_matches':type_matches,'stock_matches':stock_matches,'type_count':len(type_rows),'stock_count':len(stock_rows)}
+          samples=[]
+          if len(type_matches)==1:
+              type_id=type_matches[0]['id']
+              payload=wa.call('shop.product.search',params={'hash':'type/'+type_id,'offset':0,'limit':20,'fields':'*,skus'})
+              products=rows(payload)
+              feature_defs=rows(wa.call('shop.feature.getList'))
+              feature_names={str(x.get('code') or ''):str(x.get('name') or x.get('title') or '') for x in feature_defs}
+              for product in products[:20]:
+                  info=wa.call('shop.product.getInfo',params={'id':product.get('id')})
+                  feats=info.get('features') or {} if isinstance(info,dict) else {}
+                  codes={}
+                  if isinstance(feats,dict):
+                      for code,value in feats.items():
+                          title=feature_names.get(str(code),'')
+                          if 'код' in title.casefold() or 'артикул' in title.casefold():
+                              codes[title]={'code':str(code),'value':value}
+                  skus=product.get('skus') or []
+                  if isinstance(skus,dict):
+                      skus=list(skus.values())
+                  samples.append({
+                      'product_id':str(product.get('id') or ''),
+                      'name':str(product.get('name') or ''),
+                      'skus':[str(x.get('sku') or '') for x in skus if isinstance(x,dict)],
+                      'identity_features':codes,
+                  })
+          out={'type_matches':type_matches,'stock_matches':stock_matches,'type_count':len(type_rows),'stock_count':len(stock_rows),'samples':samples}
           os.makedirs('diagnostics',exist_ok=True)
           with open('diagnostics/megasuppliers_webasyst_ids.json','w',encoding='utf-8') as f:
               json.dump(out,f,ensure_ascii=False,indent=2)
