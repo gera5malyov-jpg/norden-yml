@@ -58,3 +58,22 @@ def test_production_deploy_is_manual_and_confirmation_gated():
     assert "inputs.confirm_production == 'DEPLOY'" in deploy
     assert "branches: [main]" not in deploy
     assert "schedule:" not in deploy
+
+
+def test_apply_requires_active_profile_and_signed_callback_is_bound():
+    run_controller = RUN_CONTROLLER.read_text(encoding="utf-8")
+    callback = (ROOT / "webasyst/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendImportCallback.controller.php").read_text(encoding="utf-8")
+    assert "PROFILE_DISABLED" in run_controller
+    assert "mode_mismatch" in callback
+    assert "config_mismatch" in callback
+
+
+def test_autoimport_ui_exposes_guarded_apply_and_feature_codes_are_consistent():
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    controller = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php").read_text(encoding="utf-8")
+    example = (ROOT / "supplier_engine/supplier.example.json").read_text(encoding="utf-8")
+    assert "s-ms-apply" in panel
+    assert "enable_writes" in panel
+    assert "feature_codes" in controller
+    assert "feature_codes" in example
+    assert "feature_ids" not in example
