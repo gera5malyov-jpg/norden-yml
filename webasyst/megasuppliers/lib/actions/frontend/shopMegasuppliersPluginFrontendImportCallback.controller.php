@@ -10,6 +10,11 @@ class shopMegasuppliersPluginFrontendImportCallbackController extends waJsonCont
             return;
         }
         $body = file_get_contents('php://input');
+        if (strlen($body) > 2097152) {
+            $this->errors = array('payload_too_large');
+            $this->getResponse()->setStatus(413);
+            return;
+        }
         $plugin = wa('shop')->getPlugin('megasuppliers');
         $secret = trim((string)$plugin->getSettings('callback_secret'));
         $provided = trim((string)waRequest::server('HTTP_X_MEGASUPPLIERS_SIGNATURE', ''));
@@ -40,6 +45,20 @@ class shopMegasuppliersPluginFrontendImportCallbackController extends waJsonCont
         $pending = file_exists($path) ? json_decode(file_get_contents($path), true) : null;
         if (!is_array($pending) || empty($pending['request_id']) || !hash_equals((string)$pending['request_id'], $request_id)) {
             $this->errors = array('stale_or_unknown_request');
+            $this->getResponse()->setStatus(409);
+            return;
+        }
+
+        $report_mode = (string)ifset($report['mode'], '');
+        if ($report_mode !== '' && $report_mode !== (string)ifset($pending['mode'])) {
+            $this->errors = array('mode_mismatch');
+            $this->getResponse()->setStatus(409);
+            return;
+        }
+        $report_config_sha = trim((string)ifset($report['config_sha256']));
+        $pending_config_sha = trim((string)ifset($pending['config_sha256']));
+        if ($report_config_sha !== '' && $pending_config_sha !== '' && !hash_equals($pending_config_sha, $report_config_sha)) {
+            $this->errors = array('config_mismatch');
             $this->getResponse()->setStatus(409);
             return;
         }
