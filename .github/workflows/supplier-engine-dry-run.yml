@@ -55,11 +55,34 @@ jobs:
         with:
           php-version: '7.3'
           coverage: none
-      - run: pip install openpyxl pytest
+      - run: pip install openpyxl pytest google-api-python-client google-auth
       - name: Supplier engine tests
         run: pytest -q tests/test_supplier_engine.py
       - name: PHP 7.3 syntax check
         run: find webasyst/megasuppliers/lib -name '*.php' -type f -print0 | xargs -0 -n1 php -l
+      - name: Build installable plugin package
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python - <<'PY'
+          import io, json, os
+          from google.oauth2 import service_account
+          from googleapiclient.discovery import build
+          from googleapiclient.http import MediaIoBaseDownload
+          info=json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
+          creds=service_account.Credentials.from_service_account_info(info,scopes=['https://www.googleapis.com/auth/drive.readonly'])
+          svc=build('drive','v3',credentials=creds,cache_discovery=False)
+          req=svc.files().get_media(fileId='129zSQGB1FKGrn1AgkbJg-EGIvQYylfxQ')
+          with io.FileIO('/tmp/megasuppliers-base.zip','wb') as fh:
+              dl=MediaIoBaseDownload(fh,req); done=False
+              while not done: _,done=dl.next_chunk()
+          PY
+          python scripts/build_megasuppliers_package.py --base /tmp/megasuppliers-base.zip --output /tmp/megasuppliers-1.1.0.zip
+          rm -rf /tmp/megasuppliers-built && mkdir /tmp/megasuppliers-built
+          unzip -q /tmp/megasuppliers-1.1.0.zip -d /tmp/megasuppliers-built
+          find /tmp/megasuppliers-built/megasuppliers -name '*.php' -type f -print0 | xargs -0 -n1 php -l
+          grep -q "'version' => '1.1.0'" /tmp/megasuppliers-built/megasuppliers/lib/config/plugin.php
+          grep -q "megasuppliers-callback/" /tmp/megasuppliers-built/megasuppliers/lib/config/routing.php
 
   dry-run:
     if: github.event_name == 'workflow_dispatch'
