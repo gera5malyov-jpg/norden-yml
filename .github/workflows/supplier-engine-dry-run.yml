@@ -57,7 +57,7 @@ jobs:
           coverage: none
       - run: pip install openpyxl pytest google-api-python-client google-auth
       - name: Supplier engine tests
-        run: pytest -q tests/test_supplier_engine.py
+        run: python -m pytest -q tests/test_supplier_engine.py
       - name: PHP 7.3 syntax check
         run: find webasyst/megasuppliers/lib -name '*.php' -type f -print0 | xargs -0 -n1 php -l
       - name: Build installable plugin package
