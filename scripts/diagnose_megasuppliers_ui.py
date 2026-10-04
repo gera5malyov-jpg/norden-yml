@@ -272,6 +272,53 @@ chown web:web /tmp/ms_norden_stock_diag.php
 su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/ms_norden_stock_diag.php' || true
 rm -f /tmp/ms_norden_stock_diag.php
 echo "NORDEN_STOCK_DIAG_END"
+
+echo "NORDEN_APPLY_AUDIT_BEGIN"
+cat >/tmp/ms_norden_apply_audit.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$m=new waModel();
+$type_id=142;
+$cutoff='2026-10-04 22:05:00';
+echo "TYPE142_TOTAL=".$m->query("SELECT COUNT(*) FROM shop_product WHERE type_id=".(int)$type_id)->fetchField()."\n";
+echo "TYPE142_CREATED_AFTER_2205=".$m->query("SELECT COUNT(*) FROM shop_product WHERE type_id=".(int)$type_id." AND create_datetime>=s:cutoff",array('cutoff'=>$cutoff))->fetchField()."\n";
+echo "TYPE142_EDITED_AFTER_2205=".$m->query("SELECT COUNT(*) FROM shop_product WHERE type_id=".(int)$type_id." AND edit_datetime>=s:cutoff",array('cutoff'=>$cutoff))->fetchField()."\n";
+echo "AUTO_FEATURES_COUNT=".$m->query("SELECT COUNT(*) FROM shop_feature WHERE code LIKE 'ms_s1_%'")->fetchField()."\n";
+$wanted=array('Вид номенклатуры','Серия','Акция','Вес, кг','Объем,м3','Количество мест','KIT ID');
+foreach($wanted as $name){
+  $f=$m->query("SELECT id,code,name,type,status FROM shop_feature WHERE name=s:name ORDER BY id DESC LIMIT 1",array('name'=>$name))->fetch();
+  if($f){
+    $linked=$m->query("SELECT COUNT(*) FROM shop_type_features WHERE type_id=".(int)$type_id." AND feature_id=".(int)$f['id'])->fetchField();
+    $f['linked_type142']=(int)$linked;
+  }
+  echo "FEATURE_".preg_replace('/[^A-Za-z0-9_]+/u','_',strtoupper($name))."=".json_encode($f,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+}
+$target='PR.243.WH.O59.BL';
+$row=$m->query(
+  "SELECT p.id product_id,p.type_id,p.status,p.create_datetime,p.edit_datetime,p.summary,s.id sku_id,s.sku,s.name sku_name
+   FROM shop_product_skus s JOIN shop_product p ON p.id=s.product_id
+   WHERE s.name=s:target OR s.sku=s:target
+   ORDER BY p.id DESC LIMIT 1",
+  array('target'=>$target)
+)->fetch();
+echo "TARGET_ROW=".json_encode($row,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+if($row){
+  $product=new shopProduct((int)$row['product_id']);
+  echo "TARGET_CATEGORIES=".json_encode($product->categories,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+  echo "TARGET_FEATURES=".json_encode($product->features,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+  $stocks=$m->query("SELECT ps.stock_id,st.name,ps.count FROM shop_product_stocks ps JOIN shop_stock st ON st.id=ps.stock_id WHERE ps.product_id=".(int)$row['product_id']." ORDER BY ps.stock_id")->fetchAll();
+  echo "TARGET_STOCKS=".json_encode($stocks,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+}
+echo "NORDEN_LINKS=".$m->query("SELECT COUNT(*) FROM shop_megasuppliers_product WHERE supplier_id=1")->fetchField()."\n";
+PHP
+chown web:web /tmp/ms_norden_apply_audit.php
+su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/ms_norden_apply_audit.php' || true
+rm -f /tmp/ms_norden_apply_audit.php
+echo "NORDEN_APPLY_AUDIT_END"
 echo "RECENT_LOG_MATCHES_BEGIN"
 grep -R -n -E '1484506|shopProduct|product.*1484506|megasuppliers' "$LOG_DIR" 2>/dev/null | tail -120 || true
 echo "RECENT_LOG_MATCHES_END"
