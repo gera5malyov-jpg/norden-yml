@@ -133,3 +133,13 @@ def test_autoimport_ui_is_compact_and_hides_legacy_admin_blocks():
     assert "Применить" in panel
     assert "window.jQuery" not in panel
     assert "$(" not in panel
+
+
+def test_stock_selector_uses_webasyst_names():
+    controller = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php").read_text(encoding="utf-8")
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    assert "shopStockModel()" in controller
+    assert "'stocks' => $this->stockOptions()" in controller
+    assert '<select name="stock_id">' in panel
+    assert "function setStockOptions(" in panel
+    assert "d.stocks||[]" in panel

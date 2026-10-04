@@ -119,7 +119,7 @@
                     <div class="field"><div class="name">Формула до скидки</div><div class="value"><input type="text" name="compare_price_formula" placeholder="supplier_price * 1.60"></div></div>
 
                     <div class="field"><div class="name">Тип товара Webasyst</div><div class="value"><input type="number" min="0" name="type_id" placeholder="ID типа"></div></div>
-                    <div class="field"><div class="name">Склад Webasyst</div><div class="value"><input type="number" min="0" name="stock_id" placeholder="ID склада"></div></div>
+                    <div class="field"><div class="name">Склад Webasyst</div><div class="value"><select name="stock_id"><option value="">— выберите склад —</option></select><p class="hint">Отображается название склада. Внутренний ID сохраняется автоматически.</p></div></div>
                     <div class="field"><div class="name">Категория Webasyst</div><div class="value"><input type="number" min="0" name="category_id" placeholder="ID категории"></div></div>
                 </div>
             </div>
@@ -199,7 +199,27 @@
     function setField(name,value){var el=field(name);if(!el)return;if(el.type==='checkbox'){el.checked=Boolean(value);}else{el.value=(value===null||typeof value==='undefined')?'':value;}}
     function setRunBusy(busy){if(checkBtn)checkBtn.disabled=!!busy;if(applyBtn)applyBtn.disabled=!!busy;}
     function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
-    function fill(c){
+    function setStockOptions(stocks,selected){
+        var el=field('stock_id');
+        if(!el)return;
+        el.innerHTML='<option value="">— выберите склад —</option>';
+        var found=false;
+        (stocks||[]).forEach(function(stock){
+            var option=document.createElement('option');
+            option.value=String(stock.id);
+            option.textContent=stock.name||('Склад '+stock.id);
+            if(String(stock.id)===String(selected)){found=true;}
+            el.appendChild(option);
+        });
+        if(selected!==null&&typeof selected!=='undefined'&&String(selected)!==''&&!found){
+            var fallback=document.createElement('option');
+            fallback.value=String(selected);
+            fallback.textContent='Склад #'+selected+' (не найден)';
+            el.appendChild(fallback);
+        }
+        el.value=(selected===null||typeof selected==='undefined')?'':String(selected);
+    }
+    function fill(c,stocks){
         if(!c)return;
         setField('format',c.source&&c.source.format);
         setField('source_location',c.source&&c.source.location);
@@ -222,7 +242,7 @@
         setField('enabled',c.enabled);
         ['create_new','zero_if_missing','only_create_in_stock','update_images','update_characteristics'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});
         setField('type_id',c.webasyst&&c.webasyst.type_id);
-        setField('stock_id',c.webasyst&&c.webasyst.stock_id);
+        setStockOptions(stocks,c.webasyst&&c.webasyst.stock_id);
         setField('category_id',c.webasyst&&c.webasyst.category_id);
     }
     function paramsFromForm(){return new URLSearchParams(new FormData(form));}
@@ -305,7 +325,8 @@
         form.reset();field('supplier_id').value=id;setStatus('Загрузка профиля…','busy');
         try{
             var r=await requestJson(configUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});
-            fill(r.data?r.data.config:r.config);
+            var d=r.data?r.data:r;
+            fill(d.config,d.stocks||[]);
             setStatus('Профиль загружен','neutral');
             await resumeCurrent(id);
         }catch(err){setStatus('Не удалось загрузить профиль','error');}
