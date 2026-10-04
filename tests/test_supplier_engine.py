@@ -106,6 +106,74 @@ def test_norden_dynamic_characteristics_are_normalized():
     assert p.characteristics == {"Цвет": "Черный", "Материал": "Сетка"}
 
 
+
+def test_norden_missing_purchase_price_skips_price_formulas():
+    c = {
+        "source": {"format": "norden"},
+        "identity": {"supplier_sku_field": "product_code", "sku_prefix": "", "brand": "Norden"},
+        "mapping": {
+            "name": "name",
+            "purchase_price": "price",
+            "price": "",
+            "compare_price": "",
+            "stock": "qty",
+            "category": "category",
+            "images": [],
+            "characteristics": {},
+        },
+        "rules": {
+            "price_formulas": {
+                "price": "purchase_price * 1.25",
+                "compare_price": "purchase_price * 1.60",
+            }
+        },
+    }
+    p = normalize(c, [{
+        "product_code": "NO-PRICE",
+        "name": "Без закупки",
+        "price": "",
+        "qty": "5",
+        "category": "Norden",
+    }])[0]
+    assert p.purchase_price is None
+    assert p.price is None
+    assert p.compare_price is None
+    assert p.stock == 5
+
+
+def test_norden_positive_purchase_price_applies_price_formulas():
+    c = {
+        "source": {"format": "norden"},
+        "identity": {"supplier_sku_field": "product_code", "sku_prefix": "", "brand": "Norden"},
+        "mapping": {
+            "name": "name",
+            "purchase_price": "price",
+            "price": "",
+            "compare_price": "",
+            "stock": "qty",
+            "category": "category",
+            "images": [],
+            "characteristics": {},
+        },
+        "rules": {
+            "price_formulas": {
+                "price": "purchase_price * 1.25",
+                "compare_price": "purchase_price * 1.60",
+            }
+        },
+    }
+    p = normalize(c, [{
+        "product_code": "H-051",
+        "name": "Кресло",
+        "price": "10000",
+        "qty": "5",
+        "category": "Norden",
+    }])[0]
+    assert p.purchase_price == 10000
+    assert p.price == 12500
+    assert p.compare_price == 16000
+
+
 def test_norden_source_falls_back_to_xml(monkeypatch):
     monkeypatch.setenv("NORDEN_SECRET", "configured")
     monkeypatch.setattr(norden, "_api_rows", lambda secret: (_ for _ in ()).throw(RuntimeError("api down")))
