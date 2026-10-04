@@ -8,7 +8,7 @@ from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source
 from supplier_engine import norden
 from supplier_engine.validators import validate_run
-from supplier_engine.webasyst_sync import apply_plan, build_plan, validate_apply_plan
+from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, validate_apply_plan
 
 
 def test_duplicate_blocks():
@@ -236,6 +236,59 @@ def test_build_plan_zeroes_missing_link_and_skips_out_of_stock_create():
     assert plan["skipped"] == [{"sku": "X-B", "reason": "not_in_stock"}]
     assert plan["zero"] == [{"supplier_sku": "OLD", "sku_id": 22, "product_id": 12}]
 
+
+
+def test_index_by_sku_uses_full_sku_fields_and_type_filter():
+    class Fake:
+        def __init__(self):
+            self.params = None
+        def call(self, method, *, params=None, **kwargs):
+            self.params = params
+            return {"products": [{
+                "id": 11,
+                "name": "Chair",
+                "skus": [{"id": 21, "sku": "H-051"}],
+            }]}
+    wa = Fake()
+    indexed = index_by_sku(wa, 142)
+    assert "H-051" in indexed
+    assert wa.params["hash"] == "type/142"
+    assert wa.params["fields"] == "*,skus,stock_counts"
+
+
+def test_build_plan_uses_supplier_link_when_webasyst_sku_differs():
+    products = [Product("H-051", "H-051", "Chair", stock=4)]
+    existing = {
+        "AF-123": [({"id": 11, "name": "Chair"}, {"id": 21, "sku": "AF-123"})],
+    }
+    links = [{"supplier_sku": "H-051", "product_id": 11, "sku_id": 21}]
+    plan = build_plan(products, existing, links, {
+        "create_new": False,
+        "update_stock": True,
+        "zero_if_missing": True,
+    })
+    assert len(plan["update"]) == 1
+    assert plan["update"][0]["product_id"] == 11
+    assert plan["zero"] == []
+    assert plan["blocked"] == []
+
+
+def test_build_plan_blocks_mass_zero_when_supplier_links_do_not_overlap():
+    products = [Product("H-051", "H-051", "Chair", stock=4)]
+    existing = {}
+    links = [
+        {"supplier_sku": "AF-%d" % i, "product_id": i + 1, "sku_id": i + 101}
+        for i in range(10)
+    ]
+    plan = build_plan(products, existing, links, {
+        "create_new": False,
+        "update_stock": True,
+        "zero_if_missing": True,
+    })
+    assert plan["zero"] == []
+    assert any(x.get("reason") == "supplier_link_overlap_too_low" for x in plan["blocked"])
+    errors = validate_apply_plan(plan, {"rules": {"update_stock": True}, "webasyst": {"stock_id": 66}})
+    assert any("обнуление" in x for x in errors)
 
 def test_validate_apply_plan_requires_explicit_type_and_stock():
     plan = {
