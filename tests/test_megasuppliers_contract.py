@@ -176,3 +176,13 @@ def test_supplier_profile_exposes_article_mode_selector():
     assert "Артикул поставщика" in panel
     assert "'sku_mode' => $sku_mode" in controller
     assert "array('numeric', 'supplier')" in controller
+
+
+
+def test_product_supplier_fallback_has_legacy_type_map():
+    helpers = (ROOT / "webasyst/megasuppliers/patches/plugin_helpers.txt").read_text(encoding="utf-8")
+    builder = (ROOT / "scripts/build_megasuppliers_package.py").read_text(encoding="utf-8")
+    assert "private function legacySupplierTypeMap()" in helpers
+    assert "'NORDEN' => array(142)" in helpers
+    assert "$this->legacySupplierTypeMap()" in helpers
+    assert "patches/plugin_helpers.txt" in builder
