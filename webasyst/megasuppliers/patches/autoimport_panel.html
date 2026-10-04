@@ -1,73 +1,275 @@
 <hr>
+{literal}
+<style>
+#s-megasuppliers-autoimport{max-width:980px;margin:0 auto;padding:8px 0 24px}
+#s-megasuppliers-autoimport .s-ms-lead{margin:4px 0 18px;color:#777}
+#s-megasuppliers-autoimport .s-ms-card{border:1px solid #ddd;border-radius:10px;padding:18px 20px;margin:0 0 14px;background:#fff}
+#s-megasuppliers-autoimport .s-ms-card h3{margin:0 0 12px}
+#s-megasuppliers-autoimport .s-ms-statusbox{border-radius:8px;padding:12px 14px;margin-top:12px;background:#f5f5f5;line-height:1.45}
+#s-megasuppliers-autoimport .s-ms-statusbox[data-tone="ok"]{background:#f0f8f1}
+#s-megasuppliers-autoimport .s-ms-statusbox[data-tone="busy"]{background:#fff8e7}
+#s-megasuppliers-autoimport .s-ms-statusbox[data-tone="error"]{background:#fff0f0}
+#s-megasuppliers-autoimport .s-ms-run-meta{display:block;margin-top:5px;color:#777;font-size:12px}
+#s-megasuppliers-autoimport .s-ms-rules label{display:block;margin:8px 0}
+#s-megasuppliers-autoimport .s-ms-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#s-megasuppliers-autoimport details{border:1px solid #ddd;border-radius:10px;margin:0 0 14px;background:#fff}
+#s-megasuppliers-autoimport details>summary{cursor:pointer;padding:15px 18px;font-weight:600}
+#s-megasuppliers-autoimport details[open]>summary{border-bottom:1px solid #eee}
+#s-megasuppliers-autoimport .s-ms-details-body{padding:16px 18px}
+#s-megasuppliers-autoimport .s-ms-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
+#s-megasuppliers-autoimport .s-ms-grid .field{margin:0}
+#s-megasuppliers-autoimport .s-ms-grid .field.full{grid-column:1/-1}
+#s-megasuppliers-autoimport .s-ms-grid .name{font-weight:600;margin-bottom:5px}
+#s-megasuppliers-autoimport .s-ms-grid input[type="text"],
+#s-megasuppliers-autoimport .s-ms-grid input[type="number"],
+#s-megasuppliers-autoimport .s-ms-grid select{width:100%;max-width:none;box-sizing:border-box}
+#s-megasuppliers-autoimport .s-ms-supplier-select{font-size:16px;min-width:320px;max-width:100%;padding:7px}
+#s-megasuppliers-autoimport .s-ms-supplier-list{width:100%;border-collapse:collapse}
+#s-megasuppliers-autoimport .s-ms-supplier-list td{padding:7px 6px;border-bottom:1px solid #eee;vertical-align:middle}
+#s-megasuppliers-autoimport .s-ms-supplier-list td:last-child{text-align:right}
+#s-megasuppliers-autoimport .s-ms-muted{color:#777;font-size:12px}
+#s-megasuppliers-autoimport .s-ms-danger-note{display:block;margin-top:7px;color:#8a6d3b}
+@media(max-width:700px){
+  #s-megasuppliers-autoimport{padding:4px 0 18px}
+  #s-megasuppliers-autoimport .s-ms-card{padding:14px}
+  #s-megasuppliers-autoimport .s-ms-grid{grid-template-columns:1fr}
+  #s-megasuppliers-autoimport .s-ms-grid .field.full{grid-column:auto}
+  #s-megasuppliers-autoimport .s-ms-actions .button{width:100%;margin:0}
+  #s-megasuppliers-autoimport .s-ms-supplier-select{width:100%;min-width:0}
+}
+</style>
+{/literal}
+
 <div class="fields form" id="s-megasuppliers-autoimport">
-    <h2>Автоматические прайсы</h2>
-    <p class="hint">Укажите источник и поля прайса. Проверка запускается только как dry-run и не меняет каталог Webasyst. GitHub token и callback secret задаются в настройках плагина.</p>
+    <h2>Обновление прайсов поставщиков</h2>
+    <p class="s-ms-lead">Выберите поставщика, проверьте правила и сначала запустите безопасную проверку. Каталог изменяется только после отдельного нажатия «Применить».</p>
+
     <form class="s-ms-config-form">
         {$wa->csrf()}
-        <div class="field"><div class="name">Поставщик</div><div class="value"><select name="supplier_id" required><option value="">— выберите —</option>{foreach $suppliers as $supplier}{if $supplier.active}<option value="{$supplier.id}">{$supplier.name|escape} ({$supplier.code|escape})</option>{/if}{/foreach}</select></div></div>
-        <div class="field"><div class="name">Формат</div><div class="value"><select name="format"><option value="yml">YML</option><option value="norden">Norden API + резерв XML</option><option value="xml">XML</option><option value="xlsx">Excel XLSX</option><option value="csv">CSV</option><option value="pdf">PDF (табличный текстовый)</option></select></div></div>
-        <div class="field"><div class="name">Ссылка на прайс</div><div class="value"><input type="text" name="source_location" class="long" placeholder="https://..."><p class="hint">Для Norden выберите «Norden API + резерв XML»: URL и secret URL не заполняются, API-ключ берётся из GitHub, а при сбое используется резервный XML. Для других приватных URL укажите GitHub Secret с именем MEGASUPPLIERS_SOURCE_*. PDF поддерживается для текстовых таблиц; сканы требуют отдельного адаптера.</p></div></div>
-        <div class="field"><div class="name">GitHub Secret URL</div><div class="value"><input type="text" name="location_secret" placeholder="MEGASUPPLIERS_SOURCE_LIGA"></div></div>
-        <div class="field"><div class="name">Лист Excel</div><div class="value"><input type="text" name="sheet"></div></div>
-        <div class="field"><div class="name">Артикул поставщика</div><div class="value"><input type="text" name="supplier_sku_field" placeholder="vendorCode" required> <input type="text" name="sku_prefix" placeholder="Префикс, например Liga-"></div></div>
-        <div class="field"><div class="name">Название / бренд</div><div class="value"><input type="text" name="name_field" placeholder="name" required> <input type="text" name="brand" placeholder="Бренд"></div></div>
-        <div class="field"><div class="name">Поля цен</div><div class="value"><input type="text" name="purchase_price_field" placeholder="закупка"> <input type="text" name="price_field" placeholder="цена"> <input type="text" name="compare_price_field" placeholder="до скидки"></div></div>
-        <div class="field"><div class="name">Остаток / категория</div><div class="value"><input type="text" name="stock_field" placeholder="stock / available"> <input type="text" name="category_field" placeholder="categoryId"></div></div>
-        <div class="field"><div class="name">Изображения</div><div class="value"><input type="text" name="images" class="long" placeholder="pictures"><p class="hint">Несколько полей — через запятую.</p></div></div>
-        <div class="field"><div class="name">Формулы цен</div><div class="value"><input type="text" name="purchase_price_formula" placeholder="закупка"> <input type="text" name="price_formula" placeholder="supplier_price * 1.25"> <input type="text" name="compare_price_formula" placeholder="supplier_price * 1.60"><p class="hint">Разрешены только числа, supplier_price, purchase_price, price, compare_price, stock и + − × ÷.</p></div></div>
-        <div class="field"><div class="name">Правила</div><div class="value">
-            <label><input type="checkbox" name="enabled" value="1"> профиль активен</label><br>
-            <label><input type="checkbox" name="create_new" value="1"> создавать новые</label><br>
-            <label><input type="checkbox" name="zero_if_missing" value="1" checked> ставить 0, если товар исчез из остатков</label><br>
-            <label><input type="checkbox" name="only_create_in_stock" value="1"> новые — только при наличии</label><br>
-            <label><input type="checkbox" name="update_images" value="1"> обновлять изображения</label><br>
-            <label><input type="checkbox" name="update_characteristics" value="1"> обновлять характеристики</label>
-        </div></div>
-        <div class="field"><div class="name">Webasyst ID</div><div class="value"><input type="number" min="0" name="type_id" placeholder="type_id"> <input type="number" min="0" name="stock_id" placeholder="stock_id"> <input type="number" min="0" name="category_id" placeholder="category_id"></div></div>
-        <div class="field"><div class="value submit"><button type="button" class="button s-ms-save">Сохранить профиль</button> <button type="button" class="button green s-ms-check">Сохранить и проверить прайс</button> <button type="button" class="button yellow s-ms-apply">Применить проверенный прайс</button> <span class="hint s-ms-status"></span></div></div>
+
+        <div class="s-ms-card">
+            <h3>1. Поставщик</h3>
+            <select name="supplier_id" class="s-ms-supplier-select" required>
+                <option value="">— выберите поставщика —</option>
+                {foreach $suppliers as $supplier}
+                    {if $supplier.active}<option value="{$supplier.id}">{$supplier.name|escape}</option>{/if}
+                {/foreach}
+            </select>
+            <div class="s-ms-statusbox" data-tone="neutral">
+                <strong class="s-ms-status">Выберите поставщика</strong>
+                <span class="s-ms-run-meta"></span>
+            </div>
+        </div>
+
+        <div class="s-ms-card s-ms-rules">
+            <h3>2. Что делать с товарами</h3>
+            <label><input type="checkbox" name="enabled" value="1"> Разрешить применение этого профиля</label>
+            <label><input type="checkbox" name="create_new" value="1"> Создавать новые товары</label>
+            <label><input type="checkbox" name="only_create_in_stock" value="1"> Создавать новые только при наличии</label>
+            <label><input type="checkbox" name="zero_if_missing" value="1" checked> Ставить остаток 0, если товар исчез из остатков поставщика</label>
+            <label><input type="checkbox" name="update_images" value="1"> Обновлять изображения существующих товаров</label>
+            <label><input type="checkbox" name="update_characteristics" value="1"> Обновлять характеристики существующих товаров</label>
+        </div>
+
+        <details class="s-ms-advanced">
+            <summary>Настройка источника и сопоставления</summary>
+            <div class="s-ms-details-body">
+                <p class="hint">Эти поля обычно настраиваются один раз. Если профиль уже работает, менять их не нужно.</p>
+                <div class="s-ms-grid">
+                    <div class="field">
+                        <div class="name">Формат источника</div>
+                        <div class="value">
+                            <select name="format">
+                                <option value="yml">YML</option>
+                                <option value="norden">Norden API + резерв XML</option>
+                                <option value="xml">XML</option>
+                                <option value="xlsx">Excel XLSX</option>
+                                <option value="csv">CSV</option>
+                                <option value="pdf">PDF</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">Лист Excel</div>
+                        <div class="value"><input type="text" name="sheet" placeholder="если нужен"></div>
+                    </div>
+                    <div class="field full">
+                        <div class="name">Ссылка на прайс</div>
+                        <div class="value"><input type="text" name="source_location" placeholder="https://..."></div>
+                    </div>
+                    <div class="field full">
+                        <div class="name">Секрет источника</div>
+                        <div class="value"><input type="text" name="location_secret" placeholder="MEGASUPPLIERS_SOURCE_..."><p class="hint">Нужен только для приватного URL. Для Norden оставьте пустым.</p></div>
+                    </div>
+
+                    <div class="field"><div class="name">Поле артикула</div><div class="value"><input type="text" name="supplier_sku_field" placeholder="vendorCode" required></div></div>
+                    <div class="field"><div class="name">Префикс артикула</div><div class="value"><input type="text" name="sku_prefix" placeholder="например Liga-"></div></div>
+                    <div class="field"><div class="name">Поле названия</div><div class="value"><input type="text" name="name_field" placeholder="name" required></div></div>
+                    <div class="field"><div class="name">Бренд</div><div class="value"><input type="text" name="brand" placeholder="бренд"></div></div>
+
+                    <div class="field"><div class="name">Закупочная цена</div><div class="value"><input type="text" name="purchase_price_field" placeholder="поле источника"></div></div>
+                    <div class="field"><div class="name">Цена продажи</div><div class="value"><input type="text" name="price_field" placeholder="поле источника"></div></div>
+                    <div class="field"><div class="name">Цена до скидки</div><div class="value"><input type="text" name="compare_price_field" placeholder="поле источника"></div></div>
+                    <div class="field"><div class="name">Остаток</div><div class="value"><input type="text" name="stock_field" placeholder="stock / available"></div></div>
+                    <div class="field"><div class="name">Категория</div><div class="value"><input type="text" name="category_field" placeholder="categoryId"></div></div>
+                    <div class="field"><div class="name">Изображения</div><div class="value"><input type="text" name="images" placeholder="pictures"><p class="hint">Несколько полей — через запятую.</p></div></div>
+
+                    <div class="field"><div class="name">Формула закупки</div><div class="value"><input type="text" name="purchase_price_formula" placeholder="supplier_price"></div></div>
+                    <div class="field"><div class="name">Формула цены</div><div class="value"><input type="text" name="price_formula" placeholder="supplier_price * 1.25"></div></div>
+                    <div class="field"><div class="name">Формула до скидки</div><div class="value"><input type="text" name="compare_price_formula" placeholder="supplier_price * 1.60"></div></div>
+
+                    <div class="field"><div class="name">Тип товара Webasyst</div><div class="value"><input type="number" min="0" name="type_id" placeholder="ID типа"></div></div>
+                    <div class="field"><div class="name">Склад Webasyst</div><div class="value"><input type="number" min="0" name="stock_id" placeholder="ID склада"></div></div>
+                    <div class="field"><div class="name">Категория Webasyst</div><div class="value"><input type="number" min="0" name="category_id" placeholder="ID категории"></div></div>
+                </div>
+            </div>
+        </details>
+
+        <div class="s-ms-card">
+            <h3>3. Проверка и запуск</h3>
+            <div class="s-ms-actions">
+                <button type="button" class="button s-ms-save">Сохранить</button>
+                <button type="button" class="button green s-ms-check">Проверить прайс</button>
+                <button type="button" class="button yellow s-ms-apply" data-guard="enable_writes">Применить</button>
+            </div>
+            <span class="s-ms-danger-note">«Проверить прайс» ничего не меняет. «Применить» меняет каталог и всегда требует отдельного подтверждения.</span>
+        </div>
     </form>
+
+    <details class="s-ms-suppliers">
+        <summary>Управление поставщиками</summary>
+        <div class="s-ms-details-body">
+            <table class="s-ms-supplier-list">
+                <tbody>
+                {foreach $suppliers as $supplier}
+                    <tr>
+                        <td><strong>{$supplier.name|escape}</strong><div class="s-ms-muted">{$supplier.code|escape} · товаров: {$supplier.product_count}</div></td>
+                        <td>
+                            <form method="post" action="{$backend_url}?plugin=megasuppliers&action=toggleSupplier">
+                                {$wa->csrf()}<input type="hidden" name="id" value="{$supplier.id}">
+                                <button type="submit" class="button light-gray">{if $supplier.active}Отключить{else}Включить{/if}</button>
+                            </form>
+                        </td>
+                    </tr>
+                {/foreach}
+                </tbody>
+            </table>
+            <h4>Добавить поставщика</h4>
+            <form method="post" action="{$backend_url}?plugin=megasuppliers&action=saveSupplier" class="fields form">
+                {$wa->csrf()}
+                <div class="field"><div class="name">Название</div><div class="value"><input type="text" name="name" required></div></div>
+                <div class="field"><div class="name">Код</div><div class="value"><input type="text" name="code" placeholder="NORDEN" required><p class="hint">Латиница, цифры, _ или -.</p></div></div>
+                <div class="field"><div class="value"><button class="button" type="submit">Добавить</button></div></div>
+            </form>
+        </div>
+    </details>
 </div>
+
 <script>
 (function(){
     var box=document.getElementById('s-megasuppliers-autoimport');
     if(!box)return;
     var form=box.querySelector('.s-ms-config-form');
     var status=box.querySelector('.s-ms-status');
+    var runMeta=box.querySelector('.s-ms-run-meta');
+    var statusBox=box.querySelector('.s-ms-statusbox');
     var saveBtn=box.querySelector('.s-ms-save'),checkBtn=box.querySelector('.s-ms-check'),applyBtn=box.querySelector('.s-ms-apply');
     var configUrl='{$backend_url}?plugin=megasuppliers&action=importConfig',runUrl='{$backend_url}?plugin=megasuppliers&action=importRun',statusUrl='{$backend_url}?plugin=megasuppliers&action=importStatus';
 {literal}
     var pollTimer=null;
-    function setStatus(text){if(status)status.textContent=text||'';}
+
+    function tidyLegacyUi(){
+        var root=document.getElementById('s-megasuppliers');
+        if(!root)return;
+        Array.prototype.forEach.call(root.children,function(el){
+            if(el===box||el.tagName==='SCRIPT'||el.tagName==='H1'||(el.classList&&el.classList.contains('alert')))return;
+            el.style.display='none';
+        });
+        var title=root.querySelector('h1');
+        if(title)title.textContent='Поставщики';
+    }
+    setTimeout(tidyLegacyUi,0);
+
+    function setStatus(text,tone,meta){
+        if(status)status.textContent=text||'';
+        if(statusBox)statusBox.setAttribute('data-tone',tone||'neutral');
+        if(runMeta)runMeta.textContent=meta||'';
+    }
     function field(name){return form.querySelector('[name="'+name+'"]');}
     function setField(name,value){var el=field(name);if(!el)return;if(el.type==='checkbox'){el.checked=Boolean(value);}else{el.value=(value===null||typeof value==='undefined')?'':value;}}
     function setRunBusy(busy){if(checkBtn)checkBtn.disabled=!!busy;if(applyBtn)applyBtn.disabled=!!busy;}
     function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
-    function fill(c){if(!c)return;setField('format',c.source&&c.source.format);setField('source_location',c.source&&c.source.location);setField('location_secret',c.source&&c.source.location_secret);setField('sheet',c.source&&c.source.sheet);setField('supplier_sku_field',c.identity&&c.identity.supplier_sku_field);setField('sku_prefix',c.identity&&c.identity.sku_prefix);setField('brand',c.identity&&c.identity.brand);setField('name_field',c.mapping&&c.mapping.name);setField('purchase_price_field',c.mapping&&c.mapping.purchase_price);setField('price_field',c.mapping&&c.mapping.price);setField('compare_price_field',c.mapping&&c.mapping.compare_price);setField('stock_field',c.mapping&&c.mapping.stock);setField('category_field',c.mapping&&c.mapping.category);setField('images',(c.mapping&&c.mapping.images||[]).join(', '));var pf=c.rules&&c.rules.price_formulas||{};setField('purchase_price_formula',pf.purchase_price);setField('price_formula',pf.price);setField('compare_price_formula',pf.compare_price);setField('enabled',c.enabled);['create_new','zero_if_missing','only_create_in_stock','update_images','update_characteristics'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});setField('type_id',c.webasyst&&c.webasyst.type_id);setField('stock_id',c.webasyst&&c.webasyst.stock_id);setField('category_id',c.webasyst&&c.webasyst.category_id);}
+    function fill(c){
+        if(!c)return;
+        setField('format',c.source&&c.source.format);
+        setField('source_location',c.source&&c.source.location);
+        setField('location_secret',c.source&&c.source.location_secret);
+        setField('sheet',c.source&&c.source.sheet);
+        setField('supplier_sku_field',c.identity&&c.identity.supplier_sku_field);
+        setField('sku_prefix',c.identity&&c.identity.sku_prefix);
+        setField('brand',c.identity&&c.identity.brand);
+        setField('name_field',c.mapping&&c.mapping.name);
+        setField('purchase_price_field',c.mapping&&c.mapping.purchase_price);
+        setField('price_field',c.mapping&&c.mapping.price);
+        setField('compare_price_field',c.mapping&&c.mapping.compare_price);
+        setField('stock_field',c.mapping&&c.mapping.stock);
+        setField('category_field',c.mapping&&c.mapping.category);
+        setField('images',(c.mapping&&c.mapping.images||[]).join(', '));
+        var pf=c.rules&&c.rules.price_formulas||{};
+        setField('purchase_price_formula',pf.purchase_price);
+        setField('price_formula',pf.price);
+        setField('compare_price_formula',pf.compare_price);
+        setField('enabled',c.enabled);
+        ['create_new','zero_if_missing','only_create_in_stock','update_images','update_characteristics'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});
+        setField('type_id',c.webasyst&&c.webasyst.type_id);
+        setField('stock_id',c.webasyst&&c.webasyst.stock_id);
+        setField('category_id',c.webasyst&&c.webasyst.category_id);
+    }
     function paramsFromForm(){return new URLSearchParams(new FormData(form));}
-    async function requestJson(url,options){var res=await fetch(url,options||{credentials:'same-origin'});var text=await res.text();var data=null;try{data=JSON.parse(text);}catch(e){}if(!res.ok){var err=new Error('HTTP '+res.status);err.data=data;throw err;}if(!data){throw new Error('INVALID_JSON');}return data;}
+    async function requestJson(url,options){
+        var res=await fetch(url,options||{credentials:'same-origin'});
+        var text=await res.text(),data=null;
+        try{data=JSON.parse(text);}catch(e){}
+        if(!res.ok){var err=new Error('HTTP '+res.status);err.data=data;throw err;}
+        if(!data)throw new Error('INVALID_JSON');
+        return data;
+    }
     function reportText(run){
         if(!run)return '';
-        if(run.status==='queued'||run.status==='running')return run.mode==='apply'?'применение выполняется…':'проверка выполняется…';
+        if(run.status==='queued'||run.status==='running')return run.mode==='apply'?'Применение выполняется…':'Проверка выполняется…';
         var report=run.report;
-        if(!report)return 'проверка завершена: '+run.status;
-        if(report.blocked)return 'проверка заблокирована: '+(report.errors||[]).join('; ');
-        if(report.status!=='ok')return 'проверка завершилась с ошибкой: '+(report.errors||[]).join('; ');
+        if(!report)return 'Проверка завершена: '+run.status;
+        if(report.blocked)return 'Проверка заблокирована: '+(report.errors||[]).join('; ');
+        if(report.status!=='ok')return 'Проверка завершилась с ошибкой: '+(report.errors||[]).join('; ');
         var plan=report.plan||{};
-        var parts=['проверка пройдена: '+(report.products||0)+' товаров'];
+        var parts=['Найдено '+(report.products||0)];
         if(typeof plan.update!=='undefined')parts.push('обновить '+plan.update);
         if(typeof plan.create!=='undefined')parts.push('создать '+plan.create);
         if(typeof plan.zero_stock!=='undefined')parts.push('обнулить '+plan.zero_stock);
         if(typeof plan.skipped!=='undefined')parts.push('пропустить '+plan.skipped);
-        return parts.join('; ');
+        return parts.join(' · ');
+    }
+    function reportMeta(run){
+        var report=run&&run.report;
+        if(!report)return '';
+        var out=[];
+        if(report.source&&report.source.fallback_used)out.push('Источник: резервный XML, API недоступен');
+        else if(report.source&&report.source.origin)out.push('Источник: '+report.source.origin);
+        if(report.warnings&&report.warnings.length)out.push(report.warnings.join(' '));
+        return out.join(' · ');
     }
     function handleRun(run){
         if(!run){setRunBusy(false);return false;}
         var active=run.status==='queued'||run.status==='running';
         setRunBusy(active);
-        setStatus(reportText(run));
+        var tone=active?'busy':((run.report&&run.report.status==='ok'&&!run.report.blocked)?'ok':'error');
+        setStatus(reportText(run),tone,reportMeta(run));
         return active;
     }
-    async function readRun(id){var r=await requestJson(statusUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});return r.data?r.data.run:r.run;}
+    async function readRun(id){
+        var r=await requestJson(statusUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});
+        return r.data?r.data.run:r.run;
+    }
     function poll(id,requestId){
         stopPoll();
         var tries=0,busy=false,currentRequest=requestId||'';
@@ -81,9 +283,9 @@
                 var active=handleRun(run);
                 if(!active){stopPoll();return;}
             }catch(err){
-                setStatus('не удалось получить статус проверки');
+                setStatus('Не удалось получить статус проверки','error');
             }finally{busy=false;}
-            if(tries>120){stopPoll();setRunBusy(false);setStatus('проверка ещё выполняется; обновите страницу для актуального статуса');}
+            if(tries>120){stopPoll();setRunBusy(false);setStatus('Проверка ещё выполняется','busy','Обновите страницу, чтобы получить актуальный статус.');}
         }
         tick();
         pollTimer=setInterval(tick,3000);
@@ -92,61 +294,72 @@
         stopPoll();
         try{
             var run=await readRun(id);
-            if(run&&handleRun(run)){poll(id,run.request_id);}
+            if(run&&handleRun(run))poll(id,run.request_id);
         }catch(err){setRunBusy(false);}
     }
     form.addEventListener('change',async function(e){
         if(!e.target||e.target.name!=='supplier_id')return;
         var id=e.target.value;
         stopPoll();setRunBusy(false);
-        if(!id){setStatus('');return;}
-        form.reset();field('supplier_id').value=id;setStatus('загрузка…');
+        if(!id){setStatus('Выберите поставщика','neutral');return;}
+        form.reset();field('supplier_id').value=id;setStatus('Загрузка профиля…','busy');
         try{
             var r=await requestJson(configUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});
             fill(r.data?r.data.config:r.config);
-            setStatus('');
+            setStatus('Профиль загружен','neutral');
             await resumeCurrent(id);
-        }catch(err){setStatus('не удалось загрузить профиль');}
+        }catch(err){setStatus('Не удалось загрузить профиль','error');}
     });
     async function save(next){
         var id=field('supplier_id').value;
-        if(!id){setStatus('выберите поставщика');return;}
-        setStatus('сохранение…');
+        if(!id){setStatus('Выберите поставщика','error');return;}
+        setStatus('Сохранение…','busy');
         try{
             var r=await requestJson(configUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:paramsFromForm()});
-            if(r&&r.status==='ok'){setStatus('профиль сохранён');if(next)await next(id);}
-            else{setStatus('ошибка сохранения');}
-        }catch(err){setStatus('ошибка сохранения');}
+            if(r&&r.status==='ok'){
+                setStatus('Профиль сохранён','ok');
+                if(next)await next(id);
+            }else setStatus('Ошибка сохранения','error');
+        }catch(err){setStatus('Ошибка сохранения','error');}
     }
     async function run(id,mode){
         setRunBusy(true);
-        setStatus(mode==='apply'?'запуск применения…':'запуск проверки…');
-        var body=new URLSearchParams();body.set('supplier_id',id);body.set('mode',mode);
-        var csrf=field('_csrf');body.set('_csrf',csrf?csrf.value:'');
+        setStatus(mode==='apply'?'Запуск применения…':'Запуск проверки…','busy');
+        var body=new URLSearchParams();
+        body.set('supplier_id',id);
+        body.set('mode',mode);
+        var csrf=field('_csrf');
+        body.set('_csrf',csrf?csrf.value:'');
         try{
             var r=await requestJson(runUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body});
             var d=r&&r.data?r.data:r,errs=r&&r.errors?r.errors:[];
             if(r&&r.status==='ok'&&d.request_id){
-                setStatus(mode==='apply'?'применение запущено':'проверка запущена');
+                setStatus(mode==='apply'?'Применение запущено':'Проверка запущена','busy');
                 poll(id,d.request_id);
                 return;
             }
             if(errs.indexOf('RUN_ALREADY_ACTIVE')!==-1){
-                setStatus('проверка уже выполняется…');
+                setStatus('Проверка уже выполняется','busy');
                 await resumeCurrent(id);
                 return;
             }
             setRunBusy(false);
-            setStatus((mode==='apply'?'применение заблокировано':'ошибка запуска')+(errs.length?': '+errs.join('; '):''));
+            setStatus((mode==='apply'?'Применение заблокировано':'Ошибка запуска')+(errs.length?': '+errs.join('; '):''),'error');
         }catch(err){
             setRunBusy(false);
             var errs=err.data&&err.data.errors?err.data.errors:[];
-            setStatus((mode==='apply'?'применение заблокировано':'ошибка запуска')+(errs.length?': '+errs.join('; '):''));
+            setStatus((mode==='apply'?'Применение заблокировано':'Ошибка запуска')+(errs.length?': '+errs.join('; '):''),'error');
         }
     }
+
     if(saveBtn)saveBtn.addEventListener('click',function(){save();});
     if(checkBtn)checkBtn.addEventListener('click',function(){save(function(id){return run(id,'dry-run');});});
-    if(applyBtn)applyBtn.addEventListener('click',function(){var id=field('supplier_id').value;if(!id){setStatus('выберите поставщика');return;}if(!confirm('Применить последний успешно проверенный прайс в каталог Webasyst? Запись будет разрешена только если включён enable_writes и прайс не изменился после dry-run.'))return;run(id,'apply');});
+    if(applyBtn)applyBtn.addEventListener('click',function(){
+        var id=field('supplier_id').value;
+        if(!id){setStatus('Выберите поставщика','error');return;}
+        if(!confirm('Применить последний успешно проверенный прайс? Это изменит товары Webasyst.'))return;
+        run(id,'apply');
+    });
 })();
 {/literal}
 </script>
