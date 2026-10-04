@@ -19,6 +19,7 @@ from .webasyst_sync import (
     index_by_supplier_sku_name,
     previous_prices,
     validate_apply_plan,
+    webasyst_sku_mode,
 )
 from webasyst.client import WebasystClient
 
@@ -254,15 +255,22 @@ def main():
         if os.getenv("WEBASYST_API_TOKEN", "").strip():
             wa = WebasystClient()
             type_id = (config.get("webasyst") or {}).get("type_id")
-            if config.get("source", {}).get("format", "").lower() == "norden" and type_id:
-                existing = index_by_supplier_sku_name(
+            if type_id:
+                by_supplier = index_by_supplier_sku_name(
                     wa,
                     type_id,
                     [product.supplier_sku for product in products],
+                    {product.sku: product.supplier_sku for product in products},
                 )
+                existing = {
+                    product.sku: by_supplier[product.supplier_sku]
+                    for product in products
+                    if product.supplier_sku in by_supplier
+                }
                 if source_meta is not None:
-                    source_meta["existing_match"] = "webasyst_sku_name"
+                    source_meta["existing_match"] = "supplier_article"
                     source_meta["existing_matched"] = len(existing)
+                    source_meta["sku_mode"] = webasyst_sku_mode(config)
             else:
                 existing = index_by_sku(wa, type_id)
         elif args.mode == "apply":
