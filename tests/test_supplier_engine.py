@@ -8,7 +8,7 @@ from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source
 from supplier_engine import norden
 from supplier_engine.validators import validate_run
-from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, validate_apply_plan
+from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan
 
 
 def test_duplicate_blocks():
@@ -254,6 +254,69 @@ def test_index_by_sku_uses_full_sku_fields_and_type_filter():
     assert "H-051" in indexed
     assert wa.params["hash"] == "type/142"
     assert wa.params["fields"] == "*,skus,stock_counts"
+
+
+
+def test_norden_index_matches_webasyst_sku_name_not_internal_af_sku():
+    class Fake:
+        def call(self, method, *, params=None, **kwargs):
+            assert method == "shop.product.search"
+            assert params["hash"] == "type/142"
+            return {"products": [{
+                "id": 11,
+                "name": "Кресло",
+                "skus": [{
+                    "id": 21,
+                    "sku": "AF-31662421",
+                    "name": "CK-2518A-P",
+                    "purchase_price": "9200",
+                    "price": "11500",
+                    "compare_price": "14720",
+                }],
+            }]}
+    indexed = index_by_supplier_sku_name(Fake(), 142, ["CK-2518A-P", "OTHER"])
+    assert list(indexed) == ["CK-2518A-P"]
+    product, sku = indexed["CK-2518A-P"][0]
+    assert product["id"] == 11
+    assert sku["sku"] == "AF-31662421"
+
+
+def test_norden_index_normalizes_supplier_article_without_guessing_ambiguity():
+    class Fake:
+        def call(self, method, *, params=None, **kwargs):
+            return {"products": [{
+                "id": 11,
+                "name": "Chair",
+                "skus": [{"id": 21, "sku": "AF-1", "name": "RT-2031"}],
+            }]}
+    indexed = index_by_supplier_sku_name(Fake(), 142, ["RT.2031"])
+    assert "RT.2031" in indexed
+
+    ambiguous = index_by_supplier_sku_name(Fake(), 142, ["RT.2031", "RT-2031"])
+    assert ambiguous == {}
+
+
+def test_build_plan_accepts_old_af_links_when_cards_match_by_supplier_article():
+    products = [
+        Product("CK-2518A-P", "CK-2518A-P", "Chair", stock=39),
+        Product("B1816", "B1816", "Chair 2", stock=4),
+    ]
+    existing = {
+        "CK-2518A-P": [({"id": 11}, {"id": 21, "sku": "AF-1", "name": "CK-2518A-P"})],
+        "B1816": [({"id": 12}, {"id": 22, "sku": "AF-2", "name": "B1816"})],
+    }
+    links = [
+        {"supplier_sku": "AF-1", "product_id": 11, "sku_id": 21},
+        {"supplier_sku": "AF-2", "product_id": 12, "sku_id": 22},
+    ]
+    plan = build_plan(products, existing, links, {
+        "create_new": False,
+        "update_stock": True,
+        "zero_if_missing": True,
+    })
+    assert len(plan["update"]) == 2
+    assert plan["zero"] == []
+    assert plan["blocked"] == []
 
 
 def test_build_plan_uses_supplier_link_when_webasyst_sku_differs():
