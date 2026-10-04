@@ -93,20 +93,22 @@ def _identity_key(value):
 
 
 def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
-    """Index one Webasyst product type by SKU name ("Наименование артикула").
+    """Index one Webasyst type by SKU name ("Наименование артикула").
 
-    Norden's Webasyst SKU itself is an internal AF-* code. The supplier article
-    is stored in shop_product_skus.name, so matching by SKU would make every
-    existing Norden card look missing.
+    Exact supplier-code equality always wins. Normalized matching is used only
+    when there is no exact Webasyst match for that supplier code and both sides
+    are unambiguous. This prevents punctuation/transliteration normalization
+    from turning two distinct historical cards into a false duplicate.
     """
+    source_codes = [str(code or "").strip() for code in (supplier_codes or []) if str(code or "").strip()]
+    source_exact = set(source_codes)
     source_by_key = defaultdict(list)
-    for code in supplier_codes or []:
-        code = str(code or "").strip()
+    for code in source_codes:
         key = _identity_key(code)
-        if code and key:
+        if key:
             source_by_key[key].append(code)
 
-    out = {}
+    entries = []
     offset = 0
     while True:
         payload = wa.call(
@@ -115,7 +117,7 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
                 "hash": "type/%s" % type_id,
                 "offset": offset,
                 "limit": 1000,
-                "fields": "*,skus,stock_counts",
+                "fields": "id,name,summary,type_id,skus",
             },
         )
         rows = _listify(payload)
@@ -125,17 +127,37 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
                 skus = list(skus.values())
             for sku in skus:
                 supplier_name = str(sku.get("name") or "").strip()
-                key = _identity_key(supplier_name)
-                if not key:
-                    continue
-                source_matches = source_by_key.get(key) or []
-                # Ambiguous normalized source codes are deliberately not guessed.
-                if len(source_matches) != 1:
-                    continue
-                out.setdefault(source_matches[0], []).append((product, sku))
+                if supplier_name:
+                    entries.append((supplier_name, product, sku))
         if len(rows) < 1000:
             break
         offset += len(rows)
+
+    out = {}
+    exact_matched_codes = set()
+    unmatched_entries = []
+    for supplier_name, product, sku in entries:
+        if supplier_name in source_exact:
+            out.setdefault(supplier_name, []).append((product, sku))
+            exact_matched_codes.add(supplier_name)
+        else:
+            unmatched_entries.append((supplier_name, product, sku))
+
+    candidates_by_key = defaultdict(list)
+    for supplier_name, product, sku in unmatched_entries:
+        key = _identity_key(supplier_name)
+        if key:
+            candidates_by_key[key].append((supplier_name, product, sku))
+
+    for key, source_matches in source_by_key.items():
+        unresolved_sources = [code for code in source_matches if code not in exact_matched_codes]
+        web_candidates = candidates_by_key.get(key) or []
+        if len(unresolved_sources) != 1 or len(web_candidates) != 1:
+            continue
+        code = unresolved_sources[0]
+        _, product, sku = web_candidates[0]
+        out.setdefault(code, []).append((product, sku))
+
     return out
 
 
