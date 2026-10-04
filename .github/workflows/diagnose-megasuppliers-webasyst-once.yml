@@ -16,6 +16,7 @@ jobs:
     env:
       WEBASYST_BASE_URL: https://profikompany.ru
       WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+      MEGASUPPLIERS_CALLBACK_SECRET: ${{ secrets.MEGASUPPLIERS_CALLBACK_SECRET }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -83,7 +84,41 @@ jobs:
                       'skus':[str(x.get('sku') or '') for x in skus if isinstance(x,dict)],
                       'identity_features':codes,
                   })
-          out={'type_matches':type_matches,'stock_matches':stock_matches,'type_count':len(type_rows),'stock_count':len(stock_rows),'samples':samples}
+          import hashlib, hmac, urllib.request
+          link_sample=[]
+          secret=os.environ.get('MEGASUPPLIERS_CALLBACK_SECRET','').strip()
+          if secret:
+              request_id='20261004025409-5cf1cf5411c0292e'
+              body=json.dumps({
+                  'action':'links','supplier_id':1,'request_id':request_id,'offset':0,'limit':30,
+              },ensure_ascii=False,separators=(',',':')).encode('utf-8')
+              sig='sha256='+hmac.new(secret.encode('utf-8'),body,hashlib.sha256).hexdigest()
+              req=urllib.request.Request(
+                  'https://profikompany.ru/megasuppliers-bridge/',
+                  data=body,method='POST',
+                  headers={'Content-Type':'application/json; charset=utf-8','X-Megasuppliers-Signature':sig},
+              )
+              with urllib.request.urlopen(req,timeout=30) as response:
+                  link_payload=json.load(response)
+              link_sample=(link_payload.get('items') or [])[:30]
+
+          raw_identity_sample=[]
+          if samples:
+              for sample in samples[:3]:
+                  info=wa.call('shop.product.getInfo',params={'id':sample['product_id']})
+                  feats=info.get('features') or {} if isinstance(info,dict) else {}
+                  raw_identity_sample.append({
+                      'product_id':sample['product_id'],
+                      'features':feats,
+                      'skus':info.get('skus') if isinstance(info,dict) else None,
+                  })
+
+          out={
+              'type_matches':type_matches,'stock_matches':stock_matches,
+              'type_count':len(type_rows),'stock_count':len(stock_rows),
+              'samples':samples,'link_sample':link_sample,
+              'raw_identity_sample':raw_identity_sample,
+          }
           os.makedirs('diagnostics',exist_ok=True)
           with open('diagnostics/megasuppliers_webasyst_ids.json','w',encoding='utf-8') as f:
               json.dump(out,f,ensure_ascii=False,indent=2)
