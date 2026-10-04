@@ -218,10 +218,6 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
             continue
         if len(matches) == 1:
             current_product, current_sku = matches[0]
-            matched_webasyst_ids.add((
-                int(current_product.get("id") or 0),
-                int(current_sku.get("id") or 0),
-            ))
             plan["update"].append({
                 "sku": product.sku,
                 "supplier_sku": product.supplier_sku,
@@ -244,17 +240,23 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
     if rules.get("zero_if_missing", False) and rules.get("update_stock", True) and valid_links:
         linked_supplier_skus = {str(link.get("supplier_sku") or "").strip() for link in valid_links}
         overlap = linked_supplier_skus & seen_supplier
-        if len(valid_links) >= 10 and len(overlap) / float(len(linked_supplier_skus) or 1) < 0.20:
+        updated_ids = {
+            (str(row.get("product_id")), str(row.get("sku_id")))
+            for row in plan["update"]
+        }
+        linked_ids = {
+            (str(link.get("product_id") or ""), str(link.get("sku_id") or ""))
+            for link in valid_links
+        }
+        matched_link_ids = linked_ids & updated_ids
+        effective_matches = max(len(overlap), len(matched_link_ids))
+        if len(valid_links) >= 10 and effective_matches / float(len(linked_supplier_skus) or 1) < 0.20:
             plan["blocked"].append({
                 "reason": "supplier_link_overlap_too_low",
                 "links": len(linked_supplier_skus),
-                "matched_links": len(overlap),
+                "matched_links": effective_matches,
             })
         else:
-            updated_ids = {
-                (str(row.get("product_id")), str(row.get("sku_id")))
-                for row in plan["update"]
-            }
             for link in valid_links:
                 supplier_sku = str(link.get("supplier_sku") or "").strip()
                 sku_id = int(link.get("sku_id") or 0)
