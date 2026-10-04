@@ -359,6 +359,30 @@ chown web:web /tmp/ms_norden_feature_write_audit.php
 su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/ms_norden_feature_write_audit.php' || true
 rm -f /tmp/ms_norden_feature_write_audit.php
 echo "NORDEN_FEATURE_WRITE_AUDIT_END"
+
+echo "NORDEN_PARTIAL_CREATE_AUDIT_BEGIN"
+cat >/tmp/ms_norden_partial_create_audit.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$m=new waModel();
+$cutoff='2026-10-04 22:05:00';
+$sql="SELECT p.id product_id,p.name product_name,p.create_datetime,p.summary,s.id sku_id,s.sku,s.name sku_name
+      FROM shop_product p JOIN shop_product_skus s ON s.product_id=p.id
+      WHERE p.type_id=142 AND p.create_datetime>=s:cutoff
+        AND ((s.name IS NULL OR s.name='') OR s.sku LIKE 'AF-%')
+      ORDER BY p.id DESC";
+$rows=$m->query($sql,array('cutoff'=>$cutoff))->fetchAll();
+echo "PARTIAL_CREATE_COUNT=".count($rows)."\n";
+echo "PARTIAL_CREATE_SAMPLE=".json_encode(array_slice($rows,0,20),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+PHP
+chown web:web /tmp/ms_norden_partial_create_audit.php
+su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/ms_norden_partial_create_audit.php' || true
+rm -f /tmp/ms_norden_partial_create_audit.php
+echo "NORDEN_PARTIAL_CREATE_AUDIT_END"
 echo "RECENT_LOG_MATCHES_BEGIN"
 grep -R -n -E '1484506|shopProduct|product.*1484506|megasuppliers' "$LOG_DIR" 2>/dev/null | tail -120 || true
 echo "RECENT_LOG_MATCHES_END"
