@@ -935,3 +935,76 @@ def test_index_matches_prefixed_supplier_article_alias():
     )
     assert "109775" in indexed
     assert indexed["109775"][0][0]["id"] == 11
+
+
+
+def test_zero_other_stocks_writes_explicit_zero_rows():
+    wa = _FakeWebasyst()
+    plan = {
+        "create": [],
+        "update": [{
+            "sku": "X-1",
+            "supplier_sku": "X-1",
+            "product_id": 11,
+            "sku_id": 21,
+            "current_product": {"id": 11, "status": 1},
+            "current_sku": {"id": 21, "sku": "21", "name": "X-1"},
+            "desired": {
+                "supplier_sku": "X-1",
+                "sku": "X-1",
+                "name": "Chair",
+                "purchase_price": 100,
+                "price": 125,
+                "compare_price": 160,
+                "stock": 2,
+                "brand": "",
+                "category": "",
+                "images": [],
+                "characteristics": {},
+            },
+        }],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    apply_plan(
+        wa,
+        plan,
+        {
+            "source": {"format": "norden"},
+            "rules": {
+                "update_prices": True,
+                "update_stock": True,
+                "zero_other_stocks": True,
+            },
+            "webasyst": {
+                "stock_id": 66,
+                "stock_ids": [6, 14, 66, 72],
+                "type_id": 142,
+                "sku_mode": "numeric",
+            },
+        },
+    )
+    sku_call = next(x for x in wa.calls if x["method"] == "shop.product.skus.update")
+    assert sku_call["data"]["stock"] == {"6": "0", "14": "0", "66": "2", "72": "0"}
+
+
+def test_zero_other_stocks_requires_stock_list():
+    plan = {
+        "create": [],
+        "update": [{
+            "sku": "X-1",
+            "desired": {"stock": 2, "characteristics": {}},
+        }],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    errors = validate_apply_plan(
+        plan,
+        {
+            "rules": {"update_stock": True, "zero_other_stocks": True},
+            "webasyst": {"stock_id": 66, "stock_ids": []},
+        },
+    )
+    assert any("stock_ids" in x for x in errors)

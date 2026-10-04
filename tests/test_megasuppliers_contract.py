@@ -186,3 +186,14 @@ def test_product_supplier_fallback_has_legacy_type_map():
     assert "'NORDEN' => array(142)" in helpers
     assert "$this->legacySupplierTypeMap()" in helpers
     assert "patches/plugin_helpers.txt" in builder
+
+
+
+def test_supplier_profile_can_zero_non_target_stocks():
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    controller = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php").read_text(encoding="utf-8")
+    assert 'name="zero_other_stocks"' in panel
+    assert "На остальных складах Webasyst ставить 0" in panel
+    assert "'zero_other_stocks' =>" in controller
+    assert "'stock_ids' => $this->stockIds()" in controller
+    assert "private function stockIds()" in controller

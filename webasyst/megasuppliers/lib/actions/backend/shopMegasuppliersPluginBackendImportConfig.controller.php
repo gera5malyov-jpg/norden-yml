@@ -70,6 +70,22 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
         return array_values($rows);
     }
 
+    private function stockIds()
+    {
+        $rows = (new shopStockModel())
+            ->select('id')
+            ->order('sort,id')
+            ->fetchAll();
+        $ids = array();
+        foreach ($rows as $row) {
+            $id = (int)ifset($row['id']);
+            if ($id) {
+                $ids[] = $id;
+            }
+        }
+        return $ids;
+    }
+
     private function fromForm($supplier)
     {
         $images = preg_split('/\\s*,\\s*/', (string)waRequest::post('images', '', waRequest::TYPE_STRING_TRIM), -1, PREG_SPLIT_NO_EMPTY);
@@ -111,6 +127,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
                 'update_images' => (bool)waRequest::post('update_images', 0, waRequest::TYPE_INT),
                 'update_characteristics' => (bool)waRequest::post('update_characteristics', 0, waRequest::TYPE_INT),
                 'zero_if_missing' => (bool)waRequest::post('zero_if_missing', 0, waRequest::TYPE_INT),
+                'zero_other_stocks' => (bool)waRequest::post('zero_other_stocks', 0, waRequest::TYPE_INT),
                 'only_create_in_stock' => (bool)waRequest::post('only_create_in_stock', 0, waRequest::TYPE_INT),
                 'price_formulas' => array_filter(array(
                     'purchase_price' => (string)waRequest::post('purchase_price_formula', '', waRequest::TYPE_STRING_TRIM),
@@ -123,6 +140,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
                 'sku_mode' => $sku_mode,
                 'type_id' => waRequest::post('type_id', 0, waRequest::TYPE_INT) ?: null,
                 'stock_id' => waRequest::post('stock_id', 0, waRequest::TYPE_INT) ?: null,
+                'stock_ids' => $this->stockIds(),
                 'category_id' => waRequest::post('category_id', 0, waRequest::TYPE_INT) ?: null,
                 'feature_codes' => array(),
             ),

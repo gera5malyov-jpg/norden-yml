@@ -67,6 +67,7 @@
             <label><input type="checkbox" name="create_new" value="1"> Создавать новые товары</label>
             <label><input type="checkbox" name="only_create_in_stock" value="1"> Создавать новые только при наличии</label>
             <label><input type="checkbox" name="zero_if_missing" value="1" checked> Ставить остаток 0, если товар исчез из остатков поставщика</label>
+            <label><input type="checkbox" name="zero_other_stocks" value="1"> На остальных складах Webasyst ставить 0</label>
             <label><input type="checkbox" name="update_images" value="1"> Обновлять ссылки изображений в «Кратком описании» существующих товаров</label>
             <label><input type="checkbox" name="update_characteristics" value="1"> Обновлять характеристики существующих товаров</label>
             <p class="hint">Новые товары создаются сразу опубликованными. Файлы изображений не скачиваются: ссылки записываются в «Краткое описание».</p>
@@ -264,6 +265,8 @@
         setField('compare_price_formula',pf.compare_price);
         setField('enabled',c.enabled);
         ['create_new','zero_if_missing','only_create_in_stock','update_images','update_characteristics'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});
+        var zeroOther=c.rules&&typeof c.rules.zero_other_stocks!=='undefined'?c.rules.zero_other_stocks:(c.source&&c.source.format==='norden');
+        setField('zero_other_stocks',zeroOther);
         setTypeOptions(types,c.webasyst&&c.webasyst.type_id);
         var skuMode=c.webasyst&&c.webasyst.sku_mode;
         if(skuMode!=='numeric'&&skuMode!=='supplier'){skuMode=(c.source&&c.source.format==='norden')?'numeric':'supplier';}
