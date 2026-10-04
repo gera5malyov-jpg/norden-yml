@@ -5,62 +5,62 @@ release_builder=yes
 ssh=yes
 stage=extract
 stage=lint php=7.3.19
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendAssignSupplier.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendAssignSupplier.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendExport.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendExport.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCallback.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCallback.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCancel.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCancel.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportRun.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportRun.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportStatus.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportStatus.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendRegenerateKey.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendRegenerateKey.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendSaveSupplier.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendSaveSupplier.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendThumbs.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendThumbs.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendToggleSupplier.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendToggleSupplier.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendBridge.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendBridge.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendImportCallback.controller.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendImportCallback.controller.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/classes/shopMegasuppliersFileReader.class.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/classes/shopMegasuppliersFileReader.class.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/config/db.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/config/db.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/config/install.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/config/install.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/config/plugin.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/config/plugin.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/config/routing.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/config/routing.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/config/settings.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/config/settings.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/models/shopMegasuppliersImport.model.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/models/shopMegasuppliersImport.model.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/models/shopMegasuppliersMeta.model.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/models/shopMegasuppliersMeta.model.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/models/shopMegasuppliersSupplier.model.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/models/shopMegasuppliersSupplier.model.php
-lint=/tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/shopMegasuppliers.plugin.php
-No syntax errors detected in /tmp/megasuppliers-stage-20261004-200407/megasuppliers/lib/shopMegasuppliers.plugin.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendAssignSupplier.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendAssignSupplier.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendExport.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendExport.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCallback.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCallback.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCancel.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCancel.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportRun.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportRun.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportStatus.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportStatus.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendRegenerateKey.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendRegenerateKey.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendSaveSupplier.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendSaveSupplier.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendThumbs.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendThumbs.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendToggleSupplier.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendToggleSupplier.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendBridge.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendBridge.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendImportCallback.controller.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendImportCallback.controller.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/classes/shopMegasuppliersFileReader.class.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/classes/shopMegasuppliersFileReader.class.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/config/db.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/config/db.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/config/install.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/config/install.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/config/plugin.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/config/plugin.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/config/routing.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/config/routing.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/config/settings.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/config/settings.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/models/shopMegasuppliersImport.model.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/models/shopMegasuppliersImport.model.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/models/shopMegasuppliersMeta.model.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/models/shopMegasuppliersMeta.model.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/models/shopMegasuppliersSupplier.model.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/models/shopMegasuppliersSupplier.model.php
+lint=/tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/shopMegasuppliers.plugin.php
+No syntax errors detected in /tmp/megasuppliers-stage-20261004-202751/megasuppliers/lib/shopMegasuppliers.plugin.php
 stage=lint_ok
 stage=copy_plugin
 opcache_reset=yes
@@ -88,7 +88,7 @@ table_shop_megasuppliers_meta=yes
 suppliers=14
 api_key_generated=yes
 config_enabled=yes
-backup=/home/web/backups/chatgpt-megasuppliers/20261004-200407
+backup=/home/web/backups/chatgpt-megasuppliers/20261004-202751
 remote_stderr=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
 http https://profikompany.ru/ 200 body='<!DOCTYPE html><html lang="ru_RU" class="main__color_scheme_purple font--montserrat" data-custom="#7B5E45"><head><title>Мебель и предметы интерьера — Санкт-Пете'
 http https://profikompany.ru/megasuppliers-api/ 405 body='{"errors":["method_not_allowed"]}'
