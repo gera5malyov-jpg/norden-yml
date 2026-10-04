@@ -155,6 +155,28 @@ PHP
 chown web:web /tmp/ms_norden_product_diag.php
 su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/ms_norden_product_diag.php' || true
 rm -f /tmp/ms_norden_product_diag.php
+
+echo "NORDEN_STOCK_DIAG_BEGIN"
+cat >/tmp/ms_norden_stock_diag.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$m=new waModel();
+$id=1484506;
+$sku_id=(int)$m->query("SELECT id FROM shop_product_skus WHERE product_id=".(int)$id." LIMIT 1")->fetchField();
+$stocks=$m->query("SELECT id,name,sort,public FROM shop_stock ORDER BY sort,id")->fetchAll();
+echo "STOCKS=".json_encode($stocks,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+$rows=$m->query("SELECT * FROM shop_product_stocks WHERE product_id=".(int)$id." OR sku_id=".(int)$sku_id." ORDER BY stock_id")->fetchAll();
+echo "PRODUCT_STOCK_ROWS=".json_encode($rows,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+echo "NORDEN_NEW_COUNT=".$m->query("SELECT COUNT(*) FROM shop_product WHERE type_id=142 AND create_datetime>='2026-10-04 20:00:00'")->fetchField()."\n";
+PHP
+chown web:web /tmp/ms_norden_stock_diag.php
+su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/ms_norden_stock_diag.php' || true
+rm -f /tmp/ms_norden_stock_diag.php
+echo "NORDEN_STOCK_DIAG_END"
 echo "RECENT_LOG_MATCHES_BEGIN"
 grep -R -n -E '1484506|shopProduct|product.*1484506|megasuppliers' "$LOG_DIR" 2>/dev/null | tail -120 || true
 echo "RECENT_LOG_MATCHES_END"
