@@ -8,7 +8,7 @@ from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source
 from supplier_engine import norden
 from supplier_engine.validators import validate_run
-from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan
+from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan, webasyst_sku_mode
 
 
 def test_duplicate_blocks():
@@ -831,3 +831,107 @@ def test_norden_existing_internal_article_is_preserved_but_supplier_name_is_enfo
     sku_call = next(x for x in wa.calls if x["method"] == "shop.product.skus.update")
     assert sku_call["data"]["name"] == "NS01025-03-01"
     assert "sku" not in sku_call["data"]
+
+
+
+def test_per_supplier_sku_mode_defaults_are_backward_compatible():
+    assert webasyst_sku_mode({"source": {"format": "norden"}, "webasyst": {}}) == "numeric"
+    assert webasyst_sku_mode({"source": {"format": "yml"}, "webasyst": {}}) == "supplier"
+    assert webasyst_sku_mode({"source": {"format": "norden"}, "webasyst": {"sku_mode": "supplier"}}) == "supplier"
+
+
+def test_supplier_article_mode_uses_prefixed_article_and_supplier_name():
+    wa = _FakeWebasyst()
+    desired = {
+        "supplier_sku": "109775",
+        "sku": "Liga-109775",
+        "name": "Sofa",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 2,
+        "brand": "Liga",
+        "category": "",
+        "images": [],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [{"sku": "Liga-109775", "supplier_sku": "109775", "desired": desired}],
+        "update": [],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    apply_plan(
+        wa,
+        plan,
+        {
+            "source": {"format": "yml"},
+            "rules": {"update_prices": True, "update_stock": True},
+            "webasyst": {"stock_id": 1, "type_id": 5, "sku_mode": "supplier"},
+        },
+    )
+    sku_calls = [x for x in wa.calls if x["method"] == "shop.product.skus.update"]
+    assert sku_calls[-1]["data"]["sku"] == "Liga-109775"
+    assert sku_calls[-1]["data"]["name"] == "109775"
+
+
+def test_switch_numeric_managed_article_to_supplier_article():
+    wa = _FakeWebasyst()
+    desired = {
+        "supplier_sku": "NS01025-03-01",
+        "sku": "NS01025-03-01",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "Norden",
+        "category": "",
+        "images": [],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [],
+        "update": [{
+            "sku": "NS01025-03-01",
+            "supplier_sku": "NS01025-03-01",
+            "product_id": 31,
+            "sku_id": 41,
+            "current_product": {"id": 31, "status": 1},
+            "current_sku": {"id": 41, "sku": "41", "name": "NS01025-03-01"},
+            "desired": desired,
+        }],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    apply_plan(
+        wa,
+        plan,
+        {
+            "source": {"format": "norden"},
+            "rules": {"update_prices": True, "update_stock": True},
+            "webasyst": {"stock_id": 1, "type_id": 142, "sku_mode": "supplier"},
+        },
+    )
+    sku_call = next(x for x in wa.calls if x["method"] == "shop.product.skus.update")
+    assert sku_call["data"]["sku"] == "NS01025-03-01"
+
+
+def test_index_matches_prefixed_supplier_article_alias():
+    class Fake:
+        def call(self, method, *, params=None, **kwargs):
+            return {"products": [{
+                "id": 11,
+                "name": "Sofa",
+                "skus": [{"id": 21, "sku": "Liga-109775", "name": ""}],
+            }]}
+    indexed = index_by_supplier_sku_name(
+        Fake(),
+        5,
+        ["109775"],
+        {"Liga-109775": "109775"},
+    )
+    assert "109775" in indexed
+    assert indexed["109775"][0][0]["id"] == 11
