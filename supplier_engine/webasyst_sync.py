@@ -332,6 +332,8 @@ def validate_apply_plan(plan, config):
     )
     if needs_stock and not web.get("stock_id"):
         errors.append("Для изменения остатков не задан webasyst.stock_id.")
+    if needs_stock and rules.get("zero_other_stocks", False) and not (web.get("stock_ids") or []):
+        errors.append("Для обнуления остальных складов не передан список webasyst.stock_ids.")
     if rules.get("update_characteristics", False):
         missing = set()
         mapping = web.get("feature_codes") or {}
@@ -344,14 +346,21 @@ def validate_apply_plan(plan, config):
     return errors
 
 
-def _sku_write_data(desired, rules, stock_id):
+def _sku_write_data(desired, rules, stock_id, stock_ids=None):
     data = {}
     if rules.get("update_prices", True):
         for field in ("purchase_price", "price", "compare_price"):
             if desired.get(field) is not None:
                 data[field] = _num_string(desired[field])
     if rules.get("update_stock", True) and desired.get("stock") is not None:
-        data["stock"] = {str(int(stock_id)): _num_string(desired["stock"])}
+        target_id = str(int(stock_id))
+        if rules.get("zero_other_stocks", False):
+            ids = [int(x) for x in (stock_ids or []) if str(x).isdigit() and int(x) > 0]
+            stock_data = {str(x): "0" for x in ids}
+            stock_data[target_id] = _num_string(desired["stock"])
+            data["stock"] = stock_data
+        else:
+            data["stock"] = {target_id: _num_string(desired["stock"])}
         data["available"] = 1 if desired["stock"] > 0 else 0
     return data
 
@@ -409,6 +418,7 @@ def apply_plan(wa: WebasystClient, plan, config):
     rules = config.get("rules") or {}
     web = config.get("webasyst") or {}
     stock_id = web.get("stock_id")
+    stock_ids = web.get("stock_ids") or []
     result = {"created": 0, "updated": 0, "zeroed": 0, "mappings": []}
 
     try:
@@ -418,7 +428,7 @@ def apply_plan(wa: WebasystClient, plan, config):
             desired = row["desired"]
             current_product = row.get("current_product") or {}
             current_sku = row.get("current_sku") or {}
-            sku_data = _sku_write_data(desired, rules, stock_id)
+            sku_data = _sku_write_data(desired, rules, stock_id, stock_ids)
 
             supplier_code = str(row.get("supplier_sku") or "").strip()
             desired_sku = str(row.get("sku") or supplier_code).strip()
@@ -520,7 +530,14 @@ def apply_plan(wa: WebasystClient, plan, config):
                     "shop.product.skus.update",
                     http_method="POST",
                     params={"id": str(row["sku_id"])},
-                    data={"stock": {str(int(stock_id)): "0"}, "available": 0},
+                    data={
+                        "stock": (
+                            {str(int(x)): "0" for x in stock_ids if str(x).isdigit() and int(x) > 0}
+                            if rules.get("zero_other_stocks", False)
+                            else {str(int(stock_id)): "0"}
+                        ),
+                        "available": 0,
+                    },
                 )
                 result["zeroed"] += 1
                 result["mappings"].append({
