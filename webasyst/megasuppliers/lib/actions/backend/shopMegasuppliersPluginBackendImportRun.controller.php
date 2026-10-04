@@ -57,7 +57,7 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
         $active_status = (string)ifset($previous['status'], '');
         if (in_array($active_status, array('queued', 'running'), true)) {
             $requested_at = strtotime((string)ifset($previous['requested_at'], ''));
-            $active_timeout = 90 * 60;
+            $active_timeout = 210 * 60;
             if ($requested_at && (time() - $requested_at) < $active_timeout) {
                 $this->response = array(
                     'status' => 'busy',
