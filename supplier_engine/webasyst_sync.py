@@ -334,7 +334,7 @@ def validate_apply_plan(plan, config):
         errors.append("Для изменения остатков не задан webasyst.stock_id.")
     if needs_stock and rules.get("zero_other_stocks", False) and not (web.get("stock_ids") or []):
         errors.append("Для обнуления остальных складов не передан список webasyst.stock_ids.")
-    if rules.get("update_characteristics", False):
+    if rules.get("update_characteristics", False) and not rules.get("auto_features", False):
         missing = set()
         mapping = web.get("feature_codes") or {}
         for row in plan["create"] + plan["update"]:
