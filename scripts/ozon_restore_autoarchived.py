@@ -3,8 +3,8 @@
 
 Safety:
 - query only visibility=ARCHIVED;
-- restore only is_autoarchived=true and is_archived!=true;
-- never touch manually archived products;
+- restore only when is_autoarchived=true;
+- never restore products where is_autoarchived is false;
 - restore no more than 10 products per run;
 - report contains counts only (no credentials or product identifiers).
 """
@@ -122,13 +122,12 @@ def bump_error(report: dict[str, Any], reason: str) -> None:
 def main() -> int:
     report: dict[str, Any] = {
         "started_at_utc": utc_now(),
-        "mode": "autoarchive_only",
+        "mode": "is_autoarchived_true_only",
         "max_restore_per_run": MAX_RESTORE,
         "archived_total_reported": None,
         "archived_items_inspected": 0,
         "autoarchive_candidates_seen": 0,
-        "manual_archive_skipped": 0,
-        "ambiguous_both_flags_skipped": 0,
+        "manual_or_other_archive_skipped": 0,
         "missing_info_skipped": 0,
         "restored_count": 0,
         "failed_count": 0,
@@ -159,8 +158,8 @@ def main() -> int:
                 except (TypeError, ValueError):
                     continue
 
-            for start in range(0, len(ids), 100):
-                batch = ids[start:start + 100]
+            for start in range(0, len(ids), 1000):
+                batch = ids[start:start + 1000]
                 info_items = get_info(batch)
                 info_by_id: dict[int, dict[str, Any]] = {}
                 for info in info_items:
@@ -177,16 +176,8 @@ def main() -> int:
                         report["missing_info_skipped"] += 1
                         continue
 
-                    is_auto = info.get("is_autoarchived") is True
-                    is_manual = info.get("is_archived") is True
-
-                    if is_auto and is_manual:
-                        report["ambiguous_both_flags_skipped"] += 1
-                        continue
-                    if is_manual:
-                        report["manual_archive_skipped"] += 1
-                        continue
-                    if not is_auto:
+                    if info.get("is_autoarchived") is not True:
+                        report["manual_or_other_archive_skipped"] += 1
                         continue
 
                     report["autoarchive_candidates_seen"] += 1
