@@ -87,6 +87,7 @@ def build(base_zip, repo_root, output, expected_sha=EXPECTED_BASE_SHA256):
 require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php';
 require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportRun.controller.php';
 require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportStatus.controller.php';
+require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportCancel.controller.php';
 """
             text = text.replace("<?php", "<?php\n" + bootstrap, 1)
         text = text.replace("public function routing($route)", "public function routing($route = array())")
