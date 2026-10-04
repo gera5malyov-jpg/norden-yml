@@ -172,7 +172,7 @@ for item in root.iter('Номенклатура'):
             tag=(child.tag or '').strip()
             val=(child.text or '').strip()
             if val:
-                print(f'{tag}={val}')
+                print('{}={}'.format(tag,val))
         break
 else:
     print('TARGET_NOT_FOUND')
