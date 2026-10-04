@@ -92,7 +92,14 @@ def _identity_key(value):
     return re.sub(r"[^0-9a-z]+", "", text)
 
 
-def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
+def webasyst_sku_mode(config):
+    mode = str((config.get("webasyst") or {}).get("sku_mode") or "").strip().lower()
+    if mode in {"numeric", "supplier"}:
+        return mode
+    return "numeric" if str((config.get("source") or {}).get("format") or "").lower() == "norden" else "supplier"
+
+
+def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes, sku_aliases=None):
     """Index one Webasyst product type by supplier article stored in SKU name.
 
     Exact text wins over normalized fallback. This prevents legacy lookalikes
@@ -100,6 +107,7 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
     """
     source_exact = {}
     source_by_key = defaultdict(list)
+    sku_aliases = {str(k): str(v) for k, v in (sku_aliases or {}).items() if str(k) and str(v)}
     for code in supplier_codes or []:
         code = str(code or "").strip()
         key = _identity_key(code)
@@ -141,6 +149,11 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
                 exact_sku = source_exact.get(internal_sku) or []
                 if len(exact_sku) == 1:
                     candidates[exact_sku[0]].append((1, product, sku))
+                    continue
+
+                alias_supplier = sku_aliases.get(internal_sku)
+                if alias_supplier and len(source_exact.get(alias_supplier) or []) == 1:
+                    candidates[alias_supplier].append((1, product, sku))
                     continue
 
                 if not supplier_name:
@@ -399,7 +412,7 @@ def apply_plan(wa: WebasystClient, plan, config):
     result = {"created": 0, "updated": 0, "zeroed": 0, "mappings": []}
 
     try:
-        is_norden = str((config.get("source") or {}).get("format") or "").lower() == "norden"
+        sku_mode = webasyst_sku_mode(config)
 
         for row in plan["update"]:
             desired = row["desired"]
@@ -407,21 +420,25 @@ def apply_plan(wa: WebasystClient, plan, config):
             current_sku = row.get("current_sku") or {}
             sku_data = _sku_write_data(desired, rules, stock_id)
 
-            if is_norden:
-                supplier_code = str(row.get("supplier_sku") or "").strip()
-                if supplier_code and str(current_sku.get("name") or "").strip() != supplier_code:
-                    sku_data["name"] = supplier_code
+            supplier_code = str(row.get("supplier_sku") or "").strip()
+            desired_sku = str(row.get("sku") or supplier_code).strip()
+            current_code = str(current_sku.get("sku") or "").strip()
+            numeric_code = str(row.get("sku_id") or "").strip()
 
-                # The cancelled old importer wrote the supplier article into
-                # Webasyst's SKU-code field. Migrate only those engine-created
-                # rows to the new numeric internal article scheme. Historical
-                # AF-* and other existing SKU codes are preserved.
-                if (
-                    supplier_code
-                    and str(current_sku.get("sku") or "").strip() == supplier_code
-                    and str(row.get("sku_id") or "").isdigit()
-                ):
-                    sku_data["sku"] = str(row["sku_id"])
+            # The supplier article always lives in Webasyst's human-readable
+            # SKU name ("Наименование артикула"), independent of article mode.
+            if supplier_code and str(current_sku.get("name") or "").strip() != supplier_code:
+                sku_data["name"] = supplier_code
+
+            # Switching the profile mode only migrates articles that were
+            # clearly managed by this importer (supplier-code or numeric SKU ID).
+            # Historical unrelated article codes such as AF-* are preserved.
+            if sku_mode == "numeric":
+                if current_code == desired_sku and numeric_code.isdigit():
+                    sku_data["sku"] = numeric_code
+            else:
+                if current_code == numeric_code and desired_sku:
+                    sku_data["sku"] = desired_sku
 
             if sku_data:
                 wa.call(
@@ -477,15 +494,11 @@ def apply_plan(wa: WebasystClient, plan, config):
             sku_id = str(skus[0].get("id") or "")
             if not sku_id:
                 raise RuntimeError("Webasyst не вернул SKU ID товара %s" % row["sku"])
-            final_sku_data = {"sku": row["sku"]}
-            if is_norden:
-                # Webasyst SKU ID is already unique and numeric. Use it as the
-                # internal article, while keeping the supplier article in the
-                # human-readable SKU name ("Наименование артикула").
-                final_sku_data = {
-                    "sku": sku_id,
-                    "name": str(row.get("supplier_sku") or "").strip(),
-                }
+            supplier_code = str(row.get("supplier_sku") or "").strip()
+            final_sku_data = {
+                "sku": sku_id if sku_mode == "numeric" else str(row.get("sku") or supplier_code).strip(),
+                "name": supplier_code,
+            }
             wa.call(
                 "shop.product.skus.update",
                 http_method="POST",
