@@ -399,9 +399,30 @@ def apply_plan(wa: WebasystClient, plan, config):
     result = {"created": 0, "updated": 0, "zeroed": 0, "mappings": []}
 
     try:
+        is_norden = str((config.get("source") or {}).get("format") or "").lower() == "norden"
+
         for row in plan["update"]:
             desired = row["desired"]
+            current_product = row.get("current_product") or {}
+            current_sku = row.get("current_sku") or {}
             sku_data = _sku_write_data(desired, rules, stock_id)
+
+            if is_norden:
+                supplier_code = str(row.get("supplier_sku") or "").strip()
+                if supplier_code and str(current_sku.get("name") or "").strip() != supplier_code:
+                    sku_data["name"] = supplier_code
+
+                # The cancelled old importer wrote the supplier article into
+                # Webasyst's SKU-code field. Migrate only those engine-created
+                # rows to the new numeric internal article scheme. Historical
+                # AF-* and other existing SKU codes are preserved.
+                if (
+                    supplier_code
+                    and str(current_sku.get("sku") or "").strip() == supplier_code
+                    and str(row.get("sku_id") or "").isdigit()
+                ):
+                    sku_data["sku"] = str(row["sku_id"])
+
             if sku_data:
                 wa.call(
                     "shop.product.skus.update",
@@ -410,8 +431,6 @@ def apply_plan(wa: WebasystClient, plan, config):
                     data=sku_data,
                 )
             product_data = _product_write_data(desired, rules, web, creating=False)
-            current_product = row.get("current_product") or {}
-            current_sku = row.get("current_sku") or {}
             if (
                 str(current_product.get("status") or "0") == "0"
                 and str(current_sku.get("sku") or "").strip() == str(row.get("supplier_sku") or "").strip()
@@ -458,11 +477,20 @@ def apply_plan(wa: WebasystClient, plan, config):
             sku_id = str(skus[0].get("id") or "")
             if not sku_id:
                 raise RuntimeError("Webasyst не вернул SKU ID товара %s" % row["sku"])
+            final_sku_data = {"sku": row["sku"]}
+            if is_norden:
+                # Webasyst SKU ID is already unique and numeric. Use it as the
+                # internal article, while keeping the supplier article in the
+                # human-readable SKU name ("Наименование артикула").
+                final_sku_data = {
+                    "sku": sku_id,
+                    "name": str(row.get("supplier_sku") or "").strip(),
+                }
             wa.call(
                 "shop.product.skus.update",
                 http_method="POST",
                 params={"id": sku_id},
-                data={"sku": row["sku"]},
+                data=final_sku_data,
             )
             result["created"] += 1
             result["mappings"].append({
