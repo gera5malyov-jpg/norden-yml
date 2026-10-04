@@ -625,3 +625,65 @@ def test_pdf_parser_rejects_table_without_required_columns():
 
     with pytest.raises(RuntimeError, match="required columns"):
         load_pdf(buf.getvalue(), required_headers=["Артикул", "Название"])
+
+
+def test_norden_index_exact_sku_fallback_recovers_engine_created_product():
+    class Fake:
+        def call(self, method, *, params=None, **kwargs):
+            return {"products": [{
+                "id": 31,
+                "name": "Engine-created chair",
+                "status": 0,
+                "skus": [{"id": 41, "sku": "H-051", "name": ""}],
+            }]}
+    indexed = index_by_supplier_sku_name(Fake(), 142, ["H-051"])
+    assert len(indexed["H-051"]) == 1
+    assert indexed["H-051"][0][0]["id"] == 31
+
+
+def test_apply_plan_publishes_only_hidden_engine_created_match():
+    wa = _FakeWebasyst()
+    desired = {
+        "supplier_sku": "H-051",
+        "sku": "H-051",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "",
+        "category": "",
+        "images": [],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [],
+        "update": [{
+            "sku": "H-051",
+            "supplier_sku": "H-051",
+            "product_id": 31,
+            "sku_id": 41,
+            "current_product": {"id": 31, "status": 0},
+            "current_sku": {"id": 41, "sku": "H-051", "name": ""},
+            "desired": desired,
+        }],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    apply_plan(
+        wa,
+        plan,
+        {
+            "rules": {
+                "update_prices": True,
+                "update_stock": True,
+                "update_name": False,
+                "update_images": False,
+                "update_characteristics": False,
+            },
+            "webasyst": {"stock_id": 1, "type_id": 142},
+        },
+    )
+    product_call = next(x for x in wa.calls if x["method"] == "shop.product.update")
+    assert product_call["data"]["status"] == 1
