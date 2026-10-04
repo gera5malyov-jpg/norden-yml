@@ -156,6 +156,28 @@ chown web:web /tmp/ms_norden_product_diag.php
 su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/ms_norden_product_diag.php' || true
 rm -f /tmp/ms_norden_product_diag.php
 
+
+echo "NORDEN_SOURCE_TARGET_BEGIN"
+python3 - <<'PY'
+import urllib.request, xml.etree.ElementTree as ET
+url='https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.xml'
+target='PR.243.WH.O59.BL'
+req=urllib.request.Request(url,headers={'User-Agent':'Megasuppliers-Diagnostic/1.0'})
+with urllib.request.urlopen(req,timeout=120) as r:
+    data=r.read()
+root=ET.fromstring(data)
+for item in root.iter('Номенклатура'):
+    if (item.findtext('Артикул') or '').strip()==target:
+        for child in list(item):
+            tag=(child.tag or '').strip()
+            val=(child.text or '').strip()
+            if val:
+                print(f'{tag}={val}')
+        break
+else:
+    print('TARGET_NOT_FOUND')
+PY
+echo "NORDEN_SOURCE_TARGET_END"
 echo "NORDEN_STOCK_DIAG_BEGIN"
 cat >/tmp/ms_norden_stock_diag.php <<'PHP'
 <?php
