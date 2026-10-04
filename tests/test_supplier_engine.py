@@ -5,8 +5,9 @@ import pytest
 from supplier_engine.adapters import load_pdf, load_xml_yml
 from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
-from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source
+from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source, _characteristic_names_for_plan
 from supplier_engine import norden
+from supplier_engine.bridge import MegasuppliersBridge
 from supplier_engine.validators import validate_run
 from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan, webasyst_sku_mode
 
@@ -1008,3 +1009,97 @@ def test_zero_other_stocks_requires_stock_list():
         },
     )
     assert any("stock_ids" in x for x in errors)
+
+
+
+def test_norden_fallback_extracts_commercial_characteristics(monkeypatch):
+    price_xml = """<?xml version="1.0" encoding="utf-8"?>
+    <Данные>
+      <Номенклатура>
+        <Артикул>PR.243.WH.O59.BL</Артикул>
+        <Цена ВидЦен="Опт">23 420</Цена>
+        <СвободныйОстаток Склад="Основной склад">2</СвободныйОстаток>
+        <Акция>Акция</Акция>
+      </Номенклатура>
+    </Данные>""".encode("utf-8")
+    full_xml = """<?xml version="1.0" encoding="utf-8"?>
+    <Данные>
+      <Номенклатура>
+        <Код>00-00019020</Код>
+        <Артикул>PR.243.WH.O59.BL</Артикул>
+        <Наименование>Рабочая станция</Наименование>
+        <НаименованиеПолное>PR.243.WH.O59.BL / Рабочая станция</НаименованиеПолное>
+        <Группа>Офисная мебель///Призма / Prizma</Группа>
+        <ВидНоменклатуры>Корпусная мебель Наборы</ВидНоменклатуры>
+        <ТипНоменклатуры>Набор</ТипНоменклатуры>
+        <Серия>Prizma</Серия>
+        <ВесЧислитель>59</ВесЧислитель>
+        <ВесЗнаменатель>1</ВесЗнаменатель>
+        <ОбъемЧислитель>0,237</ОбъемЧислитель>
+        <ОбъемЗнаменатель>1</ОбъемЗнаменатель>
+        <НаборУпаковок>
+          <Упаковка/><Упаковка/><Упаковка/><Упаковка/><Упаковка/>
+        </НаборУпаковок>
+      </Номенклатура>
+    </Данные>""".encode("utf-8")
+
+    def fake_http(url, **kwargs):
+        return price_xml if "K8%25" in url else full_xml
+
+    monkeypatch.setattr(norden, "_http_bytes", fake_http)
+    row = norden._fallback_rows()[0]
+    f = row["features"]
+    assert f["Вид номенклатуры"] == "Корпусная мебель Наборы"
+    assert f["Тип номенклатуры"] == "Набор"
+    assert f["Серия"] == "Prizma"
+    assert f["Акция"] == "Да"
+    assert f["Вес, кг"] == "59"
+    assert f["Объем,м3"] == "0.237"
+    assert f["Количество мест"] == "5"
+
+
+def test_auto_features_does_not_require_manual_feature_codes():
+    plan = {
+        "create": [],
+        "update": [{
+            "sku": "X",
+            "desired": {"stock": None, "characteristics": {"Серия": "Prizma"}},
+        }],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    errors = validate_apply_plan(
+        plan,
+        {
+            "rules": {
+                "update_stock": False,
+                "update_characteristics": True,
+                "auto_features": True,
+            },
+            "webasyst": {"type_id": 142, "feature_codes": {}},
+        },
+    )
+    assert not any("коды характеристик" in x for x in errors)
+
+
+def test_characteristic_names_include_create_and_enabled_updates():
+    plan = {
+        "create": [{"desired": {"characteristics": {"Серия": "Prizma"}}}],
+        "update": [{"desired": {"characteristics": {"Вес, кг": "59"}}}],
+    }
+    names = _characteristic_names_for_plan(plan, {"update_characteristics": True})
+    assert names == ["Вес, кг", "Серия"]
+
+
+def test_bridge_ensure_features_returns_mapping_without_duplicates():
+    bridge = MegasuppliersBridge(url="https://example.invalid/bridge", secret="x")
+    calls = []
+    def fake_call(payload):
+        calls.append(payload)
+        return {"mapping": {"Серия": "ms_s1_a"}}
+    bridge.call = fake_call
+    mapping = bridge.ensure_features(1, "req", 142, ["Серия", "Серия"])
+    assert mapping == {"Серия": "ms_s1_a"}
+    assert calls[0]["action"] == "ensure_features"
+    assert calls[0]["names"] == ["Серия"]
