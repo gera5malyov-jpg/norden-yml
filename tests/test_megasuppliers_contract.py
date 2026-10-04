@@ -121,3 +121,15 @@ def test_supplier_run_prevents_concurrent_dispatch_and_ui_follows_current_run():
     assert "создать '+plan.create" in panel
     assert "обнулить '+plan.zero_stock" in panel
     assert "пропустить '+plan.skipped" in panel
+
+
+def test_autoimport_ui_is_compact_and_hides_legacy_admin_blocks():
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    assert "Обновление прайсов поставщиков" in panel
+    assert "s-ms-advanced" in panel
+    assert "s-ms-suppliers" in panel
+    assert "tidyLegacyUi" in panel
+    assert "Проверить прайс" in panel
+    assert "Применить" in panel
+    assert "window.jQuery" not in panel
+    assert "$(" not in panel
