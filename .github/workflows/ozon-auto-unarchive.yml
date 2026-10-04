@@ -1,0 +1,62 @@
+name: Restore Ozon autoarchived products
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Ozon autoarchive restore limit resets at 03:00 Moscow time.
+    - cron: '15 0 * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-auto-unarchive.yml'
+      - 'scripts/ozon_restore_autoarchived.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ozon-auto-unarchive
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      OZON_MAX_RESTORE: '10'
+      OZON_REPORT_PATH: 'results/ozon-auto-unarchive-latest.json'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore only automatically archived products
+        id: restore
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/ozon_restore_autoarchived.py
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Save redacted report
+        shell: bash
+        run: |
+          test -f results/ozon-auto-unarchive-latest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/ozon-auto-unarchive-latest.json
+          if git diff --cached --quiet; then
+            echo "Report unchanged"
+          else
+            git commit -m "Update Ozon autoarchive restore report"
+            git push
+          fi
+
+      - name: Fail if restore job failed
+        if: steps.restore.outputs.exit_code != '0'
+        shell: bash
+        run: exit "${{ steps.restore.outputs.exit_code }}"
