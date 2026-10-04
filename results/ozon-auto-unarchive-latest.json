@@ -1,17 +1,16 @@
 {
-  "started_at_utc": "2026-10-04T11:52:12.271852+00:00",
-  "mode": "autoarchive_only",
+  "started_at_utc": "2026-10-04T11:57:58.596753+00:00",
+  "mode": "is_autoarchived_true_only",
   "max_restore_per_run": 10,
-  "archived_total_reported": 8233,
-  "archived_items_inspected": 8233,
-  "autoarchive_candidates_seen": 0,
-  "manual_archive_skipped": 6393,
-  "ambiguous_both_flags_skipped": 1840,
+  "archived_total_reported": 8223,
+  "archived_items_inspected": 20,
+  "autoarchive_candidates_seen": 10,
+  "manual_or_other_archive_skipped": 10,
   "missing_info_skipped": 0,
-  "restored_count": 0,
+  "restored_count": 10,
   "failed_count": 0,
   "failures_by_reason": {},
-  "limit_hit": null,
-  "complete_for_this_run": true,
-  "finished_at_utc": "2026-10-04T11:54:36.232483+00:00"
+  "limit_hit": "local_daily_safety_cap",
+  "complete_for_this_run": false,
+  "finished_at_utc": "2026-10-04T11:58:10.314148+00:00"
 }
