@@ -26,7 +26,7 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      OZON_MAX_RESTORE: '10'
+      OZON_MAX_RESTORE: '100'
       OZON_REPORT_PATH: 'results/ozon-auto-unarchive-latest.json'
 
     steps:
