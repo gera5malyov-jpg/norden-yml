@@ -27,6 +27,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
                 'supplier_id' => $supplier_id,
                 'config' => $config,
                 'stocks' => $this->stockOptions(),
+                'types' => $this->typeOptions(),
             );
             return;
         }
@@ -49,6 +50,15 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
             return;
         }
         $this->response = array('status' => 'ok', 'supplier_id' => $supplier_id, 'config' => $config);
+    }
+
+    private function typeOptions()
+    {
+        $rows = (new shopTypeModel())
+            ->select('id,name')
+            ->order('name')
+            ->fetchAll();
+        return array_values($rows);
     }
 
     private function stockOptions()
