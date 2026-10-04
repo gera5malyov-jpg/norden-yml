@@ -163,3 +163,16 @@ def test_cancelled_run_status_controller_is_packaged():
     controller = ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCancel.controller.php"
     assert controller.exists()
     assert "shopMegasuppliersPluginBackendImportCancel.controller.php" in build
+
+
+
+def test_supplier_profile_exposes_article_mode_selector():
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    controller = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php").read_text(encoding="utf-8")
+    assert 'name="sku_mode"' in panel
+    assert 'value="numeric"' in panel
+    assert 'value="supplier"' in panel
+    assert "Автоматический цифровой" in panel
+    assert "Артикул поставщика" in panel
+    assert "'sku_mode' => $sku_mode" in controller
+    assert "array('numeric', 'supplier')" in controller
