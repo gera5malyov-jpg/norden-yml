@@ -47,3 +47,5 @@ jobs:
             git pull --rebase origin main || true
             git push origin HEAD:main
           fi
+
+# Trigger post-deploy UI verification 2026-10-04
