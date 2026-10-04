@@ -409,23 +409,83 @@ def maybe_send_marketplace_message(order_id: str, o: dict, message_kind: str):
         report["chat_errors"] += 1
         print(f"ОШИБКА ЧАТА {o['source']}/{o['external_id']}: {type(e).__name__}: {str(e)[:500]}", file=sys.stderr)
 
+def _sku_matches(payload: Any, code: str) -> List[dict]:
+    rows = payload.get("products") if isinstance(payload, dict) else payload if isinstance(payload, list) else []
+    target = s(code).casefold()
+    found = []
+    for prod in rows or []:
+        if not isinstance(prod, dict):
+            continue
+        skus = prod.get("skus") or {}
+        skus = list(skus.values()) if isinstance(skus, dict) else skus if isinstance(skus, list) else []
+        for x in skus:
+            if (
+                isinstance(x, dict)
+                and s(x.get("sku")).casefold() == target
+                and s(x.get("id"))
+                and s(prod.get("id"))
+            ):
+                found.append({
+                    "sku_id": s(x.get("id")),
+                    "product_id": s(prod.get("id")),
+                    "sku": s(x.get("sku")) or code,
+                })
+    return found
+
+
 def wa_sku(code: str) -> Optional[dict]:
     code = s(code)
     if not code:
         return None
     if code in sku_cache:
         return sku_cache[code]
-    p = wa.call("shop.product.search", params={
-        "hash": f"search/query={code}", "limit": 100, "fields": "id,name,skus"
-    })
-    rows = p.get("products") if isinstance(p, dict) else p if isinstance(p, list) else []
+
     found = []
-    for prod in rows or []:
-        skus = prod.get("skus") or {}
-        skus = list(skus.values()) if isinstance(skus, dict) else skus if isinstance(skus, list) else []
-        for x in skus:
-            if isinstance(x, dict) and s(x.get("sku")) == code and s(x.get("id")):
-                found.append({"sku_id": s(x.get("id")), "product_id": s(prod.get("id")), "sku": code})
+
+    # Webasyst-generated SKUs in this catalog commonly have the form
+    # AF-<sku_id>. Searching them via search/query is unsafe: Shop-Script can
+    # tokenize "AF-31651906" as a broad "AF" query and return tens of thousands
+    # of products, so the exact SKU may be far beyond the first page.
+    # Search by the actual variant ID first and then verify the SKU code.
+    upper = code.upper()
+    exact_sku_id = ""
+    if upper.startswith("AF-") and upper[3:].isdigit():
+        exact_sku_id = upper[3:]
+    elif code.isdigit():
+        exact_sku_id = code
+
+    if exact_sku_id:
+        p = wa.call("shop.product.search", params={
+            "hash": f"search/sku_id={exact_sku_id}",
+            "limit": 20,
+            "fields": "id,name,skus_filtered",
+        })
+        found.extend(_sku_matches(p, code))
+
+    # Fallback for supplier/marketplace article codes (RED-..., SAMS-..., etc.).
+    # Use a much larger page and continue paging only while the result set is
+    # reasonably bounded. Every candidate is still verified by exact SKU code,
+    # so a fuzzy Shop-Script search can never produce a wrong match.
+    if not found:
+        limit = 1000
+        offset = 0
+        max_scan = 5000
+        while offset < max_scan:
+            p = wa.call("shop.product.search", params={
+                "hash": f"search/query={code}",
+                "offset": offset,
+                "limit": limit,
+                "fields": "id,name,skus",
+            })
+            found.extend(_sku_matches(p, code))
+            if found:
+                break
+            rows = p.get("products") if isinstance(p, dict) else p if isinstance(p, list) else []
+            count = int(num(p.get("count"), 0)) if isinstance(p, dict) else len(rows or [])
+            if not rows or offset + len(rows) >= count:
+                break
+            offset += len(rows)
+
     unique = {(x["sku_id"], x["product_id"]): x for x in found}
     ans = next(iter(unique.values())) if len(unique) == 1 else None
     sku_cache[code] = ans
