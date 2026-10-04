@@ -113,7 +113,7 @@ def test_supplier_run_prevents_concurrent_dispatch_and_ui_follows_current_run():
     run_controller = RUN_CONTROLLER.read_text(encoding="utf-8")
     panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
     assert "RUN_ALREADY_ACTIVE" in run_controller
-    assert "active_timeout = 90 * 60" in run_controller
+    assert "active_timeout = 210 * 60" in run_controller
     assert "run.request_id!==currentRequest" in panel
     assert "resumeCurrent" in panel
     assert "setRunBusy" in panel
@@ -227,3 +227,11 @@ def test_bridge_errors_include_http_response_body():
     bridge = (ROOT / "supplier_engine/bridge.py").read_text(encoding="utf-8")
     assert "urllib.error.HTTPError" in bridge
     assert "body=%s" in bridge
+
+
+
+def test_supplier_apply_has_sufficient_workflow_timeout():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    marker = "  supplier-run:"
+    section = workflow.split(marker, 1)[1]
+    assert "timeout-minutes: 180" in section
