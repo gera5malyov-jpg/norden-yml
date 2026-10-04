@@ -52,13 +52,16 @@ def extimg_summary(urls):
     return "" if not clean else "[extimg]\n" + "\n".join(clean) + "\n[/extimg]"
 
 
-def index_by_sku(wa: WebasystClient):
+def index_by_sku(wa: WebasystClient, type_id=None):
     out = {}
     offset = 0
     while True:
+        params = {"offset": offset, "limit": 1000, "fields": "*,skus,stock_counts"}
+        if type_id:
+            params["hash"] = "type/%s" % int(type_id)
         payload = wa.call(
             "shop.product.search",
-            params={"offset": offset, "limit": 1000, "fields": "id,name,summary,type_id,skus"},
+            params=params,
         )
         rows = _listify(payload)
         for product in rows:
@@ -96,10 +99,55 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
     plan = {"create": [], "update": [], "zero": [], "skipped": [], "blocked": []}
     seen_supplier = set()
 
+    existing_by_ids = {}
+    for matches in existing.values():
+        for current_product, current_sku in matches:
+            product_id = str(current_product.get("id") or "").strip()
+            sku_id = str(current_sku.get("id") or "").strip()
+            if product_id and sku_id:
+                existing_by_ids[(product_id, sku_id)] = (current_product, current_sku)
+
+    links_by_supplier = {}
+    valid_links = []
+    for link in links:
+        supplier_sku = str(link.get("supplier_sku") or "").strip()
+        product_id = str(link.get("product_id") or "").strip()
+        sku_id = str(link.get("sku_id") or "").strip()
+        if not supplier_sku or not product_id or not sku_id:
+            continue
+        valid_links.append(link)
+        links_by_supplier.setdefault(supplier_sku, []).append(link)
+
     for product in products:
         seen_supplier.add(product.supplier_sku)
         matches = existing.get(product.sku, [])
         desired = asdict(product)
+
+        if not matches and product.supplier_sku:
+            supplier_links = links_by_supplier.get(product.supplier_sku, [])
+            if len(supplier_links) > 1:
+                plan["blocked"].append({
+                    "sku": product.sku,
+                    "supplier_sku": product.supplier_sku,
+                    "reason": "duplicate_supplier_link",
+                    "matches": len(supplier_links),
+                })
+                continue
+            if len(supplier_links) == 1:
+                link = supplier_links[0]
+                key = (str(link.get("product_id")), str(link.get("sku_id")))
+                linked = existing_by_ids.get(key)
+                if linked is None:
+                    plan["blocked"].append({
+                        "sku": product.sku,
+                        "supplier_sku": product.supplier_sku,
+                        "reason": "stale_supplier_link",
+                        "product_id": link.get("product_id"),
+                        "sku_id": link.get("sku_id"),
+                    })
+                    continue
+                matches = [linked]
+
         if len(matches) > 1:
             plan["blocked"].append({
                 "sku": product.sku,
@@ -128,17 +176,32 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
             continue
         plan["create"].append({"sku": product.sku, "supplier_sku": product.supplier_sku, "desired": desired})
 
-    if rules.get("zero_if_missing", False) and rules.get("update_stock", True):
-        for link in links:
-            supplier_sku = str(link.get("supplier_sku") or "").strip()
-            sku_id = int(link.get("sku_id") or 0)
-            product_id = int(link.get("product_id") or 0)
-            if supplier_sku and supplier_sku not in seen_supplier and sku_id and product_id:
-                plan["zero"].append({
-                    "supplier_sku": supplier_sku,
-                    "sku_id": sku_id,
-                    "product_id": product_id,
-                })
+    if rules.get("zero_if_missing", False) and rules.get("update_stock", True) and valid_links:
+        linked_supplier_skus = {str(link.get("supplier_sku") or "").strip() for link in valid_links}
+        overlap = linked_supplier_skus & seen_supplier
+        if len(valid_links) >= 10 and len(overlap) / float(len(linked_supplier_skus) or 1) < 0.20:
+            plan["blocked"].append({
+                "reason": "supplier_link_overlap_too_low",
+                "links": len(linked_supplier_skus),
+                "matched_links": len(overlap),
+            })
+        else:
+            updated_ids = {
+                (str(row.get("product_id")), str(row.get("sku_id")))
+                for row in plan["update"]
+            }
+            for link in valid_links:
+                supplier_sku = str(link.get("supplier_sku") or "").strip()
+                sku_id = int(link.get("sku_id") or 0)
+                product_id = int(link.get("product_id") or 0)
+                if (str(product_id), str(sku_id)) in updated_ids:
+                    continue
+                if supplier_sku and supplier_sku not in seen_supplier and sku_id and product_id:
+                    plan["zero"].append({
+                        "supplier_sku": supplier_sku,
+                        "sku_id": sku_id,
+                        "product_id": product_id,
+                    })
 
     return plan
 
@@ -148,7 +211,15 @@ def validate_apply_plan(plan, config):
     web = config.get("webasyst") or {}
     rules = config.get("rules") or {}
     if plan["blocked"]:
-        errors.append("В Webasyst найдены дубли итоговых артикулов.")
+        reasons = {str(row.get("reason") or "") for row in plan["blocked"]}
+        if "duplicate_webasyst_sku" in reasons:
+            errors.append("В Webasyst найдены дубли итоговых артикулов.")
+        if "duplicate_supplier_link" in reasons:
+            errors.append("У поставщика найдены дубли привязок одного артикула.")
+        if "stale_supplier_link" in reasons:
+            errors.append("Найдены устаревшие привязки поставщика к отсутствующим SKU Webasyst.")
+        if "supplier_link_overlap_too_low" in reasons:
+            errors.append("Привязки поставщика почти не совпадают с текущим прайсом; массовое обнуление остатков заблокировано.")
     if plan["create"] and not web.get("type_id"):
         errors.append("Для создания новых товаров не задан webasyst.type_id.")
     needs_stock = rules.get("update_stock", True) and (
