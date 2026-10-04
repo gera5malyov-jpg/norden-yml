@@ -337,6 +337,8 @@ def _product_write_data(desired, rules, web, *, creating=False):
     data = {}
     if creating or rules.get("update_name", False):
         data["name"] = desired.get("name") or desired.get("sku") or "Товар"
+    # Do not upload image files into Webasyst. Keep external image URLs in
+    # the product short description, where the existing [extimg] handler can use them.
     if (creating or rules.get("update_images", False)) and desired.get("images"):
         data["summary"] = extimg_summary(desired["images"])
     if creating or rules.get("update_characteristics", False):
@@ -422,7 +424,7 @@ def apply_plan(wa: WebasystClient, plan, config):
             product_data.update({
                 "type_id": int(web["type_id"]),
                 "currency": str(web.get("currency") or "RUB"),
-                "status": int(web.get("new_product_status", 0)),
+                "status": 1,
                 "url": _slug(desired.get("name") or row["sku"]),
                 "skus": [sku_data],
             })
