@@ -154,7 +154,11 @@ def normalize(c, rows):
             images=imgs,
             characteristics=chars,
         )
-        out.append(apply_price_formulas(product, formulas))
+        is_norden = c.get("source", {}).get("format", "").lower() == "norden"
+        if is_norden and (product.purchase_price is None or product.purchase_price <= 0):
+            out.append(product)
+        else:
+            out.append(apply_price_formulas(product, formulas))
     return out
 
 
@@ -235,6 +239,11 @@ def main():
                 raise ValueError("Источник изменился после dry-run; применение заблокировано.")
 
         products = normalize(config, rows)
+        if source_meta is not None and config.get("source", {}).get("format", "").lower() == "norden":
+            source_meta["missing_purchase_price"] = sum(
+                1 for product in products
+                if product.purchase_price is None or product.purchase_price <= 0
+            )
         safety = config["safety"]
 
         wa = None
@@ -278,6 +287,11 @@ def main():
             report.warnings.append(catalog_warning)
         if source_meta and source_meta.get("fallback_used"):
             report.warnings.append("Norden API недоступен; использован резервный XML-источник.")
+        if source_meta and source_meta.get("missing_purchase_price"):
+            report.warnings.append(
+                "У %d позиций Norden нет положительной закупочной цены; их цены не будут изменяться."
+                % source_meta["missing_purchase_price"]
+            )
 
         plan = build_plan(products, existing, links, config.get("rules") or {})
         for error in validate_apply_plan(plan, config):
