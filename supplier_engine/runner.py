@@ -339,7 +339,12 @@ def main():
                         type_id,
                         characteristic_names,
                     )
-                    config.setdefault("webasyst", {}).setdefault("feature_codes", {}).update(resolved)
+                    web_cfg = config.setdefault("webasyst", {})
+                    feature_codes = web_cfg.get("feature_codes")
+                    if not isinstance(feature_codes, dict):
+                        feature_codes = {}
+                    feature_codes.update(resolved)
+                    web_cfg["feature_codes"] = feature_codes
                     features_resolved = len(resolved)
                 result = apply_plan(wa, plan, config)
                 synced = bridge.sync_links(args.supplier_id, args.request_id, result.get("mappings") or [])
