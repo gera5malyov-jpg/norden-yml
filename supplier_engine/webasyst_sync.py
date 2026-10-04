@@ -115,7 +115,7 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
                 "hash": "type/%s" % type_id,
                 "offset": offset,
                 "limit": 1000,
-                "fields": "id,name,summary,type_id,skus",
+                "fields": "*,skus,stock_counts",
             },
         )
         rows = _listify(payload)
