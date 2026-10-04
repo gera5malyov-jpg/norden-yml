@@ -126,6 +126,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
                 'update_stock' => true,
                 'update_images' => (bool)waRequest::post('update_images', 0, waRequest::TYPE_INT),
                 'update_characteristics' => (bool)waRequest::post('update_characteristics', 0, waRequest::TYPE_INT),
+                'auto_features' => (bool)waRequest::post('auto_features', 0, waRequest::TYPE_INT),
                 'zero_if_missing' => (bool)waRequest::post('zero_if_missing', 0, waRequest::TYPE_INT),
                 'zero_other_stocks' => (bool)waRequest::post('zero_other_stocks', 0, waRequest::TYPE_INT),
                 'only_create_in_stock' => (bool)waRequest::post('only_create_in_stock', 0, waRequest::TYPE_INT),
@@ -167,6 +168,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
             $config['mapping']['category'] = 'category';
             $config['mapping']['images'] = array('images');
             $config['mapping']['dynamic_characteristics'] = 'features';
+            $config['rules']['auto_features'] = true;
         }
 
         return $config;
