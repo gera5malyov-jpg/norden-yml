@@ -765,6 +765,86 @@ if ($action === 'links') {
     ));
 }
 
+if ($action === 'ensure_features') {
+    if ((string)(isset($pending['mode']) ? $pending['mode'] : '') !== 'apply') {
+        ms_bridge_json(409, array('errors' => array('apply_request_required')));
+    }
+    if (!$plugin->getSettings('enable_writes')) {
+        ms_bridge_json(403, array('errors' => array('writes_disabled')));
+    }
+
+    $type_id = isset($payload['type_id']) ? (int)$payload['type_id'] : 0;
+    $names = isset($payload['names']) ? $payload['names'] : array();
+    if (!$type_id || !is_array($names)) {
+        ms_bridge_json(422, array('errors' => array('invalid_feature_request')));
+    }
+    if (count($names) > 500) {
+        ms_bridge_json(413, array('errors' => array('too_many_features')));
+    }
+
+    $type = (new shopTypeModel())->getById($type_id);
+    if (!$type) {
+        ms_bridge_json(422, array('errors' => array('product_type_not_found')));
+    }
+
+    $feature_model = new shopFeatureModel();
+    $type_features_model = new shopTypeFeaturesModel();
+    $mapping = array();
+    $created = 0;
+    $linked = 0;
+    $seen = array();
+
+    foreach ($names as $raw_name) {
+        $name = trim((string)$raw_name);
+        if ($name === '' || mb_strlen($name, 'UTF-8') > 255) {
+            continue;
+        }
+        $key = mb_strtolower($name, 'UTF-8');
+        if (isset($seen[$key])) {
+            $mapping[$name] = $seen[$key];
+            continue;
+        }
+
+        $code = 'ms_s'.(int)$supplier_id.'_'.substr(hash('sha256', $key), 0, 16);
+        $feature = $feature_model->getByField('code', $code);
+        if (!$feature) {
+            $data = array(
+                'code' => $code,
+                'name' => $name,
+                'type' => shopFeatureModel::TYPE_VARCHAR,
+                'selectable' => 0,
+                'multiple' => 0,
+                'status' => 'private',
+                'available_for_sku' => 0,
+            );
+            $feature_id = $feature_model->save($data);
+            if (!$feature_id) {
+                ms_bridge_json(500, array('errors' => array('feature_create_failed')));
+            }
+            $feature = $feature_model->getById($feature_id);
+            $created++;
+        }
+
+        $feature_id = (int)(isset($feature['id']) ? $feature['id'] : 0);
+        if (!$feature_id) {
+            ms_bridge_json(500, array('errors' => array('feature_resolve_failed')));
+        }
+        $type_features_model->updateByFeature($feature_id, array($type_id), false);
+        $linked++;
+        $resolved_code = isset($feature['code']) ? (string)$feature['code'] : $code;
+        $mapping[$name] = $resolved_code;
+        $seen[$key] = $resolved_code;
+    }
+
+    ms_bridge_json(200, array(
+        'status' => 'ok',
+        'mapping' => $mapping,
+        'created' => $created,
+        'linked' => $linked,
+        'type_id' => $type_id,
+    ));
+}
+
 if ($action === 'sync_links') {
     if ((string)(isset($pending['mode']) ? $pending['mode'] : '') !== 'apply') {
         ms_bridge_json(409, array('errors' => array('apply_request_required')));

@@ -3,6 +3,7 @@ import hmac
 import json
 import os
 import urllib.request
+import urllib.error
 
 
 class BridgeError(RuntimeError):
@@ -35,6 +36,13 @@ class MegasuppliersBridge:
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as response:
                 raw = response.read().decode("utf-8")
+        except urllib.error.HTTPError as exc:
+            try:
+                detail = exc.read().decode("utf-8", "replace")[:1000]
+            except Exception:
+                detail = ""
+            suffix = " body=%s" % detail if detail else ""
+            raise BridgeError("Megasuppliers bridge request failed: HTTP %s%s" % (exc.code, suffix)) from exc
         except Exception as exc:
             raise BridgeError("Megasuppliers bridge request failed: %s" % exc) from exc
         try:
