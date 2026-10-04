@@ -292,8 +292,28 @@ def test_norden_index_normalizes_supplier_article_without_guessing_ambiguity():
     indexed = index_by_supplier_sku_name(Fake(), 142, ["RT.2031"])
     assert "RT.2031" in indexed
 
-    ambiguous = index_by_supplier_sku_name(Fake(), 142, ["RT.2031", "RT-2031"])
+    ambiguous = index_by_supplier_sku_name(Fake(), 142, ["RT.2031", "RT_2031"])
     assert ambiguous == {}
+
+
+def test_norden_index_exact_match_wins_over_normalized_historical_collision():
+    class Fake:
+        def call(self, method, *, params=None, **kwargs):
+            return {"products": [
+                {
+                    "id": 11,
+                    "name": "Canonical",
+                    "skus": [{"id": 21, "sku": "AF-1", "name": "HY-815C"}],
+                },
+                {
+                    "id": 12,
+                    "name": "Historical variant",
+                    "skus": [{"id": 22, "sku": "AF-2", "name": "HY815C"}],
+                },
+            ]}
+    indexed = index_by_supplier_sku_name(Fake(), 142, ["HY-815C"])
+    assert len(indexed["HY-815C"]) == 1
+    assert indexed["HY-815C"][0][0]["id"] == 11
 
 
 def test_build_plan_accepts_old_af_links_when_cards_match_by_supplier_article():
