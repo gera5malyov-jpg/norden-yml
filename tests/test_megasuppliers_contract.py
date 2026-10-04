@@ -107,3 +107,17 @@ def test_deployer_disables_legacy_create_missing_and_resets_report():
     deploy_script = DEPLOY_SCRIPT.read_text(encoding="utf-8")
     assert "'create_missing' => false" in deploy_script
     assert 'REPORT.write_text("", encoding="utf-8")' in deploy_script
+
+
+def test_supplier_run_prevents_concurrent_dispatch_and_ui_follows_current_run():
+    run_controller = RUN_CONTROLLER.read_text(encoding="utf-8")
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    assert "RUN_ALREADY_ACTIVE" in run_controller
+    assert "active_timeout = 90 * 60" in run_controller
+    assert "run.request_id!==currentRequest" in panel
+    assert "resumeCurrent" in panel
+    assert "setRunBusy" in panel
+    assert "обновить '+plan.update" in panel
+    assert "создать '+plan.create" in panel
+    assert "обнулить '+plan.zero_stock" in panel
+    assert "пропустить '+plan.skipped" in panel
