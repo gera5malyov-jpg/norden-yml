@@ -67,8 +67,9 @@
             <label><input type="checkbox" name="create_new" value="1"> Создавать новые товары</label>
             <label><input type="checkbox" name="only_create_in_stock" value="1"> Создавать новые только при наличии</label>
             <label><input type="checkbox" name="zero_if_missing" value="1" checked> Ставить остаток 0, если товар исчез из остатков поставщика</label>
-            <label><input type="checkbox" name="update_images" value="1"> Обновлять изображения существующих товаров</label>
+            <label><input type="checkbox" name="update_images" value="1"> Обновлять ссылки изображений в «Кратком описании» существующих товаров</label>
             <label><input type="checkbox" name="update_characteristics" value="1"> Обновлять характеристики существующих товаров</label>
+            <p class="hint">Новые товары создаются сразу опубликованными. Файлы изображений не скачиваются: ссылки записываются в «Краткое описание».</p>
         </div>
 
         <details class="s-ms-advanced">
@@ -118,7 +119,7 @@
                     <div class="field"><div class="name">Формула цены</div><div class="value"><input type="text" name="price_formula" placeholder="supplier_price * 1.25"></div></div>
                     <div class="field"><div class="name">Формула до скидки</div><div class="value"><input type="text" name="compare_price_formula" placeholder="supplier_price * 1.60"></div></div>
 
-                    <div class="field"><div class="name">Тип товара Webasyst</div><div class="value"><input type="number" min="0" name="type_id" placeholder="ID типа"></div></div>
+                    <div class="field"><div class="name">Тип товара Webasyst</div><div class="value"><select name="type_id"><option value="">— выберите тип товара —</option></select><p class="hint">Отображается название типа. Внутренний ID сохраняется автоматически.</p></div></div>
                     <div class="field"><div class="name">Склад Webasyst</div><div class="value"><select name="stock_id"><option value="">— выберите склад —</option></select><p class="hint">Отображается название склада. Внутренний ID сохраняется автоматически.</p></div></div>
                     <div class="field"><div class="name">Категория Webasyst</div><div class="value"><input type="number" min="0" name="category_id" placeholder="ID категории"></div></div>
                 </div>
@@ -199,6 +200,27 @@
     function setField(name,value){var el=field(name);if(!el)return;if(el.type==='checkbox'){el.checked=Boolean(value);}else{el.value=(value===null||typeof value==='undefined')?'':value;}}
     function setRunBusy(busy){if(checkBtn)checkBtn.disabled=!!busy;if(applyBtn)applyBtn.disabled=!!busy;}
     function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
+    function setTypeOptions(types,selected){
+        var el=field('type_id');
+        if(!el)return;
+        el.innerHTML='<option value="">— выберите тип товара —</option>';
+        var found=false;
+        (types||[]).forEach(function(type){
+            var option=document.createElement('option');
+            option.value=String(type.id);
+            option.textContent=type.name||('Тип '+type.id);
+            if(String(type.id)===String(selected)){found=true;}
+            el.appendChild(option);
+        });
+        if(selected!==null&&typeof selected!=='undefined'&&String(selected)!==''&&!found){
+            var fallback=document.createElement('option');
+            fallback.value=String(selected);
+            fallback.textContent='Тип #'+selected+' (не найден)';
+            el.appendChild(fallback);
+        }
+        el.value=(selected===null||typeof selected==='undefined')?'':String(selected);
+    }
+
     function setStockOptions(stocks,selected){
         var el=field('stock_id');
         if(!el)return;
@@ -219,7 +241,7 @@
         }
         el.value=(selected===null||typeof selected==='undefined')?'':String(selected);
     }
-    function fill(c,stocks){
+    function fill(c,stocks,types){
         if(!c)return;
         setField('format',c.source&&c.source.format);
         setField('source_location',c.source&&c.source.location);
@@ -241,7 +263,7 @@
         setField('compare_price_formula',pf.compare_price);
         setField('enabled',c.enabled);
         ['create_new','zero_if_missing','only_create_in_stock','update_images','update_characteristics'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});
-        setField('type_id',c.webasyst&&c.webasyst.type_id);
+        setTypeOptions(types,c.webasyst&&c.webasyst.type_id);
         setStockOptions(stocks,c.webasyst&&c.webasyst.stock_id);
         setField('category_id',c.webasyst&&c.webasyst.category_id);
     }
@@ -326,7 +348,7 @@
         try{
             var r=await requestJson(configUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});
             var d=r.data?r.data:r;
-            fill(d.config,d.stocks||[]);
+            fill(d.config,d.stocks||[],d.types||[]);
             setStatus('Профиль загружен','neutral');
             await resumeCurrent(id);
         }catch(err){setStatus('Не удалось загрузить профиль','error');}
