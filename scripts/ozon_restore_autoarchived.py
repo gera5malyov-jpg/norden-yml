@@ -5,7 +5,7 @@ Safety:
 - query only visibility=ARCHIVED;
 - restore only when is_autoarchived=true;
 - never restore products where is_autoarchived is false;
-- restore no more than 10 products per run;
+- restore no more than 100 products per run;
 - report contains counts only (no credentials or product identifiers).
 """
 from __future__ import annotations
@@ -23,7 +23,7 @@ from urllib.request import Request, urlopen
 BASE_URL = "https://api-seller.ozon.ru"
 CLIENT_ID = os.environ.get("OZON_CLIENT_ID", "").strip()
 API_KEY = os.environ.get("OZON_API_KEY", "").strip()
-MAX_RESTORE = max(1, min(int(os.environ.get("OZON_MAX_RESTORE", "10")), 10))
+MAX_RESTORE = max(1, min(int(os.environ.get("OZON_MAX_RESTORE", "100")), 100))
 REPORT_PATH = Path(os.environ.get("OZON_REPORT_PATH", "results/ozon-auto-unarchive-latest.json"))
 TIMEOUT = 60
 
