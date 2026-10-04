@@ -163,6 +163,18 @@ def normalize(c, rows):
     return out
 
 
+def _characteristic_names_for_plan(plan, rules):
+    rows = list(plan.get("create") or [])
+    if rules.get("update_characteristics", False):
+        rows.extend(plan.get("update") or [])
+    names = set()
+    for row in rows:
+        for key, value in (row.get("desired", {}).get("characteristics") or {}).items():
+            if str(key).strip() and value not in (None, ""):
+                names.add(str(key).strip())
+    return sorted(names)
+
+
 def _plan_summary(plan):
     return {
         "create": len(plan.get("create") or []),
@@ -302,6 +314,10 @@ def main():
             )
 
         plan = build_plan(products, existing, links, config.get("rules") or {})
+        characteristic_names = _characteristic_names_for_plan(plan, config.get("rules") or {})
+        if source_meta is not None:
+            source_meta["characteristics_detected"] = len(characteristic_names)
+            source_meta["characteristics_sample"] = characteristic_names[:20]
         for error in validate_apply_plan(plan, config):
             if error not in report.errors:
                 report.errors.append(error)
@@ -311,6 +327,20 @@ def main():
 
         if args.mode == "apply" and not report.blocked:
             try:
+                features_resolved = 0
+                rules = config.get("rules") or {}
+                if characteristic_names and rules.get("auto_features", False):
+                    type_id = (config.get("webasyst") or {}).get("type_id")
+                    if not type_id:
+                        raise ValueError("Для автоматических характеристик не задан webasyst.type_id.")
+                    resolved = bridge.ensure_features(
+                        args.supplier_id,
+                        args.request_id,
+                        type_id,
+                        characteristic_names,
+                    )
+                    config.setdefault("webasyst", {}).setdefault("feature_codes", {}).update(resolved)
+                    features_resolved = len(resolved)
                 result = apply_plan(wa, plan, config)
                 synced = bridge.sync_links(args.supplier_id, args.request_id, result.get("mappings") or [])
                 payload["apply"] = {
@@ -319,6 +349,7 @@ def main():
                     "updated": result["updated"],
                     "zeroed": result["zeroed"],
                     "links_synced": synced,
+                    "features_resolved": features_resolved,
                 }
             except ApplyError as exc:
                 payload["status"] = "failed"
