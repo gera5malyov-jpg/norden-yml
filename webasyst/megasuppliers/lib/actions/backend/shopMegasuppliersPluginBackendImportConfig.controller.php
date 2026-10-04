@@ -22,7 +22,12 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
 
         if (waRequest::method() === 'get') {
             $config = file_exists($path) ? json_decode(file_get_contents($path), true) : null;
-            $this->response = array('status' => 'ok', 'supplier_id' => $supplier_id, 'config' => $config);
+            $this->response = array(
+                'status' => 'ok',
+                'supplier_id' => $supplier_id,
+                'config' => $config,
+                'stocks' => $this->stockOptions(),
+            );
             return;
         }
 
@@ -44,6 +49,15 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
             return;
         }
         $this->response = array('status' => 'ok', 'supplier_id' => $supplier_id, 'config' => $config);
+    }
+
+    private function stockOptions()
+    {
+        $rows = (new shopStockModel())
+            ->select('id,name')
+            ->order('name')
+            ->fetchAll();
+        return array_values($rows);
     }
 
     private function fromForm($supplier)
