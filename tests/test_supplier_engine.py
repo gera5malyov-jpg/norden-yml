@@ -556,7 +556,10 @@ def test_apply_plan_creates_product_then_sets_final_sku():
     add_call = next(x for x in wa.calls if x["method"] == "shop.product.add")
     assert add_call["data"]["type_id"] == 5
     assert add_call["data"]["categories"] == [9]
+    assert add_call["data"]["status"] == 1
     assert "[extimg]" in add_call["data"]["summary"]
+    assert "images" not in add_call["data"]
+    assert not any("image" in call["method"].lower() for call in wa.calls)
     sku_calls = [x for x in wa.calls if x["method"] == "shop.product.skus.update"]
     assert sku_calls[-1]["data"]["sku"] == "X-1"
     assert result["mappings"][0]["product_id"] == 101
