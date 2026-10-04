@@ -113,11 +113,44 @@ jobs:
                       'skus':info.get('skus') if isinstance(info,dict) else None,
                   })
 
+          duplicate_codes = {
+              'CH-226C-OA2016-OS800','CH-202A-OA2000-OS800','815A-AF03-T09',
+              'A2067 black leather','216A-Chrome-2D-B-BB','216B-Chrome-2D-B-BB',
+              'C2067 black leather','HY-815C','HY-815CL',
+          }
+          duplicate_details={code:[] for code in duplicate_codes}
+          if len(type_matches)==1:
+              type_id=type_matches[0]['id']
+              payload=wa.call('shop.product.search',params={
+                  'hash':'type/'+type_id,'offset':0,'limit':1000,'fields':'*,skus,stock_counts'
+              })
+              for product in rows(payload):
+                  skus=product.get('skus') or []
+                  if isinstance(skus,dict):
+                      skus=list(skus.values())
+                  for sku in skus:
+                      sku_name=str(sku.get('name') or '').strip()
+                      for code in duplicate_codes:
+                          norm=lambda x: ''.join(ch.casefold() for ch in str(x) if ch.isalnum())
+                          if norm(sku_name)==norm(code):
+                              duplicate_details[code].append({
+                                  'product_id':str(product.get('id') or ''),
+                                  'product_name':str(product.get('name') or ''),
+                                  'product_status':product.get('status'),
+                                  'sku_id':str(sku.get('id') or ''),
+                                  'sku':str(sku.get('sku') or ''),
+                                  'sku_name':sku_name,
+                                  'sku_status':sku.get('status'),
+                                  'available':sku.get('available'),
+                                  'count':sku.get('count'),
+                              })
+
           out={
               'type_matches':type_matches,'stock_matches':stock_matches,
               'type_count':len(type_rows),'stock_count':len(stock_rows),
               'samples':samples,'link_sample':link_sample,
               'raw_identity_sample':raw_identity_sample,
+              'duplicate_details':duplicate_details,
           }
           os.makedirs('diagnostics',exist_ok=True)
           with open('diagnostics/megasuppliers_webasyst_ids.json','w',encoding='utf-8') as f:
