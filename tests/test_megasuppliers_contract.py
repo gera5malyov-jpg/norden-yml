@@ -143,3 +143,23 @@ def test_stock_selector_uses_webasyst_names():
     assert '<select name="stock_id">' in panel
     assert "function setStockOptions(" in panel
     assert "d.stocks||[]" in panel
+
+
+def test_type_selector_uses_webasyst_names_and_legacy_sidebar_collapses():
+    controller = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php").read_text(encoding="utf-8")
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    sidebar = (ROOT / "webasyst/megasuppliers/patches/import_panel_method.txt").read_text(encoding="utf-8")
+    assert "shopTypeModel()" in controller
+    assert "'types' => $this->typeOptions()" in controller
+    assert '<select name="type_id">' in panel
+    assert "function setTypeOptions(" in panel
+    assert "d.types||[]" in panel
+    assert 'class="s-ms-sidebar-body" style="display:none"' in sidebar
+    assert "s-ms-sidebar-toggle" in sidebar
+
+
+def test_cancelled_run_status_controller_is_packaged():
+    build = (ROOT / "scripts/build_megasuppliers_package.py").read_text(encoding="utf-8")
+    controller = ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCancel.controller.php"
+    assert controller.exists()
+    assert "shopMegasuppliersPluginBackendImportCancel.controller.php" in build

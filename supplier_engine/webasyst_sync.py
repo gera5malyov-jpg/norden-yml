@@ -127,19 +127,29 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
                 skus = list(skus.values())
             for sku in skus:
                 supplier_name = str(sku.get("name") or "").strip()
-                if not supplier_name:
-                    continue
+                internal_sku = str(sku.get("sku") or "").strip()
 
                 exact = source_exact.get(supplier_name) or []
                 if len(exact) == 1:
                     candidates[exact[0]].append((0, product, sku))
                     continue
 
+                # Products created by this supplier engine store the supplier
+                # article as the final Webasyst SKU. This exact fallback also
+                # recovers safely from a cancelled partial apply before links
+                # could be synced.
+                exact_sku = source_exact.get(internal_sku) or []
+                if len(exact_sku) == 1:
+                    candidates[exact_sku[0]].append((1, product, sku))
+                    continue
+
+                if not supplier_name:
+                    continue
                 key = _identity_key(supplier_name)
                 source_matches = source_by_key.get(key) or []
                 # Ambiguous normalized source codes are deliberately not guessed.
                 if len(source_matches) == 1:
-                    candidates[source_matches[0]].append((1, product, sku))
+                    candidates[source_matches[0]].append((2, product, sku))
 
         if len(rows) < 1000:
             break
@@ -337,6 +347,8 @@ def _product_write_data(desired, rules, web, *, creating=False):
     data = {}
     if creating or rules.get("update_name", False):
         data["name"] = desired.get("name") or desired.get("sku") or "Товар"
+    # Do not upload image files into Webasyst. Keep external image URLs in
+    # the product short description, where the existing [extimg] handler can use them.
     if (creating or rules.get("update_images", False)) and desired.get("images"):
         data["summary"] = extimg_summary(desired["images"])
     if creating or rules.get("update_characteristics", False):
@@ -398,6 +410,16 @@ def apply_plan(wa: WebasystClient, plan, config):
                     data=sku_data,
                 )
             product_data = _product_write_data(desired, rules, web, creating=False)
+            current_product = row.get("current_product") or {}
+            current_sku = row.get("current_sku") or {}
+            if (
+                str(current_product.get("status") or "0") == "0"
+                and str(current_sku.get("sku") or "").strip() == str(row.get("supplier_sku") or "").strip()
+            ):
+                # A cancelled old apply may have created the card before it
+                # could finish/link it. Such engine-created cards are safe to
+                # publish on the next successful apply.
+                product_data["status"] = 1
             if product_data:
                 wa.call(
                     "shop.product.update",
@@ -422,7 +444,7 @@ def apply_plan(wa: WebasystClient, plan, config):
             product_data.update({
                 "type_id": int(web["type_id"]),
                 "currency": str(web.get("currency") or "RUB"),
-                "status": int(web.get("new_product_status", 0)),
+                "status": 1,
                 "url": _slug(desired.get("name") or row["sku"]),
                 "skus": [sku_data],
             })
