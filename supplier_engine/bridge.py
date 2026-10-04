@@ -82,3 +82,20 @@ class MegasuppliersBridge:
             })
             total += int(data.get("updated") or 0)
         return total
+
+
+    def ensure_features(self, supplier_id, request_id, type_id, names):
+        names = sorted({str(x).strip() for x in (names or []) if str(x).strip()})
+        if not names:
+            return {}
+        data = self.call({
+            "action": "ensure_features",
+            "supplier_id": int(supplier_id),
+            "request_id": str(request_id),
+            "type_id": int(type_id),
+            "names": names,
+        })
+        mapping = data.get("mapping") or {}
+        if not isinstance(mapping, dict):
+            raise BridgeError("Megasuppliers bridge feature mapping is invalid")
+        return {str(k): str(v) for k, v in mapping.items() if str(k) and str(v)}
