@@ -211,3 +211,19 @@ def test_signed_bridge_can_create_supplier_characteristics():
     assert "'status' => 'private'" in bridge
     assert 'name="auto_features"' in panel
     assert "'auto_features' =>" in controller
+
+
+
+def test_standalone_production_bridge_supports_ensure_features():
+    deploy = DEPLOY_SCRIPT.read_text(encoding="utf-8")
+    assert "if ($action === 'ensure_features')" in deploy
+    assert "shopFeatureModel" in deploy
+    assert "shopTypeFeaturesModel" in deploy
+    assert "too_many_features" in deploy
+    assert "product_type_not_found" in deploy
+
+
+def test_bridge_errors_include_http_response_body():
+    bridge = (ROOT / "supplier_engine/bridge.py").read_text(encoding="utf-8")
+    assert "urllib.error.HTTPError" in bridge
+    assert "body=%s" in bridge
