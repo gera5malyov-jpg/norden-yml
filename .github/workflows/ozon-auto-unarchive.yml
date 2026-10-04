@@ -1,4 +1,5 @@
 name: Restore Ozon autoarchived products
+# Selection rule: is_autoarchived=true only.
 
 on:
   workflow_dispatch:
