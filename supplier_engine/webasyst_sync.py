@@ -93,22 +93,22 @@ def _identity_key(value):
 
 
 def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
-    """Index one Webasyst type by SKU name ("Наименование артикула").
+    """Index one Webasyst product type by supplier article stored in SKU name.
 
-    Exact supplier-code equality always wins. Normalized matching is used only
-    when there is no exact Webasyst match for that supplier code and both sides
-    are unambiguous. This prevents punctuation/transliteration normalization
-    from turning two distinct historical cards into a false duplicate.
+    Exact text wins over normalized fallback. This prevents legacy lookalikes
+    such as Latin C vs Cyrillic С or '-' vs '*' from becoming false duplicates.
     """
-    source_codes = [str(code or "").strip() for code in (supplier_codes or []) if str(code or "").strip()]
-    source_exact = set(source_codes)
+    source_exact = {}
     source_by_key = defaultdict(list)
-    for code in source_codes:
+    for code in supplier_codes or []:
+        code = str(code or "").strip()
         key = _identity_key(code)
-        if key:
-            source_by_key[key].append(code)
+        if not code or not key:
+            continue
+        source_exact.setdefault(code, []).append(code)
+        source_by_key[key].append(code)
 
-    entries = []
+    candidates = defaultdict(list)
     offset = 0
     while True:
         payload = wa.call(
@@ -117,7 +117,7 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
                 "hash": "type/%s" % type_id,
                 "offset": offset,
                 "limit": 1000,
-                "fields": "id,name,summary,type_id,skus",
+                "fields": "*,skus,stock_counts",
             },
         )
         rows = _listify(payload)
@@ -127,37 +127,30 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
                 skus = list(skus.values())
             for sku in skus:
                 supplier_name = str(sku.get("name") or "").strip()
-                if supplier_name:
-                    entries.append((supplier_name, product, sku))
+                if not supplier_name:
+                    continue
+
+                exact = source_exact.get(supplier_name) or []
+                if len(exact) == 1:
+                    candidates[exact[0]].append((0, product, sku))
+                    continue
+
+                key = _identity_key(supplier_name)
+                source_matches = source_by_key.get(key) or []
+                # Ambiguous normalized source codes are deliberately not guessed.
+                if len(source_matches) == 1:
+                    candidates[source_matches[0]].append((1, product, sku))
+
         if len(rows) < 1000:
             break
         offset += len(rows)
 
     out = {}
-    exact_matched_codes = set()
-    unmatched_entries = []
-    for supplier_name, product, sku in entries:
-        if supplier_name in source_exact:
-            out.setdefault(supplier_name, []).append((product, sku))
-            exact_matched_codes.add(supplier_name)
-        else:
-            unmatched_entries.append((supplier_name, product, sku))
-
-    candidates_by_key = defaultdict(list)
-    for supplier_name, product, sku in unmatched_entries:
-        key = _identity_key(supplier_name)
-        if key:
-            candidates_by_key[key].append((supplier_name, product, sku))
-
-    for key, source_matches in source_by_key.items():
-        unresolved_sources = [code for code in source_matches if code not in exact_matched_codes]
-        web_candidates = candidates_by_key.get(key) or []
-        if len(unresolved_sources) != 1 or len(web_candidates) != 1:
-            continue
-        code = unresolved_sources[0]
-        _, product, sku = web_candidates[0]
-        out.setdefault(code, []).append((product, sku))
-
+    for source_code, rows in candidates.items():
+        best_rank = min(row[0] for row in rows)
+        best = [(product, sku) for rank, product, sku in rows if rank == best_rank]
+        if best:
+            out[source_code] = best
     return out
 
 
