@@ -197,3 +197,17 @@ def test_supplier_profile_can_zero_non_target_stocks():
     assert "'zero_other_stocks' =>" in controller
     assert "'stock_ids' => $this->stockIds()" in controller
     assert "private function stockIds()" in controller
+
+
+
+def test_signed_bridge_can_create_supplier_characteristics():
+    bridge = (ROOT / "webasyst/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendBridge.controller.php").read_text(encoding="utf-8")
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    controller = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php").read_text(encoding="utf-8")
+    assert "$action === 'ensure_features'" in bridge
+    assert "shopFeatureModel" in bridge
+    assert "shopTypeFeaturesModel" in bridge
+    assert "TYPE_VARCHAR" in bridge
+    assert "'status' => 'private'" in bridge
+    assert 'name="auto_features"' in panel
+    assert "'auto_features' =>" in controller
