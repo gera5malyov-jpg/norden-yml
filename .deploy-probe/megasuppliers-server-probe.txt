@@ -1,23 +1,24 @@
 ssh_user=root exit=0
 hostname=vm-23f9aff9
 root_exists=yes
-drwxr-xr-x 16 web web 4096 Sep 28 23:19 /home/web/vm-23f9aff9.na4u.ru/www
+drwxr-xr-x 18 web web 4096 Oct  4 16:51 /home/web/vm-23f9aff9.na4u.ru/www
 drwxr-xr-x 17 web web 4096 Sep 26 20:26 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps
 drwxr-xr-x 14 web web 4096 Aug 27 10:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop
-drwxr-xr-x 81 web web 4096 Sep 28 23:19 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
+drwxr-xr-x 81 web web 4096 Oct  4 16:51 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
 --- php ---
 PHP 7.3.19 (cli) (built: Jun 25 2020 05:00:00) ( NTS )
 Copyright (c) 1997-2018 The PHP Group
 Zend Engine v3.3.19, Copyright (c) 1998-2018 Zend Technologies
 --- plugin ---
 plugin_exists=yes
-drwxr-xr-x 5 web web 4096 Sep 28 23:19 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
+drwxr-xr-x 5 web web 4096 Oct  4 16:51 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersFileReader.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersSupplier.model.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersMeta.model.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersImport.model.php
+web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/settings.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/routing.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/db.php
@@ -27,17 +28,26 @@ web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
 --- plugin php lint ---
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersFileReader.class.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendBridge.controller.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendImportCallback.controller.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendApi.controller.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendToggleSupplier.controller.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportRun.controller.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportStatus.controller.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendRegenerateKey.controller.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendSaveSupplier.controller.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendExport.controller.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendThumbs.controller.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendAssignSupplier.controller.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCallback.controller.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersSupplier.model.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersMeta.model.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersImport.model.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/settings.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/routing.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/db.php
@@ -45,7 +55,7 @@ No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plug
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php
 --- plugin config registration ---
 84:  'megasuppliers' => true,
--rw-rw-r-- 1 web web 1980 Sep 28 23:19 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
+-rw-rw-r-- 1 web web 1980 Oct  4 16:51 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
 --- plugins.php contents ---
 <?php
 
@@ -137,7 +147,7 @@ shop_megasuppliers_supplier=yes
 shop_megasuppliers_product=yes
 shop_megasuppliers_import=yes
 shop_megasuppliers_meta=yes
-plugin_class=shopMegasuppliersPlugin version=1.0.4
+plugin_class=shopMegasuppliersPlugin version=1.1.0
 --- existing plugin ownership sample ---
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/cleanup
 web:web 755 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/lib
@@ -2036,23 +2046,27 @@ return [
     'description' => 'Справочник поставщиков, обязательная привязка поставщика при импорте XLSX/CSV и API, экспорт и синхронизация с товарами Shop-Script.',
     'img' => 'img/megasuppliers.svg',
     'vendor' => 'megapolis',
-    'version' => '1.0.4',
+    'version' => '1.1.0',
     'frontend' => true,
     'handlers' => [
         'backend_extended_menu' => 'backendExtendedMenu',
         'backend_menu' => 'backendMenu',
         'backend_prod' => 'backendProd',
+        'backend_prod_list' => 'backendProdList',
+        'products_collection.filter' => 'productsCollectionFilter',
+        'backend_prod_content' => 'backendProdContent',
+        'backend_product_edit' => 'backendProductEdit',
         'backend_products' => 'backendProducts',
-        'backend_prod_filters' => 'backendProdFilters',
-        'products_collection' => 'productsCollection',
         'routing' => 'routing',
     ],
 ];
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/routing.php
 <?php
-return [
+return array(
     'megasuppliers-api/' => 'frontend/api',
-];
+    'megasuppliers-callback/' => 'frontend/importCallback',
+    'megasuppliers-bridge/' => 'frontend/bridge',
+);
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php
 <?php
 try {
@@ -2097,42 +2111,21 @@ try {
 }
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php
 <?php
+// MEGASUPPLIERS_BACKEND_CONTROLLER_BOOTSTRAP
+require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php';
+require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportRun.controller.php';
+require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportStatus.controller.php';
+
 class shopMegasuppliersPlugin extends shopPlugin
 {
     public function backendExtendedMenu(&$params)
     {
-        $base_url = wa('shop')->getAppUrl(null, true);
-        $supplier_model = new shopMegasuppliersSupplierModel();
-        $suppliers = $supplier_model->select('id,name,code')->where('active=1')->order('name')->fetchAll();
-
-        if (isset($params['menu']['catalog']) && class_exists('shopMainMenu') && method_exists('shopMainMenu', 'createSection')) {
-            shopMainMenu::createSection(
-                $params['menu'],
-                'megasuppliers',
-                'Поставщики',
-                [
-                    'icon' => '<i class="fas fa-truck"></i>',
-                    'insert_after' => 'catalog',
-                    'submenu' => [],
-                ]
-            );
-            foreach ($suppliers as $supplier) {
-                $params['menu']['megasuppliers']['submenu'][] = [
-                    'name' => $supplier['name'],
-                    'url' => $base_url.'products/?megasupplier='.(int)$supplier['id'],
-                ];
-            }
-            $params['menu']['megasuppliers']['submenu'][] = [
-                'name' => 'Управление поставщиками',
-                'url' => $base_url.'?plugin=megasuppliers',
-            ];
-        } else {
-            $params['menu']['megasuppliers'] = [
-                'name' => 'Поставщики',
-                'icon' => '<i class="fas fa-truck"></i>',
-                'url' => $base_url.'?plugin=megasuppliers',
-            ];
-        }
+        $url = wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers';
+        $params['menu']['megasuppliers'] = [
+            'name' => 'Поставщики',
+            'icon' => '<i class="fas fa-truck"></i>',
+            'url' => $url,
+        ];
     }
 
     public function backendMenu()
@@ -2167,124 +2160,276 @@ class shopMegasuppliersPlugin extends shopPlugin
     public function routing($route = array())
     {
         if (wa()->getEnv() === 'frontend') {
-            return [
+            return array(
                 'megasuppliers-api/' => 'frontend/api',
-            ];
+                'megasuppliers-callback/' => 'frontend/importCallback',
+                'megasuppliers-bridge/' => 'frontend/bridge',
+            );
         }
-        return [];
-    }
-
-    private function legacySupplierTypeMap()
-    {
-        return array(
-            'NORDEN' => array(142),
-            'TD_ANDREY' => array(126),
-            'DEEPHOUSE' => array(24),
-            'LEVMAR' => array(125),
-            'TREEZ' => array(199),
-            'YOURROOM' => array(26),
-            'AFINA' => array(63),
-            'ALETAN' => array(46, 122, 202),
-            'RED_BLACK' => array(150),
-            'B2B_FABRIKA' => array(204),
-            'KENNER' => array(203),
-            '4SIS' => array(11)
-        );
-    }
-
-    private function supplierProductSubqueries($supplier_id, $supplier_code)
-    {
-        $queries = array(
-            'SELECT product_id FROM shop_megasuppliers_product WHERE supplier_id = '.(int)$supplier_id.' AND product_id > 0'
-        );
-        $map = $this->legacySupplierTypeMap();
-        if (!empty($map[$supplier_code])) {
-            $type_ids = array_map('intval', $map[$supplier_code]);
-            $queries[] = 'SELECT id AS product_id FROM shop_product WHERE type_id IN ('.implode(',', $type_ids).')';
-        }
-        return $queries;
-    }
-
-    public function backendProducts($params = array())
-    {
-        $model = new waModel();
-        $rows = (new shopMegasuppliersSupplierModel())->select('id,name,code')->where('active=1')->order('name')->fetchAll();
-
-        $items = '';
-        foreach ($rows as $row) {
-            $id = (int)$row['id'];
-            $queries = $this->supplierProductSubqueries($id, $row['code']);
-            $count_row = $model->query('SELECT COUNT(*) c FROM ('.implode(' UNION ', $queries).') ms_products')->fetch();
-            $count = $count_row ? (int)$count_row['c'] : 0;
-            $name = htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8');
-            $items .= '<li id="s-megasuppliers-'.$id.'">'
-                .'<span class="count">'.$count.'</span>'
-                .'<a href="#/products/hash=megasuppliers/'.$id.'/">'
-                .'<i class="icon16 folders"></i>'.$name.'</a></li>';
-        }
-
-        $manage_url = wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers';
-        $manage_url = htmlspecialchars($manage_url, ENT_QUOTES, 'UTF-8');
-
-        $html = '<div class="block" id="s-megasuppliers-sidebar">'
-            .'<span class="count"><a href="'.$manage_url.'" title="Управление поставщиками"><i class="icon16 settings"></i></a></span>'
-            .'<h5 class="heading" style="cursor:pointer"><i class="icon16 collapse-handler darr"></i>Поставщики</h5>'
-            .'<ul class="menu-v with-icons">'.$items.'</ul>'
-            .'</div>'
-            .'<script>(function($){'
-            .'var b=$("#s-megasuppliers-sidebar");'
-            .'b.find("h5.heading").off("click.megasuppliers").on("click.megasuppliers",function(e){'
-            .'if($(e.target).closest("a").length){return;}'
-            .'b.find("ul.menu-v").slideToggle(120);'
-            .'b.find(".collapse-handler").toggleClass("darr").toggleClass("rarr");'
-            .'});'
-            .'})(jQuery);</script>';
-
-        return array('sidebar_section' => $html);
-    }
-
-    public function backendProdFilters(&$params)
-    {
-        $supplier_id = waRequest::get('megasupplier', 0, waRequest::TYPE_INT);
-        if ($supplier_id && !empty($params['collection'])) {
-            $supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
-            if ($supplier && !empty($supplier['active'])) {
-                $queries = $this->supplierProductSubqueries($supplier_id, $supplier['code']);
-                $params['collection']->addWhere('id IN ('.implode(' UNION ', $queries).')');
-            }
+        if (wa()->getEnv() === 'backend') {
+            return array(
+                'megasuppliers/import-config/' => 'backend/importConfig',
+                'megasuppliers/import-run/' => 'backend/importRun',
+                'megasuppliers/import-status/' => 'backend/importStatus',
+            );
         }
         return array();
     }
 
-    public function productsCollection($params)
+    private function supplierCodeFromExistingProduct($product_id)
     {
-        if (wa()->getEnv() != 'backend' || empty($params['collection'])) {
-            return null;
+        $product_id = (int)$product_id;
+        if (!$product_id) {
+            return '';
         }
-        $collection = $params['collection'];
-        $hash = $collection->getHash();
-        if (empty($hash) || $hash[0] !== $this->id || empty($hash[1])) {
-            return null;
+
+        $model = new waModel();
+
+        $feature_value = $model->query(
+            "SELECT fv.value
+             FROM shop_product_features pf
+             JOIN shop_feature_values_varchar fv ON fv.id = pf.feature_value_id
+             WHERE pf.product_id = i:product_id AND pf.feature_id = 681
+             LIMIT 1",
+            array('product_id' => $product_id)
+        )->fetchField();
+
+        if ($feature_value !== false && $feature_value !== null) {
+            $key = mb_strtolower(trim((string)$feature_value), 'UTF-8');
+            $aliases = array(
+                'norden' => 'NORDEN',
+                '4sis' => '4SIS',
+                'afinalux' => 'AFINA',
+                'aletan.ru' => 'ALETAN',
+                'aletan-provence.ru' => 'ALETAN',
+                'deephouse' => 'DEEPHOUSE',
+                'левмар' => 'LEVMAR',
+                'treez' => 'TREEZ',
+                'red-black' => 'RED_BLACK',
+                'тд андрей' => 'TD_ANDREY',
+                'андрей' => 'TD_ANDREY',
+                'кмк тд никитин' => 'TD_NIKITIN',
+                '4 сезона' => '4SEASONS',
+                '4seasons' => '4SEASONS',
+                'yourroom' => 'YOURROOM',
+                'kenner' => 'KENNER',
+                'b2b fabrika' => 'B2B_FABRIKA',
+                'в2в' => 'B2B_FABRIKA'
+            );
+            if (isset($aliases[$key])) {
+                return $aliases[$key];
+            }
         }
-        $supplier_id = (int)$hash[1];
+
+        $type_id = (int)$model->query(
+            "SELECT type_id FROM shop_product WHERE id = i:product_id LIMIT 1",
+            array('product_id' => $product_id)
+        )->fetchField();
+
+        if ($type_id) {
+            foreach ($this->legacySupplierTypeMap() as $code => $type_ids) {
+                if (in_array($type_id, array_map('intval', $type_ids), true)) {
+                    return $code;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    private function getProductSupplierId($product_id)
+    {
+        $product_id = (int)$product_id;
+        if (!$product_id) {
+            return 0;
+        }
+
+        $row = (new shopMegasuppliersProductModel())
+            ->select('supplier_id')
+            ->where('product_id = i:product_id', array('product_id' => $product_id))
+            ->order('updated_at DESC, id DESC')
+            ->limit(1)
+            ->fetchAssoc();
+        if ($row) {
+            return (int)$row['supplier_id'];
+        }
+
+        $code = $this->supplierCodeFromExistingProduct($product_id);
+        if ($code !== '') {
+            $supplier = (new shopMegasuppliersSupplierModel())->getByField('code', $code);
+            if ($supplier && !empty($supplier['active'])) {
+                return (int)$supplier['id'];
+            }
+        }
+
+        return 0;
+    }
+
+    private function supplierSelectOptions($selected_id)
+    {
+        $rows = (new shopMegasuppliersSupplierModel())
+            ->select('id,name')
+            ->where('active=1')
+            ->order('name')
+            ->fetchAll();
+        $html = '<option value="">— не выбран —</option>';
+        foreach ($rows as $row) {
+            $selected = ((int)$row['id'] === (int)$selected_id) ? ' selected' : '';
+            $html .= '<option value="'.(int)$row['id'].'"'.$selected.'>'.htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8').'</option>';
+        }
+        return $html;
+    }
+
+    private function supplierAssignUrl()
+    {
+        return wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers&module=backend&action=assignSupplier';
+    }
+
+    public function backendProductEdit($product)
+    {
+        $product_id = (int)$product->id;
+        if (!$product_id) {
+            return array();
+        }
+        $selected = $this->getProductSupplierId($product_id);
+        $options = $this->supplierSelectOptions($selected);
+        $url = htmlspecialchars($this->supplierAssignUrl(), ENT_QUOTES, 'UTF-8');
+
+        $html = '<div class="field s-megasuppliers-legacy-field">'
+            .'<div class="name">Поставщик</div>'
+            .'<div class="value"><select class="s-megasuppliers-select" data-product-id="'.$product_id.'" data-url="'.$url.'">'
+            .$options.'</select> <span class="hint s-megasuppliers-status"></span></div>'
+            .'</div>'
+            .'<script>(function($){'
+            .'var f=$(".s-megasuppliers-legacy-field").last();'
+            .'var target=null;'
+            .'$(".fields .field .name").each(function(){if($.trim($(this).text()).toUpperCase().indexOf("YML ID")>=0){target=$(this).closest(".field");return false;}});'
+            .'if(target&&target.length){f.insertBefore(target);}'
+            .'f.find(".s-megasuppliers-select").off("change.ms").on("change.ms",function(){'
+            .'var el=$(this),st=f.find(".s-megasuppliers-status");st.text("сохраняю…");'
+            .'$.post(el.data("url"),{product_id:el.data("product-id"),supplier_id:el.val(),_csrf:$("input[name=_csrf]").first().val()||""},function(r){'
+            .'if(r&&r.status==="ok"){st.text("сохранено");setTimeout(function(){st.text("");},1500);}else{st.text("ошибка");}'
+            .'},"json").fail(function(){st.text("ошибка");});'
+            .'});'
+            .'})(jQuery);</script>';
+
+        return array('basics' => $html);
+    }
+
+    public function backendProdContent($params)
+    {
+        if (empty($params['product']) || ifset($params, 'content_id', '') !== 'general') {
+            return array();
+        }
+        $product = $params['product'];
+        $product_id = (int)$product->id;
+        if (!$product_id) {
+            return array();
+        }
+        $selected = $this->getProductSupplierId($product_id);
+        $options = $this->supplierSelectOptions($selected);
+        $url = htmlspecialchars($this->supplierAssignUrl(), ENT_QUOTES, 'UTF-8');
+
+        $html = '<div class="field custom-mt-24 s-megasuppliers-new-field">'
+            .'<div class="name"><div class="wa-label for-input"><div>Поставщик</div></div></div>'
+            .'<div class="value"><select class="s-megasuppliers-select small" data-product-id="'.$product_id.'" data-url="'.$url.'">'
+            .$options.'</select> <span class="hint s-megasuppliers-status"></span></div>'
+            .'</div>'
+            .'<script>(function($){'
+            .'var f=$(".s-megasuppliers-new-field").last();'
+            .'var sets=$(".s-product-sets-section").first().closest(".field");'
+            .'if(sets.length){f.insertAfter(sets);}'
+            .'f.find(".s-megasuppliers-select").off("change.ms").on("change.ms",function(){'
+            .'var el=$(this),st=f.find(".s-megasuppliers-status");st.text("сохраняю…");'
+            .'$.post(el.data("url"),{product_id:el.data("product-id"),supplier_id:el.val(),_csrf:$("input[name=_csrf]").first().val()||""},function(r){'
+            .'if(r&&r.status==="ok"){st.text("сохранено");setTimeout(function(){st.text("");},1500);}else{st.text("ошибка");}'
+            .'},"json").fail(function(){st.text("ошибка");});'
+            .'});'
+            .'})(jQuery);</script>';
+
+        return array('form_bottom' => $html);
+    }
+
+    public function productsCollectionFilter($collection)
+    {
+        if (wa()->getEnv() !== 'backend') {
+            return;
+        }
+        $supplier_id = waRequest::get('megasupplier', 0, waRequest::TYPE_INT);
         if (!$supplier_id) {
-            return null;
+            return;
         }
         $supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
         if (!$supplier || empty($supplier['active'])) {
-            return null;
+            $collection->addWhere('0');
+            return;
         }
-
-        $queries = $this->supplierProductSubqueries($supplier_id, $supplier['code']);
-        $collection->addWhere('id IN ('.implode(' UNION ', $queries).')');
-
-        if (!empty($params['auto_title'])) {
-            $collection->addTitle('Поставщик: '.$supplier['name']);
-        }
-        return true;
+        $collection->addWhere(
+            'EXISTS (SELECT 1 FROM shop_megasuppliers_product ms '
+            .'WHERE ms.product_id=p.id AND ms.supplier_id='.(int)$supplier_id.')'
+        );
     }
 
-}
+    public function backendProdList($params)
+    {
+        $rows = (new shopMegasuppliersSupplierModel())
+            ->select('id,name,code')
+            ->where('active=1')
+            ->order('name')
+            ->fetchAll();
+
+        $selected_id = waRequest::get('megasupplier', 0, waRequest::TYPE_INT);
+        $base_url = wa('shop')->getAppUrl(null, true).'products/';
+
+        $items = '';
+        foreach ($rows as $row) {
+            $id = (int)$row['id'];
+            $name = htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8');
+            $url = htmlspecialchars($base_url.'?megasupplier='.$id, ENT_QUOTES, 'UTF-8');
+            $active = ($selected_id === $id) ? ' selected' : '';
+
+            $items .= '<li class="s-megasuppliers-new-item'.$active.'">'
+                .'<a href="'.$url.'" data-megasupplier-id="'.$id.'" class="flexbox middle full-width">'
+                .'<span class="s-icon icon"><i class="fas fa-truck"></i></span>'
+                .'<span class="s-name wide">'.$name.'</span>'
+                .'</a></li>';
+        }
+
+        $expanded = $selected_id ? 'true' : 'false';
+        $display = $selected_id ? '' : ' style="display:none;"';
+
+        $section = '<section class="vue-component-sidebar-section s-megasuppliers-new-list'.($selected_id ? ' is-expanded' : '').'" id="s-megasuppliers-new-list">'
+            .'<header class="heading cursor-pointer">'
+            .'<span class="flexbox middle space-4">'
+            .'<span class="icon"><span class="caret"><i class="fas fa-caret-'.($selected_id ? 'down' : 'right').'"></i></span></span>'
+            .'<span class="s-name">Поставщики</span>'
+            .'</span>'
+            .'</header>'
+            .'<div class="s-sidebar-list-wrapper"'.$display.'>'
+            .'<div class="s-section-content"><div class="s-content-list-wrapper"><ul class="menu">'.$items.'</ul></div></div>'
+            .'</div>'
+            .'</section>';
+
+        $section_json = json_encode($section, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        $html = '<span id="s-megasuppliers-new-bootstrap" style="display:none"></span>'
+            .'<script>(function($){'
+            .'var markup='.$section_json.';'
+            .'function install(){'
+            .'var host=$(".s-filter-categories-section").first();'
+            .'if(!host.length){return false;}'
+            .'if(!host.find("#s-megasuppliers-new-list").length){host.append(markup);}'
+            .'var box=host.find("#s-megasuppliers-new-list");'
+            .'box.find("header.heading").off("click.megasuppliers").on("click.megasuppliers",function(){'
+            .'var body=box.find(".s-sidebar-list-wrapper");'
+            .'var open=body.is(":visible");'
+            .'body.toggle(!open);'
+            .'box.toggleClass("is-expanded",!open);'
+            .'box.find(".caret i").toggleClass("fa-caret-right",open).toggleClass("fa-caret-down",!open);'
+            .'});'
+            .'box.find("a[data-megasupplier-id]").off("click.megasuppliers").on("click.megasuppliers",function(e){'
+            .'e.preventDefault();window.location.href=this.href;'
+            .'});'
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersMeta.model.php
 <?php
 class shopMegasuppliersMetaModel extends waModel
@@ -2588,7 +2733,7 @@ class shopMegasuppliersPluginFrontendApiController extends waJsonController
     {
         $this->getResponse()->setHeader('Content-Type', 'application/json; charset=utf-8');
         if (waRequest::method() !== 'post') {
-            $this->errors = ['method_not_allowed'];
+            $this->errors = array('method_not_allowed');
             $this->getResponse()->setStatus(405);
             return;
         }
@@ -2596,56 +2741,66 @@ class shopMegasuppliersPluginFrontendApiController extends waJsonController
         $expected = $meta ? (string)$meta['value'] : '';
         $provided = trim((string)waRequest::server('HTTP_X_MEGASUPPLIERS_KEY', ''));
         if ($expected === '' || $provided === '' || !hash_equals($expected, $provided)) {
-            $this->errors = ['unauthorized'];
+            $this->errors = array('unauthorized');
             $this->getResponse()->setStatus(401);
             return;
         }
         $body = file_get_contents('php://input');
+        if (strlen($body) > 5242880) {
+            $this->errors = array('payload_too_large');
+            $this->getResponse()->setStatus(413);
+            return;
+        }
         $payload = json_decode($body, true);
         if (!is_array($payload)) {
-            $this->errors = ['invalid_json'];
+            $this->errors = array('invalid_json');
             $this->getResponse()->setStatus(400);
             return;
         }
         $supplier_code = strtoupper(trim((string)ifset($payload['supplier_code'])));
         if ($supplier_code === '') {
-            $this->errors = ['SUPPLIER_REQUIRED'];
+            $this->errors = array('SUPPLIER_REQUIRED');
             $this->getResponse()->setStatus(422);
             return;
         }
         $supplier = (new shopMegasuppliersSupplierModel())->getByField('code', $supplier_code);
         if (!$supplier || empty($supplier['active'])) {
-            $this->errors = ['SUPPLIER_NOT_FOUND'];
+            $this->errors = array('SUPPLIER_NOT_FOUND');
             $this->getResponse()->setStatus(422);
             return;
         }
-        $items = ifset($payload['items'], []);
+        if (!empty($payload['create_missing'])) {
+            $this->errors = array('CREATE_MISSING_REQUIRES_PROFILE');
+            $this->getResponse()->setStatus(422);
+            return;
+        }
+        $items = ifset($payload['items'], array());
         if (!is_array($items) || !$items) {
-            $this->errors = ['ITEMS_REQUIRED'];
+            $this->errors = array('ITEMS_REQUIRED');
             $this->getResponse()->setStatus(422);
             return;
         }
         try {
             $service = new shopMegasuppliersImportService();
-            $stats = $service->importRows($supplier['id'], $items, [
+            $stats = $service->importRows($supplier['id'], $items, array(
                 'source' => 'api',
                 'filename' => '',
-                'create_missing' => !empty($payload['create_missing']),
+                'create_missing' => false,
                 'update_catalog' => !array_key_exists('update_catalog', $payload) || !empty($payload['update_catalog']),
-                'field_map' => ifset($payload['field_map'], []),
-            ]);
-            $this->response = [
+                'field_map' => ifset($payload['field_map'], array()),
+            ));
+            $this->response = array(
                 'status' => 'ok',
-                'supplier' => ['id' => (int)$supplier['id'], 'code' => $supplier['code'], 'name' => $supplier['name']],
+                'supplier' => array('id' => (int)$supplier['id'], 'code' => $supplier['code'], 'name' => $supplier['name']),
                 'import_id' => (int)$stats['import_id'],
                 'created' => $stats['created'],
                 'updated' => $stats['updated'],
                 'linked' => $stats['linked'],
                 'skipped' => $stats['skipped'],
                 'errors' => $stats['errors'],
-            ];
+            );
         } catch (Exception $e) {
-            $this->errors = [$e->getMessage()];
+            $this->errors = array($e->getMessage());
             $this->getResponse()->setStatus(422);
         }
     }
@@ -2664,6 +2819,10 @@ class shopMegasuppliersPluginBackendImportController extends waController
             $this->redirectError('Перед импортом обязательно выберите поставщика.');
             return;
         }
+        if (waRequest::post('create_missing', 0, waRequest::TYPE_INT)) {
+            $this->redirectError('Создание новых товаров через старый ручной импорт отключено. Используйте автоматический профиль поставщика с явными type_id и stock_id.');
+            return;
+        }
         $file = waRequest::file('file');
         if (!$file || !$file->uploaded()) {
             $this->redirectError('Выберите XLSX или CSV-файл.');
@@ -2672,14 +2831,19 @@ class shopMegasuppliersPluginBackendImportController extends waController
         try {
             $rows = shopMegasuppliersFileReader::read($file->tmp_name, $file->name);
             $service = new shopMegasuppliersImportService();
-            $stats = $service->importRows($supplier_id, $rows, [
+            $stats = $service->importRows($supplier_id, $rows, array(
                 'source' => 'file',
                 'filename' => $file->name,
-                'create_missing' => (bool)waRequest::post('create_missing', 0, waRequest::TYPE_INT),
+                'create_missing' => false,
                 'update_catalog' => (bool)waRequest::post('update_catalog', 0, waRequest::TYPE_INT),
-            ]);
-            $msg = sprintf('Импорт завершён: создано %d, обновлено %d, привязано %d, пропущено %d, ошибок %d.',
-                $stats['created'], $stats['updated'], $stats['linked'], $stats['skipped'], count($stats['errors'])
+            ));
+            $msg = sprintf(
+                'Импорт завершён: создано %d, обновлено %d, привязано %d, пропущено %d, ошибок %d.',
+                $stats['created'],
+                $stats['updated'],
+                $stats['linked'],
+                $stats['skipped'],
+                count($stats['errors'])
             );
             wa()->getResponse()->redirect(wa('shop')->getAppUrl(null, true).'?plugin=megasuppliers&msg='.urlencode($msg));
         } catch (Exception $e) {
@@ -2694,65 +2858,23 @@ class shopMegasuppliersPluginBackendImportController extends waController
 }
 --- recent megasuppliers/webasyst errors ---
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-log/shop/plugins/megasuppliers.log
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
-Megasuppliers install error: Unknown field id
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-log/error.log
-Error installing plugin shop.megasuppliers at first run:
-#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/config/install.php(32): waModel->getById('api_key')
-Uncaught Error: Unknown field id
-#3 megasuppliers-api/index.php(22): waModel->getById('api_key')
-Uncaught Error: Unknown field id
-#3 megasuppliers-api/index.php(22): waModel->getById('api_key')
-webasyst/shop/?plugin=megasuppliers
-Uncaught exception waException:
-#3 wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php(20): waModel->getById('api_key')
-#4 wa-system/controller/waViewAction.class.php(188): shopMegasuppliersPluginBackendAction->execute()
-#6 wa-system/controller/waDefaultViewController.class.php(48): waViewController->executeAction(Object(shopMegasuppliersPluginBackendAction))
-#12 wa-system/controller/waFrontController.class.php(84): waFrontController->execute('megasuppliers', 'backend', NULL)
-webasyst/shop/?plugin=megasuppliers
-Uncaught exception waException:
-#3 wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php(20): waModel->getById('api_key')
-#4 wa-system/controller/waViewAction.class.php(188): shopMegasuppliersPluginBackendAction->execute()
-#6 wa-system/controller/waDefaultViewController.class.php(48): waViewController->executeAction(Object(shopMegasuppliersPluginBackendAction))
-#12 wa-system/controller/waFrontController.class.php(84): waFrontController->execute('megasuppliers', 'backend', NULL)
+Uncaught exception SmartyCompilerException:
+Syntax Error in template &quot;f7fb655cc6013fc8ae41842acef78cd85f71bf67&quot;  on line 12 &quot;td {border: 1px solid #ccc;}br {mso-data-placement:same-cell;}&quot;  - Unexpected &quot;: &quot;, expected one of: &quot;}&quot; , &quot; &quot; , ATTR (0)
+#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+Uncaught exception SmartyCompilerException:
+Syntax Error in template &quot;f7fb655cc6013fc8ae41842acef78cd85f71bf67&quot;  on line 12 &quot;td {border: 1px solid #ccc;}br {mso-data-placement:same-cell;}&quot;  - Unexpected &quot;: &quot;, expected one of: &quot;}&quot; , &quot; &quot; , ATTR (0)
+#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+Uncaught exception SmartyCompilerException:
+Syntax Error in template &quot;f7fb655cc6013fc8ae41842acef78cd85f71bf67&quot;  on line 12 &quot;td {border: 1px solid #ccc;}br {mso-data-placement:same-cell;}&quot;  - Unexpected &quot;: &quot;, expected one of: &quot;}&quot; , &quot; &quot; , ATTR (0)
+#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+Uncaught exception SmartyCompilerException:
+Syntax Error in template &quot;f7fb655cc6013fc8ae41842acef78cd85f71bf67&quot;  on line 12 &quot;td {border: 1px solid #ccc;}br {mso-data-placement:same-cell;}&quot;  - Unexpected &quot;: &quot;, expected one of: &quot;}&quot; , &quot; &quot; , ATTR (0)
+#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
 --- shop plugin dispatcher ---
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/backend/shopBackendWelcome.action.php:80:        if ($plugin_id = waRequest::post('plugin')) {
 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/backend/shopBackendWelcome.action.php:81:            $data = waRequest::post($plugin_id);
@@ -3073,36 +3195,36 @@ shopYmlPluginBackendSetup.action.php
 --- existing supplier metadata sources ---
 [types]
 61	14434	Тайпит
-126	10853	ТД Андрей автовыгрузка
+126	10923	ТД Андрей автовыгрузка
 22	5855	Roomers
-21	4122	stoolgroup
-144	4048	miomarket
+21	4153	stoolgroup
+144	4052	miomarket
 141	3237	UTFC STORE
-79	2771	33 Кровати-333
+79	2776	33 Кровати-333
 164	2710	sheffilton
 132	2607	enjoyme
+124	2231	samsonopt.ru
 150	2228	RED-Black1
 58	2191	Logomebel
-20	2099	Weekend-billiard
-124	2058	samsonopt.ru
+20	2100	Weekend-billiard
 42	2013	Столлайн
 52	1917	Тетчер
-24	1889	deephouse-336
+24	1892	deephouse-336
 188	1886	neopoliscasa
-19	1853	Этажерка
+19	1861	Этажерка
 23	1749	barcelonadesign
 196	1631	z3k.ru
-51	1594	Промет
+51	1595	Промет
 199	1488	Treez.ru
 35	1477	Louvrehome
 84	1451	Просто купи Бувардо
-67	1396	reehouse
+67	1399	reehouse
 14	1384	miralls.ru
 145	1283	blago-mebel.ru
-190	1255	zip-mebel
+190	1256	zip-mebel
 31	1131	mebelik
-136	1055	Riva
-28	1051	montre-vip
+28	1059	montre-vip
+136	1057	Riva
 192	1032	Garda Decor
 202	979	aletan.ru
 11	945	4sis.ru
@@ -3111,17 +3233,17 @@ shopYmlPluginBackendSetup.action.php
 112	885	metta
 134	854	EverProf
 143	842	esf Склад
-60	815	Просто-Купи
-152	811	mebelcity стулья
+60	816	Просто-Купи
+152	813	mebelcity стулья
 93	783	idcollection
 37	706	tothome
 147	702	Натурмебель
-142	664	NORDEN-100
+142	662	NORDEN-100
 45	582	Artikul-mebel
+120	573	rotang.spb.ru
 125	571	Левмар-337
 39	567	Трия
-120	562	rotang.spb.ru
-68	541	mebwill
+68	542	mebwill
 161	525	bradexhome.ru
 195	465	championtool.ru
 128	461	gartlex.ru
@@ -3156,7 +3278,7 @@ shopYmlPluginBackendSetup.action.php
 86	97	СПб-Офис Директория Кресла
 198	92	Евроформа
 98	82	Belsi-home
-203	75	kennermebel-334
+203	80	kennermebel-334
 154	61	Эколайн
 139	60	rattan-mebel.ru
 97	44	Тайпит Диваны
@@ -3189,18 +3311,18 @@ shopYmlPluginBackendSetup.action.php
 122	0	aletan-мрамор
 202	979	aletan.ru
 166	0	Arredo Classic 
-24	1889	deephouse-336
-203	75	kennermebel-334
-142	664	NORDEN-100
+24	1892	deephouse-336
+203	80	kennermebel-334
+142	662	NORDEN-100
 150	2228	RED-Black1
 199	1488	Treez.ru
 26	0	yourroom
 125	571	Левмар-337
 204	112	Мебельная фабрика В2В-335
-126	10853	ТД Андрей автовыгрузка
+126	10923	ТД Андрей автовыгрузка
 [feature_681_values]
 151490	0	33 Кровати
-429480	2771	33кровати
+429480	2776	33кровати
 106513	945	4sis
 160174	279	afinalux
 106485	262	Alavann
@@ -3226,7 +3348,7 @@ shopYmlPluginBackendSetup.action.php
 106507	0	cosmorelax
 151409	104	Deccon.ru
 452937	0	decorumdesign
-106514	1887	Deephouse
+106514	1890	Deephouse
 211777	0	dekomo
 472962	301	demimebel
 104196	1	desperadosport
@@ -3271,9 +3393,9 @@ shopYmlPluginBackendSetup.action.php
 456231	248	mdehouse
 160268	2	Mealux
 288394	0	mebelcity столы
-288202	811	mebelcity стулья
+288202	813	mebelcity стулья
 106519	1131	mebelik
-106512	541	mebwill
+106512	542	mebwill
 305099	179	metkon
 106442	0	metkon.ru
 160270	70	metta
@@ -3281,9 +3403,9 @@ shopYmlPluginBackendSetup.action.php
 106496	1384	miralls.ru
 439118	0	mistyofficial
 104341	0	mobilicasa.ru
-104203	1051	montre-vip
+104203	1059	montre-vip
 453394	1886	neopoliscasa
-247364	661	NORDEN
+247364	659	NORDEN
 160173	0	objectmechty
 106517	0	ogogo
 441251	112	Podstolia
@@ -3292,13 +3414,13 @@ shopYmlPluginBackendSetup.action.php
 106882	0	r-home.ru
 245211	60	rattan-mebel.ru
 120405	2188	red-black
-106506	1396	reehouse
+106506	1399	reehouse
 160137	0	RIFFORMA
-243865	1055	Riva
+243865	1057	Riva
 106518	5855	Roomers
-104350	562	rotang.spb.ru
+104350	573	rotang.spb.ru
 210736	0	sale@podstolia.ru
-437571	2058	Samsonopt
+437571	2231	Samsonopt
 250180	0	samsonopt.
 243893	0	samsonopt.ru
 465684	0	sancors
@@ -3306,11 +3428,11 @@ shopYmlPluginBackendSetup.action.php
 399899	0	Semka
 365687	2710	Sheffilton
 151407	23	Shelf-on.ru
-518000	3159	signal-halmar
+518000	3163	signal-halmar
 185817	168	Sonum
 104199	165	Spbmebel.ru
 151408	5	Starbarrel
-106516	4122	Stoolgroup
+106516	4153	Stoolgroup
 405504	0	Stoolgroup Свет
 181953	0	td-arnika
 312463	0	thefurny.ru
@@ -3323,16 +3445,16 @@ shopYmlPluginBackendSetup.action.php
 160172	0	UTFC
 247299	3237	UTFC STORE
 151406	0	Vezzolli
-104195	2099	Weekend-billiard
+104195	2100	Weekend-billiard
 244092	0	Woodi
 249708	0	Woodido
 413234	0	Woodido.ru
 104190	0	Woodville
 518333	1631	z3k.ru
-460799	1255	zip-mebel
+460799	1256	zip-mebel
 336304	0	 вам свет
 160315	0	Аквилон
-477355	10517	Андрей
+477355	10587	Андрей
 461696	0	Арника
 160146	0	Аскона
 484536	0	Бит байт
@@ -3361,9 +3483,9 @@ shopYmlPluginBackendSetup.action.php
 477654	702	Натур-Мебель
 160170	0	Офисная магия
 160316	0	Первый мебельный
-104352	1599	Промет
+104352	1600	Промет
 160136	0	Просто купи Бувардо
-449832	815	Просто- купи
+449832	816	Просто- купи
 150898	0	Просто-Купи
 303382	0	Просто-Купи 
 136387	5	Профи
@@ -3390,29 +3512,43 @@ shopYmlPluginBackendSetup.action.php
 160148	0	Хеппипуф
 350403	37	Эколайн
 160171	0	Экспогрейд
-104189	1853	Этажерка
+104189	1861	Этажерка
 --- supplier mapping counts ---
 3	4SEASONS	4 Сезона	0
-14	4SIS	4SIS	1
-8	AFINA	Afina Garden	0
-9	ALETAN	Aletan	0
-12	B2B_FABRIKA	B2B Fabrika	0
-4	DEEPHOUSE	DEEPHOUSE	0
-13	KENNER	Kenner	0
-5	LEVMAR	Levmar	0
-1	NORDEN	Norden	1
-10	RED_BLACK	Red-Black	0
-6	TREEZ	Treez	0
+14	4SIS	4SIS	945
+8	AFINA	Afina Garden	294
+9	ALETAN	Aletan	979
+12	B2B_FABRIKA	B2B Fabrika	112
+4	DEEPHOUSE	DEEPHOUSE	1889
+13	KENNER	Kenner	75
+5	LEVMAR	Levmar	571
+1	NORDEN	Norden	664
+10	RED_BLACK	Red-Black	2221
+6	TREEZ	Treez	1488
 7	YOURROOM	Yourroom	0
-2	TD_ANDREY	ТД Андрей	0
+2	TD_ANDREY	ТД Андрей	9427
 11	TD_NIKITIN	ТД Никитин	0
+--- navigation/filter runtime diagnostic ---
+version=1.1.0
+handlers={"backend_extended_menu":"backendExtendedMenu","backend_menu":"backendMenu","backend_prod":"backendProd","backend_prod_list":"backendProdList","products_collection.filter":"productsCollectionFilter","backend_prod_content":"backendProdContent","backend_product_edit":"backendProductEdit","backend_products":"backendProducts","routing":"routing"}
+direct_sidebar=yes len=8167
+event_plugins=yandexmarket-plugin,nullcat-plugin,yml-plugin,lostproducts-plugin,xml-plugin,massedit-plugin,bwsimplesearch-plugin,megasuppliers-plugin
+event_sidebar=no len=0
+4sis_id=14
+
+Warning: session_start(): Cannot start session when headers already sent in /home/web/vm-23f9aff9.na4u.ru/www/wa-system/storage/waSessionStorage.class.php on line 71
+
+Fatal error: Uncaught Error: Call to undefined method shopMegasuppliersPlugin::backendProdFilters() in /tmp/ms_nav_runtime.php:32
+Stack trace:
+#0 {main}
+  thrown in /tmp/ms_nav_runtime.php on line 32
 --- backend action cli diagnostic ---
 plugin=shopMegasuppliersPlugin
 backend_class_exists=yes
 supplier_model_exists=yes
 supplier_count=14
 sidebar_render=yes
-sidebar_filter_link=yes
+sidebar_filter_link=no
 sidebar_norden=yes
 --- api bridge diagnostic ---
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/megasuppliers-api/index.php
@@ -3459,13 +3595,68 @@ Stack trace:
                 <div class="name">Действия</div>
                 <div class="value">
                     <label><input type="checkbox" name="update_catalog" value="1" checked> обновлять найденные товары Webasyst</label><br>
-                    <label><input type="checkbox" name="create_missing" value="1"> создавать новые товары, если артикул не найден</label>
+                    <label><input type="checkbox" disabled> создание новых через старый импорт отключено — используйте автоматический профиль</label>
                     <p class="hint">Без второй галочки новые строки сохраняются у поставщика, но товар Webasyst не создаётся.</p>
                 </div>
             </div>
             <div class="field"><div class="value submit"><button class="button green" type="submit">Импортировать</button></div></div>
         </form>
     </div>
+
+<hr>
+<div class="fields form" id="s-megasuppliers-autoimport">
+    <h2>Автоматические прайсы</h2>
+    <p class="hint">Укажите источник и поля прайса. Проверка запускается только как dry-run и не меняет каталог Webasyst. GitHub token и callback secret задаются в настройках плагина.</p>
+    <form class="s-ms-config-form">
+        {$wa->csrf()}
+        <div class="field"><div class="name">Поставщик</div><div class="value"><select name="supplier_id" required><option value="">— выберите —</option>{foreach $suppliers as $supplier}{if $supplier.active}<option value="{$supplier.id}">{$supplier.name|escape} ({$supplier.code|escape})</option>{/if}{/foreach}</select></div></div>
+        <div class="field"><div class="name">Формат</div><div class="value"><select name="format"><option value="yml">YML</option><option value="norden">Norden API + резерв XML</option><option value="xml">XML</option><option value="xlsx">Excel XLSX</option><option value="csv">CSV</option><option value="pdf">PDF (табличный текстовый)</option></select></div></div>
+        <div class="field"><div class="name">Ссылка на прайс</div><div class="value"><input type="text" name="source_location" class="long" placeholder="https://..."><p class="hint">Для Norden выберите «Norden API + резерв XML»: URL и secret URL не заполняются, API-ключ берётся из GitHub, а при сбое используется резервный XML. Для других приватных URL укажите GitHub Secret с именем MEGASUPPLIERS_SOURCE_*. PDF поддерживается для текстовых таблиц; сканы требуют отдельного адаптера.</p></div></div>
+        <div class="field"><div class="name">GitHub Secret URL</div><div class="value"><input type="text" name="location_secret" placeholder="MEGASUPPLIERS_SOURCE_LIGA"></div></div>
+        <div class="field"><div class="name">Лист Excel</div><div class="value"><input type="text" name="sheet"></div></div>
+        <div class="field"><div class="name">Артикул поставщика</div><div class="value"><input type="text" name="supplier_sku_field" placeholder="vendorCode" required> <input type="text" name="sku_prefix" placeholder="Префикс, например Liga-"></div></div>
+        <div class="field"><div class="name">Название / бренд</div><div class="value"><input type="text" name="name_field" placeholder="name" required> <input type="text" name="brand" placeholder="Бренд"></div></div>
+        <div class="field"><div class="name">Поля цен</div><div class="value"><input type="text" name="purchase_price_field" placeholder="закупка"> <input type="text" name="price_field" placeholder="цена"> <input type="text" name="compare_price_field" placeholder="до скидки"></div></div>
+        <div class="field"><div class="name">Остаток / категория</div><div class="value"><input type="text" name="stock_field" placeholder="stock / available"> <input type="text" name="category_field" placeholder="categoryId"></div></div>
+        <div class="field"><div class="name">Изображения</div><div class="value"><input type="text" name="images" class="long" placeholder="pictures"><p class="hint">Несколько полей — через запятую.</p></div></div>
+        <div class="field"><div class="name">Формулы цен</div><div class="value"><input type="text" name="purchase_price_formula" placeholder="закупка"> <input type="text" name="price_formula" placeholder="supplier_price * 1.25"> <input type="text" name="compare_price_formula" placeholder="supplier_price * 1.60"><p class="hint">Разрешены только числа, supplier_price, purchase_price, price, compare_price, stock и + − × ÷.</p></div></div>
+        <div class="field"><div class="name">Правила</div><div class="value">
+            <label><input type="checkbox" name="enabled" value="1"> профиль активен</label><br>
+            <label><input type="checkbox" name="create_new" value="1"> создавать новые</label><br>
+            <label><input type="checkbox" name="zero_if_missing" value="1" checked> ставить 0, если товар исчез из остатков</label><br>
+            <label><input type="checkbox" name="only_create_in_stock" value="1"> новые — только при наличии</label><br>
+            <label><input type="checkbox" name="update_images" value="1"> обновлять изображения</label><br>
+            <label><input type="checkbox" name="update_characteristics" value="1"> обновлять характеристики</label>
+        </div></div>
+        <div class="field"><div class="name">Webasyst ID</div><div class="value"><input type="number" min="0" name="type_id" placeholder="type_id"> <input type="number" min="0" name="stock_id" placeholder="stock_id"> <input type="number" min="0" name="category_id" placeholder="category_id"></div></div>
+        <div class="field"><div class="value submit"><button type="button" class="button s-ms-save">Сохранить профиль</button> <button type="button" class="button green s-ms-check">Сохранить и проверить прайс</button> <button type="button" class="button yellow s-ms-apply">Применить проверенный прайс</button> <span class="hint s-ms-status"></span></div></div>
+    </form>
+</div>
+<script>
+(function(){
+    var box=document.getElementById('s-megasuppliers-autoimport');
+    if(!box)return;
+    var form=box.querySelector('.s-ms-config-form');
+    var status=box.querySelector('.s-ms-status');
+    var configUrl='{$backend_url}?plugin=megasuppliers&action=importConfig',runUrl='{$backend_url}?plugin=megasuppliers&action=importRun',statusUrl='{$backend_url}?plugin=megasuppliers&action=importStatus';
+{literal}
+    function setStatus(text){if(status)status.textContent=text||'';}
+    function field(name){return form.querySelector('[name="'+name+'"]');}
+    function setField(name,value){var el=field(name);if(!el)return;if(el.type==='checkbox'){el.checked=Boolean(value);}else{el.value=(value===null||typeof value==='undefined')?'':value;}}
+    function fill(c){if(!c)return;setField('format',c.source&&c.source.format);setField('source_location',c.source&&c.source.location);setField('location_secret',c.source&&c.source.location_secret);setField('sheet',c.source&&c.source.sheet);setField('supplier_sku_field',c.identity&&c.identity.supplier_sku_field);setField('sku_prefix',c.identity&&c.identity.sku_prefix);setField('brand',c.identity&&c.identity.brand);setField('name_field',c.mapping&&c.mapping.name);setField('purchase_price_field',c.mapping&&c.mapping.purchase_price);setField('price_field',c.mapping&&c.mapping.price);setField('compare_price_field',c.mapping&&c.mapping.compare_price);setField('stock_field',c.mapping&&c.mapping.stock);setField('category_field',c.mapping&&c.mapping.category);setField('images',(c.mapping&&c.mapping.images||[]).join(', '));var pf=c.rules&&c.rules.price_formulas||{};setField('purchase_price_formula',pf.purchase_price);setField('price_formula',pf.price);setField('compare_price_formula',pf.compare_price);setField('enabled',c.enabled);['create_new','zero_if_missing','only_create_in_stock','update_images','update_characteristics'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});setField('type_id',c.webasyst&&c.webasyst.type_id);setField('stock_id',c.webasyst&&c.webasyst.stock_id);setField('category_id',c.webasyst&&c.webasyst.category_id);}
+    function paramsFromForm(){return new URLSearchParams(new FormData(form));}
+    async function requestJson(url,options){var res=await fetch(url,options||{credentials:'same-origin'});var text=await res.text();var data=null;try{data=JSON.parse(text);}catch(e){}if(!res.ok){var err=new Error('HTTP '+res.status);err.data=data;throw err;}if(!data){throw new Error('INVALID_JSON');}return data;}
+    form.addEventListener('change',async function(e){if(!e.target||e.target.name!=='supplier_id')return;var id=e.target.value;if(!id)return;form.reset();field('supplier_id').value=id;setStatus('загрузка…');try{var r=await requestJson(configUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});fill(r.data?r.data.config:r.config);setStatus('');}catch(err){setStatus('не удалось загрузить профиль');}});
+    async function save(next){var id=field('supplier_id').value;if(!id){setStatus('выберите поставщика');return;}setStatus('сохранение…');try{var r=await requestJson(configUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:paramsFromForm()});if(r&&r.status==='ok'){setStatus('профиль сохранён');if(next)await next(id);}else{setStatus('ошибка сохранения');}}catch(err){setStatus('ошибка сохранения');}}
+    function poll(id,requestId){var tries=0,busy=false;var timer=setInterval(async function(){if(busy)return;busy=true;tries++;try{var r=await requestJson(statusUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});var run=r.data?r.data.run:r.run;if(run&&run.request_id===requestId){if(run.status==='queued'){setStatus('проверка выполняется…');}else{clearInterval(timer);if(run.report){setStatus(run.report.blocked?'проверка заблокирована: '+(run.report.errors||[]).join('; '):'проверка пройдена: '+run.report.products+' товаров');}else{setStatus('проверка завершена: '+run.status);}}}}catch(err){}finally{busy=false;}if(tries>100){clearInterval(timer);setStatus('проверка ещё выполняется; статус можно открыть позже');}},3000);}
+    async function run(id,mode){setStatus(mode==='apply'?'запуск применения…':'запуск проверки…');var body=new URLSearchParams();body.set('supplier_id',id);body.set('mode',mode);var csrf=field('_csrf');body.set('_csrf',csrf?csrf.value:'');try{var r=await requestJson(runUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body});var d=r&&r.data?r.data:r;var errs=r&&r.errors?r.errors:[];if(r&&r.status==='ok'&&d.request_id){setStatus(mode==='apply'?'применение запущено':'проверка запущена');poll(id,d.request_id);}else{setStatus((mode==='apply'?'применение заблокировано':'ошибка запуска')+(errs.length?': '+errs.join('; '):''));}}catch(err){var errs=err.data&&err.data.errors?err.data.errors:[];setStatus((mode==='apply'?'применение заблокировано':'ошибка запуска')+(errs.length?': '+errs.join('; '):''));}}
+    var saveBtn=box.querySelector('.s-ms-save'),checkBtn=box.querySelector('.s-ms-check'),applyBtn=box.querySelector('.s-ms-apply');
+    if(saveBtn)saveBtn.addEventListener('click',function(){save();});
+    if(checkBtn)checkBtn.addEventListener('click',function(){save(function(id){return run(id,'dry-run');});});
+    if(applyBtn)applyBtn.addEventListener('click',function(){var id=field('supplier_id').value;if(!id){setStatus('выберите поставщика');return;}if(!confirm('Применить последний успешно проверенный прайс в каталог Webasyst? Запись будет разрешена только если включён enable_writes и прайс не изменился после dry-run.'))return;run(id,'apply');});
+})();
+{/literal}
+</script>
 
     <hr>
     <h2>Справочник поставщиков</h2>
@@ -3536,10 +3727,33 @@ plugin=shopMegasuppliersPlugin
 backend_action_class=yes
 meta_read=yes
 supplier_count=14
-import_count=2
+import_count=3
+--- megasuppliers performance benchmark (read-only) ---
+[indexes]
+PRIMARY	1	id
+supplier_sku	1	supplier_id
+supplier_sku	2	supplier_sku
+product_id	1	product_id
+sku_id	1	sku_id
+external_id	1	external_id
+supplier_product	1	supplier_id
+supplier_product	2	product_id
+[sizes]
+mapping_rows=18665
+mapped_products=18665
+benchmark_supplier_id=2 products=9427
+group_counts_ms=5.16 suppliers=11
+per_supplier_counts_ms=12.23 suppliers=14
+backendProdList_ms=0.17 len=10320
+backendProducts_ms=0.13 len=8167
+filter_exists_count=9427 ms=22.62,14.79,14.47
+
+Fatal error: Uncaught Error: Call to undefined method mysqli_result::fetchAll() in /tmp/ms_perf_probe.php:65
+Stack trace:
+#0 {main}
+  thrown in /tmp/ms_perf_probe.php on line 65
 --- recent megasuppliers/errors in wa-log ---
 
 stderr=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
 
 temp_key_removed=yes
-ERROR: TimeoutExpired(['ssh', '-i', '/tmp/tmpzxb4dgwv/megasuppliers_ed25519', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'ConnectTimeout=12', 'root@45.86.180.49', 'bash -s'], 120)
