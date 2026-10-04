@@ -67,6 +67,16 @@ def index_by_sku(wa: WebasystClient, type_id=None):
         )
         rows = _listify(payload)
         for product in rows:
+            summary_supplier = ""
+            if image_aliases:
+                summary = str(product.get("summary") or "")
+                for url in re.findall(r"https?://[^\s\]<>'\"]+", summary):
+                    alias = image_aliases.get(url.rstrip(".,;"))
+                    if alias:
+                        if summary_supplier and summary_supplier != alias:
+                            summary_supplier = ""
+                            break
+                        summary_supplier = alias
             skus = product.get("skus") or []
             if isinstance(skus, dict):
                 skus = list(skus.values())
@@ -99,7 +109,7 @@ def webasyst_sku_mode(config):
     return "numeric" if str((config.get("source") or {}).get("format") or "").lower() == "norden" else "supplier"
 
 
-def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes, sku_aliases=None):
+def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes, sku_aliases=None, image_aliases=None):
     """Index one Webasyst product type by supplier article stored in SKU name.
 
     Exact text wins over normalized fallback. This prevents legacy lookalikes
@@ -108,6 +118,7 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes, sku_
     source_exact = {}
     source_by_key = defaultdict(list)
     sku_aliases = {str(k): str(v) for k, v in (sku_aliases or {}).items() if str(k) and str(v)}
+    image_aliases = {str(k): str(v) for k, v in (image_aliases or {}).items() if str(k) and str(v)}
     for code in supplier_codes or []:
         code = str(code or "").strip()
         key = _identity_key(code)
@@ -156,13 +167,21 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes, sku_
                     candidates[alias_supplier].append((1, product, sku))
                     continue
 
+                # Crash recovery: if Webasyst created an AF-* SKU but the
+                # follow-up SKU-name/article update was interrupted, the
+                # product's [extimg] summary still contains the exact source
+                # image URL. Use only unique image→supplier aliases.
+                if summary_supplier and len(source_exact.get(summary_supplier) or []) == 1:
+                    candidates[summary_supplier].append((2, product, sku))
+                    continue
+
                 if not supplier_name:
                     continue
                 key = _identity_key(supplier_name)
                 source_matches = source_by_key.get(key) or []
                 # Ambiguous normalized source codes are deliberately not guessed.
                 if len(source_matches) == 1:
-                    candidates[source_matches[0]].append((2, product, sku))
+                    candidates[source_matches[0]].append((3, product, sku))
 
         if len(rows) < 1000:
             break
@@ -484,8 +503,15 @@ def apply_plan(wa: WebasystClient, plan, config):
 
         for row in plan["create"]:
             desired = row["desired"]
+            supplier_code = str(row.get("supplier_sku") or "").strip()
+            temporary_sku = str(row.get("sku") or supplier_code).strip()
             sku_data = _sku_write_data(desired, rules, stock_id, stock_ids)
-            sku_data.update({"available": 1 if (desired.get("stock") or 0) > 0 else 0, "status": 1})
+            sku_data.update({
+                "available": 1 if (desired.get("stock") or 0) > 0 else 0,
+                "status": 1,
+                "sku": temporary_sku,
+                "name": supplier_code,
+            })
             product_data = _product_write_data(desired, rules, web, creating=True)
             product_data.update({
                 "type_id": int(web["type_id"]),
@@ -504,7 +530,6 @@ def apply_plan(wa: WebasystClient, plan, config):
             sku_id = str(skus[0].get("id") or "")
             if not sku_id:
                 raise RuntimeError("Webasyst не вернул SKU ID товара %s" % row["sku"])
-            supplier_code = str(row.get("supplier_sku") or "").strip()
             final_sku_data = {
                 "sku": sku_id if sku_mode == "numeric" else str(row.get("sku") or supplier_code).strip(),
                 "name": supplier_code,
