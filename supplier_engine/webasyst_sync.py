@@ -67,16 +67,6 @@ def index_by_sku(wa: WebasystClient, type_id=None):
         )
         rows = _listify(payload)
         for product in rows:
-            summary_supplier = ""
-            if image_aliases:
-                summary = str(product.get("summary") or "")
-                for url in re.findall(r"https?://[^\s\]<>'\"]+", summary):
-                    alias = image_aliases.get(url.rstrip(".,;"))
-                    if alias:
-                        if summary_supplier and summary_supplier != alias:
-                            summary_supplier = ""
-                            break
-                        summary_supplier = alias
             skus = product.get("skus") or []
             if isinstance(skus, dict):
                 skus = list(skus.values())
@@ -141,6 +131,16 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes, sku_
         )
         rows = _listify(payload)
         for product in rows:
+            summary_supplier = ""
+            if image_aliases:
+                summary = str(product.get("summary") or "")
+                for url in re.findall(r"https?://[^\s\]<>'\"]+", summary):
+                    alias = image_aliases.get(url.rstrip(".,;"))
+                    if alias:
+                        if summary_supplier and summary_supplier != alias:
+                            summary_supplier = ""
+                            break
+                        summary_supplier = alias
             skus = product.get("skus") or []
             if isinstance(skus, dict):
                 skus = list(skus.values())
