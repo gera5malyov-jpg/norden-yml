@@ -16,6 +16,7 @@ from .webasyst_sync import (
     apply_plan,
     build_plan,
     index_by_sku,
+    index_by_supplier_sku_name,
     previous_prices,
     validate_apply_plan,
 )
@@ -243,7 +244,18 @@ def main():
         catalog_warning = None
         if os.getenv("WEBASYST_API_TOKEN", "").strip():
             wa = WebasystClient()
-            existing = index_by_sku(wa, (config.get("webasyst") or {}).get("type_id"))
+            type_id = (config.get("webasyst") or {}).get("type_id")
+            if config.get("source", {}).get("format", "").lower() == "norden" and type_id:
+                existing = index_by_supplier_sku_name(
+                    wa,
+                    type_id,
+                    [product.supplier_sku for product in products],
+                )
+                if source_meta is not None:
+                    source_meta["existing_match"] = "webasyst_sku_name"
+                    source_meta["existing_matched"] = len(existing)
+            else:
+                existing = index_by_sku(wa, type_id)
         elif args.mode == "apply":
             raise ValueError("WEBASYST_API_TOKEN is required for apply")
         else:
