@@ -227,6 +227,30 @@ for item in root.iter('Номенклатура'):
         break
 PY
 echo "NORDEN_PACKAGES_TARGET_END"
+
+echo "NORDEN_FULL_RECURSIVE_TARGET_BEGIN"
+python3 - <<'PY'
+import urllib.request, xml.etree.ElementTree as ET
+url='https://norden.group/index.php?dispatch=sw_user_prices.get_file&file=Norden.xml'
+target='PR.243.WH.O59.BL'
+req=urllib.request.Request(url,headers={'User-Agent':'Megasuppliers-Diagnostic/1.0'})
+with urllib.request.urlopen(req,timeout=120) as r:
+    data=r.read()
+root=ET.fromstring(data)
+for item in root.iter('Номенклатура'):
+    if (item.findtext('Артикул') or '').strip()==target:
+        def walk(node,path=''):
+            for child in list(node):
+                p=(path+'/'+child.tag) if path else child.tag
+                val=(child.text or '').strip()
+                attrs=' '.join('{}={}'.format(k,v) for k,v in child.attrib.items())
+                if val or attrs:
+                    print('{}{}={}'.format(p,(' ['+attrs+']') if attrs else '',val))
+                walk(child,p)
+        walk(item)
+        break
+PY
+echo "NORDEN_FULL_RECURSIVE_TARGET_END"
 echo "NORDEN_STOCK_DIAG_BEGIN"
 cat >/tmp/ms_norden_stock_diag.php <<'PHP'
 <?php
