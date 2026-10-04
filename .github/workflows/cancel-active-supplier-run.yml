@@ -14,7 +14,7 @@ jobs:
   cancel:
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel run 36028169359
+      - name: Cancel current Norden apply run
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh api --method POST repos/${{ github.repository }}/actions/runs/36028169359/cancel || true
+        run: gh api --method POST repos/${{ github.repository }}/actions/runs/37217308147/cancel || true
