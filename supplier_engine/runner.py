@@ -243,7 +243,7 @@ def main():
         catalog_warning = None
         if os.getenv("WEBASYST_API_TOKEN", "").strip():
             wa = WebasystClient()
-            existing = index_by_sku(wa)
+            existing = index_by_sku(wa, (config.get("webasyst") or {}).get("type_id"))
         elif args.mode == "apply":
             raise ValueError("WEBASYST_API_TOKEN is required for apply")
         else:
