@@ -1,3 +1,21 @@
+    private function legacySupplierTypeMap()
+    {
+        return array(
+            'NORDEN' => array(142),
+            'TD_ANDREY' => array(126),
+            'DEEPHOUSE' => array(24),
+            'LEVMAR' => array(125),
+            'TREEZ' => array(199),
+            'YOURROOM' => array(26),
+            'AFINA' => array(63),
+            'ALETAN' => array(46, 122, 202),
+            'RED_BLACK' => array(150),
+            'B2B_FABRIKA' => array(204),
+            'KENNER' => array(203),
+            '4SIS' => array(11)
+        );
+    }
+
     private function supplierCodeFromExistingProduct($product_id)
     {
         $product_id = (int)$product_id;
