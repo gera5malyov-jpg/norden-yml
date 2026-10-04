@@ -33,19 +33,117 @@
     if(!box)return;
     var form=box.querySelector('.s-ms-config-form');
     var status=box.querySelector('.s-ms-status');
+    var saveBtn=box.querySelector('.s-ms-save'),checkBtn=box.querySelector('.s-ms-check'),applyBtn=box.querySelector('.s-ms-apply');
     var configUrl='{$backend_url}?plugin=megasuppliers&action=importConfig',runUrl='{$backend_url}?plugin=megasuppliers&action=importRun',statusUrl='{$backend_url}?plugin=megasuppliers&action=importStatus';
 {literal}
+    var pollTimer=null;
     function setStatus(text){if(status)status.textContent=text||'';}
     function field(name){return form.querySelector('[name="'+name+'"]');}
     function setField(name,value){var el=field(name);if(!el)return;if(el.type==='checkbox'){el.checked=Boolean(value);}else{el.value=(value===null||typeof value==='undefined')?'':value;}}
+    function setRunBusy(busy){if(checkBtn)checkBtn.disabled=!!busy;if(applyBtn)applyBtn.disabled=!!busy;}
+    function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
     function fill(c){if(!c)return;setField('format',c.source&&c.source.format);setField('source_location',c.source&&c.source.location);setField('location_secret',c.source&&c.source.location_secret);setField('sheet',c.source&&c.source.sheet);setField('supplier_sku_field',c.identity&&c.identity.supplier_sku_field);setField('sku_prefix',c.identity&&c.identity.sku_prefix);setField('brand',c.identity&&c.identity.brand);setField('name_field',c.mapping&&c.mapping.name);setField('purchase_price_field',c.mapping&&c.mapping.purchase_price);setField('price_field',c.mapping&&c.mapping.price);setField('compare_price_field',c.mapping&&c.mapping.compare_price);setField('stock_field',c.mapping&&c.mapping.stock);setField('category_field',c.mapping&&c.mapping.category);setField('images',(c.mapping&&c.mapping.images||[]).join(', '));var pf=c.rules&&c.rules.price_formulas||{};setField('purchase_price_formula',pf.purchase_price);setField('price_formula',pf.price);setField('compare_price_formula',pf.compare_price);setField('enabled',c.enabled);['create_new','zero_if_missing','only_create_in_stock','update_images','update_characteristics'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});setField('type_id',c.webasyst&&c.webasyst.type_id);setField('stock_id',c.webasyst&&c.webasyst.stock_id);setField('category_id',c.webasyst&&c.webasyst.category_id);}
     function paramsFromForm(){return new URLSearchParams(new FormData(form));}
     async function requestJson(url,options){var res=await fetch(url,options||{credentials:'same-origin'});var text=await res.text();var data=null;try{data=JSON.parse(text);}catch(e){}if(!res.ok){var err=new Error('HTTP '+res.status);err.data=data;throw err;}if(!data){throw new Error('INVALID_JSON');}return data;}
-    form.addEventListener('change',async function(e){if(!e.target||e.target.name!=='supplier_id')return;var id=e.target.value;if(!id)return;form.reset();field('supplier_id').value=id;setStatus('загрузка…');try{var r=await requestJson(configUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});fill(r.data?r.data.config:r.config);setStatus('');}catch(err){setStatus('не удалось загрузить профиль');}});
-    async function save(next){var id=field('supplier_id').value;if(!id){setStatus('выберите поставщика');return;}setStatus('сохранение…');try{var r=await requestJson(configUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:paramsFromForm()});if(r&&r.status==='ok'){setStatus('профиль сохранён');if(next)await next(id);}else{setStatus('ошибка сохранения');}}catch(err){setStatus('ошибка сохранения');}}
-    function poll(id,requestId){var tries=0,busy=false;var timer=setInterval(async function(){if(busy)return;busy=true;tries++;try{var r=await requestJson(statusUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});var run=r.data?r.data.run:r.run;if(run&&run.request_id===requestId){if(run.status==='queued'){setStatus('проверка выполняется…');}else{clearInterval(timer);if(run.report){setStatus(run.report.blocked?'проверка заблокирована: '+(run.report.errors||[]).join('; '):'проверка пройдена: '+run.report.products+' товаров');}else{setStatus('проверка завершена: '+run.status);}}}}catch(err){}finally{busy=false;}if(tries>100){clearInterval(timer);setStatus('проверка ещё выполняется; статус можно открыть позже');}},3000);}
-    async function run(id,mode){setStatus(mode==='apply'?'запуск применения…':'запуск проверки…');var body=new URLSearchParams();body.set('supplier_id',id);body.set('mode',mode);var csrf=field('_csrf');body.set('_csrf',csrf?csrf.value:'');try{var r=await requestJson(runUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body});var d=r&&r.data?r.data:r;var errs=r&&r.errors?r.errors:[];if(r&&r.status==='ok'&&d.request_id){setStatus(mode==='apply'?'применение запущено':'проверка запущена');poll(id,d.request_id);}else{setStatus((mode==='apply'?'применение заблокировано':'ошибка запуска')+(errs.length?': '+errs.join('; '):''));}}catch(err){var errs=err.data&&err.data.errors?err.data.errors:[];setStatus((mode==='apply'?'применение заблокировано':'ошибка запуска')+(errs.length?': '+errs.join('; '):''));}}
-    var saveBtn=box.querySelector('.s-ms-save'),checkBtn=box.querySelector('.s-ms-check'),applyBtn=box.querySelector('.s-ms-apply');
+    function reportText(run){
+        if(!run)return '';
+        if(run.status==='queued'||run.status==='running')return run.mode==='apply'?'применение выполняется…':'проверка выполняется…';
+        var report=run.report;
+        if(!report)return 'проверка завершена: '+run.status;
+        if(report.blocked)return 'проверка заблокирована: '+(report.errors||[]).join('; ');
+        if(report.status!=='ok')return 'проверка завершилась с ошибкой: '+(report.errors||[]).join('; ');
+        var plan=report.plan||{};
+        var parts=['проверка пройдена: '+(report.products||0)+' товаров'];
+        if(typeof plan.update!=='undefined')parts.push('обновить '+plan.update);
+        if(typeof plan.create!=='undefined')parts.push('создать '+plan.create);
+        if(typeof plan.zero_stock!=='undefined')parts.push('обнулить '+plan.zero_stock);
+        if(typeof plan.skipped!=='undefined')parts.push('пропустить '+plan.skipped);
+        return parts.join('; ');
+    }
+    function handleRun(run){
+        if(!run){setRunBusy(false);return false;}
+        var active=run.status==='queued'||run.status==='running';
+        setRunBusy(active);
+        setStatus(reportText(run));
+        return active;
+    }
+    async function readRun(id){var r=await requestJson(statusUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});return r.data?r.data.run:r.run;}
+    function poll(id,requestId){
+        stopPoll();
+        var tries=0,busy=false,currentRequest=requestId||'';
+        setRunBusy(true);
+        async function tick(){
+            if(busy)return;
+            busy=true;tries++;
+            try{
+                var run=await readRun(id);
+                if(run&&run.request_id&&run.request_id!==currentRequest){currentRequest=run.request_id;}
+                var active=handleRun(run);
+                if(!active){stopPoll();return;}
+            }catch(err){
+                setStatus('не удалось получить статус проверки');
+            }finally{busy=false;}
+            if(tries>120){stopPoll();setRunBusy(false);setStatus('проверка ещё выполняется; обновите страницу для актуального статуса');}
+        }
+        tick();
+        pollTimer=setInterval(tick,3000);
+    }
+    async function resumeCurrent(id){
+        stopPoll();
+        try{
+            var run=await readRun(id);
+            if(run&&handleRun(run)){poll(id,run.request_id);}
+        }catch(err){setRunBusy(false);}
+    }
+    form.addEventListener('change',async function(e){
+        if(!e.target||e.target.name!=='supplier_id')return;
+        var id=e.target.value;
+        stopPoll();setRunBusy(false);
+        if(!id){setStatus('');return;}
+        form.reset();field('supplier_id').value=id;setStatus('загрузка…');
+        try{
+            var r=await requestJson(configUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});
+            fill(r.data?r.data.config:r.config);
+            setStatus('');
+            await resumeCurrent(id);
+        }catch(err){setStatus('не удалось загрузить профиль');}
+    });
+    async function save(next){
+        var id=field('supplier_id').value;
+        if(!id){setStatus('выберите поставщика');return;}
+        setStatus('сохранение…');
+        try{
+            var r=await requestJson(configUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:paramsFromForm()});
+            if(r&&r.status==='ok'){setStatus('профиль сохранён');if(next)await next(id);}
+            else{setStatus('ошибка сохранения');}
+        }catch(err){setStatus('ошибка сохранения');}
+    }
+    async function run(id,mode){
+        setRunBusy(true);
+        setStatus(mode==='apply'?'запуск применения…':'запуск проверки…');
+        var body=new URLSearchParams();body.set('supplier_id',id);body.set('mode',mode);
+        var csrf=field('_csrf');body.set('_csrf',csrf?csrf.value:'');
+        try{
+            var r=await requestJson(runUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body});
+            var d=r&&r.data?r.data:r,errs=r&&r.errors?r.errors:[];
+            if(r&&r.status==='ok'&&d.request_id){
+                setStatus(mode==='apply'?'применение запущено':'проверка запущена');
+                poll(id,d.request_id);
+                return;
+            }
+            if(errs.indexOf('RUN_ALREADY_ACTIVE')!==-1){
+                setStatus('проверка уже выполняется…');
+                await resumeCurrent(id);
+                return;
+            }
+            setRunBusy(false);
+            setStatus((mode==='apply'?'применение заблокировано':'ошибка запуска')+(errs.length?': '+errs.join('; '):''));
+        }catch(err){
+            setRunBusy(false);
+            var errs=err.data&&err.data.errors?err.data.errors:[];
+            setStatus((mode==='apply'?'применение заблокировано':'ошибка запуска')+(errs.length?': '+errs.join('; '):''));
+        }
+    }
     if(saveBtn)saveBtn.addEventListener('click',function(){save();});
     if(checkBtn)checkBtn.addEventListener('click',function(){save(function(id){return run(id,'dry-run');});});
     if(applyBtn)applyBtn.addEventListener('click',function(){var id=field('supplier_id').value;if(!id){setStatus('выберите поставщика');return;}if(!confirm('Применить последний успешно проверенный прайс в каталог Webasyst? Запись будет разрешена только если включён enable_writes и прайс не изменился после dry-run.'))return;run(id,'apply');});
