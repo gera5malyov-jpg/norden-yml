@@ -42,6 +42,36 @@ def _stock(value):
         return 0.0
 
 
+def _ratio_feature_value(numerator, denominator):
+    n = _s(numerator).replace(" ", "").replace(",", ".")
+    d = _s(denominator).replace(" ", "").replace(",", ".")
+    try:
+        n = float(n)
+        d = float(d or "1")
+        if d == 0:
+            return ""
+        value = n / d
+    except ValueError:
+        return ""
+    if value.is_integer():
+        return str(int(value))
+    return ("%.6f" % value).rstrip("0").rstrip(".")
+
+
+def _package_count(item):
+    for tag in ("КоличествоМест", "КоличествоУпаковок"):
+        value = _s(item.findtext(tag))
+        if value:
+            return value
+    for tag in ("НаборУпаковок", "Упаковки", "СоставУпаковок"):
+        node = item.find(tag)
+        if node is not None:
+            children = [x for x in list(node) if isinstance(x.tag, str)]
+            if children:
+                return str(len(children))
+    return ""
+
+
 def _http_bytes(url, headers=None, timeout=120, max_bytes=100 * 1024 * 1024):
     req = urllib.request.Request(
         url,
@@ -197,7 +227,8 @@ def _fallback_rows():
             if _s(node.attrib.get("Склад")) == "Основной склад":
                 stock = _stock(node.text)
                 break
-        price_index[article] = {"price": purchase, "qty": stock}
+        promotion = "Да" if _s(item.findtext("Акция")) else ""
+        price_index[article] = {"price": purchase, "qty": stock, "promotion": promotion}
 
     full_root = ET.fromstring(_http_bytes(FULL_XML_URL))
     rows = []
@@ -222,7 +253,30 @@ def _fallback_rows():
                 continue
             features[tag] = value
         features["Код Norden"] = _s(item.findtext("Код"))
+
+        # Useful commercial characteristics are stored in technical-looking XML
+        # fields in Norden's fallback feed. Convert them to stable human labels.
+        derived = {
+            "Вид номенклатуры": _s(item.findtext("ВидНоменклатуры")),
+            "Тип номенклатуры": _s(item.findtext("ТипНоменклатуры")),
+            "Серия": _s(item.findtext("Серия")),
+            "Вес, кг": _ratio_feature_value(
+                item.findtext("ВесЧислитель"),
+                item.findtext("ВесЗнаменатель") or "1",
+            ),
+            "Объем,м3": _ratio_feature_value(
+                item.findtext("ОбъемЧислитель"),
+                item.findtext("ОбъемЗнаменатель") or "1",
+            ),
+            "Количество мест": _package_count(item),
+        }
+        for key, value in derived.items():
+            if value:
+                features[key] = value
+
         price = price_index.get(article) or {}
+        if price.get("promotion"):
+            features["Акция"] = price["promotion"]
         rows.append({
             "product_code": article,
             "Kod": _s(item.findtext("Код")),
