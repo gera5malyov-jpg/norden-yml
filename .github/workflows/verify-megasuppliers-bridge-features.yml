@@ -1,0 +1,51 @@
+name: Verify megasuppliers bridge features
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-megasuppliers-bridge-features.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      BRIDGE_SECRET: ${{ secrets.MEGASUPPLIERS_CALLBACK_SECRET }}
+    steps:
+      - name: Verify ensure_features route without writes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, hmac, json, os, urllib.request
+          payload={
+              "action":"ensure_features",
+              "supplier_id":1,
+              "request_id":"20261004214924-66bbd4461a6004ec",
+              "type_id":142,
+              "names":[],
+          }
+          body=json.dumps(payload,ensure_ascii=False,separators=(",",":")).encode()
+          sig="sha256="+hmac.new(os.environ["BRIDGE_SECRET"].encode(),body,hashlib.sha256).hexdigest()
+          req=urllib.request.Request(
+              "https://profikompany.ru/megasuppliers-bridge/",
+              data=body,method="POST",
+              headers={
+                  "Content-Type":"application/json; charset=utf-8",
+                  "X-Megasuppliers-Signature":sig,
+                  "User-Agent":"Megasuppliers-Bridge-Verify/1.0",
+              },
+          )
+          with urllib.request.urlopen(req,timeout=30) as r:
+              raw=r.read().decode()
+              print("HTTP",r.status)
+              print(raw)
+              if r.status != 200:
+                  raise SystemExit(2)
+              data=json.loads(raw)
+              if data.get("status")!="ok":
+                  raise SystemExit(3)
+          PY
