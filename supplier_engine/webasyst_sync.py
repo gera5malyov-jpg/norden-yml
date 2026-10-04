@@ -484,7 +484,7 @@ def apply_plan(wa: WebasystClient, plan, config):
 
         for row in plan["create"]:
             desired = row["desired"]
-            sku_data = _sku_write_data(desired, rules, stock_id)
+            sku_data = _sku_write_data(desired, rules, stock_id, stock_ids)
             sku_data.update({"available": 1 if (desired.get("stock") or 0) > 0 else 0, "status": 1})
             product_data = _product_write_data(desired, rules, web, creating=True)
             product_data.update({
