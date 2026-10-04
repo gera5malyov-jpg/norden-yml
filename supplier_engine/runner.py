@@ -163,6 +163,27 @@ def normalize(c, rows):
     return out
 
 
+def _unique_image_aliases(products):
+    by_url = {}
+    ambiguous = set()
+    for product in products:
+        code = str(product.supplier_sku or "").strip()
+        if not code:
+            continue
+        for url in product.images or []:
+            url = str(url or "").strip()
+            if not url:
+                continue
+            previous = by_url.get(url)
+            if previous and previous != code:
+                ambiguous.add(url)
+            else:
+                by_url[url] = code
+    for url in ambiguous:
+        by_url.pop(url, None)
+    return by_url
+
+
 def _characteristic_names_for_plan(plan, rules):
     rows = list(plan.get("create") or [])
     if rules.get("update_characteristics", False):
@@ -273,6 +294,7 @@ def main():
                     type_id,
                     [product.supplier_sku for product in products],
                     {product.sku: product.supplier_sku for product in products},
+                    _unique_image_aliases(products),
                 )
                 existing = {
                     product.sku: by_supplier[product.supplier_sku]

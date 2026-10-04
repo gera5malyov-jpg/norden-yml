@@ -5,7 +5,7 @@ import pytest
 from supplier_engine.adapters import load_pdf, load_xml_yml
 from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
-from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source, _characteristic_names_for_plan
+from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source, _characteristic_names_for_plan, _unique_image_aliases
 from supplier_engine import norden
 from supplier_engine.bridge import MegasuppliersBridge
 from supplier_engine.validators import validate_run
@@ -1103,3 +1103,77 @@ def test_bridge_ensure_features_returns_mapping_without_duplicates():
     assert mapping == {"Серия": "ms_s1_a"}
     assert calls[0]["action"] == "ensure_features"
     assert calls[0]["names"] == ["Серия"]
+
+
+
+def test_interrupted_af_create_recovers_by_unique_summary_image():
+    class Fake:
+        def call(self, method, *, params=None, **kwargs):
+            return {"products": [{
+                "id": 1487358,
+                "name": "Desk",
+                "summary": "[extimg]\nhttps://norden.group/images/detailed/432/item.jpg\n[/extimg]",
+                "skus": [{"id": 31666496, "sku": "AF-31666496", "name": ""}],
+            }]}
+    indexed = index_by_supplier_sku_name(
+        Fake(),
+        142,
+        ["AG.193.WH.L.72.AN"],
+        {"AG.193.WH.L.72.AN": "AG.193.WH.L.72.AN"},
+        {"https://norden.group/images/detailed/432/item.jpg": "AG.193.WH.L.72.AN"},
+    )
+    assert list(indexed) == ["AG.193.WH.L.72.AN"]
+    product, sku = indexed["AG.193.WH.L.72.AN"][0]
+    assert product["id"] == 1487358
+    assert sku["sku"] == "AF-31666496"
+
+
+def test_unique_image_aliases_drop_shared_images():
+    products = [
+        Product("A", "A", "One", images=["https://x/1.jpg", "https://x/shared.jpg"]),
+        Product("B", "B", "Two", images=["https://x/2.jpg", "https://x/shared.jpg"]),
+    ]
+    aliases = _unique_image_aliases(products)
+    assert aliases["https://x/1.jpg"] == "A"
+    assert aliases["https://x/2.jpg"] == "B"
+    assert "https://x/shared.jpg" not in aliases
+
+
+def test_create_starts_with_supplier_identity_before_numeric_finalize():
+    wa = _FakeWebasyst()
+    desired = {
+        "supplier_sku": "NS01025-03-01",
+        "sku": "NS01025-03-01",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "Norden",
+        "category": "",
+        "images": ["https://x/1.jpg"],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [{"sku": "NS01025-03-01", "supplier_sku": "NS01025-03-01", "desired": desired}],
+        "update": [],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    apply_plan(
+        wa,
+        plan,
+        {
+            "source": {"format": "norden"},
+            "rules": {"update_prices": True, "update_stock": True},
+            "webasyst": {"stock_id": 66, "type_id": 142, "sku_mode": "numeric"},
+        },
+    )
+    add_call = next(x for x in wa.calls if x["method"] == "shop.product.add")
+    initial_sku = add_call["data"]["skus"][0]
+    assert initial_sku["sku"] == "NS01025-03-01"
+    assert initial_sku["name"] == "NS01025-03-01"
+    final_call = [x for x in wa.calls if x["method"] == "shop.product.skus.update"][-1]
+    assert final_call["data"]["sku"] == "202"
+    assert final_call["data"]["name"] == "NS01025-03-01"
