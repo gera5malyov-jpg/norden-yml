@@ -90,3 +90,5 @@ jobs:
             git pull --rebase origin main || true
             git push origin HEAD:main
           fi
+
+# Trigger UI fix 57e102 on 2026-10-04
