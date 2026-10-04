@@ -51,6 +51,25 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
         if (!is_array($previous)) $previous = array();
         $last_dry = !empty($previous['last_dry_run']) && is_array($previous['last_dry_run']) ? $previous['last_dry_run'] : null;
 
+        // A second dispatch for the same supplier used to overwrite the pending request.
+        // The first GitHub run then received stale_or_unknown_request (HTTP 409) from
+        // the signed bridge/callback. Keep one active request per supplier instead.
+        $active_status = (string)ifset($previous['status'], '');
+        if (in_array($active_status, array('queued', 'running'), true)) {
+            $requested_at = strtotime((string)ifset($previous['requested_at'], ''));
+            $active_timeout = 90 * 60;
+            if ($requested_at && (time() - $requested_at) < $active_timeout) {
+                $this->response = array(
+                    'status' => 'busy',
+                    'supplier_id' => $supplier_id,
+                    'request_id' => (string)ifset($previous['request_id'], ''),
+                    'mode' => (string)ifset($previous['mode'], ''),
+                );
+                $this->errors[] = 'RUN_ALREADY_ACTIVE';
+                return;
+            }
+        }
+
         $approved_source_sha = '';
         if ($mode === 'apply') {
             if (empty($config['enabled'])) {
