@@ -54,6 +54,18 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
             $this->links($supplier_id, $payload);
             return;
         }
+        if ($action === 'ensure_features') {
+            if ((string)ifset($pending['mode']) !== 'apply') {
+                $this->fail('apply_request_required', 409);
+                return;
+            }
+            if (!$plugin->getSettings('enable_writes')) {
+                $this->fail('writes_disabled', 403);
+                return;
+            }
+            $this->ensureFeatures($supplier_id, $payload);
+            return;
+        }
         if ($action === 'sync_links') {
             if ((string)ifset($pending['mode']) !== 'apply') {
                 $this->fail('apply_request_required', 409);
@@ -84,6 +96,86 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
             'items' => array_values($rows),
             'offset' => $offset,
             'limit' => $limit,
+        );
+    }
+
+
+    private function ensureFeatures($supplier_id, array $payload)
+    {
+        $type_id = (int)ifset($payload['type_id']);
+        $names = ifset($payload['names'], array());
+        if (!$type_id || !is_array($names)) {
+            $this->fail('invalid_feature_request', 422);
+            return;
+        }
+        if (count($names) > 500) {
+            $this->fail('too_many_features', 413);
+            return;
+        }
+
+        $type = (new shopTypeModel())->getById($type_id);
+        if (!$type) {
+            $this->fail('product_type_not_found', 422);
+            return;
+        }
+
+        $feature_model = new shopFeatureModel();
+        $type_features_model = new shopTypeFeaturesModel();
+        $mapping = array();
+        $created = 0;
+        $linked = 0;
+        $seen = array();
+
+        foreach ($names as $raw_name) {
+            $name = trim((string)$raw_name);
+            if ($name === '' || mb_strlen($name, 'UTF-8') > 255) {
+                continue;
+            }
+            $key = mb_strtolower($name, 'UTF-8');
+            if (isset($seen[$key])) {
+                $mapping[$name] = $seen[$key];
+                continue;
+            }
+
+            $code = 'ms_s'.(int)$supplier_id.'_'.substr(hash('sha256', $key), 0, 16);
+            $feature = $feature_model->getByField('code', $code);
+            if (!$feature) {
+                $data = array(
+                    'code' => $code,
+                    'name' => $name,
+                    'type' => shopFeatureModel::TYPE_VARCHAR,
+                    'selectable' => 0,
+                    'multiple' => 0,
+                    'status' => 'private',
+                    'available_for_sku' => 0,
+                );
+                $feature_id = $feature_model->save($data);
+                if (!$feature_id) {
+                    $this->fail('feature_create_failed', 500);
+                    return;
+                }
+                $feature = $feature_model->getById($feature_id);
+                $created++;
+            }
+
+            $feature_id = (int)ifset($feature['id']);
+            if (!$feature_id) {
+                $this->fail('feature_resolve_failed', 500);
+                return;
+            }
+            $type_features_model->updateByFeature($feature_id, array($type_id), false);
+            $linked++;
+            $resolved_code = (string)ifset($feature['code'], $code);
+            $mapping[$name] = $resolved_code;
+            $seen[$key] = $resolved_code;
+        }
+
+        $this->response = array(
+            'status' => 'ok',
+            'mapping' => $mapping,
+            'created' => $created,
+            'linked' => $linked,
+            'type_id' => $type_id,
         );
     }
 
