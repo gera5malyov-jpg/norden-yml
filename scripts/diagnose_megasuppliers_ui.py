@@ -319,6 +319,46 @@ chown web:web /tmp/ms_norden_apply_audit.php
 su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/ms_norden_apply_audit.php' || true
 rm -f /tmp/ms_norden_apply_audit.php
 echo "NORDEN_APPLY_AUDIT_END"
+
+echo "NORDEN_FEATURE_WRITE_AUDIT_BEGIN"
+cat >/tmp/ms_norden_feature_write_audit.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$m=new waModel();
+$type_id=142;
+$cutoff='2026-10-04 22:05:00';
+$count=$m->query(
+  "SELECT COUNT(DISTINCT pf.product_id)
+   FROM shop_product_features pf
+   JOIN shop_feature f ON f.id=pf.feature_id
+   JOIN shop_product p ON p.id=pf.product_id
+   WHERE p.type_id=i:type_id AND f.code LIKE 'ms_s1_%'",
+  array('type_id'=>$type_id)
+)->fetchField();
+echo "TYPE142_WITH_AUTO_FEATURE_VALUES=".$count."\n";
+$row=$m->query(
+  "SELECT p.id product_id,p.create_datetime,s.id sku_id,s.sku,s.name sku_name
+   FROM shop_product p JOIN shop_product_skus s ON s.product_id=p.id
+   WHERE p.type_id=i:type_id AND p.create_datetime>=s:cutoff
+   ORDER BY p.id DESC LIMIT 1",
+  array('type_id'=>$type_id,'cutoff'=>$cutoff)
+)->fetch();
+echo "LATEST_CREATED_AFTER_2205=".json_encode($row,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+if($row){
+  $product=new shopProduct((int)$row['product_id']);
+  $features=$product->features;
+  echo "LATEST_FEATURE_COUNT=".count($features)."\n";
+  echo "LATEST_FEATURES=".json_encode($features,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+}
+PHP
+chown web:web /tmp/ms_norden_feature_write_audit.php
+su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/ms_norden_feature_write_audit.php' || true
+rm -f /tmp/ms_norden_feature_write_audit.php
+echo "NORDEN_FEATURE_WRITE_AUDIT_END"
 echo "RECENT_LOG_MATCHES_BEGIN"
 grep -R -n -E '1484506|shopProduct|product.*1484506|megasuppliers' "$LOG_DIR" 2>/dev/null | tail -120 || true
 echo "RECENT_LOG_MATCHES_END"
