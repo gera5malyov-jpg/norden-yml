@@ -687,3 +687,147 @@ def test_apply_plan_publishes_only_hidden_engine_created_match():
     )
     product_call = next(x for x in wa.calls if x["method"] == "shop.product.update")
     assert product_call["data"]["status"] == 1
+
+
+def test_norden_create_uses_supplier_code_as_sku_name_and_numeric_sku():
+    wa = _FakeWebasyst()
+    desired = {
+        "supplier_sku": "NS01025-03-01",
+        "sku": "NS01025-03-01",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "Norden",
+        "category": "",
+        "images": [],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [{"sku": "NS01025-03-01", "supplier_sku": "NS01025-03-01", "desired": desired}],
+        "update": [],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    apply_plan(
+        wa,
+        plan,
+        {
+            "source": {"format": "norden"},
+            "rules": {
+                "update_prices": True,
+                "update_stock": True,
+                "update_images": False,
+                "update_characteristics": False,
+            },
+            "webasyst": {"stock_id": 1, "type_id": 142},
+        },
+    )
+    sku_calls = [x for x in wa.calls if x["method"] == "shop.product.skus.update"]
+    assert sku_calls[-1]["params"]["id"] == "202"
+    assert sku_calls[-1]["data"]["sku"] == "202"
+    assert sku_calls[-1]["data"]["name"] == "NS01025-03-01"
+
+
+def test_norden_partial_old_apply_migrates_supplier_code_out_of_sku_field():
+    wa = _FakeWebasyst()
+    desired = {
+        "supplier_sku": "NS01025-03-01",
+        "sku": "NS01025-03-01",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "Norden",
+        "category": "",
+        "images": [],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [],
+        "update": [{
+            "sku": "NS01025-03-01",
+            "supplier_sku": "NS01025-03-01",
+            "product_id": 31,
+            "sku_id": 41,
+            "current_product": {"id": 31, "status": 0},
+            "current_sku": {"id": 41, "sku": "NS01025-03-01", "name": ""},
+            "desired": desired,
+        }],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    apply_plan(
+        wa,
+        plan,
+        {
+            "source": {"format": "norden"},
+            "rules": {
+                "update_prices": True,
+                "update_stock": True,
+                "update_name": False,
+                "update_images": False,
+                "update_characteristics": False,
+            },
+            "webasyst": {"stock_id": 1, "type_id": 142},
+        },
+    )
+    sku_call = next(x for x in wa.calls if x["method"] == "shop.product.skus.update")
+    assert sku_call["data"]["sku"] == "41"
+    assert sku_call["data"]["name"] == "NS01025-03-01"
+    product_call = next(x for x in wa.calls if x["method"] == "shop.product.update")
+    assert product_call["data"]["status"] == 1
+
+
+def test_norden_existing_internal_article_is_preserved_but_supplier_name_is_enforced():
+    wa = _FakeWebasyst()
+    desired = {
+        "supplier_sku": "NS01025-03-01",
+        "sku": "NS01025-03-01",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "Norden",
+        "category": "",
+        "images": [],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [],
+        "update": [{
+            "sku": "NS01025-03-01",
+            "supplier_sku": "NS01025-03-01",
+            "product_id": 31,
+            "sku_id": 41,
+            "current_product": {"id": 31, "status": 1},
+            "current_sku": {"id": 41, "sku": "AF-31662421", "name": ""},
+            "desired": desired,
+        }],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    apply_plan(
+        wa,
+        plan,
+        {
+            "source": {"format": "norden"},
+            "rules": {
+                "update_prices": True,
+                "update_stock": True,
+                "update_name": False,
+                "update_images": False,
+                "update_characteristics": False,
+            },
+            "webasyst": {"stock_id": 1, "type_id": 142},
+        },
+    )
+    sku_call = next(x for x in wa.calls if x["method"] == "shop.product.skus.update")
+    assert sku_call["data"]["name"] == "NS01025-03-01"
+    assert "sku" not in sku_call["data"]
