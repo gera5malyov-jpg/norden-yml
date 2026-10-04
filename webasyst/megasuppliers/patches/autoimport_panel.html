@@ -120,6 +120,7 @@
                     <div class="field"><div class="name">Формула до скидки</div><div class="value"><input type="text" name="compare_price_formula" placeholder="supplier_price * 1.60"></div></div>
 
                     <div class="field"><div class="name">Тип товара Webasyst</div><div class="value"><select name="type_id"><option value="">— выберите тип товара —</option></select><p class="hint">Отображается название типа. Внутренний ID сохраняется автоматически.</p></div></div>
+                    <div class="field"><div class="name">Артикул Webasyst</div><div class="value"><select name="sku_mode"><option value="numeric">Автоматический цифровой</option><option value="supplier">Артикул поставщика</option></select><p class="hint">«Наименование артикула» всегда хранит код поставщика. Режим можно задать отдельно для каждого поставщика.</p></div></div>
                     <div class="field"><div class="name">Склад Webasyst</div><div class="value"><select name="stock_id"><option value="">— выберите склад —</option></select><p class="hint">Отображается название склада. Внутренний ID сохраняется автоматически.</p></div></div>
                     <div class="field"><div class="name">Категория Webasyst</div><div class="value"><input type="number" min="0" name="category_id" placeholder="ID категории"></div></div>
                 </div>
@@ -264,6 +265,9 @@
         setField('enabled',c.enabled);
         ['create_new','zero_if_missing','only_create_in_stock','update_images','update_characteristics'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});
         setTypeOptions(types,c.webasyst&&c.webasyst.type_id);
+        var skuMode=c.webasyst&&c.webasyst.sku_mode;
+        if(skuMode!=='numeric'&&skuMode!=='supplier'){skuMode=(c.source&&c.source.format==='norden')?'numeric':'supplier';}
+        setField('sku_mode',skuMode);
         setStockOptions(stocks,c.webasyst&&c.webasyst.stock_id);
         setField('category_id',c.webasyst&&c.webasyst.category_id);
     }
