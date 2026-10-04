@@ -74,6 +74,10 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
     {
         $images = preg_split('/\\s*,\\s*/', (string)waRequest::post('images', '', waRequest::TYPE_STRING_TRIM), -1, PREG_SPLIT_NO_EMPTY);
         $format = strtolower((string)waRequest::post('format', 'yml', waRequest::TYPE_STRING_TRIM));
+        $sku_mode = strtolower((string)waRequest::post('sku_mode', '', waRequest::TYPE_STRING_TRIM));
+        if (!in_array($sku_mode, array('numeric', 'supplier'), true)) {
+            $sku_mode = $format === 'norden' ? 'numeric' : 'supplier';
+        }
         $config = array(
             'code' => (string)$supplier['code'],
             'name' => (string)$supplier['name'],
@@ -116,6 +120,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
                 'warehouses' => array(),
             ),
             'webasyst' => array(
+                'sku_mode' => $sku_mode,
                 'type_id' => waRequest::post('type_id', 0, waRequest::TYPE_INT) ?: null,
                 'stock_id' => waRequest::post('stock_id', 0, waRequest::TYPE_INT) ?: null,
                 'category_id' => waRequest::post('category_id', 0, waRequest::TYPE_INT) ?: null,
@@ -159,6 +164,10 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
             return false;
         }
         if (trim((string)ifset($config['identity']['supplier_sku_field'])) === '' || trim((string)ifset($config['mapping']['name'])) === '') {
+            return false;
+        }
+        $sku_mode = strtolower((string)ifset($config['webasyst']['sku_mode']));
+        if ($sku_mode !== '' && !in_array($sku_mode, array('numeric', 'supplier'), true)) {
             return false;
         }
         $source_secret = trim((string)ifset($config['source']['location_secret']));
