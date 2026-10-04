@@ -109,6 +109,55 @@ PHP
 chown web:web /tmp/ms_ui_diag.php
 su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ms_ui_diag.php'
 rm -f /tmp/ms_ui_diag.php
+
+# Focused read-only diagnostic for a newly imported Norden product whose editor returns HTTP 500.
+TARGET_PRODUCT_ID=1484506
+LOG_DIR="$ROOT/wa-log"
+echo "NORDEN_PRODUCT_DIAG_ID=$TARGET_PRODUCT_ID"
+cat >/tmp/ms_norden_product_diag.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$id=1484506;
+$m=new waModel();
+$tables=array(
+  "PRODUCT"=>"SELECT * FROM shop_product WHERE id=".(int)$id,
+  "SKUS"=>"SELECT * FROM shop_product_skus WHERE product_id=".(int)$id,
+  "LINK"=>"SELECT * FROM shop_megasuppliers_product WHERE product_id=".(int)$id
+);
+foreach($tables as $label=>$sql){
+  try {
+    $rows=$m->query($sql)->fetchAll();
+    echo $label."=".json_encode($rows,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+  } catch(Exception $e) {
+    echo $label."_ERROR=".$e->getMessage()."\n";
+  }
+}
+try {
+  $p=new shopProduct($id);
+  echo "SHOP_PRODUCT_CONSTRUCT=yes\n";
+  echo "SHOP_PRODUCT=".json_encode($p->getData(),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+} catch(Throwable $e) {
+  echo "SHOP_PRODUCT_CONSTRUCT_ERROR=".get_class($e).": ".$e->getMessage()." @ ".$e->getFile().":".$e->getLine()."\n";
+}
+try {
+  $plugin=wa('shop')->getPlugin('megasuppliers',true);
+  $p=new shopProduct($id);
+  $x=$plugin->backendProductEdit($p);
+  echo "PLUGIN_BACKEND_PRODUCT_EDIT=yes\n";
+} catch(Throwable $e) {
+  echo "PLUGIN_BACKEND_PRODUCT_EDIT_ERROR=".get_class($e).": ".$e->getMessage()." @ ".$e->getFile().":".$e->getLine()."\n";
+}
+PHP
+chown web:web /tmp/ms_norden_product_diag.php
+su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/ms_norden_product_diag.php' || true
+rm -f /tmp/ms_norden_product_diag.php
+echo "RECENT_LOG_MATCHES_BEGIN"
+grep -R -n -E '1484506|shopProduct|product.*1484506|megasuppliers' "$LOG_DIR" 2>/dev/null | tail -120 || true
+echo "RECENT_LOG_MATCHES_END"
 '''
             p=ssh(key,"bash -s",stdin=remote,check=True,timeout=90)
             lines.append(p.stdout)
