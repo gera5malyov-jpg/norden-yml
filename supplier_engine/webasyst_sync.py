@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import re
+import unicodedata
+from collections import defaultdict
 from dataclasses import asdict
 from typing import Iterable
 
@@ -72,6 +74,65 @@ def index_by_sku(wa: WebasystClient, type_id=None):
                 code = str(sku.get("sku") or "").strip()
                 if code:
                     out.setdefault(code, []).append((product, sku))
+        if len(rows) < 1000:
+            break
+        offset += len(rows)
+    return out
+
+
+
+_CONFUSABLES = str.maketrans({
+    "а":"a","в":"b","с":"c","е":"e","н":"h","к":"k","м":"m","о":"o","р":"p","т":"t","х":"x","у":"y",
+    "А":"a","В":"b","С":"c","Е":"e","Н":"h","К":"k","М":"m","О":"o","Р":"p","Т":"t","Х":"x","У":"y",
+})
+
+
+def _identity_key(value):
+    text = unicodedata.normalize("NFKC", str(value or "").strip()).translate(_CONFUSABLES).casefold()
+    return re.sub(r"[^0-9a-z]+", "", text)
+
+
+def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes):
+    """Index one Webasyst product type by SKU name ("Наименование артикула").
+
+    Norden's Webasyst SKU itself is an internal AF-* code. The supplier article
+    is stored in shop_product_skus.name, so matching by SKU would make every
+    existing Norden card look missing.
+    """
+    source_by_key = defaultdict(list)
+    for code in supplier_codes or []:
+        code = str(code or "").strip()
+        key = _identity_key(code)
+        if code and key:
+            source_by_key[key].append(code)
+
+    out = {}
+    offset = 0
+    while True:
+        payload = wa.call(
+            "shop.product.search",
+            params={
+                "hash": "type/%s" % type_id,
+                "offset": offset,
+                "limit": 1000,
+                "fields": "id,name,summary,type_id,skus",
+            },
+        )
+        rows = _listify(payload)
+        for product in rows:
+            skus = product.get("skus") or []
+            if isinstance(skus, dict):
+                skus = list(skus.values())
+            for sku in skus:
+                supplier_name = str(sku.get("name") or "").strip()
+                key = _identity_key(supplier_name)
+                if not key:
+                    continue
+                source_matches = source_by_key.get(key) or []
+                # Ambiguous normalized source codes are deliberately not guessed.
+                if len(source_matches) != 1:
+                    continue
+                out.setdefault(source_matches[0], []).append((product, sku))
         if len(rows) < 1000:
             break
         offset += len(rows)
@@ -157,6 +218,10 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
             continue
         if len(matches) == 1:
             current_product, current_sku = matches[0]
+            matched_webasyst_ids.add((
+                int(current_product.get("id") or 0),
+                int(current_sku.get("id") or 0),
+            ))
             plan["update"].append({
                 "sku": product.sku,
                 "supplier_sku": product.supplier_sku,
