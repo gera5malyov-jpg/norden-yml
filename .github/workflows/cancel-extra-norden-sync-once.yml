@@ -1,10 +1,7 @@
 name: Cancel obsolete Norden sync once
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/cancel-extra-norden-sync-once.yml'
+  workflow_dispatch:
 
 permissions:
   actions: write
