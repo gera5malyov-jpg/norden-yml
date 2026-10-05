@@ -226,7 +226,7 @@ class KitClient:
             return r.json() if r.content else {}
         raise RuntimeError("KIT image upload retries exhausted")
 
-    def search_variants_parallel(self, names, workers=6):
+    def search_variants_parallel(self, names, workers=6, skip_broad=False):
         terms = list(dict.fromkeys(str(x or "").strip() for x in names if str(x or "").strip()))
         if not terms:
             return []
@@ -279,6 +279,9 @@ class KitClient:
                     raise RuntimeError(f"KIT search {term!r}: retries exhausted: {last_error}")
                 if last_error is not None and page <= 5 and not out:
                     raise RuntimeError(f"KIT search {term!r}: retries exhausted: {last_error}")
+            if skip_broad:
+                print(f"KIT targeted search: skip broad term {term!r} (>500 rows)", flush=True)
+                return term, []
             raise RuntimeError(f"KIT search {term!r} returned more than 500 rows; refusing broad match")
 
         rows = {}
