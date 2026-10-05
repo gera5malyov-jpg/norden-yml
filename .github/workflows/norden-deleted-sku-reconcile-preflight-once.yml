@@ -1,0 +1,45 @@
+name: Norden deleted SKU reconcile preflight once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-deleted-sku-reconcile-preflight-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 6bda27097c5b74bdc7660f0c64aca3ce6d0b301a
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check requests openpyxl pdfplumber reportlab
+      - name: Read current supplier links
+        run: python scripts/dump_megasuppliers_links.py --supplier-id 1 --output norden-links.json
+      - name: Reconcile dry-run
+        run: |
+          python -m supplier_engine.live_norden_scheduled_reconcile \
+            --mode dry-run \
+            --config supplier_engine/configs/norden_scheduled.json \
+            --links norden-links.json \
+            --output norden-reconcile-preflight.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: norden-deleted-sku-reconcile-preflight
+          path: |
+            norden-reconcile-preflight.json
+          if-no-files-found: warn
+          retention-days: 7
