@@ -1,0 +1,117 @@
+name: AtlasPage VPN secure export
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/atlaspage-vpn-export.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ATLASPAGE_ID: ${{ secrets.ATLASPAGE_ID }}
+    steps:
+      - name: Export SSTP and WireGuard via AtlasPage API
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, json, requests, sys
+
+          base='https://atlaspage51.com'
+          key=os.environ.get('ATLASPAGE_ID','').strip()
+          if not key:
+              raise SystemExit('ATLASPAGE_ID missing')
+
+          s=requests.Session()
+          h={'Accept':'application/json','Content-Type':'application/json','User-Agent':'Mozilla/5.0'}
+
+          r=s.post(base+'/api/user/auth-by-key',headers=h,json={'key':key},timeout=30)
+          if r.status_code != 200:
+              raise SystemExit(f'auth failed: {r.status_code}')
+          print('ATLAS_AUTH_OK=yes')
+
+          def normalize_list(obj):
+              if isinstance(obj,list):
+                  return obj
+              if isinstance(obj,dict):
+                  for k in ('servers','data','items','list','result'):
+                      v=obj.get(k)
+                      if isinstance(v,list):
+                          return v
+              return []
+
+          def collect(protocol):
+              r=s.get(base+'/api/user/server-list',headers=h,params={'protocol':protocol},timeout=30)
+              if r.status_code != 200:
+                  raise RuntimeError(f'{protocol} server-list failed: {r.status_code}')
+              raw=r.json()
+              servers=normalize_list(raw)
+              result=[]
+              for item in servers:
+                  if not isinstance(item,dict):
+                      continue
+                  sid=item.get('id') or item.get('server_id') or item.get('uuid') or item.get('key')
+                  config=None
+                  if sid is not None:
+                      cr=s.get(base+'/api/user/server-config',headers=h,params={'id':sid},timeout=30)
+                      if cr.status_code == 200:
+                          try: config=cr.json()
+                          except Exception: config={'raw_text':cr.text}
+                      else:
+                          config={'http_status':cr.status_code}
+                  result.append({'server':item,'config':config})
+              return {'raw_list':raw,'items':result}
+
+          out={
+              'sstp':collect('SSTP'),
+              'wireguard':collect('WireGuard')
+          }
+          with open('/tmp/vpn.json','w',encoding='utf-8') as f:
+              json.dump(out,f,ensure_ascii=False,indent=2)
+
+          print('SSTP_COUNT='+str(len(out['sstp']['items'])))
+          print('WIREGUARD_COUNT='+str(len(out['wireguard']['items'])))
+          PY
+
+      - name: Encrypt export
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p transfer
+          cat > /tmp/pub.pem <<'PUB'
+          -----BEGIN PUBLIC KEY-----
+          MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEApirk9p46KkUZXakytL7Q
+          u59/wTFzn0gthIPHj39JUrU0JTN2JL6RxxmXX6/BjPV4PwP8Oh3UFms4iWGFc4Kp
+          8OJBlARyAXvE1huh8IRlXRlsrrwTe0gijYjEjS5SjrMrEzSWxDuKIFszP2Fz2ubj
+          SEoMQhITgH6uz4qiCY+5cDppjXXb9xi5JboPmcszGrhfzAfYq+qs6+bjz1BLNYXV
+          M40hlXPCE93atsUyW7WiuKiURax3VTTLtGkmxwEV8omjKFZbtYHKbYRzjPK5K0yh
+          CIoMJSw6J5w5h7Bhpnw80M/H3GkncBOa/zBlk3h54KjkrqW4+bjWuP/yDmrRjwZH
+          s7YZ14CgiS7KrNQgA3PoCEVL3/7TPMxHWrBNt+Qh6l9EHlprz/2D5xw/JgimLXB+
+          8wooF2U3GQD/Y/QnsDpli0Fus2qY/zxtUQeFJkhgZ+JvvH1jekBvVjemLfTwTzJt
+          OtDV8UrFBU6HxipdaoN5uVJ3xlObWxkGI+tQI8QhfXmnAgMBAAE=
+          -----END PUBLIC KEY-----
+          PUB
+          openssl rand 32 > /tmp/key
+          openssl rand 16 > /tmp/iv
+          cat /tmp/key /tmp/iv > /tmp/keyiv
+          K="$(xxd -p -c 256 /tmp/key)"
+          IV="$(xxd -p -c 256 /tmp/iv)"
+          openssl enc -aes-256-cbc -K "$K" -iv "$IV" -in /tmp/vpn.json -out transfer/vpn.enc
+          openssl pkeyutl -encrypt -pubin -inkey /tmp/pub.pem \
+            -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 \
+            -in /tmp/keyiv -out transfer/keyiv.enc
+          rm -f /tmp/key /tmp/iv /tmp/keyiv /tmp/vpn.json
+
+      - name: Upload encrypted export
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlaspage-vpn-encrypted
+          path: transfer/
+          retention-days: 1
+          if-no-files-found: error
