@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import concurrent.futures
 import re
 import unicodedata
 from collections import defaultdict
@@ -52,6 +53,142 @@ def _slug(text):
 def extimg_summary(urls):
     clean = [str(x).strip() for x in (urls or []) if str(x).strip()]
     return "" if not clean else "[extimg]\n" + "\n".join(clean) + "\n[/extimg]"
+
+
+def _same_number(left, right):
+    a = _money(left)
+    b = _money(right)
+    return a is not None and b is not None and abs(a - b) < 0.0001
+
+
+def _value_text(value):
+    if isinstance(value, dict):
+        for key in ("value", "name", "title"):
+            if value.get(key) not in (None, ""):
+                return str(value.get(key)).strip()
+        values = [_value_text(v) for v in value.values()]
+        return " | ".join(x for x in values if x)
+    if isinstance(value, (list, tuple)):
+        values = [_value_text(v) for v in value]
+        return " | ".join(x for x in values if x)
+    return str(value or "").strip()
+
+
+def _current_feature_map(product):
+    raw = (product or {}).get("features")
+    if isinstance(raw, dict):
+        return {str(k): _value_text(v) for k, v in raw.items()}
+    if isinstance(raw, list):
+        out = {}
+        for row in raw:
+            if not isinstance(row, dict):
+                continue
+            code = str(row.get("code") or row.get("id") or "").strip()
+            if not code:
+                continue
+            values = row.get("values")
+            if values not in (None, ""):
+                out[code] = _value_text(values)
+            else:
+                out[code] = _value_text(row.get("value"))
+        return out
+    return {}
+
+
+def _current_stock_value(sku, stock_id):
+    sid = str(stock_id or "").strip()
+    if not sid:
+        return None
+    for key in ("stock", "stock_counts", "stocks"):
+        raw = (sku or {}).get(key)
+        if isinstance(raw, dict):
+            value = raw.get(sid)
+            if value is None and sid.isdigit():
+                value = raw.get(int(sid))
+            if isinstance(value, dict):
+                for value_key in ("count", "stock", "quantity", "value"):
+                    if value.get(value_key) not in (None, ""):
+                        value = value.get(value_key)
+                        break
+            if value not in (None, ""):
+                return _money(value)
+        elif isinstance(raw, list):
+            for row in raw:
+                if not isinstance(row, dict):
+                    continue
+                row_id = str(row.get("stock_id") or row.get("warehouse_id") or row.get("id") or "").strip()
+                if row_id != sid:
+                    continue
+                for value_key in ("count", "stock", "quantity", "value"):
+                    if row.get(value_key) not in (None, ""):
+                        return _money(row.get(value_key))
+        elif key == "stock" and raw not in (None, ""):
+            return _money(raw)
+    return None
+
+
+def _delta_sku_data(data, current_sku, stock_id):
+    if not data:
+        return {}
+    out = dict(data)
+    for field in ("purchase_price", "price", "compare_price"):
+        if field in out and _same_number(out[field], (current_sku or {}).get(field)):
+            out.pop(field, None)
+    if "sku" in out and str(out["sku"]).strip() == str((current_sku or {}).get("sku") or "").strip():
+        out.pop("sku", None)
+    if "name" in out and str(out["name"]).strip() == str((current_sku or {}).get("name") or "").strip():
+        out.pop("name", None)
+    if "available" in out:
+        current_available = (current_sku or {}).get("available")
+        if current_available not in (None, ""):
+            try:
+                if int(bool(int(current_available))) == int(bool(int(out["available"]))):
+                    out.pop("available", None)
+            except (TypeError, ValueError):
+                pass
+    if "stock" in out and isinstance(out["stock"], dict):
+        desired_stock = out["stock"]
+        stock_equal = True
+        for sid, desired in desired_stock.items():
+            current = _current_stock_value(current_sku, sid)
+            if current is None or not _same_number(current, desired):
+                stock_equal = False
+                break
+        if stock_equal:
+            out.pop("stock", None)
+    return out
+
+
+def _delta_product_data(data, current_product):
+    if not data:
+        return {}
+    out = dict(data)
+    current_product = current_product or {}
+    for field in ("name", "summary", "status"):
+        if field not in out:
+            continue
+        current = current_product.get(field)
+        desired = out[field]
+        if field == "status":
+            try:
+                same = int(current) == int(desired)
+            except (TypeError, ValueError):
+                same = str(current or "").strip() == str(desired or "").strip()
+        else:
+            same = str(current or "").strip() == str(desired or "").strip()
+        if same:
+            out.pop(field, None)
+    if "features" in out and isinstance(out["features"], dict):
+        current_features = _current_feature_map(current_product)
+        if current_features:
+            same = True
+            for code, desired in out["features"].items():
+                if _value_text(current_features.get(str(code))) != _value_text(desired):
+                    same = False
+                    break
+            if same:
+                out.pop("features", None)
+    return out
 
 
 def index_by_sku(wa: WebasystClient, type_id=None):
@@ -480,6 +617,7 @@ def apply_plan(wa: WebasystClient, plan, config):
         "recovered_skus": 0,
         "relinked_existing": 0,
         "recreated_products": 0,
+        "unchanged_updates": 0,
         "mappings": [],
         "stale_zero_links": 0,
         "stale_zero_sample": [],
@@ -685,7 +823,7 @@ def apply_plan(wa: WebasystClient, plan, config):
             result["recreated_products"] += 1
             add_mapping(row, product_id, sku_id)
 
-        for row in plan["update"]:
+        def apply_update_row(row, client):
             desired = row["desired"]
             current_product = row.get("current_product") or {}
             current_sku = row.get("current_sku") or {}
@@ -696,14 +834,9 @@ def apply_plan(wa: WebasystClient, plan, config):
             current_code = str(current_sku.get("sku") or "").strip()
             numeric_code = str(row.get("sku_id") or "").strip()
 
-            # The supplier article always lives in Webasyst's human-readable
-            # SKU name ("Наименование артикула"), independent of article mode.
             if supplier_code and str(current_sku.get("name") or "").strip() != supplier_code:
                 sku_data["name"] = supplier_code
 
-            # Switching the profile mode only migrates articles that were
-            # clearly managed by this importer (supplier-code or numeric SKU ID).
-            # Historical unrelated article codes such as AF-* are preserved.
             if sku_mode == "numeric":
                 if current_code == desired_sku and numeric_code.isdigit():
                     sku_data["sku"] = numeric_code
@@ -711,37 +844,79 @@ def apply_plan(wa: WebasystClient, plan, config):
                 if current_code == numeric_code and desired_sku:
                     sku_data["sku"] = desired_sku
 
+            sku_data = _delta_sku_data(sku_data, current_sku, stock_id)
+            sku_changed = bool(sku_data)
             if sku_data:
                 try:
-                    wa.call(
+                    client.call(
                         "shop.product.skus.update",
                         http_method="POST",
                         params={"id": str(row["sku_id"])},
                         data=sku_data,
                     )
                 except Exception as exc:
-                    if not _is_missing_webasyst_sku_error(exc):
-                        raise
-                    restore_missing_sku(row)
-                    continue
+                    if _is_missing_webasyst_sku_error(exc):
+                        return {"missing_sku": True}
+                    raise
+
             product_data = _product_write_data(desired, rules, web, creating=False)
             if (
                 str(current_product.get("status") or "0") == "0"
                 and str(current_sku.get("sku") or "").strip() == str(row.get("supplier_sku") or "").strip()
             ):
-                # A cancelled old apply may have created the card before it
-                # could finish/link it. Such engine-created cards are safe to
-                # publish on the next successful apply.
                 product_data["status"] = 1
+            product_data = _delta_product_data(product_data, current_product)
+            product_changed = bool(product_data)
             if product_data:
-                wa.call(
+                client.call(
                     "shop.product.update",
                     http_method="POST",
                     params={"id": str(row["product_id"])},
                     data=product_data,
                 )
-            result["updated"] += 1
-            add_mapping(row, row["product_id"], row["sku_id"])
+            return {
+                "missing_sku": False,
+                "unchanged": not sku_changed and not product_changed,
+            }
+
+        missing_updates = []
+        update_rows = list(plan["update"])
+        use_parallel_updates = isinstance(wa, WebasystClient) and len(update_rows) > 1
+        if use_parallel_updates:
+            def run_update(row):
+                return apply_update_row(row, WebasystClient())
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+                future_map = {pool.submit(run_update, row): row for row in update_rows}
+                done = 0
+                for future in concurrent.futures.as_completed(future_map):
+                    row = future_map[future]
+                    outcome = future.result()
+                    done += 1
+                    if outcome.get("missing_sku"):
+                        missing_updates.append(row)
+                    else:
+                        if outcome.get("unchanged"):
+                            result["unchanged_updates"] += 1
+                        result["updated"] += 1
+                        add_mapping(row, row["product_id"], row["sku_id"])
+                    if done % 250 == 0 or done == len(update_rows):
+                        print("Webasyst delta sync: %d/%d products" % (done, len(update_rows)), flush=True)
+        else:
+            for row in update_rows:
+                outcome = apply_update_row(row, wa)
+                if outcome.get("missing_sku"):
+                    missing_updates.append(row)
+                else:
+                    if outcome.get("unchanged"):
+                        result["unchanged_updates"] += 1
+                    result["updated"] += 1
+                    add_mapping(row, row["product_id"], row["sku_id"])
+
+        # Missing/deleted SKU recovery remains serialized. It re-scans the
+        # current catalog before any create/relink action and must not race.
+        for row in missing_updates:
+            restore_missing_sku(row)
 
         for row in plan.get("repair_sku", []):
             restore_missing_sku(row)

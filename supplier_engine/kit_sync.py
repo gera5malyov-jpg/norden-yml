@@ -1,3 +1,4 @@
+import concurrent.futures
 import mimetypes
 import os
 import re
@@ -207,7 +208,81 @@ class KitClient:
         return list(self.iter_collection("/v1/characteristics", {"status": ["ACTIVE"]}))
 
     def variants(self):
-        return list(self.iter_collection("/v1/variants"))
+        return list(self.scan_all_variants_parallel(workers=6))
+
+    def scan_all_variants_parallel(self, workers=6):
+        first = self.request("GET", "/v1/variants", params={"page": 1, "per_page": 100})
+        first_rows = [row for row in self._items(first) if isinstance(row, dict)]
+        for row in first_rows:
+            yield row
+        total = self._total(first)
+        if total is None:
+            # Some KIT responses omit total. Continue safely page-by-page
+            # instead of silently treating the first 100 rows as the catalog.
+            page = 2
+            while len(first_rows) == 100:
+                payload = self.request(
+                    "GET",
+                    "/v1/variants",
+                    params={"page": page, "per_page": 100},
+                )
+                rows = [row for row in self._items(payload) if isinstance(row, dict)]
+                for row in rows:
+                    yield row
+                if len(rows) < 100:
+                    return
+                first_rows = rows
+                page += 1
+            return
+        if total <= len(first_rows):
+            return
+        pages = (int(total) + 99) // 100
+
+        def get_page(page):
+            headers = dict(self.headers)
+            last_error = None
+            for attempt in range(12):
+                try:
+                    response = requests.get(
+                        KIT_BASE + "/v1/variants",
+                        headers=headers,
+                        params={"page": page, "per_page": 100},
+                        timeout=120,
+                    )
+                    if response.status_code == 429:
+                        last_error = RuntimeError("KIT variant scan HTTP 429")
+                        time.sleep(float(response.headers.get("Retry-After") or min(15, 1 + attempt)))
+                        continue
+                    if response.status_code >= 500 or response.status_code == 400:
+                        last_error = RuntimeError("KIT variant scan HTTP %s" % response.status_code)
+                        time.sleep(min(15, 1 + attempt * 2))
+                        continue
+                    if response.status_code >= 400:
+                        raise KitSyncError(
+                            "KIT HTTP %s /v1/variants: %s"
+                            % (response.status_code, response.text[:500])
+                        )
+                    payload = response.json()
+                    return page, [row for row in self._items(payload) if isinstance(row, dict)]
+                except (requests.RequestException, ValueError) as exc:
+                    last_error = exc
+                    if attempt + 1 < 12:
+                        time.sleep(min(15, 1 + attempt * 2))
+                        continue
+            raise KitSyncError(
+                "KIT variant scan page %s retries exhausted: %s" % (page, last_error)
+            )
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, int(workers))) as pool:
+            futures = [pool.submit(get_page, page) for page in range(2, pages + 1)]
+            done = 1
+            for future in concurrent.futures.as_completed(futures):
+                page, rows = future.result()
+                done += 1
+                if done % 50 == 0 or done == pages:
+                    print("KIT bulk scan: %d/%d pages" % (done, pages), flush=True)
+                for row in rows:
+                    yield row
 
     def create_category(self, title, parent_id=None):
         body = {"title": title}
@@ -339,31 +414,34 @@ def _characteristic_index(rows):
     return index
 
 
-def _single_characteristic_id(index, title):
-    matches = index.get(_norm(title), [])
+def _characteristic_sort_key(row):
+    value = _s(row.get("id"))
+    return (0, int(value)) if value.isdigit() else (1, value)
+
+
+def _pick_characteristic(matches, title):
     exact = [
         row for row in matches
         if _s(row.get("title") or row.get("name")) == title
     ]
-    if len(exact) == 1:
-        return _s(exact[0].get("id"))
-    if len(exact) > 1 or len(matches) > 1:
-        raise KitSyncError("KIT characteristic is ambiguous: %s" % title)
-    if len(matches) == 1:
-        return _s(matches[0].get("id"))
-    return ""
+    pool = exact or list(matches)
+    if not pool:
+        return None
+    # Historical KIT data can contain duplicate characteristic definitions.
+    # Reuse one stable existing definition instead of creating more duplicates.
+    return sorted(pool, key=_characteristic_sort_key)[0]
+
+
+def _single_characteristic_id(index, title):
+    row = _pick_characteristic(index.get(_norm(title), []), title)
+    return _s(row.get("id")) if row else ""
 
 
 def _ensure_characteristic(kit, rows, index, title):
     key = _norm(title)
-    matches = index.get(key, [])
-    exact = [row for row in matches if _s(row.get("title") or row.get("name")) == title]
-    if len(exact) == 1:
-        return _s(exact[0].get("id"))
-    if len(exact) > 1 or len(matches) > 1:
-        raise KitSyncError("KIT characteristic is ambiguous: %s" % title)
-    if len(matches) == 1:
-        return _s(matches[0].get("id"))
+    row = _pick_characteristic(index.get(key, []), title)
+    if row:
+        return _s(row.get("id"))
     row = kit.create_characteristic(title)
     cid = _s(row.get("id"))
     if not cid:
@@ -442,12 +520,17 @@ def _variant_characteristic_values(variant, characteristic_id):
     return []
 
 
-def _variant_supplier_article(variant, supplier_identity_ids):
+def _variant_supplier_articles(variant, supplier_identity_ids):
     values = []
     for characteristic_id in supplier_identity_ids or []:
         for value in _variant_characteristic_values(variant, characteristic_id):
             if value and value not in values:
                 values.append(value)
+    return values
+
+
+def _variant_supplier_article(variant, supplier_identity_ids):
+    values = _variant_supplier_articles(variant, supplier_identity_ids)
     if len(values) > 1:
         raise KitSyncError(
             "KIT variant %s has conflicting supplier articles: %s"
@@ -463,14 +546,16 @@ def _variant_indexes(variants, supplier_identity_ids):
     for row in variants:
         sku = _s(row.get("sku"))
         kit_id = _s(row.get("kit_id"))
-        supplier_article = _variant_supplier_article(row, supplier_identity_ids)
         brand_key = _norm(row.get("brand"))
         if sku:
             by_sku[sku].append(row)
         if kit_id:
             by_kit_id[kit_id].append(row)
-        if supplier_article and brand_key:
-            by_supplier_brand[(supplier_article, brand_key)].append(row)
+        if brand_key:
+            # Index every historical supplier identity value. Corrupt rows are
+            # rejected only when selected for the current Webasyst product.
+            for supplier_article in _variant_supplier_articles(row, supplier_identity_ids):
+                by_supplier_brand[(supplier_article, brand_key)].append(row)
     return by_sku, by_kit_id, by_supplier_brand
 
 
@@ -526,10 +611,38 @@ def _select_variant(product, by_sku, by_kit_id, by_supplier_brand, supplier_iden
     if len(exact) == 1:
         return exact[0]
 
-    if sku_matches:
+    # SKU is the primary stable identity. One same-brand KIT row is safe to
+    # relink even when its historical supplier-article field is empty/stale.
+    same_brand = [
+        row for row in sku_matches
+        if _norm(row.get("brand")) == brand_key
+    ]
+    if len(same_brand) == 1:
+        _variant_supplier_article(same_brand[0], supplier_identity_ids)
+        return same_brand[0]
+    if len(same_brand) > 1:
         raise KitSyncError(
-            "KIT already contains SKU=%s but supplier article/brand do not match exactly; automatic linking is blocked"
-            % sku
+            "KIT SKU=%s has %d Norden variants; automatic linking is ambiguous"
+            % (sku, len(same_brand))
+        )
+
+    if sku_matches:
+        candidates = []
+        for row in sku_matches[:5]:
+            articles = _variant_supplier_articles(row, supplier_identity_ids)
+            candidates.append(
+                "id=%s kit_id=%s brand=%s supplier=%s"
+                % (
+                    _s(row.get("id")),
+                    _s(row.get("kit_id")),
+                    _s(row.get("brand")),
+                    ",".join(articles) or "-",
+                )
+            )
+        raise KitSyncError(
+            "KIT already contains SKU=%s but no candidate has brand=%s; "
+            "automatic linking is blocked; candidates: %s"
+            % (sku, brand, " | ".join(candidates))
         )
 
     supplier_matches = by_supplier_brand.get((supplier_sku, brand_key), [])
@@ -565,6 +678,7 @@ def _identity_preflight(products, variants, characteristic_index, brand):
             "status": "blocked",
             "matched_by_kit_id": 0,
             "matched_exact_identity": 0,
+            "matched_by_sku_brand": 0,
             "create_new": 0,
             "conflicts": 1,
             "conflict_sample": [{"error": str(exc)[:1200]}],
@@ -574,6 +688,7 @@ def _identity_preflight(products, variants, characteristic_index, brand):
         "status": "ok",
         "matched_by_kit_id": 0,
         "matched_exact_identity": 0,
+        "matched_by_sku_brand": 0,
         "create_new": 0,
         "conflicts": 0,
         "conflict_sample": [],
@@ -596,7 +711,14 @@ def _identity_preflight(products, variants, characteristic_index, brand):
             elif _feature_kit_id(product.get("features")):
                 report["matched_by_kit_id"] += 1
             else:
-                report["matched_exact_identity"] += 1
+                existing_supplier = _variant_supplier_article(
+                    variant,
+                    supplier_identity_ids,
+                )
+                if existing_supplier == _s(product.get("supplier_sku")):
+                    report["matched_exact_identity"] += 1
+                else:
+                    report["matched_by_sku_brand"] += 1
         except Exception as exc:
             report["conflicts"] += 1
             if len(report["conflict_sample"]) < 100:
@@ -659,13 +781,82 @@ def _summary(urls):
     return "[extimg]\n" + "\n".join(urls) + "\n[/extimg]"
 
 
+def _product_identity_key(product):
+    return str(
+        product.get("product_id")
+        or product.get("sku_id")
+        or product.get("supplier_sku")
+        or product.get("sku")
+        or ""
+    )
+
+
+def _canonical_stocks(rows):
+    out = []
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        out.append((
+            _s(row.get("warehouse_id")),
+            _quantity(row.get("quantity")),
+            _quantity(row.get("reserved")),
+        ))
+    return sorted(out)
+
+
+def _canonical_characteristics(rows):
+    out = []
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        values = row.get("values") or []
+        if not isinstance(values, list):
+            values = [values]
+        normalized = tuple(sorted(_s(value) for value in values if _s(value)))
+        if not normalized and _s(row.get("value")):
+            normalized = (_s(row.get("value")),)
+        out.append((_s(row.get("characteristic_id")), normalized))
+    return sorted(out)
+
+
+def _variant_delta(current, desired):
+    if not isinstance(current, dict):
+        return dict(desired or {})
+    desired = desired or {}
+    out = {}
+    for field in ("sku", "name", "description", "brand", "status"):
+        if field in desired and _s(current.get(field)) != _s(desired.get(field)):
+            out[field] = desired[field]
+    if "stocks" in desired and _canonical_stocks(current.get("stocks")) != _canonical_stocks(desired.get("stocks")):
+        out["stocks"] = desired["stocks"]
+    if "characteristics" in desired and _canonical_characteristics(current.get("characteristics")) != _canonical_characteristics(desired.get("characteristics")):
+        out["characteristics"] = desired["characteristics"]
+    if "pricing" in desired:
+        current_pricing = current.get("pricing") or {}
+        desired_pricing = desired.get("pricing") or {}
+        if (
+            _money(current_pricing.get("price")) != _money(desired_pricing.get("price"))
+            or _money(current_pricing.get("manual_discount_price")) != _money(desired_pricing.get("manual_discount_price"))
+        ):
+            out["pricing"] = desired_pricing
+    return out
+
+
 def sync_manifest(manifest, config, *, kit=None, wa=None):
     rules = config.get("rules") or {}
     if not rules.get("export_to_kit", False):
-        return {"status": "disabled", "eligible": 0, "created": 0, "updated": 0, "skipped_no_category": 0, "errors": []}
+        return {
+            "status": "disabled",
+            "eligible": 0,
+            "created": 0,
+            "updated": 0,
+            "skipped_no_category": 0,
+            "errors": [],
+        }
 
     kit = kit or KitClient()
     wa = wa or WebasystClient()
+    use_parallel = isinstance(kit, KitClient) and isinstance(wa, WebasystClient)
     brand = _s((config.get("identity") or {}).get("brand"))
     products = [row for row in (manifest.get("items") or []) if isinstance(row, dict)]
     wa_categories = [row for row in (manifest.get("categories") or []) if isinstance(row, dict)]
@@ -676,18 +867,20 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
         "eligible": len(eligible),
         "created": 0,
         "updated": 0,
+        "unchanged_variants": 0,
         "skipped_no_category": len(products) - len(eligible),
         "categories_created": 0,
         "characteristics_created": 0,
         "images_uploaded": 0,
         "webasyst_updated": 0,
+        "webasyst_kit_id_skipped": 0,
+        "image_summary_updated": 0,
         "errors": [],
     }
     if not eligible:
         return report
 
-    # Read-only safety phase. Nothing in KIT is created or patched until every
-    # eligible Webasyst product has an unambiguous identity outcome.
+    # One bulk read builds the complete identity index before writes.
     warehouses = _warehouse_ids(kit)
     kit_characteristics = kit.characteristics()
     characteristic_index = _characteristic_index(kit_characteristics)
@@ -717,138 +910,283 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
         value for value in (supplier_article_id, legacy_code_site_id) if value
     ]
 
-    # Existing indexes were built before any writes. Adding the new empty
-    # supplier characteristic does not change existing variant identities.
-    by_sku = identity["by_sku"]
-    by_kit_id = identity["by_kit_id"]
-    by_supplier_brand = identity["by_supplier_brand"]
-    selected_variants = identity["selected"]
-
     kit_categories = kit.categories()
     category_index = _category_index(kit_categories)
     category_count_before = len(kit_categories)
     characteristic_count_before = len(kit_characteristics)
 
+    # Resolve all categories and characteristic definitions before parallel
+    # product writes. This avoids duplicate category/feature creation races.
+    category_ids_by_key = {}
     for product in eligible:
-        try:
-            paths = _webasyst_category_paths(wa_categories, product.get("category_ids"))
-            if not paths:
-                report["skipped_no_category"] += 1
+        key = _product_identity_key(product)
+        paths = _webasyst_category_paths(wa_categories, product.get("category_ids"))
+        category_ids = []
+        for path in paths:
+            cid = _ensure_category_path(kit, kit_categories, category_index, path)
+            if cid and cid not in category_ids:
+                category_ids.append(cid)
+        category_ids_by_key[key] = category_ids
+
+    for product in eligible:
+        for title, values in _feature_values(product.get("features")):
+            if _norm(title) in {
+                _norm(SUPPLIER_ARTICLE_CHARACTERISTIC),
+                _norm(LEGACY_CODE_SITE_CHARACTERISTIC),
+            }:
                 continue
-            category_ids = []
-            for path in paths:
-                cid = _ensure_category_path(kit, kit_categories, category_index, path)
-                if cid and cid not in category_ids:
-                    category_ids.append(cid)
-            if not category_ids:
-                raise KitSyncError("No KIT category resolved")
+            if values:
+                _ensure_characteristic(
+                    kit,
+                    kit_characteristics,
+                    characteristic_index,
+                    title,
+                )
 
-            variant = _select_variant(
-                product,
-                by_sku,
-                by_kit_id,
-                by_supplier_brand,
-                supplier_identity_ids,
-                brand,
-            )
-            qty = _quantity(product.get("stock"))
-            stocks = [
-                {"warehouse_id": warehouses["МСК"], "quantity": qty, "reserved": 0},
-                {"warehouse_id": warehouses["СПБ привозной"], "quantity": qty, "reserved": 0},
-            ]
-            pricing = _price_pair(product.get("purchase_price"))
-            characteristics = _kit_characteristics(
-                kit,
-                product.get("features"),
-                kit_characteristics,
-                characteristic_index,
-                supplier_article_id=supplier_article_id,
-                legacy_code_site_id=legacy_code_site_id,
-                supplier_sku=product.get("supplier_sku"),
-            )
-            variant_payload = {
-                "sku": _s(product.get("sku")),
-                "name": _s(product.get("name")),
-                "description": _s(product.get("description")),
-                "brand": brand,
-                "status": "PUBLISHED" if int(product.get("status") or 0) else "HIDDEN",
-                "stocks": stocks,
-                "characteristics": characteristics,
-            }
-            if pricing:
-                variant_payload["pricing"] = pricing
+    selected_variants = identity["selected"]
 
-            if variant is None:
-                created_product = kit.create_product(category_ids)
-                product_id = _s(created_product.get("id"))
-                if not product_id:
-                    raise KitSyncError("KIT product create returned no id")
-                variant_payload["product_id"] = product_id
-                created_variant = kit.create_variant(variant_payload)
-                variant_id = _s(created_variant.get("id"))
-                if not variant_id:
-                    raise KitSyncError("KIT variant create returned no id")
-                report["created"] += 1
-                variant = dict(created_variant)
-                variant["id"] = variant_id
-                by_sku[_s(product.get("sku"))].append(variant)
-                by_supplier_brand[(_s(product.get("supplier_sku")), _norm(brand))].append(variant)
-            else:
-                variant_id = _s(variant.get("id"))
-                product_id = _s(variant.get("product_id"))
-                if not variant_id or not product_id:
-                    full = kit.get_variant(variant_id)
-                    product_id = _s(full.get("product_id"))
-                if not product_id:
-                    raise KitSyncError("Existing KIT variant has no product_id")
-                kit.patch_product(product_id, category_ids)
-                kit.patch_variant(variant_id, variant_payload)
-                report["updated"] += 1
+    def core_one(product):
+        local_kit = KitClient() if use_parallel else kit
+        local_wa = WebasystClient() if use_parallel else wa
+        key = _product_identity_key(product)
+        category_ids = category_ids_by_key.get(key) or []
+        if not category_ids:
+            raise KitSyncError("No KIT category resolved")
 
-            full = kit.get_variant(variant_id)
-            current_media = [
-                row for row in (full.get("media") or [])
-                if isinstance(row, dict) and _s(row.get("type")).upper() == "IMAGE"
-            ]
-            if not current_media and product.get("image_urls"):
-                media = _media_from_source(kit, product.get("image_urls"))
-                if media:
-                    kit.patch_variant(variant_id, {"media": media})
-                    report["images_uploaded"] += len(media)
-                    full = kit.get_variant(variant_id)
+        variant = selected_variants.get(key)
+        qty = _quantity(product.get("stock"))
+        stocks = [
+            {"warehouse_id": warehouses["МСК"], "quantity": qty, "reserved": 0},
+            {"warehouse_id": warehouses["СПБ привозной"], "quantity": qty, "reserved": 0},
+        ]
+        pricing = _price_pair(product.get("purchase_price"))
+        characteristics = _kit_characteristics(
+            local_kit,
+            product.get("features"),
+            kit_characteristics,
+            characteristic_index,
+            supplier_article_id=supplier_article_id,
+            legacy_code_site_id=legacy_code_site_id,
+            supplier_sku=product.get("supplier_sku"),
+        )
+        variant_payload = {
+            "sku": _s(product.get("sku")),
+            "name": _s(product.get("name")),
+            "description": _s(product.get("description")),
+            "brand": brand,
+            "status": "PUBLISHED" if int(product.get("status") or 0) else "HIDDEN",
+            "stocks": stocks,
+            "characteristics": characteristics,
+        }
+        if pricing:
+            variant_payload["pricing"] = pricing
 
-            kit_id = _s(full.get("kit_id"))
-            if not kit_id or not kit_id.isdigit():
-                raise KitSyncError("KIT variant %s has no numeric kit_id" % variant_id)
-            public_urls = _public_media_urls(kit, full)
+        created = False
+        changed = False
+        if variant is None:
+            created_product = local_kit.create_product(category_ids)
+            product_id = _s(created_product.get("id"))
+            if not product_id:
+                raise KitSyncError("KIT product create returned no id")
+            variant_payload["product_id"] = product_id
+            created_variant = local_kit.create_variant(variant_payload)
+            variant_id = _s(created_variant.get("id"))
+            if not variant_id:
+                raise KitSyncError("KIT variant create returned no id")
+            variant = dict(created_variant)
+            variant["id"] = variant_id
+            created = True
+            changed = True
+        else:
+            variant_id = _s(variant.get("id"))
+            product_id = _s(variant.get("product_id"))
+            current = variant
+            if not variant_id:
+                raise KitSyncError("Existing KIT variant has no id")
+            if not product_id:
+                current = local_kit.get_variant(variant_id)
+                product_id = _s(current.get("product_id"))
+            if not product_id:
+                raise KitSyncError("Existing KIT variant has no product_id")
+            # Category writes stay explicit because category ids are not
+            # consistently present in the variant collection response.
+            local_kit.patch_product(product_id, category_ids)
+            delta = _variant_delta(current, variant_payload)
+            if delta:
+                local_kit.patch_variant(variant_id, delta)
+                changed = True
 
-            web_update = {"features": {"kit_id": kit_id}}
-            if public_urls:
-                web_update["summary"] = _summary(public_urls)
-            wa.call(
+        full = local_kit.get_variant(variant_id)
+        kit_id = _s(full.get("kit_id"))
+        if not kit_id or not kit_id.isdigit():
+            raise KitSyncError("KIT variant %s has no numeric kit_id" % variant_id)
+
+        previous_kit_id = _feature_kit_id(product.get("features"))
+        kit_id_written = False
+        if previous_kit_id != kit_id:
+            local_wa.call(
                 "shop.product.update",
                 http_method="POST",
                 params={"id": str(product["product_id"])},
-                data=web_update,
+                data={"features": {"kit_id": kit_id}},
             )
-            report["webasyst_updated"] += 1
+            kit_id_written = True
 
-            if _s(product.get("sku")):
-                by_sku[_s(product.get("sku"))] = [full]
-            by_kit_id[kit_id] = [full]
-            supplier_key = (_s(product.get("supplier_sku")), _norm(brand))
-            if supplier_key[0] and supplier_key[1]:
-                by_supplier_brand[supplier_key] = [full]
-        except Exception as exc:
-            report["errors"].append({
-                "product_id": product.get("product_id"),
-                "supplier_sku": product.get("supplier_sku"),
-                "sku": product.get("sku"),
-                "error": str(exc)[:1200],
-            })
+        return {
+            "product": product,
+            "variant_id": variant_id,
+            "kit_id": kit_id,
+            "created": created,
+            "changed": changed,
+            "kit_id_written": kit_id_written,
+            # New/relinked products need media reconciliation now. Existing
+            # products with both KIT ID and summary can skip the expensive
+            # file-url pass on ordinary delta updates.
+            "needs_media": bool(product.get("image_urls")) and (
+                created
+                or previous_kit_id != kit_id
+                or not _s(product.get("summary"))
+            ),
+        }
+
+    core_results = []
+    if use_parallel:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+            future_map = {pool.submit(core_one, product): product for product in eligible}
+            done = 0
+            for future in concurrent.futures.as_completed(future_map):
+                product = future_map[future]
+                done += 1
+                try:
+                    result = future.result()
+                    core_results.append(result)
+                    if result["created"]:
+                        report["created"] += 1
+                    else:
+                        report["updated"] += 1
+                        if not result["changed"]:
+                            report["unchanged_variants"] += 1
+                    if result["kit_id_written"]:
+                        report["webasyst_updated"] += 1
+                    else:
+                        report["webasyst_kit_id_skipped"] += 1
+                except Exception as exc:
+                    report["errors"].append({
+                        "product_id": product.get("product_id"),
+                        "supplier_sku": product.get("supplier_sku"),
+                        "sku": product.get("sku"),
+                        "stage": "core",
+                        "error": str(exc)[:1200],
+                    })
+                if done % 100 == 0 or done == len(eligible):
+                    print("KIT core sync: %d/%d products" % (done, len(eligible)), flush=True)
+    else:
+        for product in eligible:
+            try:
+                result = core_one(product)
+                core_results.append(result)
+                if result["created"]:
+                    report["created"] += 1
+                else:
+                    report["updated"] += 1
+                    if not result["changed"]:
+                        report["unchanged_variants"] += 1
+                if result["kit_id_written"]:
+                    report["webasyst_updated"] += 1
+                else:
+                    report["webasyst_kit_id_skipped"] += 1
+            except Exception as exc:
+                report["errors"].append({
+                    "product_id": product.get("product_id"),
+                    "supplier_sku": product.get("supplier_sku"),
+                    "sku": product.get("sku"),
+                    "stage": "core",
+                    "error": str(exc)[:1200],
+                })
+
+    # Media is deliberately second. All product cards, prices, stocks and KIT
+    # IDs are visible before image transfer begins.
+    media_queue = [row for row in core_results if row.get("needs_media")]
+
+    def media_one(row):
+        product = row["product"]
+        local_kit = KitClient() if use_parallel else kit
+        local_wa = WebasystClient() if use_parallel else wa
+        variant_id = row["variant_id"]
+        full = local_kit.get_variant(variant_id)
+        current_media = [
+            item for item in (full.get("media") or [])
+            if isinstance(item, dict)
+            and _s(item.get("type")).upper() == "IMAGE"
+            and _s(item.get("image_id"))
+        ]
+        uploaded = 0
+        if not current_media and product.get("image_urls"):
+            media = _media_from_source(local_kit, product.get("image_urls"))
+            if media:
+                local_kit.patch_variant(variant_id, {"media": media})
+                uploaded = len(media)
+                full = local_kit.get_variant(variant_id)
+
+        public_urls = _public_media_urls(local_kit, full)
+        summary_updated = False
+        if public_urls:
+            desired_summary = _summary(public_urls)
+            if desired_summary.strip() != _s(product.get("summary")):
+                local_wa.call(
+                    "shop.product.update",
+                    http_method="POST",
+                    params={"id": str(product["product_id"])},
+                    data={"summary": desired_summary},
+                )
+                summary_updated = True
+        return uploaded, summary_updated
+
+    if use_parallel and media_queue:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+            future_map = {pool.submit(media_one, row): row for row in media_queue}
+            done = 0
+            for future in concurrent.futures.as_completed(future_map):
+                row = future_map[future]
+                product = row["product"]
+                done += 1
+                try:
+                    uploaded, summary_updated = future.result()
+                    report["images_uploaded"] += uploaded
+                    if summary_updated:
+                        report["image_summary_updated"] += 1
+                        report["webasyst_updated"] += 1
+                except Exception as exc:
+                    report["errors"].append({
+                        "product_id": product.get("product_id"),
+                        "supplier_sku": product.get("supplier_sku"),
+                        "sku": product.get("sku"),
+                        "stage": "images",
+                        "error": str(exc)[:1200],
+                    })
+                if done % 50 == 0 or done == len(media_queue):
+                    print("KIT image sync: %d/%d products" % (done, len(media_queue)), flush=True)
+    else:
+        for row in media_queue:
+            product = row["product"]
+            try:
+                uploaded, summary_updated = media_one(row)
+                report["images_uploaded"] += uploaded
+                if summary_updated:
+                    report["image_summary_updated"] += 1
+                    report["webasyst_updated"] += 1
+            except Exception as exc:
+                report["errors"].append({
+                    "product_id": product.get("product_id"),
+                    "supplier_sku": product.get("supplier_sku"),
+                    "sku": product.get("sku"),
+                    "stage": "images",
+                    "error": str(exc)[:1200],
+                })
 
     report["categories_created"] = max(0, len(kit_categories) - category_count_before)
     report["characteristics_created"] = max(0, len(kit_characteristics) - characteristic_count_before)
     if report["errors"]:
         report["status"] = "partial_failure"
     return report
+

@@ -8,6 +8,7 @@ from pathlib import Path
 from .adapters import load_csv, load_xlsx, load_xml_yml, load_pdf
 from .bridge import MegasuppliersBridge
 from .formulas import apply_price_formulas
+from .kit_sync import sync_manifest
 from .models import Product
 from .norden import load_norden_source
 from .validators import validate_run

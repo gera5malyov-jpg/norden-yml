@@ -1335,9 +1335,11 @@ def test_kit_export_uses_webasyst_categories_and_user_prices():
         if x["values"] == ["NS-1"]
     ]
     assert len(supplier_chars) == 1
-    update = next(x for x in wa.calls if x["method"] == "shop.product.update")
-    assert update["data"]["features"]["kit_id"] == "987654"
-    assert "https://kit.example/img1.jpg" in update["data"]["summary"]
+    updates = [x for x in wa.calls if x["method"] == "shop.product.update"]
+    kit_id_update = next(x for x in updates if "features" in (x["data"] or {}))
+    summary_update = next(x for x in updates if "summary" in (x["data"] or {}))
+    assert kit_id_update["data"]["features"]["kit_id"] == "987654"
+    assert "https://kit.example/img1.jpg" in summary_update["data"]["summary"]
 
 
 def test_kit_export_preserves_multiple_webasyst_categories():
@@ -1401,22 +1403,39 @@ def test_kit_first_match_requires_sku_supplier_article_and_brand():
     assert found["id"] == "v1"
 
 
-def test_kit_same_sku_with_wrong_supplier_article_is_blocked():
+def test_kit_unique_same_sku_and_brand_accepts_stale_supplier_article():
     supplier_char_id = "f-supplier"
     variants = [
         _kit_variant("v1", "7001", "12345", "Norden", supplier_char_id, "OTHER"),
     ]
     by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [supplier_char_id])
+    found = _select_variant(
+        {"sku": "12345", "supplier_sku": "NS-1", "features": []},
+        by_sku,
+        by_kit_id,
+        by_supplier_brand,
+        [supplier_char_id],
+        "Norden",
+    )
+    assert found["id"] == "v1"
+
+
+def test_kit_duplicate_same_sku_same_brand_stays_blocked():
+    variants = [
+        {"id": "v1", "kit_id": "7001", "sku": "12345", "brand": "Norden", "product_id": "p1", "characteristics": []},
+        {"id": "v2", "kit_id": "7002", "sku": "12345", "brand": "Norden", "product_id": "p2", "characteristics": []},
+    ]
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [])
     with pytest.raises(Exception) as exc:
         _select_variant(
             {"sku": "12345", "supplier_sku": "NS-1", "features": []},
             by_sku,
             by_kit_id,
             by_supplier_brand,
-            [supplier_char_id],
+            [],
             "Norden",
         )
-    assert "automatic linking is blocked" in str(exc.value)
+    assert "ambiguous" in str(exc.value)
 
 
 def test_kit_same_supplier_article_and_brand_under_other_sku_is_blocked():
@@ -1516,7 +1535,7 @@ def test_kit_legacy_code_for_site_matches_existing_norden_card():
     assert found["id"] == "v-legacy"
 
 
-def test_kit_conflicting_new_and_legacy_supplier_codes_are_blocked():
+def test_kit_conflicting_identity_blocks_only_when_that_variant_is_selected():
     variant = {
         "id": "v-conflict",
         "kit_id": "7001",
@@ -1536,8 +1555,19 @@ def test_kit_conflicting_new_and_legacy_supplier_codes_are_blocked():
             },
         ],
     }
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(
+        [variant],
+        ["f-new", "f-code-site"],
+    )
     with pytest.raises(Exception) as exc:
-        _variant_indexes([variant], ["f-new", "f-code-site"])
+        _select_variant(
+            {"sku": "12345", "supplier_sku": "NS-1", "features": []},
+            by_sku,
+            by_kit_id,
+            by_supplier_brand,
+            ["f-new", "f-code-site"],
+            "Norden",
+        )
     assert "conflicting supplier articles" in str(exc.value)
 
 
@@ -1581,14 +1611,24 @@ def test_legacy_code_site_characteristic_title_is_fixed():
 def test_kit_preflight_blocks_all_writes_on_any_identity_conflict():
     class ConflictKit(_FakeKitForSupplierExport):
         def variants(self):
-            return [{
-                "id": "v-existing",
-                "kit_id": "7001",
-                "sku": "12345",
-                "brand": "Norden",
-                "product_id": "p-existing",
-                "characteristics": [],
-            }]
+            return [
+                {
+                    "id": "v-existing-1",
+                    "kit_id": "7001",
+                    "sku": "12345",
+                    "brand": "Norden",
+                    "product_id": "p-existing-1",
+                    "characteristics": [],
+                },
+                {
+                    "id": "v-existing-2",
+                    "kit_id": "7002",
+                    "sku": "12345",
+                    "brand": "Norden",
+                    "product_id": "p-existing-2",
+                    "characteristics": [],
+                },
+            ]
 
     kit = ConflictKit()
     wa = _FakeWaForKit()
@@ -1659,3 +1699,72 @@ def test_kit_preflight_accepts_authoritative_webasyst_kit_id_without_old_identit
     assert report["matched_by_kit_id"] == 1
     assert report["conflicts"] == 0
     assert identity["selected"]["1467631"]["kit_id"] == "1597882"
+
+def test_webasyst_delta_skips_equal_price_stock_and_availability():
+    from supplier_engine.webasyst_sync import _delta_sku_data
+
+    desired = {
+        "purchase_price": "100",
+        "price": "125",
+        "compare_price": "160",
+        "stock": {"1": "3"},
+        "available": 1,
+    }
+    current = {
+        "purchase_price": "100.0000",
+        "price": "125.00",
+        "compare_price": "160",
+        "stock_counts": {"1": "3.0"},
+        "available": "1",
+    }
+    assert _delta_sku_data(desired, current, 1) == {}
+
+
+def test_webasyst_delta_keeps_real_stock_change():
+    from supplier_engine.webasyst_sync import _delta_sku_data
+
+    desired = {"stock": {"1": "4"}, "available": 1}
+    current = {"stock_counts": {"1": "3"}, "available": "1"}
+    delta = _delta_sku_data(desired, current, 1)
+    assert delta["stock"] == {"1": "4"}
+    assert "available" not in delta
+
+
+def test_kit_variant_delta_skips_equal_payload_and_keeps_price_change():
+    from supplier_engine.kit_sync import _variant_delta
+
+    current = {
+        "sku": "AF-1",
+        "name": "Chair",
+        "description": "",
+        "brand": "Norden",
+        "status": "PUBLISHED",
+        "stocks": [
+            {"warehouse_id": "10", "quantity": 3, "reserved": 0},
+            {"warehouse_id": "20", "quantity": 3, "reserved": 0},
+        ],
+        "characteristics": [
+            {"characteristic_id": "7", "value": "ABC", "values": ["ABC"]},
+        ],
+        "pricing": {"price": "160.00", "manual_discount_price": "125"},
+    }
+    desired = {
+        "sku": "AF-1",
+        "name": "Chair",
+        "description": "",
+        "brand": "Norden",
+        "status": "PUBLISHED",
+        "stocks": [
+            {"warehouse_id": "20", "quantity": 3, "reserved": 0},
+            {"warehouse_id": "10", "quantity": 3, "reserved": 0},
+        ],
+        "characteristics": [
+            {"characteristic_id": "7", "value": "ABC", "values": ["ABC"]},
+        ],
+        "pricing": {"price": "160", "manual_discount_price": "125.00"},
+    }
+    assert _variant_delta(current, desired) == {}
+
+    desired["pricing"] = {"price": "161", "manual_discount_price": "125"}
+    assert _variant_delta(current, desired) == {"pricing": desired["pricing"]}
+

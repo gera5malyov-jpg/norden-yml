@@ -318,6 +318,7 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
                 'stock' => $stock,
                 'category_ids' => $category_ids,
                 'features' => $features,
+                'image_urls' => $image_urls,
             );
         }
 

@@ -109,7 +109,7 @@ class MegasuppliersBridge:
         return {str(k): str(v) for k, v in mapping.items() if str(k) and str(v)}
 
 
-    def kit_manifest(self, supplier_id, request_id, stock_id, page_size=100):
+    def kit_manifest(self, supplier_id, request_id, stock_id, page_size=200):
         items = []
         categories = {}
         offset = 0
