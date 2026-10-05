@@ -185,7 +185,7 @@ def _unique_image_aliases(products):
 
 
 def _characteristic_names_for_plan(plan, rules):
-    rows = list(plan.get("create") or [])
+    rows = list(plan.get("create") or []) + list(plan.get("repair_sku") or [])
     if rules.get("update_characteristics", False):
         rows.extend(plan.get("update") or [])
     names = set()
@@ -199,6 +199,7 @@ def _characteristic_names_for_plan(plan, rules):
 def _plan_summary(plan):
     return {
         "create": len(plan.get("create") or []),
+        "repair_sku": len(plan.get("repair_sku") or []),
         "update": len(plan.get("update") or []),
         "zero_stock": len(plan.get("zero") or []),
         "skipped": len(plan.get("skipped") or []),
