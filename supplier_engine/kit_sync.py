@@ -113,7 +113,16 @@ def _kit_variants(kit, products=None):
             and _s(row.get("sku")) not in found_skus
         ))
         if supplier_terms:
-            variants.extend(kit.search_variants_parallel(supplier_terms, workers=4))
+            try:
+                secondary = kit.search_variants_parallel(
+                    supplier_terms,
+                    workers=4,
+                    skip_broad=True,
+                )
+            except TypeError:
+                # Backward-compatible path for test doubles / older clients.
+                secondary = kit.search_variants_parallel(supplier_terms, workers=4)
+            variants.extend(secondary)
 
         deduped = {}
         for row in variants:
