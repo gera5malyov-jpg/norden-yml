@@ -1033,6 +1033,27 @@ if ($action === 'kit_manifest') {
     ));
 }
 
+if ($action === 'kit_result') {
+    if ((string)(isset($pending['mode']) ? $pending['mode'] : '') !== 'apply') {
+        ms_bridge_json(409, array('errors' => array('apply_request_required')));
+    }
+    $report = isset($payload['report']) ? $payload['report'] : array();
+    if (!is_array($report)) {
+        ms_bridge_json(422, array('errors' => array('invalid_kit_report')));
+    }
+    $encoded_report = json_encode($report, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+    if ($encoded_report === false || strlen($encoded_report) > 200000) {
+        ms_bridge_json(413, array('errors' => array('kit_report_too_large')));
+    }
+    $pending['kit'] = $report;
+    $pending['kit_updated_at'] = date('c');
+    $status_json = json_encode($pending, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+    if ($status_json === false || file_put_contents($status_path, $status_json, LOCK_EX) === false) {
+        ms_bridge_json(500, array('errors' => array('kit_status_write_failed')));
+    }
+    ms_bridge_json(200, array('status' => 'ok', 'saved' => true));
+}
+
 if ($action === 'sync_links') {
     if ((string)(isset($pending['mode']) ? $pending['mode'] : '') !== 'apply') {
         ms_bridge_json(409, array('errors' => array('apply_request_required')));
