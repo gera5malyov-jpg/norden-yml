@@ -95,11 +95,37 @@ def _load_repository_kit_client():
 KitClient = _load_repository_kit_client()
 
 
-def _kit_variants(kit):
-    if hasattr(kit, "scan_all_variants_parallel"):
-        return list(kit.scan_all_variants_parallel(workers=4))
+def _kit_variants(kit, products=None):
+    products = list(products or [])
+    if products and hasattr(kit, "search_variants_parallel"):
+        sku_terms = list(dict.fromkeys(
+            _s(row.get("sku")) for row in products if _s(row.get("sku"))
+        ))
+        variants = list(kit.search_variants_parallel(sku_terms, workers=6))
+        found_skus = {_s(row.get("sku")) for row in variants if _s(row.get("sku"))}
+
+        # Only products with no exact SKU candidate need the secondary legacy
+        # lookup by supplier code/model. This keeps the request volume small.
+        supplier_terms = list(dict.fromkeys(
+            _s(row.get("supplier_sku"))
+            for row in products
+            if _s(row.get("supplier_sku"))
+            and _s(row.get("sku")) not in found_skus
+        ))
+        if supplier_terms:
+            variants.extend(kit.search_variants_parallel(supplier_terms, workers=6))
+
+        deduped = {}
+        for row in variants:
+            key = _s(row.get("id")) or (_s(row.get("kit_id")) + "|" + _s(row.get("sku")))
+            if key:
+                deduped[key] = row
+        return list(deduped.values())
+
     if hasattr(kit, "variants"):
         return list(kit.variants())
+    if hasattr(kit, "scan_all_variants_parallel"):
+        return list(kit.scan_all_variants_parallel(workers=4))
     return list(kit.iter_collection("/v1/variants"))
 
 
@@ -705,7 +731,7 @@ def plan_manifest(manifest, config, *, kit=None):
     kit_categories = kit.categories()
     kit_characteristics = kit.characteristics()
     characteristic_index = _characteristic_index(kit_characteristics)
-    variants = _kit_variants(kit)
+    variants = _kit_variants(kit, eligible)
 
     preflight, identity = _identity_preflight(
         eligible,
