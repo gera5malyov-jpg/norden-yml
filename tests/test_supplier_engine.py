@@ -7,7 +7,7 @@ from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source, _characteristic_names_for_plan, _unique_image_aliases
 from supplier_engine import norden
-from supplier_engine.kit_sync import sync_manifest, _price_pair, _webasyst_category_paths, _variant_indexes, _select_variant, _kit_characteristics, SUPPLIER_ARTICLE_CHARACTERISTIC, LEGACY_CODE_SITE_CHARACTERISTIC
+from supplier_engine.kit_sync import sync_manifest, _price_pair, _webasyst_category_paths, _variant_indexes, _select_variant, _kit_characteristics, _identity_preflight, SUPPLIER_ARTICLE_CHARACTERISTIC, LEGACY_CODE_SITE_CHARACTERISTIC
 from supplier_engine.bridge import MegasuppliersBridge
 from supplier_engine.validators import validate_run
 from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan, webasyst_sku_mode
@@ -1575,3 +1575,87 @@ def test_kit_characteristics_write_new_and_legacy_supplier_identity():
 
 def test_legacy_code_site_characteristic_title_is_fixed():
     assert LEGACY_CODE_SITE_CHARACTERISTIC == "Код для сайта"
+
+
+
+def test_kit_preflight_blocks_all_writes_on_any_identity_conflict():
+    class ConflictKit(_FakeKitForSupplierExport):
+        def variants(self):
+            return [{
+                "id": "v-existing",
+                "kit_id": "7001",
+                "sku": "12345",
+                "brand": "Norden",
+                "product_id": "p-existing",
+                "characteristics": [],
+            }]
+
+    kit = ConflictKit()
+    wa = _FakeWaForKit()
+    manifest = {
+        "categories": [{"id": 2, "name": "Кресла", "parent_id": 0}],
+        "items": [{
+            "supplier_sku": "NS-1",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "12345",
+            "name": "Кресло",
+            "description": "",
+            "status": 1,
+            "purchase_price": 1000,
+            "stock": 3,
+            "category_ids": [2],
+            "features": [],
+            "image_urls": [],
+        }],
+    }
+    report = sync_manifest(
+        manifest,
+        {
+            "identity": {"brand": "Norden"},
+            "rules": {"export_to_kit": True},
+        },
+        kit=kit,
+        wa=wa,
+    )
+    assert report["status"] == "blocked"
+    assert report["preflight"]["conflicts"] == 1
+    assert not kit.created_categories
+    assert not kit.created_products
+    assert not kit.created_variants
+    assert not kit.patched_products
+    assert not kit.patched_variants
+    assert wa.calls == []
+
+
+def test_kit_preflight_accepts_authoritative_webasyst_kit_id_without_old_identity_fields():
+    product = {
+        "supplier_sku": "RT-2031",
+        "product_id": 1467631,
+        "sku_id": 31646769,
+        "sku": "AF-31646769",
+        "features": [{
+            "code": "kit_id",
+            "name": "KIT ID",
+            "values": ["1597882"],
+        }],
+        "category_ids": [1],
+    }
+    variants = [{
+        "id": "01a0ed0c-9f29-7797-ad47-586d09b6770e",
+        "kit_id": "1597882",
+        "sku": "AF-31646769",
+        "brand": "Norden",
+        "product_id": "p-current",
+        "characteristics": [],
+    }]
+    report, identity = _identity_preflight(
+        [product],
+        variants,
+        {},
+        "Norden",
+    )
+    assert report["status"] == "ok"
+    assert report["matched_by_kit_id"] == 1
+    assert report["conflicts"] == 0
+    assert identity["selected"]["1467631"]["kit_id"] == "1597882"
