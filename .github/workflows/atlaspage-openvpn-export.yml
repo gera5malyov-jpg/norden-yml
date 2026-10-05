@@ -79,7 +79,7 @@ jobs:
             const page = await context.newPage();
 
             try {
-              const response = await page.goto('https://atlaspage51.com/lk', {
+              const response = await page.goto('https://atlaspage51.com/login', {
                 waitUntil: 'domcontentloaded',
                 timeout: 45000
               });
