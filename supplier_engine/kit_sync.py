@@ -358,44 +358,151 @@ def _ensure_characteristic(kit, rows, index, title):
     return cid
 
 
-def _kit_characteristics(kit, features, rows, index):
+SUPPLIER_ARTICLE_CHARACTERISTIC = "Артикул поставщика"
+
+
+def _kit_characteristics(kit, features, rows, index, supplier_article_id=None, supplier_sku=""):
     out = []
+    seen_titles = set()
     for title, values in _feature_values(features):
+        normalized_title = _norm(title)
+        if normalized_title == _norm(SUPPLIER_ARTICLE_CHARACTERISTIC):
+            continue
         cid = _ensure_characteristic(kit, rows, index, title)
         out.append({
             "characteristic_id": cid,
             "value": values[0],
             "values": values,
         })
+        seen_titles.add(normalized_title)
+    supplier_sku = _s(supplier_sku)
+    if supplier_article_id and supplier_sku:
+        out.append({
+            "characteristic_id": supplier_article_id,
+            "value": supplier_sku,
+            "values": [supplier_sku],
+        })
     return out
 
 
-def _variant_indexes(variants):
+def _variant_characteristic_values(variant, characteristic_id):
+    characteristic_id = _s(characteristic_id)
+    if not characteristic_id:
+        return []
+    for item in variant.get("characteristics") or []:
+        if not isinstance(item, dict):
+            continue
+        if _s(item.get("characteristic_id")) != characteristic_id:
+            continue
+        values = []
+        raw_values = item.get("values") or []
+        if not isinstance(raw_values, list):
+            raw_values = [raw_values]
+        for value in raw_values:
+            value = _s(value)
+            if value and value not in values:
+                values.append(value)
+        fallback = _s(item.get("value"))
+        if fallback and fallback not in values:
+            values.append(fallback)
+        return values
+    return []
+
+
+def _variant_supplier_article(variant, supplier_article_id):
+    values = _variant_characteristic_values(variant, supplier_article_id)
+    if len(values) > 1:
+        raise KitSyncError(
+            "KIT variant %s has multiple supplier articles: %s"
+            % (_s(variant.get("id")), ", ".join(values))
+        )
+    return values[0] if values else ""
+
+
+def _variant_indexes(variants, supplier_article_id):
     by_sku = defaultdict(list)
     by_kit_id = defaultdict(list)
+    by_supplier_brand = defaultdict(list)
     for row in variants:
         sku = _s(row.get("sku"))
         kit_id = _s(row.get("kit_id"))
+        supplier_article = _variant_supplier_article(row, supplier_article_id)
+        brand_key = _norm(row.get("brand"))
         if sku:
             by_sku[sku].append(row)
         if kit_id:
             by_kit_id[kit_id].append(row)
-    return by_sku, by_kit_id
+        if supplier_article and brand_key:
+            by_supplier_brand[(supplier_article, brand_key)].append(row)
+    return by_sku, by_kit_id, by_supplier_brand
 
 
-def _select_variant(product, by_sku, by_kit_id):
-    kit_id = _feature_kit_id(product.get("features"))
-    if kit_id:
-        matches = by_kit_id.get(kit_id, [])
-        if len(matches) > 1:
-            raise KitSyncError("KIT ID %s matches %d variants" % (kit_id, len(matches)))
-        if len(matches) == 1:
-            return matches[0]
+def _select_variant(product, by_sku, by_kit_id, by_supplier_brand, supplier_article_id, brand):
+    expected_kit_id = _feature_kit_id(product.get("features"))
+    supplier_sku = _s(product.get("supplier_sku"))
     sku = _s(product.get("sku"))
-    matches = by_sku.get(sku, [])
-    if len(matches) > 1:
-        raise KitSyncError("KIT SKU %s matches %d variants" % (sku, len(matches)))
-    return matches[0] if matches else None
+    brand_key = _norm(brand)
+
+    if expected_kit_id:
+        matches = by_kit_id.get(expected_kit_id, [])
+        if len(matches) > 1:
+            raise KitSyncError("KIT ID %s matches %d variants" % (expected_kit_id, len(matches)))
+        if not matches:
+            raise KitSyncError(
+                "KIT ID %s is stored in Webasyst but was not found in KIT; automatic creation is blocked"
+                % expected_kit_id
+            )
+        variant = matches[0]
+        existing_brand = _norm(variant.get("brand"))
+        if existing_brand and brand_key and existing_brand != brand_key:
+            raise KitSyncError(
+                "KIT ID %s brand conflict: KIT=%s, Webasyst=%s"
+                % (expected_kit_id, _s(variant.get("brand")), brand)
+            )
+        existing_supplier = _variant_supplier_article(variant, supplier_article_id)
+        if existing_supplier and supplier_sku and existing_supplier != supplier_sku:
+            raise KitSyncError(
+                "KIT ID %s supplier article conflict: KIT=%s, Webasyst=%s"
+                % (expected_kit_id, existing_supplier, supplier_sku)
+            )
+        return variant
+
+    if not sku or not supplier_sku or not brand_key:
+        raise KitSyncError(
+            "First KIT match requires exact Webasyst SKU + supplier article + brand"
+        )
+
+    sku_matches = by_sku.get(sku, [])
+    exact = []
+    for variant in sku_matches:
+        if _norm(variant.get("brand")) != brand_key:
+            continue
+        if _variant_supplier_article(variant, supplier_article_id) != supplier_sku:
+            continue
+        exact.append(variant)
+
+    if len(exact) > 1:
+        raise KitSyncError(
+            "Exact KIT match is ambiguous for SKU=%s, supplier=%s, brand=%s"
+            % (sku, supplier_sku, brand)
+        )
+    if len(exact) == 1:
+        return exact[0]
+
+    if sku_matches:
+        raise KitSyncError(
+            "KIT already contains SKU=%s but supplier article/brand do not match exactly; automatic linking is blocked"
+            % sku
+        )
+
+    supplier_matches = by_supplier_brand.get((supplier_sku, brand_key), [])
+    if supplier_matches:
+        raise KitSyncError(
+            "KIT already contains supplier article=%s and brand=%s under another SKU; automatic creation is blocked"
+            % (supplier_sku, brand)
+        )
+
+    return None
 
 
 def _media_from_source(kit, urls):
@@ -466,8 +573,17 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
     category_index = _category_index(kit_categories)
     kit_characteristics = kit.characteristics()
     characteristic_index = _characteristic_index(kit_characteristics)
+    supplier_article_id = _ensure_characteristic(
+        kit,
+        kit_characteristics,
+        characteristic_index,
+        SUPPLIER_ARTICLE_CHARACTERISTIC,
+    )
     variants = kit.variants()
-    by_sku, by_kit_id = _variant_indexes(variants)
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(
+        variants,
+        supplier_article_id,
+    )
 
     category_count_before = len(kit_categories)
     characteristic_count_before = len(kit_characteristics)
@@ -486,7 +602,14 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
             if not category_ids:
                 raise KitSyncError("No KIT category resolved")
 
-            variant = _select_variant(product, by_sku, by_kit_id)
+            variant = _select_variant(
+                product,
+                by_sku,
+                by_kit_id,
+                by_supplier_brand,
+                supplier_article_id,
+                brand,
+            )
             qty = _quantity(product.get("stock"))
             stocks = [
                 {"warehouse_id": warehouses["МСК"], "quantity": qty, "reserved": 0},
@@ -498,6 +621,8 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
                 product.get("features"),
                 kit_characteristics,
                 characteristic_index,
+                supplier_article_id=supplier_article_id,
+                supplier_sku=product.get("supplier_sku"),
             )
             variant_payload = {
                 "sku": _s(product.get("sku")),
@@ -525,6 +650,7 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
                 variant = dict(created_variant)
                 variant["id"] = variant_id
                 by_sku[_s(product.get("sku"))].append(variant)
+                by_supplier_brand[(_s(product.get("supplier_sku")), _norm(brand))].append(variant)
             else:
                 variant_id = _s(variant.get("id"))
                 product_id = _s(variant.get("product_id"))
@@ -568,6 +694,9 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
             if _s(product.get("sku")):
                 by_sku[_s(product.get("sku"))] = [full]
             by_kit_id[kit_id] = [full]
+            supplier_key = (_s(product.get("supplier_sku")), _norm(brand))
+            if supplier_key[0] and supplier_key[1]:
+                by_supplier_brand[supplier_key] = [full]
         except Exception as exc:
             report["errors"].append({
                 "product_id": product.get("product_id"),
