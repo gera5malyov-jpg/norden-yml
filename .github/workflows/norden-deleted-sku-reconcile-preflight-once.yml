@@ -1,10 +1,7 @@
 name: Norden deleted SKU reconcile preflight once
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/norden-deleted-sku-reconcile-preflight-once.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
