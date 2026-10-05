@@ -256,15 +256,18 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
                 key = (str(link.get("product_id")), str(link.get("sku_id")))
                 linked = existing_by_ids.get(key)
                 if linked is None:
-                    plan["blocked"].append({
+                    # A supplier link may outlive a deleted/recreated Webasyst
+                    # modification. It is not an identity conflict: ignore the
+                    # stale link and continue with normal exact catalog matching
+                    # / create rules. A successful apply will replace the link.
+                    plan.setdefault("stale_links", []).append({
                         "sku": product.sku,
                         "supplier_sku": product.supplier_sku,
-                        "reason": "stale_supplier_link",
                         "product_id": link.get("product_id"),
                         "sku_id": link.get("sku_id"),
                     })
-                    continue
-                matches = [linked]
+                else:
+                    matches = [linked]
 
         if len(matches) > 1:
             plan["blocked"].append({
