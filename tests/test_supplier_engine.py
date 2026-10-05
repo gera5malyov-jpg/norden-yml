@@ -7,7 +7,7 @@ from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source, _characteristic_names_for_plan, _unique_image_aliases
 from supplier_engine import norden
-from supplier_engine.kit_sync import sync_manifest, _price_pair, _webasyst_category_paths
+from supplier_engine.kit_sync import sync_manifest, _price_pair, _webasyst_category_paths, _variant_indexes, _select_variant, SUPPLIER_ARTICLE_CHARACTERISTIC
 from supplier_engine.bridge import MegasuppliersBridge
 from supplier_engine.validators import validate_run
 from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan, webasyst_sku_mode
@@ -1330,6 +1330,11 @@ def test_kit_export_uses_webasyst_categories_and_user_prices():
         {"warehouse_id": "w-msk", "quantity": 7, "reserved": 0},
         {"warehouse_id": "w-spb", "quantity": 7, "reserved": 0},
     ]
+    supplier_chars = [
+        x for x in body["characteristics"]
+        if x["values"] == ["NS-1"]
+    ]
+    assert len(supplier_chars) == 1
     update = next(x for x in wa.calls if x["method"] == "shop.product.update")
     assert update["data"]["features"]["kit_id"] == "987654"
     assert "https://kit.example/img1.jpg" in update["data"]["summary"]
@@ -1352,3 +1357,126 @@ def test_kit_prices_follow_current_25_60_rule():
         "price": "1600.00",
         "manual_discount_price": "1250.00",
     }
+
+
+
+def _kit_variant(variant_id, kit_id, sku, brand, supplier_char_id, supplier_article):
+    characteristics = []
+    if supplier_article is not None:
+        characteristics.append({
+            "characteristic_id": supplier_char_id,
+            "value": supplier_article,
+            "values": [supplier_article],
+        })
+    return {
+        "id": variant_id,
+        "kit_id": kit_id,
+        "sku": sku,
+        "brand": brand,
+        "product_id": "p-" + variant_id,
+        "characteristics": characteristics,
+    }
+
+
+def test_kit_first_match_requires_sku_supplier_article_and_brand():
+    supplier_char_id = "f-supplier"
+    variants = [
+        _kit_variant("v1", "7001", "12345", "Norden", supplier_char_id, "NS-1"),
+        _kit_variant("v2", "7002", "12346", "Norden", supplier_char_id, "NS-2"),
+    ]
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, supplier_char_id)
+    product = {
+        "sku": "12345",
+        "supplier_sku": "NS-1",
+        "features": [],
+    }
+    found = _select_variant(
+        product,
+        by_sku,
+        by_kit_id,
+        by_supplier_brand,
+        supplier_char_id,
+        "Norden",
+    )
+    assert found["id"] == "v1"
+
+
+def test_kit_same_sku_with_wrong_supplier_article_is_blocked():
+    supplier_char_id = "f-supplier"
+    variants = [
+        _kit_variant("v1", "7001", "12345", "Norden", supplier_char_id, "OTHER"),
+    ]
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, supplier_char_id)
+    with pytest.raises(Exception) as exc:
+        _select_variant(
+            {"sku": "12345", "supplier_sku": "NS-1", "features": []},
+            by_sku,
+            by_kit_id,
+            by_supplier_brand,
+            supplier_char_id,
+            "Norden",
+        )
+    assert "automatic linking is blocked" in str(exc.value)
+
+
+def test_kit_same_supplier_article_and_brand_under_other_sku_is_blocked():
+    supplier_char_id = "f-supplier"
+    variants = [
+        _kit_variant("v1", "7001", "99999", "Norden", supplier_char_id, "NS-1"),
+    ]
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, supplier_char_id)
+    with pytest.raises(Exception) as exc:
+        _select_variant(
+            {"sku": "12345", "supplier_sku": "NS-1", "features": []},
+            by_sku,
+            by_kit_id,
+            by_supplier_brand,
+            supplier_char_id,
+            "Norden",
+        )
+    assert "under another SKU" in str(exc.value)
+
+
+def test_kit_id_is_authoritative_and_missing_id_never_creates_duplicate():
+    supplier_char_id = "f-supplier"
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes([], supplier_char_id)
+    with pytest.raises(Exception) as exc:
+        _select_variant(
+            {
+                "sku": "12345",
+                "supplier_sku": "NS-1",
+                "features": [{"code": "kit_id", "name": "KIT ID", "values": ["7001"]}],
+            },
+            by_sku,
+            by_kit_id,
+            by_supplier_brand,
+            supplier_char_id,
+            "Norden",
+        )
+    assert "stored in Webasyst but was not found in KIT" in str(exc.value)
+
+
+def test_kit_id_match_rejects_conflicting_supplier_article():
+    supplier_char_id = "f-supplier"
+    variants = [
+        _kit_variant("v1", "7001", "12345", "Norden", supplier_char_id, "OTHER"),
+    ]
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, supplier_char_id)
+    with pytest.raises(Exception) as exc:
+        _select_variant(
+            {
+                "sku": "12345",
+                "supplier_sku": "NS-1",
+                "features": [{"code": "kit_id", "name": "KIT ID", "values": ["7001"]}],
+            },
+            by_sku,
+            by_kit_id,
+            by_supplier_brand,
+            supplier_char_id,
+            "Norden",
+        )
+    assert "supplier article conflict" in str(exc.value)
+
+
+def test_supplier_article_characteristic_title_is_fixed():
+    assert SUPPLIER_ARTICLE_CHARACTERISTIC == "Артикул поставщика"
