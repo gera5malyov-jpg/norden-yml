@@ -1,0 +1,60 @@
+name: Read megasuppliers GitHub ref once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/read-megasuppliers-github-ref-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - name: Read plugin GitHub bridge settings
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip(); VM_ID=44780; VM_IP='45.86.180.49'
+          def req(url,method='GET',data=None,headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode('utf-8'); return json.loads(raw) if raw else {}
+          tok=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':API_KEY}).encode(),{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ms-ref-probe/1.0'})['token']
+          headers={'Authorization':'Bearer '+tok,'Content-Type':'application/json','Accept':'application/json','User-Agent':'ms-ref-probe/1.0'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'; subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub',encoding='utf-8').read().strip()
+              created=req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/','POST',json.dumps({'key':pub,'name':'chatgpt-ms-ref-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),headers)
+              kid=created['id']
+              try:
+                  php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www'; chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig()); wa('shop');
+          $p=wa('shop')->getPlugin('megasuppliers',true);
+          $dir=wa()->getDataPath('plugins/megasuppliers/import-status',false,'shop',true);
+          $path=$dir.'/1.json';
+          $out=array(
+            'github_repo'=>$p->getSettings('github_repo'),
+            'github_ref'=>$p->getSettings('github_ref'),
+            'enable_writes'=>(bool)$p->getSettings('enable_writes'),
+            'status'=>file_exists($path)?json_decode(file_get_contents($path),true):null
+          );
+          if (isset($out['status']['last_dry_run']['report']['sample'])) unset($out['status']['last_dry_run']['report']['sample']);
+          if (isset($out['status']['report']['sample'])) unset($out['status']['report']['sample']);
+          echo json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+          ?>'''
+                  remote="cat >/tmp/ms_ref.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/ms_ref.php\nsu -s /bin/bash web -c 'php /tmp/ms_ref.php'\nrm -f /tmp/ms_ref.php"
+                  p=subprocess.run(['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@'+VM_IP,remote],text=True,capture_output=True,timeout=90)
+                  print(p.stdout)
+                  if p.returncode: print(p.stderr); raise SystemExit(p.returncode)
+              finally:
+                  try: req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception: pass
+          PY
