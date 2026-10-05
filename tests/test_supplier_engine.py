@@ -1605,3 +1605,74 @@ def test_duplicate_existing_kit_characteristics_are_reused_without_new_duplicate
     assert report["status"] == "ok"
     assert "Вес, кг" not in report["missing_characteristics"]
     assert not any(error.get("characteristic") == "Вес, кг" for error in report["errors"])
+
+
+
+def test_kit_unique_same_sku_and_brand_accepts_stale_supplier_article():
+    supplier_id = "f-supplier"
+    variants = [{
+        "id": "v1",
+        "kit_id": "7001",
+        "sku": "AF-1",
+        "brand": "Norden",
+        "product_id": "p1",
+        "characteristics": [{
+            "characteristic_id": supplier_id,
+            "value": "OLD-CODE",
+            "values": ["OLD-CODE"],
+        }],
+    }]
+    from supplier_engine.kit_sync import _variant_indexes, _select_variant
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [supplier_id])
+    found = _select_variant(
+        {"sku": "AF-1", "supplier_sku": "NEW-CODE", "features": []},
+        by_sku,
+        by_kit_id,
+        by_supplier_brand,
+        [supplier_id],
+        "Norden",
+    )
+    assert found["kit_id"] == "7001"
+
+
+def test_kit_same_sku_other_brand_stays_blocked():
+    supplier_id = "f-supplier"
+    variants = [{
+        "id": "v1",
+        "kit_id": "7001",
+        "sku": "AF-1",
+        "brand": "RIVA",
+        "product_id": "p1",
+        "characteristics": [],
+    }]
+    from supplier_engine.kit_sync import _variant_indexes, _select_variant
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [supplier_id])
+    with pytest.raises(Exception) as exc:
+        _select_variant(
+            {"sku": "AF-1", "supplier_sku": "NEW-CODE", "features": []},
+            by_sku,
+            by_kit_id,
+            by_supplier_brand,
+            [supplier_id],
+            "Norden",
+        )
+    assert "no candidate has brand=Norden" in str(exc.value)
+
+
+def test_kit_duplicate_same_sku_same_brand_stays_blocked():
+    variants = [
+        {"id": "v1", "kit_id": "7001", "sku": "AF-1", "brand": "Norden", "product_id": "p1", "characteristics": []},
+        {"id": "v2", "kit_id": "7002", "sku": "AF-1", "brand": "Norden", "product_id": "p2", "characteristics": []},
+    ]
+    from supplier_engine.kit_sync import _variant_indexes, _select_variant
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [])
+    with pytest.raises(Exception) as exc:
+        _select_variant(
+            {"sku": "AF-1", "supplier_sku": "NEW-CODE", "features": []},
+            by_sku,
+            by_kit_id,
+            by_supplier_brand,
+            [],
+            "Norden",
+        )
+    assert "ambiguous" in str(exc.value)
