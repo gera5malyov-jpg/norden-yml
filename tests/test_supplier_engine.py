@@ -1543,7 +1543,12 @@ def test_kit_conflicting_new_and_legacy_supplier_codes_are_blocked():
 
 def test_kit_characteristics_write_new_and_legacy_supplier_identity():
     class FakeKit:
-        pass
+        def __init__(self):
+            self._seq = 0
+
+        def create_characteristic(self, title):
+            self._seq += 1
+            return {"id": "auto-%d" % self._seq, "title": title}
 
     rows = []
     index = {}
