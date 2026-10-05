@@ -1,7 +1,10 @@
 name: Cancel obsolete Norden sync once
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-extra-norden-sync-once.yml'
 
 permissions:
   actions: write
@@ -11,9 +14,9 @@ jobs:
   cancel:
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel obsolete initial sync
+      - name: Cancel obsolete slow full-chain run
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
-          gh api --method POST "repos/$REPO/actions/runs/37329253172/cancel" || true
+          gh api --method POST "repos/$REPO/actions/runs/37332425786/cancel" || true
