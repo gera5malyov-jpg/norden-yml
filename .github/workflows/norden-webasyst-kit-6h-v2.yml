@@ -25,7 +25,7 @@ jobs:
       - name: Checkout pinned supplier sync code
         uses: actions/checkout@v4
         with:
-          ref: 6bda27097c5b74bdc7660f0c64aca3ce6d0b301a
+          ref: 211e9718643132614513e0127eaee1dbaf7d9da9
 
       - uses: actions/setup-python@v5
         with:
