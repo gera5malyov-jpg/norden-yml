@@ -1,0 +1,24 @@
+name: Cleanup exposed AtlasPage run
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/cleanup-atlaspage-run.yml"
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete sensitive workflow run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          code=$(curl -sS -o /tmp/body -w "%{http_code}"             -X DELETE             -H "Authorization: Bearer $GH_TOKEN"             -H "Accept: application/vnd.github+json"             -H "X-GitHub-Api-Version: 2022-11-28"             "https://api.github.com/repos/${{ github.repository }}/actions/runs/37347463410")
+          echo "DELETE_HTTP=$code"
+          test "$code" = "204"
