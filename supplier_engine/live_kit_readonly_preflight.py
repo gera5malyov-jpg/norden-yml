@@ -6,7 +6,6 @@ import json
 import re
 from pathlib import Path
 
-from webasyst.client import WebasystClient
 from .kit_sync import plan_manifest
 
 
@@ -163,7 +162,7 @@ def main():
     args = ap.parse_args()
 
     helpers = _load_helpers()
-    wa = WebasystClient()
+    wa = helpers.WebasystClient()
     manifest = build_manifest(wa, helpers, args.type_name)
     result = plan_manifest(
         manifest,
