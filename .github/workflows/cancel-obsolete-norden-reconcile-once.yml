@@ -1,0 +1,24 @@
+name: Cancel obsolete Norden reconcile runs once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-obsolete-norden-reconcile-once.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel old Norden runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          for id in 37342742842 37343001544; do
+            gh api --method POST "repos/$REPO/actions/runs/$id/cancel" || true
+          done
