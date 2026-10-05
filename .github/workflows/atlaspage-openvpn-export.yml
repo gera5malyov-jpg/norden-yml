@@ -96,16 +96,24 @@ jobs:
               const login = page.getByRole('button', { name: /^Войти$/i }).first();
               if (!(await login.isVisible().catch(() => false))) throw new Error('Login button not found');
               await login.click();
-              await page.waitForURL(/\/lk(?:\/|$)/, { timeout: 20000 });
-              console.log('LOGIN_SUCCESS: yes');
+              await Promise.race([
+                page.waitForURL(/\/lk(?:\/|$)/, { timeout: 10000 }).catch(() => {}),
+                page.waitForTimeout(3500)
+              ]);
+              await sleep(800);
+              console.log('LOGIN_POST_URL:', page.url());
 
               await page.goto('https://atlaspage51.com/lk/connect', {
                 waitUntil: 'domcontentloaded',
                 timeout: 45000
               });
-              await sleep(1200);
+              await sleep(1800);
 
               console.log('CONNECT_URL:', page.url());
+              if (/\/login(?:\?|$)/i.test(page.url())) {
+                throw new Error('AtlasPage ID login did not persist to /lk/connect');
+              }
+              console.log('LOGIN_SUCCESS: yes');
               const connectControls = await page.locator('button:visible, [role="button"]:visible, [role="tab"]:visible, a:visible').allTextContents().catch(() => []);
               console.log('CONNECT_CONTROLS:', JSON.stringify(connectControls.map(clean).filter(Boolean).slice(0, 120)));
 
