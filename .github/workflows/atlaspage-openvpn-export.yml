@@ -163,13 +163,29 @@ jobs:
               console.log('CONNECT_CONTROLS:', JSON.stringify(connectControls.map(clean).filter(Boolean).slice(0, 120)));
 
               let openVpnSelected = await clickExactText(page, /^OpenVPN$/i);
+
               if (!openVpnSelected) {
-                const anyOpenVpn = page.locator('text=OpenVPN').first();
-                if (await anyOpenVpn.isVisible({ timeout: 2500 }).catch(() => false)) {
-                  await anyOpenVpn.click({ timeout: 4000 });
-                  openVpnSelected = true;
+                const chooseProtocol = page.getByRole('button', { name: /выбрать протокол/i }).first();
+                if (await chooseProtocol.isVisible({ timeout: 1500 }).catch(() => false)) {
+                  await chooseProtocol.click({ timeout: 4000 });
+                  await sleep(1200);
+                  console.log('PROTOCOL_PICKER_OPENED: yes');
+                  openVpnSelected = await clickExactText(page, /^OpenVPN$/i);
                 }
               }
+
+              if (!openVpnSelected) {
+                const openVpnButtons = page.locator('button, [role="button"], [role="tab"], a').filter({ hasText: /^OpenVPN$/i });
+                const cnt = await openVpnButtons.count();
+                for (let i = 0; i < cnt && !openVpnSelected; i++) {
+                  const el = openVpnButtons.nth(i);
+                  if (await el.isVisible().catch(() => false)) {
+                    await el.click({ timeout: 4000 });
+                    openVpnSelected = true;
+                  }
+                }
+              }
+
               if (!openVpnSelected) {
                 const bodySample = clean(await page.locator('body').innerText().catch(() => '')).slice(0, 1600);
                 console.log('CONNECT_BODY_SAMPLE:', bodySample);
