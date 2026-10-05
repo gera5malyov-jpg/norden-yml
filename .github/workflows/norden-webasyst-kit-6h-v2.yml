@@ -26,7 +26,7 @@ jobs:
       - name: Checkout pinned supplier sync code
         uses: actions/checkout@v4
         with:
-          ref: 98b5ab2b4c047e01602dbb5b85264d974b99d884
+          ref: 3b2d69798a41ea430006210e31b71b8a1a9d0bfb
 
       - uses: actions/setup-python@v5
         with:
@@ -48,6 +48,7 @@ jobs:
           python -m supplier_engine.live_norden_webasyst_refresh \
             --mode apply \
             --type-name NORDEN-100 \
+            --workers 3 \
             --output norden-webasyst-refresh.json
 
       - name: Preflight and sync categorized NORDEN-100 products to KIT
