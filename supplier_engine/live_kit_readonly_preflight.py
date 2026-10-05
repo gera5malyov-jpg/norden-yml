@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import importlib.util
 import json
 import re
+import threading
 from pathlib import Path
 
 from .kit_sync import plan_manifest
@@ -100,14 +102,23 @@ def build_manifest(wa, helpers, type_name):
 
     items = []
     skipped_no_supplier_article = []
-    for idx, basic in enumerate(basic_products, 1):
+    local = threading.local()
+
+    def readonly_client():
+        client = getattr(local, "wa", None)
+        if client is None:
+            client = helpers.WebasystClient()
+            local.wa = client
+        return client
+
+    def inspect_basic(basic):
         product_id = helpers.s(basic.get("id"))
         if not product_id:
-            continue
-        info = wa.call("shop.product.getInfo", params={"id": product_id})
+            return None
+        info = readonly_client().call("shop.product.getInfo", params={"id": product_id})
         sku_rows = helpers.product_skus(info if isinstance(info, dict) and info.get("skus") else basic)
         if not sku_rows:
-            continue
+            return None
 
         # Supplier importer uses one Webasyst SKU per supplier article. If a
         # historical product contains more, keep only the primary SKU here;
@@ -115,8 +126,7 @@ def build_manifest(wa, helpers, type_name):
         sku = sku_rows[0]
         supplier_sku = helpers.s(sku.get("name"))
         if not supplier_sku:
-            skipped_no_supplier_article.append(product_id)
-            continue
+            return {"skip_supplier_article": product_id}
 
         cids = [
             cid for cid in helpers.extract_category_ids(info, basic)
@@ -125,24 +135,41 @@ def build_manifest(wa, helpers, type_name):
         cids = list(dict.fromkeys(cids))
         summary = (info or {}).get("summary") if isinstance(info, dict) else basic.get("summary")
         stock = helpers.stock_total(sku, basic)
-        items.append({
-            "supplier_sku": supplier_sku,
-            "product_id": int(product_id) if product_id.isdigit() else product_id,
-            "sku_id": sku.get("id"),
-            "sku": helpers.s(sku.get("sku")),
-            "sku_name": supplier_sku,
-            "name": helpers.s((info or {}).get("name") if isinstance(info, dict) else "") or helpers.s(basic.get("name")),
-            "description": helpers.s((info or {}).get("description") if isinstance(info, dict) else "") or helpers.s(basic.get("description")),
-            "summary": helpers.s(summary),
-            "status": int((info or {}).get("status") or basic.get("status") or 0) if isinstance(info, dict) else int(basic.get("status") or 0),
-            "purchase_price": sku.get("purchase_price"),
-            "stock": stock,
-            "category_ids": [int(cid) if str(cid).isdigit() else cid for cid in cids],
-            "features": _feature_rows(info or {}, title_by_code, helpers.feature_value),
-            "image_urls": _summary_urls(summary),
-        })
-        if idx % 100 == 0:
-            print("WEBASYST_READONLY_SCAN=%d/%d" % (idx, len(basic_products)), flush=True)
+        return {
+            "item": {
+                "supplier_sku": supplier_sku,
+                "product_id": int(product_id) if product_id.isdigit() else product_id,
+                "sku_id": sku.get("id"),
+                "sku": helpers.s(sku.get("sku")),
+                "sku_name": supplier_sku,
+                "name": helpers.s((info or {}).get("name") if isinstance(info, dict) else "") or helpers.s(basic.get("name")),
+                "description": helpers.s((info or {}).get("description") if isinstance(info, dict) else "") or helpers.s(basic.get("description")),
+                "summary": helpers.s(summary),
+                "status": int((info or {}).get("status") or basic.get("status") or 0) if isinstance(info, dict) else int(basic.get("status") or 0),
+                "purchase_price": sku.get("purchase_price"),
+                "stock": stock,
+                "category_ids": [int(cid) if str(cid).isdigit() else cid for cid in cids],
+                "features": _feature_rows(info or {}, title_by_code, helpers.feature_value),
+                "image_urls": _summary_urls(summary),
+            }
+        }
+
+    total = len(basic_products)
+    completed = 0
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        futures = [pool.submit(inspect_basic, basic) for basic in basic_products]
+        for future in concurrent.futures.as_completed(futures):
+            row = future.result()
+            completed += 1
+            if row and row.get("skip_supplier_article"):
+                skipped_no_supplier_article.append(row["skip_supplier_article"])
+            elif row and row.get("item"):
+                items.append(row["item"])
+            if completed % 100 == 0 or completed == total:
+                print("WEBASYST_READONLY_SCAN=%d/%d" % (completed, total), flush=True)
+
+    items.sort(key=lambda row: str(row.get("product_id") or ""))
+    skipped_no_supplier_article.sort()
 
     return {
         "type_id": type_id,
