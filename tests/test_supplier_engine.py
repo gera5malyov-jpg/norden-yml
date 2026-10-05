@@ -434,6 +434,31 @@ def test_build_plan_uses_supplier_link_when_webasyst_sku_differs():
     assert plan["blocked"] == []
 
 
+
+def test_build_plan_ignores_stale_supplier_link_and_recovers_with_create():
+    products = [Product("H-051", "H-051", "Chair", stock=4)]
+    plan = build_plan(
+        products,
+        {},
+        [{"supplier_sku": "H-051", "product_id": 999, "sku_id": 888}],
+        {
+            "create_new": True,
+            "only_create_in_stock": True,
+            "update_stock": True,
+            "zero_if_missing": False,
+        },
+    )
+    assert plan["blocked"] == []
+    assert len(plan["create"]) == 1
+    assert plan["create"][0]["supplier_sku"] == "H-051"
+    assert plan["stale_links"] == [{
+        "sku": "H-051",
+        "supplier_sku": "H-051",
+        "product_id": 999,
+        "sku_id": 888,
+    }]
+
+
 def test_build_plan_blocks_mass_zero_when_supplier_links_do_not_overlap():
     products = [Product("H-051", "H-051", "Chair", stock=4)]
     existing = {}
@@ -519,6 +544,82 @@ def test_apply_plan_updates_existing_prices_and_stock():
     assert sku_call["data"]["compare_price"] == "160"
     assert sku_call["data"]["purchase_price"] == "100"
     assert sku_call["data"]["stock"] == {"1": "3"}
+
+
+
+def test_apply_plan_skips_missing_webasyst_modification_and_continues():
+    class MissingOne(_FakeWebasyst):
+        def call(self, method, *, http_method="GET", params=None, data=None, files=None):
+            if method == "shop.product.skus.update" and str((params or {}).get("id")) == "21":
+                raise RuntimeError(
+                    'HTTP 404: {"error":"invalid_param","error_description":"Модификация товара не найдена."}'
+                )
+            return super().call(
+                method,
+                http_method=http_method,
+                params=params,
+                data=data,
+                files=files,
+            )
+
+    desired = {
+        "supplier_sku": "X",
+        "sku": "X",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "",
+        "category": "",
+        "images": [],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [],
+        "update": [
+            {
+                "sku": "X-1",
+                "supplier_sku": "X-1",
+                "product_id": 11,
+                "sku_id": 21,
+                "current_product": {"id": 11, "status": 1},
+                "current_sku": {"id": 21, "sku": "AF-1", "name": "X-1"},
+                "desired": dict(desired, supplier_sku="X-1", sku="X-1"),
+            },
+            {
+                "sku": "X-2",
+                "supplier_sku": "X-2",
+                "product_id": 12,
+                "sku_id": 22,
+                "current_product": {"id": 12, "status": 1},
+                "current_sku": {"id": 22, "sku": "AF-2", "name": "X-2"},
+                "desired": dict(desired, supplier_sku="X-2", sku="X-2"),
+            },
+        ],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    result = apply_plan(
+        MissingOne(),
+        plan,
+        {
+            "source": {"format": "norden"},
+            "rules": {
+                "update_prices": True,
+                "update_stock": True,
+                "update_name": False,
+                "update_images": False,
+                "update_characteristics": False,
+            },
+            "webasyst": {"stock_id": 66, "type_id": 142},
+        },
+    )
+    assert result["updated"] == 1
+    assert result["stale_skus_skipped"] == 1
+    assert result["stale_sku_sample"][0]["sku_id"] == 21
+    assert [row["sku_id"] for row in result["mappings"]] == [22]
 
 
 def test_apply_plan_creates_product_then_sets_final_sku():
