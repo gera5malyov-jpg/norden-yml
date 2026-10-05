@@ -852,7 +852,7 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
     warehouses = _warehouse_ids(kit)
     kit_characteristics = kit.characteristics()
     characteristic_index = _characteristic_index(kit_characteristics)
-    variants = _kit_variants(kit)
+    variants = _kit_variants(kit, eligible)
     preflight, identity = _identity_preflight(
         eligible,
         variants,
