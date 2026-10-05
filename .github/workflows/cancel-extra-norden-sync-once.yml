@@ -1,22 +1,14 @@
 name: Cancel obsolete Norden sync once
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/cancel-extra-norden-sync-once.yml'
+  workflow_dispatch:
 
 permissions:
   actions: write
   contents: read
 
 jobs:
-  cancel:
+  noop:
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel competing KIT branch preflight
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-        run: |
-          gh api --method POST "repos/$REPO/actions/runs/37334343463/cancel" || true
+      - run: echo "One-time helper is inactive."
