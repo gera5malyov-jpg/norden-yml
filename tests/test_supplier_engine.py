@@ -1407,7 +1407,7 @@ def test_kit_identity_preflight_blocks_all_products_before_writes():
         "id": "v1",
         "kit_id": "7001",
         "sku": "12345",
-        "brand": "Norden",
+        "brand": "RIVA",
         "product_id": "p1",
         "characteristics": [],
     }]
