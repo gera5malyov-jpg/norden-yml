@@ -256,15 +256,14 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
                 key = (str(link.get("product_id")), str(link.get("sku_id")))
                 linked = existing_by_ids.get(key)
                 if linked is None:
-                    plan["blocked"].append({
+                    plan.setdefault("stale_links", []).append({
                         "sku": product.sku,
                         "supplier_sku": product.supplier_sku,
-                        "reason": "stale_supplier_link",
                         "product_id": link.get("product_id"),
                         "sku_id": link.get("sku_id"),
                     })
-                    continue
-                matches = [linked]
+                else:
+                    matches = [linked]
 
         if len(matches) > 1:
             plan["blocked"].append({
@@ -429,6 +428,17 @@ class ApplyError(RuntimeError):
         self.result = result
 
 
+def _is_missing_webasyst_sku_error(exc):
+    text = str(exc or "").casefold()
+    return (
+        "http 404" in text
+        and (
+            "модификация товара не найдена" in text
+            or ("invalid_param" in text and "модификац" in text)
+        )
+    )
+
+
 def apply_plan(wa: WebasystClient, plan, config):
     errors = validate_apply_plan(plan, config)
     if errors:
@@ -438,7 +448,14 @@ def apply_plan(wa: WebasystClient, plan, config):
     web = config.get("webasyst") or {}
     stock_id = web.get("stock_id")
     stock_ids = web.get("stock_ids") or []
-    result = {"created": 0, "updated": 0, "zeroed": 0, "mappings": []}
+    result = {
+        "created": 0,
+        "updated": 0,
+        "zeroed": 0,
+        "mappings": [],
+        "stale_skus_skipped": 0,
+        "stale_sku_sample": [],
+    }
 
     try:
         sku_mode = webasyst_sku_mode(config)
@@ -470,12 +487,25 @@ def apply_plan(wa: WebasystClient, plan, config):
                     sku_data["sku"] = desired_sku
 
             if sku_data:
-                wa.call(
-                    "shop.product.skus.update",
-                    http_method="POST",
-                    params={"id": str(row["sku_id"])},
-                    data=sku_data,
-                )
+                try:
+                    wa.call(
+                        "shop.product.skus.update",
+                        http_method="POST",
+                        params={"id": str(row["sku_id"])},
+                        data=sku_data,
+                    )
+                except Exception as exc:
+                    if not _is_missing_webasyst_sku_error(exc):
+                        raise
+                    result["stale_skus_skipped"] += 1
+                    if len(result["stale_sku_sample"]) < 100:
+                        result["stale_sku_sample"].append({
+                            "supplier_sku": row.get("supplier_sku"),
+                            "product_id": row.get("product_id"),
+                            "sku_id": row.get("sku_id"),
+                            "stage": "update",
+                        })
+                    continue
             product_data = _product_write_data(desired, rules, web, creating=False)
             if (
                 str(current_product.get("status") or "0") == "0"
@@ -551,19 +581,32 @@ def apply_plan(wa: WebasystClient, plan, config):
 
         if rules.get("zero_if_missing", False) and rules.get("update_stock", True):
             for row in plan["zero"]:
-                wa.call(
-                    "shop.product.skus.update",
-                    http_method="POST",
-                    params={"id": str(row["sku_id"])},
-                    data={
-                        "stock": (
-                            {str(int(x)): "0" for x in stock_ids if str(x).isdigit() and int(x) > 0}
-                            if rules.get("zero_other_stocks", False)
-                            else {str(int(stock_id)): "0"}
-                        ),
-                        "available": 0,
-                    },
-                )
+                try:
+                    wa.call(
+                        "shop.product.skus.update",
+                        http_method="POST",
+                        params={"id": str(row["sku_id"])},
+                        data={
+                            "stock": (
+                                {str(int(x)): "0" for x in stock_ids if str(x).isdigit() and int(x) > 0}
+                                if rules.get("zero_other_stocks", False)
+                                else {str(int(stock_id)): "0"}
+                            ),
+                            "available": 0,
+                        },
+                    )
+                except Exception as exc:
+                    if not _is_missing_webasyst_sku_error(exc):
+                        raise
+                    result["stale_skus_skipped"] += 1
+                    if len(result["stale_sku_sample"]) < 100:
+                        result["stale_sku_sample"].append({
+                            "supplier_sku": row.get("supplier_sku"),
+                            "product_id": row.get("product_id"),
+                            "sku_id": row.get("sku_id"),
+                            "stage": "zero",
+                        })
+                    continue
                 result["zeroed"] += 1
                 result["mappings"].append({
                     "supplier_sku": row["supplier_sku"],
