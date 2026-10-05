@@ -67,20 +67,19 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
             return;
         }
         if ($action === 'kit_manifest') {
-            if ((string)ifset($pending['mode']) !== 'apply') {
-                $this->fail('apply_request_required', 409);
+            $mode = (string)ifset($pending['mode']);
+            if (!in_array($mode, array('dry-run', 'apply'), true)) {
+                $this->fail('invalid_request_mode', 409);
                 return;
             }
-            if (!$plugin->getSettings('enable_writes')) {
-                $this->fail('writes_disabled', 403);
-                return;
-            }
+            // Read-only manifest: safe for both dry-run and apply.
             $this->kitManifest($supplier_id, $payload);
             return;
         }
         if ($action === 'kit_result') {
-            if ((string)ifset($pending['mode']) !== 'apply') {
-                $this->fail('apply_request_required', 409);
+            $mode = (string)ifset($pending['mode']);
+            if (!in_array($mode, array('dry-run', 'apply'), true)) {
+                $this->fail('invalid_request_mode', 409);
                 return;
             }
             $this->saveKitResult($status_path, $pending, ifset($payload['report'], array()));
@@ -328,6 +327,7 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
                 'stock' => $stock,
                 'category_ids' => $category_ids,
                 'features' => $features,
+                'image_urls' => $image_urls,
             );
         }
 
