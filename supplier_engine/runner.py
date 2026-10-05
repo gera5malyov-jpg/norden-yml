@@ -370,17 +370,6 @@ def main():
                     features_resolved = len(resolved)
                 result = apply_plan(wa, plan, config)
                 synced = bridge.sync_links(args.supplier_id, args.request_id, result.get("mappings") or [])
-                kit_result = None
-                if rules.get("export_to_kit", False):
-                    stock_id = (config.get("webasyst") or {}).get("stock_id")
-                    if not stock_id:
-                        raise ValueError("Для выгрузки в KIT не задан склад Webasyst.")
-                    manifest = bridge.kit_manifest(
-                        args.supplier_id,
-                        args.request_id,
-                        stock_id,
-                    )
-                    kit_result = sync_manifest(manifest, config, wa=wa)
                 payload["apply"] = {
                     "status": "ok",
                     "created": result["created"],
@@ -388,16 +377,8 @@ def main():
                     "zeroed": result["zeroed"],
                     "links_synced": synced,
                     "features_resolved": features_resolved,
+                    "kit_export": "separate_job" if rules.get("export_to_kit", False) else "disabled",
                 }
-                if kit_result is not None:
-                    payload["apply"]["kit"] = kit_result
-                    if kit_result.get("errors"):
-                        payload["status"] = "failed"
-                        payload["blocked"] = True
-                        payload["errors"].append(
-                            "KIT: синхронизация завершилась с ошибками (%d)." % len(kit_result["errors"])
-                        )
-                        payload["apply"]["status"] = "partial_failure"
             except ApplyError as exc:
                 payload["status"] = "failed"
                 payload["blocked"] = True
