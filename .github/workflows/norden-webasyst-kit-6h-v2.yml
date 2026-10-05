@@ -71,7 +71,7 @@ jobs:
             --mode apply \
             --type-name NORDEN-100 \
             --brand Norden \
-            --max-create 100 \
+            --max-create 5000 \
             --max-eligible 5000 \
             --output scheduled-kit-sync.json
 
