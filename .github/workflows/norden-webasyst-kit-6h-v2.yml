@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: '17 3,9,15,21 * * *'
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-webasyst-kit-6h-v2.yml'
 
 permissions:
   contents: read
@@ -21,7 +25,7 @@ jobs:
       - name: Checkout pinned supplier sync code
         uses: actions/checkout@v4
         with:
-          ref: b1a24f92ac08fd2f7659adb85b1ca68c84f33067
+          ref: 77f857bfb83183212608e7f6987ffb5db70f06d6
 
       - uses: actions/setup-python@v5
         with:
