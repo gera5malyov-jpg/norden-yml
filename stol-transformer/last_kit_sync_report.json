@@ -10,11 +10,12 @@
     "before_discount": "supplier retail * 1.30",
     "purchase": "NOT SENT TO KIT"
   },
-  "stock_rule": "source has no stock field; KIT stock is not modified",
-  "created": 119,
-  "updated": 0,
+  "stock_rule": "МСК = 100; СПБ привозной = 100 for every Levmar product",
+  "stock_updates": 238,
+  "created": 0,
+  "updated": 119,
   "price_updates": 119,
-  "images_uploaded": 872,
+  "images_uploaded": 86,
   "image_errors": 0,
   "characteristics_updated": 119,
   "missing_retail_price": [],
@@ -23,5 +24,5 @@
   "errors": [],
   "complete": true,
   "mapped_products": 119,
-  "generated_at": "2026-09-21T21:21:47.000840+00:00"
+  "generated_at": "2026-10-05T10:43:09.896232+00:00"
 }
