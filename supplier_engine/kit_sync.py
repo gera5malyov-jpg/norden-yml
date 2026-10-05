@@ -339,6 +339,21 @@ def _characteristic_index(rows):
     return index
 
 
+def _single_characteristic_id(index, title):
+    matches = index.get(_norm(title), [])
+    exact = [
+        row for row in matches
+        if _s(row.get("title") or row.get("name")) == title
+    ]
+    if len(exact) == 1:
+        return _s(exact[0].get("id"))
+    if len(exact) > 1 or len(matches) > 1:
+        raise KitSyncError("KIT characteristic is ambiguous: %s" % title)
+    if len(matches) == 1:
+        return _s(matches[0].get("id"))
+    return ""
+
+
 def _ensure_characteristic(kit, rows, index, title):
     key = _norm(title)
     matches = index.get(key, [])
@@ -527,6 +542,86 @@ def _select_variant(product, by_sku, by_kit_id, by_supplier_brand, supplier_iden
     return None
 
 
+def _identity_preflight(products, variants, characteristic_index, brand):
+    supplier_article_id = _single_characteristic_id(
+        characteristic_index,
+        SUPPLIER_ARTICLE_CHARACTERISTIC,
+    )
+    legacy_code_site_id = _single_characteristic_id(
+        characteristic_index,
+        LEGACY_CODE_SITE_CHARACTERISTIC,
+    )
+    supplier_identity_ids = [
+        value for value in (supplier_article_id, legacy_code_site_id) if value
+    ]
+
+    try:
+        by_sku, by_kit_id, by_supplier_brand = _variant_indexes(
+            variants,
+            supplier_identity_ids,
+        )
+    except Exception as exc:
+        return {
+            "status": "blocked",
+            "matched_by_kit_id": 0,
+            "matched_exact_identity": 0,
+            "create_new": 0,
+            "conflicts": 1,
+            "conflict_sample": [{"error": str(exc)[:1200]}],
+        }, None
+
+    report = {
+        "status": "ok",
+        "matched_by_kit_id": 0,
+        "matched_exact_identity": 0,
+        "create_new": 0,
+        "conflicts": 0,
+        "conflict_sample": [],
+    }
+    selected = {}
+    for product in products:
+        key = str(product.get("product_id") or product.get("sku_id") or product.get("supplier_sku") or "")
+        try:
+            product_key = str(
+                product.get("product_id")
+                or product.get("sku_id")
+                or product.get("supplier_sku")
+                or ""
+            )
+            variant = selected_variants.get(product_key)
+            selected[key] = variant
+            if variant is None:
+                report["create_new"] += 1
+            elif _feature_kit_id(product.get("features")):
+                report["matched_by_kit_id"] += 1
+            else:
+                report["matched_exact_identity"] += 1
+        except Exception as exc:
+            report["conflicts"] += 1
+            if len(report["conflict_sample"]) < 100:
+                report["conflict_sample"].append({
+                    "product_id": product.get("product_id"),
+                    "supplier_sku": product.get("supplier_sku"),
+                    "sku": product.get("sku"),
+                    "kit_id": _feature_kit_id(product.get("features")),
+                    "error": str(exc)[:1200],
+                })
+
+    if report["conflicts"]:
+        report["status"] = "blocked"
+        return report, None
+
+    return report, {
+        "supplier_article_id": supplier_article_id,
+        "legacy_code_site_id": legacy_code_site_id,
+        "supplier_identity_ids": supplier_identity_ids,
+        "by_sku": by_sku,
+        "by_kit_id": by_kit_id,
+        "by_supplier_brand": by_supplier_brand,
+        "selected": selected,
+    }
+
+
 def _media_from_source(kit, urls):
     media = []
     for url in list(dict.fromkeys(_s(x) for x in (urls or []) if _s(x)))[:20]:
@@ -590,32 +685,46 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
     if not eligible:
         return report
 
+    # Read-only safety phase. Nothing in KIT is created or patched until every
+    # eligible Webasyst product has an unambiguous identity outcome.
     warehouses = _warehouse_ids(kit)
-    kit_categories = kit.categories()
-    category_index = _category_index(kit_categories)
     kit_characteristics = kit.characteristics()
     characteristic_index = _characteristic_index(kit_characteristics)
-    supplier_article_id = _ensure_characteristic(
-        kit,
-        kit_characteristics,
+    variants = kit.variants()
+    preflight, identity = _identity_preflight(
+        eligible,
+        variants,
         characteristic_index,
-        SUPPLIER_ARTICLE_CHARACTERISTIC,
+        brand,
     )
-    legacy_matches = characteristic_index.get(_norm(LEGACY_CODE_SITE_CHARACTERISTIC), [])
-    if len(legacy_matches) > 1:
-        raise KitSyncError(
-            "KIT characteristic is ambiguous: %s" % LEGACY_CODE_SITE_CHARACTERISTIC
+    report["preflight"] = preflight
+    if preflight.get("status") != "ok":
+        report["status"] = "blocked"
+        report["errors"] = list(preflight.get("conflict_sample") or [])
+        return report
+
+    supplier_article_id = identity["supplier_article_id"]
+    legacy_code_site_id = identity["legacy_code_site_id"]
+    if not supplier_article_id:
+        supplier_article_id = _ensure_characteristic(
+            kit,
+            kit_characteristics,
+            characteristic_index,
+            SUPPLIER_ARTICLE_CHARACTERISTIC,
         )
-    legacy_code_site_id = _s(legacy_matches[0].get("id")) if legacy_matches else ""
     supplier_identity_ids = [
         value for value in (supplier_article_id, legacy_code_site_id) if value
     ]
-    variants = kit.variants()
-    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(
-        variants,
-        supplier_identity_ids,
-    )
 
+    # Existing indexes were built before any writes. Adding the new empty
+    # supplier characteristic does not change existing variant identities.
+    by_sku = identity["by_sku"]
+    by_kit_id = identity["by_kit_id"]
+    by_supplier_brand = identity["by_supplier_brand"]
+    selected_variants = identity["selected"]
+
+    kit_categories = kit.categories()
+    category_index = _category_index(kit_categories)
     category_count_before = len(kit_categories)
     characteristic_count_before = len(kit_characteristics)
 
