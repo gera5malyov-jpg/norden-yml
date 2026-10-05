@@ -119,11 +119,12 @@ def _kit_create_product(kit, category_ids):
 def _kit_patch_product(kit, product_id, category_ids):
     category_ids = list(category_ids or [])
     if hasattr(kit, "patch_product"):
-        return _kit_patch_product(kit, product_id, category_ids)
+        return kit.patch_product(product_id, category_ids)
     return kit.request(
         "PATCH",
         "/v1/products/%s" % product_id,
         body={"category_ids": category_ids},
+        merge_patch=True,
     )
 
 
@@ -528,7 +529,7 @@ def _summary(urls):
     return "\n".join("[extimg]\n%s\n[/extimg]" % url for url in urls)
 
 
-_EXTIMG_BLOCK_RE = re.compile(r"\\[extimg\\].*?\\[/extimg\\]", re.IGNORECASE | re.DOTALL)
+_EXTIMG_BLOCK_RE = re.compile(r"\[extimg\].*?\[/extimg\]", re.IGNORECASE | re.DOTALL)
 
 
 def _replace_extimg(summary, urls):
@@ -562,7 +563,7 @@ def _set_webasyst_kit_data(wa, product, kit_id, image_urls):
     before = wa.call("shop.product.getInfo", params={"id": product_id})
     data = {"features": {"kit_id": str(int(kit_id))}}
     if image_urls:
-        source_summary = before.get("summary") if isinstance(before, dict) else product.get("summary")
+        source_summary = (before.get("summary") or product.get("summary")) if isinstance(before, dict) else product.get("summary")
         data["summary"] = _replace_extimg(source_summary, image_urls)
     wa.call(
         "shop.product.update",
@@ -573,7 +574,7 @@ def _set_webasyst_kit_data(wa, product, kit_id, image_urls):
     after = wa.call("shop.product.getInfo", params={"id": product_id})
     if isinstance(after, dict) and isinstance(after.get("features"), dict):
         got = _s(after["features"].get("kit_id"))
-        if got and got != str(int(kit_id)):
+        if got != str(int(kit_id)):
             raise KitSyncError("Webasyst KIT ID readback mismatch: expected %s, got %s" % (kit_id, got))
         _verify_unrelated_features(before, after)
 
