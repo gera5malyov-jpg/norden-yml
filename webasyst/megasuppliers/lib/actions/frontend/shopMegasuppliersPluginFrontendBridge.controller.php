@@ -297,12 +297,10 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
 
             $summary = (string)ifset($product_row['summary']);
             $image_urls = array();
-            if (preg_match_all('~https?://[^\\s<>\\]\\[\\"\']+~u', $summary, $matches)) {
-                foreach ($matches[0] as $url) {
-                    $url = rtrim((string)$url, ".,;)");
-                    if ($url !== '' && !in_array($url, $image_urls, true)) {
-                        $image_urls[] = $url;
-                    }
+            foreach (preg_split('/\\R+/', $summary) as $line) {
+                $url = trim((string)$line);
+                if ($url !== '' && preg_match('~^https?://~i', $url) && !in_array($url, $image_urls, true)) {
+                    $image_urls[] = $url;
                 }
             }
 
