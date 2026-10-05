@@ -1659,3 +1659,72 @@ def test_kit_preflight_accepts_authoritative_webasyst_kit_id_without_old_identit
     assert report["matched_by_kit_id"] == 1
     assert report["conflicts"] == 0
     assert identity["selected"]["1467631"]["kit_id"] == "1597882"
+
+def test_webasyst_delta_skips_equal_price_stock_and_availability():
+    from supplier_engine.webasyst_sync import _delta_sku_data
+
+    desired = {
+        "purchase_price": "100",
+        "price": "125",
+        "compare_price": "160",
+        "stock": {"1": "3"},
+        "available": 1,
+    }
+    current = {
+        "purchase_price": "100.0000",
+        "price": "125.00",
+        "compare_price": "160",
+        "stock_counts": {"1": "3.0"},
+        "available": "1",
+    }
+    assert _delta_sku_data(desired, current, 1) == {}
+
+
+def test_webasyst_delta_keeps_real_stock_change():
+    from supplier_engine.webasyst_sync import _delta_sku_data
+
+    desired = {"stock": {"1": "4"}, "available": 1}
+    current = {"stock_counts": {"1": "3"}, "available": "1"}
+    delta = _delta_sku_data(desired, current, 1)
+    assert delta["stock"] == {"1": "4"}
+    assert "available" not in delta
+
+
+def test_kit_variant_delta_skips_equal_payload_and_keeps_price_change():
+    from supplier_engine.kit_sync import _variant_delta
+
+    current = {
+        "sku": "AF-1",
+        "name": "Chair",
+        "description": "",
+        "brand": "Norden",
+        "status": "PUBLISHED",
+        "stocks": [
+            {"warehouse_id": "10", "quantity": 3, "reserved": 0},
+            {"warehouse_id": "20", "quantity": 3, "reserved": 0},
+        ],
+        "characteristics": [
+            {"characteristic_id": "7", "value": "ABC", "values": ["ABC"]},
+        ],
+        "pricing": {"price": "160.00", "manual_discount_price": "125"},
+    }
+    desired = {
+        "sku": "AF-1",
+        "name": "Chair",
+        "description": "",
+        "brand": "Norden",
+        "status": "PUBLISHED",
+        "stocks": [
+            {"warehouse_id": "20", "quantity": 3, "reserved": 0},
+            {"warehouse_id": "10", "quantity": 3, "reserved": 0},
+        ],
+        "characteristics": [
+            {"characteristic_id": "7", "value": "ABC", "values": ["ABC"]},
+        ],
+        "pricing": {"price": "160", "manual_discount_price": "125.00"},
+    }
+    assert _variant_delta(current, desired) == {}
+
+    desired["pricing"] = {"price": "161", "manual_discount_price": "125"}
+    assert _variant_delta(current, desired) == {"pricing": desired["pricing"]}
+
