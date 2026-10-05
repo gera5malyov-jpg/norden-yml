@@ -97,7 +97,7 @@ KitClient = _load_repository_kit_client()
 
 def _kit_variants(kit):
     if hasattr(kit, "scan_all_variants_parallel"):
-        return list(kit.scan_all_variants_parallel(workers=10))
+        return list(kit.scan_all_variants_parallel(workers=4))
     if hasattr(kit, "variants"):
         return list(kit.variants())
     return list(kit.iter_collection("/v1/variants"))
@@ -412,9 +412,25 @@ def _select_variant(product, by_sku, by_kit_id, by_supplier_brand, supplier_iden
         return exact[0]
 
     if sku_matches:
+        candidates = []
+        for row in sku_matches[:5]:
+            try:
+                articles = _variant_supplier_articles(row, supplier_identity_ids)
+            except Exception:
+                articles = []
+            candidates.append(
+                "id=%s kit_id=%s brand=%s supplier=%s"
+                % (
+                    _s(row.get("id")),
+                    _s(row.get("kit_id")),
+                    _s(row.get("brand")),
+                    ",".join(articles) or "-",
+                )
+            )
         raise KitSyncError(
-            "KIT already contains SKU=%s but supplier article/brand do not match exactly; automatic linking is blocked"
-            % sku
+            "KIT already contains SKU=%s but supplier article/brand do not match exactly; "
+            "automatic linking is blocked; candidates: %s"
+            % (sku, " | ".join(candidates))
         )
 
     supplier_matches = by_supplier_brand.get((supplier_sku, brand_key), [])
