@@ -1343,6 +1343,52 @@ def test_kit_export_uses_webasyst_categories_and_user_prices():
     assert "https://kit.example/img1.jpg" in update["data"]["summary"]
 
 
+
+def test_kit_apply_uses_targeted_variant_lookup():
+    class TargetedKit(_FakeKitForSupplierExport):
+        def __init__(self):
+            super().__init__()
+            self.search_terms = []
+
+        def search_variants_parallel(self, names, workers=6):
+            self.search_terms.append(list(names))
+            return []
+
+        def variants(self):
+            raise AssertionError("Apply must not perform a full KIT variant scan")
+
+    kit = TargetedKit()
+    wa = _FakeWaForKit()
+    manifest = {
+        "categories": [{"id": 1, "name": "Кресла", "parent_id": 0}],
+        "items": [{
+            "supplier_sku": "NS-1",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "AF-1",
+            "name": "Кресло",
+            "description": "",
+            "status": 1,
+            "purchase_price": 1000,
+            "stock": 3,
+            "category_ids": [1],
+            "features": [],
+            "image_urls": [],
+        }],
+    }
+    report = sync_manifest(
+        manifest,
+        {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+        kit=kit,
+        wa=wa,
+    )
+    assert report["status"] == "ok"
+    assert report["created"] == 1
+    assert kit.search_terms
+    assert kit.search_terms[0] == ["AF-1"]
+
+
+
 def test_kit_export_preserves_multiple_webasyst_categories():
     paths = _webasyst_category_paths(
         [
