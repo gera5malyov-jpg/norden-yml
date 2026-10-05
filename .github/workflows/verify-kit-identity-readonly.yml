@@ -1,0 +1,134 @@
+name: Verify KIT identity readonly
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-kit-identity-readonly.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Read-only KIT identity probe
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, time, requests
+          from pathlib import Path
+
+          base='https://api.kit.yandex.net'
+          headers={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
+
+          def get(path, params=None):
+              for attempt in range(10):
+                  r=requests.get(base+path,headers=headers,params=params,timeout=90)
+                  if r.status_code==429:
+                      time.sleep(float(r.headers.get('Retry-After') or 3)); continue
+                  if r.status_code>=500:
+                      time.sleep(min(20,2**attempt)); continue
+                  r.raise_for_status()
+                  return r.json()
+              raise RuntimeError('GET retries exhausted: '+path)
+
+          def items(payload, keys):
+              if isinstance(payload,list): return payload
+              if not isinstance(payload,dict): return []
+              for k in keys:
+                  if isinstance(payload.get(k),list): return payload[k]
+              data=payload.get('data')
+              if isinstance(data,list): return data
+              if isinstance(data,dict) and isinstance(data.get('items'),list): return data['items']
+              return []
+
+          chars=[]
+          page=1
+          while True:
+              p=get('/v1/characteristics',{'status':'ACTIVE','page':page,'per_page':100})
+              rows=items(p,('characteristics','items','results'))
+              chars.extend(x for x in rows if isinstance(x,dict))
+              if len(rows)<100: break
+              page+=1
+          char_by_id={str(x.get('id')):str(x.get('title') or '') for x in chars}
+          code_site_ids=[cid for cid,title in char_by_id.items() if title.strip().casefold()=='код для сайта']
+          supplier_ids=[cid for cid,title in char_by_id.items() if title.strip().casefold()=='артикул поставщика']
+
+          vp=get('/v1/variants',{'name':'AF-31646769','page':1,'per_page':100})
+          variants=[
+              x for x in items(vp,('variants','items','results'))
+              if str(x.get('sku') or '')=='AF-31646769'
+              and str(x.get('brand') or '').casefold()=='norden'
+          ]
+          compact=[]
+          for v in variants:
+              identity=[]
+              for c in v.get('characteristics') or []:
+                  cid=str(c.get('characteristic_id') or '')
+                  title=char_by_id.get(cid,'')
+                  if title.strip().casefold() in {'код для сайта','артикул поставщика'}:
+                      vals=c.get('values') or []
+                      val=str(c.get('value') or (vals[0] if vals else ''))
+                      identity.append({'title':title,'value':val})
+              compact.append({
+                  'id':v.get('id'),
+                  'kit_id':v.get('kit_id'),
+                  'sku':v.get('sku'),
+                  'brand':v.get('brand'),
+                  'name':v.get('name'),
+                  'identity':identity,
+              })
+
+          wh=get('/v1/warehouses',{'status':'ACTIVE','page':1,'per_page':100})
+          warehouses=[
+              str(x.get('title') or x.get('name') or '')
+              for x in items(wh,('warehouses','items','results'))
+              if isinstance(x,dict)
+          ]
+
+          out={
+              'readonly':True,
+              'code_for_site_characteristic_ids':code_site_ids,
+              'supplier_article_characteristic_ids':supplier_ids,
+              'sample_exact_sku_brand_matches':compact,
+              'required_warehouses':{
+                  'МСК':'МСК' in warehouses,
+                  'СПБ привозной':'СПБ привозной' in warehouses,
+              },
+          }
+          Path('norden-kit/strict_identity_probe.json').write_text(
+              json.dumps(out,ensure_ascii=False,indent=2),
+              encoding='utf-8'
+          )
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          if not code_site_ids:
+              raise SystemExit('Код для сайта characteristic not found')
+          if len(compact)!=1:
+              raise SystemExit('Expected exactly one RT-2031 legacy KIT card')
+          values=[
+              x['value'] for x in compact[0]['identity']
+              if x['title'].strip().casefold()=='код для сайта'
+          ]
+          if values!=['RT-2031']:
+              raise SystemExit('Legacy Код для сайта does not equal RT-2031: '+repr(values))
+          if not all(out['required_warehouses'].values()):
+              raise SystemExit('Required warehouses are missing')
+          PY
+      - name: Save read-only report
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add norden-kit/strict_identity_probe.json
+          git commit -m "Verify strict KIT identity matching [skip ci]" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
