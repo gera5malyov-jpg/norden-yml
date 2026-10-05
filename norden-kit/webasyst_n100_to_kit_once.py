@@ -257,6 +257,15 @@ class KitClient:
                     if r.status_code >= 500:
                         time.sleep(min(20, 2 ** attempt))
                         continue
+                    # KIT occasionally returns transient HTTP 400 for an
+                    # otherwise valid page during large read-only scans.
+                    # Retry it conservatively; auth/not-found errors still
+                    # fail immediately.
+                    if r.status_code == 400:
+                        last_error = RuntimeError(f"KIT scan page {page}: HTTP 400")
+                        if attempt + 1 < 16:
+                            time.sleep(min(20, 1 + attempt * 2))
+                            continue
                     if r.status_code >= 400:
                         raise RuntimeError(f"KIT scan page {page}: HTTP {r.status_code}")
                     data = r.json()
