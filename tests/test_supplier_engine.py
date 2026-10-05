@@ -7,7 +7,15 @@ from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source, _characteristic_names_for_plan, _unique_image_aliases
 from supplier_engine import norden
-from supplier_engine.kit_sync import sync_manifest, _price_pair, _webasyst_category_paths
+from supplier_engine.kit_sync import (
+    sync_manifest,
+    plan_manifest,
+    _price_pair,
+    _webasyst_category_paths,
+    _replace_extimg,
+    _identity_preflight,
+    SUPPLIER_ARTICLE_CHARACTERISTIC,
+)
 from supplier_engine.bridge import MegasuppliersBridge
 from supplier_engine.validators import validate_run
 from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan, webasyst_sku_mode
@@ -1352,3 +1360,167 @@ def test_kit_prices_follow_current_25_60_rule():
         "price": "1600.00",
         "manual_discount_price": "1250.00",
     }
+
+
+
+def test_kit_readonly_preflight_makes_no_writes():
+    kit = _FakeKitForSupplierExport()
+    manifest = {
+        "categories": [
+            {"id": 1, "name": "Мебель", "parent_id": 0},
+            {"id": 2, "name": "Кресла", "parent_id": 1},
+        ],
+        "items": [{
+            "supplier_sku": "NS-1",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "12345",
+            "name": "Кресло",
+            "purchase_price": 1000,
+            "stock": 7,
+            "category_ids": [2],
+            "features": [{"code": "series", "name": "Серия", "values": ["Prizma"]}],
+            "image_urls": ["https://supplier.example/1.jpg"],
+        }],
+    }
+    report = plan_manifest(
+        manifest,
+        {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+        kit=kit,
+    )
+    assert report["status"] == "ok"
+    assert report["readonly"] is True
+    assert report["would_create"] == 1
+    assert report["required_category_paths"] == ["Мебель > Кресла"]
+    assert report["missing_category_paths"] == ["Мебель", "Мебель > Кресла"]
+    assert SUPPLIER_ARTICLE_CHARACTERISTIC in report["missing_characteristics"]
+    assert kit.created_categories == []
+    assert kit.created_products == []
+    assert kit.created_variants == []
+    assert kit.patched_products == []
+    assert kit.patched_variants == []
+    assert kit.files == {}
+
+
+def test_kit_identity_preflight_blocks_all_products_before_writes():
+    variants = [{
+        "id": "v1",
+        "kit_id": "7001",
+        "sku": "12345",
+        "brand": "Norden",
+        "product_id": "p1",
+        "characteristics": [],
+    }]
+    product = {
+        "supplier_sku": "NS-1",
+        "product_id": 101,
+        "sku_id": 201,
+        "sku": "12345",
+        "features": [],
+        "category_ids": [1],
+    }
+    report, identity = _identity_preflight([product], variants, {}, "Norden")
+    assert report["status"] == "blocked"
+    assert report["conflicts"] == 1
+    assert identity is None
+
+
+def test_kit_id_is_authoritative_in_identity_preflight():
+    variants = [{
+        "id": "v1",
+        "kit_id": "7001",
+        "sku": "AF-31646769",
+        "brand": "Norden",
+        "product_id": "p1",
+        "characteristics": [],
+    }]
+    product = {
+        "supplier_sku": "RT-2031",
+        "product_id": 101,
+        "sku_id": 201,
+        "sku": "AF-31646769",
+        "features": [{"code": "kit_id", "name": "KIT ID", "values": ["7001"]}],
+        "category_ids": [1],
+    }
+    report, identity = _identity_preflight([product], variants, {}, "Norden")
+    assert report["status"] == "ok"
+    assert report["matched_by_kit_id"] == 1
+    assert identity["selected"]["101"]["id"] == "v1"
+
+
+def test_extimg_backfill_preserves_short_description_text():
+    old = "Текст до\n[extimg]\nhttps://old.example/1.jpg\n[/extimg]\nТекст после"
+    new = _replace_extimg(old, [
+        "https://kit.example/1.jpg",
+        "https://kit.example/2.jpg",
+    ])
+    assert "Текст до" in new
+    assert "Текст после" in new
+    assert "old.example" not in new
+    assert new.count("[extimg]") == 2
+    assert new.count("[/extimg]") == 2
+
+
+def test_existing_kit_media_is_reused_without_duplicate_uploads():
+    class ExistingKit(_FakeKitForSupplierExport):
+        def characteristics(self):
+            return [{"id": "f-supplier", "title": "Артикул поставщика"}]
+
+        def variants(self):
+            return [{
+                "id": "v-existing",
+                "kit_id": "987654",
+                "sku": "12345",
+                "brand": "Norden",
+                "product_id": "p-existing",
+                "characteristics": [{
+                    "characteristic_id": "f-supplier",
+                    "value": "NS-1",
+                    "values": ["NS-1"],
+                }],
+                "media": [{
+                    "type": "IMAGE",
+                    "display_sequence": 0,
+                    "image_id": "existing-image",
+                }],
+            }]
+
+        def get_variant(self, variant_id):
+            return self.variants()[0]
+
+        def upload_image_url(self, url):
+            raise AssertionError("existing KIT images must not be uploaded again")
+
+        def file_url(self, file_id):
+            return "https://kit.example/existing.jpg"
+
+    kit = ExistingKit()
+    wa = _FakeWaForKit()
+    manifest = {
+        "categories": [{"id": 1, "name": "Кресла", "parent_id": 0}],
+        "items": [{
+            "supplier_sku": "NS-1",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "12345",
+            "name": "Кресло",
+            "description": "",
+            "status": 1,
+            "purchase_price": 1000,
+            "stock": 7,
+            "category_ids": [1],
+            "features": [],
+            "image_urls": ["https://supplier.example/1.jpg"],
+        }],
+    }
+    report = sync_manifest(
+        manifest,
+        {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+        kit=kit,
+        wa=wa,
+    )
+    assert report["status"] == "ok"
+    assert report["created"] == 0
+    assert report["updated"] == 1
+    assert report["images_uploaded"] == 0
+    assert kit.files == {}
