@@ -127,7 +127,7 @@ def _current_stock_value(sku, stock_id):
     return None
 
 
-def _delta_sku_data(data, current_sku, stock_id):
+def _delta_sku_data(data, current_sku, stock_id, current_product=None):
     if not data:
         return {}
     out = dict(data)
@@ -151,6 +151,8 @@ def _delta_sku_data(data, current_sku, stock_id):
         stock_equal = True
         for sid, desired in desired_stock.items():
             current = _current_stock_value(current_sku, sid)
+            if current is None:
+                current = _current_stock_value(current_product or {}, sid)
             if current is None or not _same_number(current, desired):
                 stock_equal = False
                 break
@@ -844,7 +846,7 @@ def apply_plan(wa: WebasystClient, plan, config):
                 if current_code == numeric_code and desired_sku:
                     sku_data["sku"] = desired_sku
 
-            sku_data = _delta_sku_data(sku_data, current_sku, stock_id)
+            sku_data = _delta_sku_data(sku_data, current_sku, stock_id, current_product)
             sku_changed = bool(sku_data)
             if sku_data:
                 try:
