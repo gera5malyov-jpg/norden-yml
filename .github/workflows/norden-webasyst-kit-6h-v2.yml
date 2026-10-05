@@ -25,7 +25,7 @@ jobs:
       - name: Checkout pinned supplier sync code
         uses: actions/checkout@v4
         with:
-          ref: 7b6ea61426b064c3a871b4a5d8b0f54f07f8ce6b
+          ref: 6bda27097c5b74bdc7660f0c64aca3ce6d0b301a
 
       - uses: actions/setup-python@v5
         with:
@@ -35,20 +35,30 @@ jobs:
         run: pip install --disable-pip-version-check openpyxl requests pdfplumber reportlab
 
       - name: Compile scheduled sync
-        run: python -m py_compile supplier_engine/live_norden_webasyst_refresh.py supplier_engine/live_kit_scheduled_sync.py supplier_engine/kit_sync.py supplier_engine/live_kit_readonly_preflight.py
+        run: python -m py_compile supplier_engine/live_norden_scheduled_reconcile.py supplier_engine/live_kit_scheduled_sync.py supplier_engine/kit_sync.py scripts/dump_megasuppliers_links.py
 
-      - name: Refresh existing NORDEN-100 from Norden source
-        id: webasyst_refresh
+      - name: Read current Norden supplier links
+        env:
+          NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+        run: |
+          python scripts/dump_megasuppliers_links.py \
+            --supplier-id 1 \
+            --output norden-links.json
+
+      - name: Reconcile Norden source with Webasyst
+        id: webasyst_reconcile
         env:
           NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
           WEBASYST_BASE_URL: https://profikompany.ru
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
         run: |
-          python -m supplier_engine.live_norden_webasyst_refresh \
+          python -m supplier_engine.live_norden_scheduled_reconcile \
             --mode apply \
-            --type-name NORDEN-100 \
-            --workers 3 \
-            --output norden-webasyst-refresh.json
+            --config supplier_engine/configs/norden_scheduled.json \
+            --links norden-links.json \
+            --max-create 3000 \
+            --max-repair 500 \
+            --output norden-webasyst-reconcile.json
 
       - name: Preflight and sync categorized NORDEN-100 products to KIT
         id: kit_sync
@@ -71,7 +81,7 @@ jobs:
         with:
           name: norden-full-chain-${{ github.run_id }}
           path: |
-            norden-webasyst-refresh.json
+            norden-webasyst-reconcile.json
             scheduled-kit-sync.json
           if-no-files-found: warn
           retention-days: 14
