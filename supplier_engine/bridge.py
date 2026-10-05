@@ -137,3 +137,13 @@ class MegasuppliersBridge:
             "items": items,
             "categories": list(categories.values()),
         }
+
+
+    def set_kit_result(self, supplier_id, request_id, report):
+        data = self.call({
+            "action": "kit_result",
+            "supplier_id": int(supplier_id),
+            "request_id": str(request_id),
+            "report": report if isinstance(report, dict) else {},
+        })
+        return bool(data.get("saved"))
