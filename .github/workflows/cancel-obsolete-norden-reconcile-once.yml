@@ -1,4 +1,4 @@
-name: Cancel obsolete Norden reconcile runs once
+name: Force cancel obsolete Norden reconcile once
 
 on:
   push:
@@ -14,11 +14,9 @@ jobs:
   cancel:
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel old Norden runs
+      - name: Force cancel old Norden run
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
-          for id in 37342742842 37343001544; do
-            gh api --method POST "repos/$REPO/actions/runs/$id/cancel" || true
-          done
+          gh api --method POST "repos/$REPO/actions/runs/37342742842/force-cancel" || true
