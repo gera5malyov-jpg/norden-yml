@@ -97,7 +97,7 @@ KitClient = _load_repository_kit_client()
 
 def _kit_variants(kit):
     if hasattr(kit, "scan_all_variants_parallel"):
-        return list(kit.scan_all_variants_parallel(workers=6))
+        return list(kit.scan_all_variants_parallel(workers=10))
     if hasattr(kit, "variants"):
         return list(kit.variants())
     return list(kit.iter_collection("/v1/variants"))
