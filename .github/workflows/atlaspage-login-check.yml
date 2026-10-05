@@ -1,4 +1,4 @@
-name: AtlasPage login check
+name: AtlasPage ID login check
 
 on:
   workflow_dispatch:
@@ -15,15 +15,12 @@ jobs:
     timeout-minutes: 10
     env:
       ATLASPAGE_ID: ${{ secrets.ATLASPAGE_ID }}
-      ATLASPAGE_PASSWORD: ${{ secrets.ATLASPAGE_PASSWORD }}
     steps:
-      - name: Check secrets are available
+      - name: Check ID secret is available
         shell: bash
         run: |
           test -n "$ATLASPAGE_ID" || { echo "ATLASPAGE_ID: MISSING"; exit 11; }
-          test -n "$ATLASPAGE_PASSWORD" || { echo "ATLASPAGE_PASSWORD: MISSING"; exit 12; }
           echo "ATLASPAGE_ID: present"
-          echo "ATLASPAGE_PASSWORD: present"
 
       - name: Install Playwright
         shell: bash
@@ -32,18 +29,21 @@ jobs:
           npm install playwright@1.55.0 >/dev/null
           npx playwright install chromium --with-deps >/dev/null
 
-      - name: Test AtlasPage login by ID
+      - name: Test AtlasPage login by ID only
         shell: bash
         run: |
           node <<'NODE'
           const { chromium } = require('playwright');
 
           const userId = process.env.ATLASPAGE_ID || '';
-          const password = process.env.ATLASPAGE_PASSWORD || '';
-          if (!userId || !password) {
-            console.error('Secrets are unavailable.');
+          if (!userId) {
+            console.error('ATLASPAGE_ID is unavailable.');
             process.exit(20);
           }
+
+          const norm = s => (s || '').replace(/\s+/g, ' ').trim();
+          const escapedId = userId.replace(/[.*+?^$()|[\]\\{}]/g, '\\$&');
+          const safe = s => norm(s).replace(new RegExp(escapedId, 'g'), '[ID]');
 
           (async () => {
             const browser = await chromium.launch({ headless: true });
@@ -58,101 +58,112 @@ jobs:
                 waitUntil: 'domcontentloaded',
                 timeout: 45000
               });
+
               console.log('SITE_HTTP:', response ? response.status() : 'no-response');
               console.log('SITE_REACHABLE:', response && response.status() < 500 ? 'yes' : 'no');
+              await page.waitForTimeout(1800);
 
-              await page.waitForTimeout(1500);
+              const visibleButtons = await page.locator('button:visible, [role="button"]:visible, [role="tab"]:visible').allTextContents();
+              console.log('VISIBLE_CONTROLS:', JSON.stringify(visibleButtons.map(safe).filter(Boolean).slice(0, 40)));
 
-              // Prefer an explicit "login by ID" selector if the site offers several methods.
-              const modeSelectors = [
-                page.getByRole('button', { name: /(?:войти|вход).*\bID\b|\bID\b.*(?:войти|вход)/i }),
-                page.getByRole('tab', { name: /\bID\b/i }),
-                page.getByText(/вход\s+по\s+ID/i, { exact: false }),
-                page.locator('label').filter({ hasText: /\bID\b/i })
+              const idModeCandidates = [
+                page.getByRole('button', { name: /вход\s+по\s+id/i }),
+                page.getByRole('tab', { name: /вход\s+по\s+id/i }),
+                page.getByText(/вход\s+по\s+id/i, { exact: false }),
+                page.getByRole('button', { name: /^id$/i }),
+                page.getByRole('tab', { name: /^id$/i }),
+                page.getByText(/^id$/i, { exact: true })
               ];
 
               let idModeSelected = false;
-              for (const locator of modeSelectors) {
+              for (const locator of idModeCandidates) {
                 try {
-                  if (await locator.first().isVisible({ timeout: 800 })) {
-                    await locator.first().click({ timeout: 3000 });
+                  const first = locator.first();
+                  if (await first.isVisible({ timeout: 800 })) {
+                    await first.click({ timeout: 3000 });
                     idModeSelected = true;
-                    await page.waitForTimeout(500);
+                    await page.waitForTimeout(700);
                     break;
                   }
                 } catch (_) {}
               }
-              console.log('ID_MODE_SELECTED:', idModeSelected ? 'yes' : 'not-needed-or-not-found');
+              console.log('ID_MODE_SELECTED:', idModeSelected ? 'yes' : 'not-found');
 
-              const inputs = page.locator('input:visible');
-              const count = await inputs.count();
-              const safeMeta = [];
+              const visibleInputs = page.locator('input:visible');
+              const count = await visibleInputs.count();
+              const meta = [];
               for (let i = 0; i < count; i++) {
-                const el = inputs.nth(i);
-                safeMeta.push({
+                const el = visibleInputs.nth(i);
+                meta.push({
                   type: (await el.getAttribute('type')) || '',
                   name: (await el.getAttribute('name')) || '',
+                  id: (await el.getAttribute('id')) || '',
                   placeholder: (await el.getAttribute('placeholder')) || ''
                 });
               }
-              console.log('VISIBLE_INPUTS:', JSON.stringify(safeMeta));
+              console.log('VISIBLE_INPUTS:', JSON.stringify(meta));
 
-              let idInput = page.locator(
-                'input:visible[name*="id" i], input:visible[id*="id" i], input:visible[placeholder*="ID" i]'
-              ).first();
+              let idInput = page.locator([
+                'input:visible[name="id"]',
+                'input:visible[name*="user_id" i]',
+                'input:visible[name*="account_id" i]',
+                'input:visible[id="id"]',
+                'input:visible[id*="user_id" i]',
+                'input:visible[placeholder*="ID" i]'
+              ].join(',')).first();
 
-              if (await idInput.count() === 0) {
+              if (await idInput.count() === 0 || !(await idInput.isVisible().catch(() => false))) {
                 idInput = page.locator(
-                  'input:visible:not([type="password"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"])'
+                  'input:visible:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="password"])'
                 ).first();
               }
-
-              const passInput = page.locator('input:visible[type="password"]').first();
 
               if (await idInput.count() === 0 || !(await idInput.isVisible().catch(() => false))) {
                 console.error('LOGIN_FORM: ID input not found');
                 process.exitCode = 31;
                 return;
               }
-              if (await passInput.count() === 0 || !(await passInput.isVisible().catch(() => false))) {
-                console.error('LOGIN_FORM: password input not found');
-                process.exitCode = 32;
-                return;
-              }
 
               await idInput.fill(userId);
-              await passInput.fill(password);
 
-              let submit = page.locator('button:visible[type="submit"]').first();
-              if (await submit.count() === 0) {
-                submit = page.getByRole('button', { name: /войти|вход|login|продолжить/i }).first();
+              let submit = page.locator('button:visible[type="submit"], input:visible[type="submit"]').first();
+              if (await submit.count() === 0 || !(await submit.isVisible().catch(() => false))) {
+                submit = page.getByRole('button', { name: /войти|продолжить|login|далее/i }).first();
               }
               if (await submit.count() === 0 || !(await submit.isVisible().catch(() => false))) {
-                console.error('LOGIN_FORM: submit button not found');
+                console.error('LOGIN_FORM: submit control not found');
                 process.exitCode = 33;
                 return;
               }
 
-              await Promise.allSettled([
-                page.waitForLoadState('networkidle', { timeout: 20000 }),
-                submit.click({ timeout: 5000 })
+              await submit.click({ timeout: 5000 });
+              await Promise.race([
+                page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {}),
+                page.waitForTimeout(5000)
               ]);
-              await page.waitForTimeout(2500);
+              await page.waitForTimeout(1800);
 
               const finalUrl = page.url();
-              const bodyText = (await page.locator('body').innerText().catch(() => '')).replace(/\s+/g, ' ');
-              const passwordStillVisible = await page.locator('input:visible[type="password"]').count() > 0;
-              const looksAuthenticated =
-                !passwordStillVisible &&
-                /\/lk(?:\/|$)/i.test(finalUrl) &&
-                /(подписк|vpn|профил|кабинет|выйти|wireguard|amnezia)/i.test(bodyText);
+              const bodyText = safe(await page.locator('body').innerText().catch(() => ''));
+              const controlsAfter = await page.locator('button:visible, [role="button"]:visible, [role="tab"]:visible').allTextContents();
 
               console.log('FINAL_URL:', finalUrl.replace(/[?#].*$/, ''));
+              console.log('POST_LOGIN_CONTROLS:', JSON.stringify(controlsAfter.map(safe).filter(Boolean).slice(0, 40)));
+
+              const loginFormStillVisible =
+                (await page.locator('input:visible').count()) > 0 &&
+                /(телефон|почт|email|вход\s+по\s+id|номер телефона)/i.test(bodyText);
+
+              const authenticatedSignals =
+                /(подписк|сервер|vpn|wireguard|amnezia|локац|конфиг|выйти|личный кабинет)/i.test(bodyText);
+
+              const looksAuthenticated = authenticatedSignals && !loginFormStillVisible;
               console.log('LOGIN_SUCCESS:', looksAuthenticated ? 'yes' : 'no');
 
               if (!looksAuthenticated) {
-                const authError = /(неверн|ошибк|invalid|incorrect|не найден|парол)/i.test(bodyText);
-                console.log('AUTH_ERROR_VISIBLE:', authError ? 'yes' : 'no');
+                const errorVisible = /(неверн|ошибк|invalid|incorrect|не найден|ист[её]к|заблок)/i.test(bodyText);
+                console.log('AUTH_ERROR_VISIBLE:', errorVisible ? 'yes' : 'no');
+                console.log('PAGE_TEXT_SAMPLE:', bodyText.slice(0, 1200));
                 process.exitCode = 40;
               }
             } catch (err) {
