@@ -1,10 +1,7 @@
 name: Force cancel obsolete Norden reconcile once
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/cancel-obsolete-norden-reconcile-once.yml'
+  workflow_dispatch:
 
 permissions:
   actions: write
