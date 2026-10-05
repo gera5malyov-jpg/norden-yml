@@ -1401,22 +1401,39 @@ def test_kit_first_match_requires_sku_supplier_article_and_brand():
     assert found["id"] == "v1"
 
 
-def test_kit_same_sku_with_wrong_supplier_article_is_blocked():
+def test_kit_unique_same_sku_and_brand_accepts_stale_supplier_article():
     supplier_char_id = "f-supplier"
     variants = [
         _kit_variant("v1", "7001", "12345", "Norden", supplier_char_id, "OTHER"),
     ]
     by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [supplier_char_id])
+    found = _select_variant(
+        {"sku": "12345", "supplier_sku": "NS-1", "features": []},
+        by_sku,
+        by_kit_id,
+        by_supplier_brand,
+        [supplier_char_id],
+        "Norden",
+    )
+    assert found["id"] == "v1"
+
+
+def test_kit_duplicate_same_sku_same_brand_stays_blocked():
+    variants = [
+        {"id": "v1", "kit_id": "7001", "sku": "12345", "brand": "Norden", "product_id": "p1", "characteristics": []},
+        {"id": "v2", "kit_id": "7002", "sku": "12345", "brand": "Norden", "product_id": "p2", "characteristics": []},
+    ]
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [])
     with pytest.raises(Exception) as exc:
         _select_variant(
             {"sku": "12345", "supplier_sku": "NS-1", "features": []},
             by_sku,
             by_kit_id,
             by_supplier_brand,
-            [supplier_char_id],
+            [],
             "Norden",
         )
-    assert "automatic linking is blocked" in str(exc.value)
+    assert "ambiguous" in str(exc.value)
 
 
 def test_kit_same_supplier_article_and_brand_under_other_sku_is_blocked():
@@ -1516,7 +1533,7 @@ def test_kit_legacy_code_for_site_matches_existing_norden_card():
     assert found["id"] == "v-legacy"
 
 
-def test_kit_conflicting_new_and_legacy_supplier_codes_are_blocked():
+def test_kit_conflicting_identity_blocks_only_when_that_variant_is_selected():
     variant = {
         "id": "v-conflict",
         "kit_id": "7001",
@@ -1536,8 +1553,19 @@ def test_kit_conflicting_new_and_legacy_supplier_codes_are_blocked():
             },
         ],
     }
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(
+        [variant],
+        ["f-new", "f-code-site"],
+    )
     with pytest.raises(Exception) as exc:
-        _variant_indexes([variant], ["f-new", "f-code-site"])
+        _select_variant(
+            {"sku": "12345", "supplier_sku": "NS-1", "features": []},
+            by_sku,
+            by_kit_id,
+            by_supplier_brand,
+            ["f-new", "f-code-site"],
+            "Norden",
+        )
     assert "conflicting supplier articles" in str(exc.value)
 
 
