@@ -4,8 +4,8 @@ name: Restore Ozon autoarchived products
 on:
   workflow_dispatch:
   schedule:
-    # Ozon autoarchive restore limit resets at 03:00 Moscow time.
-    - cron: '15 0 * * *'
+    # Ozon autoarchive restore limit resets at 03:00 Moscow time. Run at 03:27 to reduce GitHub scheduler congestion.
+    - cron: '27 0 * * *'
   push:
     branches: [main]
     paths:
@@ -54,6 +54,7 @@ jobs:
             echo "Report unchanged"
           else
             git commit -m "Update Ozon autoarchive restore report"
+            git pull --rebase origin main
             git push
           fi
 
