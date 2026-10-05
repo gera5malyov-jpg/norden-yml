@@ -35,6 +35,9 @@ LABEL = {
 }
 
 CHAT_AUTOMATION_START = os.getenv("CHAT_AUTOMATION_START", "2026-09-23T19:35:00Z")
+MISSING_PRODUCT_SKU = "MP-MISSING"
+MISSING_PRODUCT_NAME = "Товар маркетплейса — не найден в каталоге"
+MISSING_PRODUCT_TYPE_ID = "120"
 
 WELCOME_MESSAGE = """Здравствуйте! 👋
 
@@ -186,7 +189,8 @@ report = {
     "created": 0,
     "existing": 0,
     "status_updated": 0,
-    "skipped_unmatched_sku": 0,
+    "skipped_unmatched_sku": 0,  # legacy key; must stay 0 after fallback-order fix
+    "unmatched_sku": 0,
     "unmatched": [],
     "chat_welcome_sent": 0,
     "chat_review_sent": 0,
@@ -491,6 +495,54 @@ def wa_sku(code: str) -> Optional[dict]:
     sku_cache[code] = ans
     return ans
 
+
+def ensure_missing_placeholder_sku() -> dict:
+    cached = sku_cache.get(MISSING_PRODUCT_SKU)
+    if cached:
+        return cached
+
+    found = wa_sku(MISSING_PRODUCT_SKU)
+    if found:
+        return found
+
+    if DRY_RUN:
+        return {
+            "sku_id": "DRY-RUN-MISSING",
+            "product_id": "0",
+            "sku": MISSING_PRODUCT_SKU,
+        }
+
+    created = wa.call("shop.product.add", http_method="POST", data={
+        "name": MISSING_PRODUCT_NAME,
+        "type_id": MISSING_PRODUCT_TYPE_ID,
+        "status": 0,
+        "sku_type": 0,
+        "currency": "RUB",
+        "summary": "Служебная скрытая позиция. Используется только для заказов маркетплейсов, когда исходный SKU не найден в каталоге Webasyst.",
+        "skus": [{
+            "sku": MISSING_PRODUCT_SKU,
+            "name": MISSING_PRODUCT_NAME,
+            "price": "0",
+            "purchase_price": "0",
+            "compare_price": "0",
+            "available": 1,
+            "status": 0,
+        }],
+    })
+    product_id = s(created.get("id")) if isinstance(created, dict) else ""
+    if not product_id:
+        raise RuntimeError("Webasyst did not return product id for marketplace missing-item placeholder")
+
+    info = wa.call("shop.product.getInfo", params={"id": product_id})
+    matches = _sku_matches({"products": [info]}, MISSING_PRODUCT_SKU)
+    unique = {(x["sku_id"], x["product_id"]): x for x in matches}
+    if len(unique) != 1:
+        raise RuntimeError("Could not resolve marketplace missing-item placeholder SKU after creation")
+
+    ans = next(iter(unique.values()))
+    sku_cache[MISSING_PRODUCT_SKU] = ans
+    return ans
+
 def existing_order(source: str, ext: str) -> Optional[dict]:
     h = key(source, ext)
     p = wa.call("shop.order.search", params={
@@ -577,6 +629,15 @@ def comment(o: dict) -> str:
         lines.append(f"Получатель: {s(o.get('recipient_name'))}")
     if s(o.get("delivery_to") or o.get("delivery_from")):
         lines.append(f"Крайняя дата доставки: {s(o.get('delivery_to') or o.get('delivery_from'))}")
+    missing_items = o.get("_missing_items") or []
+    if missing_items:
+        lines.append("ВНИМАНИЕ: часть товаров не сопоставлена с каталогом Webasyst. Заказ создан с технической позицией.")
+        for item in missing_items:
+            qty = max(1, int(num(item.get("quantity"), 1)))
+            price = item.get("price")
+            price_text = f"{float(price):.2f} ₽" if price not in (None, "") else "цена не передана"
+            title = s(item.get("name")) or "Без названия"
+            lines.append(f"Не найден товар: SKU {s(item.get('sku')) or '—'} — {title}; {qty} шт.; {price_text}/шт.")
     lines.append(f"Статусы синхронизируются только {source} → Webasyst. Из Webasyst статусы обратно не передаются.")
     return "\n".join(lines)
 
@@ -594,6 +655,12 @@ def marketplace_order_params(o: dict) -> dict:
         v = o.get(k)
         if v not in (None, ""):
             params["mp_" + k] = lift_type_label(v) if k == "lift_type" else str(v)
+    missing_items = o.get("_missing_items") or []
+    if missing_items:
+        params["mp_missing_skus"] = ", ".join(
+            s(x.get("sku")) or "—" for x in missing_items if isinstance(x, dict)
+        )[:1000]
+        params["mp_missing_items_count"] = str(len(missing_items))
     buyer = o.get("buyer") if isinstance(o.get("buyer"), dict) else {}
     phone_extension = s(buyer.get("extension") or buyer.get("phoneCode") or buyer.get("ext"))
     if phone_extension:
@@ -753,22 +820,39 @@ def process(o: dict):
         return
     stat["eligible"] += 1
     resolved = []
+    missing = []
     for item in o["items"]:
         match = wa_sku(s(item.get("sku")))
         if not match:
-            stat["skipped"] += 1
-            report["skipped_unmatched_sku"] += 1
+            missing.append(dict(item))
+            report["unmatched_sku"] += 1
             if len(report["unmatched"]) < 30:
                 report["unmatched"].append({
                     "source": source,
                     "external_id": ext,
                     "sku": s(item.get("sku")),
+                    "name": s(item.get("name")),
+                    "quantity": max(1, int(num(item.get("quantity"), 1))),
+                    "price": item.get("price"),
                 })
-            return
+            continue
         resolved.append({
             **match,
             "quantity": max(1, int(num(item.get("quantity"), 1))),
             "price": item.get("price"),
+        })
+
+    if missing:
+        o["_missing_items"] = missing
+        placeholder = ensure_missing_placeholder_sku()
+        missing_total = 0.0
+        for item in missing:
+            qty = max(1, int(num(item.get("quantity"), 1)))
+            missing_total += num(item.get("price"), 0.0) * qty
+        resolved.append({
+            **placeholder,
+            "quantity": 1,
+            "price": missing_total,
         })
     try:
         old = existing_order(source, ext)
