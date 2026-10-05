@@ -411,13 +411,29 @@ def _select_variant(product, by_sku, by_kit_id, by_supplier_brand, supplier_iden
     if len(exact) == 1:
         return exact[0]
 
+    # Webasyst SKU (Артикул) is a primary stable identity in the existing
+    # catalog. Historical KIT cards can contain an empty or stale supplier
+    # article. If there is exactly one KIT row with the same SKU and the
+    # expected brand, link it and let Apply normalize the supplier identity.
+    same_brand = [
+        row for row in sku_matches
+        if _norm(row.get("brand")) == brand_key
+    ]
+    if len(same_brand) == 1:
+        # Still reject internally corrupted identity fields with two different
+        # values. A single stale/empty value is safe to normalize on Apply.
+        _variant_supplier_article(same_brand[0], supplier_identity_ids)
+        return same_brand[0]
+    if len(same_brand) > 1:
+        raise KitSyncError(
+            "KIT SKU=%s has %d Norden variants; automatic linking is ambiguous"
+            % (sku, len(same_brand))
+        )
+
     if sku_matches:
         candidates = []
         for row in sku_matches[:5]:
-            try:
-                articles = _variant_supplier_articles(row, supplier_identity_ids)
-            except Exception:
-                articles = []
+            articles = _variant_supplier_articles(row, supplier_identity_ids)
             candidates.append(
                 "id=%s kit_id=%s brand=%s supplier=%s"
                 % (
@@ -428,9 +444,9 @@ def _select_variant(product, by_sku, by_kit_id, by_supplier_brand, supplier_iden
                 )
             )
         raise KitSyncError(
-            "KIT already contains SKU=%s but supplier article/brand do not match exactly; "
+            "KIT already contains SKU=%s but no candidate has brand=%s; "
             "automatic linking is blocked; candidates: %s"
-            % (sku, " | ".join(candidates))
+            % (sku, brand, " | ".join(candidates))
         )
 
     supplier_matches = by_supplier_brand.get((supplier_sku, brand_key), [])
@@ -466,6 +482,7 @@ def _identity_preflight(products, variants, characteristic_index, brand):
             "status": "blocked",
             "matched_by_kit_id": 0,
             "matched_exact_identity": 0,
+            "matched_by_sku_brand": 0,
             "create_new": 0,
             "conflicts": 1,
             "conflict_sample": [{"error": str(exc)[:1200]}],
@@ -475,6 +492,7 @@ def _identity_preflight(products, variants, characteristic_index, brand):
         "status": "ok",
         "matched_by_kit_id": 0,
         "matched_exact_identity": 0,
+        "matched_by_sku_brand": 0,
         "create_new": 0,
         "conflicts": 0,
         "conflict_sample": [],
@@ -497,7 +515,14 @@ def _identity_preflight(products, variants, characteristic_index, brand):
             elif _feature_kit_id(product.get("features")):
                 report["matched_by_kit_id"] += 1
             else:
-                report["matched_exact_identity"] += 1
+                existing_supplier = _variant_supplier_article(
+                    variant,
+                    supplier_identity_ids,
+                )
+                if existing_supplier == _s(product.get("supplier_sku")):
+                    report["matched_exact_identity"] += 1
+                else:
+                    report["matched_by_sku_brand"] += 1
         except Exception as exc:
             report["conflicts"] += 1
             if len(report["conflict_sample"]) < 100:
