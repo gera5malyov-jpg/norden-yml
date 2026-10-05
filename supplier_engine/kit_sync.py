@@ -216,7 +216,25 @@ class KitClient:
         for row in first_rows:
             yield row
         total = self._total(first)
-        if not total or total <= len(first_rows):
+        if total is None:
+            # Some KIT responses omit total. Continue safely page-by-page
+            # instead of silently treating the first 100 rows as the catalog.
+            page = 2
+            while len(first_rows) == 100:
+                payload = self.request(
+                    "GET",
+                    "/v1/variants",
+                    params={"page": page, "per_page": 100},
+                )
+                rows = [row for row in self._items(payload) if isinstance(row, dict)]
+                for row in rows:
+                    yield row
+                if len(rows) < 100:
+                    return
+                first_rows = rows
+                page += 1
+            return
+        if total <= len(first_rows):
             return
         pages = (int(total) + 99) // 100
 
