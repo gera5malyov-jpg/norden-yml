@@ -214,7 +214,7 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
     rules = rules or {}
     links = links or []
     products = list(products)
-    plan = {"create": [], "update": [], "zero": [], "skipped": [], "blocked": []}
+    plan = {"create": [], "repair_sku": [], "update": [], "zero": [], "skipped": [], "blocked": []}
     seen_supplier = set()
 
     existing_by_ids = {}
@@ -256,16 +256,22 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
                 key = (str(link.get("product_id")), str(link.get("sku_id")))
                 linked = existing_by_ids.get(key)
                 if linked is None:
-                    # A supplier link may outlive a deleted/recreated Webasyst
-                    # modification. It is not an identity conflict: ignore the
-                    # stale link and continue with normal exact catalog matching
-                    # / create rules. A successful apply will replace the link.
-                    plan.setdefault("stale_links", []).append({
+                    # The old supplier link points to a SKU that no longer
+                    # exists. The catalog-wide exact search above has already
+                    # looked for this supplier article / internal SKU / exact
+                    # image alias. If it was moved to another product card,
+                    # "matches" would be non-empty and we would update/relink it.
+                    # With no current match, restore the missing SKU on the
+                    # original product card (or recreate the product if the card
+                    # itself is gone).
+                    plan["repair_sku"].append({
                         "sku": product.sku,
                         "supplier_sku": product.supplier_sku,
                         "product_id": link.get("product_id"),
-                        "sku_id": link.get("sku_id"),
+                        "old_sku_id": link.get("sku_id"),
+                        "desired": desired,
                     })
+                    continue
                 else:
                     matches = [linked]
 
@@ -347,10 +353,10 @@ def validate_apply_plan(plan, config):
             errors.append("Найдены устаревшие привязки поставщика к отсутствующим SKU Webasyst.")
         if "supplier_link_overlap_too_low" in reasons:
             errors.append("Привязки поставщика почти не совпадают с текущим прайсом; массовое обнуление остатков заблокировано.")
-    if plan["create"] and not web.get("type_id"):
+    if (plan["create"] or plan.get("repair_sku")) and not web.get("type_id"):
         errors.append("Для создания новых товаров не задан webasyst.type_id.")
     needs_stock = rules.get("update_stock", True) and (
-        any(row["desired"].get("stock") is not None for row in plan["create"] + plan["update"]) or bool(plan["zero"])
+        any(row["desired"].get("stock") is not None for row in plan["create"] + plan.get("repair_sku", []) + plan["update"]) or bool(plan["zero"])
     )
     if needs_stock and not web.get("stock_id"):
         errors.append("Для изменения остатков не задан webasyst.stock_id.")
@@ -359,7 +365,7 @@ def validate_apply_plan(plan, config):
     if rules.get("update_characteristics", False) and not rules.get("auto_features", False):
         missing = set()
         mapping = web.get("feature_codes") or {}
-        for row in plan["create"] + plan["update"]:
+        for row in plan["create"] + plan.get("repair_sku", []) + plan["update"]:
             for key, value in (row["desired"].get("characteristics") or {}).items():
                 if value not in (None, "") and not mapping.get(key):
                     missing.add(key)
@@ -426,6 +432,21 @@ def _extract_product_id(payload):
     return ""
 
 
+def _extract_sku_id(payload):
+    if isinstance(payload, dict):
+        for key in ("id", "sku_id"):
+            value = payload.get(key)
+            if value not in (None, ""):
+                return str(value)
+        for key in ("sku", "data", "result"):
+            nested = payload.get(key)
+            if isinstance(nested, dict):
+                value = _extract_sku_id(nested)
+                if value:
+                    return value
+    return ""
+
+
 class ApplyError(RuntimeError):
     def __init__(self, message, result):
         super().__init__(message)
@@ -456,13 +477,213 @@ def apply_plan(wa: WebasystClient, plan, config):
         "created": 0,
         "updated": 0,
         "zeroed": 0,
+        "recovered_skus": 0,
+        "relinked_existing": 0,
+        "recreated_products": 0,
         "mappings": [],
-        "stale_skus_skipped": 0,
-        "stale_sku_sample": [],
+        "stale_zero_links": 0,
+        "stale_zero_sample": [],
     }
 
     try:
         sku_mode = webasyst_sku_mode(config)
+
+        def add_mapping(row, product_id, sku_id):
+            desired = row.get("desired") or {}
+            result["mappings"].append({
+                "supplier_sku": row["supplier_sku"],
+                "product_id": int(product_id),
+                "sku_id": int(sku_id),
+                "purchase_price": desired.get("purchase_price"),
+                "stock": desired.get("stock"),
+            })
+
+        def create_full_product(row):
+            desired = row["desired"]
+            supplier_code = str(row.get("supplier_sku") or "").strip()
+            temporary_sku = str(row.get("sku") or supplier_code).strip()
+            sku_data = _sku_write_data(desired, rules, stock_id, stock_ids)
+            sku_data.update({
+                "available": 1 if (desired.get("stock") or 0) > 0 else 0,
+                "status": 1,
+                "sku": temporary_sku,
+                "name": supplier_code,
+            })
+            product_data = _product_write_data(desired, rules, web, creating=True)
+            product_data.update({
+                "type_id": int(web["type_id"]),
+                "currency": str(web.get("currency") or "RUB"),
+                "status": 1,
+                "url": _slug(desired.get("name") or row["sku"]),
+                "skus": [sku_data],
+            })
+            created = wa.call("shop.product.add", http_method="POST", data=product_data)
+            product_id = _extract_product_id(created)
+            if not product_id:
+                raise RuntimeError("Webasyst не вернул ID созданного товара %s" % row["sku"])
+            skus = _listify(wa.call("shop.product.skus.getList", params={"product_id": product_id}))
+            exact = [
+                item for item in skus
+                if str(item.get("name") or "").strip() == supplier_code
+                or str(item.get("sku") or "").strip() == temporary_sku
+            ]
+            if len(exact) != 1:
+                if len(skus) == 1:
+                    exact = skus
+                else:
+                    raise RuntimeError(
+                        "После восстановления товара %s невозможно однозначно определить SKU (%d вариантов)"
+                        % (row["sku"], len(skus))
+                    )
+            sku_id = str(exact[0].get("id") or "")
+            if not sku_id:
+                raise RuntimeError("Webasyst не вернул SKU ID товара %s" % row["sku"])
+            final_sku_data = {
+                "sku": sku_id if sku_mode == "numeric" else temporary_sku,
+                "name": supplier_code,
+            }
+            wa.call(
+                "shop.product.skus.update",
+                http_method="POST",
+                params={"id": sku_id},
+                data=final_sku_data,
+            )
+            result["created"] += 1
+            return product_id, sku_id
+
+        def find_current_match(row):
+            supplier_code = str(row.get("supplier_sku") or "").strip()
+            desired_sku = str(row.get("sku") or supplier_code).strip()
+            desired = row.get("desired") or {}
+            image_aliases = {
+                str(url).strip(): supplier_code
+                for url in (desired.get("images") or [])
+                if str(url).strip()
+            }
+            found = index_by_supplier_sku_name(
+                wa,
+                web.get("type_id"),
+                [supplier_code],
+                {desired_sku: supplier_code} if desired_sku else {},
+                image_aliases,
+            )
+            return list(found.get(supplier_code) or [])
+
+        def restore_missing_sku(row):
+            # Re-scan the current catalog immediately before creating anything.
+            # If the user moved/corrected the SKU into another product card,
+            # reuse that exact current SKU and only relink the supplier.
+            matches = find_current_match(row)
+            if len(matches) > 1:
+                raise RuntimeError(
+                    "В Webasyst найдено несколько текущих SKU для артикула поставщика %s; восстановление заблокировано"
+                    % row.get("supplier_sku")
+                )
+            if len(matches) == 1:
+                current_product, current_sku = matches[0]
+                product_id = str(current_product.get("id") or "")
+                sku_id = str(current_sku.get("id") or "")
+                if not product_id or not sku_id:
+                    raise RuntimeError("Найденный SKU Webasyst не содержит product_id/sku_id")
+                desired = row["desired"]
+                sku_data = _sku_write_data(desired, rules, stock_id, stock_ids)
+                supplier_code = str(row.get("supplier_sku") or "").strip()
+                desired_sku = str(row.get("sku") or supplier_code).strip()
+                current_code = str(current_sku.get("sku") or "").strip()
+                if supplier_code and str(current_sku.get("name") or "").strip() != supplier_code:
+                    sku_data["name"] = supplier_code
+                if sku_mode == "supplier" and desired_sku and current_code.isdigit():
+                    sku_data["sku"] = desired_sku
+                if sku_data:
+                    wa.call(
+                        "shop.product.skus.update",
+                        http_method="POST",
+                        params={"id": sku_id},
+                        data=sku_data,
+                    )
+                product_data = _product_write_data(desired, rules, web, creating=False)
+                if product_data:
+                    wa.call(
+                        "shop.product.update",
+                        http_method="POST",
+                        params={"id": product_id},
+                        data=product_data,
+                    )
+                result["relinked_existing"] += 1
+                add_mapping(row, product_id, sku_id)
+                return
+
+            original_product_id = str(row.get("product_id") or "").strip()
+            product_exists = False
+            if original_product_id:
+                try:
+                    info = wa.call("shop.product.getInfo", params={"id": original_product_id})
+                    product_exists = bool(isinstance(info, dict) and str(info.get("id") or original_product_id))
+                except Exception as exc:
+                    text = str(exc or "").casefold()
+                    if "http 404" not in text and "товар не найден" not in text:
+                        raise
+
+            if product_exists:
+                desired = row["desired"]
+                supplier_code = str(row.get("supplier_sku") or "").strip()
+                temporary_sku = str(row.get("sku") or supplier_code).strip()
+                sku_data = _sku_write_data(desired, rules, stock_id, stock_ids)
+                sku_data.update({
+                    "available": 1 if (desired.get("stock") or 0) > 0 else 0,
+                    "status": 1,
+                    "sku": temporary_sku,
+                    "name": supplier_code,
+                })
+                created = wa.call(
+                    "shop.product.skus.add",
+                    http_method="POST",
+                    params={"product_id": original_product_id},
+                    data=sku_data,
+                )
+                sku_id = _extract_sku_id(created)
+                if not sku_id:
+                    skus = _listify(wa.call(
+                        "shop.product.skus.getList",
+                        params={"product_id": original_product_id},
+                    ))
+                    exact = [
+                        item for item in skus
+                        if str(item.get("name") or "").strip() == supplier_code
+                        or str(item.get("sku") or "").strip() == temporary_sku
+                    ]
+                    if len(exact) != 1:
+                        raise RuntimeError(
+                            "После восстановления SKU %s найдено %d совпадений"
+                            % (supplier_code, len(exact))
+                        )
+                    sku_id = str(exact[0].get("id") or "")
+                if not sku_id:
+                    raise RuntimeError("Webasyst не вернул ID восстановленного SKU %s" % supplier_code)
+                wa.call(
+                    "shop.product.skus.update",
+                    http_method="POST",
+                    params={"id": sku_id},
+                    data={
+                        "sku": sku_id if sku_mode == "numeric" else temporary_sku,
+                        "name": supplier_code,
+                    },
+                )
+                product_data = _product_write_data(desired, rules, web, creating=False)
+                if product_data:
+                    wa.call(
+                        "shop.product.update",
+                        http_method="POST",
+                        params={"id": original_product_id},
+                        data=product_data,
+                    )
+                result["recovered_skus"] += 1
+                add_mapping(row, original_product_id, sku_id)
+                return
+
+            product_id, sku_id = create_full_product(row)
+            result["recreated_products"] += 1
+            add_mapping(row, product_id, sku_id)
 
         for row in plan["update"]:
             desired = row["desired"]
@@ -501,14 +722,7 @@ def apply_plan(wa: WebasystClient, plan, config):
                 except Exception as exc:
                     if not _is_missing_webasyst_sku_error(exc):
                         raise
-                    result["stale_skus_skipped"] += 1
-                    if len(result["stale_sku_sample"]) < 100:
-                        result["stale_sku_sample"].append({
-                            "supplier_sku": row.get("supplier_sku"),
-                            "product_id": row.get("product_id"),
-                            "sku_id": row.get("sku_id"),
-                            "stage": "update",
-                        })
+                    restore_missing_sku(row)
                     continue
             product_data = _product_write_data(desired, rules, web, creating=False)
             if (
@@ -527,61 +741,14 @@ def apply_plan(wa: WebasystClient, plan, config):
                     data=product_data,
                 )
             result["updated"] += 1
-            result["mappings"].append({
-                "supplier_sku": row["supplier_sku"],
-                "product_id": int(row["product_id"]),
-                "sku_id": int(row["sku_id"]),
-                "purchase_price": desired.get("purchase_price"),
-                "stock": desired.get("stock"),
-            })
+            add_mapping(row, row["product_id"], row["sku_id"])
+
+        for row in plan.get("repair_sku", []):
+            restore_missing_sku(row)
 
         for row in plan["create"]:
-            desired = row["desired"]
-            supplier_code = str(row.get("supplier_sku") or "").strip()
-            temporary_sku = str(row.get("sku") or supplier_code).strip()
-            sku_data = _sku_write_data(desired, rules, stock_id, stock_ids)
-            sku_data.update({
-                "available": 1 if (desired.get("stock") or 0) > 0 else 0,
-                "status": 1,
-                "sku": temporary_sku,
-                "name": supplier_code,
-            })
-            product_data = _product_write_data(desired, rules, web, creating=True)
-            product_data.update({
-                "type_id": int(web["type_id"]),
-                "currency": str(web.get("currency") or "RUB"),
-                "status": 1,
-                "url": _slug(desired.get("name") or row["sku"]),
-                "skus": [sku_data],
-            })
-            created = wa.call("shop.product.add", http_method="POST", data=product_data)
-            product_id = _extract_product_id(created)
-            if not product_id:
-                raise RuntimeError("Webasyst не вернул ID созданного товара %s" % row["sku"])
-            skus = _listify(wa.call("shop.product.skus.getList", params={"product_id": product_id}))
-            if len(skus) != 1:
-                raise RuntimeError("У созданного товара %s найдено %d SKU вместо 1" % (row["sku"], len(skus)))
-            sku_id = str(skus[0].get("id") or "")
-            if not sku_id:
-                raise RuntimeError("Webasyst не вернул SKU ID товара %s" % row["sku"])
-            final_sku_data = {
-                "sku": sku_id if sku_mode == "numeric" else str(row.get("sku") or supplier_code).strip(),
-                "name": supplier_code,
-            }
-            wa.call(
-                "shop.product.skus.update",
-                http_method="POST",
-                params={"id": sku_id},
-                data=final_sku_data,
-            )
-            result["created"] += 1
-            result["mappings"].append({
-                "supplier_sku": row["supplier_sku"],
-                "product_id": int(product_id),
-                "sku_id": int(sku_id),
-                "purchase_price": desired.get("purchase_price"),
-                "stock": desired.get("stock"),
-            })
+            product_id, sku_id = create_full_product(row)
+            add_mapping(row, product_id, sku_id)
 
         if rules.get("zero_if_missing", False) and rules.get("update_stock", True):
             for row in plan["zero"]:
@@ -602,9 +769,9 @@ def apply_plan(wa: WebasystClient, plan, config):
                 except Exception as exc:
                     if not _is_missing_webasyst_sku_error(exc):
                         raise
-                    result["stale_skus_skipped"] += 1
-                    if len(result["stale_sku_sample"]) < 100:
-                        result["stale_sku_sample"].append({
+                    result["stale_zero_links"] += 1
+                    if len(result["stale_zero_sample"]) < 100:
+                        result["stale_zero_sample"].append({
                             "supplier_sku": row.get("supplier_sku"),
                             "product_id": row.get("product_id"),
                             "sku_id": row.get("sku_id"),
