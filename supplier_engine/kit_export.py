@@ -312,6 +312,25 @@ def _extract_source_images(desired):
     return list(dict.fromkeys(_s(url) for url in (desired.get("images") or []) if _s(url)))[:20]
 
 
+def _unique_image_aliases(products):
+    aliases = {}
+    ambiguous = set()
+    for product in products:
+        code = _s(product.supplier_sku)
+        for url in product.images or []:
+            url = _s(url)
+            if not code or not url:
+                continue
+            previous = aliases.get(url)
+            if previous and previous != code:
+                ambiguous.add(url)
+            else:
+                aliases[url] = code
+    for url in ambiguous:
+        aliases.pop(url, None)
+    return aliases
+
+
 def _set_webasyst_kit_data(wa, product_id, kit_id, image_urls):
     data = {"features": {"kit_id": str(int(kit_id))}}
     if image_urls:
@@ -341,7 +360,7 @@ def sync_supplier_to_kit(wa, products, config):
         type_id,
         list(source_by_supplier),
         aliases,
-        {url: p.supplier_sku for p in products for url in p.images if _s(url)},
+        _unique_image_aliases(products),
     )
 
     stats = {
