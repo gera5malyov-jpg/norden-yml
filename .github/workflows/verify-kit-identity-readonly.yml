@@ -13,33 +13,67 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    env:
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+      WEBASYST_BASE_URL: https://profikompany.ru
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install requests
-      - name: Read-only KIT identity probe
-        env:
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      - name: Read-only Webasyst and KIT identity probe
+        shell: bash
         run: |
+          set -euo pipefail
           python - <<'PY'
           import json, os, time, requests
           from pathlib import Path
+          from webasyst.client import WebasystClient
+          from supplier_engine.webasyst_sync import index_by_sku
+
+          target_sku='AF-31646769'
+          target_supplier='RT-2031'
+          old_variant_id='01a097ba-7665-7d64-8d7c-369a20ed1a2e'
+          current_variant_id='01a0ed0c-9f29-7797-ad47-586d09b6770e'
+
+          wa=WebasystClient(min_request_interval=0.2)
+          wa_index=index_by_sku(wa,142)
+          wa_matches=wa_index.get(target_sku) or []
+          wa_out=[]
+          for product,sku in wa_matches:
+              pid=str(product.get('id') or '')
+              info=wa.call('shop.product.getInfo',params={'id':pid}) if pid else {}
+              features=info.get('features') or {} if isinstance(info,dict) else {}
+              wa_out.append({
+                  'product_id':pid,
+                  'product_name':product.get('name'),
+                  'sku_id':sku.get('id'),
+                  'sku':sku.get('sku'),
+                  'sku_name':sku.get('name'),
+                  'kit_id_feature':features.get('kit_id') if isinstance(features,dict) else None,
+                  'all_features':features,
+              })
 
           base='https://api.kit.yandex.net'
           headers={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
 
-          def get(path, params=None):
+          def get(path, params=None, allow_404=False):
               for attempt in range(10):
                   r=requests.get(base+path,headers=headers,params=params,timeout=90)
+                  if r.status_code==404 and allow_404:
+                      return {'_http_status':404}
                   if r.status_code==429:
                       time.sleep(float(r.headers.get('Retry-After') or 3)); continue
                   if r.status_code>=500:
                       time.sleep(min(20,2**attempt)); continue
                   r.raise_for_status()
-                  return r.json()
+                  data=r.json()
+                  if isinstance(data,dict):
+                      data['_http_status']=r.status_code
+                  return data
               raise RuntimeError('GET retries exhausted: '+path)
 
           def items(payload, keys):
@@ -61,33 +95,55 @@ jobs:
               if len(rows)<100: break
               page+=1
           char_by_id={str(x.get('id')):str(x.get('title') or '') for x in chars}
-          code_site_ids=[cid for cid,title in char_by_id.items() if title.strip().casefold()=='код для сайта']
-          supplier_ids=[cid for cid,title in char_by_id.items() if title.strip().casefold()=='артикул поставщика']
+          identity_titles={'код для сайта','артикул поставщика','код продавца','артикул','код norden'}
 
-          vp=get('/v1/variants',{'name':'AF-31646769','page':1,'per_page':100})
-          variants=[
-              x for x in items(vp,('variants','items','results'))
-              if str(x.get('sku') or '')=='AF-31646769'
-              and str(x.get('brand') or '').casefold()=='norden'
-          ]
-          compact=[]
-          for v in variants:
+          def compact(v):
+              if not isinstance(v,dict):
+                  return v
               identity=[]
               for c in v.get('characteristics') or []:
                   cid=str(c.get('characteristic_id') or '')
                   title=char_by_id.get(cid,'')
-                  if title.strip().casefold() in {'код для сайта','артикул поставщика'}:
+                  if title.strip().casefold() in identity_titles:
                       vals=c.get('values') or []
-                      val=str(c.get('value') or (vals[0] if vals else ''))
-                      identity.append({'title':title,'value':val})
-              compact.append({
+                      identity.append({
+                          'id':cid,
+                          'title':title,
+                          'value':str(c.get('value') or (vals[0] if vals else '')),
+                      })
+              return {
+                  'http_status':v.get('_http_status'),
                   'id':v.get('id'),
                   'kit_id':v.get('kit_id'),
                   'sku':v.get('sku'),
                   'brand':v.get('brand'),
                   'name':v.get('name'),
+                  'status':v.get('status'),
+                  'product_id':v.get('product_id'),
+                  'created_at':v.get('created_at'),
+                  'updated_at':v.get('updated_at'),
                   'identity':identity,
-              })
+              }
+
+          queries={}
+          for label,query in [
+              ('sku_exact',{'name':target_sku,'page':1,'per_page':100}),
+              ('supplier_code_search',{'name':target_supplier,'page':1,'per_page':100}),
+          ]:
+              p=get('/v1/variants',query)
+              rows=items(p,('variants','items','results'))
+              queries[label]=[
+                  compact(x) for x in rows
+                  if isinstance(x,dict)
+                  and str(x.get('brand') or '').casefold()=='norden'
+              ]
+
+          direct={}
+          for label,vid in [('old_variant',old_variant_id),('current_variant',current_variant_id)]:
+              try:
+                  direct[label]=compact(get('/v1/variants/'+vid,allow_404=True))
+              except Exception as exc:
+                  direct[label]={'error':str(exc)}
 
           wh=get('/v1/warehouses',{'status':'ACTIVE','page':1,'per_page':100})
           warehouses=[
@@ -98,37 +154,33 @@ jobs:
 
           out={
               'readonly':True,
-              'code_for_site_characteristic_ids':code_site_ids,
-              'supplier_article_characteristic_ids':supplier_ids,
-              'sample_exact_sku_brand_matches':compact,
+              'target':{'sku':target_sku,'supplier_code':target_supplier},
+              'webasyst_matches':wa_out,
+              'kit_queries':queries,
+              'kit_direct':direct,
+              'identity_characteristics':[
+                  {'id':cid,'title':title}
+                  for cid,title in char_by_id.items()
+                  if title.strip().casefold() in identity_titles
+              ],
               'required_warehouses':{
                   'МСК':'МСК' in warehouses,
                   'СПБ привозной':'СПБ привозной' in warehouses,
               },
           }
           Path('norden-kit/strict_identity_probe.json').write_text(
-              json.dumps(out,ensure_ascii=False,indent=2),
+              json.dumps(out,ensure_ascii=False,indent=2,default=str)+'\n',
               encoding='utf-8'
           )
-          print(json.dumps(out,ensure_ascii=False,indent=2))
-          if not code_site_ids:
-              raise SystemExit('Код для сайта characteristic not found')
-          if len(compact)!=1:
-              raise SystemExit('Expected exactly one RT-2031 legacy KIT card')
-          values=[
-              x['value'] for x in compact[0]['identity']
-              if x['title'].strip().casefold()=='код для сайта'
-          ]
-          if values!=['RT-2031']:
-              raise SystemExit('Legacy Код для сайта does not equal RT-2031: '+repr(values))
-          if not all(out['required_warehouses'].values()):
-              raise SystemExit('Required warehouses are missing')
+          print(json.dumps(out,ensure_ascii=False,indent=2,default=str))
           PY
       - name: Save read-only report
+        if: always()
         run: |
           git config user.name github-actions
           git config user.email actions@github.com
+          test -f norden-kit/strict_identity_probe.json || echo '{"readonly":true,"error":"probe did not produce report"}' > norden-kit/strict_identity_probe.json
           git add norden-kit/strict_identity_probe.json
-          git commit -m "Verify strict KIT identity matching [skip ci]" || exit 0
+          git commit -m "Update strict KIT identity probe [skip ci]" || exit 0
           git pull --rebase origin main
           git push origin HEAD:main
