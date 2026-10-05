@@ -101,7 +101,7 @@ def _kit_variants(kit, products=None):
         sku_terms = list(dict.fromkeys(
             _s(row.get("sku")) for row in products if _s(row.get("sku"))
         ))
-        variants = list(kit.search_variants_parallel(sku_terms, workers=6))
+        variants = list(kit.search_variants_parallel(sku_terms, workers=4))
         found_skus = {_s(row.get("sku")) for row in variants if _s(row.get("sku"))}
 
         # Only products with no exact SKU candidate need the secondary legacy
@@ -113,7 +113,7 @@ def _kit_variants(kit, products=None):
             and _s(row.get("sku")) not in found_skus
         ))
         if supplier_terms:
-            variants.extend(kit.search_variants_parallel(supplier_terms, workers=6))
+            variants.extend(kit.search_variants_parallel(supplier_terms, workers=4))
 
         deduped = {}
         for row in variants:
