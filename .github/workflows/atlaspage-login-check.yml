@@ -67,6 +67,9 @@ jobs:
               console.log('VISIBLE_CONTROLS:', JSON.stringify(visibleButtons.map(safe).filter(Boolean).slice(0, 40)));
 
               const idModeCandidates = [
+                page.getByRole('button', { name: /^по\s+id$/i }),
+                page.getByRole('tab', { name: /^по\s+id$/i }),
+                page.getByText(/^по\s+id$/i, { exact: true }),
                 page.getByRole('button', { name: /вход\s+по\s+id/i }),
                 page.getByRole('tab', { name: /вход\s+по\s+id/i }),
                 page.getByText(/вход\s+по\s+id/i, { exact: false }),
