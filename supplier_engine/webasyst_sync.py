@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import concurrent.futures
 import re
 import unicodedata
 from collections import defaultdict
@@ -822,7 +823,7 @@ def apply_plan(wa: WebasystClient, plan, config):
             result["recreated_products"] += 1
             add_mapping(row, product_id, sku_id)
 
-        for row in plan["update"]:
+        def apply_update_row(row, client):
             desired = row["desired"]
             current_product = row.get("current_product") or {}
             current_sku = row.get("current_sku") or {}
@@ -833,14 +834,9 @@ def apply_plan(wa: WebasystClient, plan, config):
             current_code = str(current_sku.get("sku") or "").strip()
             numeric_code = str(row.get("sku_id") or "").strip()
 
-            # The supplier article always lives in Webasyst's human-readable
-            # SKU name ("Наименование артикула"), independent of article mode.
             if supplier_code and str(current_sku.get("name") or "").strip() != supplier_code:
                 sku_data["name"] = supplier_code
 
-            # Switching the profile mode only migrates articles that were
-            # clearly managed by this importer (supplier-code or numeric SKU ID).
-            # Historical unrelated article codes such as AF-* are preserved.
             if sku_mode == "numeric":
                 if current_code == desired_sku and numeric_code.isdigit():
                     sku_data["sku"] = numeric_code
@@ -852,39 +848,75 @@ def apply_plan(wa: WebasystClient, plan, config):
             sku_changed = bool(sku_data)
             if sku_data:
                 try:
-                    wa.call(
+                    client.call(
                         "shop.product.skus.update",
                         http_method="POST",
                         params={"id": str(row["sku_id"])},
                         data=sku_data,
                     )
                 except Exception as exc:
-                    if not _is_missing_webasyst_sku_error(exc):
-                        raise
-                    restore_missing_sku(row)
-                    continue
+                    if _is_missing_webasyst_sku_error(exc):
+                        return {"missing_sku": True}
+                    raise
+
             product_data = _product_write_data(desired, rules, web, creating=False)
             if (
                 str(current_product.get("status") or "0") == "0"
                 and str(current_sku.get("sku") or "").strip() == str(row.get("supplier_sku") or "").strip()
             ):
-                # A cancelled old apply may have created the card before it
-                # could finish/link it. Such engine-created cards are safe to
-                # publish on the next successful apply.
                 product_data["status"] = 1
             product_data = _delta_product_data(product_data, current_product)
             product_changed = bool(product_data)
             if product_data:
-                wa.call(
+                client.call(
                     "shop.product.update",
                     http_method="POST",
                     params={"id": str(row["product_id"])},
                     data=product_data,
                 )
-            if not sku_changed and not product_changed:
-                result["unchanged_updates"] += 1
-            result["updated"] += 1
-            add_mapping(row, row["product_id"], row["sku_id"])
+            return {
+                "missing_sku": False,
+                "unchanged": not sku_changed and not product_changed,
+            }
+
+        missing_updates = []
+        update_rows = list(plan["update"])
+        use_parallel_updates = isinstance(wa, WebasystClient) and len(update_rows) > 1
+        if use_parallel_updates:
+            def run_update(row):
+                return apply_update_row(row, WebasystClient())
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+                future_map = {pool.submit(run_update, row): row for row in update_rows}
+                done = 0
+                for future in concurrent.futures.as_completed(future_map):
+                    row = future_map[future]
+                    outcome = future.result()
+                    done += 1
+                    if outcome.get("missing_sku"):
+                        missing_updates.append(row)
+                    else:
+                        if outcome.get("unchanged"):
+                            result["unchanged_updates"] += 1
+                        result["updated"] += 1
+                        add_mapping(row, row["product_id"], row["sku_id"])
+                    if done % 250 == 0 or done == len(update_rows):
+                        print("Webasyst delta sync: %d/%d products" % (done, len(update_rows)), flush=True)
+        else:
+            for row in update_rows:
+                outcome = apply_update_row(row, wa)
+                if outcome.get("missing_sku"):
+                    missing_updates.append(row)
+                else:
+                    if outcome.get("unchanged"):
+                        result["unchanged_updates"] += 1
+                    result["updated"] += 1
+                    add_mapping(row, row["product_id"], row["sku_id"])
+
+        # Missing/deleted SKU recovery remains serialized. It re-scans the
+        # current catalog before any create/relink action and must not race.
+        for row in missing_updates:
+            restore_missing_sku(row)
 
         for row in plan.get("repair_sku", []):
             restore_missing_sku(row)
