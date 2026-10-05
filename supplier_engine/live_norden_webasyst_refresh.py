@@ -115,6 +115,7 @@ def _load_type_and_stocks(wa, type_name):
 
 def _load_products(wa, type_id):
     out = []
+    seen_product_ids = set()
     offset = 0
     while True:
         payload = wa.call(
@@ -127,7 +128,13 @@ def _load_products(wa, type_id):
             },
         )
         rows = _listify(payload, ("products", "items"))
-        out.extend(rows)
+        for row in rows:
+            product_id = _s(row.get("id"))
+            if product_id and product_id in seen_product_ids:
+                continue
+            if product_id:
+                seen_product_ids.add(product_id)
+            out.append(row)
         if len(rows) < 1000:
             break
         offset += len(rows)
