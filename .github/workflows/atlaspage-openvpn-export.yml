@@ -282,7 +282,7 @@ jobs:
           });
           NODE
 
-          node /tmp/export-openvpn.js
+          NODE_PATH="$(npm root)" node /tmp/export-openvpn.js
 
       - name: Pack and encrypt configs for private transfer
         shell: bash
