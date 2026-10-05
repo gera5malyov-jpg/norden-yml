@@ -105,9 +105,24 @@ jobs:
               });
               await sleep(1200);
 
-              const openVpnSelected = await clickExactText(page, /^OpenVPN$/i);
-              if (!openVpnSelected) throw new Error('OpenVPN protocol tab not found');
-              await sleep(1200);
+              console.log('CONNECT_URL:', page.url());
+              const connectControls = await page.locator('button:visible, [role="button"]:visible, [role="tab"]:visible, a:visible').allTextContents().catch(() => []);
+              console.log('CONNECT_CONTROLS:', JSON.stringify(connectControls.map(clean).filter(Boolean).slice(0, 120)));
+
+              let openVpnSelected = await clickExactText(page, /^OpenVPN$/i);
+              if (!openVpnSelected) {
+                const anyOpenVpn = page.locator('text=OpenVPN').first();
+                if (await anyOpenVpn.isVisible({ timeout: 2500 }).catch(() => false)) {
+                  await anyOpenVpn.click({ timeout: 4000 });
+                  openVpnSelected = true;
+                }
+              }
+              if (!openVpnSelected) {
+                const bodySample = clean(await page.locator('body').innerText().catch(() => '')).slice(0, 1600);
+                console.log('CONNECT_BODY_SAMPLE:', bodySample);
+                throw new Error('OpenVPN protocol tab not found');
+              }
+              await sleep(1500);
 
               // Server rows are normally links. Keep only rows that contain an OpenVPN badge
               // and lead to another /lk/connect page.
