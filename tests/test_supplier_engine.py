@@ -1551,7 +1551,8 @@ def test_kit_characteristics_write_new_and_legacy_supplier_identity():
             return {"id": "auto-%d" % self._seq, "title": title}
 
     rows = []
-    index = {}
+    from collections import defaultdict
+    index = defaultdict(list)
     result = _kit_characteristics(
         FakeKit(),
         [{"code": "series", "name": "Серия", "values": ["Prizma"]}],
