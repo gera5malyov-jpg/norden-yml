@@ -1,0 +1,50 @@
+name: Cleanup Norden temp SSH key once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cleanup-norden-temp-ssh-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - name: Delete exact temporary diagnostic SSH key
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.parse, urllib.request
+          api_key=os.environ['NETANGELS_API_KEY'].strip()
+          vm_id=44780
+          target='chatgpt-read-norden-config-37345479180'
+          def req(url,method='GET',data=None,headers=None):
+              r=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(r,timeout=30) as x:
+                  raw=x.read().decode('utf-8')
+                  return json.loads(raw) if raw else {}
+          token=req(
+              'https://panel.netangels.ru/api/gateway/token/',
+              'POST',
+              urllib.parse.urlencode({'api_key':api_key}).encode(),
+              {'Content-Type':'application/x-www-form-urlencoded','User-Agent':'norden-key-cleanup/1.0'}
+          )['token']
+          headers={'Authorization':'Bearer '+token,'Accept':'application/json','Content-Type':'application/json','User-Agent':'norden-key-cleanup/1.0'}
+          payload=req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{vm_id}/ssh/',headers=headers)
+          rows=payload if isinstance(payload,list) else payload.get('results') or payload.get('items') or []
+          found=[]
+          for row in rows:
+              if isinstance(row,dict) and row.get('name')==target:
+                  found.append(row)
+          for row in found:
+              key_id=row.get('id')
+              if key_id is None:
+                  continue
+              req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{vm_id}/ssh/{key_id}/','DELETE',None,headers)
+          print(json.dumps({'target':target,'found':len(found),'deleted':len(found)},ensure_ascii=False))
+          PY
