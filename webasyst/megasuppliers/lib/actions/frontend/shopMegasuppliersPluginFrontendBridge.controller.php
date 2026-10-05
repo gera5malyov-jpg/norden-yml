@@ -78,6 +78,14 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
             $this->kitManifest($supplier_id, $payload);
             return;
         }
+        if ($action === 'kit_result') {
+            if ((string)ifset($pending['mode']) !== 'apply') {
+                $this->fail('apply_request_required', 409);
+                return;
+            }
+            $this->saveKitResult($status_path, $pending, ifset($payload['report'], array()));
+            return;
+        }
         if ($action === 'sync_links') {
             if ((string)ifset($pending['mode']) !== 'apply') {
                 $this->fail('apply_request_required', 409);
@@ -370,6 +378,28 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
         };
         $append($value);
         return $out;
+    }
+
+
+    private function saveKitResult($status_path, array $pending, $report)
+    {
+        if (!is_array($report)) {
+            $this->fail('invalid_kit_report', 422);
+            return;
+        }
+        $encoded = json_encode($report, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+        if ($encoded === false || strlen($encoded) > 200000) {
+            $this->fail('kit_report_too_large', 413);
+            return;
+        }
+        $pending['kit'] = $report;
+        $pending['kit_updated_at'] = date('c');
+        $json = json_encode($pending, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+        if ($json === false || waFiles::write($status_path, $json) === false) {
+            $this->fail('kit_status_write_failed', 500);
+            return;
+        }
+        $this->response = array('status' => 'ok', 'saved' => true);
     }
 
     private function syncLinks($supplier_id, $items)
