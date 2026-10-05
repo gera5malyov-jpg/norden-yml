@@ -7,6 +7,7 @@ from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source, _characteristic_names_for_plan, _unique_image_aliases
 from supplier_engine import norden
+from supplier_engine.kit_sync import sync_manifest, _price_pair, _webasyst_category_paths
 from supplier_engine.bridge import MegasuppliersBridge
 from supplier_engine.validators import validate_run
 from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan, webasyst_sku_mode
@@ -1177,3 +1178,177 @@ def test_create_starts_with_supplier_identity_before_numeric_finalize():
     final_call = [x for x in wa.calls if x["method"] == "shop.product.skus.update"][-1]
     assert final_call["data"]["sku"] == "202"
     assert final_call["data"]["name"] == "NS01025-03-01"
+
+
+
+class _FakeKitForSupplierExport:
+    def __init__(self):
+        self.created_categories = []
+        self.created_products = []
+        self.created_variants = []
+        self.patched_products = []
+        self.patched_variants = []
+        self.files = {}
+        self._cat_seq = 10
+        self._char_seq = 20
+
+    def warehouses(self):
+        return [
+            {"id": "w-msk", "title": "МСК"},
+            {"id": "w-spb", "title": "СПБ привозной"},
+        ]
+
+    def categories(self):
+        return []
+
+    def characteristics(self):
+        return []
+
+    def variants(self):
+        return []
+
+    def create_category(self, title, parent_id=None):
+        self._cat_seq += 1
+        row = {"id": "c%d" % self._cat_seq, "title": title, "parent_id": parent_id}
+        self.created_categories.append(row)
+        return row
+
+    def create_characteristic(self, title):
+        self._char_seq += 1
+        return {"id": "f%d" % self._char_seq, "title": title}
+
+    def create_product(self, category_ids):
+        row = {"id": "p-kit", "category_ids": list(category_ids)}
+        self.created_products.append(row)
+        return row
+
+    def patch_product(self, product_id, category_ids):
+        self.patched_products.append((product_id, list(category_ids)))
+        return {}
+
+    def create_variant(self, body):
+        self.created_variants.append(dict(body))
+        return {"id": "v-kit", "product_id": body["product_id"]}
+
+    def patch_variant(self, variant_id, body):
+        self.patched_variants.append((variant_id, dict(body)))
+        return {}
+
+    def get_variant(self, variant_id):
+        media = []
+        for fid in sorted(self.files):
+            media.append({"type": "IMAGE", "display_sequence": len(media), "image_id": fid})
+        return {
+            "id": variant_id,
+            "product_id": "p-kit",
+            "sku": "12345",
+            "kit_id": "987654",
+            "media": media,
+        }
+
+    def upload_image_url(self, url):
+        fid = "img%d" % (len(self.files) + 1)
+        self.files[fid] = url
+        return {"id": fid}
+
+    def file_url(self, file_id):
+        return "https://kit.example/%s.jpg" % file_id
+
+
+class _FakeWaForKit:
+    def __init__(self):
+        self.calls = []
+
+    def call(self, method, *, http_method="GET", params=None, data=None):
+        self.calls.append({
+            "method": method,
+            "http_method": http_method,
+            "params": params,
+            "data": data,
+        })
+        return {}
+
+
+def test_kit_export_uses_webasyst_categories_and_user_prices():
+    kit = _FakeKitForSupplierExport()
+    wa = _FakeWaForKit()
+    manifest = {
+        "categories": [
+            {"id": 1, "name": "Мебель", "parent_id": 0},
+            {"id": 2, "name": "Кресла", "parent_id": 1},
+        ],
+        "items": [
+            {
+                "supplier_sku": "NS-1",
+                "product_id": 101,
+                "sku_id": 201,
+                "sku": "12345",
+                "name": "Кресло",
+                "description": "Описание",
+                "status": 1,
+                "purchase_price": 1000,
+                "stock": 7,
+                "category_ids": [2],
+                "features": [
+                    {"code": "series", "name": "Серия", "values": ["Prizma"]},
+                    {"code": "kit_id", "name": "KIT ID", "values": []},
+                ],
+                "image_urls": ["https://supplier.example/1.jpg"],
+            },
+            {
+                "supplier_sku": "NS-2",
+                "product_id": 102,
+                "sku_id": 202,
+                "sku": "12346",
+                "name": "Без категории",
+                "purchase_price": 500,
+                "stock": 2,
+                "category_ids": [],
+                "features": [],
+                "image_urls": [],
+            },
+        ],
+    }
+    report = sync_manifest(
+        manifest,
+        {
+            "identity": {"brand": "Norden"},
+            "rules": {"export_to_kit": True},
+        },
+        kit=kit,
+        wa=wa,
+    )
+    assert report["status"] == "ok"
+    assert report["eligible"] == 1
+    assert report["skipped_no_category"] == 1
+    assert report["created"] == 1
+    assert [x["title"] for x in kit.created_categories] == ["Мебель", "Кресла"]
+    assert kit.created_products[0]["category_ids"] == ["c12"]
+    body = kit.created_variants[0]
+    assert body["pricing"] == {"price": "1600.00", "manual_discount_price": "1250.00"}
+    assert body["stocks"] == [
+        {"warehouse_id": "w-msk", "quantity": 7, "reserved": 0},
+        {"warehouse_id": "w-spb", "quantity": 7, "reserved": 0},
+    ]
+    update = next(x for x in wa.calls if x["method"] == "shop.product.update")
+    assert update["data"]["features"]["kit_id"] == "987654"
+    assert "https://kit.example/img1.jpg" in update["data"]["summary"]
+
+
+def test_kit_export_preserves_multiple_webasyst_categories():
+    paths = _webasyst_category_paths(
+        [
+            {"id": 1, "name": "Мебель", "parent_id": 0},
+            {"id": 2, "name": "Офис", "parent_id": 1},
+            {"id": 3, "name": "Распродажа", "parent_id": 0},
+        ],
+        [2, 3],
+    )
+    assert paths == [["Мебель", "Офис"], ["Распродажа"]]
+
+
+def test_kit_prices_follow_current_25_60_rule():
+    assert _price_pair(1000) == {
+        "price": "1600.00",
+        "manual_discount_price": "1250.00",
+    }
