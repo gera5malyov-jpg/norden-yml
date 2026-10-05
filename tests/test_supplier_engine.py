@@ -1524,3 +1524,84 @@ def test_existing_kit_media_is_reused_without_duplicate_uploads():
     assert report["updated"] == 1
     assert report["images_uploaded"] == 0
     assert kit.files == {}
+
+
+
+def test_unrelated_conflicting_kit_identity_does_not_block_norden_preflight():
+    class HistoricalKit(_FakeKitForSupplierExport):
+        def characteristics(self):
+            return [
+                {"id": "f-supplier", "title": "Артикул поставщика"},
+                {"id": "f-legacy", "title": "Код для сайта"},
+            ]
+
+        def variants(self):
+            return [{
+                "id": "v-broken-other-brand",
+                "kit_id": "555",
+                "sku": "OTHER-1",
+                "brand": "BRAUBERG",
+                "product_id": "p-other",
+                "characteristics": [
+                    {"characteristic_id": "f-supplier", "value": "320854", "values": ["320854"]},
+                    {"characteristic_id": "f-legacy", "value": "334-320854", "values": ["334-320854"]},
+                ],
+            }]
+
+    manifest = {
+        "categories": [{"id": 1, "name": "Кресла", "parent_id": 0}],
+        "items": [{
+            "supplier_sku": "NS-NEW",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "AF-NEW",
+            "name": "Кресло",
+            "purchase_price": 1000,
+            "stock": 3,
+            "category_ids": [1],
+            "features": [],
+            "image_urls": [],
+        }],
+    }
+    report = plan_manifest(
+        manifest,
+        {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+        kit=HistoricalKit(),
+    )
+    assert report["status"] == "ok"
+    assert report["preflight"]["conflicts"] == 0
+    assert report["would_create"] == 1
+
+
+def test_duplicate_existing_kit_characteristics_are_reused_without_new_duplicate():
+    class DuplicateCharacteristicKit(_FakeKitForSupplierExport):
+        def characteristics(self):
+            return [
+                {"id": "f-supplier", "title": "Артикул поставщика"},
+                {"id": "10", "title": "Вес, кг"},
+                {"id": "11", "title": "Вес, кг"},
+            ]
+
+    manifest = {
+        "categories": [{"id": 1, "name": "Кресла", "parent_id": 0}],
+        "items": [{
+            "supplier_sku": "NS-NEW",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "AF-NEW",
+            "name": "Кресло",
+            "purchase_price": 1000,
+            "stock": 3,
+            "category_ids": [1],
+            "features": [{"code": "weight", "name": "Вес, кг", "values": ["12"]}],
+            "image_urls": [],
+        }],
+    }
+    report = plan_manifest(
+        manifest,
+        {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+        kit=DuplicateCharacteristicKit(),
+    )
+    assert report["status"] == "ok"
+    assert "Вес, кг" not in report["missing_characteristics"]
+    assert not any(error.get("characteristic") == "Вес, кг" for error in report["errors"])
