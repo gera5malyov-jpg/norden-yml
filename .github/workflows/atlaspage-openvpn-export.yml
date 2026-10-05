@@ -224,52 +224,22 @@ jobs:
               );
               console.log('OPENVPN_CLICKABLES:', JSON.stringify(clickableSummary.slice(0, 160)));
 
-              // Server rows are normally links. Keep only rows that contain an OpenVPN badge
-              // and lead to another /lk/connect page.
-              const anchors = await page.locator('a[href]').evaluateAll(nodes =>
-                nodes.map(a => ({
-                  text: (a.innerText || '').replace(/\s+/g, ' ').trim(),
-                  href: a.href || '',
-                  visible: !!(a.offsetWidth || a.offsetHeight || a.getClientRects().length)
-                }))
-              );
-
-              let servers = anchors.filter(x =>
-                x.visible &&
-                /OpenVPN/i.test(x.text) &&
-                x.text.toLowerCase() !== 'openvpn' &&
-                /\/lk\/connect/i.test(x.href)
-              );
-
-              // Fallback: some versions wrap the row in a link whose text omits the badge.
-              if (!servers.length) {
-                const candidateHrefs = await page.locator('a[href*="/lk/connect"]').evaluateAll(nodes =>
-                  nodes.map(a => ({
-                    text: (a.innerText || '').replace(/\s+/g, ' ').trim(),
-                    href: a.href || '',
-                    visible: !!(a.offsetWidth || a.offsetHeight || a.getClientRects().length)
-                  }))
-                );
-                servers = candidateHrefs.filter(x =>
-                  x.visible &&
-                  x.text.length > 2 &&
-                  !/^(VLESS|WireGuard|OpenVPN|Shadowsocks|SSTP)$/i.test(x.text)
-                );
+              const serverRows = page.locator('button[class*="serverItemClickable"]');
+              const serverCount = await serverRows.count();
+              const serverLabels = [];
+              for (let i = 0; i < serverCount; i++) {
+                serverLabels.push(clean(await serverRows.nth(i).innerText().catch(() => '')));
               }
 
-              const uniq = new Map();
-              for (const s of servers) if (!uniq.has(s.href)) uniq.set(s.href, s);
-              servers = [...uniq.values()];
+              console.log('OPENVPN_SERVER_ROWS:', serverCount);
+              console.log('OPENVPN_SERVERS:', JSON.stringify(serverLabels.map(s => s.slice(0, 160))));
 
-              console.log('OPENVPN_SERVER_ROWS:', servers.length);
-              console.log('OPENVPN_SERVERS:', JSON.stringify(servers.map(s => clean(s.text).slice(0, 160))));
-
-              if (!servers.length) throw new Error('No OpenVPN server rows discovered');
+              if (!serverCount) throw new Error('No OpenVPN server buttons discovered');
 
               let saved = 0;
               const seenHashes = new Set();
 
-              async function saveConfig(buffer, label, suggested) {
+              async function saveConfig(buffer, label) {
                 if (!buffer || !buffer.length) return false;
                 const txt = buffer.toString('utf8');
                 if (!/(^|\n)client(\r?\n|$)/m.test(txt) || !/(^|\n)remote\s+/m.test(txt)) return false;
@@ -279,10 +249,11 @@ jobs:
                 if (seenHashes.has(hash)) return false;
                 seenHashes.add(hash);
 
-                let filename = suggested && /\.ovpn$/i.test(suggested)
-                  ? suggested
-                  : safeName(label) + '.ovpn';
-                filename = filename.replace(/[\\/:*?"<>|]+/g, '_');
+                const tidyLabel = clean(label)
+                  .replace(/OpenVPN/ig, '')
+                  .replace(/\b\d+\s*Мбит\/с\b/ig, '')
+                  .trim();
+                const filename = safeName(tidyLabel) + '.ovpn';
                 let target = path.join(outDir, filename);
                 let n = 2;
                 while (fs.existsSync(target)) {
@@ -294,12 +265,11 @@ jobs:
                 return true;
               }
 
-              for (let i = 0; i < servers.length; i++) {
-                const s = servers[i];
-                const label = clean(s.text).replace(/OpenVPN/ig, '').trim() || ('server_' + (i + 1));
-                console.log('SERVER_BEGIN:', i + 1, '/', servers.length, label.slice(0, 150));
+              for (let i = 0; i < serverCount; i++) {
+                const row = serverRows.nth(i);
+                const label = serverLabels[i] || ('server_' + (i + 1));
+                console.log('SERVER_BEGIN:', i + 1, '/', serverCount, label.slice(0, 150));
 
-                const detail = await context.newPage();
                 let captured = false;
 
                 const responseHandler = async (resp) => {
@@ -311,68 +281,54 @@ jobs:
                     const cd = (headers['content-disposition'] || '').toLowerCase();
                     if (!(/openvpn|octet-stream|text\/plain/.test(ct) || /attachment|\.ovpn/.test(cd) || /\.ovpn(?:\?|$)/i.test(resp.url()))) return;
                     const body = await resp.body();
-                    if (await saveConfig(body, label, null)) captured = true;
+                    if (await saveConfig(body, label)) captured = true;
                   } catch (_) {}
                 };
-                detail.on('response', responseHandler);
+
+                page.on('response', responseHandler);
 
                 try {
-                  await detail.goto(s.href, { waitUntil: 'domcontentloaded', timeout: 45000 });
-                  await sleep(900);
+                  await row.scrollIntoViewIfNeeded().catch(() => {});
+                  await row.click({ timeout: 5000 });
+                  await sleep(700);
 
-                  // Direct .ovpn/config links first.
-                  const links = await detail.locator('a[href]').evaluateAll(nodes =>
-                    nodes.map(a => ({
-                      text: (a.innerText || '').replace(/\s+/g, ' ').trim(),
-                      href: a.href || '',
-                      download: a.getAttribute('download') || ''
-                    }))
-                  );
+                  let downloadControl = null;
+                  const candidates = [
+                    page.getByRole('button', { name: /скачать\s*\.?ovpn/i }).first(),
+                    page.getByRole('link', { name: /скачать\s*\.?ovpn/i }).first(),
+                    page.locator('button, a, [role="button"]').filter({ hasText: /скачать.*ovpn/i }).first()
+                  ];
 
-                  for (const l of links) {
-                    if (captured) break;
-                    if (!(/\.ovpn(?:\?|$)/i.test(l.href) || /скач|download|конфиг|config|ovpn/i.test(l.text))) continue;
-                    try {
-                      const resp = await context.request.get(l.href, { timeout: 30000 });
-                      if (resp.ok()) {
-                        const body = await resp.body();
-                        if (await saveConfig(body, label, l.download || null)) {
-                          captured = true;
-                          break;
-                        }
-                      }
-                    } catch (_) {}
-                  }
-
-                  // Buttons / download links that trigger a browser download.
-                  if (!captured) {
-                    const ctrls = detail.locator('button:visible, a:visible, [role="button"]:visible');
-                    const n = await ctrls.count();
-                    for (let j = 0; j < n && !captured; j++) {
-                      const el = ctrls.nth(j);
-                      const txt = clean(await el.innerText().catch(() => ''));
-                      if (!/скач|download|конфиг|config|ovpn/i.test(txt)) continue;
-                      try {
-                        const dlPromise = detail.waitForEvent('download', { timeout: 7000 });
-                        await el.click({ timeout: 4000 });
-                        const dl = await dlPromise;
-                        const tmp = await dl.path();
-                        if (tmp) {
-                          const body = fs.readFileSync(tmp);
-                          if (await saveConfig(body, label, dl.suggestedFilename())) captured = true;
-                        }
-                      } catch (_) {
-                        await sleep(500);
-                      }
+                  for (const candidate of candidates) {
+                    if (await candidate.isVisible({ timeout: 700 }).catch(() => false)) {
+                      downloadControl = candidate;
+                      break;
                     }
                   }
 
-                  // Last fallback: config rendered as text/pre/code.
+                  if (!downloadControl) {
+                    const afterSelect = await page.locator('button:visible, a:visible, [role="button"]:visible').allTextContents().catch(() => []);
+                    console.log('DOWNLOAD_CONTROLS_NOT_FOUND:', JSON.stringify(afterSelect.map(clean).filter(Boolean).slice(-60)));
+                  } else {
+                    const dlPromise = page.waitForEvent('download', { timeout: 9000 }).catch(() => null);
+                    await downloadControl.click({ timeout: 5000 });
+                    const dl = await dlPromise;
+
+                    if (dl) {
+                      const tmp = await dl.path();
+                      if (tmp) {
+                        const body = fs.readFileSync(tmp);
+                        if (await saveConfig(body, label)) captured = true;
+                      }
+                    }
+
+                    await sleep(1200);
+                  }
+
                   if (!captured) {
-                    const texts = await detail.locator('pre, code, textarea').allTextContents().catch(() => []);
+                    const texts = await page.locator('pre, code, textarea').allTextContents().catch(() => []);
                     for (const t of texts) {
-                      const b = Buffer.from(t, 'utf8');
-                      if (await saveConfig(b, label, null)) {
+                      if (await saveConfig(Buffer.from(t, 'utf8'), label)) {
                         captured = true;
                         break;
                       }
@@ -381,8 +337,7 @@ jobs:
 
                   console.log('SERVER_RESULT:', captured ? 'downloaded' : 'not-found', label.slice(0, 150));
                 } finally {
-                  detail.off('response', responseHandler);
-                  await detail.close();
+                  page.off('response', responseHandler);
                 }
               }
 
