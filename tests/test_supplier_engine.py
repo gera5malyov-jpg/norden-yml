@@ -1434,6 +1434,33 @@ def test_kit_apply_uses_targeted_variant_lookup():
 
 
 
+
+def test_kit_secondary_supplier_lookup_skips_broad_terms():
+    class TargetedKit(_FakeKitForSupplierExport):
+        def __init__(self):
+            super().__init__()
+            self.calls = []
+
+        def search_variants_parallel(self, names, workers=6, skip_broad=False):
+            self.calls.append({
+                "names": list(names),
+                "skip_broad": skip_broad,
+            })
+            return []
+
+    from supplier_engine.kit_sync import _kit_variants
+    kit = TargetedKit()
+    products = [{
+        "sku": "AF-NEW",
+        "supplier_sku": "Комплект №2",
+    }]
+    rows = _kit_variants(kit, products)
+    assert rows == []
+    assert kit.calls[0] == {"names": ["AF-NEW"], "skip_broad": False}
+    assert kit.calls[1] == {"names": ["Комплект №2"], "skip_broad": True}
+
+
+
 def test_kit_export_preserves_multiple_webasyst_categories():
     paths = _webasyst_category_paths(
         [
