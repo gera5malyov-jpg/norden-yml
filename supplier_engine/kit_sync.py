@@ -578,6 +578,167 @@ def _set_webasyst_kit_data(wa, product, kit_id, image_urls):
         _verify_unrelated_features(before, after)
 
 
+
+def _plan_category_paths(categories, paths):
+    index = _category_index(categories)
+    missing = []
+    required = []
+    for path in paths:
+        parent = ""
+        normalized_path = []
+        for title in path:
+            title = _s(title)
+            if not title:
+                continue
+            normalized_path.append(title)
+            key = (parent, _norm(title))
+            matches = index.get(key, [])
+            if len(matches) > 1:
+                raise KitSyncError("KIT category is ambiguous: %s" % " > ".join(normalized_path))
+            if matches:
+                row = matches[0]
+            else:
+                virtual_id = "__planned__:" + "/".join(_norm(x) for x in normalized_path)
+                row = {"id": virtual_id, "title": title, "parent_id": parent}
+                index[key].append(row)
+                missing.append(" > ".join(normalized_path))
+            parent = _s(row.get("id"))
+        if normalized_path:
+            label = " > ".join(normalized_path)
+            if label not in required:
+                required.append(label)
+    return required, list(dict.fromkeys(missing))
+
+
+def plan_manifest(manifest, config, *, kit=None):
+    """Read-only KIT preflight. It never creates, patches, uploads or writes Webasyst."""
+    rules = config.get("rules") or {}
+    if not rules.get("export_to_kit", False):
+        return {
+            "status": "disabled",
+            "readonly": True,
+            "eligible": 0,
+            "skipped_no_category": 0,
+            "items": [],
+        }
+
+    kit = kit or KitClient()
+    brand = _s((config.get("identity") or {}).get("brand"))
+    products = [row for row in (manifest.get("items") or []) if isinstance(row, dict)]
+    wa_categories = [row for row in (manifest.get("categories") or []) if isinstance(row, dict)]
+    eligible = [row for row in products if row.get("category_ids")]
+
+    report = {
+        "status": "ok",
+        "readonly": True,
+        "eligible": len(eligible),
+        "skipped_no_category": len(products) - len(eligible),
+        "required_category_paths": [],
+        "missing_category_paths": [],
+        "missing_characteristics": [],
+        "would_create": 0,
+        "would_update": 0,
+        "would_upload_images": 0,
+        "errors": [],
+        "items": [],
+    }
+    if not eligible:
+        return report
+
+    # All calls below are GET/read-only methods.
+    _warehouse_ids(kit)
+    kit_categories = kit.categories()
+    kit_characteristics = kit.characteristics()
+    characteristic_index = _characteristic_index(kit_characteristics)
+    variants = _kit_variants(kit)
+
+    preflight, identity = _identity_preflight(
+        eligible,
+        variants,
+        characteristic_index,
+        brand,
+    )
+    report["preflight"] = preflight
+    if preflight.get("status") != "ok":
+        report["status"] = "blocked"
+        report["errors"] = list(preflight.get("conflict_sample") or [])
+
+    all_paths = []
+    for product in eligible:
+        paths = _webasyst_category_paths(wa_categories, product.get("category_ids"))
+        if not paths:
+            report["errors"].append({
+                "product_id": product.get("product_id"),
+                "supplier_sku": product.get("supplier_sku"),
+                "error": "Webasyst category path cannot be resolved",
+            })
+            continue
+        all_paths.extend(paths)
+    try:
+        required, missing = _plan_category_paths(kit_categories, all_paths)
+        report["required_category_paths"] = required
+        report["missing_category_paths"] = missing
+    except Exception as exc:
+        report["status"] = "blocked"
+        report["errors"].append({"error": str(exc)[:1200]})
+
+    wanted_characteristics = {SUPPLIER_ARTICLE_CHARACTERISTIC}
+    for product in eligible:
+        for title, values in _feature_values(product.get("features")):
+            if values and _norm(title) not in {
+                _norm(SUPPLIER_ARTICLE_CHARACTERISTIC),
+                _norm(LEGACY_CODE_SITE_CHARACTERISTIC),
+            }:
+                wanted_characteristics.add(title)
+    for title in sorted(wanted_characteristics):
+        try:
+            cid = _single_characteristic_id(characteristic_index, title)
+        except Exception as exc:
+            report["status"] = "blocked"
+            report["errors"].append({"characteristic": title, "error": str(exc)[:1200]})
+            continue
+        if not cid:
+            report["missing_characteristics"].append(title)
+
+    selected = identity.get("selected", {}) if identity else {}
+    for product in eligible:
+        key = str(product.get("product_id") or product.get("sku_id") or product.get("supplier_sku") or "")
+        variant = selected.get(key) if identity else None
+        action = "blocked" if preflight.get("status") != "ok" else ("create" if variant is None else "update")
+        if action == "create":
+            report["would_create"] += 1
+        elif action == "update":
+            report["would_update"] += 1
+
+        source_images = list(dict.fromkeys(
+            _s(url) for url in (product.get("image_urls") or []) if _s(url)
+        ))[:20]
+        current_media = []
+        if isinstance(variant, dict):
+            current_media = [
+                row for row in (variant.get("media") or [])
+                if isinstance(row, dict) and _s(row.get("type")).upper() == "IMAGE"
+            ]
+        image_uploads = len(source_images) if source_images and not current_media else 0
+        report["would_upload_images"] += image_uploads
+        paths = _webasyst_category_paths(wa_categories, product.get("category_ids"))
+        report["items"].append({
+            "product_id": product.get("product_id"),
+            "supplier_sku": product.get("supplier_sku"),
+            "webasyst_sku": product.get("sku"),
+            "name": product.get("name"),
+            "action": action,
+            "kit_id": _s(variant.get("kit_id")) if isinstance(variant, dict) else "",
+            "categories": [" > ".join(path) for path in paths],
+            "source_images": len(source_images),
+            "image_uploads": image_uploads,
+        })
+
+    if report["errors"] and report["status"] == "ok":
+        report["status"] = "blocked"
+    return report
+
+
 def sync_manifest(manifest, config, *, kit=None, wa=None):
     rules = config.get("rules") or {}
     if not rules.get("export_to_kit", False):
