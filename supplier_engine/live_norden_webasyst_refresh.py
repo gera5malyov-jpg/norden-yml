@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
+import threading
 import re
 import unicodedata
 from collections import defaultdict
@@ -239,6 +241,7 @@ def main():
     ap.add_argument("--type-name", default=TYPE_NAME)
     ap.add_argument("--mode", choices=("dry-run", "apply"), default="apply")
     ap.add_argument("--output", default="norden-webasyst-refresh.json")
+    ap.add_argument("--workers", type=int, default=3)
     args = ap.parse_args()
 
     payload = {
@@ -271,6 +274,7 @@ def main():
             "source": {
                 "origin": source_meta.get("origin"),
                 "fallback_used": bool(source_meta.get("fallback_used")),
+                "api_error": source_meta.get("api_error") or "",
                 "rows": len(source_rows),
             },
             "webasyst": {
@@ -306,31 +310,45 @@ def main():
         zeroed_missing = 0
         purchase_updated = 0
         errors = []
-        for row in items:
-            try:
-                wa.call(
-                    "shop.product.skus.update",
-                    http_method="POST",
-                    params={"id": row["sku_id"]},
-                    data=row["data"],
-                )
-                updated += 1
-                if row["source"] is None:
-                    zeroed_missing += 1
-                if row["data"].get("purchase_price"):
-                    purchase_updated += 1
-            except Exception as exc:
-                errors.append({
-                    "product_id": row["product_id"],
-                    "sku_id": row["sku_id"],
-                    "sku": row["sku"],
-                    "supplier_article": row["supplier_article"],
-                    "error": str(exc)[:1000],
-                })
-                if len(errors) >= 100:
-                    break
+        workers = max(1, min(4, int(args.workers or 1)))
+        local = threading.local()
+
+        def apply_one(row):
+            client = getattr(local, "wa", None)
+            if client is None:
+                client = WebasystClient(min_request_interval=0.45)
+                local.wa = client
+            client.call(
+                "shop.product.skus.update",
+                http_method="POST",
+                params={"id": row["sku_id"]},
+                data=row["data"],
+            )
+            return row
+
+        completed = 0
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = [pool.submit(apply_one, row) for row in items]
+            for future in concurrent.futures.as_completed(futures):
+                completed += 1
+                try:
+                    row = future.result()
+                    updated += 1
+                    if row["source"] is None:
+                        zeroed_missing += 1
+                    if row["data"].get("purchase_price"):
+                        purchase_updated += 1
+                except Exception as exc:
+                    errors.append({"error": str(exc)[:1000]})
+                if completed % 100 == 0 or completed == len(futures):
+                    print(
+                        "WEBASYST_NORDEN_REFRESH=%d/%d errors=%d"
+                        % (completed, len(futures), len(errors)),
+                        flush=True,
+                    )
 
         payload["apply"] = {
+            "workers": workers,
             "updated": updated,
             "purchase_updated": purchase_updated,
             "zeroed_missing": zeroed_missing,
