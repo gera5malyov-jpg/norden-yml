@@ -226,6 +226,84 @@ class KitClient:
             return r.json() if r.content else {}
         raise RuntimeError("KIT image upload retries exhausted")
 
+    def search_variants_parallel(self, names, workers=6, skip_broad=False):
+        terms = list(dict.fromkeys(str(x or "").strip() for x in names if str(x or "").strip()))
+        if not terms:
+            return []
+
+        def one(term):
+            headers = dict(self.headers)
+            out = []
+            page = 1
+            # Exact SKU/model searches should be tiny. Keep a hard cap so a
+            # malformed generic term can never turn this back into a deep scan.
+            while page <= 5:
+                last_error = None
+                for attempt in range(12):
+                    try:
+                        r = requests.get(
+                            KIT_BASE + "/v1/variants",
+                            headers=headers,
+                            params={"name": term, "page": page, "per_page": 100},
+                            timeout=120,
+                        )
+                        if r.status_code == 429:
+                            last_error = RuntimeError(
+                                f"KIT search {term!r} page {page}: HTTP 429"
+                            )
+                            time.sleep(float(r.headers.get("Retry-After") or min(15, 1 + attempt)))
+                            continue
+                        if r.status_code >= 500 or r.status_code == 400:
+                            last_error = RuntimeError(
+                                f"KIT search {term!r} page {page}: HTTP {r.status_code}"
+                            )
+                            time.sleep(min(15, 1 + attempt * 2))
+                            continue
+                        if r.status_code >= 400:
+                            raise RuntimeError(
+                                f"KIT search {term!r} page {page}: HTTP {r.status_code}"
+                            )
+                        data = r.json()
+                        batch = self.items(data)
+                        out.extend(x for x in batch if isinstance(x, dict))
+                        if len(batch) < 100:
+                            return term, out
+                        page += 1
+                        break
+                    except (requests.RequestException, ValueError) as exc:
+                        last_error = exc
+                        if attempt + 1 >= 12:
+                            break
+                        time.sleep(min(15, 1 + attempt * 2))
+                else:
+                    raise RuntimeError(f"KIT search {term!r}: retries exhausted: {last_error}")
+                if last_error is not None and page <= 5 and not out:
+                    raise RuntimeError(f"KIT search {term!r}: retries exhausted: {last_error}")
+            if skip_broad:
+                print(f"KIT targeted search: skip broad term {term!r} (>500 rows)", flush=True)
+                return term, []
+            raise RuntimeError(f"KIT search {term!r} returned more than 500 rows; refusing broad match")
+
+        rows = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = [pool.submit(one, term) for term in terms]
+            done = 0
+            for fut in concurrent.futures.as_completed(futures):
+                term, batch = fut.result()
+                done += 1
+                if done % 100 == 0 or done == len(futures):
+                    print(f"KIT targeted search: {done}/{len(futures)} terms", flush=True)
+                for row in batch:
+                    rid = str(row.get("id") or "").strip()
+                    key = rid or (
+                        str(row.get("kit_id") or "").strip()
+                        + "|"
+                        + str(row.get("sku") or "").strip()
+                    )
+                    if key:
+                        rows[key] = row
+        return list(rows.values())
+
     def scan_all_variants_parallel(self, workers=10):
         first = self.request("GET", "/v1/variants", params={"page": 1, "per_page": 100})
         rows = self.items(first)
@@ -257,6 +335,15 @@ class KitClient:
                     if r.status_code >= 500:
                         time.sleep(min(20, 2 ** attempt))
                         continue
+                    # KIT occasionally returns transient HTTP 400 for an
+                    # otherwise valid page during large read-only scans.
+                    # Retry it conservatively; auth/not-found errors still
+                    # fail immediately.
+                    if r.status_code == 400:
+                        last_error = RuntimeError(f"KIT scan page {page}: HTTP 400")
+                        if attempt + 1 < 16:
+                            time.sleep(min(20, 1 + attempt * 2))
+                            continue
                     if r.status_code >= 400:
                         raise RuntimeError(f"KIT scan page {page}: HTTP {r.status_code}")
                     data = r.json()

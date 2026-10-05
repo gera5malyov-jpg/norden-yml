@@ -185,7 +185,7 @@ def _unique_image_aliases(products):
 
 
 def _characteristic_names_for_plan(plan, rules):
-    rows = list(plan.get("create") or [])
+    rows = list(plan.get("create") or []) + list(plan.get("repair_sku") or [])
     if rules.get("update_characteristics", False):
         rows.extend(plan.get("update") or [])
     names = set()
@@ -199,6 +199,7 @@ def _characteristic_names_for_plan(plan, rules):
 def _plan_summary(plan):
     return {
         "create": len(plan.get("create") or []),
+        "repair_sku": len(plan.get("repair_sku") or []),
         "update": len(plan.get("update") or []),
         "zero_stock": len(plan.get("zero") or []),
         "skipped": len(plan.get("skipped") or []),
@@ -370,34 +371,19 @@ def main():
                     features_resolved = len(resolved)
                 result = apply_plan(wa, plan, config)
                 synced = bridge.sync_links(args.supplier_id, args.request_id, result.get("mappings") or [])
-                kit_result = None
-                if rules.get("export_to_kit", False):
-                    stock_id = (config.get("webasyst") or {}).get("stock_id")
-                    if not stock_id:
-                        raise ValueError("Для выгрузки в KIT не задан склад Webasyst.")
-                    manifest = bridge.kit_manifest(
-                        args.supplier_id,
-                        args.request_id,
-                        stock_id,
-                    )
-                    kit_result = sync_manifest(manifest, config, wa=wa)
                 payload["apply"] = {
                     "status": "ok",
                     "created": result["created"],
                     "updated": result["updated"],
                     "zeroed": result["zeroed"],
+                    "recovered_skus": result.get("recovered_skus", 0),
+                    "relinked_existing": result.get("relinked_existing", 0),
+                    "recreated_products": result.get("recreated_products", 0),
+                    "stale_zero_links": result.get("stale_zero_links", 0),
                     "links_synced": synced,
                     "features_resolved": features_resolved,
+                    "kit_export": "separate_job" if rules.get("export_to_kit", False) else "disabled",
                 }
-                if kit_result is not None:
-                    payload["apply"]["kit"] = kit_result
-                    if kit_result.get("errors"):
-                        payload["status"] = "failed"
-                        payload["blocked"] = True
-                        payload["errors"].append(
-                            "KIT: синхронизация завершилась с ошибками (%d)." % len(kit_result["errors"])
-                        )
-                        payload["apply"]["status"] = "partial_failure"
             except ApplyError as exc:
                 payload["status"] = "failed"
                 payload["blocked"] = True

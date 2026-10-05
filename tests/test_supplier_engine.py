@@ -7,7 +7,15 @@ from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source, _characteristic_names_for_plan, _unique_image_aliases
 from supplier_engine import norden
-from supplier_engine.kit_sync import sync_manifest, _price_pair, _webasyst_category_paths
+from supplier_engine.kit_sync import (
+    sync_manifest,
+    plan_manifest,
+    _price_pair,
+    _webasyst_category_paths,
+    _replace_extimg,
+    _identity_preflight,
+    SUPPLIER_ARTICLE_CHARACTERISTIC,
+)
 from supplier_engine.bridge import MegasuppliersBridge
 from supplier_engine.validators import validate_run
 from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan, webasyst_sku_mode
@@ -426,6 +434,52 @@ def test_build_plan_uses_supplier_link_when_webasyst_sku_differs():
     assert plan["blocked"] == []
 
 
+
+def test_build_plan_marks_deleted_link_for_sku_repair():
+    products = [Product("H-051", "H-051", "Chair", stock=4)]
+    plan = build_plan(
+        products,
+        {},
+        [{"supplier_sku": "H-051", "product_id": 999, "sku_id": 888}],
+        {
+            "create_new": True,
+            "only_create_in_stock": True,
+            "update_stock": True,
+            "zero_if_missing": False,
+        },
+    )
+    assert plan["blocked"] == []
+    assert plan["create"] == []
+    assert len(plan["repair_sku"]) == 1
+    assert plan["repair_sku"][0]["supplier_sku"] == "H-051"
+    assert plan["repair_sku"][0]["product_id"] == 999
+    assert plan["repair_sku"][0]["old_sku_id"] == 888
+
+
+def test_build_plan_relinks_when_supplier_article_moved_to_another_product():
+    products = [Product("H-051", "H-051", "Chair", stock=4)]
+    existing = {
+        "H-051": [(
+            {"id": 777, "name": "Moved card"},
+            {"id": 778, "sku": "AF-NEW", "name": "H-051"},
+        )],
+    }
+    plan = build_plan(
+        products,
+        existing,
+        [{"supplier_sku": "H-051", "product_id": 999, "sku_id": 888}],
+        {
+            "create_new": True,
+            "update_stock": True,
+            "zero_if_missing": False,
+        },
+    )
+    assert plan["repair_sku"] == []
+    assert len(plan["update"]) == 1
+    assert plan["update"][0]["product_id"] == 777
+    assert plan["update"][0]["sku_id"] == 778
+
+
 def test_build_plan_blocks_mass_zero_when_supplier_links_do_not_overlap():
     products = [Product("H-051", "H-051", "Chair", stock=4)]
     existing = {}
@@ -511,6 +565,167 @@ def test_apply_plan_updates_existing_prices_and_stock():
     assert sku_call["data"]["compare_price"] == "160"
     assert sku_call["data"]["purchase_price"] == "100"
     assert sku_call["data"]["stock"] == {"1": "3"}
+
+
+
+def test_apply_plan_recovers_missing_webasyst_modification_in_original_product():
+    class MissingOne(_FakeWebasyst):
+        def call(self, method, *, http_method="GET", params=None, data=None, files=None):
+            params = params or {}
+            if method == "shop.product.skus.update" and str(params.get("id")) == "21":
+                raise RuntimeError(
+                    'HTTP 404: {"error":"invalid_param","error_description":"Модификация товара не найдена."}'
+                )
+            if method == "shop.product.search":
+                return {"products": []}
+            if method == "shop.product.getInfo" and str(params.get("id")) == "11":
+                return {"id": 11, "name": "Original card"}
+            if method == "shop.product.skus.add" and str(params.get("product_id")) == "11":
+                self.calls.append({
+                    "method": method,
+                    "http_method": http_method,
+                    "params": params,
+                    "data": data or {},
+                })
+                return {"id": 55}
+            return super().call(
+                method,
+                http_method=http_method,
+                params=params,
+                data=data,
+                files=files,
+            )
+
+    desired = {
+        "supplier_sku": "X",
+        "sku": "X",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "",
+        "category": "",
+        "images": [],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [],
+        "repair_sku": [],
+        "update": [
+            {
+                "sku": "X-1",
+                "supplier_sku": "X-1",
+                "product_id": 11,
+                "sku_id": 21,
+                "current_product": {"id": 11, "status": 1},
+                "current_sku": {"id": 21, "sku": "AF-1", "name": "X-1"},
+                "desired": dict(desired, supplier_sku="X-1", sku="X-1"),
+            },
+            {
+                "sku": "X-2",
+                "supplier_sku": "X-2",
+                "product_id": 12,
+                "sku_id": 22,
+                "current_product": {"id": 12, "status": 1},
+                "current_sku": {"id": 22, "sku": "AF-2", "name": "X-2"},
+                "desired": dict(desired, supplier_sku="X-2", sku="X-2"),
+            },
+        ],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    wa = MissingOne()
+    result = apply_plan(
+        wa,
+        plan,
+        {
+            "source": {"format": "norden"},
+            "rules": {
+                "update_prices": True,
+                "update_stock": True,
+                "update_name": False,
+                "update_images": False,
+                "update_characteristics": False,
+            },
+            "webasyst": {"stock_id": 66, "type_id": 142},
+        },
+    )
+    assert result["updated"] == 1
+    assert result["recovered_skus"] == 1
+    assert result["relinked_existing"] == 0
+    assert [row["sku_id"] for row in result["mappings"]] == [55, 22]
+    add_call = next(x for x in wa.calls if x["method"] == "shop.product.skus.add")
+    assert add_call["params"]["product_id"] == "11"
+    final_call = [x for x in wa.calls if x["method"] == "shop.product.skus.update" and str(x["params"].get("id")) == "55"][-1]
+    assert final_call["data"]["sku"] == "55"
+    assert final_call["data"]["name"] == "X-1"
+
+
+def test_apply_plan_relinks_live_moved_sku_instead_of_recreating():
+    class Moved(_FakeWebasyst):
+        def call(self, method, *, http_method="GET", params=None, data=None, files=None):
+            params = params or {}
+            if method == "shop.product.search":
+                return {
+                    "products": [{
+                        "id": 700,
+                        "name": "Moved card",
+                        "skus": [{"id": 701, "sku": "AF-MOVED", "name": "X-1"}],
+                    }]
+                }
+            return super().call(
+                method,
+                http_method=http_method,
+                params=params,
+                data=data,
+                files=files,
+            )
+
+    desired = {
+        "supplier_sku": "X-1",
+        "sku": "X-1",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "",
+        "category": "",
+        "images": [],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [],
+        "repair_sku": [{
+            "sku": "X-1",
+            "supplier_sku": "X-1",
+            "product_id": 11,
+            "old_sku_id": 21,
+            "desired": desired,
+        }],
+        "update": [],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+    wa = Moved()
+    result = apply_plan(
+        wa,
+        plan,
+        {
+            "source": {"format": "norden"},
+            "rules": {"update_prices": True, "update_stock": True},
+            "webasyst": {"stock_id": 66, "type_id": 142},
+        },
+    )
+    assert result["relinked_existing"] == 1
+    assert result["recovered_skus"] == 0
+    assert result["mappings"][0]["product_id"] == 700
+    assert result["mappings"][0]["sku_id"] == 701
+    assert not any(x["method"] == "shop.product.skus.add" for x in wa.calls)
+
 
 
 def test_apply_plan_creates_product_then_sets_final_sku():
@@ -1181,6 +1396,71 @@ def test_create_starts_with_supplier_identity_before_numeric_finalize():
 
 
 
+
+
+def test_norden_webasyst_refresh_deduplicates_repeated_search_rows():
+    from supplier_engine.live_norden_webasyst_refresh import _load_products
+
+    class Fake:
+        def __init__(self):
+            self.calls = 0
+
+        def call(self, method, *, params=None, **kwargs):
+            self.calls += 1
+            if self.calls == 1:
+                row = {"id": 10, "skus": [{"id": 20, "sku": "AF-1", "name": "NS-1"}]}
+                return {"products": [dict(row) for _ in range(1000)]}
+            return {"products": []}
+
+    rows = _load_products(Fake(), 142)
+    assert len(rows) == 1
+    assert rows[0]["id"] == 10
+
+
+def test_norden_webasyst_refresh_updates_purchase_and_main_stock_only():
+    from supplier_engine.live_norden_webasyst_refresh import _build_plan
+    products = [{
+        "id": 10,
+        "skus": [{"id": 20, "sku": "AF-1", "name": "NS-1"}],
+    }]
+    source = {
+        "ns-1": {"product_code": "NS-1", "price": 1000, "qty": 7},
+    }
+    plan = _build_plan(products, source, "2", ["1", "2", "3"])
+    assert plan["matched"] == 1
+    assert plan["missing_from_source"] == 0
+    row = plan["items"][0]
+    assert row["data"]["purchase_price"] == "1000.00"
+    assert row["data"]["stock"] == {"1": "0", "2": "7", "3": "0"}
+    assert row["data"]["available"] == 1
+
+
+def test_norden_webasyst_refresh_zeroes_missing_supplier_article_stock():
+    from supplier_engine.live_norden_webasyst_refresh import _build_plan
+    products = [{
+        "id": 10,
+        "skus": [{"id": 20, "sku": "AF-OLD", "name": "OLD-1"}],
+    }]
+    plan = _build_plan(products, {}, "2", ["1", "2"])
+    row = plan["items"][0]
+    assert row["data"]["stock"] == {"1": "0", "2": "0"}
+    assert row["data"]["available"] == 0
+    assert "purchase_price" not in row["data"]
+    assert plan["missing_from_source"] == 1
+
+
+def test_norden_webasyst_refresh_blocks_duplicate_supplier_article():
+    from supplier_engine.live_norden_webasyst_refresh import _build_plan
+    products = [
+        {"id": 10, "skus": [{"id": 20, "sku": "AF-1", "name": "NS-1"}]},
+        {"id": 11, "skus": [{"id": 21, "sku": "AF-2", "name": "NS-1"}]},
+    ]
+    with pytest.raises(RuntimeError) as exc:
+        _build_plan(products, {"ns-1": {"product_code": "NS-1", "price": 1, "qty": 1}}, "2", ["2"])
+    assert "Duplicate supplier articles" in str(exc.value)
+
+
+
 class _FakeKitForSupplierExport:
     def __init__(self):
         self.created_categories = []
@@ -1335,6 +1615,79 @@ def test_kit_export_uses_webasyst_categories_and_user_prices():
     assert "https://kit.example/img1.jpg" in update["data"]["summary"]
 
 
+
+def test_kit_apply_uses_targeted_variant_lookup():
+    class TargetedKit(_FakeKitForSupplierExport):
+        def __init__(self):
+            super().__init__()
+            self.search_terms = []
+
+        def search_variants_parallel(self, names, workers=6):
+            self.search_terms.append(list(names))
+            return []
+
+        def variants(self):
+            raise AssertionError("Apply must not perform a full KIT variant scan")
+
+    kit = TargetedKit()
+    wa = _FakeWaForKit()
+    manifest = {
+        "categories": [{"id": 1, "name": "Кресла", "parent_id": 0}],
+        "items": [{
+            "supplier_sku": "NS-1",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "AF-1",
+            "name": "Кресло",
+            "description": "",
+            "status": 1,
+            "purchase_price": 1000,
+            "stock": 3,
+            "category_ids": [1],
+            "features": [],
+            "image_urls": [],
+        }],
+    }
+    report = sync_manifest(
+        manifest,
+        {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+        kit=kit,
+        wa=wa,
+    )
+    assert report["status"] == "ok"
+    assert report["created"] == 1
+    assert kit.search_terms
+    assert kit.search_terms[0] == ["AF-1"]
+
+
+
+
+def test_kit_secondary_supplier_lookup_skips_broad_terms():
+    class TargetedKit(_FakeKitForSupplierExport):
+        def __init__(self):
+            super().__init__()
+            self.calls = []
+
+        def search_variants_parallel(self, names, workers=6, skip_broad=False):
+            self.calls.append({
+                "names": list(names),
+                "skip_broad": skip_broad,
+            })
+            return []
+
+    from supplier_engine.kit_sync import _kit_variants
+    kit = TargetedKit()
+    products = [{
+        "sku": "AF-NEW",
+        "supplier_sku": "Комплект №2",
+    }]
+    rows = _kit_variants(kit, products)
+    assert rows == []
+    assert kit.calls[0] == {"names": ["AF-NEW"], "skip_broad": False}
+    assert kit.calls[1] == {"names": ["Комплект №2"], "skip_broad": True}
+
+
+
 def test_kit_export_preserves_multiple_webasyst_categories():
     paths = _webasyst_category_paths(
         [
@@ -1352,3 +1705,319 @@ def test_kit_prices_follow_current_25_60_rule():
         "price": "1600.00",
         "manual_discount_price": "1250.00",
     }
+
+
+
+def test_kit_readonly_preflight_makes_no_writes():
+    kit = _FakeKitForSupplierExport()
+    manifest = {
+        "categories": [
+            {"id": 1, "name": "Мебель", "parent_id": 0},
+            {"id": 2, "name": "Кресла", "parent_id": 1},
+        ],
+        "items": [{
+            "supplier_sku": "NS-1",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "12345",
+            "name": "Кресло",
+            "purchase_price": 1000,
+            "stock": 7,
+            "category_ids": [2],
+            "features": [{"code": "series", "name": "Серия", "values": ["Prizma"]}],
+            "image_urls": ["https://supplier.example/1.jpg"],
+        }],
+    }
+    report = plan_manifest(
+        manifest,
+        {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+        kit=kit,
+    )
+    assert report["status"] == "ok"
+    assert report["readonly"] is True
+    assert report["would_create"] == 1
+    assert report["required_category_paths"] == ["Мебель > Кресла"]
+    assert report["missing_category_paths"] == ["Мебель", "Мебель > Кресла"]
+    assert SUPPLIER_ARTICLE_CHARACTERISTIC in report["missing_characteristics"]
+    assert kit.created_categories == []
+    assert kit.created_products == []
+    assert kit.created_variants == []
+    assert kit.patched_products == []
+    assert kit.patched_variants == []
+    assert kit.files == {}
+
+
+def test_kit_identity_preflight_blocks_all_products_before_writes():
+    variants = [{
+        "id": "v1",
+        "kit_id": "7001",
+        "sku": "12345",
+        "brand": "RIVA",
+        "product_id": "p1",
+        "characteristics": [],
+    }]
+    product = {
+        "supplier_sku": "NS-1",
+        "product_id": 101,
+        "sku_id": 201,
+        "sku": "12345",
+        "features": [],
+        "category_ids": [1],
+    }
+    report, identity = _identity_preflight([product], variants, {}, "Norden")
+    assert report["status"] == "blocked"
+    assert report["conflicts"] == 1
+    assert identity is None
+
+
+def test_kit_id_is_authoritative_in_identity_preflight():
+    variants = [{
+        "id": "v1",
+        "kit_id": "7001",
+        "sku": "AF-31646769",
+        "brand": "Norden",
+        "product_id": "p1",
+        "characteristics": [],
+    }]
+    product = {
+        "supplier_sku": "RT-2031",
+        "product_id": 101,
+        "sku_id": 201,
+        "sku": "AF-31646769",
+        "features": [{"code": "kit_id", "name": "KIT ID", "values": ["7001"]}],
+        "category_ids": [1],
+    }
+    report, identity = _identity_preflight([product], variants, {}, "Norden")
+    assert report["status"] == "ok"
+    assert report["matched_by_kit_id"] == 1
+    assert identity["selected"]["101"]["id"] == "v1"
+
+
+def test_extimg_backfill_preserves_short_description_text():
+    old = "Текст до\n[extimg]\nhttps://old.example/1.jpg\n[/extimg]\nТекст после"
+    new = _replace_extimg(old, [
+        "https://kit.example/1.jpg",
+        "https://kit.example/2.jpg",
+    ])
+    assert "Текст до" in new
+    assert "Текст после" in new
+    assert "old.example" not in new
+    assert new.count("[extimg]") == 2
+    assert new.count("[/extimg]") == 2
+
+
+def test_existing_kit_media_is_reused_without_duplicate_uploads():
+    class ExistingKit(_FakeKitForSupplierExport):
+        def characteristics(self):
+            return [{"id": "f-supplier", "title": "Артикул поставщика"}]
+
+        def variants(self):
+            return [{
+                "id": "v-existing",
+                "kit_id": "987654",
+                "sku": "12345",
+                "brand": "Norden",
+                "product_id": "p-existing",
+                "characteristics": [{
+                    "characteristic_id": "f-supplier",
+                    "value": "NS-1",
+                    "values": ["NS-1"],
+                }],
+                "media": [{
+                    "type": "IMAGE",
+                    "display_sequence": 0,
+                    "image_id": "existing-image",
+                }],
+            }]
+
+        def get_variant(self, variant_id):
+            return self.variants()[0]
+
+        def upload_image_url(self, url):
+            raise AssertionError("existing KIT images must not be uploaded again")
+
+        def file_url(self, file_id):
+            return "https://kit.example/existing.jpg"
+
+    kit = ExistingKit()
+    wa = _FakeWaForKit()
+    manifest = {
+        "categories": [{"id": 1, "name": "Кресла", "parent_id": 0}],
+        "items": [{
+            "supplier_sku": "NS-1",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "12345",
+            "name": "Кресло",
+            "description": "",
+            "status": 1,
+            "purchase_price": 1000,
+            "stock": 7,
+            "category_ids": [1],
+            "features": [],
+            "image_urls": ["https://supplier.example/1.jpg"],
+        }],
+    }
+    report = sync_manifest(
+        manifest,
+        {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+        kit=kit,
+        wa=wa,
+    )
+    assert report["status"] == "ok"
+    assert report["created"] == 0
+    assert report["updated"] == 1
+    assert report["images_uploaded"] == 0
+    assert kit.files == {}
+
+
+
+def test_unrelated_conflicting_kit_identity_does_not_block_norden_preflight():
+    class HistoricalKit(_FakeKitForSupplierExport):
+        def characteristics(self):
+            return [
+                {"id": "f-supplier", "title": "Артикул поставщика"},
+                {"id": "f-legacy", "title": "Код для сайта"},
+            ]
+
+        def variants(self):
+            return [{
+                "id": "v-broken-other-brand",
+                "kit_id": "555",
+                "sku": "OTHER-1",
+                "brand": "BRAUBERG",
+                "product_id": "p-other",
+                "characteristics": [
+                    {"characteristic_id": "f-supplier", "value": "320854", "values": ["320854"]},
+                    {"characteristic_id": "f-legacy", "value": "334-320854", "values": ["334-320854"]},
+                ],
+            }]
+
+    manifest = {
+        "categories": [{"id": 1, "name": "Кресла", "parent_id": 0}],
+        "items": [{
+            "supplier_sku": "NS-NEW",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "AF-NEW",
+            "name": "Кресло",
+            "purchase_price": 1000,
+            "stock": 3,
+            "category_ids": [1],
+            "features": [],
+            "image_urls": [],
+        }],
+    }
+    report = plan_manifest(
+        manifest,
+        {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+        kit=HistoricalKit(),
+    )
+    assert report["status"] == "ok"
+    assert report["preflight"]["conflicts"] == 0
+    assert report["would_create"] == 1
+
+
+def test_duplicate_existing_kit_characteristics_are_reused_without_new_duplicate():
+    class DuplicateCharacteristicKit(_FakeKitForSupplierExport):
+        def characteristics(self):
+            return [
+                {"id": "f-supplier", "title": "Артикул поставщика"},
+                {"id": "10", "title": "Вес, кг"},
+                {"id": "11", "title": "Вес, кг"},
+            ]
+
+    manifest = {
+        "categories": [{"id": 1, "name": "Кресла", "parent_id": 0}],
+        "items": [{
+            "supplier_sku": "NS-NEW",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "AF-NEW",
+            "name": "Кресло",
+            "purchase_price": 1000,
+            "stock": 3,
+            "category_ids": [1],
+            "features": [{"code": "weight", "name": "Вес, кг", "values": ["12"]}],
+            "image_urls": [],
+        }],
+    }
+    report = plan_manifest(
+        manifest,
+        {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+        kit=DuplicateCharacteristicKit(),
+    )
+    assert report["status"] == "ok"
+    assert "Вес, кг" not in report["missing_characteristics"]
+    assert not any(error.get("characteristic") == "Вес, кг" for error in report["errors"])
+
+
+
+def test_kit_unique_same_sku_and_brand_accepts_stale_supplier_article():
+    supplier_id = "f-supplier"
+    variants = [{
+        "id": "v1",
+        "kit_id": "7001",
+        "sku": "AF-1",
+        "brand": "Norden",
+        "product_id": "p1",
+        "characteristics": [{
+            "characteristic_id": supplier_id,
+            "value": "OLD-CODE",
+            "values": ["OLD-CODE"],
+        }],
+    }]
+    from supplier_engine.kit_sync import _variant_indexes, _select_variant
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [supplier_id])
+    found = _select_variant(
+        {"sku": "AF-1", "supplier_sku": "NEW-CODE", "features": []},
+        by_sku,
+        by_kit_id,
+        by_supplier_brand,
+        [supplier_id],
+        "Norden",
+    )
+    assert found["kit_id"] == "7001"
+
+
+def test_kit_same_sku_other_brand_stays_blocked():
+    supplier_id = "f-supplier"
+    variants = [{
+        "id": "v1",
+        "kit_id": "7001",
+        "sku": "AF-1",
+        "brand": "RIVA",
+        "product_id": "p1",
+        "characteristics": [],
+    }]
+    from supplier_engine.kit_sync import _variant_indexes, _select_variant
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [supplier_id])
+    with pytest.raises(Exception) as exc:
+        _select_variant(
+            {"sku": "AF-1", "supplier_sku": "NEW-CODE", "features": []},
+            by_sku,
+            by_kit_id,
+            by_supplier_brand,
+            [supplier_id],
+            "Norden",
+        )
+    assert "no candidate has brand=Norden" in str(exc.value)
+
+
+def test_kit_duplicate_same_sku_same_brand_stays_blocked():
+    variants = [
+        {"id": "v1", "kit_id": "7001", "sku": "AF-1", "brand": "Norden", "product_id": "p1", "characteristics": []},
+        {"id": "v2", "kit_id": "7002", "sku": "AF-1", "brand": "Norden", "product_id": "p2", "characteristics": []},
+    ]
+    from supplier_engine.kit_sync import _variant_indexes, _select_variant
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [])
+    with pytest.raises(Exception) as exc:
+        _select_variant(
+            {"sku": "AF-1", "supplier_sku": "NEW-CODE", "features": []},
+            by_sku,
+            by_kit_id,
+            by_supplier_brand,
+            [],
+            "Norden",
+        )
+    assert "ambiguous" in str(exc.value)

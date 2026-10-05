@@ -881,12 +881,11 @@ if ($action === 'ensure_features') {
 
 
 if ($action === 'kit_manifest') {
-    if ((string)(isset($pending['mode']) ? $pending['mode'] : '') !== 'apply') {
-        ms_bridge_json(409, array('errors' => array('apply_request_required')));
+    $mode = (string)(isset($pending['mode']) ? $pending['mode'] : '');
+    if (!in_array($mode, array('dry-run', 'apply'), true)) {
+        ms_bridge_json(409, array('errors' => array('invalid_request_mode')));
     }
-    if (!$plugin->getSettings('enable_writes')) {
-        ms_bridge_json(403, array('errors' => array('writes_disabled')));
-    }
+    // Read-only manifest: safe for both dry-run and apply.
 
     $limit = isset($payload['limit']) ? (int)$payload['limit'] : 100;
     $limit = min(200, max(1, $limit));
@@ -1014,6 +1013,7 @@ if ($action === 'kit_manifest') {
             'stock' => $stock,
             'category_ids' => $category_ids,
             'features' => $features,
+            'image_urls' => $image_urls,
         );
     }
 
@@ -1034,8 +1034,9 @@ if ($action === 'kit_manifest') {
 }
 
 if ($action === 'kit_result') {
-    if ((string)(isset($pending['mode']) ? $pending['mode'] : '') !== 'apply') {
-        ms_bridge_json(409, array('errors' => array('apply_request_required')));
+    $mode = (string)(isset($pending['mode']) ? $pending['mode'] : '');
+    if (!in_array($mode, array('dry-run', 'apply'), true)) {
+        ms_bridge_json(409, array('errors' => array('invalid_request_mode')));
     }
     $report = isset($payload['report']) ? $payload['report'] : array();
     if (!is_array($report)) {

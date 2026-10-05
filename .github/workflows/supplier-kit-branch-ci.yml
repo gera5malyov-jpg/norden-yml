@@ -1,0 +1,79 @@
+name: Supplier KIT branch CI
+
+on:
+  push:
+    branches:
+      - supplier-kit-export-20261005
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supplier-kit-branch-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.3'
+          coverage: none
+      - run: pip install openpyxl pytest requests pdfplumber reportlab
+      - name: Python compile check
+        run: python -m compileall -q supplier_engine tests
+      - name: Supplier engine tests
+        run: python -m pytest -q tests/test_supplier_engine.py tests/test_megasuppliers_contract.py
+      - name: PHP syntax check
+        run: find webasyst/megasuppliers/lib -name '*.php' -type f -print0 | xargs -0 -n1 php -l
+      - name: Read-only KIT transport smoke
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          from supplier_engine.kit_sync import KitClient
+          if not os.environ.get('YANDEX_KIT_TOKEN','').strip():
+              raise SystemExit('YANDEX_KIT_TOKEN is not configured')
+          kit=KitClient()
+          names=[str(x.get('title') or x.get('name') or '') for x in kit.warehouses()]
+          required={'МСК','СПБ привозной'}
+          missing=required-set(names)
+          if missing:
+              raise SystemExit('missing KIT warehouses: '+repr(sorted(missing)))
+          print('KIT_READONLY_SMOKE=ok')
+          PY
+      - name: Read-only Norden API to Webasyst refresh preflight
+        env:
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: |
+          python -m supplier_engine.live_norden_webasyst_refresh --mode dry-run --output norden-webasyst-refresh-preflight.json
+
+      - name: Read-only live Norden KIT preflight
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python -m supplier_engine.live_kit_readonly_preflight --output kit-live-preflight.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: norden-webasyst-refresh-preflight
+          path: norden-webasyst-refresh-preflight.json
+          if-no-files-found: warn
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kit-live-preflight
+          path: kit-live-preflight.json
+          if-no-files-found: error
