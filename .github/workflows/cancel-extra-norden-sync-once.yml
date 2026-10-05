@@ -1,14 +1,22 @@
-name: Cancel extra Norden sync once
+name: Cancel obsolete Norden sync once
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-extra-norden-sync-once.yml'
 
 permissions:
   actions: write
   contents: read
 
 jobs:
-  noop:
+  cancel:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "One-time duplicate cancellation completed on 2026-10-05."
+      - name: Cancel obsolete initial sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api --method POST "repos/$REPO/actions/runs/37329253172/cancel" || true
