@@ -284,3 +284,14 @@ def test_supplier_engine_reuses_existing_repository_kit_client():
     assert "class KitClient:" not in kit_sync
     assert not (ROOT / "supplier_engine/kit_export.py").exists()
     assert "from .kit_sync import KitSyncError, plan_manifest, sync_manifest" in kit_runner
+
+
+
+def test_workflow_separates_readonly_kit_preflight_from_apply_export():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assert "  kit-preflight:" in workflow
+    assert "inputs.mode == 'dry-run'" in workflow
+    assert "--mode dry-run" in workflow
+    assert "  kit-export:" in workflow
+    assert "inputs.mode == 'apply'" in workflow
+    assert "--mode apply" in workflow
