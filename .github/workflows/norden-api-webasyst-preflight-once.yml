@@ -1,10 +1,7 @@
 name: Norden API to Webasyst preflight once
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/norden-api-webasyst-preflight-once.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
