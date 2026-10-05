@@ -248,6 +248,9 @@ class KitClient:
                             timeout=120,
                         )
                         if r.status_code == 429:
+                            last_error = RuntimeError(
+                                f"KIT search {term!r} page {page}: HTTP 429"
+                            )
                             time.sleep(float(r.headers.get("Retry-After") or min(15, 1 + attempt)))
                             continue
                         if r.status_code >= 500 or r.status_code == 400:
