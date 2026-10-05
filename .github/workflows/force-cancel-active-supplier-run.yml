@@ -17,4 +17,4 @@ jobs:
       - name: Force cancel outdated Norden apply
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh api --method POST repos/${{ github.repository }}/actions/runs/37222803948/force-cancel
+        run: gh api --method POST repos/${{ github.repository }}/actions/runs/37284962513/force-cancel
