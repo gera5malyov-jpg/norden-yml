@@ -23,7 +23,9 @@ def main():
     data = json.loads(REPORT.read_text(encoding="utf-8"))
 
     errors = n(data.get("errors"))
-    unmatched = n(data.get("skipped_unmatched_sku"))
+    unmatched = n(data.get("unmatched_sku"))
+    if not unmatched:
+        unmatched = n(data.get("skipped_unmatched_sku"))
     chat_errors = n(data.get("chat_errors"))
     chat_blocked = n(data.get("chat_blocked"))
 
@@ -34,11 +36,12 @@ def main():
                 f"{x.get('source')} {x.get('external_id')}: SKU {x.get('sku')}"
             )
         send_notification(
-            "red",
-            "order_not_imported_webasyst",
-            f"Заказы не созданы в Webasyst — {unmatched}",
-            "; ".join(samples[:8]) or "Не найден товар/SKU в Webasyst.",
-            "orders:webasyst:unmatched",
+            "yellow",
+            "order_created_with_missing_sku",
+            f"Заказы созданы с несопоставленными товарами — {unmatched}",
+            ("Заказы не пропущены: для отсутствующих SKU использована служебная позиция. " +
+             ("; ".join(samples[:8]) or "Не найден товар/SKU в Webasyst.")),
+            "orders:webasyst:unmatched-placeholder",
             ORDERS_URL,
             quiet=True,
         )
