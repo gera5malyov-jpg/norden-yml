@@ -79,28 +79,73 @@ jobs:
             const page = await context.newPage();
 
             try {
-              const response = await page.goto('https://atlaspage51.com/login', {
+              const response = await page.goto('https://atlaspage51.com/lk', {
                 waitUntil: 'domcontentloaded',
                 timeout: 45000
               });
               if (!response || response.status() >= 500) throw new Error('AtlasPage unavailable');
+              await sleep(1800);
 
-              const selected = await clickExactText(page, /^По\s+ID$/i);
-              if (!selected) throw new Error('Could not select "По ID" login mode');
-              await sleep(400);
+              const idModeCandidates = [
+                page.getByRole('button', { name: /^по\s+id$/i }),
+                page.getByRole('tab', { name: /^по\s+id$/i }),
+                page.getByText(/^по\s+id$/i, { exact: true }),
+                page.getByRole('button', { name: /вход\s+по\s+id/i }),
+                page.getByRole('tab', { name: /вход\s+по\s+id/i }),
+                page.getByText(/вход\s+по\s+id/i, { exact: false }),
+                page.getByRole('button', { name: /^id$/i }),
+                page.getByRole('tab', { name: /^id$/i }),
+                page.getByText(/^id$/i, { exact: true })
+              ];
 
-              const idInput = page.locator('input:visible').first();
-              if (!(await idInput.isVisible().catch(() => false))) throw new Error('ID input not found');
+              let idModeSelected = false;
+              for (const locator of idModeCandidates) {
+                try {
+                  const first = locator.first();
+                  if (await first.isVisible({ timeout: 800 })) {
+                    await first.click({ timeout: 3000 });
+                    idModeSelected = true;
+                    await sleep(700);
+                    break;
+                  }
+                } catch (_) {}
+              }
+              if (!idModeSelected) throw new Error('Could not select "По ID" login mode');
+
+              let idInput = page.locator([
+                'input:visible[name="id"]',
+                'input:visible[name*="user_id" i]',
+                'input:visible[name*="account_id" i]',
+                'input:visible[id="id"]',
+                'input:visible[id*="user_id" i]',
+                'input:visible[placeholder*="ID" i]'
+              ].join(',')).first();
+
+              if (await idInput.count() === 0 || !(await idInput.isVisible().catch(() => false))) {
+                idInput = page.locator(
+                  'input:visible:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="password"])'
+                ).first();
+              }
+              if (await idInput.count() === 0 || !(await idInput.isVisible().catch(() => false))) {
+                throw new Error('ID input not found');
+              }
+
               await idInput.fill(userId);
 
-              const login = page.getByRole('button', { name: /^Войти$/i }).first();
-              if (!(await login.isVisible().catch(() => false))) throw new Error('Login button not found');
-              await login.click();
+              let login = page.locator('button:visible[type="submit"], input:visible[type="submit"]').first();
+              if (await login.count() === 0 || !(await login.isVisible().catch(() => false))) {
+                login = page.getByRole('button', { name: /войти|продолжить|login|далее/i }).first();
+              }
+              if (await login.count() === 0 || !(await login.isVisible().catch(() => false))) {
+                throw new Error('Login button not found');
+              }
+
+              await login.click({ timeout: 5000 });
               await Promise.race([
-                page.waitForURL(/\/lk(?:\/|$)/, { timeout: 10000 }).catch(() => {}),
-                page.waitForTimeout(3500)
+                page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {}),
+                page.waitForTimeout(5000)
               ]);
-              await sleep(800);
+              await sleep(1800);
               console.log('LOGIN_POST_URL:', page.url());
 
               await page.goto('https://atlaspage51.com/lk/connect', {
