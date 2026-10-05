@@ -1,0 +1,22 @@
+name: Cancel extra Norden sync once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-extra-norden-sync-once.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel queued duplicate run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api --method POST "repos/$REPO/actions/runs/37329430066/cancel" || true
