@@ -328,9 +328,10 @@ def main():
 
         completed = 0
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = [pool.submit(apply_one, row) for row in items]
+            futures = {pool.submit(apply_one, row): row for row in items}
             for future in concurrent.futures.as_completed(futures):
                 completed += 1
+                input_row = futures[future]
                 try:
                     row = future.result()
                     updated += 1
@@ -339,7 +340,13 @@ def main():
                     if row["data"].get("purchase_price"):
                         purchase_updated += 1
                 except Exception as exc:
-                    errors.append({"error": str(exc)[:1000]})
+                    errors.append({
+                        "product_id": input_row["product_id"],
+                        "sku_id": input_row["sku_id"],
+                        "sku": input_row["sku"],
+                        "supplier_article": input_row["supplier_article"],
+                        "error": str(exc)[:1000],
+                    })
                 if completed % 100 == 0 or completed == len(futures):
                     print(
                         "WEBASYST_NORDEN_REFRESH=%d/%d errors=%d"
