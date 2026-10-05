@@ -1,0 +1,38 @@
+name: Norden API to Webasyst preflight once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-api-webasyst-preflight-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 98b5ab2b4c047e01602dbb5b85264d974b99d884
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check requests openpyxl pdfplumber reportlab
+      - name: Read-only Norden API to Webasyst preflight
+        env:
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: |
+          python -m supplier_engine.live_norden_webasyst_refresh \
+            --mode dry-run \
+            --output norden-webasyst-refresh-preflight.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: norden-webasyst-refresh-preflight
+          path: norden-webasyst-refresh-preflight.json
+          if-no-files-found: error
