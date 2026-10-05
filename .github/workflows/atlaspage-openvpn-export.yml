@@ -1,0 +1,339 @@
+name: AtlasPage export all OpenVPN configs
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/atlaspage-openvpn-export.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ATLASPAGE_ID: ${{ secrets.ATLASPAGE_ID }}
+
+    steps:
+      - name: Check AtlasPage ID
+        shell: bash
+        run: |
+          test -n "$ATLASPAGE_ID" || { echo "ATLASPAGE_ID: MISSING"; exit 11; }
+          echo "ATLASPAGE_ID: present"
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install chromium --with-deps >/dev/null
+
+      - name: Download every OpenVPN configuration
+        shell: bash
+        run: |
+          cat > /tmp/export-openvpn.js <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+
+          const userId = process.env.ATLASPAGE_ID || '';
+          const outDir = path.resolve('openvpn-configs');
+          fs.mkdirSync(outDir, { recursive: true });
+
+          const sleep = ms => new Promise(r => setTimeout(r, ms));
+          const clean = s => (s || '').replace(/\s+/g, ' ').trim();
+          const safeName = s => clean(s)
+            .replace(/OpenVPN/ig, '')
+            .replace(/[\\/:*?"<>|]+/g, '_')
+            .replace(/\s+/g, '_')
+            .replace(/^_+|_+$/g, '')
+            .slice(0, 120) || 'server';
+
+          async function clickExactText(page, re) {
+            const candidates = [
+              page.getByRole('button', { name: re }),
+              page.getByRole('tab', { name: re }),
+              page.getByText(re, { exact: true })
+            ];
+            for (const loc of candidates) {
+              try {
+                const el = loc.first();
+                if (await el.isVisible({ timeout: 700 })) {
+                  await el.click({ timeout: 4000 });
+                  return true;
+                }
+              } catch (_) {}
+            }
+            return false;
+          }
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const context = await browser.newContext({
+              locale: 'ru-RU',
+              acceptDownloads: true,
+              userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/154 Safari/537.36'
+            });
+            const page = await context.newPage();
+
+            try {
+              const response = await page.goto('https://atlaspage51.com/lk', {
+                waitUntil: 'domcontentloaded',
+                timeout: 45000
+              });
+              if (!response || response.status() >= 500) throw new Error('AtlasPage unavailable');
+
+              const selected = await clickExactText(page, /^По\s+ID$/i);
+              if (!selected) throw new Error('Could not select "По ID" login mode');
+              await sleep(400);
+
+              const idInput = page.locator('input:visible').first();
+              if (!(await idInput.isVisible().catch(() => false))) throw new Error('ID input not found');
+              await idInput.fill(userId);
+
+              const login = page.getByRole('button', { name: /^Войти$/i }).first();
+              if (!(await login.isVisible().catch(() => false))) throw new Error('Login button not found');
+              await login.click();
+              await page.waitForURL(/\/lk(?:\/|$)/, { timeout: 20000 });
+              console.log('LOGIN_SUCCESS: yes');
+
+              await page.goto('https://atlaspage51.com/lk/connect', {
+                waitUntil: 'domcontentloaded',
+                timeout: 45000
+              });
+              await sleep(1200);
+
+              const openVpnSelected = await clickExactText(page, /^OpenVPN$/i);
+              if (!openVpnSelected) throw new Error('OpenVPN protocol tab not found');
+              await sleep(1200);
+
+              // Server rows are normally links. Keep only rows that contain an OpenVPN badge
+              // and lead to another /lk/connect page.
+              const anchors = await page.locator('a[href]').evaluateAll(nodes =>
+                nodes.map(a => ({
+                  text: (a.innerText || '').replace(/\s+/g, ' ').trim(),
+                  href: a.href || '',
+                  visible: !!(a.offsetWidth || a.offsetHeight || a.getClientRects().length)
+                }))
+              );
+
+              let servers = anchors.filter(x =>
+                x.visible &&
+                /OpenVPN/i.test(x.text) &&
+                x.text.toLowerCase() !== 'openvpn' &&
+                /\/lk\/connect/i.test(x.href)
+              );
+
+              // Fallback: some versions wrap the row in a link whose text omits the badge.
+              if (!servers.length) {
+                const candidateHrefs = await page.locator('a[href*="/lk/connect"]').evaluateAll(nodes =>
+                  nodes.map(a => ({
+                    text: (a.innerText || '').replace(/\s+/g, ' ').trim(),
+                    href: a.href || '',
+                    visible: !!(a.offsetWidth || a.offsetHeight || a.getClientRects().length)
+                  }))
+                );
+                servers = candidateHrefs.filter(x =>
+                  x.visible &&
+                  x.text.length > 2 &&
+                  !/^(VLESS|WireGuard|OpenVPN|Shadowsocks|SSTP)$/i.test(x.text)
+                );
+              }
+
+              const uniq = new Map();
+              for (const s of servers) if (!uniq.has(s.href)) uniq.set(s.href, s);
+              servers = [...uniq.values()];
+
+              console.log('OPENVPN_SERVER_ROWS:', servers.length);
+              console.log('OPENVPN_SERVERS:', JSON.stringify(servers.map(s => clean(s.text).slice(0, 160))));
+
+              if (!servers.length) throw new Error('No OpenVPN server rows discovered');
+
+              let saved = 0;
+              const seenHashes = new Set();
+
+              async function saveConfig(buffer, label, suggested) {
+                if (!buffer || !buffer.length) return false;
+                const txt = buffer.toString('utf8');
+                if (!/(^|\n)client(\r?\n|$)/m.test(txt) || !/(^|\n)remote\s+/m.test(txt)) return false;
+
+                const crypto = require('crypto');
+                const hash = crypto.createHash('sha256').update(buffer).digest('hex');
+                if (seenHashes.has(hash)) return false;
+                seenHashes.add(hash);
+
+                let filename = suggested && /\.ovpn$/i.test(suggested)
+                  ? suggested
+                  : safeName(label) + '.ovpn';
+                filename = filename.replace(/[\\/:*?"<>|]+/g, '_');
+                let target = path.join(outDir, filename);
+                let n = 2;
+                while (fs.existsSync(target)) {
+                  target = path.join(outDir, filename.replace(/\.ovpn$/i, '') + '_' + n++ + '.ovpn');
+                }
+                fs.writeFileSync(target, buffer);
+                saved++;
+                console.log('SAVED_CONFIG:', path.basename(target));
+                return true;
+              }
+
+              for (let i = 0; i < servers.length; i++) {
+                const s = servers[i];
+                const label = clean(s.text).replace(/OpenVPN/ig, '').trim() || ('server_' + (i + 1));
+                console.log('SERVER_BEGIN:', i + 1, '/', servers.length, label.slice(0, 150));
+
+                const detail = await context.newPage();
+                let captured = false;
+
+                const responseHandler = async (resp) => {
+                  if (captured) return;
+                  try {
+                    if (resp.status() !== 200) return;
+                    const headers = await resp.allHeaders();
+                    const ct = (headers['content-type'] || '').toLowerCase();
+                    const cd = (headers['content-disposition'] || '').toLowerCase();
+                    if (!(/openvpn|octet-stream|text\/plain/.test(ct) || /attachment|\.ovpn/.test(cd) || /\.ovpn(?:\?|$)/i.test(resp.url()))) return;
+                    const body = await resp.body();
+                    if (await saveConfig(body, label, null)) captured = true;
+                  } catch (_) {}
+                };
+                detail.on('response', responseHandler);
+
+                try {
+                  await detail.goto(s.href, { waitUntil: 'domcontentloaded', timeout: 45000 });
+                  await sleep(900);
+
+                  // Direct .ovpn/config links first.
+                  const links = await detail.locator('a[href]').evaluateAll(nodes =>
+                    nodes.map(a => ({
+                      text: (a.innerText || '').replace(/\s+/g, ' ').trim(),
+                      href: a.href || '',
+                      download: a.getAttribute('download') || ''
+                    }))
+                  );
+
+                  for (const l of links) {
+                    if (captured) break;
+                    if (!(/\.ovpn(?:\?|$)/i.test(l.href) || /скач|download|конфиг|config|ovpn/i.test(l.text))) continue;
+                    try {
+                      const resp = await context.request.get(l.href, { timeout: 30000 });
+                      if (resp.ok()) {
+                        const body = await resp.body();
+                        if (await saveConfig(body, label, l.download || null)) {
+                          captured = true;
+                          break;
+                        }
+                      }
+                    } catch (_) {}
+                  }
+
+                  // Buttons / download links that trigger a browser download.
+                  if (!captured) {
+                    const ctrls = detail.locator('button:visible, a:visible, [role="button"]:visible');
+                    const n = await ctrls.count();
+                    for (let j = 0; j < n && !captured; j++) {
+                      const el = ctrls.nth(j);
+                      const txt = clean(await el.innerText().catch(() => ''));
+                      if (!/скач|download|конфиг|config|ovpn/i.test(txt)) continue;
+                      try {
+                        const dlPromise = detail.waitForEvent('download', { timeout: 7000 });
+                        await el.click({ timeout: 4000 });
+                        const dl = await dlPromise;
+                        const tmp = await dl.path();
+                        if (tmp) {
+                          const body = fs.readFileSync(tmp);
+                          if (await saveConfig(body, label, dl.suggestedFilename())) captured = true;
+                        }
+                      } catch (_) {
+                        await sleep(500);
+                      }
+                    }
+                  }
+
+                  // Last fallback: config rendered as text/pre/code.
+                  if (!captured) {
+                    const texts = await detail.locator('pre, code, textarea').allTextContents().catch(() => []);
+                    for (const t of texts) {
+                      const b = Buffer.from(t, 'utf8');
+                      if (await saveConfig(b, label, null)) {
+                        captured = true;
+                        break;
+                      }
+                    }
+                  }
+
+                  console.log('SERVER_RESULT:', captured ? 'downloaded' : 'not-found', label.slice(0, 150));
+                } finally {
+                  detail.off('response', responseHandler);
+                  await detail.close();
+                }
+              }
+
+              console.log('OPENVPN_CONFIGS_SAVED:', saved);
+              if (!saved) throw new Error('No OpenVPN configs were downloaded');
+            } finally {
+              await browser.close();
+            }
+          })().catch(err => {
+            console.error('EXPORT_ERROR:', err && err.message ? err.message : String(err));
+            process.exit(1);
+          });
+          NODE
+
+          node /tmp/export-openvpn.js
+
+      - name: Pack and encrypt configs for private transfer
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$(find openvpn-configs -type f -name '*.ovpn' -print -quit)"
+
+          mkdir -p transfer
+          tar -czf /tmp/atlaspage-openvpn-configs.tar.gz openvpn-configs
+
+          cat > /tmp/transfer-public.pem <<'PUBKEY'
+          -----BEGIN PUBLIC KEY-----
+          MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAzPzF9L0agWId7FCqWaWD
+          WIwWVZHs/ZMvaxIrGOifIDeT6VKUa+dV0rH51/G7XARWQdn/wjGlz2r33dCn1F+E
+          6Dv6mEts7cmsUtZ9G9g/yo+mtN8F7EgF4hmj6VZ/8/KEoQBQHc7ktrvTgxs/Avq0
+          0PzN8BUj91CcIggKbh1jLfDKXlvZsQEz4g378oHQE8E2gpcjySGp4RGLOD+vbM86
+          rMxQ3h2dmfaXl73BvnxHvcP95ev4t8KahSnCKDICZEZ45bCrfdY3BiDY10c1KA6P
+          deatwGPbx+YJyjJMVtyvL7kJ1ddGkbAdqJ9JKC39CIyBTxnVzlm624iar85Oxocw
+          68CSLZNAqdAY1AZWVovKpc7YncHA9ESmA0o2gK/dCuzQmQJM8/jTqVbC74BqQWsb
+          TVer8WCIUU84Zc9ZJu67uEDjdMVFtPiydoV5Z8yG3m6yw21QiQXM3OOaJ4cApCnQ
+          dlEk9WQS1RTEXjGMjy2HIo6c3dllEmzgf9PuGMlxDRs9AgMBAAE=
+          -----END PUBLIC KEY-----
+          PUBKEY
+
+          openssl rand 32 > /tmp/aes.key
+          openssl rand 16 > /tmp/aes.iv
+          cat /tmp/aes.key /tmp/aes.iv > /tmp/keyiv.bin
+
+          KEYHEX="$(xxd -p -c 256 /tmp/aes.key)"
+          IVHEX="$(xxd -p -c 256 /tmp/aes.iv)"
+
+          openssl enc -aes-256-cbc -K "$KEYHEX" -iv "$IVHEX" \
+            -in /tmp/atlaspage-openvpn-configs.tar.gz \
+            -out transfer/configs.enc
+
+          openssl pkeyutl -encrypt \
+            -pubin -inkey /tmp/transfer-public.pem \
+            -pkeyopt rsa_padding_mode:oaep \
+            -pkeyopt rsa_oaep_md:sha256 \
+            -in /tmp/keyiv.bin \
+            -out transfer/keyiv.enc
+
+          printf 'files='
+          find openvpn-configs -type f -name '*.ovpn' | wc -l
+
+          rm -f /tmp/aes.key /tmp/aes.iv /tmp/keyiv.bin /tmp/atlaspage-openvpn-configs.tar.gz
+
+      - name: Upload encrypted transfer package
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlaspage-openvpn-encrypted
+          path: transfer/
+          if-no-files-found: error
+          retention-days: 1
