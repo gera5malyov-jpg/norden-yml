@@ -211,31 +211,35 @@ def _characteristic_index(rows):
     return index
 
 
-def _single_characteristic_id(index, title):
-    matches = index.get(_norm(title), [])
+def _characteristic_sort_key(row):
+    value = _s(row.get("id"))
+    return (0, int(value)) if value.isdigit() else (1, value)
+
+
+def _pick_characteristic(matches, title):
     exact = [
         row for row in matches
         if _s(row.get("title") or row.get("name")) == title
     ]
-    if len(exact) == 1:
-        return _s(exact[0].get("id"))
-    if len(exact) > 1 or len(matches) > 1:
-        raise KitSyncError("KIT characteristic is ambiguous: %s" % title)
-    if len(matches) == 1:
-        return _s(matches[0].get("id"))
-    return ""
+    pool = exact or list(matches)
+    if not pool:
+        return None
+    # Historical KIT data contains duplicate characteristic definitions.
+    # Reuse one stable existing definition instead of creating yet another
+    # duplicate or blocking the whole supplier.
+    return sorted(pool, key=_characteristic_sort_key)[0]
+
+
+def _single_characteristic_id(index, title):
+    row = _pick_characteristic(index.get(_norm(title), []), title)
+    return _s(row.get("id")) if row else ""
 
 
 def _ensure_characteristic(kit, rows, index, title):
     key = _norm(title)
-    matches = index.get(key, [])
-    exact = [row for row in matches if _s(row.get("title") or row.get("name")) == title]
-    if len(exact) == 1:
-        return _s(exact[0].get("id"))
-    if len(exact) > 1 or len(matches) > 1:
-        raise KitSyncError("KIT characteristic is ambiguous: %s" % title)
-    if len(matches) == 1:
-        return _s(matches[0].get("id"))
+    row = _pick_characteristic(index.get(key, []), title)
+    if row:
+        return _s(row.get("id"))
     row = kit.create_characteristic(title)
     cid = _s(row.get("id"))
     if not cid:
@@ -258,8 +262,7 @@ def _kit_characteristics(
     legacy_code_site_id=None,
     supplier_sku="",
 ):
-    out = []
-    seen_titles = set()
+    by_id = {}
     for title, values in _feature_values(features):
         normalized_title = _norm(title)
         if normalized_title in {
@@ -268,26 +271,27 @@ def _kit_characteristics(
         }:
             continue
         cid = _ensure_characteristic(kit, rows, index, title)
-        out.append({
+        if not cid or cid in by_id:
+            continue
+        by_id[cid] = {
             "characteristic_id": cid,
             "value": values[0],
             "values": values,
-        })
-        seen_titles.add(normalized_title)
+        }
     supplier_sku = _s(supplier_sku)
     if supplier_article_id and supplier_sku:
-        out.append({
+        by_id[supplier_article_id] = {
             "characteristic_id": supplier_article_id,
             "value": supplier_sku,
             "values": [supplier_sku],
-        })
+        }
     if legacy_code_site_id and supplier_sku and legacy_code_site_id != supplier_article_id:
-        out.append({
+        by_id[legacy_code_site_id] = {
             "characteristic_id": legacy_code_site_id,
             "value": supplier_sku,
             "values": [supplier_sku],
-        })
-    return out
+        }
+    return list(by_id.values())
 
 
 def _variant_characteristic_values(variant, characteristic_id):
@@ -314,12 +318,17 @@ def _variant_characteristic_values(variant, characteristic_id):
     return []
 
 
-def _variant_supplier_article(variant, supplier_identity_ids):
+def _variant_supplier_articles(variant, supplier_identity_ids):
     values = []
     for characteristic_id in supplier_identity_ids or []:
         for value in _variant_characteristic_values(variant, characteristic_id):
             if value and value not in values:
                 values.append(value)
+    return values
+
+
+def _variant_supplier_article(variant, supplier_identity_ids):
+    values = _variant_supplier_articles(variant, supplier_identity_ids)
     if len(values) > 1:
         raise KitSyncError(
             "KIT variant %s has conflicting supplier articles: %s"
@@ -335,14 +344,18 @@ def _variant_indexes(variants, supplier_identity_ids):
     for row in variants:
         sku = _s(row.get("sku"))
         kit_id = _s(row.get("kit_id"))
-        supplier_article = _variant_supplier_article(row, supplier_identity_ids)
         brand_key = _norm(row.get("brand"))
         if sku:
             by_sku[sku].append(row)
         if kit_id:
             by_kit_id[kit_id].append(row)
-        if supplier_article and brand_key:
-            by_supplier_brand[(supplier_article, brand_key)].append(row)
+        if brand_key:
+            # Index every historical identity value. A row with conflicting
+            # values is only fatal when that specific row is selected for the
+            # current Webasyst product; unrelated broken KIT rows must not
+            # block the entire Norden export.
+            for supplier_article in _variant_supplier_articles(row, supplier_identity_ids):
+                by_supplier_brand[(supplier_article, brand_key)].append(row)
     return by_sku, by_kit_id, by_supplier_brand
 
 
