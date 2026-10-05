@@ -582,13 +582,14 @@ def _identity_preflight(products, variants, characteristic_index, brand):
     for product in products:
         key = str(product.get("product_id") or product.get("sku_id") or product.get("supplier_sku") or "")
         try:
-            product_key = str(
-                product.get("product_id")
-                or product.get("sku_id")
-                or product.get("supplier_sku")
-                or ""
+            variant = _select_variant(
+                product,
+                by_sku,
+                by_kit_id,
+                by_supplier_brand,
+                supplier_identity_ids,
+                brand,
             )
-            variant = selected_variants.get(product_key)
             selected[key] = variant
             if variant is None:
                 report["create_new"] += 1
