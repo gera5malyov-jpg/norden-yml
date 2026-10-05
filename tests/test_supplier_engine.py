@@ -1189,6 +1189,51 @@ def test_create_starts_with_supplier_identity_before_numeric_finalize():
 
 
 
+
+def test_norden_webasyst_refresh_updates_purchase_and_main_stock_only():
+    from supplier_engine.live_norden_webasyst_refresh import _build_plan
+    products = [{
+        "id": 10,
+        "skus": [{"id": 20, "sku": "AF-1", "name": "NS-1"}],
+    }]
+    source = {
+        "ns-1": {"product_code": "NS-1", "price": 1000, "qty": 7},
+    }
+    plan = _build_plan(products, source, "2", ["1", "2", "3"])
+    assert plan["matched"] == 1
+    assert plan["missing_from_source"] == 0
+    row = plan["items"][0]
+    assert row["data"]["purchase_price"] == "1000.00"
+    assert row["data"]["stock"] == {"1": "0", "2": "7", "3": "0"}
+    assert row["data"]["available"] == 1
+
+
+def test_norden_webasyst_refresh_zeroes_missing_supplier_article_stock():
+    from supplier_engine.live_norden_webasyst_refresh import _build_plan
+    products = [{
+        "id": 10,
+        "skus": [{"id": 20, "sku": "AF-OLD", "name": "OLD-1"}],
+    }]
+    plan = _build_plan(products, {}, "2", ["1", "2"])
+    row = plan["items"][0]
+    assert row["data"]["stock"] == {"1": "0", "2": "0"}
+    assert row["data"]["available"] == 0
+    assert "purchase_price" not in row["data"]
+    assert plan["missing_from_source"] == 1
+
+
+def test_norden_webasyst_refresh_blocks_duplicate_supplier_article():
+    from supplier_engine.live_norden_webasyst_refresh import _build_plan
+    products = [
+        {"id": 10, "skus": [{"id": 20, "sku": "AF-1", "name": "NS-1"}]},
+        {"id": 11, "skus": [{"id": 21, "sku": "AF-2", "name": "NS-1"}]},
+    ]
+    with pytest.raises(RuntimeError) as exc:
+        _build_plan(products, {"ns-1": {"product_code": "NS-1", "price": 1, "qty": 1}}, "2", ["2"])
+    assert "Duplicate supplier articles" in str(exc.value)
+
+
+
 class _FakeKitForSupplierExport:
     def __init__(self):
         self.created_categories = []
