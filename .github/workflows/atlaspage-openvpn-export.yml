@@ -294,12 +294,6 @@ jobs:
 
                   const overlay = page.locator('div[class*="popupOverlay"]:visible').last();
                   const overlayVisible = await overlay.isVisible({ timeout: 1800 }).catch(() => false);
-                  if (overlayVisible && i === 0) {
-                    const popupText = clean(await overlay.innerText().catch(() => '')).slice(0, 1400);
-                    const popupControls = await overlay.locator('button:visible, a:visible, [role="button"]:visible').allTextContents().catch(() => []);
-                    console.log('POPUP_TEXT_SAMPLE:', popupText);
-                    console.log('POPUP_CONTROLS:', JSON.stringify(popupControls.map(clean).filter(Boolean).slice(0, 80)));
-                  }
 
                   let downloadControl = null;
                   const scope = overlayVisible ? overlay : page;
