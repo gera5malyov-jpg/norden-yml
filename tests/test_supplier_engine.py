@@ -7,7 +7,7 @@ from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source, _characteristic_names_for_plan, _unique_image_aliases
 from supplier_engine import norden
-from supplier_engine.kit_sync import sync_manifest, _price_pair, _webasyst_category_paths, _variant_indexes, _select_variant, SUPPLIER_ARTICLE_CHARACTERISTIC
+from supplier_engine.kit_sync import sync_manifest, _price_pair, _webasyst_category_paths, _variant_indexes, _select_variant, _kit_characteristics, SUPPLIER_ARTICLE_CHARACTERISTIC, LEGACY_CODE_SITE_CHARACTERISTIC
 from supplier_engine.bridge import MegasuppliersBridge
 from supplier_engine.validators import validate_run
 from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan, webasyst_sku_mode
@@ -1384,7 +1384,7 @@ def test_kit_first_match_requires_sku_supplier_article_and_brand():
         _kit_variant("v1", "7001", "12345", "Norden", supplier_char_id, "NS-1"),
         _kit_variant("v2", "7002", "12346", "Norden", supplier_char_id, "NS-2"),
     ]
-    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, supplier_char_id)
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [supplier_char_id])
     product = {
         "sku": "12345",
         "supplier_sku": "NS-1",
@@ -1395,7 +1395,7 @@ def test_kit_first_match_requires_sku_supplier_article_and_brand():
         by_sku,
         by_kit_id,
         by_supplier_brand,
-        supplier_char_id,
+        [supplier_char_id],
         "Norden",
     )
     assert found["id"] == "v1"
@@ -1406,14 +1406,14 @@ def test_kit_same_sku_with_wrong_supplier_article_is_blocked():
     variants = [
         _kit_variant("v1", "7001", "12345", "Norden", supplier_char_id, "OTHER"),
     ]
-    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, supplier_char_id)
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [supplier_char_id])
     with pytest.raises(Exception) as exc:
         _select_variant(
             {"sku": "12345", "supplier_sku": "NS-1", "features": []},
             by_sku,
             by_kit_id,
             by_supplier_brand,
-            supplier_char_id,
+            [supplier_char_id],
             "Norden",
         )
     assert "automatic linking is blocked" in str(exc.value)
@@ -1424,14 +1424,14 @@ def test_kit_same_supplier_article_and_brand_under_other_sku_is_blocked():
     variants = [
         _kit_variant("v1", "7001", "99999", "Norden", supplier_char_id, "NS-1"),
     ]
-    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, supplier_char_id)
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [supplier_char_id])
     with pytest.raises(Exception) as exc:
         _select_variant(
             {"sku": "12345", "supplier_sku": "NS-1", "features": []},
             by_sku,
             by_kit_id,
             by_supplier_brand,
-            supplier_char_id,
+            [supplier_char_id],
             "Norden",
         )
     assert "under another SKU" in str(exc.value)
@@ -1439,7 +1439,7 @@ def test_kit_same_supplier_article_and_brand_under_other_sku_is_blocked():
 
 def test_kit_id_is_authoritative_and_missing_id_never_creates_duplicate():
     supplier_char_id = "f-supplier"
-    by_sku, by_kit_id, by_supplier_brand = _variant_indexes([], supplier_char_id)
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes([], [supplier_char_id])
     with pytest.raises(Exception) as exc:
         _select_variant(
             {
@@ -1450,7 +1450,7 @@ def test_kit_id_is_authoritative_and_missing_id_never_creates_duplicate():
             by_sku,
             by_kit_id,
             by_supplier_brand,
-            supplier_char_id,
+            [supplier_char_id],
             "Norden",
         )
     assert "stored in Webasyst but was not found in KIT" in str(exc.value)
@@ -1461,7 +1461,7 @@ def test_kit_id_match_rejects_conflicting_supplier_article():
     variants = [
         _kit_variant("v1", "7001", "12345", "Norden", supplier_char_id, "OTHER"),
     ]
-    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, supplier_char_id)
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(variants, [supplier_char_id])
     with pytest.raises(Exception) as exc:
         _select_variant(
             {
@@ -1472,7 +1472,7 @@ def test_kit_id_match_rejects_conflicting_supplier_article():
             by_sku,
             by_kit_id,
             by_supplier_brand,
-            supplier_char_id,
+            [supplier_char_id],
             "Norden",
         )
     assert "supplier article conflict" in str(exc.value)
@@ -1480,3 +1480,92 @@ def test_kit_id_match_rejects_conflicting_supplier_article():
 
 def test_supplier_article_characteristic_title_is_fixed():
     assert SUPPLIER_ARTICLE_CHARACTERISTIC == "Артикул поставщика"
+
+
+
+def test_kit_legacy_code_for_site_matches_existing_norden_card():
+    legacy_id = "f-code-site"
+    variants = [{
+        "id": "v-legacy",
+        "kit_id": "1500515",
+        "sku": "AF-31646769",
+        "brand": "Norden",
+        "product_id": "p-legacy",
+        "characteristics": [{
+            "characteristic_id": legacy_id,
+            "value": "RT-2031",
+            "values": ["RT-2031"],
+        }],
+    }]
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(
+        variants,
+        ["f-new-supplier", legacy_id],
+    )
+    found = _select_variant(
+        {
+            "sku": "AF-31646769",
+            "supplier_sku": "RT-2031",
+            "features": [],
+        },
+        by_sku,
+        by_kit_id,
+        by_supplier_brand,
+        ["f-new-supplier", legacy_id],
+        "Norden",
+    )
+    assert found["id"] == "v-legacy"
+
+
+def test_kit_conflicting_new_and_legacy_supplier_codes_are_blocked():
+    variant = {
+        "id": "v-conflict",
+        "kit_id": "7001",
+        "sku": "12345",
+        "brand": "Norden",
+        "product_id": "p1",
+        "characteristics": [
+            {
+                "characteristic_id": "f-new",
+                "value": "NS-1",
+                "values": ["NS-1"],
+            },
+            {
+                "characteristic_id": "f-code-site",
+                "value": "OTHER",
+                "values": ["OTHER"],
+            },
+        ],
+    }
+    with pytest.raises(Exception) as exc:
+        _variant_indexes([variant], ["f-new", "f-code-site"])
+    assert "conflicting supplier articles" in str(exc.value)
+
+
+def test_kit_characteristics_write_new_and_legacy_supplier_identity():
+    class FakeKit:
+        pass
+
+    rows = []
+    index = {}
+    result = _kit_characteristics(
+        FakeKit(),
+        [{"code": "series", "name": "Серия", "values": ["Prizma"]}],
+        rows,
+        index,
+        supplier_article_id="f-new",
+        legacy_code_site_id="f-code-site",
+        supplier_sku="RT-2031",
+    )
+    identity_rows = [
+        row for row in result
+        if row["characteristic_id"] in {"f-new", "f-code-site"}
+    ]
+    assert {row["characteristic_id"] for row in identity_rows} == {
+        "f-new",
+        "f-code-site",
+    }
+    assert all(row["values"] == ["RT-2031"] for row in identity_rows)
+
+
+def test_legacy_code_site_characteristic_title_is_fixed():
+    assert LEGACY_CODE_SITE_CHARACTERISTIC == "Код для сайта"
