@@ -113,7 +113,7 @@ def test_supplier_run_prevents_concurrent_dispatch_and_ui_follows_current_run():
     run_controller = RUN_CONTROLLER.read_text(encoding="utf-8")
     panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
     assert "RUN_ALREADY_ACTIVE" in run_controller
-    assert "active_timeout = 210 * 60" in run_controller
+    assert "active_timeout = 350 * 60" in run_controller
     assert "run.request_id!==currentRequest" in panel
     assert "resumeCurrent" in panel
     assert "setRunBusy" in panel
@@ -234,4 +234,30 @@ def test_supplier_apply_has_sufficient_workflow_timeout():
     workflow = WORKFLOW.read_text(encoding="utf-8")
     marker = "  supplier-run:"
     section = workflow.split(marker, 1)[1]
-    assert "timeout-minutes: 180" in section
+    assert "timeout-minutes: 330" in section
+
+
+
+def test_supplier_profile_and_bridge_support_kit_export():
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    controller = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php").read_text(encoding="utf-8")
+    bridge = (ROOT / "webasyst/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendBridge.controller.php").read_text(encoding="utf-8")
+    deploy = DEPLOY_SCRIPT.read_text(encoding="utf-8")
+    runner = (ROOT / "supplier_engine/runner.py").read_text(encoding="utf-8")
+    kit_sync = (ROOT / "supplier_engine/kit_sync.py").read_text(encoding="utf-8")
+    assert 'name="export_to_kit"' in panel
+    assert "только товары, разложенные по категориям Webasyst" in panel
+    assert "'export_to_kit' =>" in controller
+    assert "$action === 'kit_manifest'" in bridge
+    assert "if ($action === 'kit_manifest')" in deploy
+    assert "bridge.kit_manifest(" in runner
+    assert "sync_manifest(" in runner
+    assert "СПБ привозной" in kit_sync
+    assert 'Decimal("1.25")' in kit_sync
+    assert 'Decimal("1.60")' in kit_sync
+    assert '"kit_id"' in kit_sync
+
+
+def test_supplier_workflow_exposes_kit_token_for_apply():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assert "YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}" in workflow

@@ -66,6 +66,18 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
             $this->ensureFeatures($supplier_id, $payload);
             return;
         }
+        if ($action === 'kit_manifest') {
+            if ((string)ifset($pending['mode']) !== 'apply') {
+                $this->fail('apply_request_required', 409);
+                return;
+            }
+            if (!$plugin->getSettings('enable_writes')) {
+                $this->fail('writes_disabled', 403);
+                return;
+            }
+            $this->kitManifest($supplier_id, $payload);
+            return;
+        }
         if ($action === 'sync_links') {
             if ((string)ifset($pending['mode']) !== 'apply') {
                 $this->fail('apply_request_required', 409);
@@ -177,6 +189,187 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
             'linked' => $linked,
             'type_id' => $type_id,
         );
+    }
+
+
+    private function kitManifest($supplier_id, array $payload)
+    {
+        $limit = min(200, max(1, (int)ifset($payload['limit'], 100)));
+        $offset = max(0, (int)ifset($payload['offset'], 0));
+        $stock_id = (int)ifset($payload['stock_id']);
+        if (!$stock_id) {
+            $this->fail('stock_id_required', 422);
+            return;
+        }
+
+        $link_model = new shopMegasuppliersProductModel();
+        $sql = 'SELECT supplier_sku,product_id,sku_id,purchase_price,stock '
+            .'FROM shop_megasuppliers_product WHERE supplier_id='.(int)$supplier_id
+            .' ORDER BY id LIMIT '.$limit.' OFFSET '.$offset;
+        $links = $link_model->query($sql)->fetchAll();
+
+        $product_model = new shopProductModel();
+        $sku_model = new shopProductSkusModel();
+        $category_product_model = new shopCategoryProductsModel();
+        $category_model = new shopCategoryModel();
+        $stock_model = new shopProductStocksModel();
+        $feature_model = new shopFeatureModel();
+
+        $feature_rows = $feature_model->select('code,name')->fetchAll();
+        $feature_names = array();
+        foreach ($feature_rows as $feature_row) {
+            $code = trim((string)ifset($feature_row['code']));
+            if ($code !== '') {
+                $feature_names[$code] = (string)ifset($feature_row['name'], $code);
+            }
+        }
+
+        $all_categories = $category_model->select('id,name,parent_id')->fetchAll();
+        $category_map = array();
+        foreach ($all_categories as $category) {
+            $cid = (int)ifset($category['id']);
+            if ($cid) {
+                $category_map[$cid] = array(
+                    'id' => $cid,
+                    'name' => (string)ifset($category['name']),
+                    'parent_id' => (int)ifset($category['parent_id']),
+                );
+            }
+        }
+
+        $items = array();
+        $used_category_ids = array();
+        foreach ($links as $link) {
+            $product_id = (int)ifset($link['product_id']);
+            $sku_id = (int)ifset($link['sku_id']);
+            if (!$product_id || !$sku_id) {
+                continue;
+            }
+            $product_row = $product_model->getById($product_id);
+            $sku_row = $sku_model->getById($sku_id);
+            if (!$product_row || !$sku_row || (int)ifset($sku_row['product_id']) !== $product_id) {
+                continue;
+            }
+
+            $category_rows = $category_product_model
+                ->select('category_id')
+                ->where('product_id='.(int)$product_id)
+                ->fetchAll();
+            $category_ids = array();
+            foreach ($category_rows as $category_row) {
+                $cid = (int)ifset($category_row['category_id']);
+                if ($cid) {
+                    $category_ids[] = $cid;
+                    $used_category_ids[$cid] = true;
+                    $parent = isset($category_map[$cid]) ? (int)$category_map[$cid]['parent_id'] : 0;
+                    $guard = 0;
+                    while ($parent && isset($category_map[$parent]) && $guard++ < 50) {
+                        $used_category_ids[$parent] = true;
+                        $parent = (int)$category_map[$parent]['parent_id'];
+                    }
+                }
+            }
+            $category_ids = array_values(array_unique($category_ids));
+
+            $stock_row = $stock_model->getByField(array(
+                'sku_id' => $sku_id,
+                'stock_id' => $stock_id,
+            ));
+            $stock = $stock_row && isset($stock_row['count']) ? (float)$stock_row['count'] : 0.0;
+
+            $product = new shopProduct($product_id);
+            $raw_features = $product->features;
+            $features = array();
+            if (is_array($raw_features)) {
+                foreach ($raw_features as $code => $value) {
+                    $code = (string)$code;
+                    $name = isset($feature_names[$code]) ? $feature_names[$code] : $code;
+                    $values = $this->featureValues($value);
+                    if ($values) {
+                        $features[] = array(
+                            'code' => $code,
+                            'name' => $name,
+                            'values' => $values,
+                        );
+                    }
+                }
+            }
+
+            $summary = (string)ifset($product_row['summary']);
+            $image_urls = array();
+            if (preg_match_all('~https?://[^\\s<>\\]\\[\\"\']+~u', $summary, $matches)) {
+                foreach ($matches[0] as $url) {
+                    $url = rtrim((string)$url, ".,;)");
+                    if ($url !== '' && !in_array($url, $image_urls, true)) {
+                        $image_urls[] = $url;
+                    }
+                }
+            }
+
+            $items[] = array(
+                'supplier_sku' => (string)ifset($link['supplier_sku']),
+                'product_id' => $product_id,
+                'sku_id' => $sku_id,
+                'sku' => (string)ifset($sku_row['sku']),
+                'sku_name' => (string)ifset($sku_row['name']),
+                'name' => (string)ifset($product_row['name']),
+                'description' => (string)ifset($product_row['description']),
+                'summary' => $summary,
+                'status' => (int)ifset($product_row['status']),
+                'purchase_price' => isset($sku_row['purchase_price']) ? (float)$sku_row['purchase_price'] : $this->nullableNumber(ifset($link['purchase_price'], null)),
+                'stock' => $stock,
+                'category_ids' => $category_ids,
+                'features' => $features,
+            );
+        }
+
+        $categories = array();
+        foreach (array_keys($used_category_ids) as $cid) {
+            if (isset($category_map[$cid])) {
+                $categories[] = $category_map[$cid];
+            }
+        }
+
+        $this->response = array(
+            'status' => 'ok',
+            'items' => $items,
+            'categories' => $categories,
+            'offset' => $offset,
+            'limit' => $limit,
+        );
+    }
+
+    private function featureValues($value)
+    {
+        $out = array();
+        $append = function ($item) use (&$out, &$append) {
+            if (is_array($item)) {
+                foreach ($item as $part) {
+                    $append($part);
+                }
+                return;
+            }
+            if (is_object($item)) {
+                if (method_exists($item, '__toString')) {
+                    $item = (string)$item;
+                } elseif (isset($item->value)) {
+                    $item = $item->value;
+                } else {
+                    return;
+                }
+            }
+            if (is_bool($item)) {
+                $item = $item ? 'Да' : 'Нет';
+            }
+            if (is_scalar($item)) {
+                $text = trim(strip_tags((string)$item));
+                if ($text !== '' && !in_array($text, $out, true)) {
+                    $out[] = $text;
+                }
+            }
+        };
+        $append($value);
+        return $out;
     }
 
     private function syncLinks($supplier_id, $items)

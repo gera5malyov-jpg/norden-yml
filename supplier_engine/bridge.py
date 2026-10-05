@@ -107,3 +107,33 @@ class MegasuppliersBridge:
         if not isinstance(mapping, dict):
             raise BridgeError("Megasuppliers bridge feature mapping is invalid")
         return {str(k): str(v) for k, v in mapping.items() if str(k) and str(v)}
+
+
+    def kit_manifest(self, supplier_id, request_id, stock_id, page_size=100):
+        items = []
+        categories = {}
+        offset = 0
+        while True:
+            data = self.call({
+                "action": "kit_manifest",
+                "supplier_id": int(supplier_id),
+                "request_id": str(request_id),
+                "stock_id": int(stock_id),
+                "offset": int(offset),
+                "limit": int(page_size),
+            })
+            rows = data.get("items") or []
+            cats = data.get("categories") or []
+            if not isinstance(rows, list) or not isinstance(cats, list):
+                raise BridgeError("Megasuppliers KIT manifest payload is invalid")
+            items.extend(row for row in rows if isinstance(row, dict))
+            for row in cats:
+                if isinstance(row, dict) and row.get("id") is not None:
+                    categories[str(row["id"])] = row
+            if len(rows) < page_size:
+                break
+            offset += len(rows)
+        return {
+            "items": items,
+            "categories": list(categories.values()),
+        }

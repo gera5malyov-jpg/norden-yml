@@ -522,6 +522,40 @@ function ms_json($status, $payload)
     exit;
 }
 
+
+function ms_bridge_feature_values($value)
+{
+    $out = array();
+    $append = function ($item) use (&$out, &$append) {
+        if (is_array($item)) {
+            foreach ($item as $part) {
+                $append($part);
+            }
+            return;
+        }
+        if (is_object($item)) {
+            if (method_exists($item, '__toString')) {
+                $item = (string)$item;
+            } elseif (isset($item->value)) {
+                $item = $item->value;
+            } else {
+                return;
+            }
+        }
+        if (is_bool($item)) {
+            $item = $item ? 'Да' : 'Нет';
+        }
+        if (is_scalar($item)) {
+            $text = trim(strip_tags((string)$item));
+            if ($text !== '' && !in_array($text, $out, true)) {
+                $out[] = $text;
+            }
+        }
+    };
+    $append($value);
+    return $out;
+}
+
 if (strtolower(isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : '') !== 'post') {
     ms_json(405, array('errors' => array('method_not_allowed')));
 }
@@ -842,6 +876,160 @@ if ($action === 'ensure_features') {
         'created' => $created,
         'linked' => $linked,
         'type_id' => $type_id,
+    ));
+}
+
+
+if ($action === 'kit_manifest') {
+    if ((string)(isset($pending['mode']) ? $pending['mode'] : '') !== 'apply') {
+        ms_bridge_json(409, array('errors' => array('apply_request_required')));
+    }
+    if (!$plugin->getSettings('enable_writes')) {
+        ms_bridge_json(403, array('errors' => array('writes_disabled')));
+    }
+
+    $limit = isset($payload['limit']) ? (int)$payload['limit'] : 100;
+    $limit = min(200, max(1, $limit));
+    $offset = isset($payload['offset']) ? max(0, (int)$payload['offset']) : 0;
+    $stock_id = isset($payload['stock_id']) ? (int)$payload['stock_id'] : 0;
+    if (!$stock_id) {
+        ms_bridge_json(422, array('errors' => array('stock_id_required')));
+    }
+
+    $link_model = new shopMegasuppliersProductModel();
+    $sql = 'SELECT supplier_sku,product_id,sku_id,purchase_price,stock '
+        .'FROM shop_megasuppliers_product WHERE supplier_id='.(int)$supplier_id
+        .' ORDER BY id LIMIT '.$limit.' OFFSET '.$offset;
+    $links = $link_model->query($sql)->fetchAll();
+
+    $product_model = new shopProductModel();
+    $sku_model = new shopProductSkusModel();
+    $category_product_model = new shopCategoryProductsModel();
+    $category_model = new shopCategoryModel();
+    $stock_model = new shopProductStocksModel();
+    $feature_model = new shopFeatureModel();
+
+    $feature_rows = $feature_model->select('code,name')->fetchAll();
+    $feature_names = array();
+    foreach ($feature_rows as $feature_row) {
+        $code = trim((string)(isset($feature_row['code']) ? $feature_row['code'] : ''));
+        if ($code !== '') {
+            $feature_names[$code] = isset($feature_row['name']) ? (string)$feature_row['name'] : $code;
+        }
+    }
+
+    $all_categories = $category_model->select('id,name,parent_id')->fetchAll();
+    $category_map = array();
+    foreach ($all_categories as $category) {
+        $cid = isset($category['id']) ? (int)$category['id'] : 0;
+        if ($cid) {
+            $category_map[$cid] = array(
+                'id' => $cid,
+                'name' => isset($category['name']) ? (string)$category['name'] : '',
+                'parent_id' => isset($category['parent_id']) ? (int)$category['parent_id'] : 0,
+            );
+        }
+    }
+
+    $items = array();
+    $used_category_ids = array();
+    foreach ($links as $link) {
+        $product_id = isset($link['product_id']) ? (int)$link['product_id'] : 0;
+        $sku_id = isset($link['sku_id']) ? (int)$link['sku_id'] : 0;
+        if (!$product_id || !$sku_id) {
+            continue;
+        }
+        $product_row = $product_model->getById($product_id);
+        $sku_row = $sku_model->getById($sku_id);
+        if (!$product_row || !$sku_row || (int)(isset($sku_row['product_id']) ? $sku_row['product_id'] : 0) !== $product_id) {
+            continue;
+        }
+
+        $category_rows = $category_product_model
+            ->select('category_id')
+            ->where('product_id='.(int)$product_id)
+            ->fetchAll();
+        $category_ids = array();
+        foreach ($category_rows as $category_row) {
+            $cid = isset($category_row['category_id']) ? (int)$category_row['category_id'] : 0;
+            if ($cid) {
+                $category_ids[] = $cid;
+                $used_category_ids[$cid] = true;
+                $parent = isset($category_map[$cid]) ? (int)$category_map[$cid]['parent_id'] : 0;
+                $guard = 0;
+                while ($parent && isset($category_map[$parent]) && $guard++ < 50) {
+                    $used_category_ids[$parent] = true;
+                    $parent = (int)$category_map[$parent]['parent_id'];
+                }
+            }
+        }
+        $category_ids = array_values(array_unique($category_ids));
+
+        $stock_row = $stock_model->getByField(array(
+            'sku_id' => $sku_id,
+            'stock_id' => $stock_id,
+        ));
+        $stock = $stock_row && isset($stock_row['count']) ? (float)$stock_row['count'] : 0.0;
+
+        $product = new shopProduct($product_id);
+        $raw_features = $product->features;
+        $features = array();
+        if (is_array($raw_features)) {
+            foreach ($raw_features as $code => $value) {
+                $code = (string)$code;
+                $name = isset($feature_names[$code]) ? $feature_names[$code] : $code;
+                $values = ms_bridge_feature_values($value);
+                if ($values) {
+                    $features[] = array(
+                        'code' => $code,
+                        'name' => $name,
+                        'values' => $values,
+                    );
+                }
+            }
+        }
+
+        $summary = isset($product_row['summary']) ? (string)$product_row['summary'] : '';
+        $image_urls = array();
+        if (preg_match_all('~https?://[^\\s<>\\]\\[\\"\']+~u', $summary, $matches)) {
+            foreach ($matches[0] as $url) {
+                $url = rtrim((string)$url, ".,;)");
+                if ($url !== '' && !in_array($url, $image_urls, true)) {
+                    $image_urls[] = $url;
+                }
+            }
+        }
+
+        $items[] = array(
+            'supplier_sku' => isset($link['supplier_sku']) ? (string)$link['supplier_sku'] : '',
+            'product_id' => $product_id,
+            'sku_id' => $sku_id,
+            'sku' => isset($sku_row['sku']) ? (string)$sku_row['sku'] : '',
+            'sku_name' => isset($sku_row['name']) ? (string)$sku_row['name'] : '',
+            'name' => isset($product_row['name']) ? (string)$product_row['name'] : '',
+            'description' => isset($product_row['description']) ? (string)$product_row['description'] : '',
+            'summary' => $summary,
+            'status' => isset($product_row['status']) ? (int)$product_row['status'] : 0,
+            'purchase_price' => isset($sku_row['purchase_price']) ? (float)$sku_row['purchase_price'] : null,
+            'stock' => $stock,
+            'category_ids' => $category_ids,
+            'features' => $features,
+        );
+    }
+
+    $categories = array();
+    foreach (array_keys($used_category_ids) as $cid) {
+        if (isset($category_map[$cid])) {
+            $categories[] = $category_map[$cid];
+        }
+    }
+
+    ms_bridge_json(200, array(
+        'status' => 'ok',
+        'items' => $items,
+        'categories' => $categories,
+        'offset' => $offset,
+        'limit' => $limit,
     ));
 }
 
