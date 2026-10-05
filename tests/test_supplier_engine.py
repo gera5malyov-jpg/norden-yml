@@ -1291,6 +1291,26 @@ def test_create_starts_with_supplier_identity_before_numeric_finalize():
 
 
 
+
+def test_norden_webasyst_refresh_deduplicates_repeated_search_rows():
+    from supplier_engine.live_norden_webasyst_refresh import _load_products
+
+    class Fake:
+        def __init__(self):
+            self.calls = 0
+
+        def call(self, method, *, params=None, **kwargs):
+            self.calls += 1
+            if self.calls == 1:
+                row = {"id": 10, "skus": [{"id": 20, "sku": "AF-1", "name": "NS-1"}]}
+                return {"products": [dict(row) for _ in range(1000)]}
+            return {"products": []}
+
+    rows = _load_products(Fake(), 142)
+    assert len(rows) == 1
+    assert rows[0]["id"] == 10
+
+
 def test_norden_webasyst_refresh_updates_purchase_and_main_stock_only():
     from supplier_engine.live_norden_webasyst_refresh import _build_plan
     products = [{
