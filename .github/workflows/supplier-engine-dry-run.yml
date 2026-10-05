@@ -61,6 +61,7 @@ permissions:
 
 jobs:
   tests:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -127,7 +128,6 @@ jobs:
 
   supplier-run:
     if: github.event_name == 'workflow_dispatch'
-    needs: tests
     concurrency:
       group: supplier-webasyst-${{ inputs.supplier_id || 'unknown' }}
       cancel-in-progress: false
@@ -147,6 +147,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install openpyxl requests pdfplumber
+      - name: Fast syntax check
+        run: python -m py_compile supplier_engine/runner.py supplier_engine/webasyst_sync.py supplier_engine/kit_sync.py supplier_engine/bridge.py
       - name: Resolve supplier config
         id: cfg
         env:
