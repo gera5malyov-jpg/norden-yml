@@ -396,31 +396,34 @@ def _characteristic_index(rows):
     return index
 
 
-def _single_characteristic_id(index, title):
-    matches = index.get(_norm(title), [])
+def _characteristic_sort_key(row):
+    value = _s(row.get("id"))
+    return (0, int(value)) if value.isdigit() else (1, value)
+
+
+def _pick_characteristic(matches, title):
     exact = [
         row for row in matches
         if _s(row.get("title") or row.get("name")) == title
     ]
-    if len(exact) == 1:
-        return _s(exact[0].get("id"))
-    if len(exact) > 1 or len(matches) > 1:
-        raise KitSyncError("KIT characteristic is ambiguous: %s" % title)
-    if len(matches) == 1:
-        return _s(matches[0].get("id"))
-    return ""
+    pool = exact or list(matches)
+    if not pool:
+        return None
+    # Historical KIT data can contain duplicate characteristic definitions.
+    # Reuse one stable existing definition instead of creating more duplicates.
+    return sorted(pool, key=_characteristic_sort_key)[0]
+
+
+def _single_characteristic_id(index, title):
+    row = _pick_characteristic(index.get(_norm(title), []), title)
+    return _s(row.get("id")) if row else ""
 
 
 def _ensure_characteristic(kit, rows, index, title):
     key = _norm(title)
-    matches = index.get(key, [])
-    exact = [row for row in matches if _s(row.get("title") or row.get("name")) == title]
-    if len(exact) == 1:
-        return _s(exact[0].get("id"))
-    if len(exact) > 1 or len(matches) > 1:
-        raise KitSyncError("KIT characteristic is ambiguous: %s" % title)
-    if len(matches) == 1:
-        return _s(matches[0].get("id"))
+    row = _pick_characteristic(index.get(key, []), title)
+    if row:
+        return _s(row.get("id"))
     row = kit.create_characteristic(title)
     cid = _s(row.get("id"))
     if not cid:
@@ -499,12 +502,17 @@ def _variant_characteristic_values(variant, characteristic_id):
     return []
 
 
-def _variant_supplier_article(variant, supplier_identity_ids):
+def _variant_supplier_articles(variant, supplier_identity_ids):
     values = []
     for characteristic_id in supplier_identity_ids or []:
         for value in _variant_characteristic_values(variant, characteristic_id):
             if value and value not in values:
                 values.append(value)
+    return values
+
+
+def _variant_supplier_article(variant, supplier_identity_ids):
+    values = _variant_supplier_articles(variant, supplier_identity_ids)
     if len(values) > 1:
         raise KitSyncError(
             "KIT variant %s has conflicting supplier articles: %s"
@@ -520,14 +528,16 @@ def _variant_indexes(variants, supplier_identity_ids):
     for row in variants:
         sku = _s(row.get("sku"))
         kit_id = _s(row.get("kit_id"))
-        supplier_article = _variant_supplier_article(row, supplier_identity_ids)
         brand_key = _norm(row.get("brand"))
         if sku:
             by_sku[sku].append(row)
         if kit_id:
             by_kit_id[kit_id].append(row)
-        if supplier_article and brand_key:
-            by_supplier_brand[(supplier_article, brand_key)].append(row)
+        if brand_key:
+            # Index every historical supplier identity value. Corrupt rows are
+            # rejected only when selected for the current Webasyst product.
+            for supplier_article in _variant_supplier_articles(row, supplier_identity_ids):
+                by_supplier_brand[(supplier_article, brand_key)].append(row)
     return by_sku, by_kit_id, by_supplier_brand
 
 
@@ -583,10 +593,38 @@ def _select_variant(product, by_sku, by_kit_id, by_supplier_brand, supplier_iden
     if len(exact) == 1:
         return exact[0]
 
-    if sku_matches:
+    # SKU is the primary stable identity. One same-brand KIT row is safe to
+    # relink even when its historical supplier-article field is empty/stale.
+    same_brand = [
+        row for row in sku_matches
+        if _norm(row.get("brand")) == brand_key
+    ]
+    if len(same_brand) == 1:
+        _variant_supplier_article(same_brand[0], supplier_identity_ids)
+        return same_brand[0]
+    if len(same_brand) > 1:
         raise KitSyncError(
-            "KIT already contains SKU=%s but supplier article/brand do not match exactly; automatic linking is blocked"
-            % sku
+            "KIT SKU=%s has %d Norden variants; automatic linking is ambiguous"
+            % (sku, len(same_brand))
+        )
+
+    if sku_matches:
+        candidates = []
+        for row in sku_matches[:5]:
+            articles = _variant_supplier_articles(row, supplier_identity_ids)
+            candidates.append(
+                "id=%s kit_id=%s brand=%s supplier=%s"
+                % (
+                    _s(row.get("id")),
+                    _s(row.get("kit_id")),
+                    _s(row.get("brand")),
+                    ",".join(articles) or "-",
+                )
+            )
+        raise KitSyncError(
+            "KIT already contains SKU=%s but no candidate has brand=%s; "
+            "automatic linking is blocked; candidates: %s"
+            % (sku, brand, " | ".join(candidates))
         )
 
     supplier_matches = by_supplier_brand.get((supplier_sku, brand_key), [])
@@ -622,6 +660,7 @@ def _identity_preflight(products, variants, characteristic_index, brand):
             "status": "blocked",
             "matched_by_kit_id": 0,
             "matched_exact_identity": 0,
+            "matched_by_sku_brand": 0,
             "create_new": 0,
             "conflicts": 1,
             "conflict_sample": [{"error": str(exc)[:1200]}],
@@ -631,6 +670,7 @@ def _identity_preflight(products, variants, characteristic_index, brand):
         "status": "ok",
         "matched_by_kit_id": 0,
         "matched_exact_identity": 0,
+        "matched_by_sku_brand": 0,
         "create_new": 0,
         "conflicts": 0,
         "conflict_sample": [],
@@ -653,7 +693,14 @@ def _identity_preflight(products, variants, characteristic_index, brand):
             elif _feature_kit_id(product.get("features")):
                 report["matched_by_kit_id"] += 1
             else:
-                report["matched_exact_identity"] += 1
+                existing_supplier = _variant_supplier_article(
+                    variant,
+                    supplier_identity_ids,
+                )
+                if existing_supplier == _s(product.get("supplier_sku")):
+                    report["matched_exact_identity"] += 1
+                else:
+                    report["matched_by_sku_brand"] += 1
         except Exception as exc:
             report["conflicts"] += 1
             if len(report["conflict_sample"]) < 100:
