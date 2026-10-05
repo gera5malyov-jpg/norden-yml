@@ -1,18 +1,16 @@
 {
-  "started_at_utc": "2026-10-04T12:00:12.564964+00:00",
+  "started_at_utc": "2026-10-05T01:39:57.948403+00:00",
   "mode": "is_autoarchived_true_only",
   "max_restore_per_run": 100,
-  "archived_total_reported": 8213,
-  "archived_items_inspected": 1353,
-  "autoarchive_candidates_seen": 71,
-  "manual_or_other_archive_skipped": 1282,
+  "archived_total_reported": 8133,
+  "archived_items_inspected": 2224,
+  "autoarchive_candidates_seen": 100,
+  "manual_or_other_archive_skipped": 2124,
   "missing_info_skipped": 0,
-  "restored_count": 70,
-  "failed_count": 1,
-  "failures_by_reason": {
-    "restore_limit_exceeded": 1
-  },
-  "limit_hit": "restore_limit_exceeded",
+  "restored_count": 100,
+  "failed_count": 0,
+  "failures_by_reason": {},
+  "limit_hit": "local_daily_safety_cap",
   "complete_for_this_run": false,
-  "finished_at_utc": "2026-10-04T12:01:15.887175+00:00"
+  "finished_at_utc": "2026-10-05T01:41:30.865422+00:00"
 }
