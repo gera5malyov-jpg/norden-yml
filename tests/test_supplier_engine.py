@@ -1335,9 +1335,11 @@ def test_kit_export_uses_webasyst_categories_and_user_prices():
         if x["values"] == ["NS-1"]
     ]
     assert len(supplier_chars) == 1
-    update = next(x for x in wa.calls if x["method"] == "shop.product.update")
-    assert update["data"]["features"]["kit_id"] == "987654"
-    assert "https://kit.example/img1.jpg" in update["data"]["summary"]
+    updates = [x for x in wa.calls if x["method"] == "shop.product.update"]
+    kit_id_update = next(x for x in updates if "features" in (x["data"] or {}))
+    summary_update = next(x for x in updates if "summary" in (x["data"] or {}))
+    assert kit_id_update["data"]["features"]["kit_id"] == "987654"
+    assert "https://kit.example/img1.jpg" in summary_update["data"]["summary"]
 
 
 def test_kit_export_preserves_multiple_webasyst_categories():
@@ -1609,14 +1611,24 @@ def test_legacy_code_site_characteristic_title_is_fixed():
 def test_kit_preflight_blocks_all_writes_on_any_identity_conflict():
     class ConflictKit(_FakeKitForSupplierExport):
         def variants(self):
-            return [{
-                "id": "v-existing",
-                "kit_id": "7001",
-                "sku": "12345",
-                "brand": "Norden",
-                "product_id": "p-existing",
-                "characteristics": [],
-            }]
+            return [
+                {
+                    "id": "v-existing-1",
+                    "kit_id": "7001",
+                    "sku": "12345",
+                    "brand": "Norden",
+                    "product_id": "p-existing-1",
+                    "characteristics": [],
+                },
+                {
+                    "id": "v-existing-2",
+                    "kit_id": "7002",
+                    "sku": "12345",
+                    "brand": "Norden",
+                    "product_id": "p-existing-2",
+                    "characteristics": [],
+                },
+            ]
 
     kit = ConflictKit()
     wa = _FakeWaForKit()
