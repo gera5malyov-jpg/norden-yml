@@ -49,6 +49,14 @@ jobs:
               raise SystemExit('missing KIT warehouses: '+repr(sorted(missing)))
           print('KIT_READONLY_SMOKE=ok')
           PY
+      - name: Read-only Norden API to Webasyst refresh preflight
+        env:
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: |
+          python -m supplier_engine.live_norden_webasyst_refresh --mode dry-run --output norden-webasyst-refresh-preflight.json
+
       - name: Read-only live Norden KIT preflight
         env:
           WEBASYST_BASE_URL: https://profikompany.ru
@@ -56,6 +64,13 @@ jobs:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         run: |
           python -m supplier_engine.live_kit_readonly_preflight --output kit-live-preflight.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: norden-webasyst-refresh-preflight
+          path: norden-webasyst-refresh-preflight.json
+          if-no-files-found: warn
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
