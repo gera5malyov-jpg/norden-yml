@@ -1,10 +1,7 @@
 name: Cleanup Norden temp SSH key once
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/cleanup-norden-temp-ssh-once.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
