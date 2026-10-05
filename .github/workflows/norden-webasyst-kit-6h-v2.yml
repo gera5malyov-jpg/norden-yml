@@ -26,7 +26,7 @@ jobs:
       - name: Checkout pinned supplier sync code
         uses: actions/checkout@v4
         with:
-          ref: 9ddf57e463ba40a7229fdbf0ad4233aa70a680bc
+          ref: 98b5ab2b4c047e01602dbb5b85264d974b99d884
 
       - uses: actions/setup-python@v5
         with:
@@ -36,10 +36,22 @@ jobs:
         run: pip install --disable-pip-version-check openpyxl requests pdfplumber reportlab
 
       - name: Compile scheduled sync
-        run: python -m py_compile supplier_engine/live_kit_scheduled_sync.py supplier_engine/kit_sync.py supplier_engine/live_kit_readonly_preflight.py
+        run: python -m py_compile supplier_engine/live_norden_webasyst_refresh.py supplier_engine/live_kit_scheduled_sync.py supplier_engine/kit_sync.py supplier_engine/live_kit_readonly_preflight.py
 
-      - name: Preflight and sync categorized NORDEN-100 products
-        id: sync
+      - name: Refresh existing NORDEN-100 from Norden source
+        id: webasyst_refresh
+        env:
+          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: |
+          python -m supplier_engine.live_norden_webasyst_refresh \
+            --mode apply \
+            --type-name NORDEN-100 \
+            --output norden-webasyst-refresh.json
+
+      - name: Preflight and sync categorized NORDEN-100 products to KIT
+        id: kit_sync
         env:
           WEBASYST_BASE_URL: https://profikompany.ru
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
@@ -53,11 +65,13 @@ jobs:
             --max-eligible 5000 \
             --output scheduled-kit-sync.json
 
-      - name: Save run report
+      - name: Save run reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: norden-webasyst-kit-${{ github.run_id }}
-          path: scheduled-kit-sync.json
+          name: norden-full-chain-${{ github.run_id }}
+          path: |
+            norden-webasyst-refresh.json
+            scheduled-kit-sync.json
           if-no-files-found: warn
           retention-days: 14
