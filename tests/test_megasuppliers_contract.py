@@ -244,14 +244,18 @@ def test_supplier_profile_and_bridge_support_kit_export():
     bridge = (ROOT / "webasyst/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendBridge.controller.php").read_text(encoding="utf-8")
     deploy = DEPLOY_SCRIPT.read_text(encoding="utf-8")
     runner = (ROOT / "supplier_engine/runner.py").read_text(encoding="utf-8")
+    kit_runner = (ROOT / "supplier_engine/kit_runner.py").read_text(encoding="utf-8")
     kit_sync = (ROOT / "supplier_engine/kit_sync.py").read_text(encoding="utf-8")
     assert 'name="export_to_kit"' in panel
     assert "только товары, разложенные по категориям Webasyst" in panel
     assert "'export_to_kit' =>" in controller
     assert "$action === 'kit_manifest'" in bridge
     assert "if ($action === 'kit_manifest')" in deploy
-    assert "bridge.kit_manifest(" in runner
-    assert "sync_manifest(" in runner
+    assert "bridge.kit_manifest(" not in runner
+    assert "sync_manifest(" not in runner
+    assert "bridge.kit_manifest(" in kit_runner
+    assert "plan_manifest(" in kit_runner
+    assert "sync_manifest(" in kit_runner
     assert "СПБ привозной" in kit_sync
     assert 'Decimal("1.25")' in kit_sync
     assert 'Decimal("1.60")' in kit_sync
@@ -261,3 +265,22 @@ def test_supplier_profile_and_bridge_support_kit_export():
 def test_supplier_workflow_exposes_kit_token_for_apply():
     workflow = WORKFLOW.read_text(encoding="utf-8")
     assert "YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}" in workflow
+
+
+
+def test_kit_bridge_manifest_is_readonly_and_contains_images():
+    bridge = (ROOT / "webasyst/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendBridge.controller.php").read_text(encoding="utf-8")
+    deploy = DEPLOY_SCRIPT.read_text(encoding="utf-8")
+    for text in (bridge, deploy):
+        assert "'image_urls' => $image_urls" in text
+        assert "array('dry-run', 'apply')" in text
+    assert "writes_disabled" not in bridge.split("if ($action === 'kit_manifest')", 1)[1].split("if ($action === 'kit_result')", 1)[0]
+
+
+def test_supplier_engine_reuses_existing_repository_kit_client():
+    kit_sync = (ROOT / "supplier_engine/kit_sync.py").read_text(encoding="utf-8")
+    kit_runner = (ROOT / "supplier_engine/kit_runner.py").read_text(encoding="utf-8")
+    assert '"norden-kit" / "webasyst_n100_to_kit_once.py"' in kit_sync
+    assert "class KitClient:" not in kit_sync
+    assert not (ROOT / "supplier_engine/kit_export.py").exists()
+    assert "from .kit_sync import KitSyncError, plan_manifest, sync_manifest" in kit_runner
