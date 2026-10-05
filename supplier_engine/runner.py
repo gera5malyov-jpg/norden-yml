@@ -387,6 +387,10 @@ def main():
                     "created": result["created"],
                     "updated": result["updated"],
                     "zeroed": result["zeroed"],
+                    "recovered_skus": result.get("recovered_skus", 0),
+                    "relinked_existing": result.get("relinked_existing", 0),
+                    "recreated_products": result.get("recreated_products", 0),
+                    "stale_zero_links": result.get("stale_zero_links", 0),
                     "links_synced": synced,
                     "features_resolved": features_resolved,
                 }
