@@ -1,10 +1,7 @@
 name: Read Norden megasuppliers config once
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/read-norden-megasuppliers-config-once.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
