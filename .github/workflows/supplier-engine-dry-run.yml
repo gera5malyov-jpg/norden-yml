@@ -128,6 +128,9 @@ jobs:
   supplier-run:
     if: github.event_name == 'workflow_dispatch'
     needs: tests
+    concurrency:
+      group: supplier-webasyst-${{ inputs.supplier_id || 'unknown' }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 330
     env:
