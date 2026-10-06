@@ -441,6 +441,7 @@ class shopOzonstocksyncPluginSync
                     s.name AS sku_name,
                     s.available,
                     s.status AS sku_status,
+                    COALESCE(s.count, 0) AS stock_count,
                     " . $cost_select . " AS purchase_price
                  FROM shop_set_products sp
                  INNER JOIN shop_product p ON p.id = sp.product_id
@@ -448,6 +449,10 @@ class shopOzonstocksyncPluginSync
                  WHERE sp.set_id = s:set_id
                    AND s.sku IS NOT NULL
                    AND s.sku <> ''
+                   AND p.status = 1
+                   AND s.status = 1
+                   AND s.available = 1
+                   AND COALESCE(s.count, 0) > 0
                  ORDER BY p.id, s.id",
                 array('set_id' => self::CREATE_SET_ID)
             )->fetchAll();
@@ -460,7 +465,7 @@ class shopOzonstocksyncPluginSync
             'CREATE_ALLOWLIST: id=' . self::CREATE_SET_ID
             . ', name=' . self::CREATE_SET_NAME
             . ', products=' . (int)$set['count']
-            . ', sku_rows=' . count($rows)
+            . ', in_stock_active_sku_rows=' . count($rows)
         );
 
         return $rows;
