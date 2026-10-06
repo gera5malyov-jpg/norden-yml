@@ -130,10 +130,11 @@ jobs:
           $rc=new ReflectionClass('shopOzonstocksyncPluginSync');
           $create_set_id=$rc->getConstant('CREATE_SET_ID');
           $create_set_name=$rc->getConstant('CREATE_SET_NAME');
+          $create_primary_account=$rc->getConstant('CREATE_PRIMARY_ACCOUNT_INDEX');
           $set_model=new shopSetModel();
           $create_set=$set_model->getById($create_set_id);
           $allowlist_ok=($create_set && (string)$create_set['name']===$create_set_name && (int)$create_set['type']===0);
-          $ok=(isset($info['version']) && $info['version']==='1.7.0' && strlen($html)>500 && strpos($html,'type_margin_percent')!==false && strpos($html,'ozs-stock-picker')!==false && strpos($html,'_mapping_rows_present')!==false && $allowlist_ok);
+          $ok=(isset($info['version']) && $info['version']==='1.7.0' && strlen($html)>500 && strpos($html,'type_margin_percent')!==false && strpos($html,'ozs-stock-picker')!==false && strpos($html,'_mapping_rows_present')!==false && $allowlist_ok && (int)$create_primary_account===1);
           echo 'PLUGIN_CLASS='.get_class($p)."\n";
           echo 'VERSION='.(isset($info['version'])?$info['version']:'')."\n";
           echo 'UI_LENGTH='.strlen($html)."\n";
@@ -144,6 +145,7 @@ jobs:
           echo 'CREATE_SET_NAME='.(string)$create_set_name."\n";
           echo 'CREATE_SET_COUNT='.($create_set?(int)$create_set['count']:-1)."\n";
           echo 'CREATE_ALLOWLIST='.($allowlist_ok?'OK':'FAIL')."\n";
+          echo 'CREATE_PRIMARY_ACCOUNT_INDEX='.(int)$create_primary_account."\n";
           echo 'HEALTH='.($ok?'OK':'FAIL')."\n";
           exit($ok?0:2);
           ?>
@@ -202,3 +204,5 @@ jobs:
             git pull --rebase origin main || true
             git push origin HEAD:main
           fi
+
+# deploy trigger primary-account routing 2026-10-06
