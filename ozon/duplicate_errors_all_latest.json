@@ -1,6 +1,5258 @@
 {
-  "total_product_ids": 8884,
-  "scanned_info_items": 0,
-  "duplicate_error_count": 0,
-  "items": []
+  "total_offer_ids": 8884,
+  "scanned_info_items": 8884,
+  "duplicate_error_count": 107,
+  "items": [
+    {
+      "offer_id": "9710020018112",
+      "product_id": 1177381749,
+      "sku": 1687067434,
+      "name": "Зеркало ЗР 551 Бася, шимо темный/шимо светлый",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T06:11:38.888033Z"
+      },
+      "duplicates": [
+        "AF-31200887 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31200887 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31200887 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31200887\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31114831",
+      "product_id": 1482494515,
+      "sku": 1931442922,
+      "name": "Зеркало в чёрной раме Ноулз",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-10-01T00:28:37.612621Z"
+      },
+      "duplicates": [
+        "AF-31395752 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31395752 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31395752 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31395752\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31200887",
+      "product_id": 1177382410,
+      "sku": 1687067510,
+      "name": "Зеркало ГАРМОНИЯ ЗР 601 (0,81х0,61х0,02), шимо темный/шимо светлый",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T06:15:56.358283Z"
+      },
+      "duplicates": [
+        "AF-31200888 - 751816, 9710020018112 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31200888 - 751816, 9710020018112 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31200888 - 751816, 9710020018112 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31200888\",\"COMPANYID\":751816},{\"OFFERID\":\"9710020018112\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31201275",
+      "product_id": 1177382427,
+      "sku": 1686233169,
+      "name": "Зеркало \"Сакура\" (800х600), лоредо",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T06:20:51.393644Z"
+      },
+      "duplicates": [
+        "AF-31201283 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31201283 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31201283 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31201283\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31201283",
+      "product_id": 1177382392,
+      "sku": 1686233262,
+      "name": "Зеркало \"Саломея\" (800х600), венге/лоредо",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T06:12:38.685656Z"
+      },
+      "duplicates": [
+        "AF-31201275 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31201275 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31201275 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31201275\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31219478",
+      "product_id": 1280492048,
+      "sku": 1775099288,
+      "name": "Комод \"Айден\" КМ06-800 - Серый",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T15:57:53.818910Z"
+      },
+      "duplicates": [
+        "9710020022057 - 751816, 9710020020809 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: 9710020022057 - 751816, 9710020020809 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "9710020022057 - 751816, 9710020020809 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"9710020022057\",\"COMPANYID\":751816},{\"OFFERID\":\"9710020020809\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31315788",
+      "product_id": 1267867646,
+      "sku": 1764396751,
+      "name": "Зеркало в чёрной раме Шифа",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T14:47:17.440494Z"
+      },
+      "duplicates": [
+        "AF-31648853 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31648853 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31648853 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31648853\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31378522",
+      "product_id": 1495200595,
+      "sku": 1940835119,
+      "name": "Стул руководителя Everprof Monaco Wood Кожа Черный",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-10-01T01:25:20.080743Z"
+      },
+      "duplicates": [
+        "AF-31395652 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31395652 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31395652 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31395652\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31648744",
+      "product_id": 5813806267,
+      "sku": 5344916109,
+      "name": "Кресло Everprof Simple White (Симпл Белый) Сетка Серый",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T20:21:53.184603Z"
+      },
+      "duplicates": [
+        "AF-31648745 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31648745 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31648745 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31648745\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31648745",
+      "product_id": 5813806010,
+      "sku": 5344914897,
+      "name": "Кресло Everprof Start White (Старт Белый) Сетка Серый",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T20:21:32.843844Z"
+      },
+      "duplicates": [
+        "AF-31648744 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31648744 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31648744 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31648744\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651469",
+      "product_id": 6033550670,
+      "sku": 5532380067,
+      "name": "Кресло-качалка 05/05 разборное из натурального ротанга, мёд, коричневая подушка",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T21:18:50.011420Z"
+      },
+      "duplicates": [
+        "AF-31651483 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651483 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651483 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651483\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651470",
+      "product_id": 6033550388,
+      "sku": 5532379811,
+      "name": "Кресло-качалка 05/05 разборное из натурального ротанга, мёд, бежевая подушка",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T21:11:34.030385Z"
+      },
+      "duplicates": [
+        "AF-31651484 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651484 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651484 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651484\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651477",
+      "product_id": 6033550676,
+      "sku": 5532379604,
+      "name": "Кресло-качалка 05/05 из натурального ротанга, белый матовый, коричневая подушка",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-10-01T21:19:22.536114Z"
+      },
+      "duplicates": [
+        "AF-31651467 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651467 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651467 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651467\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651478",
+      "product_id": 6033550343,
+      "sku": 5532379142,
+      "name": "Кресло-качалка 05/05 из натурального ротанга, белый матовый, бежевая подушка",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-10-01T21:10:52.420207Z"
+      },
+      "duplicates": [
+        "AF-31651468 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651468 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651468 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651468\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651483",
+      "product_id": 6033550304,
+      "sku": 5532379607,
+      "name": "Кресло-качалка 05/05 из натурального ротанга, мёд, коричневая подушка",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T21:10:48.413920Z"
+      },
+      "duplicates": [
+        "AF-31651469 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651469 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651469 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651469\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651484",
+      "product_id": 6033550708,
+      "sku": 5532380383,
+      "name": "Кресло-качалка 05/05 из натурального ротанга, мёд, бежевая подушка",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T21:19:32.902833Z"
+      },
+      "duplicates": [
+        "AF-31651470 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651470 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651470 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651470\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651560",
+      "product_id": 6085580551,
+      "sku": 5577497780,
+      "name": "Кресло Багама из натурального ротанга, каркас белый матовый, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:27:12.672033Z"
+      },
+      "duplicates": [
+        "AF-31651561 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651561 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651561 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651561\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651561",
+      "product_id": 6085580298,
+      "sku": 5577497147,
+      "name": "Кресло Багама из натурального ротанга, каркас белый матовый, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:07:19.955163Z"
+      },
+      "duplicates": [
+        "AF-31651560 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651560 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651560 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651560\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651563",
+      "product_id": 6085581064,
+      "sku": 5577497536,
+      "name": "Кресло Багама из натурального ротанга, каркас белый матовый, подушка бежевая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:35:49.839967Z"
+      },
+      "duplicates": [
+        "AF-31651564 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651564 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651564 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651564\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651564",
+      "product_id": 6085581068,
+      "sku": 5577497175,
+      "name": "Кресло Багама из натурального ротанга, каркас белый матовый, подушка бежевая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:36:14.899583Z"
+      },
+      "duplicates": [
+        "AF-31651563 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651563 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651563 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651563\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651567",
+      "product_id": 6085580314,
+      "sku": 5577497073,
+      "name": "Кресло Багама из натурального ротанга, каркас коньяк, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:07:58.765530Z"
+      },
+      "duplicates": [
+        "AF-31651568 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651568 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651568 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651568\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651568",
+      "product_id": 6085581074,
+      "sku": 5577498004,
+      "name": "Кресло Багама из натурального ротанга, каркас коньяк, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:36:24.676785Z"
+      },
+      "duplicates": [
+        "AF-31651567 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651567 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651567 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651567\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651570",
+      "product_id": 6085581032,
+      "sku": 5577497541,
+      "name": "Кресло Багама из натурального ротанга, каркас коньяк, подушка бежевая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:35:16.064616Z"
+      },
+      "duplicates": [
+        "AF-31651571 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651571 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651571 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651571\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651574",
+      "product_id": 6085580861,
+      "sku": 5577496395,
+      "name": "Кресло Багама из натурального ротанга, каркас мед, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:29:21.407695Z"
+      },
+      "duplicates": [
+        "AF-31651575 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651575 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651575 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651575\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651575",
+      "product_id": 6085580523,
+      "sku": 5577496614,
+      "name": "Кресло Багама из натурального ротанга, каркас мед, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:26:50.646679Z"
+      },
+      "duplicates": [
+        "AF-31651574 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651574 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651574 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651574\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651577",
+      "product_id": 6085580815,
+      "sku": 5577496941,
+      "name": "Кресло Багама из натурального ротанга, каркас мед, подушка бежевая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:28:46.717495Z"
+      },
+      "duplicates": [
+        "AF-31651578 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651578 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651578 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651578\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651578",
+      "product_id": 6085581058,
+      "sku": 5577496216,
+      "name": "Кресло Багама из натурального ротанга, каркас мед, подушка бежевая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:35:38.117557Z"
+      },
+      "duplicates": [
+        "AF-31651577 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651577 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651577 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651577\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651581",
+      "product_id": 6085580635,
+      "sku": 5577500014,
+      "name": "Кресло Багама из натурального ротанга, каркас миндаль матовый, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:27:43.687611Z"
+      },
+      "duplicates": [
+        "AF-31651582 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651582 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651582 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651582\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651582",
+      "product_id": 6085580287,
+      "sku": 5577497201,
+      "name": "Кресло Багама из натурального ротанга, каркас миндаль матовый, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:06:44.222039Z"
+      },
+      "duplicates": [
+        "AF-31651581 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651581 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651581 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651581\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651591",
+      "product_id": 6085580452,
+      "sku": 5577497099,
+      "name": "Кресло Багама из натурального ротанга, каркас натуральный, подушка бежевая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:25:19.258057Z"
+      },
+      "duplicates": [
+        "AF-31651592 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651592 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651592 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651592\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651595",
+      "product_id": 6085580369,
+      "sku": 5577497624,
+      "name": "Кресло Багама из натурального ротанга, каркас олива, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:16:07.248950Z"
+      },
+      "duplicates": [
+        "AF-31651596 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651596 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651596 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651596\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651596",
+      "product_id": 6085580321,
+      "sku": 5577497782,
+      "name": "Кресло Багама из натурального ротанга, каркас олива, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:08:37.761532Z"
+      },
+      "duplicates": [
+        "AF-31651595 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651595 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651595 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651595\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651598",
+      "product_id": 6085581000,
+      "sku": 5577496980,
+      "name": "Кресло Багама из натурального ротанга, каркас олива, подушка бежевая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:35:05.338743Z"
+      },
+      "duplicates": [
+        "AF-31651599 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651599 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651599 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651599\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651599",
+      "product_id": 6085580455,
+      "sku": 5577497087,
+      "name": "Кресло Багама из натурального ротанга, каркас олива, подушка бежевая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:25:54.964057Z"
+      },
+      "duplicates": [
+        "AF-31651598 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651598 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651598 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651598\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651602",
+      "product_id": 6055962088,
+      "sku": 5552310584,
+      "name": "Диван Багама 2х местный, каркас белый матовый, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:21:47.966312Z"
+      },
+      "duplicates": [
+        "AF-31651603 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651603 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651603 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651603\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651603",
+      "product_id": 6055962031,
+      "sku": 5552317250,
+      "name": "Диван Багама 2х местный, каркас белый матовый, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:13:09.257428Z"
+      },
+      "duplicates": [
+        "AF-31651602 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651602 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651602 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651602\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651605",
+      "product_id": 6055962667,
+      "sku": 5552313560,
+      "name": "Диван Багама 2х местный, каркас белый матовый, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:39:24.357127Z"
+      },
+      "duplicates": [
+        "AF-31651606 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651606 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651606 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651606\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651606",
+      "product_id": 6055962068,
+      "sku": 5552312307,
+      "name": "Диван Багама 2х местный, каркас белый матовый, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:20:40.441168Z"
+      },
+      "duplicates": [
+        "AF-31651605 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651605 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651605 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651605\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651612",
+      "product_id": 6055962689,
+      "sku": 5552314442,
+      "name": "Диван Багама 2х местный, каркас венге, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-10-01T22:39:51.099062Z"
+      },
+      "duplicates": [
+        "AF-31651613 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651613 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651613 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651613\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651613",
+      "product_id": 6055962096,
+      "sku": 5552318903,
+      "name": "Диван Багама 2х местный, каркас венге, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-10-01T22:22:05.465244Z"
+      },
+      "duplicates": [
+        "AF-31651612 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651612 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651612 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651612\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651616",
+      "product_id": 6055962092,
+      "sku": 5552310453,
+      "name": "Диван Багама 2х местный, каркас коньяк, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:22:07.347556Z"
+      },
+      "duplicates": [
+        "AF-31651617 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651617 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651617 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651617\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651617",
+      "product_id": 6055962182,
+      "sku": 5552311086,
+      "name": "Диван Багама 2х местный, каркас коньяк, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:30:43.524693Z"
+      },
+      "duplicates": [
+        "AF-31651616 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651616 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651616 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651616\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651619",
+      "product_id": 6055962162,
+      "sku": 5552315076,
+      "name": "Диван Багама 2х местный, каркас коньяк, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:30:10.317839Z"
+      },
+      "duplicates": [
+        "AF-31651620 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651620 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651620 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651620\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651620",
+      "product_id": 6055962315,
+      "sku": 5552323272,
+      "name": "Диван Багама 2х местный, каркас коньяк, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:38:26.300404Z"
+      },
+      "duplicates": [
+        "AF-31651619 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651619 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651619 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651619\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651623",
+      "product_id": 6055962294,
+      "sku": 5552312132,
+      "name": "Диван Багама 2х местный, каркас мед, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:38:18.778790Z"
+      },
+      "duplicates": [
+        "AF-31651624 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651624 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651624 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651624\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651624",
+      "product_id": 6055962141,
+      "sku": 5552313231,
+      "name": "Диван Багама 2х местный, каркас мед, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:29:23.305724Z"
+      },
+      "duplicates": [
+        "AF-31651623 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651623 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651623 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651623\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651626",
+      "product_id": 6055962046,
+      "sku": 5552315721,
+      "name": "Диван Багама 2х местный, каркас мед, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:13:58.519779Z"
+      },
+      "duplicates": [
+        "AF-31651627 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651627 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651627 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651627\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651637",
+      "product_id": 6055961942,
+      "sku": 5552310389,
+      "name": "Диван Багама 2х местный, каркас натуральный, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:04:38.534647Z"
+      },
+      "duplicates": [
+        "AF-31651638 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651638 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651638 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651638\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651638",
+      "product_id": 6055962187,
+      "sku": 5552312642,
+      "name": "Диван Багама 2х местный, каркас натуральный, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:31:03.693451Z"
+      },
+      "duplicates": [
+        "AF-31651637 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651637 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651637 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651637\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651640",
+      "product_id": 6055961985,
+      "sku": 5552309033,
+      "name": "Диван Багама 2х местный, каркас натуральный, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:06:13.923053Z"
+      },
+      "duplicates": [
+        "AF-31651641 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651641 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651641 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651641\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651641",
+      "product_id": 6055962199,
+      "sku": 5552309087,
+      "name": "Диван Багама 2х местный, каркас натуральный, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:31:22.128194Z"
+      },
+      "duplicates": [
+        "AF-31651640 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651640 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651640 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651640\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651644",
+      "product_id": 6055962061,
+      "sku": 5552314061,
+      "name": "Диван Багама 2х местный, каркас олива, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:15:04.143154Z"
+      },
+      "duplicates": [
+        "AF-31651645 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651645 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651645 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651645\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651645",
+      "product_id": 6055962201,
+      "sku": 5552315521,
+      "name": "Диван Багама 2х местный, каркас олива, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:31:38.100247Z"
+      },
+      "duplicates": [
+        "AF-31651644 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651644 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651644 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651644\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651647",
+      "product_id": 6055962028,
+      "sku": 5552311991,
+      "name": "Диван Багама 2х местный, каркас олива, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:12:42.472484Z"
+      },
+      "duplicates": [
+        "AF-31651648 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651648 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651648 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651648\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651648",
+      "product_id": 6055962078,
+      "sku": 5552309870,
+      "name": "Диван Багама 2х местный, каркас олива, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:21:01.982534Z"
+      },
+      "duplicates": [
+        "AF-31651647 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651647 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651647 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651647\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651651",
+      "product_id": 6055962238,
+      "sku": 5552310044,
+      "name": "Диван Багама 2х местный, каркас орех матовый, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:32:09.837493Z"
+      },
+      "duplicates": [
+        "AF-31651652 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651652 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651652 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651652\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651652",
+      "product_id": 6055962152,
+      "sku": 5552309177,
+      "name": "Диван Багама 2х местный, каркас орех матовый, подушка коричневая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:29:22.228724Z"
+      },
+      "duplicates": [
+        "AF-31651651 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651651 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651651 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651651\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651654",
+      "product_id": 6055962325,
+      "sku": 5552308055,
+      "name": "Диван Багама 2х местный, каркас орех матовый, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:38:52.849079Z"
+      },
+      "duplicates": [
+        "AF-31651655 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651655 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651655 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651655\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651655",
+      "product_id": 6055962067,
+      "sku": 5552309384,
+      "name": "Диван Багама 2х местный, каркас орех матовый, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:20:30.839665Z"
+      },
+      "duplicates": [
+        "AF-31651654 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651654 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651654 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651654\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651661",
+      "product_id": 6055962098,
+      "sku": 5552314615,
+      "name": "Диван Багама 2х местный, каркас темно-коричневый, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:22:10.169174Z"
+      },
+      "duplicates": [
+        "AF-31651662 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651662 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651662 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651662\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651662",
+      "product_id": 6055962428,
+      "sku": 5552313664,
+      "name": "Диван Багама 2х местный, каркас темно-коричневый, подушка светлая",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T22:38:48.358860Z"
+      },
+      "duplicates": [
+        "AF-31651661 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651661 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651661 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651661\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651767",
+      "product_id": 6204076399,
+      "sku": 5685563971,
+      "name": "стул Токио из комбинированного ротанга, каркас коньяк",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [
+        "OZN5685563971"
+      ],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-06T17:51:43.601291Z"
+      },
+      "duplicates": [
+        "AF-31651769 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651769 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651769 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651769\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651768",
+      "product_id": 6204076460,
+      "sku": 5685564815,
+      "name": "Стул Токио из комбинированного ротанга, каркас темно-коричневый",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [
+        "OZN5685564815"
+      ],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-06T17:51:41.347265Z"
+      },
+      "duplicates": [
+        "AF-31651770 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651770 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651770 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651770\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651769",
+      "product_id": 6204076375,
+      "sku": 5685563786,
+      "name": "стул Париж из комбинированного ротанга, каркас коньяк",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [
+        "OZN5685563786"
+      ],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-06T17:51:44.680999Z"
+      },
+      "duplicates": [
+        "AF-31651767 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651767 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651767 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651767\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AF-31651770",
+      "product_id": 6204076436,
+      "sku": 5685563439,
+      "name": "Стул Париж из комбинированного ротанга, каркас темно-коричневый",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [
+        "OZN5685563439"
+      ],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-06T17:51:44.565227Z"
+      },
+      "duplicates": [
+        "AF-31651768 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: AF-31651768 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "AF-31651768 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"AF-31651768\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "AND-366120",
+      "product_id": 1134713221,
+      "sku": 1649384225,
+      "name": "Стол обеденный Бостон-2 (750х1100х690) металл белый/белый гранит",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T14:45:52.679055Z"
+      },
+      "duplicates": [
+        "971002000493748 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: 971002000493748 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "971002000493748 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"971002000493748\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00000692",
+      "product_id": 1238555615,
+      "sku": 1738881654,
+      "name": "Кресло маятник Сенатор 78 (Венге/Дунди-112)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T12:38:33.136377Z"
+      },
+      "duplicates": [
+        "RED-00-00012695 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00012695 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00012695 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00012695\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00002369",
+      "product_id": 1180864121,
+      "sku": 1710827827,
+      "name": "Вешалка напольная Стелла-1-МД (Бук)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-30T07:14:44.924210Z"
+      },
+      "duplicates": [
+        "RED-00-00002372 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00002372 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00002372 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00002372\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00002372",
+      "product_id": 1180864123,
+      "sku": 1715156574,
+      "name": "Вешалка напольная Стелла-1-ДД (Бук)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-30T07:15:08.081445Z"
+      },
+      "duplicates": [
+        "RED-00-00002369 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00002369 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00002369 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00002369\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00002375",
+      "product_id": 1180864125,
+      "sku": 1689199278,
+      "name": "Вешалка напольная Стелла-2-М (Бук)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T07:15:14.538075Z"
+      },
+      "duplicates": [
+        "RED-00-00002374 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00002374 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00002374 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00002374\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00004044",
+      "product_id": 1144600831,
+      "sku": 1658426962,
+      "name": "Банкетка Джульетта (Молочный дуб/Крем/ткань) Вис",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-30T00:41:51.203473Z"
+      },
+      "duplicates": [
+        "RED-00-00013184 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00013184 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00013184 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00013184\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00004656",
+      "product_id": 1181946830,
+      "sku": 1690091894,
+      "name": "Вешалка напольная \"Верона Классик\"(венге)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T07:30:46.623909Z"
+      },
+      "duplicates": [
+        "RED-00-00010198 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00010198 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00010198 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00010198\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00004678",
+      "product_id": 1251604031,
+      "sku": 1750003040,
+      "name": "Банкетка Стефани (Венге/Бурый) Вис",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T13:52:59.510993Z"
+      },
+      "duplicates": [
+        "RED-00-00011426 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00011426 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00011426 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00011426\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00004755",
+      "product_id": 1181946873,
+      "sku": 1690091933,
+      "name": "Вешалка напольная \"Верона Люкс\"(Слоновая кость)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T07:40:00.998718Z"
+      },
+      "duplicates": [
+        "RED-00-00004754 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00004754 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00004754 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00004754\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00008148",
+      "product_id": 1144600913,
+      "sku": 1658122984,
+      "name": "Банкетка Глория (Венге/Verona Vanila) Ls",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T00:43:00.837796Z"
+      },
+      "duplicates": [
+        "RED-00-00011688 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00011688 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00011688 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00011688\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00008275",
+      "product_id": 1143728684,
+      "sku": 1657384135,
+      "name": "Банкетка \"Грейс\" (дуб шампань/ткань Бордо, кретная стяжкa)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-30T00:27:26.685259Z"
+      },
+      "duplicates": [
+        "RED-00-00011423 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00011423 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00011423 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00011423\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00009447",
+      "product_id": 1131868091,
+      "sku": 1646817656,
+      "name": "Стол обеденный Круглый-0090 (белая эмаль)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-29T12:18:34.981785Z"
+      },
+      "duplicates": [
+        "RED-00-_0009108 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-_0009108 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-_0009108 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-_0009108\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00009586",
+      "product_id": 1143745176,
+      "sku": 1657384558,
+      "name": "Банкетка \"Бергамо-Люкс\" (Белый)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T00:30:53.218269Z"
+      },
+      "duplicates": [
+        "RED-00-00009585 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00009585 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00009585 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00009585\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00010294",
+      "product_id": 1131867939,
+      "sku": 1646816696,
+      "name": "Стол обеденный Круглый-0090 (беленый дуб)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-29T11:55:45.843665Z"
+      },
+      "duplicates": [
+        "RED-00-_0009109 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-_0009109 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-_0009109 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-_0009109\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00010295",
+      "product_id": 1131868006,
+      "sku": 1646817539,
+      "name": "Стол обеденный Круглый-0090 (венге)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T12:07:45.363676Z"
+      },
+      "duplicates": [
+        "RED-00-_0009110 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-_0009110 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-_0009110 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-_0009110\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00010296",
+      "product_id": 1131867987,
+      "sku": 1646817467,
+      "name": "Стол обеденный Круглый-0090 (махагон)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-29T12:03:49.304068Z"
+      },
+      "duplicates": [
+        "RED-00-_0009111 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-_0009111 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-_0009111 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-_0009111\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00010297",
+      "product_id": 1131867955,
+      "sku": 1646817345,
+      "name": "Стол обеденный Круглый-0090 (светлый тон)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T11:59:01.956393Z"
+      },
+      "duplicates": [
+        "RED-00-_0009112 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-_0009112 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-_0009112 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-_0009112\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00010408",
+      "product_id": 1131867961,
+      "sku": 1646817381,
+      "name": "Стол обеденный Лилия-0110 (светлый тон)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-29T11:59:33.615820Z"
+      },
+      "duplicates": [
+        "RED-00-00010432 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00010432 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00010432 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00010432\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00010409",
+      "product_id": 1131868066,
+      "sku": 1646817441,
+      "name": "Стол обеденный Лилия-0110 (средний тон)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-29T12:13:53.554397Z"
+      },
+      "duplicates": [
+        "RED-00-00010433 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00010433 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00010433 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00010433\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00010433",
+      "product_id": 1131868028,
+      "sku": 1646817647,
+      "name": "Стол обеденный Овальный-0110 (средний тон)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T12:09:37.225967Z"
+      },
+      "duplicates": [
+        "RED-00-00010409 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00010409 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00010409 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00010409\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00010479",
+      "product_id": 1127684827,
+      "sku": 1642925294,
+      "name": "Стол обеденный Лилия-1300 (светлый тон)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T10:14:22.303024Z"
+      },
+      "duplicates": [
+        "RED-00-00010439 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00010439 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00010439 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00010439\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00010867",
+      "product_id": 1144600704,
+      "sku": 1658122134,
+      "name": "Банкетка Джульетта (Молочный дуб/ткань Verona Vanilla) Вис",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T00:41:03.952416Z"
+      },
+      "duplicates": [
+        "RED-00-00004044 - 751816, RED-00-00013184 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00004044 - 751816, RED-00-00013184 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00004044 - 751816, RED-00-00013184 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00004044\",\"COMPANYID\":751816},{\"OFFERID\":\"RED-00-00013184\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00011191",
+      "product_id": 1131868016,
+      "sku": 1646816607,
+      "name": "Стол обеденный Лилия-0090 (слоновая кость 9001)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T12:08:27.193920Z"
+      },
+      "duplicates": [
+        "RED-00-00011190 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00011190 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00011190 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00011190\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00011423",
+      "product_id": 1143635090,
+      "sku": 1657384006,
+      "name": "Банкетка \"Грейс\" (Дуб шампань, ткань бордовая, каретная стяжка) Вис",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-30T00:26:56.889843Z"
+      },
+      "duplicates": [
+        "RED-00-00008275 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00008275 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00008275 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00008275\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00011460",
+      "product_id": 1140357327,
+      "sku": 1654515296,
+      "name": "Кресло Лион (Слоновая кость/ткань Малмо 28)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T18:23:44.467215Z"
+      },
+      "duplicates": [
+        "RED-00-00011582 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00011582 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00011582 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00011582\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00011690",
+      "product_id": 1143635079,
+      "sku": 1657383958,
+      "name": "Банкетка \"Грейс\" (Дуб шампань, к/з Бордо, каретная стяжка) Вис",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T00:26:25.706710Z"
+      },
+      "duplicates": [
+        "RED-00-00011423 - 751816, RED-00-00008275 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00011423 - 751816, RED-00-00008275 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00011423 - 751816, RED-00-00008275 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00011423\",\"COMPANYID\":751816},{\"OFFERID\":\"RED-00-00008275\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00012265",
+      "product_id": 1140357279,
+      "sku": 1654565411,
+      "name": "Кресло Монэ (Венге, ткань Малмо 05)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T18:17:26.372805Z"
+      },
+      "duplicates": [
+        "RED-00-00013168 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00013168 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00013168 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00013168\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00012340",
+      "product_id": 1140357231,
+      "sku": 1654514886,
+      "name": "Кресло Лион (Орех текстура/ткань V 28)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-29T18:09:16.761208Z"
+      },
+      "duplicates": [
+        "RED-00-00012075 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00012075 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00012075 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00012075\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00012595",
+      "product_id": 1143775892,
+      "sku": 1657415198,
+      "name": "Банкетка Глория (Слоновая кость / ткань Крем)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T00:36:03.594345Z"
+      },
+      "duplicates": [
+        "RED-00-00011417 - 751816, RED-00-00012740 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00011417 - 751816, RED-00-00012740 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00011417 - 751816, RED-00-00012740 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00011417\",\"COMPANYID\":751816},{\"OFFERID\":\"RED-00-00012740\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00012817",
+      "product_id": 1140357199,
+      "sku": 1654565610,
+      "name": "Кресло Монэ (Венге, ткань Малмо 95)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T18:02:58.790412Z"
+      },
+      "duplicates": [
+        "RED-00-00013168 - 751816, RED-00-00013145 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00013168 - 751816, RED-00-00013145 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00013168 - 751816, RED-00-00013145 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00013168\",\"COMPANYID\":751816},{\"OFFERID\":\"RED-00-00013145\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-00013184",
+      "product_id": 1143775871,
+      "sku": 1657415158,
+      "name": "Банкетка Джульетта (Молочный дуб / ткань V 18)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-30T00:32:43.017297Z"
+      },
+      "duplicates": [
+        "RED-00-00004044 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00004044 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00004044 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00004044\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-_0008711",
+      "product_id": 1179308504,
+      "sku": 1687854354,
+      "name": "Вешалка напольная ВН (средний тон)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-30T07:09:14.598736Z"
+      },
+      "duplicates": [
+        "RED-00-_0008712 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-_0008712 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-_0008712 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-_0008712\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-_0008712",
+      "product_id": 1179308487,
+      "sku": 1687854257,
+      "name": "Вешалка напольная ВН (темный тон)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-30T07:09:11.792102Z"
+      },
+      "duplicates": [
+        "RED-00-_0008711 - 751816, RED-00-_0008713 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-_0008711 - 751816, RED-00-_0008713 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-_0008711 - 751816, RED-00-_0008713 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-_0008711\",\"COMPANYID\":751816},{\"OFFERID\":\"RED-00-_0008713\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-_0008713",
+      "product_id": 1179308524,
+      "sku": 1687854246,
+      "name": "Вешалка напольная ВН (венге)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-30T07:10:00.172695Z"
+      },
+      "duplicates": [
+        "RED-00-_0008712 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-_0008712 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-_0008712 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-_0008712\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-_0008871",
+      "product_id": 1140357344,
+      "sku": 1654378241,
+      "name": "Кресло Бархат (темный тон / 6 - шоколад)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T18:27:52.974527Z"
+      },
+      "duplicates": [
+        "RED-00-_0008870 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-_0008870 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-_0008870 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-_0008870\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-_0009108",
+      "product_id": 1131868015,
+      "sku": 1646817093,
+      "name": "Стол обеденный Лилия-0090 (белая эмаль)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-29T12:08:37.625921Z"
+      },
+      "duplicates": [
+        "RED-00-00009447 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00009447 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00009447 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00009447\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-_0009110",
+      "product_id": 1131868076,
+      "sku": 1646817116,
+      "name": "Стол обеденный Лилия-0090 (венге)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T12:14:32.963903Z"
+      },
+      "duplicates": [
+        "RED-00-00010295 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00010295 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00010295 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00010295\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-_0009111",
+      "product_id": 1131867996,
+      "sku": 1646817686,
+      "name": "Стол обеденный Лилия-0090 (махагон)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-09-29T12:04:35.528849Z"
+      },
+      "duplicates": [
+        "RED-00-00010296 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00010296 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00010296 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00010296\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "RED-00-_0009112",
+      "product_id": 1131867972,
+      "sku": 1646816584,
+      "name": "Стол обеденный Лилия-0090 (светлый тон)",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Не продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить карточку товара",
+        "status_updated_at": "2026-09-29T12:00:33.513745Z"
+      },
+      "duplicates": [
+        "RED-00-00010297 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: RED-00-00010297 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "RED-00-00010297 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"RED-00-00010297\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "SAMS-641937",
+      "product_id": 6203733857,
+      "sku": 5681029230,
+      "name": "Стол NOSTRESS (НОСТРЕСС) TG-002, стеклянная столешница, 60х60 см, металлический каркас, черный, 641937",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T23:45:39.081900Z"
+      },
+      "duplicates": [
+        "SAMS-641936 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: SAMS-641936 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "SAMS-641936 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"SAMS-641936\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "SAMS-641951",
+      "product_id": 4125609203,
+      "sku": 3934503870,
+      "name": "Полка BRABIX \"SMART WS-002\", 580х290х300 мм, ЛОФТ, 2 полки, металл/ЛДСП ясень шимо светлый, 641951",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T13:46:29.501713Z"
+      },
+      "duplicates": [
+        "SAMS-641952 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: SAMS-641952 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "SAMS-641952 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"SAMS-641952\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    },
+    {
+      "offer_id": "SAMS-641952",
+      "product_id": 4125609213,
+      "sku": 3934502775,
+      "name": "Полка BRABIX \"SMART WS-002\", 580х290х300 мм, ЛОФТ, 2 полки, металл/ЛДСП бунратти, 641952",
+      "is_archived": false,
+      "is_autoarchived": false,
+      "barcodes": [],
+      "status": {
+        "status": "moderated",
+        "status_failed": "moderated",
+        "moderate_status": "approved",
+        "validation_status": "success",
+        "status_name": "Продается",
+        "status_description": "Не обновлен",
+        "is_created": true,
+        "status_tooltip": "Не удалось обновить товар — покупатели видят его без изменений. Опубликуйте карточку заново: нажмите на три точки → Редактировать товар → Отправить",
+        "status_updated_at": "2026-10-01T13:46:47.379152Z"
+      },
+      "duplicates": [
+        "SAMS-641951 - 751816"
+      ],
+      "errors": [
+        {
+          "code": "SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT",
+          "field": "spu",
+          "attribute_id": 0,
+          "state": "moderated",
+          "level": "ERROR_LEVEL_ERROR",
+          "texts": {
+            "attribute_name": "",
+            "description": "Такой же товар дублируется в следующих карточках и кабинетах: SAMS-641951 - 751816. Узнать",
+            "short_description": "",
+            "params": [
+              {
+                "name": "Duplicates",
+                "value": "SAMS-641951 - 751816"
+              },
+              {
+                "name": "DocURL",
+                "value": "https://seller-edu.ozon.ru/work-with-goods/zagruzka-tovarov/creating-goods/oshibki-pri-rabote-s-kartochkami"
+              }
+            ],
+            "hint_code": "SPU_ALREADY_EXISTS_HINT",
+            "message": "{\"DUPLICATES\":[{\"OFFERID\":\"SAMS-641951\",\"COMPANYID\":751816}]}"
+          }
+        }
+      ]
+    }
+  ]
 }
