@@ -22,6 +22,8 @@ jobs:
         run: |
           gh api --method POST "repos/$REPO/actions/runs/37431816847/cancel" || true
           gh api --method POST "repos/$REPO/actions/runs/37432387166/cancel" || true
+          gh api --method POST "repos/$REPO/actions/runs/37432925605/cancel" || true
+          gh api --method POST "repos/$REPO/actions/runs/37432945315/cancel" || true
 
       - name: Checkout corrected KIT sync
         uses: actions/checkout@v4
