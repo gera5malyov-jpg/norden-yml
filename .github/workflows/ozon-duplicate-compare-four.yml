@@ -1,0 +1,169 @@
+name: Ozon duplicate compare four cards
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-duplicate-compare-four.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - run: python -m pip install requests
+      - name: Fetch and compare four Ozon cards
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os, json, time, requests
+          from pathlib import Path
+
+          offers = ["AF-31651768","AF-31651770","AF-31651767","AF-31651769"]
+          S=requests.Session()
+          S.headers.update({
+              "Client-Id":os.environ["OZON_CLIENT_ID"],
+              "Api-Key":os.environ["OZON_API_KEY"],
+              "Content-Type":"application/json",
+              "Accept":"application/json",
+          })
+          BASE="https://api-seller.ozon.ru"
+
+          def post(path, body, allow_error=False):
+              last=None
+              for i in range(6):
+                  r=S.post(BASE+path,json=body,timeout=120)
+                  if r.status_code==429:
+                      time.sleep(float(r.headers.get("Retry-After") or 2))
+                      continue
+                  try: data=r.json()
+                  except Exception: data={"raw":r.text}
+                  if not r.ok and not allow_error:
+                      raise RuntimeError(f"{path} HTTP {r.status_code}: {r.text[:1000]}")
+                  return {"status":r.status_code,"data":data}
+              raise RuntimeError(f"{path}: rate limit")
+
+          report={"offers":offers,"info":None,"attributes_endpoint":None,"cards":{},"attribute_definitions":{}}
+
+          info=post("/v3/product/info/list",{"offer_id":offers})
+          report["info"]=info
+          items=(info["data"].get("items") or (info["data"].get("result") or {}).get("items") or [])
+          by_offer={str(x.get("offer_id")):x for x in items}
+
+          attr_resp=post("/v4/product/info/attributes",{
+              "filter":{"offer_id":offers,"visibility":"ALL"},
+              "limit":1000,
+              "sort_dir":"ASC"
+          }, allow_error=True)
+          report["attributes_endpoint"]=attr_resp
+          attr_items=[]
+          if attr_resp["status"] < 400:
+              d=attr_resp["data"]
+              attr_items=d.get("items") or (d.get("result") or {}).get("items") or []
+          attr_by_offer={str(x.get("offer_id")):x for x in attr_items}
+
+          # Build category/type dictionary so attribute IDs are human-readable.
+          pairs=set()
+          for x in list(by_offer.values())+list(attr_by_offer.values()):
+              dc=x.get("description_category_id")
+              tid=x.get("type_id")
+              if dc and tid: pairs.add((int(dc),int(tid)))
+
+          defs={}
+          for dc,tid in sorted(pairs):
+              rr=post("/v1/description-category/attribute",{
+                  "description_category_id":dc,
+                  "type_id":tid,
+                  "language":"DEFAULT"
+              }, allow_error=True)
+              key=f"{dc}:{tid}"
+              report["attribute_definitions"][key]=rr
+              if rr["status"]<400:
+                  rows=rr["data"].get("result") or rr["data"].get("attributes") or rr["data"].get("items") or []
+                  if isinstance(rows,dict):
+                      rows=rows.get("attributes") or rows.get("items") or []
+                  defs[key]={int(a.get("id")):a for a in rows if a.get("id") is not None}
+
+          for offer in offers:
+              inf=by_offer.get(offer) or {}
+              att=attr_by_offer.get(offer) or {}
+              dc=att.get("description_category_id") or inf.get("description_category_id")
+              tid=att.get("type_id") or inf.get("type_id")
+              amap=defs.get(f"{dc}:{tid}",{})
+              attrs=[]
+              for a in att.get("attributes") or []:
+                  aid=a.get("id")
+                  meta=amap.get(int(aid)) if aid is not None else None
+                  vals=[]
+                  for v in a.get("values") or []:
+                      vals.append({
+                          "value":v.get("value"),
+                          "dictionary_value_id":v.get("dictionary_value_id")
+                      })
+                  attrs.append({
+                      "id":aid,
+                      "name":(meta or {}).get("name"),
+                      "values":vals
+                  })
+              attrs.sort(key=lambda x: ((x.get("name") or "").casefold(), x.get("id") or 0))
+              report["cards"][offer]={
+                  "product_id": inf.get("id") or inf.get("product_id") or att.get("id"),
+                  "name": inf.get("name") or att.get("name"),
+                  "barcodes": inf.get("barcodes") or att.get("barcodes"),
+                  "model_info": inf.get("model_info"),
+                  "description_category_id": dc,
+                  "type_id": tid,
+                  "created_at": inf.get("created_at"),
+                  "updated_at": inf.get("updated_at"),
+                  "status": inf.get("statuses") or inf.get("status"),
+                  "attributes": attrs,
+                  "complex_attributes": att.get("complex_attributes"),
+                  "raw_info": inf,
+                  "raw_attributes": att
+              }
+
+          # Compact equality/difference index.
+          names=set()
+          for card in report["cards"].values():
+              for a in card["attributes"]:
+                  if a.get("name"): names.add(a["name"])
+          comparison={}
+          for name in sorted(names,key=str.casefold):
+              vals={}
+              for offer,card in report["cards"].items():
+                  found=[a for a in card["attributes"] if a.get("name")==name]
+                  vals[offer]=found[0]["values"] if found else None
+              sig=[json.dumps(vals[o],ensure_ascii=False,sort_keys=True) for o in offers]
+              comparison[name]={"same_all":len(set(sig))==1,"values":vals}
+          report["comparison"]=comparison
+
+          out=Path("ozon/duplicate_compare_four_latest.json")
+          out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          print(json.dumps({
+              "cards_found":list(by_offer),
+              "attr_status":attr_resp["status"],
+              "attr_cards_found":list(attr_by_offer),
+              "output":str(out)
+          },ensure_ascii=False))
+          PY
+      - name: Save report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add ozon/duplicate_compare_four_latest.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Ozon duplicate comparison for four cards"
+            git pull --rebase origin main || true
+            git push origin HEAD:main || true
+          fi
