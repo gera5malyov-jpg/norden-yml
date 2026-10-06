@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json, os, subprocess, tempfile, urllib.parse, urllib.request
+import json, os, subprocess, tempfile, urllib.parse, urllib.request, urllib.error, hashlib, hmac
 from pathlib import Path
 
 API_KEY=os.environ["NETANGELS_API_KEY"].strip()
@@ -13,8 +13,40 @@ def req(url, method="GET", data=None, headers=None):
         raw=r.read().decode("utf-8")
         return r.status, json.loads(raw) if raw else {}
 
+def bridge_probe():
+    secret=os.environ.get("MEGASUPPLIERS_CALLBACK_SECRET","").strip()
+    if not secret:
+        return "BRIDGE_PROBE=secret_missing"
+    request_id=os.environ.get("MEGASUPPLIERS_REQUEST_ID","20261006181640-48de2f0bf8c19079").strip()
+    payload={
+        "action":"kit_manifest",
+        "supplier_id":1,
+        "request_id":request_id,
+        "stock_id":66,
+        "offset":0,
+        "limit":1,
+    }
+    body=json.dumps(payload,ensure_ascii=False,separators=(",",":")).encode("utf-8")
+    sig="sha256="+hmac.new(secret.encode("utf-8"),body,hashlib.sha256).hexdigest()
+    req=urllib.request.Request(
+        "https://profikompany.ru/megasuppliers-bridge/",
+        data=body,method="POST",
+        headers={"Content-Type":"application/json; charset=utf-8","X-Megasuppliers-Signature":sig,"User-Agent":"Megasuppliers-Diagnostic/1.0"},
+    )
+    try:
+        with urllib.request.urlopen(req,timeout=30) as r:
+            raw=r.read().decode("utf-8","replace")
+            return "BRIDGE_PROBE_HTTP=%s\nBRIDGE_PROBE_BODY=%s" % (r.status, raw[:4000])
+    except urllib.error.HTTPError as e:
+        raw=e.read().decode("utf-8","replace")
+        return "BRIDGE_PROBE_HTTP=%s\nBRIDGE_PROBE_BODY=%s" % (e.code, raw[:4000])
+    except Exception as e:
+        return "BRIDGE_PROBE_ERROR=%r" % (e,)
+
 def main():
     REPORT.parent.mkdir(exist_ok=True)
+    probe=bridge_probe()
+    print(probe)
     body=urllib.parse.urlencode({"api_key":API_KEY}).encode()
     _,tok=req("https://panel.netangels.ru/api/gateway/token/","POST",body,
         {"Content-Type":"application/x-www-form-urlencoded","User-Agent":"ms-diagnose/1.0"})
@@ -67,7 +99,7 @@ echo "TABLE_SCHEMA_END"
             p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no",
                 "-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=15",f"root@{VM_IP}","bash -s"],
                 input=remote.encode("utf-8"),text=False,capture_output=True,timeout=120)
-            out=(p.stdout or b"").decode("utf-8","replace")
+            out=probe+"\n"+(p.stdout or b"").decode("utf-8","replace")
             if p.stderr: out+="\nSTDERR\n"+p.stderr.decode("utf-8","replace")
             REPORT.write_text(out,encoding="utf-8")
             print(out)
