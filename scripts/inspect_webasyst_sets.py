@@ -70,6 +70,30 @@ $out['product_columns']=$m->query("SHOW COLUMNS FROM shop_product")->fetchAll();
 $out['sku_columns']=$m->query("SHOW COLUMNS FROM shop_product_skus")->fetchAll();
 $out['image_columns']=$m->query("SHOW COLUMNS FROM shop_product_images")->fetchAll();
 
+$all_tables=$m->query("SHOW TABLES")->fetchAll();
+$out['ozon_tables']=array();
+foreach($all_tables as $tr){
+    foreach($tr as $tv){
+        if(stripos((string)$tv,'ozon')!==false) $out['ozon_tables'][]=(string)$tv;
+    }
+}
+sort($out['ozon_tables']);
+
+$out['image_url_helpers']=array();
+$helper_files=array(
+    $root.'/wa-apps/shop/lib/classes/shopImage.class.php',
+    $root.'/wa-apps/shop/lib/models/shopProductImages.model.php'
+);
+foreach($helper_files as $hf){
+    if(!is_file($hf)) continue;
+    $src=file($hf);
+    foreach($src as $ln=>$txt){
+        if(stripos($txt,'function getUrl')!==false || stripos($txt,'getUrl(')!==false || stripos($txt,'getPath(')!==false){
+            $out['image_url_helpers'][]=array('file'=>str_replace($root,'',$hf),'line'=>$ln+1,'text'=>trim($txt));
+        }
+    }
+}
+
 $out['ozon_features']=$m->query("
     SELECT id,parent_id,code,name,type,multiple,status
     FROM shop_feature
