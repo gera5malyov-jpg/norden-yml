@@ -1,0 +1,84 @@
+name: Norden KIT single probe create
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-kit-single-probe-create.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  create-one:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Stop hung batch run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: gh api --method POST "repos/$REPO/actions/runs/37433403835/force-cancel" || true
+
+      - name: Checkout current sync code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install --disable-pip-version-check requests
+
+      - name: Create one verified Norden product in KIT
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json
+          from supplier_engine.live_kit_readonly_preflight import _load_helpers, build_manifest
+          from supplier_engine.kit_sync import KitClient, sync_manifest
+
+          TARGET = "31663505"
+          helpers = _load_helpers()
+          wa = helpers.WebasystClient()
+          manifest = build_manifest(wa, helpers, "NORDEN-100")
+          matches = [
+              row for row in manifest.get("items", [])
+              if str(row.get("sku") or "").strip() == TARGET
+          ]
+          if len(matches) != 1:
+              raise SystemExit("Expected exactly one Webasyst SKU %s, found %d" % (TARGET, len(matches)))
+
+          item = dict(matches[0])
+          item["image_urls"] = []
+          if not item.get("category_ids"):
+              raise SystemExit("Target SKU has no Webasyst category")
+
+          single = dict(manifest)
+          single["items"] = [item]
+          result = sync_manifest(
+              single,
+              {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+              kit=KitClient(),
+              wa=wa,
+          )
+          report = {"target": TARGET, "product": item, "result": result}
+          open("single-kit-create.json","w",encoding="utf-8").write(json.dumps(report,ensure_ascii=False,indent=2))
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          if result.get("status") != "ok" or result.get("errors"):
+              raise SystemExit(2)
+          if int(result.get("created") or 0) + int(result.get("updated") or 0) != 1:
+              raise SystemExit("Unexpected single-item accounting")
+          PY
+
+      - name: Save single create report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: norden-kit-single-probe-${{ github.run_id }}
+          path: single-kit-create.json
+          if-no-files-found: warn
+          retention-days: 14
