@@ -231,6 +231,42 @@ $out['legacy_ozon_samples']=$m->query("
 ")->fetchAll();
 $legacy_ids=array();
 foreach($out['legacy_ozon_samples'] as $r){$legacy_ids[(int)$r['product_id']]=(int)$r['product_id'];}
+
+$out['ozon_offer_dry_samples']=array();
+try{
+    wa('ozon');
+    $n=0;
+    foreach($out['legacy_ozon_samples'] as $r){
+        if($n>=3) break;
+        $errors=array();
+        $op=new ozonProduct((int)$r['product_id']);
+        $offers=$op->getOzonOffers((int)$r['sku_id'],false,$errors);
+        $summaries=array();
+        foreach($offers as $offer){
+            $summaries[]=array(
+                'keys'=>array_keys($offer),
+                'offer_id'=>isset($offer['offer_id'])?$offer['offer_id']:null,
+                'description_category_id'=>isset($offer['description_category_id'])?$offer['description_category_id']:null,
+                'type_id'=>isset($offer['type_id'])?$offer['type_id']:null,
+                'price'=>isset($offer['price'])?$offer['price']:null,
+                'old_price'=>isset($offer['old_price'])?$offer['old_price']:null,
+                'width'=>isset($offer['width'])?$offer['width']:null,
+                'height'=>isset($offer['height'])?$offer['height']:null,
+                'depth'=>isset($offer['depth'])?$offer['depth']:null,
+                'weight'=>isset($offer['weight'])?$offer['weight']:null,
+                'attributes_count'=>isset($offer['attributes'])&&is_array($offer['attributes'])?count($offer['attributes']):0,
+                'images_count'=>isset($offer['images'])&&is_array($offer['images'])?count($offer['images']):0
+            );
+        }
+        $out['ozon_offer_dry_samples'][]=array(
+            'product_id'=>$r['product_id'],'sku_id'=>$r['sku_id'],'sku'=>$r['sku'],
+            'offers'=>$summaries,'errors'=>$errors
+        );
+        $n++;
+    }
+}catch(Throwable $e){
+    $out['ozon_offer_dry_error']=$e->getMessage();
+}
 if($legacy_ids){
     $pf_cols=array();
     foreach($m->query("SHOW COLUMNS FROM shop_product_features")->fetchAll() as $col){
