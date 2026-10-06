@@ -1,0 +1,23 @@
+name: Force cancel old Norden KIT recovery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/force-cancel-old-norden-kit-recovery.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel-old:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Force cancel obsolete KIT recovery runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api --method POST "repos/$REPO/actions/runs/37432387166/force-cancel" || true
+          gh api --method POST "repos/$REPO/actions/runs/37432945315/force-cancel" || true
