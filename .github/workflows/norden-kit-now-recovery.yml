@@ -1,0 +1,60 @@
+name: Norden KIT recovery now
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-kit-now-recovery.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  kit-sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Stop obsolete full-chain run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: gh api --method POST "repos/$REPO/actions/runs/37431816847/cancel" || true
+
+      - name: Checkout corrected KIT sync
+        uses: actions/checkout@v4
+        with:
+          ref: 8c07194e05f1daf23154480cbdab92c0dd2a9668
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install --disable-pip-version-check requests
+
+      - name: Compile KIT sync
+        run: python -m py_compile supplier_engine/live_kit_scheduled_sync.py supplier_engine/live_kit_readonly_preflight.py supplier_engine/kit_sync.py
+
+      - name: Sync categorized NORDEN-100 products to KIT now
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python -m supplier_engine.live_kit_scheduled_sync \
+            --mode apply \
+            --type-name NORDEN-100 \
+            --brand Norden \
+            --max-create 5000 \
+            --max-eligible 5000 \
+            --output scheduled-kit-sync.json
+
+      - name: Save KIT report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: norden-kit-recovery-${{ github.run_id }}
+          path: scheduled-kit-sync.json
+          if-no-files-found: warn
+          retention-days: 14
