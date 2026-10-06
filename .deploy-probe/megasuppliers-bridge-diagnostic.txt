@@ -1,4 +1,5 @@
-NOW=2026-10-06T18:49:11+03:00
+BRIDGE_PROBE=secret_missing
+NOW=2026-10-06T18:51:19+03:00
 RECENT_LOG_FILES_BEGIN
 /home/web/vm-23f9aff9.na4u.ru/www/wa-log/cli.log
 /home/web/vm-23f9aff9.na4u.ru/www/wa-log/db.log
@@ -31,11 +32,6 @@ RECENT_LOG_FILES_BEGIN
 RECENT_LOG_FILES_END
 MEGASUPPLIERS_ERRORS_BEGIN
 ### /var/log/apache2/user-logs/profikompany.ru/access.log
-185.171.194.69 - - [06/Oct/2026:18:30:03 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importConfig&supplier_id=1 HTTP/1.0" 200 9039 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-185.171.194.69 - - [06/Oct/2026:18:30:03 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 14476 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-185.171.194.69 - - [06/Oct/2026:18:30:03 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 14476 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-185.171.194.69 - - [06/Oct/2026:18:30:07 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 14476 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-185.171.194.69 - - [06/Oct/2026:18:30:10 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 14476 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
 185.171.194.69 - - [06/Oct/2026:18:30:13 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 14476 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
 185.171.194.69 - - [06/Oct/2026:18:30:16 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 14476 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
 185.171.194.69 - - [06/Oct/2026:18:30:19 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 14476 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
@@ -111,6 +107,11 @@ MEGASUPPLIERS_ERRORS_BEGIN
 45.86.180.49 - - [06/Oct/2026:18:42:06 +0300] "POST /megasuppliers-api/ HTTP/1.0" 422 230 "-" "curl/7.52.1"
 40.74.209.162 - - [06/Oct/2026:18:42:08 +0300] "GET / HTTP/1.0" 200 355083 "-" "megasuppliers-install-check/1.0"
 40.74.209.162 - - [06/Oct/2026:18:42:12 +0300] "GET /megasuppliers-api/ HTTP/1.0" 405 229 "-" "megasuppliers-install-check/1.0"
+185.171.194.69 - - [06/Oct/2026:18:50:19 +0300] "GET /webasyst/shop/?plugin=megasuppliers HTTP/1.0" 200 55705 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+185.171.194.69 - - [06/Oct/2026:18:50:20 +0300] "GET /favicon.ico HTTP/1.0" 200 41623 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+185.171.194.69 - - [06/Oct/2026:18:50:22 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importConfig&supplier_id=1 HTTP/1.0" 200 9039 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+185.171.194.69 - - [06/Oct/2026:18:50:22 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 28459 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+20.168.4.4 - - [06/Oct/2026:18:51:27 +0300] "POST /megasuppliers-bridge/ HTTP/1.0" 500 218 "-" "Megasuppliers-Diagnostic/1.0"
 ### /var/log/auth.log
 Oct  6 11:58:05 vm-23f9aff9 sshd[101231]: Invalid user liberty-bridge from 109.160.32.170 port 41406
 Oct  6 11:58:05 vm-23f9aff9 sshd[101231]: input_userauth_request: invalid user liberty-bridge [preauth]
