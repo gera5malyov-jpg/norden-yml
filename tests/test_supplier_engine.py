@@ -1768,3 +1768,98 @@ def test_kit_variant_delta_skips_equal_payload_and_keeps_price_change():
     desired["pricing"] = {"price": "161", "manual_discount_price": "125"}
     assert _variant_delta(current, desired) == {"pricing": desired["pricing"]}
 
+def test_missing_webasyst_product_404_is_recoverable():
+    from supplier_engine.webasyst_sync import _is_missing_webasyst_object_error
+
+    exc = RuntimeError(
+        'HTTP 404: {"error": "invalid_param", "error_description": "Товар не найден."}'
+    )
+    assert _is_missing_webasyst_object_error(exc)
+
+
+def test_apply_plan_recreates_product_when_product_update_returns_404():
+    class MissingProductWa:
+        def __init__(self):
+            self.calls = []
+            self.product_update_failed = False
+
+        def call(self, method, *, http_method="GET", params=None, data=None, files=None):
+            self.calls.append({
+                "method": method,
+                "http_method": http_method,
+                "params": params or {},
+                "data": data or {},
+            })
+            if method == "shop.product.skus.update":
+                return {}
+            if method == "shop.product.update" and not self.product_update_failed:
+                self.product_update_failed = True
+                raise RuntimeError(
+                    'HTTP 404: {"error": "invalid_param", "error_description": "Товар не найден."}'
+                )
+            if method == "shop.product.search":
+                return {"products": []}
+            if method == "shop.product.getInfo":
+                raise RuntimeError(
+                    'HTTP 404: {"error": "invalid_param", "error_description": "Товар не найден."}'
+                )
+            if method == "shop.product.add":
+                return {"id": "101"}
+            if method == "shop.product.skus.getList":
+                return {"skus": [{"id": "202", "sku": "X-1", "name": "1"}]}
+            return {}
+
+    wa = MissingProductWa()
+    desired = {
+        "supplier_sku": "1",
+        "sku": "X-1",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "",
+        "category": "",
+        "images": [],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [],
+        "update": [{
+            "sku": "X-1",
+            "supplier_sku": "1",
+            "product_id": 11,
+            "sku_id": 21,
+            "current_product": {"id": 11, "name": "Old", "status": 1},
+            "current_sku": {"id": 21, "sku": "X-1", "name": "1"},
+            "desired": desired,
+        }],
+        "repair_sku": [],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+
+    result = apply_plan(
+        wa,
+        plan,
+        {
+            "rules": {
+                "update_prices": True,
+                "update_stock": True,
+                "update_name": True,
+                "update_images": False,
+                "update_characteristics": False,
+            },
+            "webasyst": {
+                "stock_id": 1,
+                "type_id": 5,
+                "sku_mode": "supplier",
+            },
+        },
+    )
+
+    assert result["recreated_products"] == 1
+    assert result["mappings"][-1]["product_id"] == 101
+    assert result["mappings"][-1]["sku_id"] == 202
+
