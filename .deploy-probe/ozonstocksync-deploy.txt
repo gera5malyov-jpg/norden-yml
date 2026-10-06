@@ -1,11 +1,11 @@
-BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-20261006-183310.tgz
+BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-20261006-195526.tgz
 --- staging lint ---
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-183310/lib/classes/shopOzonstocksyncPluginSync.class.php
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-183310/lib/cli/shopOzonstocksyncPluginSync.cli.php
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-183310/lib/shopOzonstocksync.plugin.php
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-183310/lib/config/rfbs_commissions.php
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-183310/lib/config/settings.php
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-183310/lib/config/plugin.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-195526/lib/classes/shopOzonstocksyncPluginSync.class.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-195526/lib/cli/shopOzonstocksyncPluginSync.cli.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-195526/lib/shopOzonstocksync.plugin.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-195526/lib/config/rfbs_commissions.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-195526/lib/config/settings.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-195526/lib/config/plugin.php
 --- production lint ---
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginSync.cli.php
@@ -21,9 +21,8 @@ MULTI_STOCK_UI=yes
 MAPPING_ROWS_UI=yes
 CREATE_SET_ID=ozon_upload
 CREATE_SET_NAME=Грузить в Ozon
-CREATE_SET_COUNT=1
+CREATE_SET_COUNT=663
 CREATE_ALLOWLIST=OK
-CREATE_PRIMARY_ACCOUNT_INDEX=1
 HEALTH=OK
 DEPLOY_STATUS=OK
 
