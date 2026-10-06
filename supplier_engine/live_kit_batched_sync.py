@@ -206,19 +206,17 @@ def main():
                     "Created count %d exceeds limit %d"
                     % (totals["created"], args.max_create)
                 )
-            if result.get("status") != "ok" or batch_report["errors"]:
-                payload["totals"] = totals
-                payload["status"] = "partial_failure"
-                _write(args.output, payload)
-                raise SystemExit(2)
-
-            # Keep an on-disk checkpoint after every successful batch.
+            # Per-product API errors must not stop the supplier-wide run.
+            # Successful cards in the batch are already committed and have
+            # their KIT IDs written back. Keep the error in the report and
+            # continue with the next batch; only structural/top-level failures
+            # should abort the whole process.
             payload["totals"] = totals
-            payload["status"] = "in_progress"
+            payload["status"] = "in_progress_with_errors" if totals["errors"] else "in_progress"
             _write(args.output, payload)
 
         payload["totals"] = totals
-        payload["status"] = "ok"
+        payload["status"] = "partial_failure" if totals["errors"] else "ok"
         payload["media_phase"] = "deferred"
         _write(args.output, payload)
 
