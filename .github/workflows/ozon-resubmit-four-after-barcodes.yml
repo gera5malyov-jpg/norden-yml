@@ -1,0 +1,111 @@
+name: Ozon resubmit four cards after barcode generation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-resubmit-four-after-barcodes.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  resubmit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - run: python -m pip install requests
+      - name: Resubmit current attributes without changing values
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os, json, time, requests
+          from pathlib import Path
+
+          offers=["AF-31651768","AF-31651770","AF-31651767","AF-31651769"]
+          S=requests.Session()
+          S.headers.update({
+            "Client-Id":os.environ["OZON_CLIENT_ID"],
+            "Api-Key":os.environ["OZON_API_KEY"],
+            "Content-Type":"application/json",
+            "Accept":"application/json"
+          })
+          B="https://api-seller.ozon.ru"
+          def post(path,body):
+            r=S.post(B+path,json=body,timeout=120)
+            try:d=r.json()
+            except Exception:d={"raw":r.text}
+            return {"status":r.status_code,"data":d,"text":r.text[:5000]}
+
+          attrs=post("/v4/product/info/attributes",{
+            "filter":{"offer_id":offers,"visibility":"ALL"},
+            "limit":1000,
+            "sort_dir":"ASC"
+          })
+          data=attrs["data"]
+          items=[]
+          if isinstance(data,list): items=data
+          elif isinstance(data,dict):
+            if isinstance(data.get("items"),list): items=data["items"]
+            elif isinstance(data.get("result"),list): items=data["result"]
+            elif isinstance(data.get("result"),dict): items=data["result"].get("items") or []
+
+          payload=[]
+          for item in items:
+            offer=str(item.get("offer_id") or "")
+            if offer not in offers: continue
+            current=[]
+            for a in item.get("attributes") or []:
+              aa={
+                "complex_id":int(a.get("complex_id") or 0),
+                "id":int(a.get("id") or 0),
+                "values":[]
+              }
+              for v in a.get("values") or []:
+                aa["values"].append({
+                  "dictionary_value_id":int(v.get("dictionary_value_id") or 0),
+                  "value":str(v.get("value") or "")
+                })
+              current.append(aa)
+            payload.append({"offer_id":offer,"attributes":current})
+
+          upd=post("/v1/product/attributes/update",{"items":payload})
+          task_id=None
+          if isinstance(upd["data"],dict):
+            task_id=upd["data"].get("task_id") or (upd["data"].get("result") or {}).get("task_id") if isinstance(upd["data"].get("result"),dict) else upd["data"].get("task_id")
+
+          checks=[]
+          if task_id:
+            for i in range(12):
+              time.sleep(10)
+              inf=post("/v1/product/import/info",{"task_id":int(task_id)})
+              checks.append(inf)
+              raw=json.dumps(inf["data"],ensure_ascii=False)
+              if any(x in raw.lower() for x in ["imported","success","failed","error"]):
+                if i>=2: break
+
+          final=post("/v3/product/info/list",{"offer_id":offers})
+          report={"offers":offers,"attributes_fetch":attrs,"payload_count":len(payload),"update":upd,"task_checks":checks,"final":final}
+          Path("ozon/four_barcode_resubmit_test_latest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          print("UPDATE",json.dumps(upd,ensure_ascii=False))
+          print("PAYLOAD_COUNT",len(payload))
+          print("FINAL",json.dumps(final,ensure_ascii=False)[:12000])
+          PY
+      - name: Save report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add ozon/four_barcode_resubmit_test_latest.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Ozon barcode resubmit test"
+            git pull --rebase origin main || true
+            git push origin HEAD:main || true
+          fi
