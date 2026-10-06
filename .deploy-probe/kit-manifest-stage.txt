@@ -1,0 +1,55 @@
+STAGE=link_model BEGIN
+RESULT_OBJECT=shopMegasuppliersProductModel
+STAGE=link_model OK
+STAGE=links BEGIN
+RESULT_COUNT=1
+STAGE=links OK
+STAGE=ids BEGIN
+RESULT_COUNT=2
+STAGE=ids OK
+STAGE=product_model BEGIN
+RESULT_OBJECT=shopProductModel
+STAGE=product_model OK
+STAGE=sku_model BEGIN
+RESULT_OBJECT=shopProductSkusModel
+STAGE=sku_model OK
+STAGE=category_product_model BEGIN
+RESULT_OBJECT=shopCategoryProductsModel
+STAGE=category_product_model OK
+STAGE=category_model BEGIN
+RESULT_OBJECT=shopCategoryModel
+STAGE=category_model OK
+STAGE=stock_model BEGIN
+RESULT_OBJECT=shopProductStocksModel
+STAGE=stock_model OK
+STAGE=feature_model BEGIN
+RESULT_OBJECT=shopFeatureModel
+STAGE=feature_model OK
+STAGE=feature_rows BEGIN
+RESULT_COUNT=2264
+STAGE=feature_rows OK
+STAGE=all_categories BEGIN
+RESULT_COUNT=823
+STAGE=all_categories OK
+STAGE=product_row BEGIN
+RESULT_COUNT=54
+STAGE=product_row OK
+STAGE=sku_row BEGIN
+RESULT_COUNT=24
+STAGE=sku_row OK
+STAGE=category_rows BEGIN
+RESULT_COUNT=1
+STAGE=category_rows OK
+STAGE=stock_row BEGIN
+RESULT_COUNT=4
+STAGE=stock_row OK
+STAGE=shopProduct BEGIN
+RESULT_OBJECT=shopProduct
+STAGE=shopProduct OK
+STAGE=product_features BEGIN
+RESULT_COUNT=43
+STAGE=product_features OK
+DONE
+
+STDERR
+Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
