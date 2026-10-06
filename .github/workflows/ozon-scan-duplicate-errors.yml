@@ -48,31 +48,40 @@ jobs:
               return r.json()
             raise RuntimeError("rate limit: "+path)
 
-          product_ids=[]
+          offer_ids=[]
           cursor=""
           seen=set()
           while True:
             body={"filter":{"visibility":"ALL"},"limit":1000}
             if cursor: body["last_id"]=cursor
             d=post("/v3/product/list",body)
-            res=d.get("result") or {}
-            items=res.get("items") or d.get("items") or []
+            res=d.get("result") if isinstance(d,dict) else {}
+            if not isinstance(res,dict): res={}
+            items=res.get("items") or (d.get("items") if isinstance(d,dict) else []) or []
             for x in items:
-              pid=x.get("product_id") or x.get("id")
-              if pid is not None and str(pid) not in seen:
-                seen.add(str(pid)); product_ids.append(str(pid))
-            nxt=res.get("last_id") or d.get("last_id") or ""
+              offer=str(x.get("offer_id") or "").strip()
+              if offer and offer not in seen:
+                seen.add(offer); offer_ids.append(offer)
+            nxt=res.get("last_id") or (d.get("last_id") if isinstance(d,dict) else "") or ""
             if not items or not nxt or nxt==cursor:
               break
             cursor=nxt
 
+          def extract_items(d):
+            if isinstance(d,list): return d
+            if not isinstance(d,dict): return []
+            if isinstance(d.get("items"),list): return d.get("items") or []
+            res=d.get("result")
+            if isinstance(res,list): return res
+            if isinstance(res,dict) and isinstance(res.get("items"),list): return res.get("items") or []
+            return []
+
           dup=[]
           scanned=0
-          for i in range(0,len(product_ids),1000):
-            chunk=product_ids[i:i+1000]
-            d=post("/v3/product/info/list",{"product_id":chunk})
-            items=d if isinstance(d,list) else d.get("items") or (d.get("result") or {}).get("items") if isinstance(d.get("result"),dict) else d.get("result") or []
-            if not isinstance(items,list): items=[]
+          for i in range(0,len(offer_ids),1000):
+            chunk=offer_ids[i:i+1000]
+            d=post("/v3/product/info/list",{"offer_id":chunk})
+            items=extract_items(d)
             scanned += len(items)
             for x in items:
               errors=x.get("errors") or []
@@ -98,14 +107,14 @@ jobs:
             time.sleep(0.2)
 
           report={
-            "total_product_ids":len(product_ids),
+            "total_offer_ids":len(offer_ids),
             "scanned_info_items":scanned,
             "duplicate_error_count":len(dup),
             "items":sorted(dup,key=lambda x:str(x.get("offer_id") or ""))
           }
           Path("ozon/duplicate_errors_all_latest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
           print(json.dumps({
-            "total_product_ids":report["total_product_ids"],
+            "total_offer_ids":report["total_offer_ids"],
             "scanned_info_items":report["scanned_info_items"],
             "duplicate_error_count":report["duplicate_error_count"]
           },ensure_ascii=False))
