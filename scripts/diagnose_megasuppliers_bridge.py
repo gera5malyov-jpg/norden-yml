@@ -1,3 +1,4 @@
+# Probe after standalone bridge fix 2026-10-06
 #!/usr/bin/env python3
 import json, os, subprocess, tempfile, urllib.parse, urllib.request, urllib.error, hashlib, hmac
 from pathlib import Path
