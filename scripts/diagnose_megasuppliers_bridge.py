@@ -66,9 +66,9 @@ echo "TABLE_SCHEMA_END"
 '''
             p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no",
                 "-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=15",f"root@{VM_IP}","bash -s"],
-                input=remote,text=True,capture_output=True,timeout=120)
-            out=p.stdout
-            if p.stderr: out+="\nSTDERR\n"+p.stderr
+                input=remote.encode("utf-8"),text=False,capture_output=True,timeout=120)
+            out=(p.stdout or b"").decode("utf-8","replace")
+            if p.stderr: out+="\nSTDERR\n"+p.stderr.decode("utf-8","replace")
             REPORT.write_text(out,encoding="utf-8")
             print(out)
             if p.returncode: raise RuntimeError("remote exit "+str(p.returncode))
