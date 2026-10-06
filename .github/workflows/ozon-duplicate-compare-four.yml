@@ -57,8 +57,22 @@ jobs:
 
           info=post("/v3/product/info/list",{"offer_id":offers})
           report["info"]=info
-          items=(info["data"].get("items") or (info["data"].get("result") or {}).get("items") or [])
-          by_offer={str(x.get("offer_id")):x for x in items}
+          def extract_items(data):
+              if isinstance(data,list):
+                  return data
+              if not isinstance(data,dict):
+                  return []
+              if isinstance(data.get("items"),list):
+                  return data.get("items") or []
+              res=data.get("result")
+              if isinstance(res,list):
+                  return res
+              if isinstance(res,dict) and isinstance(res.get("items"),list):
+                  return res.get("items") or []
+              return []
+
+          items=extract_items(info["data"])
+          by_offer={str(x.get("offer_id")):x for x in items if isinstance(x,dict)}
 
           attr_resp=post("/v4/product/info/attributes",{
               "filter":{"offer_id":offers,"visibility":"ALL"},
@@ -69,8 +83,8 @@ jobs:
           attr_items=[]
           if attr_resp["status"] < 400:
               d=attr_resp["data"]
-              attr_items=d.get("items") or (d.get("result") or {}).get("items") or []
-          attr_by_offer={str(x.get("offer_id")):x for x in attr_items}
+              attr_items=extract_items(d)
+          attr_by_offer={str(x.get("offer_id")):x for x in attr_items if isinstance(x,dict)}
 
           # Build category/type dictionary so attribute IDs are human-readable.
           pairs=set()
