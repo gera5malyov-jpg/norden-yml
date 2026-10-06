@@ -1,0 +1,65 @@
+name: Test ozonstocksync once
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-ozonstocksync-once.yml'
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - name: Lint and contract checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          {
+            echo "TEST=ozonstocksync-1.6.0"
+            echo "--- PHP LINT ---"
+            find webasyst/ozonstocksync -name '*.php' -print0 | while IFS= read -r -d '' f; do php -l "$f"; done
+            echo "--- CONTRACT ---"
+            python3 - <<'PY'
+          from pathlib import Path
+          root=Path('webasyst/ozonstocksync')
+          plugin=(root/'lib/shopOzonstocksync.plugin.php').read_text(encoding='utf-8')
+          sync=(root/'lib/classes/shopOzonstocksyncPluginSync.class.php').read_text(encoding='utf-8')
+          settings=(root/'lib/config/settings.php').read_text(encoding='utf-8')
+          info=(root/'lib/config/plugin.php').read_text(encoding='utf-8')
+          checks={
+              'version_1_6_0': "'version' => '1.6.0'" in info,
+              'custom_getControls': 'function getControls' in plugin,
+              'type_margin_ui': 'type_margin_percent' in plugin,
+              'type_margin_setting': "'type_margin_percent'" in settings,
+              'type_margin_price_logic': 'getTargetMarkupPercentForTip' in sync,
+              'hidden_stock_zero': '$stock = 0;' in sync,
+              'force_price_touch': 'getForcePriceTouchDelta' in sync,
+              'retry_429': '429' in sync and 'ResourceExhausted' in sync,
+              'price_batch_max_guard': "'price_batch_size' => array(1, 100, 50)" in plugin,
+          }
+          for k,v in checks.items():
+              print(f'{k}={"OK" if v else "FAIL"}')
+          if not all(checks.values()):
+              raise SystemExit(2)
+          PY
+            echo "TEST_STATUS=OK"
+          } > .deploy-probe/ozonstocksync-test.txt 2>&1
+          cat .deploy-probe/ozonstocksync-test.txt
+      - name: Save report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .deploy-probe/ozonstocksync-test.txt || echo "TEST_STATUS=FAILED_NO_REPORT" > .deploy-probe/ozonstocksync-test.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/ozonstocksync-test.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save ozonstocksync test report [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
