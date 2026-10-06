@@ -1,0 +1,83 @@
+# Ozon Stock Sync — 10 аккаунтов + названия + отдельные логи
+
+## Что умеет
+- До 10 аккаунтов Ozon.
+- У каждого аккаунта своё название для логов.
+- Общий лог: `wa-log/ozonstocksync.log`.
+- Отдельные логи по аккаунтам:
+  - `wa-log/ozonstocksync_megapolis.log`
+  - `wa-log/ozonstocksync_profi.log`
+  - `wa-log/ozonstocksync_norden_nds.log`
+- Остатки + цены.
+- Цены считаются от закупки:
+  - price: закупка + 21% после комиссии RFBS и эквайринга;
+  - min_price: закупка + 15% после комиссии RFBS и эквайринга.
+
+
+Update 2026-05-07:
+- Removed non-critical SKIP_SHOW_COLUMNS messages from logs.
+- Ozon API limits preserved: stock batches 100 items, price batches 1000 items.
+
+## Версия force price touch
+
+В этой версии плагин принудительно отправляет цены в Ozon даже если видимая цена продажи не изменилась.
+
+Особенность: видимая цена `price` не меняется. Чтобы Ozon не воспринимал строку как полностью идентичную и не игнорировал её как no-op, плагин при каждом запуске безопасно чередует `min_price` на +/- 1 рубль, только если `min_price` остаётся больше 0 и меньше основной цены.
+
+Лимиты Ozon сохранены:
+- остатки: по 100 товаров за запрос;
+- цены: по 1000 товаров за запрос.
+
+
+Update 2026-05-11:
+- Price batch limit returned to 100 items per request.
+- Stock batch limit remains 100 items per request.
+- Hidden or unavailable products are no longer skipped for stock sync: the plugin sends stock=0 to Ozon for these offers.
+- Force price update behavior is preserved: sale price is unchanged, min_price alternates by +/- 1 RUB when safe.
+
+
+## v2 slow API batches
+Добавлены настройки пауз, уменьшенный батч цен и повторы при Ozon API 429/ResourceExhausted/5xx. Рекомендуется: price_batch_size=50, price_pre_wait_seconds=60, price_batch_pause_seconds=10, api_retry_count=5, api_retry_wait_seconds=180.
+
+
+## v1.5.1-fixed — важное исправление запуска из cron
+
+Исправлено: старая CLI-команда не читала параметры из cron. Если в cron было написано `dry=0`, плагин всё равно брал настройку `dry_run` из админки и мог продолжать писать `DRY_RUN_STOCKS` / `DRY_RUN_PRICES`, ничего не отправляя в Ozon.
+
+Теперь CLI понимает параметры:
+- `dry=0` или `dry_run=0` — реальная отправка в Ozon;
+- `dry=1` — тестовый режим;
+- `stocks=1` / `stocks=0` — включить/выключить остатки;
+- `prices=1` / `prices=0` — включить/выключить цены;
+- `price_batch_size=50`, `price_batch_pause_seconds=10`, `api_retry_count=5` и другие технические паузы можно передавать прямо в cron.
+
+Рекомендуемый cron не чаще 1 раза в 3 часа и обязательно через `flock`:
+
+```bash
+0 */3 * * * flock -n /tmp/ozonstocksync.lock /usr/bin/php /home/web/vm-23f9aff9.na4u.ru/www/cli.php shop ozonstocksyncPluginSync dry=0 stocks=1 prices=1 >> /home/web/vm-23f9aff9.na4u.ru/www/wa-log/ozonstocksync-cron.log 2>&1
+```
+
+Проверка после запуска:
+
+```bash
+tail -n 200 /home/web/vm-23f9aff9.na4u.ru/www/wa-log/ozonstocksync_megapolis.log | egrep 'ACCOUNT_MODE|OK_STOCKS|OK_PRICES|ERROR_STOCKS|ERROR_PRICES|DRY_RUN'
+tail -n 200 /home/web/vm-23f9aff9.na4u.ru/www/wa-log/ozonstocksync_profi.log | egrep 'ACCOUNT_MODE|OK_STOCKS|OK_PRICES|ERROR_STOCKS|ERROR_PRICES|DRY_RUN'
+```
+
+Если всё включено правильно, в новых строках должно быть `ACCOUNT_MODE ... dry_run=0`, а вместо `DRY_RUN_STOCKS/DRY_RUN_PRICES` должны появляться `OK_STOCKS/OK_PRICES` либо реальные `ERROR_*` от Ozon API.
+
+
+## v1.5.2 — комиссии RFBS от 14.07.2026
+
+- Таблица комиссий обновлена по файлу Ozon «Таблица категорий для расчёта вознаграждения» от 14.07.2026.
+- В новой таблице Ozon для RFBS указана единая ставка без деления по цене товара. Для совместимости ставка повторяется во всех четырёх ценовых диапазонах расчёта плагина.
+- Если один тип товара встречается в нескольких категориях с разными ставками, используется максимальная ставка, чтобы не занизить цену продажи.
+
+
+## v1.5.3 — комиссии RFBS с 28.08.2026
+
+- Таблица комиссий обновлена по файлу Ozon «Таблица категорий для расчёта вознаграждения» с датой действия 28.08.2026.
+- Обновлены ставки для всех 8 980 нормализованных типов товаров; 7 804 ставки отличаются от таблицы 14.07.2026.
+- Для повторяющихся типов товара по-прежнему используется максимальная стандартная ставка, чтобы не занизить цену продажи.
+- Добавлена отдельная ставка RFBS 0,5% при цене свыше 500 000 ₽ для 13 типов мототехники, для которых она указана в таблице Ozon.
+- Устранено лишнее увеличение цены на один шаг округления из-за микроскопической погрешности дробных вычислений.
