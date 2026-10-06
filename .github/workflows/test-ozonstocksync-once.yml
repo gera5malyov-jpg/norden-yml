@@ -53,6 +53,8 @@ jobs:
               'double_preimport_guard': 'CREATE_ABORT_SECOND_EXISTENCE_CHECK' in sync and sync.count('getRemoteExistingOfferIds(') >= 3,
               'native_ozon_generator': "new ozonProduct($product_id)" in sync and 'getOzonOffers($sku_id, false, $generator_errors)' in sync,
               'create_before_stock_price': sync.find('createMissingProductsForAccount($account') < sync.find("foreach ($account['mappings'] as $mapping)"),
+              'single_primary_creation_account': "const CREATE_PRIMARY_ACCOUNT_INDEX = 1" in sync and 'CREATE_ROUTE_SKIP_NON_PRIMARY' in sync and 'CREATE_ROUTE_PRIMARY' in sync,
+              'creation_not_routed_by_old_sets': 'route_sets=' not in sync and 'CREATE_ROUTE_ERROR' not in sync,
           }
           for k,v in checks.items():
               print(f'{k}={"OK" if v else "FAIL"}')
