@@ -1,0 +1,81 @@
+name: Verify ozonstocksync live once
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-ozonstocksync-live-once.yml'
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - name: Verify live UI safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request, pathlib
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip(); VM_ID=44780; VM_IP='45.86.180.49'
+          REPORT=pathlib.Path('.deploy-probe/ozonstocksync-live-verify.txt')
+          def req(url,method='GET',data=None,headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode('utf-8'); return json.loads(raw) if raw else {}
+          tok=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':API_KEY}).encode(),{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozs-verify/1.0'})['token']
+          headers={'Authorization':'Bearer '+tok,'Content-Type':'application/json','Accept':'application/json','User-Agent':'ozs-verify/1.0'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'; subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub',encoding='utf-8').read().strip()
+              created=req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/','POST',json.dumps({'key':pub,'name':'chatgpt-ozs-verify-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),headers)
+              kid=created['id']
+              try:
+                  php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www'; chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig()); wa('shop');
+          $p=wa('shop')->getPlugin('ozonstocksync',true);
+          $controls=$p->getControls(array('namespace'=>'shop_ozonstocksync'));
+          $html=isset($controls['ozonstocksync_ui'])?(string)$controls['ozonstocksync_ui']:'';
+          preg_match_all('/class="ozs-type-row(?:[^"]*)"/',$html,$m);
+          $tm=$p->getSettings('type_margin_percent');
+          if(is_string($tm)){$d=json_decode($tm,true);if(is_array($d))$tm=$d;}
+          echo 'VERSION='.$p->getVersion()."\n";
+          echo 'TYPE_ROWS='.count($m[0])."\n";
+          echo 'SAVED_TYPE_MARGINS='.(is_array($tm)?count($tm):0)."\n";
+          echo 'ACQUIRING_PERCENT='.(string)$p->getSettings('acquiring_percent')."\n";
+          echo 'TARGET_MARGIN_PERCENT='.(string)$p->getSettings('target_margin_percent')."\n";
+          echo 'MIN_MARGIN_PERCENT='.(string)$p->getSettings('min_margin_percent')."\n";
+          echo 'UPDATE_STOCKS='.(string)$p->getSettings('update_stocks')."\n";
+          echo 'UPDATE_PRICES='.(string)$p->getSettings('update_prices')."\n";
+          echo 'DRY_RUN='.(string)$p->getSettings('dry_run')."\n";
+          echo 'VERIFY_STATUS='.(count($m[0])>0?'OK':'NO_TYPES')."\n";
+          ?>'''
+                  remote="cat >/tmp/ozs_verify.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/ozs_verify.php\nsu -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ozs_verify.php'\nrm -f /tmp/ozs_verify.php"
+                  p=subprocess.run(['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@'+VM_IP,remote],text=True,capture_output=True,timeout=120)
+                  if p.returncode: raise SystemExit(p.stderr)
+                  REPORT.parent.mkdir(parents=True,exist_ok=True); REPORT.write_text(p.stdout,encoding='utf-8')
+              finally:
+                  try:req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception:pass
+          PY
+      - name: Save verify report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/ozonstocksync-live-verify.txt || echo "VERIFY_STATUS=FAILED_NO_REPORT" > .deploy-probe/ozonstocksync-live-verify.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/ozonstocksync-live-verify.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save ozonstocksync live verification [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
