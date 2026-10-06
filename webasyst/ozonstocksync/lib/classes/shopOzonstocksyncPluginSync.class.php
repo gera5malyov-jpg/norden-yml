@@ -4,6 +4,7 @@ class shopOzonstocksyncPluginSync
     const STOCKS_URL = 'https://api-seller.ozon.ru/v2/products/stocks';
     const PRICES_URL = 'https://api-seller.ozon.ru/v1/product/import/prices';
     const PRODUCT_LIST_URL = 'https://api-seller.ozon.ru/v3/product/list';
+    const PRODUCT_INFO_LIST_URL = 'https://api-seller.ozon.ru/v3/product/info/list';
     const PRODUCT_IMPORT_URL = 'https://api-seller.ozon.ru/v3/product/import';
     const PRODUCT_IMPORT_INFO_URL = 'https://api-seller.ozon.ru/v1/product/import/info';
     const CREATE_SET_ID = 'ozon_upload';
@@ -57,6 +58,16 @@ class shopOzonstocksyncPluginSync
             $this->log('ACCOUNT_LOG_START: file=' . $this->account_log_file);
             $this->log('ACCOUNT_START: account=' . $account['name'] . ', mappings=' . count($account['mappings']));
             $this->log('ACCOUNT_MODE: account=' . $account['name'] . ', dry_run=' . ($dry_run ? '1' : '0') . ', update_stocks=' . ($update_stocks ? '1' : '0') . ', update_prices=' . ($update_prices ? '1' : '0'));
+
+            // Create only explicitly allowed, genuinely missing cards first.
+            // This keeps the existing stock/price synchronizer independent, while allowing
+            // the newly created offer to receive its normal stock/price update in this run.
+            $create_result = $this->createMissingProductsForAccount($account, $create_candidates, $dry_run);
+            $total_create_submitted += $create_result['submitted'];
+            $total_create_would_create += $create_result['would_create'];
+            $total_create_skipped_existing += $create_result['skipped_existing'];
+            $total_create_errors += $create_result['errors'];
+            $total_errors += $create_result['errors'];
 
             $account_price_items = array();
 
@@ -126,13 +137,6 @@ class shopOzonstocksyncPluginSync
                 $total_errors += $errors;
                 $this->log('ACCOUNT_PRICES_FINISH: account=' . $account['name'] . ', sent=' . $sent . ', errors=' . $errors);
             }
-
-            $create_result = $this->createMissingProductsForAccount($account, $create_candidates, $dry_run);
-            $total_create_submitted += $create_result['submitted'];
-            $total_create_would_create += $create_result['would_create'];
-            $total_create_skipped_existing += $create_result['skipped_existing'];
-            $total_create_errors += $create_result['errors'];
-            $total_errors += $create_result['errors'];
 
             $this->log('ACCOUNT_FINISH: account=' . $account['name']);
             $this->account_log_file = null;
@@ -665,23 +669,27 @@ class shopOzonstocksyncPluginSync
         );
     }
 
-    private function getRemoteExistingOfferIds($ids, $client_id, $api_key)
+    private function getRemoteExistingOfferIds($offer_ids, $client_id, $api_key, $product_ids = array(), $sku_ids = array())
     {
-        $normalized_map = array();
-        foreach ((array)$ids as $id) {
-            $id = trim((string)$id);
-            if ($id !== '') {
-                $normalized_map[$id] = $id;
-            }
-        }
-        $normalized = array_values($normalized_map);
-
-        if (!$normalized) {
-            return array('ok' => true, 'existing' => array());
-        }
-
         $existing = array();
-        foreach (array_chunk($normalized, 1000) as $chunk) {
+
+        $normalize = function ($values, $numeric_only = false) {
+            $result = array();
+            foreach ((array)$values as $value) {
+                $value = trim((string)$value);
+                if ($value === '') continue;
+                if ($numeric_only && !ctype_digit($value)) continue;
+                $result[$value] = $value;
+            }
+            return array_values($result);
+        };
+
+        $offer_ids = $normalize($offer_ids);
+        $product_ids = $normalize($product_ids, true);
+        $sku_ids = $normalize($sku_ids, true);
+
+        // Fast exact check by seller offer_id.
+        foreach (array_chunk($offer_ids, 1000) as $chunk) {
             $response = $this->sendToOzon(
                 self::PRODUCT_LIST_URL,
                 array(
@@ -694,44 +702,64 @@ class shopOzonstocksyncPluginSync
                 $client_id,
                 $api_key
             );
-
             if (!$response['ok']) {
-                return array(
-                    'ok' => false,
-                    'existing' => $existing,
-                    'code' => $response['code'],
-                    'body' => $response['body']
-                );
+                return array('ok' => false, 'existing' => $existing, 'code' => $response['code'], 'body' => $response['body']);
             }
-
             $decoded = json_decode((string)$response['body'], true);
             if (!is_array($decoded)) {
-                return array(
-                    'ok' => false,
-                    'existing' => $existing,
-                    'code' => $response['code'],
-                    'body' => 'invalid_json: ' . $response['body']
-                );
+                return array('ok' => false, 'existing' => $existing, 'code' => $response['code'], 'body' => 'invalid_json: ' . $response['body']);
             }
-
-            $items = array();
-            if (isset($decoded['result']['items']) && is_array($decoded['result']['items'])) {
-                $items = $decoded['result']['items'];
-            } elseif (isset($decoded['items']) && is_array($decoded['items'])) {
-                $items = $decoded['items'];
-            }
-
+            $items = isset($decoded['result']['items']) && is_array($decoded['result']['items'])
+                ? $decoded['result']['items']
+                : (isset($decoded['items']) && is_array($decoded['items']) ? $decoded['items'] : array());
             foreach ($items as $item) {
-                if (isset($item['offer_id'])) {
-                    $offer_id = trim((string)$item['offer_id']);
+                $offer_id = isset($item['offer_id']) ? trim((string)$item['offer_id']) : '';
+                if ($offer_id !== '') {
+                    $existing[$offer_id] = $item;
+                }
+                $sku = isset($item['sku']) ? trim((string)$item['sku']) : '';
+                if ($sku !== '') {
+                    $existing['sku:' . $sku] = $item;
+                }
+                $pid = isset($item['product_id']) ? trim((string)$item['product_id']) : (isset($item['id']) ? trim((string)$item['id']) : '');
+                if ($pid !== '') {
+                    $existing['product_id:' . $pid] = $item;
+                }
+            }
+        }
+
+        // Strong saved-ID checks. /v3/product/info/list accepts product_id and Ozon SKU.
+        foreach (array('product_id' => $product_ids, 'sku' => $sku_ids) as $field => $values) {
+            foreach (array_chunk($values, 1000) as $chunk) {
+                if (!$chunk) continue;
+                $response = $this->sendToOzon(
+                    self::PRODUCT_INFO_LIST_URL,
+                    array($field => $chunk),
+                    $client_id,
+                    $api_key
+                );
+                if (!$response['ok']) {
+                    return array('ok' => false, 'existing' => $existing, 'code' => $response['code'], 'body' => $response['body']);
+                }
+                $decoded = json_decode((string)$response['body'], true);
+                if (!is_array($decoded)) {
+                    return array('ok' => false, 'existing' => $existing, 'code' => $response['code'], 'body' => 'invalid_json: ' . $response['body']);
+                }
+                $items = isset($decoded['items']) && is_array($decoded['items'])
+                    ? $decoded['items']
+                    : (isset($decoded['result']['items']) && is_array($decoded['result']['items']) ? $decoded['result']['items'] : array());
+                foreach ($items as $item) {
+                    $offer_id = isset($item['offer_id']) ? trim((string)$item['offer_id']) : '';
                     if ($offer_id !== '') {
                         $existing[$offer_id] = $item;
                     }
-                }
-                if (isset($item['sku'])) {
-                    $sku = trim((string)$item['sku']);
-                    if ($sku !== '' && isset($normalized_map[$sku])) {
-                        $existing[$sku] = $item;
+                    $sku = isset($item['sku']) ? trim((string)$item['sku']) : '';
+                    if ($sku !== '') {
+                        $existing['sku:' . $sku] = $item;
+                    }
+                    $pid = isset($item['id']) ? trim((string)$item['id']) : (isset($item['product_id']) ? trim((string)$item['product_id']) : '');
+                    if ($pid !== '') {
+                        $existing['product_id:' . $pid] = $item;
                     }
                 }
             }
@@ -760,18 +788,9 @@ class shopOzonstocksyncPluginSync
             $sku_id = (int)$candidate['sku_id'];
             $webasyst_sku = trim((string)$candidate['sku']);
 
+            // A saved ID is evidence that must be verified remotely, not a reason
+            // to skip blindly: the old Ozon card may have been deleted or archived.
             $saved = $this->getSavedOzonEvidence($account, $sku_id);
-            if ($saved) {
-                $result['skipped_existing']++;
-                $this->log(
-                    'CREATE_SKIP_SAVED_OZON_ID: account=' . $account['name']
-                    . ', sku_id=' . $sku_id
-                    . ', sku=' . $webasyst_sku
-                    . ', ozon_product_id=' . (int)$saved['ozon_product_id']
-                    . ', ozon_offer_id=' . (string)$saved['ozon_offer_id']
-                );
-                continue;
-            }
 
             $item = $this->prepareCreateOffer($candidate);
             if (!$item['ok']) {
@@ -786,6 +805,8 @@ class shopOzonstocksyncPluginSync
                 continue;
             }
 
+            $item['saved_ozon_product_id'] = $saved && isset($saved['ozon_product_id']) ? (int)$saved['ozon_product_id'] : 0;
+            $item['saved_ozon_offer_id'] = $saved && isset($saved['ozon_offer_id']) ? trim((string)$saved['ozon_offer_id']) : '';
             $prepared[] = $item;
         }
 
@@ -802,14 +823,31 @@ class shopOzonstocksyncPluginSync
 
         // First fail-closed remote guard: generated offer_id + raw Webasyst SKU.
         $lookup_ids = array();
+        $lookup_product_ids = array();
+        $lookup_sku_ids = array();
         foreach ($prepared as $item) {
             $lookup_ids[] = $item['offer_id'];
             $lookup_ids[] = $item['webasyst_sku'];
+            if (!empty($item['saved_ozon_offer_id']) && $item['saved_ozon_offer_id'] !== '0') {
+                $lookup_ids[] = $item['saved_ozon_offer_id'];
+            }
+            if (!empty($item['saved_ozon_product_id'])) {
+                $lookup_product_ids[] = (string)$item['saved_ozon_product_id'];
+            }
+            // If an available saved/raw identifier is numeric, also check it as Ozon SKU.
+            foreach (array($item['saved_ozon_offer_id'], $item['webasyst_sku']) as $possible_sku) {
+                $possible_sku = trim((string)$possible_sku);
+                if ($possible_sku !== '' && ctype_digit($possible_sku)) {
+                    $lookup_sku_ids[] = $possible_sku;
+                }
+            }
         }
         $remote = $this->getRemoteExistingOfferIds(
             $lookup_ids,
             $account['client_id'],
-            $account['api_key']
+            $account['api_key'],
+            $lookup_product_ids,
+            $lookup_sku_ids
         );
         if (!$remote['ok']) {
             $result['errors'] += count($prepared);
@@ -824,16 +862,29 @@ class shopOzonstocksyncPluginSync
 
         $pending = array();
         foreach ($prepared as $item) {
-            $exists_by_offer = isset($remote['existing'][$item['offer_id']]);
-            $exists_by_sku = isset($remote['existing'][$item['webasyst_sku']]);
-            if ($exists_by_offer || $exists_by_sku) {
+            $exists_by_offer = isset($remote['existing'][$item['offer_id']])
+                || isset($remote['existing'][$item['webasyst_sku']])
+                || (!empty($item['saved_ozon_offer_id']) && isset($remote['existing'][$item['saved_ozon_offer_id']]));
+            $exists_by_product_id = !empty($item['saved_ozon_product_id'])
+                && isset($remote['existing']['product_id:' . $item['saved_ozon_product_id']]);
+            $exists_by_ozon_sku = false;
+            foreach (array($item['saved_ozon_offer_id'], $item['webasyst_sku']) as $possible_sku) {
+                $possible_sku = trim((string)$possible_sku);
+                if ($possible_sku !== '' && isset($remote['existing']['sku:' . $possible_sku])) {
+                    $exists_by_ozon_sku = true;
+                    break;
+                }
+            }
+            if ($exists_by_offer || $exists_by_product_id || $exists_by_ozon_sku) {
                 $result['skipped_existing']++;
+                $matched_by = $exists_by_product_id ? 'saved_product_id' : ($exists_by_ozon_sku ? 'ozon_sku' : 'offer_id');
                 $this->log(
                     'CREATE_SKIP_REMOTE_EXISTS: account=' . $account['name']
                     . ', sku_id=' . $item['sku_id']
                     . ', sku=' . $item['webasyst_sku']
                     . ', offer_id=' . $item['offer_id']
-                    . ', matched_by=' . ($exists_by_offer ? 'offer_id' : 'sku')
+                    . ', saved_product_id=' . (int)$item['saved_ozon_product_id']
+                    . ', matched_by=' . $matched_by
                 );
                 continue;
             }
@@ -872,15 +923,31 @@ class shopOzonstocksyncPluginSync
         foreach (array_chunk($pending, self::CREATE_BATCH_SIZE) as $batch) {
             // product/import is an upsert endpoint. Re-check immediately before calling it.
             $batch_lookup = array();
+            $batch_product_ids = array();
+            $batch_sku_ids = array();
             foreach ($batch as $item) {
                 $batch_lookup[] = $item['offer_id'];
                 $batch_lookup[] = $item['webasyst_sku'];
+                if (!empty($item['saved_ozon_offer_id']) && $item['saved_ozon_offer_id'] !== '0') {
+                    $batch_lookup[] = $item['saved_ozon_offer_id'];
+                }
+                if (!empty($item['saved_ozon_product_id'])) {
+                    $batch_product_ids[] = (string)$item['saved_ozon_product_id'];
+                }
+                foreach (array($item['saved_ozon_offer_id'], $item['webasyst_sku']) as $possible_sku) {
+                    $possible_sku = trim((string)$possible_sku);
+                    if ($possible_sku !== '' && ctype_digit($possible_sku)) {
+                        $batch_sku_ids[] = $possible_sku;
+                    }
+                }
             }
 
             $second = $this->getRemoteExistingOfferIds(
                 $batch_lookup,
                 $account['client_id'],
-                $account['api_key']
+                $account['api_key'],
+                $batch_product_ids,
+                $batch_sku_ids
             );
             if (!$second['ok']) {
                 $result['errors'] += count($batch);
@@ -895,7 +962,18 @@ class shopOzonstocksyncPluginSync
 
             $final = array();
             foreach ($batch as $item) {
-                if (isset($second['existing'][$item['offer_id']]) || isset($second['existing'][$item['webasyst_sku']])) {
+                $second_exists = isset($second['existing'][$item['offer_id']])
+                    || isset($second['existing'][$item['webasyst_sku']])
+                    || (!empty($item['saved_ozon_offer_id']) && isset($second['existing'][$item['saved_ozon_offer_id']]))
+                    || (!empty($item['saved_ozon_product_id']) && isset($second['existing']['product_id:' . $item['saved_ozon_product_id']]));
+                foreach (array($item['saved_ozon_offer_id'], $item['webasyst_sku']) as $possible_sku) {
+                    $possible_sku = trim((string)$possible_sku);
+                    if ($possible_sku !== '' && isset($second['existing']['sku:' . $possible_sku])) {
+                        $second_exists = true;
+                        break;
+                    }
+                }
+                if ($second_exists) {
                     $result['skipped_existing']++;
                     $this->log(
                         'CREATE_SKIP_SECOND_CHECK_EXISTS: account=' . $account['name']
