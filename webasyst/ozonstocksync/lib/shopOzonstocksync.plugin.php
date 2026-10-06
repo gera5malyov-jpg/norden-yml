@@ -135,8 +135,8 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html = '';
         $html .= '<div class="ozs-settings">';
         $html .= '<div class="ozs-hero">';
-        $html .= '<div><div class="ozs-title">Ozon Stock Sync</div><div class="ozs-subtitle">Остатки, склады, цены и индивидуальная наценка по типам Ozon</div></div>';
-        $html .= '<span class="ozs-version">v1.6.1</span>';
+        $html .= '<div><div class="ozs-title">Ozon Stock Sync</div><div class="ozs-subtitle">Остатки, цены и безопасное создание новых карточек из списка «Грузить в Ozon»</div></div>';
+        $html .= '<span class="ozs-version">v1.7.0</span>';
         $html .= '</div>';
 
         $html .= '<div class="ozs-summary-grid">';
@@ -165,6 +165,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html .= $this->inputField($namespace, 'round_step', 'Округление вверх, ₽', 'number', 'Шаг округления цены', '1');
         $html .= '</div>';
         $html .= '<div class="ozs-formula">Цена = Закупка × (1 + наценка) ÷ (1 − комиссия Ozon − эквайринг). В Ozon себестоимость не отправляется.</div>';
+        $html .= '<div class="ozs-alert ozs-alert-info"><b>Создание новых карточек:</b> разрешено только товарам из единственного списка Webasyst <b>«Грузить в Ozon»</b> (ID: <code>ozon_upload</code>). Существующие карточки перед импортом проверяются и этим механизмом не обновляются. Удаление товара из списка запрещает только будущую попытку создания и не удаляет карточку из Ozon.</div>';
         $html .= '</div></details>';
 
         $html .= '<details class="ozs-card" open>';
