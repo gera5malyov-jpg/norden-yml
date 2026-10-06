@@ -1,0 +1,144 @@
+name: AtlasPage SSTP secure export v2
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/atlaspage-sstp-export-v2.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ATLASPAGE_ID: ${{ secrets.ATLASPAGE_ID }}
+    steps:
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install chromium --with-deps >/dev/null
+
+      - name: Export SSTP server details
+        run: |
+          cat > /tmp/export-sstp.js <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const userId = process.env.ATLASPAGE_ID || '';
+          if (!userId) throw new Error('ATLASPAGE_ID missing');
+          const clean = s => (s || '').replace(/\s+/g, ' ').trim();
+          const sleep = ms => new Promise(r => setTimeout(r, ms));
+          async function clickText(page, re) {
+            const candidates = [
+              page.getByRole('button', { name: re }).first(),
+              page.getByRole('tab', { name: re }).first(),
+              page.getByText(re, { exact: true }).first()
+            ];
+            for (const el of candidates) {
+              if (await el.isVisible({ timeout: 700 }).catch(()=>false)) {
+                await el.click({ timeout: 4000 });
+                return true;
+              }
+            }
+            return false;
+          }
+          (async () => {
+            const browser = await chromium.launch({headless:true});
+            const context = await browser.newContext({locale:'ru-RU'});
+            const page = await context.newPage();
+            await page.goto('https://atlaspage51.com/lk', {waitUntil:'domcontentloaded', timeout:45000});
+            await sleep(1500);
+            if (!await clickText(page, /^По\s+ID$/i)) throw new Error('ID login mode not found');
+            let idInput = page.locator('input:visible[placeholder*="ID" i], input:visible[name*="id" i]').first();
+            if (!(await idInput.isVisible().catch(()=>false))) idInput = page.locator('input:visible').first();
+            await idInput.fill(userId);
+            let login = page.locator('button:visible[type="submit"]').first();
+            if (!(await login.isVisible().catch(()=>false))) login = page.getByRole('button', {name:/войти|далее|продолжить/i}).first();
+            await login.click();
+            await Promise.race([page.waitForLoadState('networkidle', {timeout:15000}).catch(()=>{}), page.waitForTimeout(4000)]);
+            await page.goto('https://atlaspage51.com/lk/connect', {waitUntil:'domcontentloaded', timeout:45000});
+            await sleep(1600);
+            if (/\/login(?:\?|$)/i.test(page.url())) throw new Error('login did not persist');
+            let selected = await clickText(page, /^SSTP$/i);
+            if (!selected) {
+              const choose = page.getByRole('button', {name:/выбрать протокол/i}).first();
+              if (await choose.isVisible({timeout:1200}).catch(()=>false)) {
+                await choose.click();
+                await sleep(800);
+                selected = await clickText(page, /^SSTP$/i);
+              }
+            }
+            if (!selected) throw new Error('SSTP protocol not found');
+            await sleep(1200);
+            const rows = page.locator('button[class*="serverItemClickable"]');
+            const n = await rows.count();
+            const result = [];
+            for (let i=0; i<n; i++) {
+              const row = rows.nth(i);
+              const label = clean(await row.innerText().catch(()=>'')) || ('server_'+(i+1));
+              await row.scrollIntoViewIfNeeded().catch(()=>{});
+              await row.click({timeout:5000});
+              await sleep(700);
+              const overlay = page.locator('div[class*="popupOverlay"]:visible').last();
+              const overlayVisible = await overlay.isVisible({timeout:1500}).catch(()=>false);
+              const scope = overlayVisible ? overlay : page;
+              const text = clean(await scope.innerText().catch(()=>''));
+              const fields = await scope.locator('input, textarea').evaluateAll(nodes => nodes.map(n => ({
+                type:n.getAttribute('type')||'', name:n.getAttribute('name')||'',
+                placeholder:n.getAttribute('placeholder')||'', value:n.value||''
+              })));
+              const links = await scope.locator('a[href]').evaluateAll(nodes => nodes.map(a => ({
+                text:(a.innerText||'').replace(/\s+/g,' ').trim(), href:a.href||''
+              })));
+              result.push({label,text,fields,links});
+              await page.keyboard.press('Escape').catch(()=>{});
+              await sleep(300);
+              if (await overlay.isVisible().catch(()=>false)) {
+                const close = overlay.locator('button[aria-label*="close" i],button[aria-label*="закры" i],button[class*="close" i]').first();
+                if (await close.isVisible({timeout:500}).catch(()=>false)) await close.click({force:true}).catch(()=>{});
+              }
+              await sleep(300);
+            }
+            fs.writeFileSync('/tmp/sstp.json', JSON.stringify(result, null, 2));
+            console.log('SSTP_EXPORT_COUNT:', result.length);
+            await browser.close();
+          })().catch(e=>{ console.error('EXPORT_ERROR:',e.message); process.exit(1); });
+          NODE
+          NODE_PATH="$(npm root)" node /tmp/export-sstp.js
+
+      - name: Encrypt export
+        run: |
+          set -euo pipefail
+          mkdir -p transfer
+          cat > /tmp/pub.pem <<'PUB'
+          -----BEGIN PUBLIC KEY-----
+          MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEApirk9p46KkUZXakytL7Q
+          u59/wTFzn0gthIPHj39JUrU0JTN2JL6RxxmXX6/BjPV4PwP8Oh3UFms4iWGFc4Kp
+          8OJBlARyAXvE1huh8IRlXRlsrrwTe0gijYjEjS5SjrMrEzSWxDuKIFszP2Fz2ubj
+          SEoMQhITgH6uz4qiCY+5cDppjXXb9xi5JboPmcszGrhfzAfYq+qs6+bjz1BLNYXV
+          M40hlXPCE93atsUyW7WiuKiURax3VTTLtGkmxwEV8omjKFZbtYHKbYRzjPK5K0yh
+          CIoMJSw6J5w5h7Bhpnw80M/H3GkncBOa/zBlk3h54KjkrqW4+bjWuP/yDmrRjwZH
+          s7YZ14CgiS7KrNQgA3PoCEVL3/7TPMxHWrBNt+Qh6l9EHlprz/2D5xw/JgimLXB+
+          8wooF2U3GQD/Y/QnsDpli0Fus2qY/zxtUQeFJkhgZ+JvvH1jekBvVjemLfTwTzJt
+          OtDV8UrFBU6HxipdaoN5uVJ3xlObWxkGI+tQI8QhfXmnAgMBAAE=
+          -----END PUBLIC KEY-----
+          PUB
+          openssl rand 32 > /tmp/key
+          openssl rand 16 > /tmp/iv
+          cat /tmp/key /tmp/iv > /tmp/keyiv
+          K="$(xxd -p -c 256 /tmp/key)"
+          IV="$(xxd -p -c 256 /tmp/iv)"
+          openssl enc -aes-256-cbc -K "$K" -iv "$IV" -in /tmp/sstp.json -out transfer/sstp.enc
+          openssl pkeyutl -encrypt -pubin -inkey /tmp/pub.pem -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 -in /tmp/keyiv -out transfer/keyiv.enc
+          rm -f /tmp/key /tmp/iv /tmp/keyiv /tmp/sstp.json
+
+      - name: Upload encrypted export
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlaspage-sstp-encrypted-v2
+          path: transfer/
+          retention-days: 1
+          if-no-files-found: error
