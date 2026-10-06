@@ -1,0 +1,19 @@
+TEST=ozonstocksync-1.6.0
+--- PHP LINT ---
+No syntax errors detected in webasyst/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
+No syntax errors detected in webasyst/ozonstocksync/lib/shopOzonstocksync.plugin.php
+No syntax errors detected in webasyst/ozonstocksync/lib/config/settings.php
+No syntax errors detected in webasyst/ozonstocksync/lib/config/plugin.php
+No syntax errors detected in webasyst/ozonstocksync/lib/config/rfbs_commissions.php
+No syntax errors detected in webasyst/ozonstocksync/lib/cli/shopOzonstocksyncPluginSync.cli.php
+--- CONTRACT ---
+version_1_6_0=OK
+custom_getControls=OK
+type_margin_ui=OK
+type_margin_setting=OK
+type_margin_price_logic=OK
+hidden_stock_zero=OK
+force_price_touch=OK
+retry_429=OK
+price_batch_max_guard=OK
+TEST_STATUS=OK
