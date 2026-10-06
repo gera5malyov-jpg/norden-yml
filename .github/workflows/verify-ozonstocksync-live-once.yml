@@ -46,6 +46,28 @@ jobs:
           $tm=$p->getSettings('type_margin_percent');
           if(is_string($tm)){$d=json_decode($tm,true);if(is_array($d))$tm=$d;}
           echo 'VERSION='.$p->getVersion()."\n";
+
+          require_once $root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php';
+          $rc=new ReflectionClass('shopOzonstocksyncPluginSync');
+          $create_set_id=$rc->getConstant('CREATE_SET_ID');
+          $create_set_name=$rc->getConstant('CREATE_SET_NAME');
+          $model=new waModel();
+          $create_set=$model->query("SELECT id,name,type,count FROM shop_set WHERE id=s:id LIMIT 1",array('id'=>$create_set_id))->fetchAssoc();
+          $allowlist_ok=($create_set && (string)$create_set['name']===$create_set_name && (int)$create_set['type']===0);
+          echo 'CREATE_SET_ID='.(string)$create_set_id."\n";
+          echo 'CREATE_SET_NAME='.(string)$create_set_name."\n";
+          echo 'CREATE_SET_COUNT='.($create_set?(int)$create_set['count']:-1)."\n";
+          echo 'CREATE_ALLOWLIST='.($allowlist_ok?'OK':'FAIL')."\n";
+
+          $sync_source=file_get_contents($root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php');
+          $create_pos=strpos($sync_source,'createMissingProductsForAccount($account');
+          $mapping_pos=strpos($sync_source,"foreach ($account['mappings'] as $mapping)");
+          $create_before_sync=($create_pos!==false && $mapping_pos!==false && $create_pos<$mapping_pos);
+          $saved_remote_guard=(strpos($sync_source,'PRODUCT_INFO_LIST_URL')!==false && strpos($sync_source,'saved_ozon_product_id')!==false);
+          $second_guard=(strpos($sync_source,'CREATE_ABORT_SECOND_EXISTENCE_CHECK')!==false);
+          echo 'CREATE_BEFORE_STOCK_PRICE='.($create_before_sync?'OK':'FAIL')."\n";
+          echo 'SAVED_ID_REMOTE_GUARD='.($saved_remote_guard?'OK':'FAIL')."\n";
+          echo 'SECOND_PREIMPORT_GUARD='.($second_guard?'OK':'FAIL')."\n";
           echo 'TYPE_ROWS='.count($m[0])."\n";
           echo 'SAVED_TYPE_MARGINS='.(is_array($tm)?count($tm):0)."\n";
           echo 'ACQUIRING_PERCENT='.(string)$p->getSettings('acquiring_percent')."\n";
@@ -55,7 +77,6 @@ jobs:
           echo 'UPDATE_PRICES='.(string)$p->getSettings('update_prices')."\n";
           echo 'DRY_RUN='.(string)$p->getSettings('dry_run')."\n";
 
-          $model=new waModel();
           $stocks=$model->query("SELECT id,name FROM shop_stock ORDER BY id")->fetchAll();
           echo 'WEBASYST_STOCKS='.count($stocks)."\n";
           foreach($stocks as $s){echo 'STOCK_'.(int)$s['id'].'='.(string)$s['name']."\n";}
@@ -69,15 +90,52 @@ jobs:
           echo 'SERIALIZE_SAMPLE='.str_replace("\n",' | ',$sample)."\n";
           $serializer_ok=(strpos($sample,'sample_set;123456;1,2;1')!==false && strpos($sample,'sample_general;654321;;0')!==false);
 
-          require_once $root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php';
           $sync=new shopOzonstocksyncPluginSync(array());
           $rpm=new ReflectionMethod($sync,'parseMappings');
           $rpm->setAccessible(true);
           $parsed=$rpm->invoke($sync,"sample_set;123456;1,2;1");
           $parser_ok=(isset($parsed[0]['webasyst_stock_id']) && $parsed[0]['webasyst_stock_id']==='1,2');
 
+          // Read-only live probe of the new duplicate guard. No product/import call is made.
+          $guard_api_ok=false;
+          $guard_detected=false;
+          $client_id=trim((string)$p->getSettings('client_id'));
+          $api_key=trim((string)$p->getSettings('api_key'));
+          if($client_id!=='' && $api_key!==''){
+              $samples=$model->query("
+                  SELECT e.ozon_product_id,e.ozon_offer_id,e.shop_sku_id,s.sku
+                  FROM ozon_exported_product e
+                  INNER JOIN shop_product_skus s ON s.id=e.shop_sku_id
+                  WHERE e.ozon_product_id>0 AND s.sku IS NOT NULL AND s.sku<>''
+                  ORDER BY e.id DESC
+                  LIMIT 10
+              ")->fetchAll();
+              $grm=new ReflectionMethod($sync,'getRemoteExistingOfferIds');
+              $grm->setAccessible(true);
+              foreach($samples as $sample){
+                  $offers=array((string)$sample['sku']);
+                  if(isset($sample['ozon_offer_id']) && (string)$sample['ozon_offer_id']!=='' && (string)$sample['ozon_offer_id']!=='0'){
+                      $offers[]=(string)$sample['ozon_offer_id'];
+                  }
+                  $skus=array();
+                  if(isset($sample['ozon_offer_id']) && ctype_digit((string)$sample['ozon_offer_id']) && (string)$sample['ozon_offer_id']!=='0'){
+                      $skus[]=(string)$sample['ozon_offer_id'];
+                  }
+                  $guard=$grm->invoke($sync,$offers,$client_id,$api_key,array((string)$sample['ozon_product_id']),$skus);
+                  if(!empty($guard['ok'])){
+                      $guard_api_ok=true;
+                      if(!empty($guard['existing'])){
+                          $guard_detected=true;
+                          break;
+                      }
+                  }
+              }
+          }
+          echo 'DUPLICATE_GUARD_API='.($guard_api_ok?'OK':'FAIL')."\n";
+          echo 'DUPLICATE_GUARD_DETECTED='.($guard_detected?'YES':'NO_MATCH_IN_SAMPLE')."\n";
+
           $ui_ok=(strpos($html,'ozs-stock-picker')!==false && strpos($html,'_mapping_rows_present')!==false);
-          $ok=(count($m[0])>0 && $serializer_ok && $parser_ok && $ui_ok);
+          $ok=($p->getVersion()==='1.7.0' && count($m[0])>0 && $serializer_ok && $parser_ok && $ui_ok && $allowlist_ok && $create_before_sync && $saved_remote_guard && $second_guard && $guard_api_ok);
           echo 'SERIALIZER='.($serializer_ok?'OK':'FAIL')."\n";
           echo 'PARSER='.($parser_ok?'OK':'FAIL')."\n";
           echo 'MULTI_STOCK_UI='.($ui_ok?'OK':'FAIL')."\n";
