@@ -592,7 +592,17 @@ def _single_characteristic_id(index, title):
 
 def _ensure_characteristic(kit, rows, index, title):
     key = _norm(title)
-    row = _pick_characteristic(index.get(key, []), title)
+    matches = list(index.get(key, []))
+    # Different Webasyst characteristic titles may normalize to the same key
+    # (for example "Вес, кг" and "Вескг"). Reusing a merely normalized match
+    # makes KIT receive two values for one STRING characteristic and it rejects
+    # the variant. Reuse only an exact-title definition; otherwise create a
+    # separate KIT characteristic so every source field keeps its own value.
+    exact = [
+        row for row in matches
+        if _s(row.get("title") or row.get("name")) == title
+    ]
+    row = _pick_characteristic(exact, title) if exact else None
     if row:
         return _s(row.get("id"))
     row = kit.create_characteristic(title)
@@ -632,7 +642,15 @@ def _kit_characteristics(
         }:
             continue
         cid = _ensure_characteristic(kit, rows, index, title)
-        definition = rows_by_id.get(_s(cid)) or {}
+        definition = rows_by_id.get(_s(cid)) or next(
+            (
+                row for row in rows
+                if isinstance(row, dict) and _s(row.get("id")) == _s(cid)
+            ),
+            {},
+        )
+        if definition:
+            rows_by_id[_s(cid)] = definition
         ctype = _s(definition.get("type")).upper()
         select_mode = _s(definition.get("select_mode")).upper()
 
