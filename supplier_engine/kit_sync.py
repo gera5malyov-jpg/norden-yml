@@ -619,6 +619,11 @@ def _kit_characteristics(
 ):
     out = []
     seen_titles = set()
+    rows_by_id = {
+        _s(row.get("id")): row
+        for row in rows or []
+        if isinstance(row, dict) and _s(row.get("id"))
+    }
     for title, values in _feature_values(features):
         normalized_title = _norm(title)
         if normalized_title in {
@@ -627,10 +632,24 @@ def _kit_characteristics(
         }:
             continue
         cid = _ensure_characteristic(kit, rows, index, title)
+        definition = rows_by_id.get(_s(cid)) or {}
+        ctype = _s(definition.get("type")).upper()
+        select_mode = _s(definition.get("select_mode")).upper()
+
+        normalized_values = list(values)
+        # KIT STRING characteristics and SINGLE-select characteristics accept
+        # one logical value only. Preserve all Webasyst source values by
+        # joining them into one string instead of dropping data or failing.
+        if len(normalized_values) > 1 and (
+            ctype == "STRING" or select_mode == "SINGLE"
+        ):
+            joined = " | ".join(normalized_values)
+            normalized_values = [joined]
+
         out.append({
             "characteristic_id": cid,
-            "value": values[0],
-            "values": values,
+            "value": normalized_values[0],
+            "values": normalized_values,
         })
         seen_titles.add(normalized_title)
     supplier_sku = _s(supplier_sku)
