@@ -22,3 +22,5 @@ jobs:
           gh api --method POST "repos/$REPO/actions/runs/37432387166/force-cancel" || true
           gh api --method POST "repos/$REPO/actions/runs/37432945315/force-cancel" || true
           gh api --method POST "repos/$REPO/actions/runs/37444701845/force-cancel" || true
+          gh api --method POST "repos/$REPO/actions/runs/37444696650/force-cancel" || true
+          gh api --method POST "repos/$REPO/actions/runs/37449540760/force-cancel" || true
