@@ -1,0 +1,72 @@
+name: Inspect Ozon dimension mappings 31663537 once
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    if: contains(github.event.head_commit.message, 'INSPECT_OZON_DIM_MAP_31663537')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - name: Inspect Webasyst dimension mappings
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip(); VM_ID=44780; VM_IP='45.86.180.49'
+          ROOT='/home/web/vm-23f9aff9.na4u.ru/www'
+          def req(url,method='GET',data=None,headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode(); return json.loads(raw) if raw else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':API_KEY}).encode(),{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozs-dim-map/1.0'})['token']
+          headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/json','User-Agent':'ozs-dim-map/1.0'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'; subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub').read().strip()
+              created=req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/','POST',json.dumps({'key':pub,'name':'chatgpt-ozs-dim-map'}).encode(),headers)
+              kid=created['id']; common=['-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null']
+              try:
+                  php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());wa('shop');
+          $m=new waModel();
+          $rules=$m->query("SELECT * FROM ozon_product_rule ORDER BY id")->fetchAll();
+          $filtered=array();
+          foreach($rules as $r){
+            $s=json_encode($r,JSON_UNESCAPED_UNICODE);
+            if(preg_match('/width|height|depth|weight|шир|выс|глуб|вес/i',$s)){$filtered[]=$r;}
+          }
+          echo 'RULES='.json_encode($filtered,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          $features=$m->query("
+            SELECT f.id,f.code,f.name,pf.product_id,pf.sku_id,pf.feature_value_id,
+                   COALESCE(v.value, pf.feature_value_id) AS value
+            FROM shop_product_features pf
+            INNER JOIN shop_feature f ON f.id=pf.feature_id
+            LEFT JOIN shop_feature_values_varchar v ON v.id=pf.feature_value_id
+            WHERE pf.product_id=1484399
+            ORDER BY f.id,pf.sku_id
+          ")->fetchAll();
+          echo 'FEATURES='.json_encode($features,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          ?>''';
+                  remote=f"""cat >/tmp/ozs_dim_map.php <<'PHP'
+          {php}
+          PHP
+          chown web:web /tmp/ozs_dim_map.php
+          su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ozs_dim_map.php'
+          rm -f /tmp/ozs_dim_map.php
+          """
+                  p=subprocess.run(['ssh']+common+['root@'+VM_IP,remote],text=True,capture_output=True,timeout=120)
+                  print(p.stdout)
+                  if p.stderr.strip(): print('STDERR='+p.stderr.strip())
+                  if p.returncode: raise SystemExit(p.returncode)
+              finally:
+                  try:req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception as e: print('cleanup='+str(e))
+          PY
