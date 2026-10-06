@@ -1,0 +1,191 @@
+name: Deploy ozonstocksync 1.6.0 once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-ozonstocksync-1-6-0.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Pre-deploy lint
+        shell: bash
+        run: |
+          set -euo pipefail
+          find webasyst/ozonstocksync -name '*.php' -print0 | while IFS= read -r -d '' f; do
+            php -l "$f"
+          done
+          tar -czf /tmp/ozonstocksync-1.6.0.tgz -C webasyst/ozonstocksync .
+
+      - name: Deploy with backup and health check
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request, pathlib, textwrap
+
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip()
+          VM_ID=44780
+          VM_IP='45.86.180.49'
+          ROOT='/home/web/vm-23f9aff9.na4u.ru/www'
+          REPORT=pathlib.Path('.deploy-probe/ozonstocksync-deploy.txt')
+
+          def req(url, method='GET', data=None, headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode('utf-8')
+                  return json.loads(raw) if raw else {}
+
+          token=req(
+              'https://panel.netangels.ru/api/gateway/token/',
+              'POST',
+              urllib.parse.urlencode({'api_key':API_KEY}).encode(),
+              {'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozs-deploy/1.0'}
+          )['token']
+          headers={
+              'Authorization':'Bearer '+token,
+              'Content-Type':'application/json',
+              'Accept':'application/json',
+              'User-Agent':'ozs-deploy/1.0'
+          }
+
+          output=[]
+          def add(s):
+              output.append(str(s))
+              print(s)
+
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub',encoding='utf-8').read().strip()
+              created=req(
+                  f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/',
+                  'POST',
+                  json.dumps({'key':pub,'name':'chatgpt-ozs-deploy-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),
+                  headers
+              )
+              kid=created['id']
+              ssh_base=['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@'+VM_IP]
+              try:
+                  scp=subprocess.run(
+                      ['scp','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null',
+                       '/tmp/ozonstocksync-1.6.0.tgz','root@'+VM_IP+':/tmp/ozonstocksync-1.6.0.tgz'],
+                      text=True,capture_output=True,timeout=90
+                  )
+                  if scp.returncode:
+                      raise SystemExit(scp.stderr)
+
+                  remote=r'''set -eu
+          ROOT=/home/web/vm-23f9aff9.na4u.ru/www
+          PLUGIN="$ROOT/wa-apps/shop/plugins/ozonstocksync"
+          PLUGINS="$ROOT/wa-apps/shop/plugins"
+          BACKUP_DIR="$ROOT/wa-data/protected/shop/ozonstocksync-backups"
+          STAMP=$(date +%Y%m%d-%H%M%S)
+          BACKUP="$BACKUP_DIR/ozonstocksync-$STAMP.tgz"
+          STAGE="/tmp/ozonstocksync-stage-$STAMP"
+
+          mkdir -p "$BACKUP_DIR" "$STAGE"
+          test -d "$PLUGIN"
+          tar -czf "$BACKUP" -C "$PLUGINS" ozonstocksync
+          tar -xzf /tmp/ozonstocksync-1.6.0.tgz -C "$STAGE"
+
+          echo "BACKUP=$BACKUP"
+          echo "--- staging lint ---"
+          find "$STAGE" -name '*.php' -print0 | while IFS= read -r -d '' f; do php -l "$f"; done
+
+          cp -a "$STAGE"/. "$PLUGIN"/
+          chown -R web:web "$PLUGIN"
+
+          set +e
+          (
+            set -e
+            echo "--- production lint ---"
+            find "$PLUGIN" -name '*.php' -print0 | while IFS= read -r -d '' f; do php -l "$f"; done
+
+            cat >/tmp/ozs_health.php <<'PHP'
+          <?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';
+          chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());
+          wa('shop');
+          $p=wa('shop')->getPlugin('ozonstocksync',true);
+          $info=$p->getInfo();
+          $controls=$p->getControls(array('namespace'=>'shop_ozonstocksync'));
+          $html=isset($controls['ozonstocksync_ui']) ? (string)$controls['ozonstocksync_ui'] : '';
+          $ok=(isset($info['version']) && $info['version']==='1.6.0' && strlen($html)>500 && strpos($html,'type_margin_percent')!==false);
+          echo 'PLUGIN_CLASS='.get_class($p)."\n";
+          echo 'VERSION='.(isset($info['version'])?$info['version']:'')."\n";
+          echo 'UI_LENGTH='.strlen($html)."\n";
+          echo 'TYPE_MARGIN_UI='.(strpos($html,'type_margin_percent')!==false?'yes':'no')."\n";
+          echo 'HEALTH='.($ok?'OK':'FAIL')."\n";
+          exit($ok?0:2);
+          ?>
+          PHP
+            chown web:web /tmp/ozs_health.php
+            su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ozs_health.php'
+            rm -f /tmp/ozs_health.php
+          )
+          HEALTH_RC=$?
+          set -e
+
+          if [ "$HEALTH_RC" -ne 0 ]; then
+            echo "HEALTH_FAILED=1"
+            rm -rf "$PLUGIN"
+            tar -xzf "$BACKUP" -C "$PLUGINS"
+            chown -R web:web "$PLUGIN"
+            echo "ROLLBACK=OK"
+            rm -rf "$STAGE" /tmp/ozonstocksync-1.6.0.tgz /tmp/ozs_health.php
+            exit "$HEALTH_RC"
+          fi
+
+          rm -rf "$STAGE" /tmp/ozonstocksync-1.6.0.tgz
+          echo "DEPLOY_STATUS=OK"
+          '''
+                  p=subprocess.run(ssh_base+[remote],text=True,capture_output=True,timeout=240)
+                  add(p.stdout)
+                  if p.stderr.strip():
+                      add('STDERR='+p.stderr.strip())
+                  if p.returncode:
+                      add('DEPLOY_STATUS=FAILED')
+                      REPORT.parent.mkdir(parents=True,exist_ok=True)
+                      REPORT.write_text('\n'.join(output)+'\n',encoding='utf-8')
+                      raise SystemExit(p.returncode)
+              finally:
+                  try:
+                      req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception as e:
+                      add('SSH_KEY_CLEANUP_WARNING='+str(e))
+
+          REPORT.parent.mkdir(parents=True,exist_ok=True)
+          REPORT.write_text('\n'.join(output)+'\n',encoding='utf-8')
+          PY
+
+      - name: Save deploy report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/ozonstocksync-deploy.txt || echo "DEPLOY_STATUS=FAILED_NO_REPORT" > .deploy-probe/ozonstocksync-deploy.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/ozonstocksync-deploy.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save ozonstocksync 1.6.0 deploy report [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
