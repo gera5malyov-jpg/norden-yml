@@ -1,0 +1,81 @@
+name: Verify Ozon SKU 31663537 once
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: contains(github.event.head_commit.message, 'VERIFY_OZON_31663537_ONCE')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - name: Verify target SKU read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip(); VM_ID=44780; VM_IP='45.86.180.49'
+          ROOT='/home/web/vm-23f9aff9.na4u.ru/www'
+          def req(url,method='GET',data=None,headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode(); return json.loads(raw) if raw else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':API_KEY}).encode(),{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozs-verify-sku/1.0'})['token']
+          headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/json','User-Agent':'ozs-verify-sku/1.0'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'; subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub').read().strip()
+              created=req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/','POST',json.dumps({'key':pub,'name':'chatgpt-ozs-verify-31663537'}).encode(),headers)
+              kid=created['id']; common=['-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null']
+              try:
+                  php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www'; chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig()); wa('shop');
+          $p=wa('shop')->getPlugin('ozonstocksync',true);
+          $settings=array();
+          for($i=1;$i<=10;$i++){
+            $suffix=($i===1)?'':'_'.$i;
+            foreach(array('account_name','client_id','api_key','mappings') as $k){$settings[$k.$suffix]=$p->getSettings($k.$suffix);}
+          }
+          foreach(array('update_stocks','update_prices','tip_feature_code','acquiring_percent','target_margin_percent','min_margin_percent','old_price_multiplier','round_step','only_available','dry_run','purchase_price_column','stock_batch_size','stock_batch_pause_seconds','price_batch_size','price_pre_wait_seconds','price_batch_pause_seconds','price_mapping_pause_seconds','api_retry_count','api_retry_wait_seconds','ozon_warehouse_id','set_id','webasyst_stock_id','reserve') as $k){$settings[$k]=$p->getSettings($k);}
+          require_once $root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php';
+          $sync=new shopOzonstocksyncPluginSync($settings);
+          $ra=new ReflectionMethod($sync,'parseAccounts');$ra->setAccessible(true);
+          $re=new ReflectionMethod($sync,'getRemoteExistingOfferIds');$re->setAccessible(true);
+          $accounts=$ra->invoke($sync);
+          foreach($accounts as $account){
+            if((int)$account['index']!==1) continue;
+            $r=$re->invoke($sync,array('31663537'),$account['client_id'],$account['api_key']);
+            $items=!empty($r['existing']) ? array_values($r['existing']) : array();
+            echo 'REMOTE_OK='.(!empty($r['ok'])?'YES':'NO')."\n";
+            echo 'REMOTE_EXISTS='.($items?'YES':'NO')."\n";
+            echo 'REMOTE_ITEMS='.json_encode($items,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          }
+          ?>''';
+                  remote=f"""set -u
+          ROOT='{ROOT}'
+          echo '=== TARGET LOG MATCHES ==='
+          grep -h '31663537' "$ROOT"/wa-log/ozonstocksync*.log 2>/dev/null | tail -n 100 || true
+          echo '=== CREATE LOG SINCE 18:30 ==='
+          grep -hE '2026-10-06 18:(3[0-9]|4[0-9]).*CREATE_' "$ROOT"/wa-log/ozonstocksync*.log 2>/dev/null | tail -n 160 || true
+          cat >/tmp/verify_ozs_31663537.php <<'PHP'
+          {php}
+          PHP
+          chown web:web /tmp/verify_ozs_31663537.php
+          echo '=== OZON API ==='
+          su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/verify_ozs_31663537.php'
+          rm -f /tmp/verify_ozs_31663537.php
+          """
+                  p=subprocess.run(['ssh']+common+['root@'+VM_IP,remote],text=True,capture_output=True,timeout=120)
+                  print(p.stdout)
+                  if p.stderr.strip(): print('STDERR='+p.stderr.strip())
+                  if p.returncode: raise SystemExit(p.returncode)
+              finally:
+                  try:req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception as e: print('cleanup='+str(e))
+          PY
