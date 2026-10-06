@@ -1,0 +1,141 @@
+name: Norden KIT fast single create
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-kit-fast-single-create.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  create-one-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Stop previous diagnostic run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: gh api --method POST "repos/$REPO/actions/runs/37434267492/force-cancel" || true
+
+      - name: Checkout current sync code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install --disable-pip-version-check requests
+
+      - name: Create SKU 31663505 directly
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json
+          from supplier_engine.live_kit_readonly_preflight import (
+              _load_helpers, _category_rows, _feature_rows, _summary_urls
+          )
+          from supplier_engine.kit_sync import KitClient, sync_manifest
+
+          PRODUCT_ID = "1484367"
+          TARGET_SKU = "31663505"
+
+          helpers = _load_helpers()
+          wa = helpers.WebasystClient()
+
+          info = wa.call("shop.product.getInfo", params={"id": PRODUCT_ID})
+          if not isinstance(info, dict):
+              raise SystemExit("Webasyst product info is invalid")
+
+          sku_rows = [
+              row for row in helpers.product_skus(info)
+              if helpers.s(row.get("sku")) == TARGET_SKU
+          ]
+          if len(sku_rows) != 1:
+              raise SystemExit("Expected one exact SKU %s, found %d" % (TARGET_SKU, len(sku_rows)))
+          sku = sku_rows[0]
+          supplier_sku = helpers.s(sku.get("name"))
+          if not supplier_sku:
+              raise SystemExit("Supplier article is empty")
+
+          category_payload = wa.call("shop.category.getTree")
+          categories = _category_rows(category_payload, helpers.listify)
+          known = {str(row["id"]) for row in categories}
+          cids = [
+              cid for cid in helpers.extract_category_ids(info, info)
+              if str(cid) in known
+          ]
+          cids = list(dict.fromkeys(cids))
+          if not cids:
+              raise SystemExit("Target SKU has no valid Webasyst categories")
+
+          feature_defs = helpers.listify(
+              wa.call("shop.feature.getList"),
+              ("features", "items"),
+          )
+          title_by_code = {
+              helpers.s(row.get("code")): helpers.s(
+                  row.get("name") or row.get("title") or row.get("code")
+              )
+              for row in feature_defs
+              if helpers.s(row.get("code"))
+          }
+
+          summary = helpers.s(info.get("summary"))
+          item = {
+              "supplier_sku": supplier_sku,
+              "product_id": int(PRODUCT_ID),
+              "sku_id": sku.get("id"),
+              "sku": TARGET_SKU,
+              "sku_name": supplier_sku,
+              "name": helpers.s(info.get("name")),
+              "description": helpers.s(info.get("description")),
+              "summary": summary,
+              "status": int(info.get("status") or 0),
+              "purchase_price": sku.get("purchase_price"),
+              "stock": helpers.stock_total(sku, info),
+              "category_ids": [int(cid) if str(cid).isdigit() else cid for cid in cids],
+              "features": _feature_rows(info, title_by_code, helpers.feature_value),
+              "image_urls": [],
+          }
+
+          manifest = {
+              "type_id": None,
+              "type_name": "NORDEN-100",
+              "webasyst_products": 1,
+              "skipped_no_supplier_article": [],
+              "items": [item],
+              "categories": categories,
+          }
+
+          result = sync_manifest(
+              manifest,
+              {"identity": {"brand": "Norden"}, "rules": {"export_to_kit": True}},
+              kit=KitClient(),
+              wa=wa,
+          )
+          report = {"target": TARGET_SKU, "item": item, "result": result}
+          with open("fast-single-create.json","w",encoding="utf-8") as fh:
+              json.dump(report, fh, ensure_ascii=False, indent=2)
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+
+          if result.get("status") != "ok" or result.get("errors"):
+              raise SystemExit(2)
+          if int(result.get("created") or 0) + int(result.get("updated") or 0) != 1:
+              raise SystemExit("Unexpected accounting: %r" % result)
+          PY
+
+      - name: Save report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: norden-kit-fast-single-${{ github.run_id }}
+          path: fast-single-create.json
+          if-no-files-found: warn
+          retention-days: 14
