@@ -1,0 +1,140 @@
+name: AtlasPage encrypted VPN relay
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/atlaspage-export-to-mac.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  relay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ATLASPAGE_ID: ${{ secrets.ATLASPAGE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install chromium --with-deps >/dev/null
+
+      - name: Collect SSTP and WireGuard from AtlasPage
+        run: |
+          cat > /tmp/export.js <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const userId = process.env.ATLASPAGE_ID || '';
+          if (!userId) throw new Error('ATLASPAGE_ID missing');
+          const sleep = ms => new Promise(r => setTimeout(r, ms));
+          const clean = s => (s || '').replace(/\s+/g, ' ').trim();
+
+          async function clickText(page, re) {
+            const candidates = [
+              page.getByRole('button', { name: re }).first(),
+              page.getByRole('tab', { name: re }).first(),
+              page.getByText(re, { exact: true }).first()
+            ];
+            for (const el of candidates) {
+              if (await el.isVisible({ timeout: 700 }).catch(()=>false)) {
+                await el.click({ timeout: 4000 });
+                return true;
+              }
+            }
+            return false;
+          }
+
+          async function selectProtocol(page, name) {
+            if (await clickText(page, new RegExp('^'+name+'$','i'))) return true;
+            const choose = page.getByRole('button', {name:/выбрать протокол/i}).first();
+            if (await choose.isVisible({timeout:1200}).catch(()=>false)) {
+              await choose.click();
+              await sleep(700);
+              return await clickText(page, new RegExp('^'+name+'$','i'));
+            }
+            return false;
+          }
+
+          async function collectProtocol(page, name) {
+            if (!(await selectProtocol(page, name))) throw new Error(name+' protocol not found');
+            await sleep(1000);
+            const rows = page.locator('button[class*="serverItemClickable"]');
+            const n = await rows.count();
+            const result = [];
+            console.log(name+'_ROWS='+n);
+            for (let i=0; i<n; i++) {
+              const row = rows.nth(i);
+              const label = clean(await row.innerText().catch(()=>'')) || (name+'_'+(i+1));
+              await row.scrollIntoViewIfNeeded().catch(()=>{});
+              await row.click({timeout:5000});
+              await sleep(650);
+              const overlay = page.locator('div[class*="popupOverlay"]:visible').last();
+              const scope = await overlay.isVisible({timeout:1200}).catch(()=>false) ? overlay : page;
+              const text = await scope.innerText().catch(()=>'');
+              const fields = await scope.locator('input, textarea').evaluateAll(nodes =>
+                nodes.map(n => ({
+                  type:n.getAttribute('type')||'',
+                  name:n.getAttribute('name')||'',
+                  placeholder:n.getAttribute('placeholder')||'',
+                  value:n.value||''
+                }))
+              );
+              result.push({label, text, fields});
+              await page.keyboard.press('Escape').catch(()=>{});
+              await sleep(250);
+            }
+            return result;
+          }
+
+          (async()=>{
+            const browser = await chromium.launch({headless:true});
+            const context = await browser.newContext({locale:'ru-RU'});
+            const page = await context.newPage();
+            await page.goto('https://atlaspage51.com/lk', {waitUntil:'domcontentloaded',timeout:45000});
+            await sleep(1300);
+            if (!(await clickText(page,/^По\s+ID$/i))) throw new Error('ID login mode not found');
+            let inp = page.locator('input:visible[placeholder*="ID" i],input:visible[name*="id" i]').first();
+            if (!(await inp.isVisible().catch(()=>false))) inp=page.locator('input:visible').first();
+            await inp.fill(userId);
+            let login=page.locator('button:visible[type="submit"]').first();
+            if (!(await login.isVisible().catch(()=>false))) login=page.getByRole('button',{name:/войти/i}).first();
+            await login.click();
+            await sleep(3500);
+            await page.goto('https://atlaspage51.com/lk/connect',{waitUntil:'domcontentloaded',timeout:45000});
+            await sleep(1300);
+            if (/\/login(?:\?|$)/i.test(page.url())) throw new Error('login failed');
+            const sstp = await collectProtocol(page,'SSTP');
+            await page.goto('https://atlaspage51.com/lk/connect',{waitUntil:'domcontentloaded',timeout:45000});
+            await sleep(1000);
+            const wireguard = await collectProtocol(page,'WireGuard');
+            fs.writeFileSync('/tmp/vpn-pack.json', JSON.stringify({sstp,wireguard},null,2));
+            console.log('SSTP_COUNT='+sstp.length);
+            console.log('WIREGUARD_COUNT='+wireguard.length);
+            await browser.close();
+          })().catch(e=>{console.error('EXPORT_ERROR='+e.message);process.exit(1)});
+          NODE
+          NODE_PATH="$(npm root)" node /tmp/export.js
+
+      - name: Encrypt and publish temporary relay
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 \
+            -pass env:ATLASPAGE_ID -in /tmp/vpn-pack.json -out /tmp/vpn-pack.enc
+          base64 -w0 /tmp/vpn-pack.enc > tmp/atlas-vpn-pack.enc.b64
+          rm -f /tmp/vpn-pack.json /tmp/vpn-pack.enc
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tmp/atlas-vpn-pack.enc.b64
+          if git diff --cached --quiet; then
+            echo "NO_CHANGES"
+          else
+            git commit -m "Temporary encrypted Atlas VPN relay"
+            git push
+          fi
