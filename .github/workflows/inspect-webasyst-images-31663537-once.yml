@@ -1,0 +1,60 @@
+name: Inspect Webasyst images 31663537 once
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-webasyst-images-31663537-once.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - name: Inspect short description and product images
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip(); VM_ID=44780; VM_IP='45.86.180.49'
+          ROOT='/home/web/vm-23f9aff9.na4u.ru/www'
+          def req(url,method='GET',data=None,headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode(); return json.loads(raw) if raw else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':API_KEY}).encode(),{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozs-image-inspect/1.0'})['token']
+          headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/json','User-Agent':'ozs-image-inspect/1.0'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'; subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub').read().strip()
+              created=req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/','POST',json.dumps({'key':pub,'name':'chatgpt-ozs-img-inspect-31663537'}).encode(),headers)
+              kid=created['id']; common=['-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null']
+              try:
+                  php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www'; chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig()); wa('shop');
+          $m=new waModel();
+          $row=$m->query("SELECT p.id,p.name,p.summary,p.description FROM shop_product p JOIN shop_product_skus s ON s.product_id=p.id WHERE s.sku=s:sku LIMIT 1",array('sku'=>'31663537'))->fetchAssoc();
+          echo 'PRODUCT='.json_encode($row,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES).PHP_EOL;
+          $imgs=$m->query("SELECT id,product_id,ext,sort,description,original_filename FROM shop_product_images WHERE product_id=i:id ORDER BY sort,id",array('id'=>(int)$row['id']))->fetchAll();
+          echo 'IMAGES='.json_encode($imgs,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES).PHP_EOL;
+          ?>''';
+                  remote=f"""cat >/tmp/inspect_imgs_31663537.php <<'PHP'
+          {php}
+          PHP
+          chown web:web /tmp/inspect_imgs_31663537.php
+          su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/inspect_imgs_31663537.php'
+          rm -f /tmp/inspect_imgs_31663537.php
+          """
+                  p=subprocess.run(['ssh']+common+['root@'+VM_IP,remote],text=True,capture_output=True,timeout=120)
+                  print(p.stdout)
+                  if p.stderr.strip(): print('STDERR='+p.stderr.strip())
+                  if p.returncode: raise SystemExit(p.returncode)
+              finally:
+                  try:req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception as e: print('cleanup='+str(e))
+          PY
