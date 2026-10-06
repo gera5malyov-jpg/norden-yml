@@ -860,13 +860,8 @@ class shopOzonstocksyncPluginSync
             if (!empty($item['saved_ozon_product_id'])) {
                 $lookup_product_ids[] = (string)$item['saved_ozon_product_id'];
             }
-            // If an available saved/raw identifier is numeric, also check it as Ozon SKU.
-            foreach (array($item['saved_ozon_offer_id'], $item['webasyst_sku']) as $possible_sku) {
-                $possible_sku = trim((string)$possible_sku);
-                if ($possible_sku !== '' && ctype_digit($possible_sku)) {
-                    $lookup_sku_ids[] = $possible_sku;
-                }
-            }
+            // Webasyst SKU / saved offer_id are seller offer identifiers, not Ozon's
+            // internal SKU. They are already checked through PRODUCT_LIST_URL by offer_id.
         }
         $remote = $this->getRemoteExistingOfferIds(
             $lookup_ids,
@@ -893,17 +888,9 @@ class shopOzonstocksyncPluginSync
                 || (!empty($item['saved_ozon_offer_id']) && isset($remote['existing'][$item['saved_ozon_offer_id']]));
             $exists_by_product_id = !empty($item['saved_ozon_product_id'])
                 && isset($remote['existing']['product_id:' . $item['saved_ozon_product_id']]);
-            $exists_by_ozon_sku = false;
-            foreach (array($item['saved_ozon_offer_id'], $item['webasyst_sku']) as $possible_sku) {
-                $possible_sku = trim((string)$possible_sku);
-                if ($possible_sku !== '' && isset($remote['existing']['sku:' . $possible_sku])) {
-                    $exists_by_ozon_sku = true;
-                    break;
-                }
-            }
-            if ($exists_by_offer || $exists_by_product_id || $exists_by_ozon_sku) {
+            if ($exists_by_offer || $exists_by_product_id) {
                 $result['skipped_existing']++;
-                $matched_by = $exists_by_product_id ? 'saved_product_id' : ($exists_by_ozon_sku ? 'ozon_sku' : 'offer_id');
+                $matched_by = $exists_by_product_id ? 'saved_product_id' : 'offer_id';
                 $this->log(
                     'CREATE_SKIP_REMOTE_EXISTS: account=' . $account['name']
                     . ', sku_id=' . $item['sku_id']
@@ -960,12 +947,7 @@ class shopOzonstocksyncPluginSync
                 if (!empty($item['saved_ozon_product_id'])) {
                     $batch_product_ids[] = (string)$item['saved_ozon_product_id'];
                 }
-                foreach (array($item['saved_ozon_offer_id'], $item['webasyst_sku']) as $possible_sku) {
-                    $possible_sku = trim((string)$possible_sku);
-                    if ($possible_sku !== '' && ctype_digit($possible_sku)) {
-                        $batch_sku_ids[] = $possible_sku;
-                    }
-                }
+                // Seller offer identifiers must not be sent as Ozon internal SKU ids.
             }
 
             $second = $this->getRemoteExistingOfferIds(
@@ -993,13 +975,6 @@ class shopOzonstocksyncPluginSync
                     || isset($second['existing'][$item['webasyst_sku']])
                     || (!empty($item['saved_ozon_offer_id']) && isset($second['existing'][$item['saved_ozon_offer_id']]))
                     || (!empty($item['saved_ozon_product_id']) && isset($second['existing']['product_id:' . $item['saved_ozon_product_id']]));
-                foreach (array($item['saved_ozon_offer_id'], $item['webasyst_sku']) as $possible_sku) {
-                    $possible_sku = trim((string)$possible_sku);
-                    if ($possible_sku !== '' && isset($second['existing']['sku:' . $possible_sku])) {
-                        $second_exists = true;
-                        break;
-                    }
-                }
                 if ($second_exists) {
                     $result['skipped_existing']++;
                     $this->log(
