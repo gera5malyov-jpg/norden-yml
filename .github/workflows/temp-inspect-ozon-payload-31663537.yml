@@ -1,0 +1,60 @@
+name: Inspect Ozon offer payload 31663537 once
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    if: contains(github.event.head_commit.message, 'INSPECT_OZON_PAYLOAD_31663537')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - name: Inspect payload read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip(); VM_ID=44780; VM_IP='45.86.180.49'
+          ROOT='/home/web/vm-23f9aff9.na4u.ru/www'
+          def req(url,method='GET',data=None,headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode(); return json.loads(raw) if raw else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':API_KEY}).encode(),{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozs-payload-inspect/1.0'})['token']
+          headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/json','User-Agent':'ozs-payload-inspect/1.0'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'; subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub').read().strip()
+              created=req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/','POST',json.dumps({'key':pub,'name':'chatgpt-ozs-payload-31663537'}).encode(),headers)
+              kid=created['id']; common=['-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null']
+              try:
+                  php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());wa('shop');wa('ozon');
+          $product_id=1484399;$sku_id=31663537;
+          $errors=array();
+          $op=new ozonProduct($product_id);
+          $offers=$op->getOzonOffers($sku_id,true,$errors);
+          echo 'ERRORS='.json_encode($errors,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          echo 'OFFERS='.json_encode($offers,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          ?>''';
+                  remote=f"""cat >/tmp/inspect_offer_31663537.php <<'PHP'
+          {php}
+          PHP
+          chown web:web /tmp/inspect_offer_31663537.php
+          su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/inspect_offer_31663537.php'
+          rm -f /tmp/inspect_offer_31663537.php
+          """
+                  p=subprocess.run(['ssh']+common+['root@'+VM_IP,remote],text=True,capture_output=True,timeout=120)
+                  print(p.stdout)
+                  if p.stderr.strip(): print('STDERR='+p.stderr.strip())
+                  if p.returncode: raise SystemExit(p.returncode)
+              finally:
+                  try:req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception as e: print('cleanup='+str(e))
+          PY
