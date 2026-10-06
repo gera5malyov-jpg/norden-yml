@@ -1,4 +1,4 @@
-name: Deploy ozonstocksync 1.6.0 once
+name: Deploy ozonstocksync 1.6.1 once
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
           find webasyst/ozonstocksync -name '*.php' -print0 | while IFS= read -r -d '' f; do
             php -l "$f"
           done
-          tar -czf /tmp/ozonstocksync-1.6.0.tgz -C webasyst/ozonstocksync .
+          tar -czf /tmp/ozonstocksync-1.6.1.tgz -C webasyst/ozonstocksync .
 
       - name: Deploy with backup and health check
         shell: bash
@@ -82,7 +82,7 @@ jobs:
               try:
                   scp=subprocess.run(
                       ['scp','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null',
-                       '/tmp/ozonstocksync-1.6.0.tgz','root@'+VM_IP+':/tmp/ozonstocksync-1.6.0.tgz'],
+                       '/tmp/ozonstocksync-1.6.1.tgz','root@'+VM_IP+':/tmp/ozonstocksync-1.6.1.tgz'],
                       text=True,capture_output=True,timeout=90
                   )
                   if scp.returncode:
@@ -100,7 +100,7 @@ jobs:
           mkdir -p "$BACKUP_DIR" "$STAGE"
           test -d "$PLUGIN"
           tar -czf "$BACKUP" -C "$PLUGINS" ozonstocksync
-          tar -xzf /tmp/ozonstocksync-1.6.0.tgz -C "$STAGE"
+          tar -xzf /tmp/ozonstocksync-1.6.1.tgz -C "$STAGE"
 
           echo "BACKUP=$BACKUP"
           echo "--- staging lint ---"
@@ -126,11 +126,13 @@ jobs:
           $info=$p->getInfo();
           $controls=$p->getControls(array('namespace'=>'shop_ozonstocksync'));
           $html=isset($controls['ozonstocksync_ui']) ? (string)$controls['ozonstocksync_ui'] : '';
-          $ok=(isset($info['version']) && $info['version']==='1.6.0' && strlen($html)>500 && strpos($html,'type_margin_percent')!==false);
+          $ok=(isset($info['version']) && $info['version']==='1.6.1' && strlen($html)>500 && strpos($html,'type_margin_percent')!==false && strpos($html,'ozs-stock-picker')!==false && strpos($html,'_mapping_rows_present')!==false);
           echo 'PLUGIN_CLASS='.get_class($p)."\n";
           echo 'VERSION='.(isset($info['version'])?$info['version']:'')."\n";
           echo 'UI_LENGTH='.strlen($html)."\n";
           echo 'TYPE_MARGIN_UI='.(strpos($html,'type_margin_percent')!==false?'yes':'no')."\n";
+          echo 'MULTI_STOCK_UI='.(strpos($html,'ozs-stock-picker')!==false?'yes':'no')."\n";
+          echo 'MAPPING_ROWS_UI='.(strpos($html,'_mapping_rows_present')!==false?'yes':'no')."\n";
           echo 'HEALTH='.($ok?'OK':'FAIL')."\n";
           exit($ok?0:2);
           ?>
@@ -148,11 +150,11 @@ jobs:
             tar -xzf "$BACKUP" -C "$PLUGINS"
             chown -R web:web "$PLUGIN"
             echo "ROLLBACK=OK"
-            rm -rf "$STAGE" /tmp/ozonstocksync-1.6.0.tgz /tmp/ozs_health.php
+            rm -rf "$STAGE" /tmp/ozonstocksync-1.6.1.tgz /tmp/ozs_health.php
             exit "$HEALTH_RC"
           fi
 
-          rm -rf "$STAGE" /tmp/ozonstocksync-1.6.0.tgz
+          rm -rf "$STAGE" /tmp/ozonstocksync-1.6.1.tgz
           echo "DEPLOY_STATUS=OK"
           '''
                   p=subprocess.run(ssh_base+[remote],text=True,capture_output=True,timeout=240)
@@ -185,7 +187,7 @@ jobs:
           git config user.email actions@github.com
           git add .deploy-probe/ozonstocksync-deploy.txt
           if ! git diff --cached --quiet; then
-            git commit -m "Save ozonstocksync 1.6.0 deploy report [skip ci]"
+            git commit -m "Save ozonstocksync 1.6.1 deploy report [skip ci]"
             git pull --rebase origin main || true
             git push origin HEAD:main
           fi
