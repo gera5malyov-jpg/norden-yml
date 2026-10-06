@@ -17,31 +17,36 @@ def bridge_probe():
     secret=os.environ.get("MEGASUPPLIERS_CALLBACK_SECRET","").strip()
     if not secret:
         return "BRIDGE_PROBE=secret_missing"
-    request_id=os.environ.get("MEGASUPPLIERS_REQUEST_ID","20261006181640-48de2f0bf8c19079").strip()
-    payload={
-        "action":"kit_manifest",
-        "supplier_id":1,
-        "request_id":request_id,
-        "stock_id":66,
-        "offset":0,
-        "limit":1,
-    }
-    body=json.dumps(payload,ensure_ascii=False,separators=(",",":")).encode("utf-8")
-    sig="sha256="+hmac.new(secret.encode("utf-8"),body,hashlib.sha256).hexdigest()
-    req=urllib.request.Request(
-        "https://profikompany.ru/megasuppliers-bridge/",
-        data=body,method="POST",
-        headers={"Content-Type":"application/json; charset=utf-8","X-Megasuppliers-Signature":sig,"User-Agent":"Megasuppliers-Diagnostic/1.0"},
-    )
-    try:
-        with urllib.request.urlopen(req,timeout=30) as r:
-            raw=r.read().decode("utf-8","replace")
-            return "BRIDGE_PROBE_HTTP=%s\nBRIDGE_PROBE_BODY=%s" % (r.status, raw[:4000])
-    except urllib.error.HTTPError as e:
-        raw=e.read().decode("utf-8","replace")
-        return "BRIDGE_PROBE_HTTP=%s\nBRIDGE_PROBE_BODY=%s" % (e.code, raw[:4000])
-    except Exception as e:
-        return "BRIDGE_PROBE_ERROR=%r" % (e,)
+    request_id=os.environ.get("MEGASUPPLIERS_REQUEST_ID","20261006191723-dba222b4d20f9432").strip()
+    results=[]
+    for limit in (200,100,50,25,1):
+        payload={
+            "action":"kit_manifest",
+            "supplier_id":1,
+            "request_id":request_id,
+            "stock_id":66,
+            "offset":0,
+            "limit":limit,
+        }
+        body=json.dumps(payload,ensure_ascii=False,separators=(",",":")).encode("utf-8")
+        sig="sha256="+hmac.new(secret.encode("utf-8"),body,hashlib.sha256).hexdigest()
+        req=urllib.request.Request(
+            "https://profikompany.ru/megasuppliers-bridge/",
+            data=body,method="POST",
+            headers={"Content-Type":"application/json; charset=utf-8","X-Megasuppliers-Signature":sig,"User-Agent":"Megasuppliers-Diagnostic/1.0"},
+        )
+        try:
+            with urllib.request.urlopen(req,timeout=60) as r:
+                raw=r.read()
+                preview=raw[:500].decode("utf-8","replace")
+                results.append("KIT_MANIFEST limit=%s HTTP=%s bytes=%s preview=%s" % (limit,r.status,len(raw),preview))
+        except urllib.error.HTTPError as e:
+            raw=e.read()
+            preview=raw[:500].decode("utf-8","replace")
+            results.append("KIT_MANIFEST limit=%s HTTP=%s bytes=%s preview=%s" % (limit,e.code,len(raw),preview))
+        except Exception as e:
+            results.append("KIT_MANIFEST limit=%s ERROR=%r" % (limit,e))
+    return "\n".join(results)
 
 def main():
     REPORT.parent.mkdir(exist_ok=True)
