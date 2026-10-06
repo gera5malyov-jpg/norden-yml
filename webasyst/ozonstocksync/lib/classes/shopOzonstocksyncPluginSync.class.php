@@ -16,7 +16,7 @@ class shopOzonstocksyncPluginSync
     const CREATE_FALLBACK_WEIGHT_KG = 31;
     const STOCK_BATCH_SIZE = 100;
     const PRICE_BATCH_SIZE = 100;
-    const CREATE_BATCH_SIZE = 100;
+    const CREATE_BATCH_SIZE = 1;
 
     private $settings;
     private $log_file = 'ozonstocksync.log';
@@ -980,6 +980,7 @@ class shopOzonstocksyncPluginSync
                 $this->log(
                     'CREATE_ABORT_SECOND_EXISTENCE_CHECK: account=' . $account['name']
                     . ', batch=' . count($batch)
+                    . ', offers=' . implode(',', array_column($batch, 'offer_id'))
                     . ', http=' . (isset($second['code']) ? (int)$second['code'] : 0)
                     . ', body=' . (isset($second['body']) ? $second['body'] : '')
                 );
@@ -1032,6 +1033,7 @@ class shopOzonstocksyncPluginSync
                 $this->log(
                     'CREATE_IMPORT_ERROR: account=' . $account['name']
                     . ', batch=' . count($final)
+                    . ', offers=' . implode(',', array_column($final, 'offer_id'))
                     . ', http=' . $response['code']
                     . ', body=' . $response['body']
                 );
@@ -1053,6 +1055,7 @@ class shopOzonstocksyncPluginSync
                 $this->log(
                     'CREATE_IMPORT_NO_TASK_ID: account=' . $account['name']
                     . ', batch=' . count($final)
+                    . ', offers=' . implode(',', array_column($final, 'offer_id'))
                     . ', body=' . $response['body']
                 );
                 continue;
