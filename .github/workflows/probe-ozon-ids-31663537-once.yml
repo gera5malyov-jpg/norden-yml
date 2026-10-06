@@ -32,3 +32,5 @@ jobs:
           post("/v3/product/list",{"filter":{"offer_id":["31663537"],"visibility":"ALL"},"limit":1000})
           post("/v3/product/info/list",{"sku":["31663537"]})
           PY
+
+# trigger
