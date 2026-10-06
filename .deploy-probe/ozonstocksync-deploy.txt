@@ -1,0 +1,23 @@
+BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-20261006-145641.tgz
+--- staging lint ---
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-145641/lib/classes/shopOzonstocksyncPluginSync.class.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-145641/lib/cli/shopOzonstocksyncPluginSync.cli.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-145641/lib/shopOzonstocksync.plugin.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-145641/lib/config/rfbs_commissions.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-145641/lib/config/settings.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-145641/lib/config/plugin.php
+--- production lint ---
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginSync.cli.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/shopOzonstocksync.plugin.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/config/rfbs_commissions.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/config/settings.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/config/plugin.php
+PLUGIN_CLASS=shopOzonstocksyncPlugin
+VERSION=1.6.0
+UI_LENGTH=60355
+TYPE_MARGIN_UI=yes
+HEALTH=OK
+DEPLOY_STATUS=OK
+
+STDERR=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
