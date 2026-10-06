@@ -23,7 +23,6 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           import hashlib,hmac,json,os,re,urllib.parse,urllib.request
-
           TARGET='AF-31662421'
           REQUEST_ID='20261006231419-7d2f758b8b407355'
           BRIDGE='https://profikompany.ru/megasuppliers-bridge/'
@@ -38,7 +37,7 @@ jobs:
               req=urllib.request.Request(BRIDGE,data=body,method='POST',headers={
                   'Content-Type':'application/json; charset=utf-8',
                   'X-Megasuppliers-Signature':sig,
-                  'User-Agent':'KIT-Characteristic-Diagnostic/1.0',
+                  'User-Agent':'KIT-Characteristic-Diagnostic/1.1',
               })
               with urllib.request.urlopen(req,timeout=90) as r:
                   return json.loads(r.read().decode())
@@ -56,16 +55,11 @@ jobs:
                       break
               if target or len(items)<200:
                   break
-
           if not target:
               raise SystemExit('target not found in current kit_manifest')
 
-          multi=[
-              {'code':f.get('code'),'name':f.get('name'),'values':f.get('values')}
-              for f in (target.get('features') or [])
-              if isinstance(f,dict) and len(f.get('values') or [])>1
-          ]
-          print('TARGET_MULTI_FEATURES='+json.dumps(multi,ensure_ascii=False))
+          features=[f for f in (target.get('features') or []) if isinstance(f,dict)]
+          print('TARGET_FEATURES='+json.dumps(features,ensure_ascii=False))
 
           headers={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
           rows=[]
@@ -85,16 +79,38 @@ jobs:
               if page>20:
                   break
 
-          bytitle={}
+          index={}
           for row in rows:
               title=str(row.get('title') or row.get('name') or '').strip()
               if title:
-                  bytitle.setdefault(norm(title),[]).append(row)
+                  index.setdefault(norm(title),[]).append(row)
 
-          for f in multi:
-              matches=bytitle.get(norm(f['name']),[])
-              print('FEATURE='+json.dumps(f,ensure_ascii=False))
-              print('KIT_DEFINITIONS='+json.dumps(matches,ensure_ascii=False,sort_keys=True))
+          selected=[]
+          for f in features:
+              title=str(f.get('name') or '').strip()
+              if not title:
+                  continue
+              matches=index.get(norm(title),[])
+              exact=[r for r in matches if str(r.get('title') or r.get('name') or '').strip()==title]
+              pool=exact or matches
+              pool=sorted(pool,key=lambda r:(0,int(str(r.get('id')))) if str(r.get('id') or '').isdigit() else (1,str(r.get('id') or '')))
+              chosen=pool[0] if pool else None
+              selected.append({
+                  'code':f.get('code'),'name':title,'values':f.get('values'),
+                  'norm':norm(title),
+                  'chosen':chosen,
+                  'match_count':len(matches),
+              })
+          print('SELECTED='+json.dumps(selected,ensure_ascii=False,sort_keys=True))
+
+          by_cid={}
+          for x in selected:
+              c=x.get('chosen') or {}
+              cid=str(c.get('id') or '')
+              if cid:
+                  by_cid.setdefault(cid,[]).append(x)
+          dups={cid:v for cid,v in by_cid.items() if len(v)>1}
+          print('DUPLICATE_SELECTED_IDS='+json.dumps(dups,ensure_ascii=False,sort_keys=True))
           PY
 
-# trigger diagnostic
+# trigger diagnostic v2
