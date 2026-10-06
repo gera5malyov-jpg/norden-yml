@@ -1,0 +1,168 @@
+name: Run Ozon Stock Sync for SKU 31663537 once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/run-ozonstocksync-31663537-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run production sync once and verify target SKU
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request, textwrap
+
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip()
+          VM_ID=44780
+          VM_IP='45.86.180.49'
+          ROOT='/home/web/vm-23f9aff9.na4u.ru/www'
+
+          def req(url, method='GET', data=None, headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode('utf-8')
+                  return json.loads(raw) if raw else {}
+
+          token=req(
+              'https://panel.netangels.ru/api/gateway/token/',
+              'POST',
+              urllib.parse.urlencode({'api_key':API_KEY}).encode(),
+              {'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozs-run-once/1.0'}
+          )['token']
+          headers={
+              'Authorization':'Bearer '+token,
+              'Content-Type':'application/json',
+              'Accept':'application/json',
+              'User-Agent':'ozs-run-once/1.0'
+          }
+
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub',encoding='utf-8').read().strip()
+              created=req(
+                  f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/',
+                  'POST',
+                  json.dumps({'key':pub,'name':'chatgpt-ozs-31663537-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),
+                  headers
+              )
+              kid=created['id']
+              ssh=['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@'+VM_IP]
+              try:
+                  pre=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';
+          chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());
+          wa('shop');
+          $m=new waModel();
+          $sku='31663537';
+          $rows=$m->query("
+              SELECT p.id AS product_id,p.name,s.id AS sku_id,s.sku,
+                     MAX(CASE WHEN sp.set_id='ozon_upload' THEN 1 ELSE 0 END) AS in_upload_set
+              FROM shop_product_skus s
+              INNER JOIN shop_product p ON p.id=s.product_id
+              LEFT JOIN shop_set_products sp ON sp.product_id=p.id
+              WHERE s.sku=s:sku OR s.id=i:sku_id
+              GROUP BY p.id,p.name,s.id,s.sku
+              ORDER BY (s.sku=s:sku) DESC,s.id
+          ",array('sku'=>$sku,'sku_id'=>(int)$sku))->fetchAll();
+          echo "TARGET_ROWS=".json_encode($rows,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          $target=null;
+          foreach($rows as $row){
+              if((string)$row['sku']===$sku){$target=$row;break;}
+          }
+          if(!$target && $rows){$target=$rows[0];}
+          if(!$target){echo "PRECHECK=TARGET_NOT_FOUND\n";exit(3);}
+          if(empty($target['in_upload_set'])){echo "PRECHECK=NOT_IN_UPLOAD_SET\n";exit(4);}
+
+          $p=wa('shop')->getPlugin('ozonstocksync',true);
+          $settings=array();
+          for($i=1;$i<=10;$i++){
+              $suffix=($i===1)?'':'_'.$i;
+              foreach(array('account_name','client_id','api_key','mappings') as $k){
+                  $settings[$k.$suffix]=$p->getSettings($k.$suffix);
+              }
+          }
+          foreach(array(
+              'update_stocks','update_prices','tip_feature_code','acquiring_percent',
+              'target_margin_percent','min_margin_percent','old_price_multiplier',
+              'round_step','only_available','dry_run','purchase_price_column',
+              'stock_batch_size','stock_batch_pause_seconds','price_batch_size',
+              'price_pre_wait_seconds','price_batch_pause_seconds','price_mapping_pause_seconds',
+              'api_retry_count','api_retry_wait_seconds','ozon_warehouse_id','set_id',
+              'webasyst_stock_id','reserve'
+          ) as $k){$settings[$k]=$p->getSettings($k);}
+
+          require_once $root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php';
+          $sync=new shopOzonstocksyncPluginSync($settings);
+          $ra=new ReflectionMethod($sync,'parseAccounts');$ra->setAccessible(true);
+          $rr=new ReflectionMethod($sync,'routeCreateCandidatesForAccount');$rr->setAccessible(true);
+          $re=new ReflectionMethod($sync,'getRemoteExistingOfferIds');$re->setAccessible(true);
+          $accounts=$ra->invoke($sync);
+          $candidate=array(
+              'product_id'=>(int)$target['product_id'],
+              'sku_id'=>(int)$target['sku_id'],
+              'sku'=>(string)$target['sku'],
+          );
+          $routes=array();
+          foreach($accounts as $account){
+              $routed=$rr->invoke($sync,$account,array($candidate));
+              if($routed){
+                  $remote=$re->invoke($sync,array((string)$target['sku']),$account['client_id'],$account['api_key']);
+                  $routes[]=array(
+                      'index'=>$account['index'],
+                      'name'=>$account['name'],
+                      'remote_check_ok'=>!empty($remote['ok']),
+                      'already_exists'=>!empty($remote['existing'])
+                  );
+              }
+          }
+          echo "ROUTES=".json_encode($routes,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          if(!$routes){echo "PRECHECK=NO_ACCOUNT_ROUTE\n";exit(5);}
+          echo "PRECHECK=OK\n";
+          ?>''';
+
+                  remote = f"""set -euo pipefail
+          ROOT='{ROOT}'
+          cat >/tmp/ozs_precheck_31663537.php <<'PHP'
+          {pre}
+          PHP
+          chown web:web /tmp/ozs_precheck_31663537.php
+          echo '=== PRECHECK ==='
+          su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ozs_precheck_31663537.php'
+          rm -f /tmp/ozs_precheck_31663537.php
+
+          echo '=== RUN ONCE ==='
+          su -s /bin/bash web -c "cd '$ROOT' && flock -n /tmp/ozonstocksync.lock /usr/bin/php cli.php shop ozonstocksyncPluginSync dry=0 stocks=1 prices=0"
+
+          echo '=== TARGET LOGS ==='
+          grep -h '31663537' "$ROOT"/wa-log/ozonstocksync*.log 2>/dev/null | tail -n 100 || true
+          echo '=== CREATE LOG TAIL ==='
+          grep -hE 'CREATE_(SUBMITTED|TASK_ITEM_OK|TASK_ITEM_ERROR|TASK_ITEM_FAILED|SKIP_REMOTE_EXISTS|SKIP_SECOND_CHECK_EXISTS|SKIP_INVALID|ACCOUNT_FINISH)' "$ROOT"/wa-log/ozonstocksync*.log 2>/dev/null | tail -n 120 || true
+          """
+                  p=subprocess.run(ssh+[remote],text=True,capture_output=True,timeout=2400)
+                  print(p.stdout)
+                  if p.stderr.strip():
+                      print('STDERR='+p.stderr.strip())
+                  if p.returncode:
+                      raise SystemExit(p.returncode)
+              finally:
+                  try:
+                      req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception as e:
+                      print('SSH_KEY_CLEANUP_WARNING='+str(e))
+          PY
