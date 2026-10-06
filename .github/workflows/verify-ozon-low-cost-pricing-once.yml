@@ -55,7 +55,7 @@ jobs:
           echo 'MIN_MARGIN='.(float)$settings['min_margin_percent']."\n";
           $m=new ReflectionMethod($sync,'calculatePrices'); $m->setAccessible(true);
           $comm=array(0.10,0.10,0.10,0.10);
-          foreach(array(2499,2500,2000,3000) as $cost){
+          foreach(array(1999,2000,2500,3000) as $cost){
             $r=$m->invoke($sync,$cost,$comm,'');
             echo 'COST_'.$cost.'='.json_encode($r,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
           }
