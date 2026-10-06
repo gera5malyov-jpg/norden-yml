@@ -1,6 +1,8 @@
 BRIDGE_PROBE_HTTP=409
 BRIDGE_PROBE_BODY={"errors":["stale_or_unknown_request"]}
-NOW=2026-10-06T22:39:10+03:00
+NOW=2026-10-06T22:41:14+03:00
+BRIDGE_LOG_TAIL_BEGIN
+BRIDGE_LOG_TAIL_END
 RECENT_LOG_FILES_BEGIN
 /home/web/vm-23f9aff9.na4u.ru/www/wa-log/cli.log
 /home/web/vm-23f9aff9.na4u.ru/www/wa-log/db.log
@@ -34,7 +36,6 @@ RECENT_LOG_FILES_BEGIN
 RECENT_LOG_FILES_END
 MEGASUPPLIERS_ERRORS_BEGIN
 ### /var/log/apache2/user-logs/profikompany.ru/access.log
-185.171.194.69 - - [06/Oct/2026:19:21:47 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 14476 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
 185.171.194.69 - - [06/Oct/2026:19:21:57 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 14476 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
 185.171.194.69 - - [06/Oct/2026:19:22:57 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 14476 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
 185.171.194.69 - - [06/Oct/2026:19:23:14 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 14476 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
@@ -114,6 +115,7 @@ MEGASUPPLIERS_ERRORS_BEGIN
 185.171.194.69 - - [06/Oct/2026:22:32:56 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importConfig&supplier_id=1 HTTP/1.0" 200 9039 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (iPhone; CPU iPhone OS 26_6_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 YaBrowser/26.10.0.1738.10 SA/3 Mobile/15E148 Safari/604.1"
 185.171.194.69 - - [06/Oct/2026:22:32:56 +0300] "GET /webasyst/shop/?plugin=megasuppliers&action=importStatus&supplier_id=1 HTTP/1.0" 200 28459 "https://profikompany.ru/webasyst/shop/?plugin=megasuppliers" "Mozilla/5.0 (iPhone; CPU iPhone OS 26_6_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 YaBrowser/26.10.0.1738.10 SA/3 Mobile/15E148 Safari/604.1"
 40.76.127.64 - - [06/Oct/2026:22:39:06 +0300] "POST /megasuppliers-bridge/ HTTP/1.0" 409 225 "-" "Megasuppliers-Diagnostic/1.0"
+20.29.206.231 - - [06/Oct/2026:22:41:08 +0300] "POST /megasuppliers-bridge/ HTTP/1.0" 409 225 "-" "Megasuppliers-Diagnostic/1.0"
 ### /var/log/auth.log
 Oct  6 11:58:05 vm-23f9aff9 sshd[101231]: Invalid user liberty-bridge from 109.160.32.170 port 41406
 Oct  6 11:58:05 vm-23f9aff9 sshd[101231]: input_userauth_request: invalid user liberty-bridge [preauth]
@@ -162,4 +164,4 @@ TABLE_SCHEMA_END
 
 STDERR
 Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
-bash: line 9: warning: command substitution: ignored null byte in input
+bash: line 17: warning: command substitution: ignored null byte in input
