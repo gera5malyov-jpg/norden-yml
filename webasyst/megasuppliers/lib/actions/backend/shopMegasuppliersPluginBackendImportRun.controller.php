@@ -24,6 +24,11 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
             return;
         }
 
+        $config = $this->enforceNordenType($config, $config_path);
+        if (!is_array($config)) {
+            return;
+        }
+
         $plugin = wa('shop')->getPlugin('megasuppliers');
         $repo = trim((string)$plugin->getSettings('github_repo'));
         $ref = trim((string)$plugin->getSettings('github_ref'));
@@ -181,6 +186,75 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
             'supplier_id' => $supplier_id,
             'request_id' => $request_id,
         );
+    }
+
+    private function enforceNordenType(array $config, $config_path)
+    {
+        $format = strtolower(trim((string)ifset($config['source']['format'])));
+        if ($format !== 'norden') {
+            return $config;
+        }
+
+        $type_model = new shopTypeModel();
+        $webasyst = !empty($config['webasyst']) && is_array($config['webasyst']) ? $config['webasyst'] : array();
+        $configured_id = !empty($webasyst['type_id']) ? (int)$webasyst['type_id'] : 0;
+        $resolved_id = 0;
+
+        if ($configured_id) {
+            $row = $type_model->getById($configured_id);
+            if ($row && $this->isNordenTypeName(ifset($row['name']))) {
+                $resolved_id = $configured_id;
+            }
+        }
+
+        // The current production Norden product type is 142. Keep this only as
+        // a verified preference: its name must still identify Norden.
+        if (!$resolved_id) {
+            $row = $type_model->getById(142);
+            if ($row && $this->isNordenTypeName(ifset($row['name']))) {
+                $resolved_id = 142;
+            }
+        }
+
+        if (!$resolved_id) {
+            $rows = $type_model->select('id,name')->order('id')->fetchAll();
+            $matches = array();
+            foreach ($rows as $row) {
+                $id = (int)ifset($row['id']);
+                if ($id && $this->isNordenTypeName(ifset($row['name']))) {
+                    $matches[] = $id;
+                }
+            }
+            $matches = array_values(array_unique($matches));
+            if (count($matches) === 1) {
+                $resolved_id = (int)$matches[0];
+            }
+        }
+
+        if (!$resolved_id) {
+            $this->errors[] = 'NORDEN_TYPE_NOT_FOUND';
+            return null;
+        }
+
+        if (!isset($config['webasyst']) || !is_array($config['webasyst'])) {
+            $config['webasyst'] = array();
+        }
+        if ((int)ifset($config['webasyst']['type_id']) !== $resolved_id) {
+            $config['webasyst']['type_id'] = $resolved_id;
+            $json = json_encode($config, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+            if ($json === false || waFiles::write($config_path, $json) === false) {
+                $this->errors[] = 'NORDEN_TYPE_CONFIG_WRITE_FAILED';
+                return null;
+            }
+        }
+
+        return $config;
+    }
+
+    private function isNordenTypeName($name)
+    {
+        $name = mb_strtolower(trim((string)$name), 'UTF-8');
+        return $name !== '' && (strpos($name, 'norden') !== false || strpos($name, 'норден') !== false);
     }
 
     private function markDispatchFailure($path, array $pending, $message)
