@@ -34,7 +34,7 @@ for ($i = 1; $i <= 10; $i++) {
             ? "ozon_td_andrey;1020002090779000;;1\nozon;1020001825140000;;1"
             : '',
         'title' => 'Аккаунт Ozon ' . $i . ' — связки',
-        'description' => 'Формат: ID_списка; Ozon_warehouse_id; ID_склада_Webasyst; резерв. Пустой ID склада Webasyst означает общий остаток SKU.',
+        'description' => 'Формат: ID_списка; Ozon_warehouse_id; ID_склада_Webasyst или несколько ID через запятую; резерв. Пустое значение означает общий остаток SKU.',
         'control_type' => waHtmlControl::TEXTAREA,
     );
 }
