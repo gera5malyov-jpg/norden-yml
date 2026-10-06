@@ -287,9 +287,14 @@ def main():
         links = []
         bridge = None
         catalog_warning = None
+        source_format = str((config.get("source") or {}).get("format") or "").strip().lower()
+        type_id = (config.get("webasyst") or {}).get("type_id")
+        if source_format == "norden" and not type_id:
+            raise ValueError(
+                "Для Norden не задан webasyst.type_id; полный каталог Webasyst сканировать запрещено."
+            )
         if os.getenv("WEBASYST_API_TOKEN", "").strip():
             wa = WebasystClient()
-            type_id = (config.get("webasyst") or {}).get("type_id")
             if type_id:
                 by_supplier = index_by_supplier_sku_name(
                     wa,
