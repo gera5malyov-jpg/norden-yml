@@ -1,11 +1,11 @@
-BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-20261006-152641.tgz
+BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-20261006-170626.tgz
 --- staging lint ---
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-152641/lib/classes/shopOzonstocksyncPluginSync.class.php
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-152641/lib/cli/shopOzonstocksyncPluginSync.cli.php
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-152641/lib/shopOzonstocksync.plugin.php
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-152641/lib/config/rfbs_commissions.php
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-152641/lib/config/settings.php
-No syntax errors detected in /tmp/ozonstocksync-stage-20261006-152641/lib/config/plugin.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-170626/lib/classes/shopOzonstocksyncPluginSync.class.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-170626/lib/cli/shopOzonstocksyncPluginSync.cli.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-170626/lib/shopOzonstocksync.plugin.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-170626/lib/config/rfbs_commissions.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-170626/lib/config/settings.php
+No syntax errors detected in /tmp/ozonstocksync-stage-20261006-170626/lib/config/plugin.php
 --- production lint ---
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginSync.cli.php
@@ -14,11 +14,15 @@ No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plug
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/config/settings.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/config/plugin.php
 PLUGIN_CLASS=shopOzonstocksyncPlugin
-VERSION=1.6.1
-UI_LENGTH=375345
+VERSION=1.7.0
+UI_LENGTH=376001
 TYPE_MARGIN_UI=yes
 MULTI_STOCK_UI=yes
 MAPPING_ROWS_UI=yes
+CREATE_SET_ID=ozon_upload
+CREATE_SET_NAME=Грузить в Ozon
+CREATE_SET_COUNT=0
+CREATE_ALLOWLIST=OK
 HEALTH=OK
 DEPLOY_STATUS=OK
 
