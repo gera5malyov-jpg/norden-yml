@@ -273,10 +273,9 @@ jobs:
                   if max_ap <= 0 or max_ap + 1e-9 < floor:
                       report["candidates_skipped_below_floor"] += 1
                       continue
-                  stock_available = f(c.get("stock"))
-                  if stock_available <= 0:
-                      report["candidates_skipped_no_stock"] += 1
-                      continue
+                  # Candidate stock can be zero in Ozon's response even for an eligible
+                  # candidate, so do not pre-filter by it. Ozon will validate availability
+                  # during activation.
                   # Highest Ozon-accepted promo price, never below our floor.
                   target_price = round(max_ap, 2)
                   if target_price + 1e-9 < floor:
@@ -383,6 +382,11 @@ jobs:
           if [ ! -f ozon/safe_promo_enroll_latest.json ]; then
             echo '{"status":"workflow_failed_before_report"}' > ozon/safe_promo_enroll_latest.json
           fi
+          cp ozon/safe_promo_enroll_latest.json /tmp/safe_promo_enroll_latest.json
+          git fetch origin main
+          git reset --hard origin/main
+          mkdir -p ozon
+          cp /tmp/safe_promo_enroll_latest.json ozon/safe_promo_enroll_latest.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ozon/safe_promo_enroll_latest.json
