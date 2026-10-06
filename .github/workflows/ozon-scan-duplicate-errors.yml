@@ -1,0 +1,123 @@
+name: Ozon scan duplicate errors
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-scan-duplicate-errors.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - run: python -m pip install requests
+      - name: Scan all Ozon products for duplicate errors
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os, json, time, requests
+          from pathlib import Path
+
+          S=requests.Session()
+          S.headers.update({
+            "Client-Id":os.environ["OZON_CLIENT_ID"],
+            "Api-Key":os.environ["OZON_API_KEY"],
+            "Content-Type":"application/json",
+            "Accept":"application/json",
+          })
+          B="https://api-seller.ozon.ru"
+
+          def post(path,body):
+            for i in range(8):
+              r=S.post(B+path,json=body,timeout=120)
+              if r.status_code==429:
+                time.sleep(float(r.headers.get("Retry-After") or 2))
+                continue
+              r.raise_for_status()
+              return r.json()
+            raise RuntimeError("rate limit: "+path)
+
+          product_ids=[]
+          cursor=""
+          seen=set()
+          while True:
+            body={"filter":{"visibility":"ALL"},"limit":1000}
+            if cursor: body["last_id"]=cursor
+            d=post("/v3/product/list",body)
+            res=d.get("result") or {}
+            items=res.get("items") or d.get("items") or []
+            for x in items:
+              pid=x.get("product_id") or x.get("id")
+              if pid is not None and str(pid) not in seen:
+                seen.add(str(pid)); product_ids.append(str(pid))
+            nxt=res.get("last_id") or d.get("last_id") or ""
+            if not items or not nxt or nxt==cursor:
+              break
+            cursor=nxt
+
+          dup=[]
+          scanned=0
+          for i in range(0,len(product_ids),1000):
+            chunk=product_ids[i:i+1000]
+            d=post("/v3/product/info/list",{"product_id":chunk})
+            items=d if isinstance(d,list) else d.get("items") or (d.get("result") or {}).get("items") if isinstance(d.get("result"),dict) else d.get("result") or []
+            if not isinstance(items,list): items=[]
+            scanned += len(items)
+            for x in items:
+              errors=x.get("errors") or []
+              hits=[e for e in errors if e.get("code")=="SPU_ALREADY_EXISTS_IN_ANOTHER_ACCOUNT"]
+              if hits:
+                pairs=[]
+                for e in hits:
+                  texts=e.get("texts") or {}
+                  params=texts.get("params") or []
+                  pairs.extend([p.get("value") for p in params if p.get("name")=="Duplicates" and p.get("value")])
+                dup.append({
+                  "offer_id":x.get("offer_id"),
+                  "product_id":x.get("id") or x.get("product_id"),
+                  "sku":x.get("sku"),
+                  "name":x.get("name"),
+                  "is_archived":x.get("is_archived"),
+                  "is_autoarchived":x.get("is_autoarchived"),
+                  "barcodes":x.get("barcodes") or [],
+                  "status":x.get("statuses") or x.get("status"),
+                  "duplicates":pairs,
+                  "errors":hits
+                })
+            time.sleep(0.2)
+
+          report={
+            "total_product_ids":len(product_ids),
+            "scanned_info_items":scanned,
+            "duplicate_error_count":len(dup),
+            "items":sorted(dup,key=lambda x:str(x.get("offer_id") or ""))
+          }
+          Path("ozon/duplicate_errors_all_latest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          print(json.dumps({
+            "total_product_ids":report["total_product_ids"],
+            "scanned_info_items":report["scanned_info_items"],
+            "duplicate_error_count":report["duplicate_error_count"]
+          },ensure_ascii=False))
+          PY
+      - name: Save report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add ozon/duplicate_errors_all_latest.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Ozon duplicate error scan"
+            git pull --rebase origin main || true
+            git push origin HEAD:main || true
+          fi
