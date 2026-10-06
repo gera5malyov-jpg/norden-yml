@@ -635,6 +635,36 @@ class shopOzonstocksyncPluginSync
         $offer['price'] = (string)$price_data['price'];
         $offer['old_price'] = (string)$price_data['old_price'];
 
+        // Supplier imports can keep remote image URLs in the Webasyst short
+        // description inside [extimg]...[/extimg], while shop_product_images is
+        // intentionally empty. The installed Ozon generator only sees native
+        // product images, so merge these external URLs into the create payload.
+        $external_images = $this->getCreateExternalImageUrls($product_id);
+        if ($external_images) {
+            $native_images = isset($offer['images']) && is_array($offer['images'])
+                ? $offer['images']
+                : array();
+
+            $merged_images = array();
+            foreach (array_merge($native_images, $external_images) as $image_url) {
+                $image_url = trim((string)$image_url);
+                if ($image_url === '' || isset($merged_images[$image_url])) {
+                    continue;
+                }
+                $merged_images[$image_url] = $image_url;
+            }
+
+            $offer['images'] = array_values($merged_images);
+            $this->log(
+                'CREATE_EXTIMG_IMAGES: product_id=' . $product_id
+                . ', sku_id=' . $sku_id
+                . ', sku=' . $webasyst_sku
+                . ', native=' . count($native_images)
+                . ', extimg=' . count($external_images)
+                . ', total=' . count($offer['images'])
+            );
+        }
+
         return array(
             'ok' => true,
             'offer' => $offer,
@@ -643,6 +673,56 @@ class shopOzonstocksyncPluginSync
             'webasyst_sku' => $webasyst_sku,
             'offer_id' => $generated_offer_id
         );
+    }
+
+    private function getCreateExternalImageUrls($product_id)
+    {
+        $product_id = (int)$product_id;
+        if ($product_id <= 0) {
+            return array();
+        }
+
+        try {
+            $model = new waModel();
+            $summary = (string)$model->query(
+                'SELECT summary FROM shop_product WHERE id = i:id LIMIT 1',
+                array('id' => $product_id)
+            )->fetchField();
+        } catch (Throwable $e) {
+            $this->log(
+                'CREATE_EXTIMG_READ_ERROR: product_id=' . $product_id
+                . ', error=' . $e->getMessage()
+            );
+            return array();
+        }
+
+        if ($summary === '' || stripos($summary, '[extimg]') === false) {
+            return array();
+        }
+
+        $urls = array();
+        if (preg_match_all('~\\[extimg\\](.*?)\\[/extimg\\]~is', $summary, $blocks)) {
+            foreach ($blocks[1] as $block) {
+                $block = html_entity_decode((string)$block, ENT_QUOTES, 'UTF-8');
+                if (!preg_match_all('~https?://[^\\s<>"\\'\\]\\[]+~iu', $block, $matches)) {
+                    continue;
+                }
+                foreach ($matches[0] as $url) {
+                    $url = trim((string)$url);
+                    $url = rtrim($url, ".,;:)");
+                    if ($url === '' || !filter_var($url, FILTER_VALIDATE_URL)) {
+                        continue;
+                    }
+                    $scheme = strtolower((string)parse_url($url, PHP_URL_SCHEME));
+                    if ($scheme !== 'http' && $scheme !== 'https') {
+                        continue;
+                    }
+                    $urls[$url] = $url;
+                }
+            }
+        }
+
+        return array_values($urls);
     }
 
     private function applyCreatePackageFallback($ozon_product, $product_id, $sku_id, $webasyst_sku)
