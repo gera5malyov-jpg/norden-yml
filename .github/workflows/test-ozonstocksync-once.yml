@@ -64,6 +64,9 @@ jobs:
               'seller_offer_not_internal_sku': "Seller offer identifiers must not be sent as Ozon internal SKU ids." in sync and "saved offer_id are seller offer identifiers, not Ozon's" in sync,
               'create_extimg_images': 'getCreateExternalImageUrls' in sync and 'CREATE_EXTIMG_IMAGES' in sync and "stripos($summary, '[extimg]')" in sync,
               'extimg_only_create_payload': "$offer['images'] = array_values($merged_images);" in sync and 'array_merge($native_images, $external_images)' in sync,
+              'low_cost_50_target_markup': 'const LOW_COST_THRESHOLD_RUB = 2500' in sync and 'const LOW_COST_TARGET_MARKUP_PERCENT = 50' in sync and 'if ((float)$cost < self::LOW_COST_THRESHOLD_RUB)' in sync,
+              'low_cost_keeps_min_18_logic': "$min_markup = max(0, (float)$this->get('min_margin_percent', 18)) / 100;" in sync,
+              'low_cost_does_not_reduce_higher_type_margin': 'max(' in sync and 'self::LOW_COST_TARGET_MARKUP_PERCENT' in sync,
           }
           for k,v in checks.items():
               print(f'{k}={"OK" if v else "FAIL"}')
