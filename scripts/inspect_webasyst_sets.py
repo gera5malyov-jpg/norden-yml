@@ -82,6 +82,59 @@ $out['ozon_features']=$m->query("
     ORDER BY id
 ")->fetchAll();
 
+$out['category_type_features']=$m->query("
+    SELECT id,parent_id,code,name,type,multiple,status
+    FROM shop_feature
+    WHERE LOWER(code) LIKE '%categor%'
+       OR LOWER(name) LIKE '%категор%'
+       OR LOWER(code) LIKE '%type%'
+       OR LOWER(name) LIKE '%тип%'
+    ORDER BY id
+    LIMIT 500
+")->fetchAll();
+
+$out['installed_shop_plugins']=array();
+$plugin_root=$root.'/wa-apps/shop/plugins';
+if(is_dir($plugin_root)){
+    foreach(scandir($plugin_root) as $d){
+        if($d==='.' || $d==='..' || !is_dir($plugin_root.'/'.$d)) continue;
+        $out['installed_shop_plugins'][]=$d;
+    }
+    sort($out['installed_shop_plugins']);
+}
+
+$out['plugin_settings_ids']=$m->query("
+    SELECT DISTINCT plugin
+    FROM wa_app_settings
+    WHERE app_id='shop'
+    ORDER BY plugin
+")->fetchAll();
+
+$out['legacy_ozon_samples']=$m->query("
+    SELECT sp.set_id,p.id AS product_id,p.name,p.type_id,p.category_id,
+           s.id AS sku_id,s.sku,s.name AS sku_name,s.purchase_price,s.price,s.compare_price
+    FROM shop_set_products sp
+    INNER JOIN shop_product p ON p.id=sp.product_id
+    INNER JOIN shop_product_skus s ON s.product_id=p.id
+    WHERE sp.set_id IN ('shchyashcht_norden','ever','ozon','ozon-lo','ozon_td_andrey','ozon_natur','ozon_merdes','lover-zerkala')
+      AND s.sku IS NOT NULL AND s.sku<>''
+    ORDER BY sp.set_id,sp.sort,p.id,s.id
+    LIMIT 40
+")->fetchAll();
+$legacy_ids=array();
+foreach($out['legacy_ozon_samples'] as $r){$legacy_ids[(int)$r['product_id']]=(int)$r['product_id'];}
+if($legacy_ids){
+    $out['legacy_feature_rows']=$m->query("
+        SELECT pf.product_id,pf.sku_id,pf.feature_id,f.code,f.name,f.type,
+               pf.feature_value_id,pf.value_int,pf.value_double,pf.value_decimal,pf.value_varchar,pf.value_text
+        FROM shop_product_features pf
+        INNER JOIN shop_feature f ON f.id=pf.feature_id
+        WHERE pf.product_id IN (i:ids)
+        ORDER BY pf.product_id,pf.feature_id
+        LIMIT 5000
+    ",array('ids'=>array_values($legacy_ids)))->fetchAll();
+}else{$out['legacy_feature_rows']=array();}
+
 $out['likely_card_features']=$m->query("
     SELECT id,parent_id,code,name,type,multiple,status
     FROM shop_feature
