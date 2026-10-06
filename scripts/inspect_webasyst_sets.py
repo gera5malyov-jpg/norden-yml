@@ -79,6 +79,47 @@ foreach($all_tables as $tr){
 }
 sort($out['ozon_tables']);
 
+$out['ozon_table_meta']=array();
+foreach(array(
+    'ozon_exported_product','ozon_category_wa_category','ozon_category',
+    'ozon_attribute','ozon_category_attribute','ozon_value_pair',
+    'ozon_product_rule','ozon_warehouse','ozon_tasks'
+) as $tbl){
+    try{
+        $cols=$m->query("SHOW COLUMNS FROM `".$tbl."`")->fetchAll();
+        $sample=$m->query("SELECT * FROM `".$tbl."` LIMIT 20")->fetchAll();
+        $out['ozon_table_meta'][$tbl]=array('columns'=>$cols,'sample'=>$sample);
+    }catch(Exception $e){
+        $out['ozon_table_meta'][$tbl]=array('error'=>$e->getMessage());
+    }
+}
+
+$out['ozon_table_source_refs']=array();
+$search_roots=array($root.'/wa-apps/shop/plugins',$root.'/wa-apps/shop/lib');
+foreach($search_roots as $sr){
+    if(!is_dir($sr)) continue;
+    $cmd="grep -RIl --include='*.php' 'ozon_exported_product' ".escapeshellarg($sr)." 2>/dev/null | head -50";
+    $refs=array();
+    exec($cmd,$refs);
+    foreach($refs as $ref){
+        $out['ozon_table_source_refs'][]=str_replace($root,'',$ref);
+    }
+}
+
+$out['market_ozon_files']=array();
+foreach(array($root.'/wa-apps/shop/plugins/market',$root.'/wa-apps/shop/plugins/ozonstat') as $pr){
+    if(!is_dir($pr)) continue;
+    $it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($pr,FilesystemIterator::SKIP_DOTS));
+    foreach($it as $fi){
+        if(!$fi->isFile()) continue;
+        $p=$fi->getPathname();
+        if(preg_match('/ozon|export|product/i',$p)){
+            $out['market_ozon_files'][]=str_replace($root,'',$p);
+            if(count($out['market_ozon_files'])>=120) break 2;
+        }
+    }
+}
+
 $out['image_url_helpers']=array();
 $helper_files=array(
     $root.'/wa-apps/shop/lib/classes/shopImage.class.php',
