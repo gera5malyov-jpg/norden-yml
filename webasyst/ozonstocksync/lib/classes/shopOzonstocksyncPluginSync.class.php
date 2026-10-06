@@ -50,7 +50,7 @@ class shopOzonstocksyncPluginSync
             $account_price_items = array();
 
             foreach ($account['mappings'] as $mapping) {
-                $label = 'account=' . $account['name'] . ', set_id=' . $mapping['set_id'] . ', ozon_warehouse_id=' . $mapping['ozon_warehouse_id'] . ', webasyst_stock_id=' . ($mapping['webasyst_stock_id'] === '' ? 'general' : $mapping['webasyst_stock_id']) . ', reserve=' . $mapping['reserve'];
+                $label = 'account=' . $account['name'] . ', set_id=' . $mapping['set_id'] . ', ozon_warehouse_id=' . $mapping['ozon_warehouse_id'] . ', webasyst_stock_ids=' . ($mapping['webasyst_stock_id'] === '' ? 'general' : $mapping['webasyst_stock_id']) . ', reserve=' . $mapping['reserve'];
 
                 if ($update_stocks) {
                     $items = $this->collectStocks($mapping);
@@ -176,7 +176,7 @@ class shopOzonstocksyncPluginSync
             $parts = array_map('trim', explode(';', $line));
             $set_id = isset($parts[0]) ? $parts[0] : '';
             $ozon_warehouse_id = isset($parts[1]) ? (int)$parts[1] : 0;
-            $webasyst_stock_id = isset($parts[2]) ? $parts[2] : '';
+            $webasyst_stock_id = isset($parts[2]) ? $this->normalizeStockIdsString($parts[2]) : '';
             $reserve = isset($parts[3]) && $parts[3] !== '' ? (int)$parts[3] : 0;
             if ($set_id === '' || !$ozon_warehouse_id) {
                 $this->log('SKIP_BAD_MAPPING: ' . $line);
@@ -187,12 +187,35 @@ class shopOzonstocksyncPluginSync
         return $mappings;
     }
 
+    private function normalizeStockIdsString($value)
+    {
+        $ids = $this->parseStockIds($value);
+        return $ids ? implode(',', $ids) : '';
+    }
+
+    private function parseStockIds($value)
+    {
+        if (is_array($value)) {
+            $parts = $value;
+        } else {
+            $parts = preg_split('/[\\s,|]+/', trim((string)$value));
+        }
+        $ids = array();
+        foreach ((array)$parts as $part) {
+            $id = (int)trim((string)$part);
+            if ($id > 0) {
+                $ids[$id] = $id;
+            }
+        }
+        return array_values($ids);
+    }
+
     private function parseFallbackMapping()
     {
         $set_id = trim((string)$this->get('set_id', ''));
         $ozon_warehouse_id = (int)$this->get('ozon_warehouse_id', 0);
         if ($set_id !== '' && $ozon_warehouse_id) {
-            return array('set_id' => $set_id, 'ozon_warehouse_id' => $ozon_warehouse_id, 'webasyst_stock_id' => trim((string)$this->get('webasyst_stock_id', '')), 'reserve' => max(0, (int)$this->get('reserve', 0)));
+            return array('set_id' => $set_id, 'ozon_warehouse_id' => $ozon_warehouse_id, 'webasyst_stock_id' => $this->normalizeStockIdsString((string)$this->get('webasyst_stock_id', '')), 'reserve' => max(0, (int)$this->get('reserve', 0)));
         }
         return null;
     }
@@ -200,21 +223,27 @@ class shopOzonstocksyncPluginSync
     private function collectStocks($mapping)
     {
         $ozon_warehouse_id = (int)$mapping['ozon_warehouse_id'];
-        $webasyst_stock_id = trim((string)$mapping['webasyst_stock_id']);
+        $webasyst_stock_id = $this->normalizeStockIdsString(isset($mapping['webasyst_stock_id']) ? $mapping['webasyst_stock_id'] : '');
+        $webasyst_stock_ids = $this->parseStockIds($webasyst_stock_id);
         $set_id = trim((string)$mapping['set_id']);
         $reserve = max(0, (int)$mapping['reserve']);
         $only_available = (int)$this->get('only_available', 1) === 1;
         $model = new waModel();
         $params = array('set_id' => $set_id);
 
-        if ($webasyst_stock_id !== '') {
-            $sql = "SELECT DISTINCT s.id, s.sku, COALESCE(ps.count, 0) AS stock_count, s.available, s.status, p.status AS product_status
+        if ($webasyst_stock_ids) {
+            $sql = "SELECT DISTINCT s.id, s.sku, COALESCE(ps.stock_count, 0) AS stock_count, s.available, s.status, p.status AS product_status
                 FROM shop_product_skus s
                 INNER JOIN shop_product p ON p.id = s.product_id
                 INNER JOIN shop_set_products sp ON sp.product_id = s.product_id AND sp.set_id = s:set_id
-                LEFT JOIN shop_product_stocks ps ON ps.sku_id = s.id AND ps.stock_id = i:stock_id
+                LEFT JOIN (
+                    SELECT sku_id, SUM(COALESCE(count, 0)) AS stock_count
+                    FROM shop_product_stocks
+                    WHERE stock_id IN (i:stock_ids)
+                    GROUP BY sku_id
+                ) ps ON ps.sku_id = s.id
                 WHERE s.sku IS NOT NULL AND s.sku <> ''";
-            $params['stock_id'] = (int)$webasyst_stock_id;
+            $params['stock_ids'] = $webasyst_stock_ids;
         } else {
             $sql = "SELECT DISTINCT s.id, s.sku, COALESCE(s.count, 0) AS stock_count, s.available, s.status, p.status AS product_status
                 FROM shop_product_skus s
@@ -224,7 +253,7 @@ class shopOzonstocksyncPluginSync
         }
         $sql .= " ORDER BY s.id";
         $rows = $model->query($sql, $params)->fetchAll();
-        $this->log('FILTER_STOCKS: set_id=' . $set_id . ', ozon_warehouse_id=' . $ozon_warehouse_id . ', webasyst_stock_id=' . ($webasyst_stock_id === '' ? 'general' : $webasyst_stock_id) . ', rows=' . count($rows));
+        $this->log('FILTER_STOCKS: set_id=' . $set_id . ', ozon_warehouse_id=' . $ozon_warehouse_id . ', webasyst_stock_ids=' . ($webasyst_stock_id === '' ? 'general' : $webasyst_stock_id) . ', rows=' . count($rows));
         $items = array();
         foreach ($rows as $row) {
             $offer_id = trim((string)$row['sku']);
