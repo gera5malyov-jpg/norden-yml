@@ -1863,3 +1863,74 @@ def test_apply_plan_recreates_product_when_product_update_returns_404():
     assert result["mappings"][-1]["product_id"] == 101
     assert result["mappings"][-1]["sku_id"] == 202
 
+
+
+def test_kit_characteristics_keep_normalized_title_collisions_distinct():
+    class FakeKit:
+        def __init__(self):
+            self.created = []
+
+        def create_characteristic(self, title):
+            row = {
+                "id": "created-%d" % (len(self.created) + 1),
+                "title": title,
+                "type": "STRING",
+                "select_mode": "SINGLE",
+            }
+            self.created.append(row)
+            return row
+
+    from collections import defaultdict
+    existing = {
+        "id": "weight-comma",
+        "title": "Вес, кг",
+        "type": "STRING",
+        "select_mode": "SINGLE",
+    }
+    rows = [existing]
+    index = defaultdict(list)
+    index["вескг"].append(existing)
+    kit = FakeKit()
+
+    result = _kit_characteristics(
+        kit,
+        [
+            {"code": "weight_a", "name": "Вес, кг", "values": ["16.84"]},
+            {"code": "weight_b", "name": "Вескг", "values": ["14,5"]},
+        ],
+        rows,
+        index,
+    )
+
+    payload = {row["characteristic_id"]: row["values"] for row in result}
+    assert payload["weight-comma"] == ["16.84"]
+    assert payload["created-1"] == ["14,5"]
+    assert kit.created[0]["title"] == "Вескг"
+
+
+def test_kit_characteristics_collapse_new_string_multivalue():
+    class FakeKit:
+        def create_characteristic(self, title):
+            return {
+                "id": "new-string",
+                "title": title,
+                "type": "STRING",
+                "select_mode": "SINGLE",
+            }
+
+    from collections import defaultdict
+    rows = []
+    index = defaultdict(list)
+
+    result = _kit_characteristics(
+        FakeKit(),
+        [{"code": "material", "name": "Материал", "values": ["Сетка", "Ткань"]}],
+        rows,
+        index,
+    )
+
+    assert result == [{
+        "characteristic_id": "new-string",
+        "value": "Сетка | Ткань",
+        "values": ["Сетка | Ткань"],
+    }]
