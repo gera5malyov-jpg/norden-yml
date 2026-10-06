@@ -1,4 +1,4 @@
-name: Diagnose KIT characteristic types once
+name: Validate KIT characteristic fix once
 
 on:
   push:
@@ -10,107 +10,19 @@ permissions:
   contents: read
 
 jobs:
-  diagnose:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      BRIDGE_SECRET: ${{ secrets.MEGASUPPLIERS_CALLBACK_SECRET }}
-      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
     steps:
-      - name: Read problematic Norden feature metadata
-        shell: bash
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check pytest openpyxl requests pdfplumber reportlab
+      - name: Syntax check
+        run: python -m py_compile supplier_engine/kit_sync.py
+      - name: KIT characteristic regression tests
         run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import hashlib,hmac,json,os,re,urllib.parse,urllib.request
-          TARGET='AF-31662421'
-          REQUEST_ID='20261006231419-7d2f758b8b407355'
-          BRIDGE='https://profikompany.ru/megasuppliers-bridge/'
-          KIT='https://api.kit.yandex.net'
-
-          def norm(v):
-              return re.sub(r'[^0-9a-zа-яё]+','',str(v or '').casefold())
-
-          def bridge(payload):
-              body=json.dumps(payload,ensure_ascii=False,separators=(',',':')).encode()
-              sig='sha256='+hmac.new(os.environ['BRIDGE_SECRET'].encode(),body,hashlib.sha256).hexdigest()
-              req=urllib.request.Request(BRIDGE,data=body,method='POST',headers={
-                  'Content-Type':'application/json; charset=utf-8',
-                  'X-Megasuppliers-Signature':sig,
-                  'User-Agent':'KIT-Characteristic-Diagnostic/1.1',
-              })
-              with urllib.request.urlopen(req,timeout=90) as r:
-                  return json.loads(r.read().decode())
-
-          target=None
-          for offset in range(0,6000,200):
-              data=bridge({
-                  'action':'kit_manifest','supplier_id':1,'request_id':REQUEST_ID,
-                  'stock_id':1,'offset':offset,'limit':200,
-              })
-              items=data.get('items') or []
-              for item in items:
-                  if str(item.get('supplier_sku') or '').strip()==TARGET:
-                      target=item
-                      break
-              if target or len(items)<200:
-                  break
-          if not target:
-              raise SystemExit('target not found in current kit_manifest')
-
-          features=[f for f in (target.get('features') or []) if isinstance(f,dict)]
-          print('TARGET_FEATURES='+json.dumps(features,ensure_ascii=False))
-
-          headers={'Authorization':'Bearer '+os.environ['YANDEX_KIT_TOKEN'],'Accept':'application/json'}
-          rows=[]
-          page=1
-          while True:
-              q=urllib.parse.urlencode({'status':'ACTIVE','page':page,'per_page':100})
-              req=urllib.request.Request(KIT+'/v1/characteristics?'+q,headers=headers)
-              with urllib.request.urlopen(req,timeout=90) as r:
-                  payload=json.loads(r.read().decode())
-              batch=payload if isinstance(payload,list) else next(
-                  (payload.get(k) for k in ('items','results','characteristics') if isinstance(payload.get(k),list)),[]
-              )
-              rows.extend(batch)
-              if len(batch)<100:
-                  break
-              page+=1
-              if page>20:
-                  break
-
-          index={}
-          for row in rows:
-              title=str(row.get('title') or row.get('name') or '').strip()
-              if title:
-                  index.setdefault(norm(title),[]).append(row)
-
-          selected=[]
-          for f in features:
-              title=str(f.get('name') or '').strip()
-              if not title:
-                  continue
-              matches=index.get(norm(title),[])
-              exact=[r for r in matches if str(r.get('title') or r.get('name') or '').strip()==title]
-              pool=exact or matches
-              pool=sorted(pool,key=lambda r:(0,int(str(r.get('id')))) if str(r.get('id') or '').isdigit() else (1,str(r.get('id') or '')))
-              chosen=pool[0] if pool else None
-              selected.append({
-                  'code':f.get('code'),'name':title,'values':f.get('values'),
-                  'norm':norm(title),
-                  'chosen':chosen,
-                  'match_count':len(matches),
-              })
-          print('SELECTED='+json.dumps(selected,ensure_ascii=False,sort_keys=True))
-
-          by_cid={}
-          for x in selected:
-              c=x.get('chosen') or {}
-              cid=str(c.get('id') or '')
-              if cid:
-                  by_cid.setdefault(cid,[]).append(x)
-          dups={cid:v for cid,v in by_cid.items() if len(v)>1}
-          print('DUPLICATE_SELECTED_IDS='+json.dumps(dups,ensure_ascii=False,sort_keys=True))
-          PY
-
-# trigger diagnostic v2
+          python -m pytest -q tests/test_supplier_engine.py \
+            -k 'kit_characteristics_keep_normalized_title_collisions_distinct or kit_characteristics_collapse_new_string_multivalue'
+# trigger validation v1
