@@ -20,13 +20,14 @@ def bridge_probe():
         return "BRIDGE_PROBE=secret_missing"
     request_id=os.environ.get("MEGASUPPLIERS_REQUEST_ID","20261006191723-dba222b4d20f9432").strip()
     results=[]
-    for limit in (200,100,50,25,1):
+    probes=[(3600,200),(3600,100),(3700,100),(3600,50),(3650,50),(3700,50),(3750,50)]
+    for offset,limit in probes:
         payload={
             "action":"kit_manifest",
             "supplier_id":1,
             "request_id":request_id,
             "stock_id":66,
-            "offset":0,
+            "offset":offset,
             "limit":limit,
         }
         body=json.dumps(payload,ensure_ascii=False,separators=(",",":")).encode("utf-8")
@@ -39,14 +40,12 @@ def bridge_probe():
         try:
             with urllib.request.urlopen(req,timeout=60) as r:
                 raw=r.read()
-                preview=raw[:500].decode("utf-8","replace")
-                results.append("KIT_MANIFEST limit=%s HTTP=%s bytes=%s preview=%s" % (limit,r.status,len(raw),preview))
+                results.append("KIT_MANIFEST offset=%s limit=%s HTTP=%s bytes=%s" % (offset,limit,r.status,len(raw)))
         except urllib.error.HTTPError as e:
             raw=e.read()
-            preview=raw[:500].decode("utf-8","replace")
-            results.append("KIT_MANIFEST limit=%s HTTP=%s bytes=%s preview=%s" % (limit,e.code,len(raw),preview))
+            results.append("KIT_MANIFEST offset=%s limit=%s HTTP=%s bytes=%s body=%s" % (offset,limit,e.code,len(raw),raw[:500].decode("utf-8","replace")))
         except Exception as e:
-            results.append("KIT_MANIFEST limit=%s ERROR=%r" % (limit,e))
+            results.append("KIT_MANIFEST offset=%s limit=%s ERROR=%r" % (offset,limit,e))
     return "\n".join(results)
 
 def main():
