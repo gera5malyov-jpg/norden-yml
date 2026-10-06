@@ -103,12 +103,7 @@ if(is_dir($plugin_root)){
     sort($out['installed_shop_plugins']);
 }
 
-$out['plugin_settings_ids']=$m->query("
-    SELECT DISTINCT plugin
-    FROM wa_app_settings
-    WHERE app_id='shop'
-    ORDER BY plugin
-")->fetchAll();
+$out['wa_app_settings_columns']=$m->query("SHOW COLUMNS FROM wa_app_settings")->fetchAll();
 
 $out['legacy_ozon_samples']=$m->query("
     SELECT sp.set_id,p.id AS product_id,p.name,p.type_id,p.category_id,
@@ -124,16 +119,24 @@ $out['legacy_ozon_samples']=$m->query("
 $legacy_ids=array();
 foreach($out['legacy_ozon_samples'] as $r){$legacy_ids[(int)$r['product_id']]=(int)$r['product_id'];}
 if($legacy_ids){
+    $pf_cols=array();
+    foreach($m->query("SHOW COLUMNS FROM shop_product_features")->fetchAll() as $col){
+        if(isset($col['Field'])) $pf_cols[$col['Field']]=true;
+    }
+    $out['product_feature_columns']=array_keys($pf_cols);
+    $select=array('pf.product_id','pf.feature_id','f.code','f.name','f.type');
+    foreach(array('sku_id','feature_value_id','value_id','value_int','value_double','value_decimal','value_varchar','value_text') as $col){
+        if(isset($pf_cols[$col])) $select[]='pf.'.$col;
+    }
     $out['legacy_feature_rows']=$m->query("
-        SELECT pf.product_id,pf.sku_id,pf.feature_id,f.code,f.name,f.type,
-               pf.feature_value_id,pf.value_int,pf.value_double,pf.value_decimal,pf.value_varchar,pf.value_text
+        SELECT ".implode(',',$select)."
         FROM shop_product_features pf
         INNER JOIN shop_feature f ON f.id=pf.feature_id
         WHERE pf.product_id IN (i:ids)
         ORDER BY pf.product_id,pf.feature_id
         LIMIT 5000
     ",array('ids'=>array_values($legacy_ids)))->fetchAll();
-}else{$out['legacy_feature_rows']=array();}
+}else{$out['legacy_feature_rows']=array();$out['product_feature_columns']=array();}
 
 $out['likely_card_features']=$m->query("
     SELECT id,parent_id,code,name,type,multiple,status
@@ -217,7 +220,7 @@ echo json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_
                 text=True,capture_output=True,timeout=180,
             )
             if p.returncode:
-                raise RuntimeError(p.stderr[-6000:] or p.stdout[-6000:])
+                raise RuntimeError((p.stdout[-12000:] + "\nSTDERR:\n" + p.stderr[-6000:]).strip())
             print(p.stdout)
         finally:
             try:
