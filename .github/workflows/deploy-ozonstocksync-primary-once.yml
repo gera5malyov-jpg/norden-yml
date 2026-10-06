@@ -1,0 +1,69 @@
+name: Deploy ozonstocksync primary routing once
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-ozonstocksync-primary-once.yml'
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy class with backup and verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l webasyst/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip()
+          VM_ID=44780; VM_IP='45.86.180.49'
+          ROOT='/home/web/vm-23f9aff9.na4u.ru/www'
+          SRC='webasyst/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php'
+          DST=ROOT+'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php'
+          def req(url,method='GET',data=None,headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode(); return json.loads(raw) if raw else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',
+                    urllib.parse.urlencode({'api_key':API_KEY}).encode(),
+                    {'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozs-primary-deploy/1.0'})['token']
+          headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/json','User-Agent':'ozs-primary-deploy/1.0'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub').read().strip()
+              created=req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/','POST',
+                          json.dumps({'key':pub,'name':'chatgpt-ozs-primary-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),headers)
+              kid=created['id']
+              common=['-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null']
+              try:
+                  scp=subprocess.run(['scp']+common+[SRC,'root@'+VM_IP+':/tmp/shopOzonstocksyncPluginSync.class.php.new'],text=True,capture_output=True)
+                  if scp.returncode: raise SystemExit(scp.stderr)
+                  remote=f"""set -eu
+          DST='{DST}'
+          BAK="$DST.bak-$(date +%Y%m%d-%H%M%S)"
+          cp -a "$DST" "$BAK"
+          echo "BACKUP=$BAK"
+          cp /tmp/shopOzonstocksyncPluginSync.class.php.new "$DST"
+          chown web:web "$DST"
+          php -l "$DST"
+          grep -q "const CREATE_PRIMARY_ACCOUNT_INDEX = 1;" "$DST" || {{ cp -a "$BAK" "$DST"; chown web:web "$DST"; echo ROLLBACK=OK; exit 2; }}
+          grep -q "CREATE_ROUTE_SKIP_NON_PRIMARY" "$DST" || {{ cp -a "$BAK" "$DST"; chown web:web "$DST"; echo ROLLBACK=OK; exit 3; }}
+          rm -f /tmp/shopOzonstocksyncPluginSync.class.php.new
+          echo PRIMARY_ROUTING=OK
+          echo DEPLOY_STATUS=OK
+          """
+                  p=subprocess.run(['ssh']+common+['root@'+VM_IP,remote],text=True,capture_output=True,timeout=180)
+                  print(p.stdout)
+                  if p.stderr.strip(): print('STDERR='+p.stderr.strip())
+                  if p.returncode: raise SystemExit(p.returncode)
+              finally:
+                  try:req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception as e: print('SSH_KEY_CLEANUP_WARNING='+str(e))
+          PY
