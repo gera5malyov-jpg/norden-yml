@@ -66,17 +66,21 @@ class WebasystClient:
         self._last = 0.0
         self.min_interval = 0.18
 
-    def call(self, method, params=None):
+    def call(self, method, params=None, http_method="GET", data=None):
         p = dict(params or {})
         p["format"] = "json"
         p["access_token"] = self.token
         url = f"{self.base_url}/api.php/{method}"
+        http_method = str(http_method or "GET").upper()
         for attempt in range(10):
             delay = self.min_interval - (time.monotonic() - self._last)
             if delay > 0:
                 time.sleep(delay)
             self._last = time.monotonic()
-            r = self.session.get(url, params=p, timeout=90)
+            if http_method == "POST":
+                r = self.session.post(url, params=p, data=(data or {}), timeout=90)
+            else:
+                r = self.session.get(url, params=p, timeout=90)
             if r.status_code == 429:
                 time.sleep(float(r.headers.get("Retry-After") or min(30, 2 * (attempt + 1))))
                 continue
@@ -84,14 +88,16 @@ class WebasystClient:
                 time.sleep(min(20, 2 ** attempt))
                 continue
             try:
-                data = r.json()
+                payload = r.json()
             except Exception:
                 raise WebasystAPIError(f"non-JSON HTTP {r.status_code}")
             if r.status_code >= 400:
-                raise WebasystAPIError(f"HTTP {r.status_code}: {str(data)[:800]}")
-            if isinstance(data, dict) and data.get("error"):
-                raise WebasystAPIError(f"{data.get('error')}: {data.get('error_description') or ''}")
-            return data
+                raise WebasystAPIError(f"HTTP {r.status_code}: {str(payload)[:800]}")
+            if isinstance(payload, dict) and payload.get("error"):
+                raise WebasystAPIError(
+                    f"{payload.get('error')}: {payload.get('error_description') or ''}"
+                )
+            return payload
         raise WebasystAPIError(f"retries exhausted: {method}")
 
 
