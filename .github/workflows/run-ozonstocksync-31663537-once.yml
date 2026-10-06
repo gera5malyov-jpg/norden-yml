@@ -147,7 +147,7 @@ jobs:
           rm -f /tmp/ozs_precheck_31663537.php
 
           echo '=== RUN ONCE ==='
-          su -s /bin/bash web -c "cd '$ROOT' && flock -n /tmp/ozonstocksync.lock /usr/bin/php cli.php shop ozonstocksyncPluginSync dry=0 stocks=1 prices=0"
+          su -s /bin/bash web -c "cd '$ROOT' && flock -w 900 /tmp/ozonstocksync.lock /usr/bin/php cli.php shop ozonstocksyncPluginSync dry=0 stocks=1 prices=0"
 
           echo '=== TARGET LOGS ==='
           grep -h '31663537' "$ROOT"/wa-log/ozonstocksync*.log 2>/dev/null | tail -n 100 || true
@@ -167,4 +167,4 @@ jobs:
                       print('SSH_KEY_CLEANUP_WARNING='+str(e))
           PY
 
-# trigger: 2026-10-06 retry-primary
+# trigger: 2026-10-06 wait-lock
