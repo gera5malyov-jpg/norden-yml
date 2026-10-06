@@ -98,6 +98,7 @@ class KitClient:
         self.headers = {"Authorization": "Bearer " + token, "Accept": "application/json"}
         self.min_request_interval = float(min_request_interval)
         self._last_request = 0.0
+        self._variants_cache = None
 
     def _pace(self):
         delay = self.min_request_interval - (time.monotonic() - self._last_request)
@@ -208,7 +209,9 @@ class KitClient:
         return list(self.iter_collection("/v1/characteristics", {"status": ["ACTIVE"]}))
 
     def variants(self):
-        return list(self.scan_all_variants_parallel(workers=6))
+        if self._variants_cache is None:
+            self._variants_cache = list(self.scan_all_variants_parallel(workers=6))
+        return list(self._variants_cache)
 
     def scan_all_variants_parallel(self, workers=6):
         first = self.request("GET", "/v1/variants", params={"page": 1, "per_page": 100})
@@ -217,8 +220,6 @@ class KitClient:
             yield row
         total = self._total(first)
         if total is None:
-            # Some KIT responses omit total. Continue safely page-by-page
-            # instead of silently treating the first 100 rows as the catalog.
             page = 2
             while len(first_rows) == 100:
                 payload = self.request(
@@ -238,40 +239,101 @@ class KitClient:
             return
         pages = (int(total) + 99) // 100
 
-        def get_page(page):
+        def fetch_page(page, per_page=100, attempts=12):
             headers = dict(self.headers)
             last_error = None
-            for attempt in range(12):
+            for attempt in range(attempts):
                 try:
                     response = requests.get(
                         KIT_BASE + "/v1/variants",
                         headers=headers,
-                        params={"page": page, "per_page": 100},
+                        params={"page": page, "per_page": per_page},
                         timeout=120,
                     )
                     if response.status_code == 429:
-                        last_error = RuntimeError("KIT variant scan HTTP 429")
+                        last_error = RuntimeError(
+                            "KIT variant scan page %s/%s HTTP 429"
+                            % (page, per_page)
+                        )
                         time.sleep(float(response.headers.get("Retry-After") or min(15, 1 + attempt)))
                         continue
                     if response.status_code >= 500 or response.status_code == 400:
-                        last_error = RuntimeError("KIT variant scan HTTP %s" % response.status_code)
-                        time.sleep(min(15, 1 + attempt * 2))
-                        continue
+                        last_error = RuntimeError(
+                            "KIT variant scan page %s/%s HTTP %s"
+                            % (page, per_page, response.status_code)
+                        )
+                        if attempt + 1 < attempts:
+                            time.sleep(min(15, 1 + attempt * 2))
+                            continue
+                        break
                     if response.status_code >= 400:
                         raise KitSyncError(
-                            "KIT HTTP %s /v1/variants: %s"
-                            % (response.status_code, response.text[:500])
+                            "KIT HTTP %s /v1/variants page=%s per_page=%s: %s"
+                            % (response.status_code, page, per_page, response.text[:500])
                         )
                     payload = response.json()
-                    return page, [row for row in self._items(payload) if isinstance(row, dict)]
+                    return [
+                        row for row in self._items(payload)
+                        if isinstance(row, dict)
+                    ]
                 except (requests.RequestException, ValueError) as exc:
                     last_error = exc
-                    if attempt + 1 < 12:
+                    if attempt + 1 < attempts:
                         time.sleep(min(15, 1 + attempt * 2))
                         continue
+                    break
             raise KitSyncError(
-                "KIT variant scan page %s retries exhausted: %s" % (page, last_error)
+                "KIT variant scan page %s/%s retries exhausted: %s"
+                % (page, per_page, last_error)
             )
+
+        def recover_page(page):
+            # KIT occasionally returns persistent HTTP 400 for one valid
+            # 100-row page. Recover the exact same 100-row offset using
+            # smaller page sizes before giving up. This keeps the scan
+            # complete, so duplicate protection remains intact.
+            start = (page - 1) * 100
+            errors = []
+            for per_page in (50, 25, 10):
+                chunks = 100 // per_page
+                base_page = (start // per_page) + 1
+                recovered = []
+                ok = True
+                for offset in range(chunks):
+                    small_page = base_page + offset
+                    try:
+                        recovered.extend(
+                            fetch_page(small_page, per_page=per_page, attempts=6)
+                        )
+                    except Exception as exc:
+                        errors.append(
+                            "per_page=%s page=%s: %s"
+                            % (per_page, small_page, str(exc)[:300])
+                        )
+                        ok = False
+                        break
+                if ok:
+                    print(
+                        "KIT bulk scan: recovered page %d via per_page=%d"
+                        % (page, per_page),
+                        flush=True,
+                    )
+                    return recovered
+            raise KitSyncError(
+                "KIT variant scan page %s could not be recovered: %s"
+                % (page, " | ".join(errors[-6:]))
+            )
+
+        def get_page(page):
+            try:
+                return page, fetch_page(page, per_page=100, attempts=12)
+            except Exception as exc:
+                print(
+                    "KIT bulk scan: page %d failed (%s); trying smaller pages"
+                    % (page, str(exc)[:300]),
+                    flush=True,
+                )
+                return page, recover_page(page)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, int(workers))) as pool:
             futures = [pool.submit(get_page, page) for page in range(2, pages + 1)]
