@@ -1,0 +1,126 @@
+name: Snapshot ozonstocksync from production once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/snapshot-ozonstocksync-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Snapshot production plugin
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request, shutil, pathlib
+
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip()
+          VM_ID=44780
+          VM_IP='45.86.180.49'
+          ROOT='/home/web/vm-23f9aff9.na4u.ru/www'
+          REMOTE=f'{ROOT}/wa-apps/shop/plugins/ozonstocksync'
+          TARGET=pathlib.Path('webasyst/ozonstocksync')
+          REPORT=pathlib.Path('.deploy-probe/ozonstocksync-snapshot.txt')
+
+          def req(url,method='GET',data=None,headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode('utf-8')
+                  return json.loads(raw) if raw else {}
+
+          token=req(
+              'https://panel.netangels.ru/api/gateway/token/',
+              'POST',
+              urllib.parse.urlencode({'api_key':API_KEY}).encode(),
+              {'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozonstocksync-snapshot/1.0'}
+          )['token']
+          headers={
+              'Authorization':'Bearer '+token,
+              'Content-Type':'application/json',
+              'Accept':'application/json',
+              'User-Agent':'ozonstocksync-snapshot/1.0'
+          }
+
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub',encoding='utf-8').read().strip()
+              created=req(
+                  f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/',
+                  'POST',
+                  json.dumps({'key':pub,'name':'chatgpt-ozonstocksync-snapshot-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),
+                  headers
+              )
+              kid=created['id']
+              try:
+                  check=subprocess.run(
+                      ['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null',
+                       'root@'+VM_IP,f'test -d {REMOTE} && find {REMOTE} -maxdepth 4 -type f -print | sort'],
+                      text=True,capture_output=True,timeout=90
+                  )
+                  if check.returncode:
+                      raise SystemExit(check.stderr or 'ozonstocksync plugin not found')
+
+                  if TARGET.exists():
+                      shutil.rmtree(TARGET)
+                  TARGET.mkdir(parents=True,exist_ok=True)
+
+                  tar=subprocess.Popen(
+                      ['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null',
+                       'root@'+VM_IP,f'cd {REMOTE} && tar -czf - --exclude="*.log" --exclude="*.zip" --exclude="*.bak" .'],
+                      stdout=subprocess.PIPE,stderr=subprocess.PIPE
+                  )
+                  ext=subprocess.run(['tar','-xzf','-','-C',str(TARGET)],stdin=tar.stdout,capture_output=True,text=True,timeout=90)
+                  tar.stdout.close()
+                  err=tar.stderr.read().decode('utf-8','replace')
+                  rc=tar.wait()
+                  if rc or ext.returncode:
+                      raise SystemExit(err+'\n'+ext.stderr)
+
+                  # Remove obvious generated/runtime files if present.
+                  for p in list(TARGET.rglob('*')):
+                      if p.is_file() and (p.name.startswith('.') or p.suffix.lower() in {'.log','.zip','.bak'}):
+                          p.unlink()
+
+                  REPORT.parent.mkdir(parents=True,exist_ok=True)
+                  files=sorted(str(p.relative_to(TARGET)) for p in TARGET.rglob('*') if p.is_file())
+                  REPORT.write_text(
+                      'SNAPSHOT_STATUS=OK\n'
+                      +f'PLUGIN={REMOTE}\n'
+                      +f'FILES={len(files)}\n'
+                      +'\n'.join(files)+'\n',
+                      encoding='utf-8'
+                  )
+              finally:
+                  try:
+                      req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception:
+                      pass
+          PY
+
+      - name: Commit snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add webasyst/ozonstocksync .deploy-probe/ozonstocksync-snapshot.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Snapshot production ozonstocksync [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
