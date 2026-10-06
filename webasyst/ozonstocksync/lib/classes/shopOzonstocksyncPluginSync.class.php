@@ -9,6 +9,7 @@ class shopOzonstocksyncPluginSync
     const PRODUCT_IMPORT_INFO_URL = 'https://api-seller.ozon.ru/v1/product/import/info';
     const CREATE_SET_ID = 'ozon_upload';
     const CREATE_SET_NAME = 'Грузить в Ozon';
+    const CREATE_PRIMARY_ACCOUNT_INDEX = 1;
     const STOCK_BATCH_SIZE = 100;
     const PRICE_BATCH_SIZE = 100;
     const CREATE_BATCH_SIZE = 100;
@@ -386,7 +387,8 @@ class shopOzonstocksyncPluginSync
 
     /**
      * Creation allow-list. Permission to create comes exclusively from this one list.
-     * Existing stock/price mappings are used only to route a permitted product to an account.
+     * New cards are created only in the primary Ozon account. Existing stock/price
+     * mappings remain independent and are not used as additional creation permissions.
      */
     private function collectCreateCandidates()
     {
@@ -466,59 +468,23 @@ class shopOzonstocksyncPluginSync
             return array();
         }
 
-        $set_ids = array();
-        foreach ((array)$account['mappings'] as $mapping) {
-            $set_id = trim((string)$mapping['set_id']);
-            if ($set_id !== '' && $set_id !== self::CREATE_SET_ID) {
-                $set_ids[$set_id] = $set_id;
-            }
-        }
-        $set_ids = array_values($set_ids);
-
-        if (!$set_ids) {
-            $this->log('CREATE_ROUTE_EMPTY: account=' . $account['name'] . ', reason=no_mapping_sets');
+        // There is one global allow-list, therefore product creation must have one
+        // deterministic target account. Otherwise the same SKU can be imported into
+        // several seller accounts just because it belongs to several old sync sets.
+        if ((int)$account['index'] !== self::CREATE_PRIMARY_ACCOUNT_INDEX) {
+            $this->log(
+                'CREATE_ROUTE_SKIP_NON_PRIMARY: account=' . $account['name']
+                . ', account_index=' . (int)$account['index']
+                . ', primary_index=' . self::CREATE_PRIMARY_ACCOUNT_INDEX
+            );
             return array();
-        }
-
-        $product_ids = array();
-        foreach ($candidates as $candidate) {
-            $product_id = (int)$candidate['product_id'];
-            if ($product_id > 0) {
-                $product_ids[$product_id] = $product_id;
-            }
-        }
-        if (!$product_ids) {
-            return array();
-        }
-
-        $route_product_ids = array();
-        $model = new waModel();
-        foreach ($set_ids as $set_id) {
-            try {
-                $rows = $model->query(
-                    "SELECT DISTINCT product_id
-                     FROM shop_set_products
-                     WHERE set_id = s:set_id
-                       AND product_id IN (i:product_ids)",
-                    array('set_id' => $set_id, 'product_ids' => array_values($product_ids))
-                )->fetchAll();
-                foreach ($rows as $row) {
-                    $pid = (int)$row['product_id'];
-                    if ($pid > 0) {
-                        $route_product_ids[$pid] = true;
-                    }
-                }
-            } catch (Exception $e) {
-                $this->log('CREATE_ROUTE_ERROR: account=' . $account['name'] . ', set_id=' . $set_id . ', error=' . $e->getMessage());
-            }
         }
 
         $result = array();
         $seen_skus = array();
         foreach ($candidates as $candidate) {
-            $product_id = (int)$candidate['product_id'];
             $sku_id = (int)$candidate['sku_id'];
-            if (!isset($route_product_ids[$product_id]) || $sku_id <= 0 || isset($seen_skus[$sku_id])) {
+            if ($sku_id <= 0 || isset($seen_skus[$sku_id])) {
                 continue;
             }
             $seen_skus[$sku_id] = true;
@@ -526,10 +492,10 @@ class shopOzonstocksyncPluginSync
         }
 
         $this->log(
-            'CREATE_ROUTE: account=' . $account['name']
+            'CREATE_ROUTE_PRIMARY: account=' . $account['name']
+            . ', account_index=' . (int)$account['index']
             . ', allowlist_skus=' . count($candidates)
             . ', routed_skus=' . count($result)
-            . ', route_sets=' . implode(',', $set_ids)
         );
 
         return $result;
