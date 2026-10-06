@@ -10,6 +10,10 @@ class shopOzonstocksyncPluginSync
     const CREATE_SET_ID = 'ozon_upload';
     const CREATE_SET_NAME = 'Грузить в Ozon';
     const CREATE_PRIMARY_ACCOUNT_INDEX = 1;
+    const CREATE_FALLBACK_DEPTH_CM = 50;
+    const CREATE_FALLBACK_HEIGHT_CM = 100;
+    const CREATE_FALLBACK_WIDTH_CM = 50;
+    const CREATE_FALLBACK_WEIGHT_KG = 31;
     const STOCK_BATCH_SIZE = 100;
     const PRICE_BATCH_SIZE = 100;
     const CREATE_BATCH_SIZE = 100;
@@ -562,6 +566,7 @@ class shopOzonstocksyncPluginSync
                 throw new waException('Класс ozonProduct не найден');
             }
             $ozon_product = new ozonProduct($product_id);
+            $this->applyCreatePackageFallback($ozon_product, $product_id, $sku_id, $webasyst_sku);
             $offers = $ozon_product->getOzonOffers($sku_id, false, $generator_errors);
         } catch (Throwable $e) {
             try { wa('shop'); } catch (Throwable $ignore) {}
@@ -633,6 +638,56 @@ class shopOzonstocksyncPluginSync
             'webasyst_sku' => $webasyst_sku,
             'offer_id' => $generated_offer_id
         );
+    }
+
+    private function applyCreatePackageFallback($ozon_product, $product_id, $sku_id, $webasyst_sku)
+    {
+        // The installed Ozon app reads these four service feature codes when it
+        // validates dimensions. Some supplier imports have package data under
+        // supplier-specific feature names instead, so the Ozon fields are empty.
+        //
+        // Write only to the shopProduct in-memory cache. No save() call is made,
+        // therefore Webasyst catalog data are not changed by this fallback.
+        $features = isset($ozon_product['features']) && is_array($ozon_product['features'])
+            ? $ozon_product['features']
+            : array();
+
+        $fallbacks = array(
+            'glubina_upakovki1' => self::CREATE_FALLBACK_DEPTH_CM,
+            'vysota_upakovki1' => self::CREATE_FALLBACK_HEIGHT_CM,
+            'shirina_upakovki1' => self::CREATE_FALLBACK_WIDTH_CM,
+            'ves_upakovki' => self::CREATE_FALLBACK_WEIGHT_KG
+        );
+
+        $applied = array();
+        foreach ($fallbacks as $code => $value) {
+            $current = isset($features[$code]) ? $features[$code] : null;
+            $numeric = null;
+
+            if (is_object($current) && isset($current->value)) {
+                $numeric = (float)$current->value;
+            } elseif (is_array($current) && isset($current['value'])) {
+                $numeric = (float)$current['value'];
+            } elseif (is_scalar($current)) {
+                $numeric = (float)str_replace(',', '.', (string)$current);
+            }
+
+            if ($numeric === null || $numeric <= 0) {
+                $features[$code] = (string)$value;
+                $applied[$code] = $value;
+            }
+        }
+
+        if ($applied) {
+            $ozon_product['features'] = $features;
+            $this->log(
+                'CREATE_PACKAGE_FALLBACK: product_id=' . (int)$product_id
+                . ', sku_id=' . (int)$sku_id
+                . ', sku=' . (string)$webasyst_sku
+                . ', values=' . json_encode($applied, JSON_UNESCAPED_UNICODE)
+                . ', persisted=0'
+            );
+        }
     }
 
     private function getRemoteExistingOfferIds($offer_ids, $client_id, $api_key, $product_ids = array(), $sku_ids = array())
