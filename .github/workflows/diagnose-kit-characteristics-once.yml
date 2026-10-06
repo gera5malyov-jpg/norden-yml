@@ -96,3 +96,5 @@ jobs:
               print('FEATURE='+json.dumps(f,ensure_ascii=False))
               print('KIT_DEFINITIONS='+json.dumps(matches,ensure_ascii=False,sort_keys=True))
           PY
+
+# trigger diagnostic
