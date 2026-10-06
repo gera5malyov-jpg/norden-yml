@@ -6,6 +6,7 @@ on:
     paths:
       - 'scripts/diagnose_megasuppliers_bridge.py'
       - 'scripts/diagnose_kit_manifest_stage.py'
+      - 'scripts/diagnose_kit_manifest_json.py'
       - '.github/workflows/diagnose-megasuppliers-bridge.yml'
   workflow_dispatch:
 
@@ -31,6 +32,8 @@ jobs:
         run: python3 scripts/diagnose_megasuppliers_bridge.py
       - name: Diagnose KIT manifest stage
         run: python3 scripts/diagnose_kit_manifest_stage.py
+      - name: Diagnose KIT manifest JSON
+        run: python3 scripts/diagnose_kit_manifest_json.py
       - name: Save diagnostic report
         if: always()
         shell: bash
@@ -40,7 +43,7 @@ jobs:
           test -f .deploy-probe/megasuppliers-bridge-diagnostic.txt || echo "DIAGNOSTIC=FAILED_NO_REPORT" > .deploy-probe/megasuppliers-bridge-diagnostic.txt
           git config user.name github-actions
           git config user.email actions@github.com
-          git add .deploy-probe/megasuppliers-bridge-diagnostic.txt .deploy-probe/kit-manifest-stage.txt
+          git add .deploy-probe/megasuppliers-bridge-diagnostic.txt .deploy-probe/kit-manifest-stage.txt .deploy-probe/kit-manifest-json.txt
           if ! git diff --cached --quiet; then
             git commit -m "Save megasuppliers bridge diagnostic [skip ci]"
             git pull --rebase origin main || true
