@@ -1,0 +1,98 @@
+name: Inspect Ozonstocksync and Webasyst sets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-ozonstocksync-and-sets.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect production plugin and sets
+        run: |
+          python - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request
+
+          VM_ID=44780
+          VM_IP="45.86.180.49"
+          ROOT="/home/web/vm-23f9aff9.na4u.ru/www"
+
+          def req_json(url, method="GET", data=None, headers=None):
+              req=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  raw=r.read().decode("utf-8")
+                  return json.loads(raw) if raw else {}
+
+          api_key=os.environ["NETANGELS_API_KEY"].strip()
+          token=req_json(
+              "https://panel.netangels.ru/api/gateway/token/",
+              "POST",
+              urllib.parse.urlencode({"api_key":api_key}).encode(),
+              {"Content-Type":"application/x-www-form-urlencoded","User-Agent":"ozonstocksync-inspect/1.0"},
+          ).get("token")
+          if not token: raise SystemExit("No NetAngels token")
+          headers={"Authorization":"Bearer "+token,"Content-Type":"application/json","Accept":"application/json","User-Agent":"ozonstocksync-inspect/1.0"}
+
+          with tempfile.TemporaryDirectory() as td:
+              key=td+"/id_ed25519"
+              subprocess.run(["ssh-keygen","-q","-t","ed25519","-N","","-f",key],check=True)
+              pub=open(key+".pub").read().strip()
+              created=req_json(
+                  f"https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/",
+                  "POST",
+                  json.dumps({"key":pub,"name":"chatgpt-ozonstocksync-inspect"}).encode(),
+                  headers,
+              )
+              kid=created.get("id")
+              try:
+                  php=r'''<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root);
+require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig());
+wa('shop');
+$m=new waModel();
+$out=array();
+try {
+  $out['shop_set_columns']=$m->query("SHOW COLUMNS FROM shop_set")->fetchAll();
+  $out['sets']=$m->query("SELECT * FROM shop_set ORDER BY id LIMIT 100")->fetchAll();
+  $out['shop_set_products_columns']=$m->query("SHOW COLUMNS FROM shop_set_products")->fetchAll();
+} catch(Exception $e) {
+  $out['set_error']=$e->getMessage();
+}
+echo json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+?>''';
+                  remote=f"""set -eu
+PLUGIN='{ROOT}/wa-apps/shop/plugins/ozonstocksync'
+echo '===FILES==='
+if [ -d "$PLUGIN" ]; then find "$PLUGIN" -maxdepth 5 -type f | sort; else echo 'PLUGIN_MISSING'; fi
+echo '===GREP==='
+if [ -d "$PLUGIN" ]; then
+  grep -RniE 'ozon|product|offer|import|update|stock|settings|backend|set|list' "$PLUGIN" --include='*.php' --include='*.js' --include='*.html' --include='*.json' 2>/dev/null | head -500 || true
+fi
+cat >/tmp/inspect_sets.php <<'PHP'
+{php}
+PHP
+chown web:web /tmp/inspect_sets.php
+su -s /bin/bash web -c 'php /tmp/inspect_sets.php'
+rm -f /tmp/inspect_sets.php
+"""
+                  p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=15","root@"+VM_IP,remote],text=True,capture_output=True,timeout=180)
+                  print(p.stdout)
+                  if p.returncode:
+                      print(p.stderr)
+                      raise SystemExit(p.returncode)
+              finally:
+                  if kid:
+                      try:req_json(f"https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/","DELETE",None,headers)
+                      except Exception as e: print("cleanup warning",e)
+          PY
