@@ -1,0 +1,82 @@
+name: Align ozonstocksync margin once
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/align-ozonstocksync-margin-once.yml'
+permissions:
+  contents: write
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - name: Align only legacy minimum margin
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request, pathlib
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip(); VM_ID=44780; VM_IP='45.86.180.49'
+          REPORT=pathlib.Path('.deploy-probe/ozonstocksync-margin-align.txt')
+          def req(url,method='GET',data=None,headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode('utf-8'); return json.loads(raw) if raw else {}
+          tok=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':API_KEY}).encode(),{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozs-margin-align/1.0'})['token']
+          headers={'Authorization':'Bearer '+tok,'Content-Type':'application/json','Accept':'application/json','User-Agent':'ozs-margin-align/1.0'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'; subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub',encoding='utf-8').read().strip()
+              created=req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/','POST',json.dumps({'key':pub,'name':'chatgpt-ozs-margin-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),headers)
+              kid=created['id']
+              try:
+                  php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www'; chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig()); wa('shop');
+          $p=wa('shop')->getPlugin('ozonstocksync',true);
+          $before=(string)$p->getSettings('min_margin_percent');
+          $changed=false;
+          if ((float)$before === 15.0) {
+              $m=new waAppSettingsModel();
+              $m->set(array('shop','ozonstocksync'),'min_margin_percent','18');
+              $changed=true;
+          }
+          $p2=wa('shop')->getPlugin('ozonstocksync',true);
+          $m2=new waAppSettingsModel();
+          $after=(string)$m2->get(array('shop','ozonstocksync'),'min_margin_percent','18');
+          echo 'BEFORE_MIN_MARGIN='.$before."\n";
+          echo 'CHANGED='.($changed?'yes':'no')."\n";
+          echo 'AFTER_MIN_MARGIN='.$after."\n";
+          echo 'TARGET_MARGIN='.(string)$p->getSettings('target_margin_percent')."\n";
+          echo 'ALIGN_STATUS='.(((float)$after===18.0)?'OK':'FAIL')."\n";
+          exit(((float)$after===18.0)?0:2);
+          ?>'''
+                  remote="cat >/tmp/ozs_margin.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/ozs_margin.php\nsu -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ozs_margin.php'\nrm -f /tmp/ozs_margin.php"
+                  p=subprocess.run(['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@'+VM_IP,remote],text=True,capture_output=True,timeout=120)
+                  REPORT.parent.mkdir(parents=True,exist_ok=True); REPORT.write_text(p.stdout+(('\nSTDERR='+p.stderr) if p.stderr.strip() else ''),encoding='utf-8')
+                  if p.returncode: raise SystemExit(p.returncode)
+              finally:
+                  try:req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception:pass
+          PY
+      - name: Save report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/ozonstocksync-margin-align.txt || echo "ALIGN_STATUS=FAILED_NO_REPORT" > .deploy-probe/ozonstocksync-margin-align.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/ozonstocksync-margin-align.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save ozonstocksync margin alignment report [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
