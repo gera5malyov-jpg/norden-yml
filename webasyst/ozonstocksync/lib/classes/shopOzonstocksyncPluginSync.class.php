@@ -3,8 +3,14 @@ class shopOzonstocksyncPluginSync
 {
     const STOCKS_URL = 'https://api-seller.ozon.ru/v2/products/stocks';
     const PRICES_URL = 'https://api-seller.ozon.ru/v1/product/import/prices';
+    const PRODUCT_LIST_URL = 'https://api-seller.ozon.ru/v3/product/list';
+    const PRODUCT_IMPORT_URL = 'https://api-seller.ozon.ru/v3/product/import';
+    const PRODUCT_IMPORT_INFO_URL = 'https://api-seller.ozon.ru/v1/product/import/info';
+    const CREATE_SET_ID = 'ozon_upload';
+    const CREATE_SET_NAME = 'Грузить в Ozon';
     const STOCK_BATCH_SIZE = 100;
     const PRICE_BATCH_SIZE = 100;
+    const CREATE_BATCH_SIZE = 100;
 
     private $settings;
     private $log_file = 'ozonstocksync.log';
@@ -22,6 +28,7 @@ class shopOzonstocksyncPluginSync
         $update_stocks = (int)$this->get('update_stocks', 1) === 1;
         $update_prices = (int)$this->get('update_prices', 0) === 1;
         $accounts = $this->parseAccounts();
+        $create_candidates = $this->collectCreateCandidates();
 
         if (!$accounts) {
             throw new waException('Не заполнены аккаунты Ozon или связки. Нужны Client-Id, Api-Key и хотя бы одна связка.');
@@ -35,10 +42,14 @@ class shopOzonstocksyncPluginSync
             $total_mappings += count($account['mappings']);
         }
 
-        $this->log('START_ACCOUNTS: accounts=' . count($accounts) . ', mappings=' . $total_mappings . ', dry_run=' . ($dry_run ? '1' : '0') . ', update_stocks=' . ($update_stocks ? '1' : '0') . ', update_prices=' . ($update_prices ? '1' : '0'));
+        $this->log('START_ACCOUNTS: accounts=' . count($accounts) . ', mappings=' . $total_mappings . ', dry_run=' . ($dry_run ? '1' : '0') . ', update_stocks=' . ($update_stocks ? '1' : '0') . ', update_prices=' . ($update_prices ? '1' : '0') . ', create_allowlist=' . count($create_candidates));
 
         $total_sent_stocks = 0;
         $total_sent_prices = 0;
+        $total_create_submitted = 0;
+        $total_create_would_create = 0;
+        $total_create_skipped_existing = 0;
+        $total_create_errors = 0;
         $total_errors = 0;
 
         foreach ($accounts as $account) {
@@ -116,12 +127,29 @@ class shopOzonstocksyncPluginSync
                 $this->log('ACCOUNT_PRICES_FINISH: account=' . $account['name'] . ', sent=' . $sent . ', errors=' . $errors);
             }
 
+            $create_result = $this->createMissingProductsForAccount($account, $create_candidates, $dry_run);
+            $total_create_submitted += $create_result['submitted'];
+            $total_create_would_create += $create_result['would_create'];
+            $total_create_skipped_existing += $create_result['skipped_existing'];
+            $total_create_errors += $create_result['errors'];
+            $total_errors += $create_result['errors'];
+
             $this->log('ACCOUNT_FINISH: account=' . $account['name']);
             $this->account_log_file = null;
         }
 
-        $this->log('FINISH_ACCOUNTS: accounts=' . count($accounts) . ', sent_stocks=' . $total_sent_stocks . ', sent_prices=' . $total_sent_prices . ', errors=' . $total_errors);
-        return array('accounts' => count($accounts), 'sent_stocks' => $total_sent_stocks, 'sent_prices' => $total_sent_prices, 'errors' => $total_errors, 'dry_run' => $dry_run);
+        $this->log('FINISH_ACCOUNTS: accounts=' . count($accounts) . ', sent_stocks=' . $total_sent_stocks . ', sent_prices=' . $total_sent_prices . ', create_submitted=' . $total_create_submitted . ', create_would_create=' . $total_create_would_create . ', create_skipped_existing=' . $total_create_skipped_existing . ', create_errors=' . $total_create_errors . ', errors=' . $total_errors);
+        return array(
+            'accounts' => count($accounts),
+            'sent_stocks' => $total_sent_stocks,
+            'sent_prices' => $total_sent_prices,
+            'create_submitted' => $total_create_submitted,
+            'create_would_create' => $total_create_would_create,
+            'create_skipped_existing' => $total_create_skipped_existing,
+            'create_errors' => $total_create_errors,
+            'errors' => $total_errors,
+            'dry_run' => $dry_run
+        );
     }
 
     private function parseAccounts()
@@ -350,6 +378,728 @@ class shopOzonstocksyncPluginSync
         }
         $this->log('FILTER_PRICES: set_id=' . $set_id . ', rows=' . count($rows) . ', prices=' . count($items) . ', skipped_no_cost=' . $skipped_no_cost . ', skipped_no_tip=' . $skipped_no_tip . ', skipped_no_commission=' . $skipped_no_commission . ', skipped_bad_price=' . $skipped_bad_price);
         return $items;
+    }
+
+    /**
+     * Creation allow-list. Permission to create comes exclusively from this one list.
+     * Existing stock/price mappings are used only to route a permitted product to an account.
+     */
+    private function collectCreateCandidates()
+    {
+        $model = new waModel();
+
+        try {
+            $set = $model->query(
+                "SELECT id, name, type, count FROM shop_set WHERE id = s:id LIMIT 1",
+                array('id' => self::CREATE_SET_ID)
+            )->fetchAssoc();
+        } catch (Exception $e) {
+            $this->log('CREATE_ALLOWLIST_ERROR: cannot read set: ' . $e->getMessage());
+            return array();
+        }
+
+        if (!$set) {
+            $this->log('CREATE_ALLOWLIST_MISSING: id=' . self::CREATE_SET_ID . ', expected_name=' . self::CREATE_SET_NAME);
+            return array();
+        }
+
+        if ((string)$set['name'] !== self::CREATE_SET_NAME || (int)$set['type'] !== 0) {
+            $this->log(
+                'CREATE_ALLOWLIST_INVALID: id=' . self::CREATE_SET_ID
+                . ', actual_name=' . (string)$set['name']
+                . ', type=' . (int)$set['type']
+                . ', expected_name=' . self::CREATE_SET_NAME
+                . ', expected_type=0'
+            );
+            return array();
+        }
+
+        $sku_columns = $this->getTableColumns('shop_product_skus');
+        $cost_column = $this->detectCostColumn($sku_columns);
+        $cost_select = $cost_column
+            ? 'COALESCE(s.' . $cost_column . ', 0)'
+            : '0';
+
+        try {
+            $rows = $model->query(
+                "SELECT DISTINCT
+                    p.id AS product_id,
+                    p.name AS product_name,
+                    p.status AS product_status,
+                    s.id AS sku_id,
+                    s.sku,
+                    s.name AS sku_name,
+                    s.available,
+                    s.status AS sku_status,
+                    " . $cost_select . " AS purchase_price
+                 FROM shop_set_products sp
+                 INNER JOIN shop_product p ON p.id = sp.product_id
+                 INNER JOIN shop_product_skus s ON s.product_id = p.id
+                 WHERE sp.set_id = s:set_id
+                   AND s.sku IS NOT NULL
+                   AND s.sku <> ''
+                 ORDER BY p.id, s.id",
+                array('set_id' => self::CREATE_SET_ID)
+            )->fetchAll();
+        } catch (Exception $e) {
+            $this->log('CREATE_ALLOWLIST_ERROR: cannot read products: ' . $e->getMessage());
+            return array();
+        }
+
+        $this->log(
+            'CREATE_ALLOWLIST: id=' . self::CREATE_SET_ID
+            . ', name=' . self::CREATE_SET_NAME
+            . ', products=' . (int)$set['count']
+            . ', sku_rows=' . count($rows)
+        );
+
+        return $rows;
+    }
+
+    private function routeCreateCandidatesForAccount($account, $candidates)
+    {
+        if (!$candidates) {
+            return array();
+        }
+
+        $set_ids = array();
+        foreach ((array)$account['mappings'] as $mapping) {
+            $set_id = trim((string)$mapping['set_id']);
+            if ($set_id !== '' && $set_id !== self::CREATE_SET_ID) {
+                $set_ids[$set_id] = $set_id;
+            }
+        }
+        $set_ids = array_values($set_ids);
+
+        if (!$set_ids) {
+            $this->log('CREATE_ROUTE_EMPTY: account=' . $account['name'] . ', reason=no_mapping_sets');
+            return array();
+        }
+
+        $product_ids = array();
+        foreach ($candidates as $candidate) {
+            $product_id = (int)$candidate['product_id'];
+            if ($product_id > 0) {
+                $product_ids[$product_id] = $product_id;
+            }
+        }
+        if (!$product_ids) {
+            return array();
+        }
+
+        $route_product_ids = array();
+        $model = new waModel();
+        foreach ($set_ids as $set_id) {
+            try {
+                $rows = $model->query(
+                    "SELECT DISTINCT product_id
+                     FROM shop_set_products
+                     WHERE set_id = s:set_id
+                       AND product_id IN (i:product_ids)",
+                    array('set_id' => $set_id, 'product_ids' => array_values($product_ids))
+                )->fetchAll();
+                foreach ($rows as $row) {
+                    $pid = (int)$row['product_id'];
+                    if ($pid > 0) {
+                        $route_product_ids[$pid] = true;
+                    }
+                }
+            } catch (Exception $e) {
+                $this->log('CREATE_ROUTE_ERROR: account=' . $account['name'] . ', set_id=' . $set_id . ', error=' . $e->getMessage());
+            }
+        }
+
+        $result = array();
+        $seen_skus = array();
+        foreach ($candidates as $candidate) {
+            $product_id = (int)$candidate['product_id'];
+            $sku_id = (int)$candidate['sku_id'];
+            if (!isset($route_product_ids[$product_id]) || $sku_id <= 0 || isset($seen_skus[$sku_id])) {
+                continue;
+            }
+            $seen_skus[$sku_id] = true;
+            $result[] = $candidate;
+        }
+
+        $this->log(
+            'CREATE_ROUTE: account=' . $account['name']
+            . ', allowlist_skus=' . count($candidates)
+            . ', routed_skus=' . count($result)
+            . ', route_sets=' . implode(',', $set_ids)
+        );
+
+        return $result;
+    }
+
+    private function getSavedOzonEvidence($account, $sku_id)
+    {
+        // The installed Webasyst Ozon application has one global exported-product table.
+        // It belongs to the primary account only. Secondary accounts are checked remotely.
+        if ((int)$account['index'] !== 1 || (int)$sku_id <= 0) {
+            return null;
+        }
+
+        $columns = $this->getTableColumns('ozon_exported_product');
+        if (!in_array('shop_sku_id', $columns, true)) {
+            return null;
+        }
+
+        try {
+            $model = new waModel();
+            $rows = $model->query(
+                "SELECT id, ozon_product_id, ozon_offer_id, shop_sku_id
+                 FROM ozon_exported_product
+                 WHERE shop_sku_id = i:sku_id
+                 ORDER BY id DESC
+                 LIMIT 10",
+                array('sku_id' => (int)$sku_id)
+            )->fetchAll();
+
+            foreach ($rows as $row) {
+                $product_id = isset($row['ozon_product_id']) ? (int)$row['ozon_product_id'] : 0;
+                $offer_id = isset($row['ozon_offer_id']) ? trim((string)$row['ozon_offer_id']) : '';
+                if ($product_id > 0 || ($offer_id !== '' && $offer_id !== '0')) {
+                    return array(
+                        'ozon_product_id' => $product_id,
+                        'ozon_offer_id' => $offer_id,
+                        'row_id' => isset($row['id']) ? (int)$row['id'] : 0
+                    );
+                }
+            }
+        } catch (Exception $e) {
+            $this->log('CREATE_SAVED_ID_CHECK_ERROR: sku_id=' . (int)$sku_id . ', error=' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    private function prepareCreateOffer($candidate)
+    {
+        $product_id = (int)$candidate['product_id'];
+        $sku_id = (int)$candidate['sku_id'];
+        $webasyst_sku = trim((string)$candidate['sku']);
+
+        if ($product_id <= 0 || $sku_id <= 0 || $webasyst_sku === '') {
+            return array('ok' => false, 'error' => 'bad_candidate');
+        }
+
+        $generator_errors = array();
+        $offers = array();
+
+        try {
+            wa('ozon');
+            if (!class_exists('ozonProduct')) {
+                throw new waException('Класс ozonProduct не найден');
+            }
+            $ozon_product = new ozonProduct($product_id);
+            $offers = $ozon_product->getOzonOffers($sku_id, false, $generator_errors);
+        } catch (Throwable $e) {
+            try { wa('shop'); } catch (Throwable $ignore) {}
+            return array('ok' => false, 'error' => 'generator_exception: ' . $e->getMessage());
+        }
+
+        try { wa('shop'); } catch (Throwable $ignore) {}
+
+        if (!$offers) {
+            return array(
+                'ok' => false,
+                'error' => 'generator_rejected: ' . ($generator_errors ? implode(' || ', $generator_errors) : 'no_offer')
+            );
+        }
+
+        $offer = null;
+        foreach ($offers as $generated) {
+            if (isset($generated['offer_id']) && trim((string)$generated['offer_id']) === $webasyst_sku) {
+                $offer = $generated;
+                break;
+            }
+        }
+        if ($offer === null && count($offers) === 1) {
+            $offer = reset($offers);
+        }
+
+        if (!$offer || empty($offer['offer_id'])) {
+            return array('ok' => false, 'error' => 'generator_no_offer_id');
+        }
+
+        $generated_offer_id = trim((string)$offer['offer_id']);
+        if ($generated_offer_id !== $webasyst_sku) {
+            $this->log(
+                'CREATE_OFFER_ID_DIFFERS_FROM_SKU: product_id=' . $product_id
+                . ', sku_id=' . $sku_id
+                . ', sku=' . $webasyst_sku
+                . ', offer_id=' . $generated_offer_id
+            );
+        }
+
+        $cost = isset($candidate['purchase_price']) ? (float)$candidate['purchase_price'] : 0;
+        if ($cost <= 0) {
+            return array('ok' => false, 'error' => 'no_purchase_price');
+        }
+
+        $tips = $this->loadTipOzonValues(array($product_id));
+        if (!isset($tips[$product_id]) || trim((string)$tips[$product_id]) === '') {
+            return array('ok' => false, 'error' => 'no_tip_ozon');
+        }
+        $tip = trim((string)$tips[$product_id]);
+        $commissions = $this->getCommissionForTip($tip);
+        if (!$commissions) {
+            return array('ok' => false, 'error' => 'no_commission_for_tip: ' . $tip);
+        }
+        $price_data = $this->calculatePrices($cost, $commissions, $tip);
+        if (!$price_data) {
+            return array('ok' => false, 'error' => 'price_formula_failed');
+        }
+
+        // Creation uses the same current price policy as the separate price synchronizer.
+        $offer['price'] = (string)$price_data['price'];
+        $offer['old_price'] = (string)$price_data['old_price'];
+
+        return array(
+            'ok' => true,
+            'offer' => $offer,
+            'product_id' => $product_id,
+            'sku_id' => $sku_id,
+            'webasyst_sku' => $webasyst_sku,
+            'offer_id' => $generated_offer_id
+        );
+    }
+
+    private function getRemoteExistingOfferIds($ids, $client_id, $api_key)
+    {
+        $normalized_map = array();
+        foreach ((array)$ids as $id) {
+            $id = trim((string)$id);
+            if ($id !== '') {
+                $normalized_map[$id] = $id;
+            }
+        }
+        $normalized = array_values($normalized_map);
+
+        if (!$normalized) {
+            return array('ok' => true, 'existing' => array());
+        }
+
+        $existing = array();
+        foreach (array_chunk($normalized, 1000) as $chunk) {
+            $response = $this->sendToOzon(
+                self::PRODUCT_LIST_URL,
+                array(
+                    'filter' => array(
+                        'offer_id' => $chunk,
+                        'visibility' => 'ALL'
+                    ),
+                    'limit' => 1000
+                ),
+                $client_id,
+                $api_key
+            );
+
+            if (!$response['ok']) {
+                return array(
+                    'ok' => false,
+                    'existing' => $existing,
+                    'code' => $response['code'],
+                    'body' => $response['body']
+                );
+            }
+
+            $decoded = json_decode((string)$response['body'], true);
+            if (!is_array($decoded)) {
+                return array(
+                    'ok' => false,
+                    'existing' => $existing,
+                    'code' => $response['code'],
+                    'body' => 'invalid_json: ' . $response['body']
+                );
+            }
+
+            $items = array();
+            if (isset($decoded['result']['items']) && is_array($decoded['result']['items'])) {
+                $items = $decoded['result']['items'];
+            } elseif (isset($decoded['items']) && is_array($decoded['items'])) {
+                $items = $decoded['items'];
+            }
+
+            foreach ($items as $item) {
+                if (isset($item['offer_id'])) {
+                    $offer_id = trim((string)$item['offer_id']);
+                    if ($offer_id !== '') {
+                        $existing[$offer_id] = $item;
+                    }
+                }
+                if (isset($item['sku'])) {
+                    $sku = trim((string)$item['sku']);
+                    if ($sku !== '' && isset($normalized_map[$sku])) {
+                        $existing[$sku] = $item;
+                    }
+                }
+            }
+        }
+
+        return array('ok' => true, 'existing' => $existing);
+    }
+
+    private function createMissingProductsForAccount($account, $candidates, $dry_run)
+    {
+        $result = array(
+            'submitted' => 0,
+            'would_create' => 0,
+            'skipped_existing' => 0,
+            'errors' => 0
+        );
+
+        $routed = $this->routeCreateCandidatesForAccount($account, $candidates);
+        if (!$routed) {
+            $this->log('CREATE_ACCOUNT_FINISH: account=' . $account['name'] . ', routed=0');
+            return $result;
+        }
+
+        $prepared = array();
+        foreach ($routed as $candidate) {
+            $sku_id = (int)$candidate['sku_id'];
+            $webasyst_sku = trim((string)$candidate['sku']);
+
+            $saved = $this->getSavedOzonEvidence($account, $sku_id);
+            if ($saved) {
+                $result['skipped_existing']++;
+                $this->log(
+                    'CREATE_SKIP_SAVED_OZON_ID: account=' . $account['name']
+                    . ', sku_id=' . $sku_id
+                    . ', sku=' . $webasyst_sku
+                    . ', ozon_product_id=' . (int)$saved['ozon_product_id']
+                    . ', ozon_offer_id=' . (string)$saved['ozon_offer_id']
+                );
+                continue;
+            }
+
+            $item = $this->prepareCreateOffer($candidate);
+            if (!$item['ok']) {
+                $result['errors']++;
+                $this->log(
+                    'CREATE_SKIP_INVALID: account=' . $account['name']
+                    . ', product_id=' . (int)$candidate['product_id']
+                    . ', sku_id=' . $sku_id
+                    . ', sku=' . $webasyst_sku
+                    . ', reason=' . $item['error']
+                );
+                continue;
+            }
+
+            $prepared[] = $item;
+        }
+
+        if (!$prepared) {
+            $this->log(
+                'CREATE_ACCOUNT_FINISH: account=' . $account['name']
+                . ', routed=' . count($routed)
+                . ', prepared=0'
+                . ', skipped_existing=' . $result['skipped_existing']
+                . ', errors=' . $result['errors']
+            );
+            return $result;
+        }
+
+        // First fail-closed remote guard: generated offer_id + raw Webasyst SKU.
+        $lookup_ids = array();
+        foreach ($prepared as $item) {
+            $lookup_ids[] = $item['offer_id'];
+            $lookup_ids[] = $item['webasyst_sku'];
+        }
+        $remote = $this->getRemoteExistingOfferIds(
+            $lookup_ids,
+            $account['client_id'],
+            $account['api_key']
+        );
+        if (!$remote['ok']) {
+            $result['errors'] += count($prepared);
+            $this->log(
+                'CREATE_ABORT_EXISTENCE_CHECK: account=' . $account['name']
+                . ', prepared=' . count($prepared)
+                . ', http=' . (isset($remote['code']) ? (int)$remote['code'] : 0)
+                . ', body=' . (isset($remote['body']) ? $remote['body'] : '')
+            );
+            return $result;
+        }
+
+        $pending = array();
+        foreach ($prepared as $item) {
+            $exists_by_offer = isset($remote['existing'][$item['offer_id']]);
+            $exists_by_sku = isset($remote['existing'][$item['webasyst_sku']]);
+            if ($exists_by_offer || $exists_by_sku) {
+                $result['skipped_existing']++;
+                $this->log(
+                    'CREATE_SKIP_REMOTE_EXISTS: account=' . $account['name']
+                    . ', sku_id=' . $item['sku_id']
+                    . ', sku=' . $item['webasyst_sku']
+                    . ', offer_id=' . $item['offer_id']
+                    . ', matched_by=' . ($exists_by_offer ? 'offer_id' : 'sku')
+                );
+                continue;
+            }
+            $pending[] = $item;
+        }
+
+        if ($dry_run) {
+            $result['would_create'] = count($pending);
+            foreach (array_slice($pending, 0, 20) as $item) {
+                $offer = $item['offer'];
+                $this->log(
+                    'DRY_RUN_CREATE: account=' . $account['name']
+                    . ', product_id=' . $item['product_id']
+                    . ', sku_id=' . $item['sku_id']
+                    . ', sku=' . $item['webasyst_sku']
+                    . ', offer_id=' . $item['offer_id']
+                    . ', description_category_id=' . (isset($offer['description_category_id']) ? $offer['description_category_id'] : '')
+                    . ', type_id=' . (isset($offer['type_id']) ? $offer['type_id'] : '')
+                    . ', attributes=' . (isset($offer['attributes']) && is_array($offer['attributes']) ? count($offer['attributes']) : 0)
+                    . ', images=' . (isset($offer['images']) && is_array($offer['images']) ? count($offer['images']) : 0)
+                    . ', price=' . (isset($offer['price']) ? $offer['price'] : '')
+                );
+            }
+            $this->log(
+                'CREATE_ACCOUNT_FINISH: account=' . $account['name']
+                . ', routed=' . count($routed)
+                . ', prepared=' . count($prepared)
+                . ', would_create=' . $result['would_create']
+                . ', skipped_existing=' . $result['skipped_existing']
+                . ', errors=' . $result['errors']
+                . ', dry_run=1'
+            );
+            return $result;
+        }
+
+        foreach (array_chunk($pending, self::CREATE_BATCH_SIZE) as $batch) {
+            // product/import is an upsert endpoint. Re-check immediately before calling it.
+            $batch_lookup = array();
+            foreach ($batch as $item) {
+                $batch_lookup[] = $item['offer_id'];
+                $batch_lookup[] = $item['webasyst_sku'];
+            }
+
+            $second = $this->getRemoteExistingOfferIds(
+                $batch_lookup,
+                $account['client_id'],
+                $account['api_key']
+            );
+            if (!$second['ok']) {
+                $result['errors'] += count($batch);
+                $this->log(
+                    'CREATE_ABORT_SECOND_EXISTENCE_CHECK: account=' . $account['name']
+                    . ', batch=' . count($batch)
+                    . ', http=' . (isset($second['code']) ? (int)$second['code'] : 0)
+                    . ', body=' . (isset($second['body']) ? $second['body'] : '')
+                );
+                continue;
+            }
+
+            $final = array();
+            foreach ($batch as $item) {
+                if (isset($second['existing'][$item['offer_id']]) || isset($second['existing'][$item['webasyst_sku']])) {
+                    $result['skipped_existing']++;
+                    $this->log(
+                        'CREATE_SKIP_SECOND_CHECK_EXISTS: account=' . $account['name']
+                        . ', sku=' . $item['webasyst_sku']
+                        . ', offer_id=' . $item['offer_id']
+                    );
+                    continue;
+                }
+                $final[] = $item;
+            }
+
+            if (!$final) {
+                continue;
+            }
+
+            $offers = array();
+            foreach ($final as $item) {
+                $offers[] = $item['offer'];
+            }
+
+            $response = $this->sendToOzon(
+                self::PRODUCT_IMPORT_URL,
+                array('items' => $offers),
+                $account['client_id'],
+                $account['api_key']
+            );
+
+            if (!$response['ok']) {
+                $result['errors'] += count($final);
+                $this->log(
+                    'CREATE_IMPORT_ERROR: account=' . $account['name']
+                    . ', batch=' . count($final)
+                    . ', http=' . $response['code']
+                    . ', body=' . $response['body']
+                );
+                continue;
+            }
+
+            $decoded = json_decode((string)$response['body'], true);
+            $task_id = 0;
+            if (is_array($decoded)) {
+                if (isset($decoded['result']['task_id'])) {
+                    $task_id = (int)$decoded['result']['task_id'];
+                } elseif (isset($decoded['task_id'])) {
+                    $task_id = (int)$decoded['task_id'];
+                }
+            }
+
+            if ($task_id <= 0) {
+                $result['errors'] += count($final);
+                $this->log(
+                    'CREATE_IMPORT_NO_TASK_ID: account=' . $account['name']
+                    . ', batch=' . count($final)
+                    . ', body=' . $response['body']
+                );
+                continue;
+            }
+
+            $result['submitted'] += count($final);
+            $this->log(
+                'CREATE_SUBMITTED: account=' . $account['name']
+                . ', batch=' . count($final)
+                . ', task_id=' . $task_id
+                . ', offers=' . implode(',', array_column($final, 'offer_id'))
+            );
+
+            $result['errors'] += $this->checkCreateImportTask(
+                $task_id,
+                array_column($final, 'offer_id'),
+                $account['client_id'],
+                $account['api_key'],
+                $account['name']
+            );
+        }
+
+        $this->log(
+            'CREATE_ACCOUNT_FINISH: account=' . $account['name']
+            . ', routed=' . count($routed)
+            . ', prepared=' . count($prepared)
+            . ', submitted=' . $result['submitted']
+            . ', skipped_existing=' . $result['skipped_existing']
+            . ', errors=' . $result['errors']
+        );
+
+        return $result;
+    }
+
+    private function checkCreateImportTask($task_id, $offer_ids, $client_id, $api_key, $account_name)
+    {
+        $offer_ids = array_values(array_unique(array_map('strval', (array)$offer_ids)));
+        if (!$offer_ids || (int)$task_id <= 0) {
+            return 0;
+        }
+
+        $attempts = 5;
+        $last_body = '';
+
+        for ($attempt = 1; $attempt <= $attempts; $attempt++) {
+            if ($attempt > 1) {
+                $this->sleepIfPositive(2, 'CREATE_TASK_WAIT account=' . $account_name . ', task_id=' . (int)$task_id);
+            }
+
+            $response = $this->sendToOzon(
+                self::PRODUCT_IMPORT_INFO_URL,
+                array('task_id' => (int)$task_id),
+                $client_id,
+                $api_key
+            );
+            $last_body = isset($response['body']) ? (string)$response['body'] : '';
+
+            if (!$response['ok']) {
+                if ($attempt >= $attempts) {
+                    $this->log(
+                        'CREATE_TASK_STATUS_ERROR: account=' . $account_name
+                        . ', task_id=' . (int)$task_id
+                        . ', http=' . (int)$response['code']
+                        . ', body=' . $last_body
+                    );
+                    return count($offer_ids);
+                }
+                continue;
+            }
+
+            $decoded = json_decode($last_body, true);
+            $items = array();
+            if (is_array($decoded)) {
+                if (isset($decoded['result']['items']) && is_array($decoded['result']['items'])) {
+                    $items = $decoded['result']['items'];
+                } elseif (isset($decoded['items']) && is_array($decoded['items'])) {
+                    $items = $decoded['items'];
+                }
+            }
+
+            if (!$items) {
+                continue;
+            }
+
+            $seen = array();
+            $errors = 0;
+            $pending = 0;
+
+            foreach ($items as $item) {
+                $offer_id = isset($item['offer_id']) ? trim((string)$item['offer_id']) : '';
+                if ($offer_id === '' || !in_array($offer_id, $offer_ids, true)) {
+                    continue;
+                }
+                $seen[$offer_id] = true;
+
+                $item_errors = isset($item['errors']) && is_array($item['errors']) ? $item['errors'] : array();
+                if ($item_errors) {
+                    $errors++;
+                    $this->log(
+                        'CREATE_TASK_ITEM_ERROR: account=' . $account_name
+                        . ', task_id=' . (int)$task_id
+                        . ', offer_id=' . $offer_id
+                        . ', errors=' . json_encode($item_errors, JSON_UNESCAPED_UNICODE)
+                    );
+                    continue;
+                }
+
+                $status = '';
+                if (isset($item['status'])) {
+                    $status = trim((string)$item['status']);
+                } elseif (isset($item['state'])) {
+                    $status = trim((string)$item['state']);
+                }
+
+                if ($status !== '' && preg_match('/error|fail|reject/i', $status)) {
+                    $errors++;
+                    $this->log(
+                        'CREATE_TASK_ITEM_FAILED: account=' . $account_name
+                        . ', task_id=' . (int)$task_id
+                        . ', offer_id=' . $offer_id
+                        . ', status=' . $status
+                    );
+                } elseif (isset($item['product_id']) && (int)$item['product_id'] > 0) {
+                    $this->log(
+                        'CREATE_TASK_ITEM_OK: account=' . $account_name
+                        . ', task_id=' . (int)$task_id
+                        . ', offer_id=' . $offer_id
+                        . ', product_id=' . (int)$item['product_id']
+                        . ', status=' . $status
+                    );
+                } else {
+                    $pending++;
+                }
+            }
+
+            if ($errors > 0) {
+                return $errors;
+            }
+
+            if (count($seen) >= count($offer_ids) && $pending === 0) {
+                return 0;
+            }
+        }
+
+        $this->log(
+            'CREATE_TASK_PENDING: account=' . $account_name
+            . ', task_id=' . (int)$task_id
+            . ', offers=' . implode(',', $offer_ids)
+            . ', last_body=' . $last_body
+        );
+        return 0;
     }
 
     private function detectCostColumn($columns)
