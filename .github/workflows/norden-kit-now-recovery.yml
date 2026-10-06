@@ -10,6 +10,10 @@ permissions:
   actions: write
   contents: read
 
+concurrency:
+  group: norden-kit-recovery
+  cancel-in-progress: false
+
 jobs:
   kit-sync:
     runs-on: ubuntu-latest
@@ -29,7 +33,7 @@ jobs:
       - name: Checkout corrected KIT sync
         uses: actions/checkout@v4
         with:
-          ref: bc8c0e70ce4fe8e091f13d1346c33617a7e57d18
+          ref: 62d939af7ac262fc2d49ff0f8a8ca018a2abbba6
 
       - uses: actions/setup-python@v5
         with:
