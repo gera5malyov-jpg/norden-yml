@@ -17,6 +17,7 @@ jobs:
     timeout-minutes: 10
     env:
       NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      MEGASUPPLIERS_CALLBACK_SECRET: ${{ secrets.MEGASUPPLIERS_CALLBACK_SECRET }}
     steps:
       - uses: actions/checkout@v4
         with:
