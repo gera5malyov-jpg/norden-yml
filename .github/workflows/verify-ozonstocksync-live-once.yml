@@ -54,7 +54,35 @@ jobs:
           echo 'UPDATE_STOCKS='.(string)$p->getSettings('update_stocks')."\n";
           echo 'UPDATE_PRICES='.(string)$p->getSettings('update_prices')."\n";
           echo 'DRY_RUN='.(string)$p->getSettings('dry_run')."\n";
-          echo 'VERIFY_STATUS='.(count($m[0])>0?'OK':'NO_TYPES')."\n";
+
+          $model=new waModel();
+          $stocks=$model->query("SELECT id,name FROM shop_stock ORDER BY id")->fetchAll();
+          echo 'WEBASYST_STOCKS='.count($stocks)."\n";
+          foreach($stocks as $s){echo 'STOCK_'.(int)$s['id'].'='.(string)$s['name']."\n";}
+
+          $rm=new ReflectionMethod($p,'serializeMappingRows');
+          $rm->setAccessible(true);
+          $sample=$rm->invoke($p,array(
+              array('set_id'=>'sample_set','ozon_warehouse_id'=>123456,'webasyst_stock_ids'=>array('1','2'),'reserve'=>1),
+              array('set_id'=>'sample_general','ozon_warehouse_id'=>654321,'webasyst_stock_ids'=>array('general'),'reserve'=>0)
+          ));
+          echo 'SERIALIZE_SAMPLE='.str_replace("\n",' | ',$sample)."\n";
+          $serializer_ok=(strpos($sample,'sample_set;123456;1,2;1')!==false && strpos($sample,'sample_general;654321;;0')!==false);
+
+          require_once $root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php';
+          $sync=new shopOzonstocksyncPluginSync(array());
+          $rpm=new ReflectionMethod($sync,'parseMappings');
+          $rpm->setAccessible(true);
+          $parsed=$rpm->invoke($sync,"sample_set;123456;1,2;1");
+          $parser_ok=(isset($parsed[0]['webasyst_stock_id']) && $parsed[0]['webasyst_stock_id']==='1,2');
+
+          $ui_ok=(strpos($html,'ozs-stock-picker')!==false && strpos($html,'_mapping_rows_present')!==false);
+          $ok=(count($m[0])>0 && $serializer_ok && $parser_ok && $ui_ok);
+          echo 'SERIALIZER='.($serializer_ok?'OK':'FAIL')."\n";
+          echo 'PARSER='.($parser_ok?'OK':'FAIL')."\n";
+          echo 'MULTI_STOCK_UI='.($ui_ok?'OK':'FAIL')."\n";
+          echo 'VERIFY_STATUS='.($ok?'OK':'FAIL')."\n";
+          exit($ok?0:2);
           ?>'''
                   remote="cat >/tmp/ozs_verify.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/ozs_verify.php\nsu -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ozs_verify.php'\nrm -f /tmp/ozs_verify.php"
                   p=subprocess.run(['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@'+VM_IP,remote],text=True,capture_output=True,timeout=120)
