@@ -61,7 +61,7 @@ jobs:
 
           $sync_source=file_get_contents($root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php');
           $create_pos=strpos($sync_source,'createMissingProductsForAccount($account');
-          $mapping_pos=strpos($sync_source,"foreach ($account['mappings'] as $mapping)");
+          $mapping_pos=strpos($sync_source,'foreach ($account[\'mappings\'] as $mapping)');
           $create_before_sync=($create_pos!==false && $mapping_pos!==false && $create_pos<$mapping_pos);
           $saved_remote_guard=(strpos($sync_source,'PRODUCT_INFO_LIST_URL')!==false && strpos($sync_source,'saved_ozon_product_id')!==false);
           $second_guard=(strpos($sync_source,'CREATE_ABORT_SECOND_EXISTENCE_CHECK')!==false);
