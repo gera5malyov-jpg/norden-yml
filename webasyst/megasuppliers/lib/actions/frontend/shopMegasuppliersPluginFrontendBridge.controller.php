@@ -75,7 +75,17 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
                 $this->fail('writes_disabled', 403);
                 return;
             }
-            $this->kitManifest($supplier_id, $payload);
+            try {
+                waLog::log('kit_manifest start supplier='.(int)$supplier_id.' offset='.(int)ifset($payload['offset']).' limit='.(int)ifset($payload['limit']), 'megasuppliers_bridge.log');
+                $this->kitManifest($supplier_id, $payload);
+                waLog::log('kit_manifest prepared supplier='.(int)$supplier_id.' items='.count((array)ifset($this->response['items'], array())).' categories='.count((array)ifset($this->response['categories'], array())), 'megasuppliers_bridge.log');
+            } catch (Throwable $e) {
+                waLog::log(
+                    'kit_manifest exception '.get_class($e).': '.$e->getMessage()."\n".$e->getTraceAsString(),
+                    'megasuppliers_bridge.log'
+                );
+                $this->fail('kit_manifest_failed', 500);
+            }
             return;
         }
         if ($action === 'sync_links') {
