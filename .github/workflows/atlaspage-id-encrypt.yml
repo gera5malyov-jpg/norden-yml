@@ -1,0 +1,42 @@
+name: Encrypt AtlasPage ID
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/atlaspage-id-encrypt.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  encrypt:
+    runs-on: ubuntu-latest
+    env:
+      ATLASPAGE_ID: ${{ secrets.ATLASPAGE_ID }}
+    steps:
+      - name: Encrypt ID for local Mac
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$ATLASPAGE_ID"
+          cat > /tmp/pub.pem <<'PUB'
+          -----BEGIN PUBLIC KEY-----
+          MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEApirk9p46KkUZXakytL7Q
+          u59/wTFzn0gthIPHj39JUrU0JTN2JL6RxxmXX6/BjPV4PwP8Oh3UFms4iWGFc4Kp
+          8OJBlARyAXvE1huh8IRlXRlsrrwTe0gijYjEjS5SjrMrEzSWxDuKIFszP2Fz2ubj
+          SEoMQhITgH6uz4qiCY+5cDppjXXb9xi5JboPmcszGrhfzAfYq+qs6+bjz1BLNYXV
+          M40hlXPCE93atsUyW7WiuKiURax3VTTLtGkmxwEV8omjKFZbtYHKbYRzjPK5K0yh
+          CIoMJSw6J5w5h7Bhpnw80M/H3GkncBOa/zBlk3h54KjkrqW4+bjWuP/yDmrRjwZH
+          s7YZ14CgiS7KrNQgA3PoCEVL3/7TPMxHWrBNt+Qh6l9EHlprz/2D5xw/JgimLXB+
+          8wooF2U3GQD/Y/QnsDpli0Fus2qY/zxtUQeFJkhgZ+JvvH1jekBvVjemLfTwTzJt
+          OtDV8UrFBU6HxipdaoN5uVJ3xlObWxkGI+tQI8QhfXmnAgMBAAE=
+          -----END PUBLIC KEY-----
+          PUB
+          printf '%s' "$ATLASPAGE_ID" >/tmp/id.txt
+          openssl pkeyutl -encrypt -pubin -inkey /tmp/pub.pem -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 -in /tmp/id.txt -out /tmp/id.enc
+          echo "ID_CIPHERTEXT_BEGIN"
+          base64 -w0 /tmp/id.enc
+          echo
+          echo "ID_CIPHERTEXT_END"
+          rm -f /tmp/id.txt /tmp/id.enc
