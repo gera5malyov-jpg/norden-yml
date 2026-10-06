@@ -19,7 +19,7 @@ jobs:
           set -euo pipefail
           mkdir -p .deploy-probe
           {
-            echo "TEST=ozonstocksync-1.6.0"
+            echo "TEST=ozonstocksync-1.6.1"
             echo "--- PHP LINT ---"
             find webasyst/ozonstocksync -name '*.php' -print0 | while IFS= read -r -d '' f; do php -l "$f"; done
             echo "--- CONTRACT ---"
@@ -31,7 +31,7 @@ jobs:
           settings=(root/'lib/config/settings.php').read_text(encoding='utf-8')
           info=(root/'lib/config/plugin.php').read_text(encoding='utf-8')
           checks={
-              'version_1_6_0': "'version' => '1.6.0'" in info,
+              'version_1_6_1': "'version' => '1.6.1'" in info,
               'custom_getControls': 'function getControls' in plugin,
               'type_margin_ui': 'type_margin_percent' in plugin,
               'type_margin_setting': "'type_margin_percent'" in settings,
@@ -40,6 +40,10 @@ jobs:
               'force_price_touch': 'getForcePriceTouchDelta' in sync,
               'retry_429': '429' in sync and 'ResourceExhausted' in sync,
               'price_batch_max_guard': "'price_batch_size' => array(1, 100, 50)" in plugin,
+              'multi_stock_sum_sql': 'SUM(COALESCE(count, 0)) AS stock_count' in sync and 'stock_id IN (i:stock_ids)' in sync,
+              'multi_stock_parser': 'normalizeStockIdsString' in sync and 'parseStockIds' in sync,
+              'multi_stock_ui': 'renderMappingsEditor' in plugin and 'ozs-stock-picker' in plugin,
+              'mapping_serializer': 'serializeMappingRows' in plugin and '_mapping_rows_present' in plugin,
           }
           for k,v in checks.items():
               print(f'{k}={"OK" if v else "FAIL"}')
