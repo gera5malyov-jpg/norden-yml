@@ -124,6 +124,19 @@ if(is_dir($ozon_app)){
     }
 }
 
+$out['ozon_app_source_snippets']=array();
+foreach(array(
+    $root.'/wa-apps/ozon/lib/cli/ozonExportProducts.cli.php',
+    $root.'/wa-apps/ozon/lib/actions/api/ozonExport.actions.php',
+    $root.'/wa-apps/ozon/lib/models/ozonExportedProducts.model.php'
+) as $sf){
+    if(!is_file($sf)) continue;
+    $txt=file_get_contents($sf);
+    if($txt!==false){
+        $out['ozon_app_source_snippets'][str_replace($root,'',$sf)]=substr($txt,0,60000);
+    }
+}
+
 $out['market_ozon_files']=array();
 foreach(array($root.'/wa-apps/shop/plugins/market',$root.'/wa-apps/shop/plugins/ozonstat') as $pr){
     if(!is_dir($pr)) continue;
