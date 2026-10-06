@@ -19,7 +19,7 @@ jobs:
           set -euo pipefail
           mkdir -p .deploy-probe
           {
-            echo "TEST=ozonstocksync-1.6.1"
+            echo "TEST=ozonstocksync-1.7.0"
             echo "--- PHP LINT ---"
             find webasyst/ozonstocksync -name '*.php' -print0 | while IFS= read -r -d '' f; do php -l "$f"; done
             echo "--- CONTRACT ---"
@@ -31,7 +31,7 @@ jobs:
           settings=(root/'lib/config/settings.php').read_text(encoding='utf-8')
           info=(root/'lib/config/plugin.php').read_text(encoding='utf-8')
           checks={
-              'version_1_6_1': "'version' => '1.6.1'" in info,
+              'version_1_7_0': "'version' => '1.7.0'" in info,
               'custom_getControls': 'function getControls' in plugin,
               'type_margin_ui': 'type_margin_percent' in plugin,
               'type_margin_setting': "'type_margin_percent'" in settings,
@@ -44,6 +44,15 @@ jobs:
               'multi_stock_parser': 'normalizeStockIdsString' in sync and 'parseStockIds' in sync,
               'multi_stock_ui': 'renderMappingsEditor' in plugin and 'ozs-stock-picker' in plugin,
               'mapping_serializer': 'serializeMappingRows' in plugin and '_mapping_rows_present' in plugin,
+              'single_create_allowlist': "const CREATE_SET_ID = 'ozon_upload'" in sync and "const CREATE_SET_NAME = 'Грузить в Ozon'" in sync,
+              'allowlist_is_only_permission': 'collectCreateCandidates' in sync and "sp.set_id = s:set_id" in sync and "'set_id' => self::CREATE_SET_ID" in sync,
+              'no_extra_create_permission_setting': 'create_permission' not in settings and 'create_enabled' not in settings and 'upload_to_ozon' not in settings,
+              'existing_remote_offer_guard': 'CREATE_SKIP_REMOTE_EXISTS' in sync and 'PRODUCT_LIST_URL' in sync,
+              'saved_id_remote_guard': 'saved_ozon_product_id' in sync and 'PRODUCT_INFO_LIST_URL' in sync and "'product_id:'" in sync,
+              'ozon_sku_remote_guard': "'sku:'" in sync and "array('product_id' => $product_ids, 'sku' => $sku_ids)" in sync,
+              'double_preimport_guard': 'CREATE_ABORT_SECOND_EXISTENCE_CHECK' in sync and sync.count('getRemoteExistingOfferIds(') >= 3,
+              'native_ozon_generator': "new ozonProduct($product_id)" in sync and 'getOzonOffers($sku_id, false, $generator_errors)' in sync,
+              'create_before_stock_price': sync.find('createMissingProductsForAccount($account') < sync.find("foreach ($account['mappings'] as $mapping)"),
           }
           for k,v in checks.items():
               print(f'{k}={"OK" if v else "FAIL"}')
