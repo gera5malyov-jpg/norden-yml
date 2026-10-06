@@ -300,7 +300,7 @@ class shopOzonstocksyncPluginSync
                 $this->log('PRICE_ERROR_NO_COMMISSION: offer_id=' . $offer_id . ', product_id=' . $product_id . ', tip_ozon=' . $tip . ', normalized_tip=' . $this->normalizeTip($tip));
                 continue;
             }
-            $price_data = $this->calculatePrices($cost, $commissions);
+            $price_data = $this->calculatePrices($cost, $commissions, $tip);
             if (!$price_data) {
                 $skipped_bad_price++;
                 $this->log('PRICE_SKIP_BAD_FORMULA: offer_id=' . $offer_id . ', tip_ozon=' . $tip . ', cost=' . $cost);
@@ -439,11 +439,11 @@ class shopOzonstocksyncPluginSync
         return preg_replace('/\s+/u', ' ', $value);
     }
 
-    private function calculatePrices($cost, $commissions)
+    private function calculatePrices($cost, $commissions, $tip = '')
     {
         $acquiring = max(0, (float)$this->get('acquiring_percent', 2)) / 100;
-        $target_markup = max(0, (float)$this->get('target_margin_percent', 21)) / 100;
-        $min_markup = max(0, (float)$this->get('min_margin_percent', 15)) / 100;
+        $target_markup = $this->getTargetMarkupPercentForTip($tip) / 100;
+        $min_markup = max(0, (float)$this->get('min_margin_percent', 18)) / 100;
         $old_multiplier = max(1.01, (float)$this->get('old_price_multiplier', 1.5));
         $round_step = max(1, (int)$this->get('round_step', 5));
         $price = $this->calculatePriceForMarkup($cost, $commissions, $acquiring, $target_markup, $round_step);
@@ -453,6 +453,36 @@ class shopOzonstocksyncPluginSync
         $old_price = $this->ceilToStep($price * $old_multiplier, $round_step);
         if ($old_price <= $price) $old_price = $price + $round_step;
         return array('price' => (int)$price, 'old_price' => (int)$old_price, 'min_price' => (int)$min_price);
+    }
+
+    private function getTargetMarkupPercentForTip($tip)
+    {
+        $default = max(0, (float)$this->get('target_margin_percent', 20));
+        $margins = $this->get('type_margin_percent', array());
+
+        if (is_string($margins) && $margins !== '') {
+            $decoded = json_decode($margins, true);
+            if (is_array($decoded)) {
+                $margins = $decoded;
+            }
+        }
+        if (!is_array($margins) || trim((string)$tip) === '') {
+            return $default;
+        }
+
+        $key = sha1($this->normalizeTip($tip));
+        if (!isset($margins[$key]) || $margins[$key] === '' || !is_numeric($margins[$key])) {
+            return $default;
+        }
+
+        $value = (float)$margins[$key];
+        if ($value < 0) {
+            $value = 0;
+        }
+        if ($value > 300) {
+            $value = 300;
+        }
+        return $value;
     }
 
     private function calculatePriceForMarkup($cost, $commissions, $acquiring, $markup, $round_step)
