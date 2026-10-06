@@ -1,4 +1,43 @@
 TEST=ozonstocksync-1.7.0
 --- PHP LINT ---
-PHP Parse error:  syntax error, unexpected token "\", expecting ")" in webasyst/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php on line 707
-Errors parsing webasyst/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
+No syntax errors detected in webasyst/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
+No syntax errors detected in webasyst/ozonstocksync/lib/shopOzonstocksync.plugin.php
+No syntax errors detected in webasyst/ozonstocksync/lib/config/settings.php
+No syntax errors detected in webasyst/ozonstocksync/lib/config/plugin.php
+No syntax errors detected in webasyst/ozonstocksync/lib/config/rfbs_commissions.php
+No syntax errors detected in webasyst/ozonstocksync/lib/cli/shopOzonstocksyncPluginSync.cli.php
+--- CONTRACT ---
+version_1_7_0=OK
+custom_getControls=OK
+type_margin_ui=OK
+type_margin_setting=OK
+type_margin_price_logic=OK
+hidden_stock_zero=OK
+force_price_touch=OK
+retry_429=OK
+price_batch_max_guard=OK
+multi_stock_sum_sql=OK
+multi_stock_parser=OK
+multi_stock_ui=OK
+mapping_serializer=OK
+single_create_allowlist=OK
+allowlist_is_only_permission=OK
+no_extra_create_permission_setting=OK
+existing_remote_offer_guard=OK
+saved_id_remote_guard=OK
+ozon_sku_remote_guard=OK
+double_preimport_guard=OK
+native_ozon_generator=OK
+create_before_stock_price=OK
+single_primary_creation_account=OK
+creation_not_routed_by_old_sets=OK
+create_only_active_in_stock=OK
+create_logs_in_stock_rows=OK
+package_fallback_in_memory=OK
+package_fallback_defaults=OK
+single_item_create_batch=OK
+create_error_names_offer=OK
+seller_offer_not_internal_sku=OK
+create_extimg_images=OK
+extimg_only_create_payload=OK
+TEST_STATUS=OK
