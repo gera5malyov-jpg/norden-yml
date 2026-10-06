@@ -17,6 +17,8 @@ class shopOzonstocksyncPluginSync
     const STOCK_BATCH_SIZE = 100;
     const PRICE_BATCH_SIZE = 100;
     const CREATE_BATCH_SIZE = 1;
+    const LOW_COST_THRESHOLD_RUB = 2500;
+    const LOW_COST_TARGET_MARKUP_PERCENT = 50;
 
     private $settings;
     private $log_file = 'ozonstocksync.log';
@@ -1383,7 +1385,16 @@ class shopOzonstocksyncPluginSync
     private function calculatePrices($cost, $commissions, $tip = '')
     {
         $acquiring = max(0, (float)$this->get('acquiring_percent', 2)) / 100;
-        $target_markup = $this->getTargetMarkupPercentForTip($tip) / 100;
+
+        $target_markup_percent = $this->getTargetMarkupPercentForTip($tip);
+        if ((float)$cost < self::LOW_COST_THRESHOLD_RUB) {
+            $target_markup_percent = max(
+                $target_markup_percent,
+                self::LOW_COST_TARGET_MARKUP_PERCENT
+            );
+        }
+
+        $target_markup = $target_markup_percent / 100;
         $min_markup = max(0, (float)$this->get('min_margin_percent', 18)) / 100;
         $old_multiplier = max(1.01, (float)$this->get('old_price_multiplier', 1.5));
         $round_step = max(1, (int)$this->get('round_step', 5));
