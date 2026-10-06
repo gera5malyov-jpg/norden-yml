@@ -781,6 +781,194 @@ def _summary(urls):
     return "[extimg]\n" + "\n".join(urls) + "\n[/extimg]"
 
 
+
+def _plan_category_paths_readonly(categories, paths):
+    index = _category_index(categories)
+    required = []
+    missing = []
+    seen_required = set()
+    seen_missing = set()
+
+    for path in paths or []:
+        clean = [_s(title) for title in path if _s(title)]
+        if not clean:
+            continue
+        label = " > ".join(clean)
+        if label not in seen_required:
+            required.append(label)
+            seen_required.add(label)
+
+        parent = ""
+        unresolved = False
+        for depth, title in enumerate(clean):
+            key = (parent, _norm(title))
+            matches = index.get(key, [])
+            if len(matches) > 1:
+                raise KitSyncError("KIT category is ambiguous: %s" % label)
+            if len(matches) == 1:
+                parent = _s(matches[0].get("id"))
+                continue
+            unresolved = True
+            missing_label = " > ".join(clean[: depth + 1])
+            if missing_label not in seen_missing:
+                missing.append(missing_label)
+                seen_missing.add(missing_label)
+            # Once a parent is missing, every deeper node is necessarily
+            # missing too; record the remaining full path once.
+            if depth + 1 < len(clean) and label not in seen_missing:
+                missing.append(label)
+                seen_missing.add(label)
+            break
+        if unresolved:
+            continue
+
+    return required, missing
+
+
+def plan_manifest(manifest, config, *, kit=None):
+    """Read-only KIT preflight for the optimized bulk-sync path."""
+    rules = config.get("rules") or {}
+    if not rules.get("export_to_kit", False):
+        return {
+            "status": "disabled",
+            "readonly": True,
+            "eligible": 0,
+            "skipped_no_category": 0,
+            "items": [],
+        }
+
+    kit = kit or KitClient()
+    brand = _s((config.get("identity") or {}).get("brand"))
+    products = [row for row in (manifest.get("items") or []) if isinstance(row, dict)]
+    wa_categories = [row for row in (manifest.get("categories") or []) if isinstance(row, dict)]
+    eligible = [row for row in products if row.get("category_ids")]
+
+    report = {
+        "status": "ok",
+        "readonly": True,
+        "eligible": len(eligible),
+        "skipped_no_category": len(products) - len(eligible),
+        "required_category_paths": [],
+        "missing_category_paths": [],
+        "missing_characteristics": [],
+        "would_create": 0,
+        "would_update": 0,
+        "would_upload_images": 0,
+        "errors": [],
+        "items": [],
+    }
+    if not eligible:
+        return report
+
+    # Everything below is GET/read-only. Variant discovery uses the same
+    # bulk scanner as apply, so preflight no longer performs thousands of
+    # one-SKU searches.
+    _warehouse_ids(kit)
+    kit_categories = kit.categories()
+    kit_characteristics = kit.characteristics()
+    characteristic_index = _characteristic_index(kit_characteristics)
+    variants = kit.variants()
+
+    preflight, identity = _identity_preflight(
+        eligible,
+        variants,
+        characteristic_index,
+        brand,
+    )
+    report["preflight"] = preflight
+    if preflight.get("status") != "ok":
+        report["status"] = "blocked"
+        report["errors"].extend(list(preflight.get("conflict_sample") or []))
+
+    all_paths = []
+    product_paths = {}
+    for product in eligible:
+        key = _product_identity_key(product)
+        paths = _webasyst_category_paths(
+            wa_categories,
+            product.get("category_ids"),
+        )
+        product_paths[key] = paths
+        if not paths:
+            report["errors"].append({
+                "product_id": product.get("product_id"),
+                "supplier_sku": product.get("supplier_sku"),
+                "error": "Webasyst category path cannot be resolved",
+            })
+        else:
+            all_paths.extend(paths)
+
+    try:
+        required, missing = _plan_category_paths_readonly(
+            kit_categories,
+            all_paths,
+        )
+        report["required_category_paths"] = required
+        report["missing_category_paths"] = missing
+    except Exception as exc:
+        report["status"] = "blocked"
+        report["errors"].append({"error": str(exc)[:1200]})
+
+    wanted_characteristics = {SUPPLIER_ARTICLE_CHARACTERISTIC}
+    for product in eligible:
+        for title, values in _feature_values(product.get("features")):
+            if values and _norm(title) not in {
+                _norm(SUPPLIER_ARTICLE_CHARACTERISTIC),
+                _norm(LEGACY_CODE_SITE_CHARACTERISTIC),
+            }:
+                wanted_characteristics.add(title)
+
+    for title in sorted(wanted_characteristics):
+        cid = _single_characteristic_id(characteristic_index, title)
+        if not cid:
+            report["missing_characteristics"].append(title)
+
+    selected = identity.get("selected", {}) if identity else {}
+    for product in eligible:
+        key = _product_identity_key(product)
+        variant = selected.get(key) if identity else None
+        action = (
+            "blocked"
+            if preflight.get("status") != "ok"
+            else ("create" if variant is None else "update")
+        )
+        if action == "create":
+            report["would_create"] += 1
+        elif action == "update":
+            report["would_update"] += 1
+
+        source_images = list(dict.fromkeys(
+            _s(url) for url in (product.get("image_urls") or []) if _s(url)
+        ))[:20]
+        current_media = []
+        if isinstance(variant, dict):
+            current_media = [
+                row for row in (variant.get("media") or [])
+                if isinstance(row, dict)
+                and _s(row.get("type")).upper() == "IMAGE"
+            ]
+        image_uploads = len(source_images) if source_images and not current_media else 0
+        report["would_upload_images"] += image_uploads
+        report["items"].append({
+            "product_id": product.get("product_id"),
+            "supplier_sku": product.get("supplier_sku"),
+            "webasyst_sku": product.get("sku"),
+            "name": product.get("name"),
+            "action": action,
+            "kit_id": _s(variant.get("kit_id")) if isinstance(variant, dict) else "",
+            "categories": [
+                " > ".join(path)
+                for path in product_paths.get(key, [])
+            ],
+            "source_images": len(source_images),
+            "image_uploads": image_uploads,
+        })
+
+    if report["errors"] and report["status"] == "ok":
+        report["status"] = "blocked"
+    return report
+
+
 def _product_identity_key(product):
     return str(
         product.get("product_id")
