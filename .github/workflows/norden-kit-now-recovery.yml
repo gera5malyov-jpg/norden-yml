@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: norden-kit-recovery
+  group: supplier-webasyst-1
   cancel-in-progress: false
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
       - name: Checkout corrected KIT sync
         uses: actions/checkout@v4
         with:
-          ref: 40ac7562f7fbcd07aacc50564d73664012015cbb
+          ref: f86e619e1c3e9be093588e282de42fb43b2a4d54
 
       - uses: actions/setup-python@v5
         with:
