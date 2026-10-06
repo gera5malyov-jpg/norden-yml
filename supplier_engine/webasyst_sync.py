@@ -592,15 +592,23 @@ class ApplyError(RuntimeError):
         self.result = result
 
 
-def _is_missing_webasyst_sku_error(exc):
+def _is_missing_webasyst_object_error(exc):
     text = str(exc or "").casefold()
+    if "http 404" not in text:
+        return False
     return (
-        "http 404" in text
-        and (
-            "модификация товара не найдена" in text
-            or ("invalid_param" in text and "модификац" in text)
+        "модификация товара не найдена" in text
+        or "товар не найден" in text
+        or (
+            "invalid_param" in text
+            and ("модификац" in text or "товар" in text)
         )
     )
+
+
+def _is_missing_webasyst_sku_error(exc):
+    # Backward-compatible alias used by older call sites/tests.
+    return _is_missing_webasyst_object_error(exc)
 
 
 def apply_plan(wa: WebasystClient, plan, config):
@@ -857,7 +865,7 @@ def apply_plan(wa: WebasystClient, plan, config):
                         data=sku_data,
                     )
                 except Exception as exc:
-                    if _is_missing_webasyst_sku_error(exc):
+                    if _is_missing_webasyst_object_error(exc):
                         return {"missing_sku": True}
                     raise
 
@@ -870,12 +878,17 @@ def apply_plan(wa: WebasystClient, plan, config):
             product_data = _delta_product_data(product_data, current_product)
             product_changed = bool(product_data)
             if product_data:
-                client.call(
-                    "shop.product.update",
-                    http_method="POST",
-                    params={"id": str(row["product_id"])},
-                    data=product_data,
-                )
+                try:
+                    client.call(
+                        "shop.product.update",
+                        http_method="POST",
+                        params={"id": str(row["product_id"])},
+                        data=product_data,
+                    )
+                except Exception as exc:
+                    if _is_missing_webasyst_object_error(exc):
+                        return {"missing_sku": True}
+                    raise
             return {
                 "missing_sku": False,
                 "unchanged": not sku_changed and not product_changed,
@@ -944,7 +957,7 @@ def apply_plan(wa: WebasystClient, plan, config):
                         },
                     )
                 except Exception as exc:
-                    if not _is_missing_webasyst_sku_error(exc):
+                    if not _is_missing_webasyst_object_error(exc):
                         raise
                     result["stale_zero_links"] += 1
                     if len(result["stale_zero_sample"]) < 100:
