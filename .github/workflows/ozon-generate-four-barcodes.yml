@@ -1,0 +1,78 @@
+name: Ozon generate barcodes for four duplicate-test cards
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-generate-four-barcodes.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - run: python -m pip install requests
+      - name: Generate Ozon barcodes and verify
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os, json, time, requests
+          from pathlib import Path
+
+          offers=["AF-31651768","AF-31651770","AF-31651767","AF-31651769"]
+          product_ids=[6204076460,6204076436,6204076399,6204076375]
+
+          S=requests.Session()
+          S.headers.update({
+            "Client-Id":os.environ["OZON_CLIENT_ID"],
+            "Api-Key":os.environ["OZON_API_KEY"],
+            "Content-Type":"application/json",
+            "Accept":"application/json"
+          })
+          B="https://api-seller.ozon.ru"
+
+          def post(path,body):
+            r=S.post(B+path,json=body,timeout=120)
+            try:d=r.json()
+            except Exception:d={"raw":r.text}
+            return {"status":r.status_code,"data":d,"text":r.text[:3000]}
+
+          before=post("/v3/product/info/list",{"offer_id":offers})
+          gen=post("/v1/barcode/generate",{"product_ids":product_ids})
+          time.sleep(8)
+          after=post("/v3/product/info/list",{"offer_id":offers})
+
+          report={"offers":offers,"product_ids":product_ids,"before":before,"generate":gen,"after":after}
+          Path("ozon/four_barcode_generation_test_latest.json").write_text(
+            json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"
+          )
+
+          print("GENERATE",json.dumps(gen,ensure_ascii=False))
+          items=(after["data"].get("items") if isinstance(after["data"],dict) else after["data"]) or []
+          if isinstance(items,dict): items=items.get("items") or []
+          print("AFTER",json.dumps([
+            {"offer_id":x.get("offer_id"),"id":x.get("id"),"barcodes":x.get("barcodes"),"errors":x.get("errors"),"statuses":x.get("statuses")}
+            for x in items if isinstance(x,dict)
+          ],ensure_ascii=False))
+          PY
+      - name: Save report
+        if: always()
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add ozon/four_barcode_generation_test_latest.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Ozon four-card barcode generation test"
+            git pull --rebase origin main || true
+            git push origin HEAD:main || true
+          fi
