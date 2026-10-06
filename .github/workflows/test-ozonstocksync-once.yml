@@ -62,6 +62,8 @@ jobs:
               'single_item_create_batch': 'const CREATE_BATCH_SIZE = 1' in sync,
               'create_error_names_offer': "offers=' . implode(',', array_column($final, 'offer_id'))" in sync,
               'seller_offer_not_internal_sku': "Seller offer identifiers must not be sent as Ozon internal SKU ids." in sync and "saved offer_id are seller offer identifiers, not Ozon's" in sync,
+              'create_extimg_images': 'getCreateExternalImageUrls' in sync and 'CREATE_EXTIMG_IMAGES' in sync and "stripos($summary, '[extimg]')" in sync,
+              'extimg_only_create_payload': "$offer['images'] = array_values($merged_images);" in sync and 'array_merge($native_images, $external_images)' in sync,
           }
           for k,v in checks.items():
               print(f'{k}={"OK" if v else "FAIL"}')
