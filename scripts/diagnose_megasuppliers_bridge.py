@@ -62,6 +62,14 @@ def main():
             remote=r'''set -euo pipefail
 ROOT=/home/web/vm-23f9aff9.na4u.ru/www
 echo "NOW=$(date -Is)"
+echo "BRIDGE_LOG_TAIL_BEGIN"
+for f in "$ROOT/wa-log/megasuppliers_bridge.log" "$ROOT/wa-log/shop/megasuppliers_bridge.log" "$ROOT/wa-log/shop/plugins/megasuppliers_bridge.log"; do
+  if [ -f "$f" ]; then
+    echo "### $f"
+    tail -n 250 "$f"
+  fi
+done
+echo "BRIDGE_LOG_TAIL_END"
 echo "RECENT_LOG_FILES_BEGIN"
 find "$ROOT/wa-log" /var/log -type f -mmin -180 2>/dev/null | sort | head -200
 echo "RECENT_LOG_FILES_END"
