@@ -106,6 +106,24 @@ foreach($search_roots as $sr){
     }
 }
 
+$out['ozon_app_refs']=array();
+$ozon_app=$root.'/wa-apps/ozon';
+if(is_dir($ozon_app)){
+    $cmd="grep -RIl --include='*.php' -E 'ozonExportProductsCli|ozon_exported_product|class[[:space:]]+ozon.*Export.*Product' ".escapeshellarg($ozon_app)." 2>/dev/null | head -100";
+    $refs=array();
+    exec($cmd,$refs);
+    foreach($refs as $ref){$out['ozon_app_refs'][]=str_replace($root,'',$ref);}
+    $out['ozon_app_cli_files']=array();
+    $cli_dir=$ozon_app.'/lib/cli';
+    if(is_dir($cli_dir)){
+        foreach(scandir($cli_dir) as $cf){
+            if($cf==='.'||$cf==='..') continue;
+            $out['ozon_app_cli_files'][]=$cf;
+        }
+        sort($out['ozon_app_cli_files']);
+    }
+}
+
 $out['market_ozon_files']=array();
 foreach(array($root.'/wa-apps/shop/plugins/market',$root.'/wa-apps/shop/plugins/ozonstat') as $pr){
     if(!is_dir($pr)) continue;
