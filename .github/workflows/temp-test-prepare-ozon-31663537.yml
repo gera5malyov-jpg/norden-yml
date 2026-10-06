@@ -1,0 +1,80 @@
+name: Test prepare Ozon SKU 31663537 once
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    if: contains(github.event.head_commit.message, 'TEST_PREPARE_OZON_31663537')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - name: Test prepareCreateOffer without sending
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip(); VM_ID=44780; VM_IP='45.86.180.49'
+          ROOT='/home/web/vm-23f9aff9.na4u.ru/www'
+          def req(url,method='GET',data=None,headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode(); return json.loads(raw) if raw else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':API_KEY}).encode(),{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozs-prepare-test/1.0'})['token']
+          headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/json','User-Agent':'ozs-prepare-test/1.0'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'; subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub').read().strip()
+              created=req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/','POST',json.dumps({'key':pub,'name':'chatgpt-ozs-prepare-31663537'}).encode(),headers)
+              kid=created['id']; common=['-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null']
+              try:
+                  php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());wa('shop');
+          $p=wa('shop')->getPlugin('ozonstocksync',true);
+          $settings=array();
+          for($i=1;$i<=10;$i++){ $suffix=($i===1)?'':'_'.$i; foreach(array('account_name','client_id','api_key','mappings') as $k){$settings[$k.$suffix]=$p->getSettings($k.$suffix);} }
+          foreach(array('update_stocks','update_prices','tip_feature_code','acquiring_percent','target_margin_percent','min_margin_percent','old_price_multiplier','round_step','only_available','dry_run','purchase_price_column','stock_batch_size','stock_batch_pause_seconds','price_batch_size','price_pre_wait_seconds','price_batch_pause_seconds','price_mapping_pause_seconds','api_retry_count','api_retry_wait_seconds','ozon_warehouse_id','set_id','webasyst_stock_id','reserve') as $k){$settings[$k]=$p->getSettings($k);}
+          require_once $root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php';
+          $sync=new shopOzonstocksyncPluginSync($settings);
+          $rc=new ReflectionMethod($sync,'collectCreateCandidates');$rc->setAccessible(true);
+          $rp=new ReflectionMethod($sync,'prepareCreateOffer');$rp->setAccessible(true);
+          $candidates=$rc->invoke($sync);$target=null;
+          foreach($candidates as $c){if((string)$c['sku']==='31663537'){$target=$c;break;}}
+          if(!$target){echo "TARGET=NOT_FOUND\n";exit(2);}
+          $r=$rp->invoke($sync,$target);
+          echo 'PREPARE_OK='.(!empty($r['ok'])?'YES':'NO')."\n";
+          if(empty($r['ok'])){echo 'ERROR='.(isset($r['error'])?$r['error']:'unknown')."\n";exit(3);}
+          $o=$r['offer'];
+          echo 'OFFER_ID='.(string)$r['offer_id']."\n";
+          echo 'DEPTH='.(isset($o['depth'])?$o['depth']:'')."\n";
+          echo 'WIDTH='.(isset($o['width'])?$o['width']:'')."\n";
+          echo 'HEIGHT='.(isset($o['height'])?$o['height']:'')."\n";
+          echo 'DIMENSION_UNIT='.(isset($o['dimension_unit'])?$o['dimension_unit']:'')."\n";
+          echo 'WEIGHT='.(isset($o['weight'])?$o['weight']:'')."\n";
+          echo 'WEIGHT_UNIT='.(isset($o['weight_unit'])?$o['weight_unit']:'')."\n";
+          echo 'TYPE_ID='.(isset($o['type_id'])?$o['type_id']:'')."\n";
+          echo 'CATEGORY='.(isset($o['description_category_id'])?$o['description_category_id']:'')."\n";
+          echo 'ATTRIBUTES='.(isset($o['attributes'])&&is_array($o['attributes'])?count($o['attributes']):0)."\n";
+          echo 'IMAGES='.(isset($o['images'])&&is_array($o['images'])?count($o['images']):0)."\n";
+          ?>''';
+                  remote=f"""cat >/tmp/test_prepare_31663537.php <<'PHP'
+          {php}
+          PHP
+          chown web:web /tmp/test_prepare_31663537.php
+          su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/test_prepare_31663537.php'
+          rm -f /tmp/test_prepare_31663537.php
+          """
+                  p=subprocess.run(['ssh']+common+['root@'+VM_IP,remote],text=True,capture_output=True,timeout=120)
+                  print(p.stdout)
+                  if p.stderr.strip(): print('STDERR='+p.stderr.strip())
+                  if p.returncode: raise SystemExit(p.returncode)
+              finally:
+                  try:req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception as e: print('cleanup='+str(e))
+          PY
