@@ -21,6 +21,24 @@ class shopOzonstocksyncPlugin extends shopPlugin
 
     public function saveSettings($settings = array())
     {
+        $mapping_rows_present = !empty($settings['_mapping_rows_present']);
+        unset($settings['_mapping_rows_present']);
+
+        if ($mapping_rows_present) {
+            $mapping_rows = isset($settings['mapping_rows']) && is_array($settings['mapping_rows'])
+                ? $settings['mapping_rows']
+                : array();
+
+            for ($i = 1; $i <= 10; $i++) {
+                $suffix = ($i === 1) ? '' : '_' . $i;
+                $rows = isset($mapping_rows[$i]) && is_array($mapping_rows[$i])
+                    ? $mapping_rows[$i]
+                    : array();
+                $settings['mappings' . $suffix] = $this->serializeMappingRows($rows);
+            }
+            unset($settings['mapping_rows']);
+        }
+
         $type_margin_present = !empty($settings['_type_margin_present']);
         unset($settings['_type_margin_present']);
 
@@ -90,6 +108,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $global_margin = (float)$this->getSettings('target_margin_percent');
         $type_margins = $this->getTypeMargins();
         $type_rows = $this->loadAssignedOzonTypes($feature_code);
+        $webasyst_stocks = $this->loadWebasystStocks();
 
         $configured_accounts = 0;
         for ($i = 1; $i <= 10; $i++) {
@@ -116,8 +135,8 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html = '';
         $html .= '<div class="ozs-settings">';
         $html .= '<div class="ozs-hero">';
-        $html .= '<div><div class="ozs-title">Ozon Stock Sync</div><div class="ozs-subtitle">Остатки, цены и индивидуальная наценка по типам Ozon</div></div>';
-        $html .= '<span class="ozs-version">v1.6.0</span>';
+        $html .= '<div><div class="ozs-title">Ozon Stock Sync</div><div class="ozs-subtitle">Остатки, склады, цены и индивидуальная наценка по типам Ozon</div></div>';
+        $html .= '<span class="ozs-version">v1.6.1</span>';
         $html .= '</div>';
 
         $html .= '<div class="ozs-summary-grid">';
@@ -210,6 +229,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html .= '<details class="ozs-card">';
         $html .= '<summary><span><b>Аккаунты и склады Ozon</b><small>Client-Id, Api-Key и связки складов</small></span><span class="ozs-chevron">⌄</span></summary>';
         $html .= '<div class="ozs-card-body ozs-accounts">';
+        $html .= '<input type="hidden" name="' . $this->e($namespace) . '[_mapping_rows_present]" value="1">';
         for ($i = 1; $i <= 10; $i++) {
             $suffix = ($i === 1) ? '' : '_' . $i;
             $account_name = trim((string)$this->getSettings('account_name' . $suffix));
@@ -227,7 +247,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
             $html .= $this->inputField($namespace, 'client_id' . $suffix, 'Client-Id', 'text', 'Ozon Seller API');
             $html .= $this->inputField($namespace, 'api_key' . $suffix, 'Api-Key', 'password', 'Ozon Seller API');
             $html .= '</div>';
-            $html .= $this->textareaField($namespace, 'mappings' . $suffix, 'Связки складов', 'Одна строка: ID списка Webasyst; ID склада Ozon; ID склада Webasyst; резерв');
+            $html .= $this->renderMappingsEditor($namespace, $i, $mappings, $webasyst_stocks);
             $html .= '</div></details>';
         }
         $html .= '</div></details>';
@@ -257,6 +277,152 @@ class shopOzonstocksyncPlugin extends shopPlugin
     private function summaryCard($label, $value, $hint)
     {
         return '<div class="ozs-summary"><span>' . $this->e($label) . '</span><b>' . $value . '</b><small>' . $hint . '</small></div>';
+    }
+
+    private function serializeMappingRows($rows)
+    {
+        $lines = array();
+        foreach ((array)$rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $set_id = trim(isset($row['set_id']) ? (string)$row['set_id'] : '');
+            $ozon_warehouse_id = isset($row['ozon_warehouse_id']) ? (int)$row['ozon_warehouse_id'] : 0;
+            $reserve = isset($row['reserve']) ? max(0, (int)$row['reserve']) : 0;
+
+            if ($set_id === '' || $ozon_warehouse_id <= 0) {
+                continue;
+            }
+
+            $selected = isset($row['webasyst_stock_ids']) ? (array)$row['webasyst_stock_ids'] : array();
+            $stock_ids = array();
+            $use_general = false;
+            foreach ($selected as $value) {
+                $value = trim((string)$value);
+                if ($value === 'general' || $value === '') {
+                    $use_general = true;
+                    continue;
+                }
+                $id = (int)$value;
+                if ($id > 0) {
+                    $stock_ids[$id] = $id;
+                }
+            }
+
+            $stock_part = $use_general ? '' : implode(',', array_values($stock_ids));
+            $lines[] = $set_id . ';' . $ozon_warehouse_id . ';' . $stock_part . ';' . $reserve;
+        }
+        return implode("\n", $lines);
+    }
+
+    private function parseMappingRowsForUi($raw)
+    {
+        $rows = array();
+        foreach (preg_split('/\r\n|\r|\n/', trim((string)$raw)) as $line) {
+            $line = trim($line);
+            if ($line === '' || substr($line, 0, 1) === '#') {
+                continue;
+            }
+            $parts = array_map('trim', explode(';', $line));
+            $stock_ids = array();
+            if (!empty($parts[2])) {
+                foreach (preg_split('/[\\s,|]+/', $parts[2]) as $part) {
+                    $id = (int)$part;
+                    if ($id > 0) {
+                        $stock_ids[$id] = $id;
+                    }
+                }
+            }
+            $rows[] = array(
+                'set_id' => isset($parts[0]) ? $parts[0] : '',
+                'ozon_warehouse_id' => isset($parts[1]) ? $parts[1] : '',
+                'webasyst_stock_ids' => array_values($stock_ids),
+                'reserve' => isset($parts[3]) && $parts[3] !== '' ? max(0, (int)$parts[3]) : 0,
+            );
+        }
+        return $rows;
+    }
+
+    private function loadWebasystStocks()
+    {
+        try {
+            $model = new waModel();
+            $columns = $this->getTableColumns('shop_stock');
+            $order = in_array('sort', $columns, true) ? 'sort, id' : 'id';
+            $rows = $model->query("SELECT id, name FROM shop_stock ORDER BY " . $order)->fetchAll();
+            $result = array();
+            foreach ($rows as $row) {
+                $id = (int)$row['id'];
+                if ($id > 0) {
+                    $result[$id] = trim((string)$row['name']) !== '' ? (string)$row['name'] : ('Склад #' . $id);
+                }
+            }
+            return $result;
+        } catch (Exception $e) {
+            waLog::log(date('Y-m-d H:i:s') . ' STOCK_UI_LOAD_ERROR: ' . $e->getMessage(), 'ozonstocksync.log');
+            return array();
+        }
+    }
+
+    private function renderMappingsEditor($namespace, $account_index, $raw, $stocks)
+    {
+        $rows = $this->parseMappingRowsForUi($raw);
+        if (!$rows) {
+            $rows[] = array(
+                'set_id' => '',
+                'ozon_warehouse_id' => '',
+                'webasyst_stock_ids' => array(),
+                'reserve' => 0,
+            );
+        }
+
+        $html = '<div class="ozs-mappings" data-account="' . (int)$account_index . '" data-next-index="' . count($rows) . '">';
+        $html .= '<div class="ozs-mappings-head"><div><b>Связки Ozon → Webasyst</b><small>Для каждой связки выберите один или несколько складов Webasyst. Их остатки суммируются.</small></div>'
+            . '<button type="button" class="button light-gray ozs-add-mapping">+ Добавить связку</button></div>';
+        $html .= '<div class="ozs-mapping-list">';
+
+        foreach ($rows as $index => $row) {
+            $html .= $this->renderMappingRow($namespace, $account_index, $index, $row, $stocks);
+        }
+
+        $html .= '</div>';
+        $html .= '<div class="ozs-hint">Если выбран «Общий остаток SKU», используется общий остаток Webasyst. Если отмечено несколько конкретных складов — Ozon получает их сумму минус резерв.</div>';
+        $html .= '</div>';
+        return $html;
+    }
+
+    private function renderMappingRow($namespace, $account_index, $row_index, $row, $stocks)
+    {
+        $base = $this->e($namespace) . '[mapping_rows][' . (int)$account_index . '][' . (int)$row_index . ']';
+        $selected = array();
+        foreach ((array)$row['webasyst_stock_ids'] as $id) {
+            $id = (int)$id;
+            if ($id > 0) {
+                $selected[$id] = true;
+            }
+        }
+        $use_general = !$selected;
+
+        $html = '<div class="ozs-mapping-row" data-row-index="' . (int)$row_index . '">';
+        $html .= '<div class="ozs-mapping-main">';
+        $html .= '<label class="ozs-field"><span>Список Webasyst</span><input type="text" name="' . $base . '[set_id]" value="' . $this->e($row['set_id']) . '" placeholder="например: ozon"><small>ID списка товаров</small></label>';
+        $html .= '<label class="ozs-field"><span>Склад Ozon</span><input type="number" min="1" step="1" name="' . $base . '[ozon_warehouse_id]" value="' . $this->e($row['ozon_warehouse_id']) . '" placeholder="ID склада Ozon"><small>Warehouse ID из Ozon</small></label>';
+        $html .= '<label class="ozs-field"><span>Резерв, шт.</span><input type="number" min="0" step="1" name="' . $base . '[reserve]" value="' . (int)$row['reserve'] . '"><small>Вычитается после суммирования</small></label>';
+        $html .= '<button type="button" class="button light-gray ozs-remove-mapping" title="Удалить связку">Удалить</button>';
+        $html .= '</div>';
+
+        $html .= '<div class="ozs-stock-picker"><span class="ozs-stock-title">С каких складов Webasyst брать остаток</span>';
+        $html .= '<label class="ozs-stock-chip ozs-general-stock"><input type="checkbox" class="ozs-stock-check ozs-stock-general" name="' . $base . '[webasyst_stock_ids][]" value="general"' . ($use_general ? ' checked' : '') . '><span>Общий остаток SKU</span></label>';
+
+        if ($stocks) {
+            foreach ($stocks as $stock_id => $stock_name) {
+                $html .= '<label class="ozs-stock-chip"><input type="checkbox" class="ozs-stock-check ozs-stock-specific" name="' . $base . '[webasyst_stock_ids][]" value="' . (int)$stock_id . '"' . (isset($selected[(int)$stock_id]) ? ' checked' : '') . '><span>' . $this->e($stock_name) . ' <small>#' . (int)$stock_id . '</small></span></label>';
+            }
+        } else {
+            $html .= '<span class="ozs-bad">Список складов Webasyst не удалось получить.</span>';
+        }
+        $html .= '</div></div>';
+        return $html;
     }
 
     private function checkboxField($namespace, $key, $label, $hint)
@@ -628,13 +794,74 @@ class shopOzonstocksyncPlugin extends shopPlugin
         .ozs-account-state{font-size:11px;color:var(--text-color-hint,#888);border-radius:999px;padding:3px 8px;background:var(--background-color-input,#f3f3f3)}
         .ozs-account-state.is-ok{color:var(--green,#178b4e);background:rgba(25,160,90,.09)}
         .ozs-account-body{border-top:1px solid var(--border-color-soft,#eee);padding:12px}
+        .ozs-mappings{margin-top:14px;border-top:1px solid var(--border-color-soft,#eee);padding-top:14px}
+        .ozs-mappings-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+        .ozs-mappings-head>div{display:flex;flex-direction:column;gap:3px}
+        .ozs-mappings-head small{font-size:12px;color:var(--text-color-hint,#777);font-weight:400}
+        .ozs-mapping-list{display:flex;flex-direction:column;gap:10px}
+        .ozs-mapping-row{border:1px solid var(--border-color-soft,#e5e5e5);border-radius:10px;padding:12px;background:var(--background-color,#fafafa)}
+        .ozs-mapping-main{display:grid;grid-template-columns:minmax(180px,1.2fr) minmax(160px,1fr) minmax(110px,.55fr) auto;gap:10px;align-items:end}
+        .ozs-remove-mapping{margin-bottom:18px}
+        .ozs-stock-picker{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px;padding-top:10px;border-top:1px dashed var(--border-color-soft,#ddd)}
+        .ozs-stock-title{width:100%;font-size:12px;font-weight:600;margin-bottom:1px}
+        .ozs-stock-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border-color-soft,#ddd);border-radius:999px;padding:6px 9px;background:var(--background-color-blank,#fff);cursor:pointer;font-size:12px}
+        .ozs-stock-chip input{margin:0}
+        .ozs-stock-chip small{color:var(--text-color-hint,#888)}
+        .ozs-general-stock{font-weight:600}
         @media(max-width:900px){.ozs-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ozs-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-        @media(max-width:640px){.ozs-summary-grid,.ozs-form-grid,.ozs-switch-grid{grid-template-columns:1fr}.ozs-type-toolbar{align-items:stretch;flex-direction:column}.ozs-search{max-width:none!important}.ozs-legend{text-align:left}.ozs-title{font-size:21px}}
+        @media(max-width:900px){.ozs-mapping-main{grid-template-columns:repeat(2,minmax(0,1fr))}.ozs-remove-mapping{margin-bottom:0}} 
+        @media(max-width:640px){.ozs-summary-grid,.ozs-form-grid,.ozs-switch-grid{grid-template-columns:1fr}.ozs-type-toolbar,.ozs-mappings-head{align-items:stretch;flex-direction:column}.ozs-search{max-width:none!important}.ozs-legend{text-align:left}.ozs-title{font-size:21px}.ozs-mapping-main{grid-template-columns:1fr}}
         </style>';
     }
 
     private function settingsJs()
     {
-        return '<script>(function(){var q=document.getElementById("ozs-type-search");if(!q){return;}q.addEventListener("input",function(){var needle=(q.value||"").toLowerCase().trim();var rows=document.querySelectorAll(".ozs-type-row");for(var i=0;i<rows.length;i++){var hay=(rows[i].getAttribute("data-search")||"").toLowerCase();rows[i].style.display=(!needle||hay.indexOf(needle)!==-1)?"":"none";}});})();</script>';
+        return '<script>(function(){
+            var q=document.getElementById("ozs-type-search");
+            if(q){q.addEventListener("input",function(){var needle=(q.value||"").toLowerCase().trim();var rows=document.querySelectorAll(".ozs-type-row");for(var i=0;i<rows.length;i++){var hay=(rows[i].getAttribute("data-search")||"").toLowerCase();rows[i].style.display=(!needle||hay.indexOf(needle)!==-1)?"":"none";}});}
+
+            function bindStockPicker(row){
+                var general=row.querySelector(".ozs-stock-general");
+                var specifics=row.querySelectorAll(".ozs-stock-specific");
+                if(general){general.addEventListener("change",function(){if(general.checked){for(var i=0;i<specifics.length;i++){specifics[i].checked=false;}}});}
+                for(var j=0;j<specifics.length;j++){specifics[j].addEventListener("change",function(){if(this.checked&&general){general.checked=false;}var any=false;for(var k=0;k<specifics.length;k++){if(specifics[k].checked){any=true;break;}}if(!any&&general){general.checked=true;}});}
+            }
+
+            function bindRow(row){
+                bindStockPicker(row);
+                var remove=row.querySelector(".ozs-remove-mapping");
+                if(remove){remove.addEventListener("click",function(){var list=row.parentNode;if(list.querySelectorAll(".ozs-mapping-row").length>1){row.remove();}else{var inputs=row.querySelectorAll("input");for(var i=0;i<inputs.length;i++){if(inputs[i].type==="checkbox"){inputs[i].checked=inputs[i].classList.contains("ozs-stock-general");}else if(inputs[i].name.indexOf("[reserve]")!==-1){inputs[i].value="0";}else{inputs[i].value="";}}}});}
+            }
+
+            var existing=document.querySelectorAll(".ozs-mapping-row");
+            for(var e=0;e<existing.length;e++){bindRow(existing[e]);}
+
+            var containers=document.querySelectorAll(".ozs-mappings");
+            for(var c=0;c<containers.length;c++){(function(box){
+                var add=box.querySelector(".ozs-add-mapping");
+                if(!add){return;}
+                add.addEventListener("click",function(){
+                    var list=box.querySelector(".ozs-mapping-list");
+                    var source=list.querySelector(".ozs-mapping-row");
+                    if(!source){return;}
+                    var row=source.cloneNode(true);
+                    var oldIndex=row.getAttribute("data-row-index");
+                    var newIndex=parseInt(box.getAttribute("data-next-index")||"0",10);
+                    box.setAttribute("data-next-index",String(newIndex+1));
+                    row.setAttribute("data-row-index",String(newIndex));
+                    var fields=row.querySelectorAll("input");
+                    for(var i=0;i<fields.length;i++){
+                        var name=fields[i].getAttribute("name")||"";
+                        name=name.replace("["+oldIndex+"]","["+newIndex+"]");
+                        fields[i].setAttribute("name",name);
+                        if(fields[i].type==="checkbox"){fields[i].checked=fields[i].classList.contains("ozs-stock-general");}
+                        else if(name.indexOf("[reserve]")!==-1){fields[i].value="0";}
+                        else{fields[i].value="";}
+                    }
+                    list.appendChild(row);
+                    bindRow(row);
+                });
+            })(containers[c]);}
+        })();</script>';
     }
 }
