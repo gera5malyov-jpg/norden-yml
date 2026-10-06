@@ -1,0 +1,372 @@
+name: Ozon safe promo enroll
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-safe-promo-enroll.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Install requests
+        run: python -m pip install requests
+
+      - name: Audit all Ozon actions and safely enroll eligible products
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json, os, time, math, requests
+
+          BASE = "https://api-seller.ozon.ru"
+          S = requests.Session()
+          S.headers.update({
+              "Client-Id": os.environ["OZON_CLIENT_ID"],
+              "Api-Key": os.environ["OZON_API_KEY"],
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+          })
+
+          def call(method, path, body=None, allow_error=False):
+              last = None
+              for attempt in range(15):
+                  try:
+                      r = S.request(method, BASE + path, json=body, timeout=180)
+                      last = r
+                  except Exception as e:
+                      if attempt == 14:
+                          print("REQUEST_EXCEPTION", method, path, repr(e), flush=True)
+                      time.sleep(min(30, 1 + attempt))
+                      continue
+                  if r.status_code == 429:
+                      time.sleep(float(r.headers.get("Retry-After") or min(30, 1 + attempt)))
+                      continue
+                  if r.status_code >= 500:
+                      time.sleep(min(30, 1 + attempt))
+                      continue
+                  try:
+                      data = r.json() if r.content else {}
+                  except Exception:
+                      data = {"raw": r.text}
+                  if r.status_code >= 400 and not allow_error:
+                      print("HTTP_ERROR", method, path, r.status_code,
+                            json.dumps(data, ensure_ascii=False)[:4000], flush=True)
+                  return data, r
+              return None, last
+
+          def f(v):
+              try:
+                  x = float(v or 0)
+                  return x if math.isfinite(x) else 0.0
+              except Exception:
+                  return 0.0
+
+          def chunks(seq, n):
+              for i in range(0, len(seq), n):
+                  yield seq[i:i+n]
+
+          def load_prices():
+              items, seen, cursor = [], set(), ""
+              while True:
+                  d, r = call("POST", "/v5/product/info/prices", {
+                      "cursor": cursor,
+                      "filter": {"visibility": "ALL"},
+                      "limit": 1000
+                  })
+                  if not d or (r is not None and r.status_code >= 400):
+                      raise SystemExit("Cannot load Ozon prices")
+                  rows = d.get("items") or []
+                  for x in rows:
+                      pid = x.get("product_id")
+                      if pid is not None and int(pid) not in seen:
+                          seen.add(int(pid))
+                          items.append(x)
+                  nxt = d.get("cursor") or ""
+                  if not rows or not nxt or nxt == cursor:
+                      break
+                  cursor = nxt
+              return items
+
+          def action_products(path, action_id):
+              rows_all = []
+              offset = 0
+              while True:
+                  d, r = call("POST", path, {
+                      "action_id": action_id,
+                      "limit": 1000,
+                      "offset": offset
+                  }, allow_error=True)
+                  if not d or (r is not None and r.status_code >= 400):
+                      return rows_all, {
+                          "status": r.status_code if r is not None else None,
+                          "response": d
+                      }
+                  result = d.get("result") or {}
+                  rows = result.get("products") or []
+                  rows_all.extend(rows)
+                  if len(rows) < 1000:
+                      break
+                  offset += 1000
+              return rows_all, None
+
+          prices = load_prices()
+          by_pid = {int(x["product_id"]): x for x in prices if x.get("product_id") is not None}
+          with_floor = []
+          no_floor = []
+          for x in prices:
+              p = x.get("price") or {}
+              row = {
+                  "offer_id": str(x.get("offer_id") or ""),
+                  "product_id": int(x["product_id"]),
+                  "min_price": f(p.get("min_price")),
+                  "current_price": f(p.get("price")),
+                  "auto_action_enabled": bool(p.get("auto_action_enabled")),
+                  "auto_add_enabled": bool(p.get("auto_add_to_ozon_actions_list_enabled")),
+              }
+              (with_floor if row["min_price"] > 0 else no_floor).append(row)
+
+          report = {
+              "products_total": len(prices),
+              "products_with_floor": len(with_floor),
+              "products_without_floor": len(no_floor),
+              "flags_requested": 0,
+              "flags_updated": 0,
+              "flags_rejected": [],
+              "timer_batches_ok": 0,
+              "timer_batches_failed": 0,
+              "actions_total": 0,
+              "actions": [],
+              "participants_below_floor_found": 0,
+              "participants_below_floor_removed": 0,
+              "candidate_rows_seen": 0,
+              "candidates_safe": 0,
+              "candidates_skipped_no_floor": 0,
+              "candidates_skipped_below_floor": 0,
+              "candidates_skipped_no_stock": 0,
+              "activate_requested": 0,
+              "activate_added": 0,
+              "activate_rejected": [],
+              "final_below_floor_count": 0,
+              "final_below_floor_sample": [],
+              "no_floor_sample": [x["offer_id"] for x in no_floor[:100]],
+          }
+
+          # Ensure Ozon promo controls are enabled only for products protected by a real floor.
+          need_flags = [x for x in with_floor if not x["auto_action_enabled"] or not x["auto_add_enabled"]]
+          for batch in chunks(need_flags, 500):
+              payload = {"prices": [{
+                  "offer_id": x["offer_id"],
+                  "auto_action_enabled": "ENABLED",
+                  "auto_add_to_ozon_actions_list_enabled": "ENABLED",
+                  "min_price_for_auto_actions_enabled": True
+              } for x in batch if x["offer_id"]]}
+              if not payload["prices"]:
+                  continue
+              d, r = call("POST", "/v1/product/import/prices", payload, allow_error=True)
+              report["flags_requested"] += len(payload["prices"])
+              results = (d or {}).get("result") or []
+              by_offer = {str(z.get("offer_id")): z for z in results if z.get("offer_id") is not None}
+              for row in payload["prices"]:
+                  rr = by_offer.get(str(row["offer_id"]))
+                  if rr and rr.get("updated") is True:
+                      report["flags_updated"] += 1
+                  else:
+                      report["flags_rejected"].append({
+                          "offer_id": row["offer_id"],
+                          "errors": (rr or {}).get("errors") if rr else (d or {})
+                      })
+
+          # Refresh minimum-price protection timer for every protected product.
+          safe_pids = [str(x["product_id"]) for x in with_floor]
+          for batch in chunks(safe_pids, 1000):
+              d, r = call("POST", "/v1/product/action/timer/update",
+                          {"product_ids": batch}, allow_error=True)
+              if r is not None and r.status_code < 400:
+                  report["timer_batches_ok"] += 1
+              else:
+                  report["timer_batches_failed"] += 1
+
+          # Ozon promotions available to the seller.
+          d, r = call("GET", "/v1/actions", allow_error=False)
+          if not d or (r is not None and r.status_code >= 400):
+              raise SystemExit("Cannot load Ozon actions")
+          actions = d.get("result") or []
+          report["actions_total"] = len(actions)
+
+          for a in actions:
+              aid = a.get("id")
+              if aid is None:
+                  continue
+              atype = str(a.get("action_type") or "")
+              title = str(a.get("title") or "")
+              ar = {
+                  "action_id": aid,
+                  "title": title,
+                  "type": atype,
+                  "participants_before": 0,
+                  "below_floor_found": 0,
+                  "below_floor_removed": 0,
+                  "candidates": 0,
+                  "safe_candidates": 0,
+                  "added": 0,
+                  "rejected": 0,
+                  "read_error": None,
+              }
+
+              # 1) Remove any already-participating product whose promo price is below min_price.
+              participants, perr = action_products("/v1/actions/products", aid)
+              ar["participants_before"] = len(participants)
+              if perr:
+                  ar["read_error"] = {"participants": perr}
+              remove_ids = []
+              for pr in participants:
+                  pid = int(pr.get("id") or pr.get("product_id") or 0)
+                  info = by_pid.get(pid)
+                  floor = f(((info or {}).get("price") or {}).get("min_price"))
+                  ap = f(pr.get("action_price"))
+                  if floor > 0 and ap > 0 and ap < floor:
+                      remove_ids.append(pid)
+
+              ar["below_floor_found"] = len(remove_ids)
+              report["participants_below_floor_found"] += len(remove_ids)
+              for batch in chunks(remove_ids, 500):
+                  rd, rr = call("POST", "/v1/actions/products/deactivate", {
+                      "action_id": aid,
+                      "product_ids": batch
+                  }, allow_error=True)
+                  res = (rd or {}).get("result") or {}
+                  ok = len(res.get("product_ids") or [])
+                  ar["below_floor_removed"] += ok
+                  report["participants_below_floor_removed"] += ok
+
+              # 2) Read all candidates and add only when Ozon's maximum allowed promo price
+              # is >= our min_price. We use max_action_price itself: this is the highest
+              # qualifying promo price, so margin is preserved as much as Ozon allows.
+              candidates, cerr = action_products("/v1/actions/candidates", aid)
+              ar["candidates"] = len(candidates)
+              report["candidate_rows_seen"] += len(candidates)
+              if cerr:
+                  ar["read_error"] = {**(ar["read_error"] or {}), "candidates": cerr}
+
+              safe = []
+              for c in candidates:
+                  pid = int(c.get("id") or c.get("product_id") or 0)
+                  info = by_pid.get(pid)
+                  if not info:
+                      continue
+                  price_info = info.get("price") or {}
+                  floor = f(price_info.get("min_price"))
+                  if floor <= 0:
+                      report["candidates_skipped_no_floor"] += 1
+                      continue
+                  max_ap = f(c.get("max_action_price"))
+                  if max_ap <= 0 or max_ap + 1e-9 < floor:
+                      report["candidates_skipped_below_floor"] += 1
+                      continue
+                  stock_available = f(c.get("stock"))
+                  if stock_available <= 0:
+                      report["candidates_skipped_no_stock"] += 1
+                      continue
+                  # Highest Ozon-accepted promo price, never below our floor.
+                  target_price = round(max_ap, 2)
+                  if target_price + 1e-9 < floor:
+                      continue
+                  safe.append({
+                      "product_id": pid,
+                      "action_price": target_price,
+                      # Minimum exposure. If the action requires more, Ozon will reject it
+                      # rather than silently enroll more units.
+                      "stock": 1
+                  })
+
+              ar["safe_candidates"] = len(safe)
+              report["candidates_safe"] += len(safe)
+
+              for batch in chunks(safe, 500):
+                  ad, rr = call("POST", "/v1/actions/products/activate", {
+                      "action_id": aid,
+                      "products": batch
+                  }, allow_error=True)
+                  report["activate_requested"] += len(batch)
+                  res = (ad or {}).get("result") or {}
+                  added = res.get("product_ids") or []
+                  rejected = res.get("rejected") or []
+                  ar["added"] += len(added)
+                  ar["rejected"] += len(rejected)
+                  report["activate_added"] += len(added)
+                  if rejected and len(report["activate_rejected"]) < 300:
+                      for x in rejected[:max(0, 300-len(report["activate_rejected"]))]:
+                          report["activate_rejected"].append({
+                              "action_id": aid,
+                              "title": title,
+                              **x
+                          })
+
+              report["actions"].append(ar)
+
+          # Final verification: absolutely no participating item with a known floor may
+          # remain below that floor. If Ozon changed a price while this workflow ran,
+          # remove it and then verify one more time.
+          time.sleep(5)
+          refreshed = load_prices()
+          final_by = {int(x["product_id"]): x for x in refreshed if x.get("product_id") is not None}
+
+          for a in actions:
+              aid = a.get("id")
+              if aid is None:
+                  continue
+              participants, _ = action_products("/v1/actions/products", aid)
+              bad = []
+              for pr in participants:
+                  pid = int(pr.get("id") or pr.get("product_id") or 0)
+                  info = final_by.get(pid)
+                  floor = f(((info or {}).get("price") or {}).get("min_price"))
+                  ap = f(pr.get("action_price"))
+                  if floor > 0 and ap > 0 and ap < floor:
+                      bad.append((pid, ap, floor, (info or {}).get("offer_id")))
+              if bad:
+                  for batch in chunks([x[0] for x in bad], 500):
+                      call("POST", "/v1/actions/products/deactivate", {
+                          "action_id": aid,
+                          "product_ids": batch
+                      }, allow_error=True)
+
+          time.sleep(3)
+          for a in actions:
+              aid = a.get("id")
+              if aid is None:
+                  continue
+              participants, _ = action_products("/v1/actions/products", aid)
+              for pr in participants:
+                  pid = int(pr.get("id") or pr.get("product_id") or 0)
+                  info = final_by.get(pid)
+                  floor = f(((info or {}).get("price") or {}).get("min_price"))
+                  ap = f(pr.get("action_price"))
+                  if floor > 0 and ap > 0 and ap < floor:
+                      report["final_below_floor_count"] += 1
+                      if len(report["final_below_floor_sample"]) < 100:
+                          report["final_below_floor_sample"].append({
+                              "action_id": aid,
+                              "title": a.get("title"),
+                              "product_id": pid,
+                              "offer_id": (info or {}).get("offer_id"),
+                              "action_price": ap,
+                              "min_price": floor,
+                          })
+
+          # Verify we did not attach products to pricing strategies.
+          report["pricing_strategy_products_added_by_this_workflow"] = 0
+
+          print("FINAL_REPORT_JSON", json.dumps(report, ensure_ascii=False, sort_keys=True), flush=True)
+
+          if report["final_below_floor_count"] > 0:
+              raise SystemExit(2)
+          PY
