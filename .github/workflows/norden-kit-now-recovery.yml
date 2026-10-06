@@ -33,7 +33,7 @@ jobs:
       - name: Checkout corrected KIT sync
         uses: actions/checkout@v4
         with:
-          ref: 62d939af7ac262fc2d49ff0f8a8ca018a2abbba6
+          ref: 40ac7562f7fbcd07aacc50564d73664012015cbb
 
       - uses: actions/setup-python@v5
         with:
