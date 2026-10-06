@@ -1,8 +1,8 @@
 <?php
 return array(
     'name' => 'Ozon Stock Sync',
-    'description' => 'Синхронизация остатков и цен Shop-Script/Webasyst с Ozon: до 10 аккаунтов, названия аккаунтов, отдельные логи.',
-    'version' => '1.5.3',
+    'description' => 'Синхронизация остатков и цен Shop-Script/Webasyst с Ozon: удобные настройки, комиссии по типам товаров и индивидуальная наценка.',
+    'version' => '1.6.0',
     'vendor' => 'megapolis',
     'handlers' => array(),
 );
