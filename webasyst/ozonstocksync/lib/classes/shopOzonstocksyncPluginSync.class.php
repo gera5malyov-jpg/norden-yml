@@ -17,7 +17,7 @@ class shopOzonstocksyncPluginSync
     const STOCK_BATCH_SIZE = 100;
     const PRICE_BATCH_SIZE = 100;
     const CREATE_BATCH_SIZE = 1;
-    const LOW_COST_THRESHOLD_RUB = 2500;
+    const LOW_COST_THRESHOLD_RUB = 2000;
     const LOW_COST_TARGET_MARKUP_PERCENT = 50;
 
     private $settings;
