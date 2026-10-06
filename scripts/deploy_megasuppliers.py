@@ -732,8 +732,47 @@ header('Content-Type: application/json; charset=utf-8');
 function ms_bridge_json($status, $payload)
 {
     http_response_code($status);
-    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($json === false) {
+        http_response_code(500);
+        echo '{"errors":["json_encode_failed"]}';
+        exit;
+    }
+    echo $json;
     exit;
+}
+
+function ms_bridge_feature_values($value)
+{
+    $out = array();
+    $append = function ($item) use (&$out, &$append) {
+        if (is_array($item)) {
+            foreach ($item as $part) {
+                $append($part);
+            }
+            return;
+        }
+        if (is_object($item)) {
+            if (method_exists($item, '__toString')) {
+                $item = (string)$item;
+            } elseif (isset($item->value)) {
+                $item = $item->value;
+            } else {
+                return;
+            }
+        }
+        if (is_bool($item)) {
+            $item = $item ? 'Да' : 'Нет';
+        }
+        if (is_scalar($item)) {
+            $text = trim(strip_tags((string)$item));
+            if ($text !== '' && !in_array($text, $out, true)) {
+                $out[] = $text;
+            }
+        }
+    };
+    $append($value);
+    return $out;
 }
 
 if (strtolower(isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : '') !== 'post') {
@@ -1012,6 +1051,7 @@ if ($action === 'kit_manifest') {
             'stock' => $stock,
             'category_ids' => $category_ids,
             'features' => $features,
+            'image_urls' => $image_urls,
         );
     }
 
