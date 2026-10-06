@@ -61,6 +61,7 @@ jobs:
               'package_fallback_defaults': 'CREATE_FALLBACK_DEPTH_CM = 50' in sync and 'CREATE_FALLBACK_HEIGHT_CM = 100' in sync and 'CREATE_FALLBACK_WIDTH_CM = 50' in sync and 'CREATE_FALLBACK_WEIGHT_KG = 31' in sync,
               'single_item_create_batch': 'const CREATE_BATCH_SIZE = 1' in sync,
               'create_error_names_offer': "offers=' . implode(',', array_column($final, 'offer_id'))" in sync,
+              'seller_offer_not_internal_sku': "Seller offer identifiers must not be sent as Ozon internal SKU ids." in sync and "saved offer_id are seller offer identifiers, not Ozon's" in sync,
           }
           for k,v in checks.items():
               print(f'{k}={"OK" if v else "FAIL"}')
