@@ -55,6 +55,8 @@ jobs:
               'create_before_stock_price': sync.find('createMissingProductsForAccount($account') < sync.find("foreach ($account['mappings'] as $mapping)"),
               'single_primary_creation_account': "const CREATE_PRIMARY_ACCOUNT_INDEX = 1" in sync and 'CREATE_ROUTE_SKIP_NON_PRIMARY' in sync and 'CREATE_ROUTE_PRIMARY' in sync,
               'creation_not_routed_by_old_sets': 'route_sets=' not in sync and 'CREATE_ROUTE_ERROR' not in sync,
+              'package_fallback_in_memory': 'applyCreatePackageFallback' in sync and 'CREATE_PACKAGE_FALLBACK' in sync and 'persisted=0' in sync,
+              'package_fallback_defaults': 'CREATE_FALLBACK_DEPTH_CM = 50' in sync and 'CREATE_FALLBACK_HEIGHT_CM = 100' in sync and 'CREATE_FALLBACK_WIDTH_CM = 50' in sync and 'CREATE_FALLBACK_WEIGHT_KG = 31' in sync,
           }
           for k,v in checks.items():
               print(f'{k}={"OK" if v else "FAIL"}')
