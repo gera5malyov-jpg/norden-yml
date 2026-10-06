@@ -704,7 +704,7 @@ class shopOzonstocksyncPluginSync
         if (preg_match_all('~\\[extimg\\](.*?)\\[/extimg\\]~is', $summary, $blocks)) {
             foreach ($blocks[1] as $block) {
                 $block = html_entity_decode((string)$block, ENT_QUOTES, 'UTF-8');
-                if (!preg_match_all('~https?://[^\\s<>"\\'\\]\\[]+~iu', $block, $matches)) {
+                if (!preg_match_all("~https?://[^\\s<>\"'\\]\\[]+~iu", $block, $matches)) {
                     continue;
                 }
                 foreach ($matches[0] as $url) {
