@@ -213,6 +213,97 @@ class KitClient:
             self._variants_cache = list(self.scan_all_variants_parallel(workers=6))
         return list(self._variants_cache)
 
+    def search_variants_parallel(self, names, workers=6, skip_broad=False):
+        terms = list(dict.fromkeys(
+            _s(value) for value in names if _s(value)
+        ))
+        if not terms:
+            return []
+
+        def one(term):
+            headers = dict(self.headers)
+            out = []
+            page = 1
+            while page <= 5:
+                last_error = None
+                for attempt in range(12):
+                    try:
+                        response = requests.get(
+                            KIT_BASE + "/v1/variants",
+                            headers=headers,
+                            params={"name": term, "page": page, "per_page": 100},
+                            timeout=120,
+                        )
+                        if response.status_code == 429:
+                            last_error = RuntimeError(
+                                "KIT search %r page %s HTTP 429" % (term, page)
+                            )
+                            time.sleep(float(response.headers.get("Retry-After") or min(15, 1 + attempt)))
+                            continue
+                        if response.status_code >= 500 or response.status_code == 400:
+                            last_error = RuntimeError(
+                                "KIT search %r page %s HTTP %s"
+                                % (term, page, response.status_code)
+                            )
+                            if attempt + 1 < 12:
+                                time.sleep(min(15, 1 + attempt * 2))
+                                continue
+                            break
+                        if response.status_code >= 400:
+                            raise KitSyncError(
+                                "KIT search %r page %s HTTP %s: %s"
+                                % (term, page, response.status_code, response.text[:500])
+                            )
+                        payload = response.json()
+                        batch = [
+                            row for row in self._items(payload)
+                            if isinstance(row, dict)
+                        ]
+                        out.extend(batch)
+                        if len(batch) < 100:
+                            return term, out
+                        page += 1
+                        break
+                    except (requests.RequestException, ValueError) as exc:
+                        last_error = exc
+                        if attempt + 1 < 12:
+                            time.sleep(min(15, 1 + attempt * 2))
+                            continue
+                        break
+                if last_error is not None and page <= 5 and not out:
+                    raise KitSyncError(
+                        "KIT search %r retries exhausted: %s" % (term, last_error)
+                    )
+
+            if skip_broad:
+                print(
+                    "KIT targeted search: skip broad term %r (>500 rows)" % term,
+                    flush=True,
+                )
+                return term, []
+            raise KitSyncError(
+                "KIT search %r returned more than 500 rows; refusing broad match" % term
+            )
+
+        rows = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, int(workers))) as pool:
+            futures = [pool.submit(one, term) for term in terms]
+            done = 0
+            for future in concurrent.futures.as_completed(futures):
+                term, batch = future.result()
+                done += 1
+                if done % 100 == 0 or done == len(futures):
+                    print(
+                        "KIT targeted search: %d/%d terms" % (done, len(futures)),
+                        flush=True,
+                    )
+                for row in batch:
+                    rid = _s(row.get("id"))
+                    key = rid or (_s(row.get("kit_id")) + "|" + _s(row.get("sku")))
+                    if key:
+                        rows[key] = row
+        return list(rows.values())
+
     def scan_all_variants_parallel(self, workers=6):
         first = self.request("GET", "/v1/variants", params={"page": 1, "per_page": 100})
         first_rows = [row for row in self._items(first) if isinstance(row, dict)]
@@ -717,6 +808,47 @@ def _select_variant(product, by_sku, by_kit_id, by_supplier_brand, supplier_iden
     return None
 
 
+def _kit_variants(kit, products=None):
+    products = list(products or [])
+    if products and hasattr(kit, "search_variants_parallel"):
+        sku_terms = list(dict.fromkeys(
+            _s(row.get("sku")) for row in products if _s(row.get("sku"))
+        ))
+        variants = list(kit.search_variants_parallel(sku_terms, workers=6))
+        found_skus = {
+            _s(row.get("sku")) for row in variants if _s(row.get("sku"))
+        }
+
+        # Secondary lookup only for Webasyst SKUs not found in KIT. This
+        # detects legacy cards stored under another SKU without scanning the
+        # whole ~100k KIT catalog.
+        supplier_terms = list(dict.fromkeys(
+            _s(row.get("supplier_sku"))
+            for row in products
+            if _s(row.get("supplier_sku"))
+            and _s(row.get("sku")) not in found_skus
+        ))
+        if supplier_terms:
+            variants.extend(
+                kit.search_variants_parallel(
+                    supplier_terms,
+                    workers=6,
+                    skip_broad=True,
+                )
+            )
+
+        deduped = {}
+        for row in variants:
+            key = _s(row.get("id")) or (
+                _s(row.get("kit_id")) + "|" + _s(row.get("sku"))
+            )
+            if key:
+                deduped[key] = row
+        return list(deduped.values())
+
+    return list(kit.variants())
+
+
 def _identity_preflight(products, variants, characteristic_index, brand):
     supplier_article_id = _single_characteristic_id(
         characteristic_index,
@@ -929,7 +1061,7 @@ def plan_manifest(manifest, config, *, kit=None):
     kit_categories = kit.categories()
     kit_characteristics = kit.characteristics()
     characteristic_index = _characteristic_index(kit_characteristics)
-    variants = kit.variants()
+    variants = _kit_variants(kit, eligible)
 
     preflight, identity = _identity_preflight(
         eligible,
@@ -1134,7 +1266,7 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
     warehouses = _warehouse_ids(kit)
     kit_characteristics = kit.characteristics()
     characteristic_index = _characteristic_index(kit_characteristics)
-    variants = kit.variants()
+    variants = _kit_variants(kit, eligible)
     preflight, identity = _identity_preflight(
         eligible,
         variants,
