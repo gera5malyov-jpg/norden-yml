@@ -24,11 +24,12 @@ jobs:
           gh api --method POST "repos/$REPO/actions/runs/37432387166/cancel" || true
           gh api --method POST "repos/$REPO/actions/runs/37432925605/cancel" || true
           gh api --method POST "repos/$REPO/actions/runs/37432945315/cancel" || true
+          gh api --method POST "repos/$REPO/actions/runs/37433001363/force-cancel" || true
 
       - name: Checkout corrected KIT sync
         uses: actions/checkout@v4
         with:
-          ref: 5e6d6677e2daf3ae7204f1bec9e15def2895e232
+          ref: bc8c0e70ce4fe8e091f13d1346c33617a7e57d18
 
       - uses: actions/setup-python@v5
         with:
@@ -38,7 +39,7 @@ jobs:
         run: pip install --disable-pip-version-check requests
 
       - name: Compile KIT sync
-        run: python -m py_compile supplier_engine/live_kit_scheduled_sync.py supplier_engine/live_kit_readonly_preflight.py supplier_engine/kit_sync.py
+        run: python -m py_compile supplier_engine/live_kit_batched_sync.py supplier_engine/live_kit_readonly_preflight.py supplier_engine/kit_sync.py
 
       - name: Sync categorized NORDEN-100 products to KIT now
         env:
@@ -46,19 +47,19 @@ jobs:
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
         run: |
-          python -m supplier_engine.live_kit_scheduled_sync \
-            --mode apply \
+          python -m supplier_engine.live_kit_batched_sync \
             --type-name NORDEN-100 \
             --brand Norden \
+            --batch-size 100 \
             --max-create 5000 \
             --max-eligible 5000 \
-            --output scheduled-kit-sync.json
+            --output scheduled-kit-batched-sync.json
 
       - name: Save KIT report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: norden-kit-recovery-${{ github.run_id }}
-          path: scheduled-kit-sync.json
+          path: scheduled-kit-batched-sync.json
           if-no-files-found: warn
           retention-days: 14
