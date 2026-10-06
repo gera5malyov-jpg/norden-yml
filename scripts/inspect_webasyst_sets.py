@@ -126,7 +126,7 @@ if(is_dir($ozon_app)){
 
 $out['ozon_core_refs']=array();
 if(is_dir($ozon_app)){
-    foreach(array('class ozonProductsHelper','class ozonExportManager','function getWaProductsCollection','function exportProducts') as $needle){
+    foreach(array('class ozonProductsHelper','class ozonExportManager','class ozonOffersGenerator','function getWaProductsCollection','function exportProducts','function getOzonOffers') as $needle){
         $cmd="grep -RIl --include='*.php' ".escapeshellarg($needle)." ".escapeshellarg($ozon_app)." 2>/dev/null | head -50";
         $refs=array();
         exec($cmd,$refs);
