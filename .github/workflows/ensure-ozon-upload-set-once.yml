@@ -1,0 +1,24 @@
+name: Ensure Ozon upload set once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ensure-ozon-upload-set-once.yml'
+      - 'scripts/ensure_ozon_upload_set.py'
+
+permissions:
+  contents: read
+
+jobs:
+  ensure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/ensure_ozon_upload_set.py
