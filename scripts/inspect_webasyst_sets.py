@@ -124,12 +124,29 @@ if(is_dir($ozon_app)){
     }
 }
 
+$out['ozon_core_refs']=array();
+if(is_dir($ozon_app)){
+    foreach(array('class ozonProductsHelper','class ozonExportManager','function getWaProductsCollection','function exportProducts') as $needle){
+        $cmd="grep -RIl --include='*.php' ".escapeshellarg($needle)." ".escapeshellarg($ozon_app)." 2>/dev/null | head -50";
+        $refs=array();
+        exec($cmd,$refs);
+        foreach($refs as $ref){
+            $short=str_replace($root,'',$ref);
+            $out['ozon_core_refs'][$short]=$short;
+        }
+    }
+}
+$out['ozon_core_refs']=array_values($out['ozon_core_refs']);
+
 $out['ozon_app_source_snippets']=array();
-foreach(array(
+$source_files=array(
     $root.'/wa-apps/ozon/lib/cli/ozonExportProducts.cli.php',
     $root.'/wa-apps/ozon/lib/actions/api/ozonExport.actions.php',
     $root.'/wa-apps/ozon/lib/models/ozonExportedProducts.model.php'
-) as $sf){
+);
+foreach($out['ozon_core_refs'] as $rel){$source_files[]=$root.$rel;}
+$source_files=array_values(array_unique($source_files));
+foreach($source_files as $sf){
     if(!is_file($sf)) continue;
     $txt=file_get_contents($sf);
     if($txt!==false){
