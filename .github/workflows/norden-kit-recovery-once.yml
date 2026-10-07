@@ -1,0 +1,57 @@
+name: Norden KIT recovery once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/norden-kit-recovery-once.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supplier-webasyst-1
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Checkout fixed supplier sync code
+        uses: actions/checkout@v4
+        with:
+          ref: c2ea8cf7861679801d6c6c4d69ec9669ea18ef79
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install --disable-pip-version-check openpyxl requests pdfplumber reportlab
+
+      - name: Compile fixed KIT sync
+        run: python -m py_compile supplier_engine/live_kit_scheduled_sync.py supplier_engine/kit_sync.py
+
+      - name: Apply categorized NORDEN-100 products to KIT
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python -m supplier_engine.live_kit_scheduled_sync \
+            --mode apply \
+            --type-name NORDEN-100 \
+            --brand Norden \
+            --max-create 5000 \
+            --max-eligible 6000 \
+            --output norden-kit-recovery.json
+
+      - name: Save recovery report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: norden-kit-recovery-${{ github.run_id }}
+          path: norden-kit-recovery.json
+          if-no-files-found: warn
+          retention-days: 14
