@@ -108,6 +108,28 @@ jobs:
               print(json.dumps(r["errors"][:20],ensure_ascii=False,indent=2))
           PY
 
+      - name: Email Komus batch report to shop
+        if: always()
+        env:
+          GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        shell: bash
+        run: |
+          set +e
+          kind="final"
+          if [[ "${{ steps.next.outputs.continue }}" == "true" ]]; then
+            kind="intermediate"
+          fi
+          python komus-kit/send_report_email.py \
+            --report /tmp/komus-bootstrap.json \
+            --kind "$kind" \
+            --run-url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          rc=$?
+          if [[ "$rc" != "0" ]]; then
+            echo "::warning::Komus report email failed with exit code $rc"
+          fi
+          exit 0
+
       - name: Queue next Komus batch
         if: ${{ steps.next.outputs.continue }} == 'true'
         env:
