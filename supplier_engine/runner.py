@@ -114,6 +114,15 @@ def parse_source(c, data):
     raise ValueError("Unsupported format: %s" % fmt)
 
 
+def _price_formulas_require_purchase_price(formulas):
+    if not isinstance(formulas, dict):
+        return False
+    return any(
+        isinstance(expression, str) and "purchase_price" in expression
+        for expression in formulas.values()
+    )
+
+
 def normalize(c, rows):
     m = c["mapping"]
     ident = c["identity"]
@@ -122,7 +131,7 @@ def normalize(c, rows):
     formulas = rules.get("price_formulas") or {}
     if not isinstance(formulas, dict):
         formulas = {}
-    require_purchase_price = bool(rules.get("require_purchase_price", False))
+    require_purchase_price = bool(rules.get("require_purchase_price", False)) or _price_formulas_require_purchase_price(formulas)
     characteristic_map = m.get("characteristics") or {}
     if not isinstance(characteristic_map, dict):
         characteristic_map = {}
@@ -356,7 +365,7 @@ def main():
                 "У %d позиций Norden нет положительной закупочной цены; их цены не будут изменяться."
                 % source_meta["missing_purchase_price"]
             )
-        if (config.get("rules") or {}).get("require_purchase_price"):
+        if effective_rules.get("require_purchase_price"):
             missing_required_purchase = sum(
                 1 for product in products
                 if product.purchase_price is None or product.purchase_price <= 0
@@ -367,8 +376,12 @@ def main():
                     % missing_required_purchase
                 )
 
-        plan = build_plan(products, existing, links, config.get("rules") or {})
-        characteristic_names = _characteristic_names_for_plan(plan, config.get("rules") or {})
+        effective_rules = dict(config.get("rules") or {})
+        if _price_formulas_require_purchase_price(effective_rules.get("price_formulas") or {}):
+            effective_rules["require_purchase_price"] = True
+
+        plan = build_plan(products, existing, links, effective_rules)
+        characteristic_names = _characteristic_names_for_plan(plan, effective_rules)
         if source_meta is not None:
             source_meta["characteristics_detected"] = len(characteristic_names)
             source_meta["characteristics_sample"] = characteristic_names[:20]
