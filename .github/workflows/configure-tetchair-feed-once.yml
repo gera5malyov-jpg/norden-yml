@@ -1,0 +1,114 @@
+name: Configure Tetchair combined feed once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/configure-tetchair-feed-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Point Webasyst Tetchair profile to combined feed
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip()
+          VM_ID=44780
+          VM_IP='45.86.180.49'
+          FEED='https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/main/tetchair/tetchair-combined.xml'
+          def req(url, method='GET', data=None, headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode('utf-8')
+                  return json.loads(raw) if raw else {}
+          tok=req(
+              'https://panel.netangels.ru/api/gateway/token/',
+              'POST',
+              urllib.parse.urlencode({'api_key':API_KEY}).encode(),
+              {'Content-Type':'application/x-www-form-urlencoded','User-Agent':'tetchair-config/1.0'},
+          )['token']
+          headers={'Authorization':'Bearer '+tok,'Content-Type':'application/json','Accept':'application/json','User-Agent':'tetchair-config/1.0'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub',encoding='utf-8').read().strip()
+              created=req(
+                  f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/',
+                  'POST',
+                  json.dumps({'key':pub,'name':'chatgpt-tetchair-config-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),
+                  headers,
+              )
+              key_id=created['id']
+              try:
+                  php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';
+          chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());
+          wa('shop');
+          $dir=wa()->getDataPath('plugins/megasuppliers/import-config',false,'shop',true);
+          $path=$dir.'/15.json';
+          if (!file_exists($path)) { fwrite(STDERR,"CONFIG_NOT_FOUND\n"); exit(2); }
+          $cfg=json_decode(file_get_contents($path),true);
+          if (!is_array($cfg)) { fwrite(STDERR,"CONFIG_INVALID\n"); exit(3); }
+          $backup=$path.'.bak-'.date('Ymd-His');
+          if (!copy($path,$backup)) { fwrite(STDERR,"BACKUP_FAILED\n"); exit(4); }
+
+          $cfg['source']['kind']='url';
+          $cfg['source']['format']='yml';
+          $cfg['source']['location']='__FEED__';
+          $cfg['source']['location_secret']='';
+
+          $cfg['identity']['supplier_sku_field']='vendorCode';
+          $cfg['mapping']['name']='name';
+          $cfg['mapping']['purchase_price']='purchase_price';
+          $cfg['mapping']['price']='price';
+          $cfg['mapping']['stock']='qty';
+          $cfg['mapping']['category']='categoryId';
+          $cfg['mapping']['images']=array('pictures');
+
+          $cfg['webasyst']['type_id']=1917;
+
+          $json=json_encode($cfg,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+          if ($json===false || file_put_contents($path,$json)===false) {
+              fwrite(STDERR,"CONFIG_WRITE_FAILED\n"); exit(5);
+          }
+
+          $check=json_decode(file_get_contents($path),true);
+          $summary=array(
+              'status'=>'ok',
+              'supplier_id'=>15,
+              'code'=>isset($check['code'])?$check['code']:'',
+              'type_id'=>isset($check['webasyst']['type_id'])?(int)$check['webasyst']['type_id']:0,
+              'source_format'=>isset($check['source']['format'])?$check['source']['format']:'',
+              'source_location'=>isset($check['source']['location'])?$check['source']['location']:'',
+              'purchase_price_field'=>isset($check['mapping']['purchase_price'])?$check['mapping']['purchase_price']:'',
+              'price_field'=>isset($check['mapping']['price'])?$check['mapping']['price']:'',
+              'stock_field'=>isset($check['mapping']['stock'])?$check['mapping']['stock']:'',
+              'backup_created'=>basename($backup),
+          );
+          echo json_encode($summary,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+          ?>''';
+                  php=php.replace('__FEED__',FEED)
+                  remote="cat >/tmp/configure_tetchair.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/configure_tetchair.php\nsu -s /bin/bash web -c 'php /tmp/configure_tetchair.php'\nrm -f /tmp/configure_tetchair.php"
+                  p=subprocess.run(['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@'+VM_IP,remote],text=True,capture_output=True,timeout=90)
+                  print(p.stdout)
+                  if p.returncode:
+                      print(p.stderr)
+                      raise SystemExit(p.returncode)
+              finally:
+                  try:
+                      req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{key_id}/delete/','DELETE',b'',headers)
+                  except Exception as e:
+                      print('cleanup warning:',e)
+          PY
