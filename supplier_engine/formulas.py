@@ -45,7 +45,10 @@ def evaluate_formula(expression, variables):
 def apply_price_formulas(product, formulas):
     if not formulas:
         return product
-    source_price = product.price
+    # supplier_price means the supplier's mapped purchase/base price.
+    # Keep product.price only as a backwards-compatible fallback for feeds
+    # that do not expose a dedicated purchase_price field.
+    source_price = product.purchase_price if product.purchase_price is not None else product.price
     variables = {
         "supplier_price": source_price,
         "purchase_price": product.purchase_price,
