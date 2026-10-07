@@ -173,16 +173,48 @@ def main():
     if not current:
         raise RuntimeError("manifest contains no valid WireGuard profiles")
 
+    current_hashes = {
+        str(k): str(v)
+        for k, v in (manifest.get("sha256") or {}).items()
+        if str(k) in current and re.fullmatch(r"[0-9a-fA-F]{64}", str(v))
+    }
+
     state = load_state(current)
     seen = set(state.get("seen", []))
+    state_hashes = state.get("hashes") if isinstance(state.get("hashes"), dict) else {}
+
+    seeded = []
+    for filename in current:
+        if filename in seen and filename not in state_hashes and filename in current_hashes:
+            state_hashes[filename] = current_hashes[filename]
+            seeded.append(filename)
+    if seeded:
+        state["hashes"] = state_hashes
+        state["hash_baseline_at"] = datetime.now(timezone.utc).isoformat()
+        save_state(state)
+        log("HASH_BASELINE_INITIALIZED count=" + str(len(seeded)))
+
     new_profiles = [x for x in current if x not in seen]
-    if not new_profiles:
-        log("NO_NEW_LOCATIONS manifest_count=" + str(len(current)))
+    updated_profiles = [
+        x for x in current
+        if x in seen
+        and x in current_hashes
+        and state_hashes.get(x)
+        and state_hashes.get(x) != current_hashes.get(x)
+    ]
+    pending_profiles = new_profiles + [x for x in updated_profiles if x not in new_profiles]
+
+    if not pending_profiles:
+        log("NO_NEW_OR_UPDATED_CONFIGS manifest_count=" + str(len(current)))
         return
 
-    log("NEW_LOCATIONS " + ",".join(new_profiles))
+    if new_profiles:
+        log("NEW_LOCATIONS " + ",".join(new_profiles))
+    if updated_profiles:
+        log("UPDATED_CONFIGS " + ",".join(updated_profiles))
+
     pack = decrypt_pack()
-    missing = [x for x in new_profiles if x not in pack]
+    missing = [x for x in pending_profiles if x not in pack]
     if missing:
         raise RuntimeError("encrypted pack is missing: " + ",".join(missing))
 
@@ -196,6 +228,8 @@ def main():
         if description in desc_set:
             log(f"ALREADY_IN_ROUTER {filename}")
             seen.add(filename)
+            if filename in current_hashes:
+                state_hashes[filename] = current_hashes[filename]
             changed = True
             continue
         try:
@@ -203,9 +237,20 @@ def main():
             log(f"ADDED_DISABLED {filename} interface={created}")
             desc_set.add(description)
             seen.add(filename)
+            if filename in current_hashes:
+                state_hashes[filename] = current_hashes[filename]
             changed = True
         except Exception as e:
             log(f"IMPORT_FAILED {filename} {type(e).__name__}: {e}")
+
+    for filename in updated_profiles:
+        try:
+            created, _ = import_profile(session, filename, pack[filename])
+            log(f"UPDATED_CONFIG_ADDED_DISABLED {filename} interface={created}")
+            state_hashes[filename] = current_hashes[filename]
+            changed = True
+        except Exception as e:
+            log(f"UPDATED_CONFIG_IMPORT_FAILED {filename} {type(e).__name__}: {e}")
 
     if changed:
         save = session.post(
@@ -215,10 +260,18 @@ def main():
         )
         log("CONFIG_SAVE_HTTP " + str(save.status_code))
         state["seen"] = sorted(seen)
+        state["hashes"] = dict(sorted(state_hashes.items()))
         state["last_success_at"] = datetime.now(timezone.utc).isoformat()
         save_state(state)
 
-    remaining = [x for x in current if x not in seen]
+    remaining_new = [x for x in current if x not in seen]
+    remaining_updated = [
+        x for x in current
+        if x in current_hashes
+        and state_hashes.get(x)
+        and state_hashes.get(x) != current_hashes.get(x)
+    ]
+    remaining = remaining_new + [x for x in remaining_updated if x not in remaining_new]
     if remaining:
         raise RuntimeError("profiles still pending: " + ",".join(remaining))
 
