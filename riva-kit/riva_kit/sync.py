@@ -568,10 +568,7 @@ class SyncRunner:
                 continue
 
             if self.max_new is not None and created_or_planned >= self.max_new:
-                if self.new_only:
-                    creation_limit_hit = True
-                    self.report['new_limit_skipped'] += 1
-                    continue
+                creation_limit_hit = True
                 stopped_early = True
                 break
 
@@ -604,6 +601,10 @@ class SyncRunner:
                     by_sku.setdefault(offer.kit_sku, []).append(normalized)
                     created_this_run.add(offer.kit_sku)
                     self.report['new_products_created'] += 1
+                if self.new_only and self.max_new is not None and created_or_planned >= self.max_new:
+                    creation_limit_hit = True
+                    stopped_early = True
+                    break
             except Exception as exc:
                 if 'image set' in str(exc):
                     self.report['image_failure_count'] += 1
