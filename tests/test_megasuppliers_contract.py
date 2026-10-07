@@ -261,3 +261,18 @@ def test_supplier_profile_and_bridge_support_kit_export():
 def test_supplier_workflow_exposes_kit_token_for_apply():
     workflow = WORKFLOW.read_text(encoding="utf-8")
     assert "YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}" in workflow
+
+
+def test_supplier_matching_is_strictly_scoped_to_configured_product_type():
+    runner = (ROOT / "supplier_engine/runner.py").read_text(encoding="utf-8")
+    bridge_py = (ROOT / "supplier_engine/bridge.py").read_text(encoding="utf-8")
+    bridge_php = (ROOT / "webasyst/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendBridge.controller.php").read_text(encoding="utf-8")
+    sync = (ROOT / "supplier_engine/webasyst_sync.py").read_text(encoding="utf-8")
+
+    assert "сверка товаров вне выбранного типа запрещена" in runner
+    assert "type_id=type_id" in runner
+    assert 'payload["type_id"] = int(type_id)' in bridge_py
+    assert "JOIN shop_product p ON p.id=m.product_id" in bridge_php
+    assert "p.type_id=" in bridge_php
+    assert "product_type_mismatch" in bridge_php
+    assert "current_type_id != target_type_id" in sync
