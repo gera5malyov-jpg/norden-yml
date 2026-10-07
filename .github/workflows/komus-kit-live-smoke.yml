@@ -1,0 +1,39 @@
+name: Komus KIT live smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/komus-kit-live-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: komus-kit-write
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Create one missing Komus product
+        env:
+          KOMUS_API: ${{ secrets.KOMUS_API }}
+          KOMUS_API_KEY: ${{ secrets.KOMUS_API_KEY }}
+          KOMUS_TOKEN: ${{ secrets.KOMUS_TOKEN }}
+          KOMUS_API_TOKEN: ${{ secrets.KOMUS_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          PYTHONPATH=samson-kit python komus-kit/sync_komus_kit.py             --new-only --max-new 1             --report /tmp/komus-live-smoke.json
+      - name: Print report
+        if: always()
+        run: cat /tmp/komus-live-smoke.json || true
