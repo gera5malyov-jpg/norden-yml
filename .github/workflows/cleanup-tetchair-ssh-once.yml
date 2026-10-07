@@ -1,0 +1,40 @@
+name: Cleanup Tetchair SSH key once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cleanup-tetchair-ssh-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove temporary Tetchair SSH key
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.parse, urllib.request
+          api=os.environ["NETANGELS_API_KEY"].strip()
+          def req(url,method="GET",data=None,headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode()
+                  return r.status, (json.loads(raw) if raw else {})
+          _,tok=req("https://panel.netangels.ru/api/gateway/token/","POST",urllib.parse.urlencode({"api_key":api}).encode(),{"Content-Type":"application/x-www-form-urlencoded"})
+          h={"Authorization":"Bearer "+tok["token"],"Accept":"application/json"}
+          _,data=req("https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/","GET",None,h)
+          for item in data.get("entities",[]):
+              name=str(item.get("name") or "")
+              if name.startswith("chatgpt-tetchair-config-"):
+                  key_id=item.get("id")
+                  q=urllib.request.Request(f"https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/{key_id}/",method="DELETE",headers=h)
+                  with urllib.request.urlopen(q,timeout=30) as r:
+                      print("deleted",key_id,r.status)
+          PY
