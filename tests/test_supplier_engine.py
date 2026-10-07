@@ -86,6 +86,75 @@ def test_supplier_price_formula_prefers_mapped_purchase_price():
     assert p.compare_price == 8298
 
 
+def test_required_purchase_price_never_falls_back_to_retail_price():
+    c = {
+        "source": {"format": "yml"},
+        "identity": {"supplier_sku_field": "vendorCode", "sku_prefix": "tet-", "brand": "Tetchair"},
+        "mapping": {
+            "name": "name",
+            "purchase_price": "purchase_price",
+            "price": "price",
+            "compare_price": "",
+            "stock": "qty",
+            "category": "categoryId",
+            "images": [],
+            "characteristics": {},
+        },
+        "rules": {
+            "require_purchase_price": True,
+            "price_formulas": {
+                "purchase_price": "purchase_price",
+                "price": "purchase_price * 1.25",
+                "compare_price": "purchase_price * 1.80",
+            },
+        },
+    }
+    p = normalize(c, [{
+        "vendorCode": "NO-WHOLESALE",
+        "name": "Chair",
+        "purchase_price": "",
+        "price": "6150",
+        "qty": "3",
+        "categoryId": "1",
+    }])[0]
+    assert p.purchase_price is None
+    assert p.price is None
+    assert p.compare_price is None
+    assert p.stock == 3
+
+
+def test_missing_required_purchase_skips_only_new_product_but_allows_existing_stock_update():
+    from supplier_engine.webasyst_sync import build_plan
+
+    product = Product(
+        supplier_sku="NO-WHOLESALE",
+        sku="tet-NO-WHOLESALE",
+        name="Chair",
+        purchase_price=None,
+        price=None,
+        compare_price=None,
+        stock=3,
+    )
+    rules = {"create_new": True, "require_purchase_price": True}
+
+    new_plan = build_plan([product], {}, [], rules)
+    assert new_plan["create"] == []
+    assert new_plan["skipped"][0]["reason"] == "missing_purchase_price"
+
+    existing = {
+        product.sku: [(
+            {"id": 101, "type_id": 1917, "name": "Chair"},
+            {"id": 201, "sku": product.sku, "name": product.supplier_sku, "purchase_price": "1000", "price": "1250"},
+        )]
+    }
+    existing_plan = build_plan([product], existing, [], rules)
+    assert len(existing_plan["update"]) == 1
+    assert existing_plan["skipped"] == []
+    assert existing_plan["update"][0]["desired"]["purchase_price"] is None
+    assert existing_plan["update"][0]["desired"]["price"] is None
+    assert existing_plan["update"][0]["desired"]["stock"] == 3
+
+
 def test_normalize_accepts_php_empty_array_mappings():
     c = {
         "identity": {"supplier_sku_field": "Артикул", "sku_prefix": "", "brand": "Norden"},
