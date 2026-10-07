@@ -2117,3 +2117,85 @@ def test_large_kit_batch_uses_one_bulk_catalog_scan():
     assert rows == [{"id": "v1", "sku": "1"}]
     assert kit.bulk_workers == 10
     assert kit.targeted_called is False
+
+
+def test_repair_sku_never_reuses_product_from_another_type():
+    class WrongTypeWa:
+        def __init__(self):
+            self.calls = []
+
+        def call(self, method, *, http_method="GET", params=None, data=None, files=None):
+            self.calls.append({
+                "method": method,
+                "http_method": http_method,
+                "params": params or {},
+                "data": data or {},
+            })
+            if method == "shop.product.search":
+                return {"products": []}
+            if method == "shop.product.getInfo":
+                return {"id": "11", "type_id": 999, "name": "Other supplier product"}
+            if method == "shop.product.add":
+                return {"id": "101"}
+            if method == "shop.product.skus.getList":
+                return {"skus": [{"id": "202", "sku": "X-1", "name": "SUP-1"}]}
+            if method == "shop.product.skus.update":
+                return {}
+            return {}
+
+    wa = WrongTypeWa()
+    desired = {
+        "supplier_sku": "SUP-1",
+        "sku": "X-1",
+        "name": "Chair",
+        "purchase_price": 100,
+        "price": 125,
+        "compare_price": 160,
+        "stock": 3,
+        "brand": "",
+        "category": "",
+        "images": [],
+        "characteristics": {},
+    }
+    plan = {
+        "create": [],
+        "update": [],
+        "repair_sku": [{
+            "sku": "X-1",
+            "supplier_sku": "SUP-1",
+            "product_id": 11,
+            "old_sku_id": 21,
+            "desired": desired,
+        }],
+        "zero": [],
+        "blocked": [],
+        "skipped": [],
+    }
+
+    result = apply_plan(
+        wa,
+        plan,
+        {
+            "rules": {
+                "update_prices": True,
+                "update_stock": True,
+                "update_name": True,
+                "update_images": False,
+                "update_characteristics": False,
+            },
+            "webasyst": {
+                "stock_id": 1,
+                "type_id": 5,
+                "sku_mode": "supplier",
+            },
+        },
+    )
+
+    assert result["recovered_skus"] == 0
+    assert result["recreated_products"] == 1
+    assert result["mappings"][-1]["product_id"] == 101
+    assert not [
+        call for call in wa.calls
+        if call["method"] == "shop.product.skus.add"
+        and str(call["params"].get("product_id")) == "11"
+    ]
