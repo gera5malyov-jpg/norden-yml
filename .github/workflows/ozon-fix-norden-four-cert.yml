@@ -1,0 +1,82 @@
+name: Fix four Norden products and bind certificate
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-fix-norden-four-cert.yml'
+permissions:
+  contents: read
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - name: Fix required attributes, wait for SKU, bind certificate
+        run: |
+          python - <<'PY'
+          import json, os, time, urllib.request, urllib.error, sys
+          BASE="https://api-seller.ozon.ru"
+          H={"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json","Accept":"application/json"}
+          CERT=5483296
+          offers=[
+            ("AF-31649509","Garda Lux 6227A",971400622,"9401390000 - Мебель для сидения вращающаяся с регулирующими высоту приспособлениями, прочая",True),
+            ("AF-31649510","Garda Lux 6227A-HS",971400622,"9401390000 - Мебель для сидения вращающаяся с регулирующими высоту приспособлениями, прочая",True),
+            ("AF-31652868","Like black AF-01AC",971400627,"9401710009 - Мебель для сидения обитая с металлическим каркасом, прочая: прочая",False),
+            ("31663537","Харман LB",971400622,"9401390000 - Мебель для сидения вращающаяся с регулирующими высоту приспособлениями, прочая",False),
+          ]
+          def post(path,body):
+              req=urllib.request.Request(BASE+path,data=json.dumps(body,ensure_ascii=False).encode(),headers=H,method="POST")
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      raw=r.read().decode()
+                      return json.loads(raw) if raw else {}
+              except urllib.error.HTTPError as e:
+                  return {"__error__":{"status":e.code,"body":e.read().decode("utf-8","replace")}}
+          items=[]
+          for offer,model,tnid,tnval,fixdepth in offers:
+              attrs=[
+                {"complex_id":0,"id":9048,"values":[{"dictionary_value_id":0,"value":model}]},
+                {"complex_id":0,"id":22232,"values":[{"dictionary_value_id":tnid,"value":tnval}]},
+              ]
+              if fixdepth:
+                  attrs.append({"complex_id":0,"id":6666,"values":[{"dictionary_value_id":0,"value":"51"}]})
+              items.append({"offer_id":offer,"attributes":attrs})
+          upd=post("/v1/product/attributes/update",{"items":items})
+          print("ATTR_UPDATE",json.dumps(upd,ensure_ascii=False))
+          if "__error__" in upd:
+              sys.exit(2)
+          task_id=int(upd.get("task_id") or 0)
+          if task_id:
+              for i in range(12):
+                  time.sleep(5)
+                  inf=post("/v1/product/import/info",{"task_id":task_id})
+                  print("IMPORT_INFO",i,json.dumps(inf,ensure_ascii=False))
+                  if "__error__" not in inf:
+                      rows=(inf.get("result") or {}).get("items") or []
+                      if rows and all(str(x.get("status") or "").lower() not in ("pending","processing") for x in rows):
+                          break
+          offer_ids=[x[0] for x in offers]
+          products=[]
+          for i in range(12):
+              products=(post("/v3/product/info/list",{"offer_id":offer_ids}).get("items") or [])
+              snap=[{"id":p.get("id"),"offer_id":p.get("offer_id"),"sku":p.get("sku"),"status":(p.get("statuses") or {}).get("status"),"status_name":(p.get("statuses") or {}).get("status_name"),"is_created":(p.get("statuses") or {}).get("is_created"),"errors":[e.get("code") for e in p.get("errors") or []]} for p in products]
+              print("PRODUCTS",i,json.dumps(snap,ensure_ascii=False))
+              if len(products)==4 and all(int(p.get("sku") or 0)>0 for p in products):
+                  break
+              time.sleep(5)
+          ready=[int(p.get("id") or 0) for p in products if int(p.get("sku") or 0)>0]
+          if ready:
+              b=post("/v1/product/certificate/bind",{"certificate_id":CERT,"product_id":ready})
+              print("BIND",json.dumps(b,ensure_ascii=False))
+          final=post("/v3/product/info/list",{"offer_id":offer_ids})
+          print("FINAL_PRODUCTS",json.dumps(final,ensure_ascii=False))
+          cert=post("/v1/product/certificate/products/list",{"certificate_id":CERT,"limit":1000})
+          bound={int(x.get("product_id") or 0) for x in (cert.get("result") or {}).get("items") or []}
+          target={int(p.get("id") or 0) for p in final.get("items") or []}
+          print("FINAL_BIND",json.dumps({"target_ids":sorted(target),"bound_now":sorted(target & bound),"missing":sorted(target-bound)},ensure_ascii=False))
+          if target-bound:
+              sys.exit(3)
+          PY
