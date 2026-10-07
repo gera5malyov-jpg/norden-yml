@@ -19,8 +19,7 @@ ID_FILE = HOME / ".atlaspage_real_id"
 ROUTER_PASSWORD_FILE = HOME / ".keenetic_chatgpt_pw"
 LOG = HOME / "atlas_wireguard_daily_sync.log"
 
-MANIFEST_URL = "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/main/vpn/atlas-wireguard-manifest.json"
-PACK_URL = "https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/main/vpn/atlas-wireguard-pack.enc.b64"
+GITHUB_CONTENTS_BASE = "https://api.github.com/repos/gera5malyov-jpg/norden-yml/contents/vpn"
 ROUTER = "http://192.168.1.1"
 ROUTER_LOGIN = "chatgpt"
 PROFILE_RE = re.compile(r"^VPNTYPE-[A-Za-z0-9._-]+\.conf$")
@@ -33,10 +32,22 @@ def log(message):
         f.write(line + "\n")
 
 
-def fetch_json(url):
-    r = requests.get(url, timeout=30, headers={"Cache-Control": "no-cache"})
+def fetch_repo_bytes(filename):
+    url = GITHUB_CONTENTS_BASE + "/" + filename
+    r = requests.get(
+        url,
+        params={"ref": "main"},
+        timeout=30,
+        headers={"Accept": "application/vnd.github+json", "Cache-Control": "no-cache"},
+    )
     r.raise_for_status()
-    return r.json()
+    data = r.json()
+    content = data.get("content") or ""
+    return base64.b64decode(content)
+
+
+def fetch_repo_json(filename):
+    return json.loads(fetch_repo_bytes(filename).decode("utf-8"))
 
 
 def load_state(current_profiles):
@@ -94,11 +105,13 @@ def current_wireguard_descriptions(session):
 def decrypt_pack():
     if not ID_FILE.exists():
         raise RuntimeError("AtlasPage local ID file is missing")
-    r = requests.get(PACK_URL, timeout=30, headers={"Cache-Control": "no-cache"})
-    if r.status_code == 404:
-        raise RuntimeError("encrypted WireGuard pack is not published yet")
-    r.raise_for_status()
-    encrypted = base64.b64decode(r.text.strip())
+    try:
+        packed_b64 = fetch_repo_bytes("atlas-wireguard-pack.enc.b64").decode("ascii").strip()
+    except requests.HTTPError as e:
+        if e.response is not None and e.response.status_code == 404:
+            raise RuntimeError("encrypted WireGuard pack is not published yet")
+        raise
+    encrypted = base64.b64decode(packed_b64)
     with tempfile.TemporaryDirectory(prefix="atlas-wg-") as td:
         td = pathlib.Path(td)
         enc = td / "pack.enc"
@@ -155,7 +168,7 @@ def import_profile(session, filename, raw_bytes):
 
 
 def main():
-    manifest = fetch_json(MANIFEST_URL)
+    manifest = fetch_repo_json("atlas-wireguard-manifest.json")
     current = sorted({x for x in manifest.get("profiles", []) if PROFILE_RE.fullmatch(str(x))})
     if not current:
         raise RuntimeError("manifest contains no valid WireGuard profiles")
