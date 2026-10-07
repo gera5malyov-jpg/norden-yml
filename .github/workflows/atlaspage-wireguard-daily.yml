@@ -1,0 +1,300 @@
+name: AtlasPage WireGuard daily monitor
+
+on:
+  schedule:
+    - cron: "15 6 * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/atlaspage-wireguard-daily.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atlaspage-wireguard-daily
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ATLASPAGE_ID: ${{ secrets.ATLASPAGE_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$ATLASPAGE_ID" || { echo "ATLASPAGE_ID is missing"; exit 11; }
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install chromium --with-deps >/dev/null
+
+      - name: Download current WireGuard profiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/atlas-wg
+          mkdir -p /tmp/atlas-wg
+
+          cat > /tmp/atlas-wireguard-download.js <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+
+          const userId = process.env.ATLASPAGE_ID || '';
+          if (!userId) throw new Error('ATLASPAGE_ID missing');
+
+          const sleep = ms => new Promise(r => setTimeout(r, ms));
+          const clean = s => (s || '').replace(/\s+/g, ' ').trim();
+          const profileRe = /^VPNTYPE-[A-Za-z0-9._-]+\.conf$/;
+
+          async function clickText(page, re) {
+            const candidates = [
+              page.getByRole('button', {name: re}).first(),
+              page.getByRole('tab', {name: re}).first(),
+              page.getByText(re, {exact: true}).first()
+            ];
+            for (const el of candidates) {
+              if (await el.isVisible({timeout: 800}).catch(() => false)) {
+                await el.click({timeout: 5000});
+                return true;
+              }
+            }
+            return false;
+          }
+
+          async function closeOverlay(page) {
+            await page.keyboard.press('Escape').catch(() => {});
+            await sleep(250);
+            const overlay = page.locator('div[class*="popupOverlay"]:visible').last();
+            if (await overlay.isVisible({timeout: 300}).catch(() => false)) {
+              const close = overlay.locator(
+                'button[aria-label*="close" i],button[aria-label*="закры" i],button[class*="close" i]'
+              ).first();
+              if (await close.isVisible({timeout: 300}).catch(() => false)) {
+                await close.click({force: true}).catch(() => {});
+              }
+            }
+            await sleep(250);
+          }
+
+          (async () => {
+            const browser = await chromium.launch({headless: true});
+            const context = await browser.newContext({locale: 'ru-RU', acceptDownloads: true});
+            const page = await context.newPage();
+
+            await page.goto('https://atlaspage51.com/lk', {
+              waitUntil: 'domcontentloaded',
+              timeout: 45000
+            });
+            await sleep(1500);
+
+            if (!(await clickText(page, /^По\s+ID$/i))) {
+              throw new Error('ID login mode not found');
+            }
+
+            let input = page.locator(
+              'input:visible[placeholder*="ID" i],input:visible[name*="id" i]'
+            ).first();
+            if (!(await input.isVisible().catch(() => false))) {
+              input = page.locator('input:visible').first();
+            }
+            await input.fill(userId);
+
+            let submit = page.locator('button:visible[type="submit"]').first();
+            if (!(await submit.isVisible().catch(() => false))) {
+              submit = page.getByRole('button', {name: /войти|далее|продолжить/i}).first();
+            }
+            await submit.click({timeout: 5000});
+            await Promise.race([
+              page.waitForLoadState('networkidle', {timeout: 15000}).catch(() => {}),
+              page.waitForTimeout(4000)
+            ]);
+
+            await page.goto('https://atlaspage51.com/lk/connect', {
+              waitUntil: 'domcontentloaded',
+              timeout: 45000
+            });
+            await sleep(1500);
+            if (/\/login(?:\?|$)/i.test(page.url())) {
+              throw new Error('AtlasPage login did not persist');
+            }
+
+            let selected = await clickText(page, /^WireGuard$/i);
+            if (!selected) {
+              const choose = page.getByRole('button', {name: /выбрать протокол/i}).first();
+              if (await choose.isVisible({timeout: 1200}).catch(() => false)) {
+                await choose.click();
+                await sleep(700);
+                selected = await clickText(page, /^WireGuard$/i);
+              }
+            }
+            if (!selected) throw new Error('WireGuard protocol not found');
+            await sleep(1200);
+
+            let rows = page.locator('button[class*="serverItemClickable"]');
+            let count = await rows.count();
+            if (count === 0) {
+              rows = page.locator('button').filter({hasText: /WireGuard/i});
+              count = await rows.count();
+            }
+            if (count < 1) throw new Error('No WireGuard server rows found');
+
+            const profiles = [];
+            for (let i = 0; i < count; i++) {
+              const row = rows.nth(i);
+              const label = clean(await row.innerText().catch(() => ''));
+              await row.scrollIntoViewIfNeeded().catch(() => {});
+              await row.click({timeout: 5000});
+              await sleep(700);
+
+              const overlay = page.locator('div[class*="popupOverlay"]:visible').last();
+              const scope = await overlay.isVisible({timeout: 1200}).catch(() => false) ? overlay : page;
+              const controls = scope.locator('button,a');
+              const n = await controls.count();
+              let downloadControl = null;
+              let filename = '';
+
+              for (let j = 0; j < n; j++) {
+                const control = controls.nth(j);
+                const text = clean(await control.innerText().catch(() => ''));
+                const match = text.match(/^Скачать\s+(VPNTYPE-[A-Za-z0-9._-]+\.conf)$/i);
+                if (match && profileRe.test(match[1])) {
+                  downloadControl = control;
+                  filename = match[1];
+                  break;
+                }
+              }
+
+              if (!downloadControl || !filename) {
+                throw new Error('WireGuard download control not found for row ' + i + ' ' + label);
+              }
+
+              const downloadPromise = page.waitForEvent('download', {timeout: 12000});
+              await downloadControl.click({timeout: 5000});
+              const download = await downloadPromise;
+              const suggested = path.basename(download.suggestedFilename() || filename);
+              const finalName = profileRe.test(suggested) ? suggested : filename;
+              if (!profileRe.test(finalName)) {
+                throw new Error('Unsafe WireGuard filename: ' + finalName);
+              }
+              await download.saveAs('/tmp/atlas-wg/' + finalName);
+              profiles.push(finalName);
+              console.log('DOWNLOADED=' + finalName);
+              await closeOverlay(page);
+            }
+
+            const unique = [...new Set(profiles)].sort();
+            if (unique.length !== count) {
+              throw new Error('WireGuard profile count mismatch: rows=' + count + ' unique=' + unique.length);
+            }
+            fs.writeFileSync('/tmp/atlas-wg-profiles.json', JSON.stringify(unique, null, 2));
+            console.log('WIREGUARD_COUNT=' + unique.length);
+            await browser.close();
+          })().catch(err => {
+            console.error('WIREGUARD_MONITOR_ERROR=' + (err && err.message ? err.message : String(err)));
+            process.exit(1);
+          });
+          NODE
+
+          NODE_PATH="$(npm root)" node /tmp/atlas-wireguard-download.js
+
+      - name: Compare with stored manifest
+        id: compare
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p vpn
+          python3 - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          manifest_path = Path('vpn/atlas-wireguard-manifest.json')
+          current = sorted(set(json.load(open('/tmp/atlas-wg-profiles.json', encoding='utf-8'))))
+
+          old = []
+          old_data = {}
+          if manifest_path.exists():
+              old_data = json.loads(manifest_path.read_text(encoding='utf-8'))
+              old = sorted(set(old_data.get('profiles', [])))
+
+          added = sorted(set(current) - set(old))
+          removed = sorted(set(old) - set(current))
+          changed = current != old
+
+          print('CURRENT_COUNT=' + str(len(current)))
+          print('PREVIOUS_COUNT=' + str(len(old)))
+          print('ADDED=' + ','.join(added))
+          print('REMOVED=' + ','.join(removed))
+          print('CHANGED=' + ('yes' if changed else 'no'))
+
+          out = os.environ['GITHUB_OUTPUT']
+          with open(out, 'a', encoding='utf-8') as f:
+              f.write('changed=' + ('true' if changed else 'false') + '\n')
+              f.write('added=' + ','.join(added) + '\n')
+              f.write('removed=' + ','.join(removed) + '\n')
+
+          if changed:
+              data = {
+                  'version': 1,
+                  'provider': 'AtlasPage',
+                  'protocol': 'WireGuard',
+                  'baseline': False,
+                  'profiles': current,
+                  'updated_at': datetime.now(timezone.utc).isoformat(),
+                  'added_on_last_scan': added,
+                  'removed_on_last_scan': removed,
+              }
+              manifest_path.write_text(
+                  json.dumps(data, ensure_ascii=False, indent=2) + '\n',
+                  encoding='utf-8'
+              )
+          PY
+
+      - name: Encrypt current profile pack
+        if: steps.compare.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -czf /tmp/atlas-wireguard-pack.tar.gz -C /tmp/atlas-wg .
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000             -pass env:ATLASPAGE_ID             -in /tmp/atlas-wireguard-pack.tar.gz             -out /tmp/atlas-wireguard-pack.enc
+          base64 -w0 /tmp/atlas-wireguard-pack.enc > vpn/atlas-wireguard-pack.enc.b64
+          rm -f /tmp/atlas-wireguard-pack.tar.gz /tmp/atlas-wireguard-pack.enc
+
+      - name: Commit changed manifest and encrypted pack
+        if: steps.compare.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vpn/atlas-wireguard-manifest.json vpn/atlas-wireguard-pack.enc.b64
+          git commit -m "Update AtlasPage WireGuard locations"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "### AtlasPage WireGuard monitor"
+            echo
+            echo "- Changed: ${{ steps.compare.outputs.changed || 'unknown' }}"
+            echo "- Added: ${{ steps.compare.outputs.added || 'none' }}"
+            echo "- Removed: ${{ steps.compare.outputs.removed || 'none' }}"
+            echo "- Router changes: none from GitHub runner"
+          } >> "$GITHUB_STEP_SUMMARY"
