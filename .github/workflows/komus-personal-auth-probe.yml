@@ -1,0 +1,133 @@
+name: Komus personal auth probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/komus-personal-auth-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install parser deps
+        run: pip install requests beautifulsoup4
+
+      - name: Inspect and authenticate Komus personal account
+        env:
+          KOMUS_LOGIN: \${{ secrets.KOMUS_LOGIN }}
+          KOMUS_PASSWORD: \${{ secrets.KOMUS_PASSWORD }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, re, json, urllib.parse
+          import requests
+          from bs4 import BeautifulSoup
+
+          login=os.environ.get("KOMUS_LOGIN","").strip()
+          password=os.environ.get("KOMUS_PASSWORD","").strip()
+          if not login or not password:
+              raise SystemExit("KOMUS_LOGIN/KOMUS_PASSWORD are not configured")
+
+          s=requests.Session()
+          s.headers.update({
+              "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130 Safari/537.36",
+              "Accept-Language":"ru-RU,ru;q=0.9,en;q=0.8",
+          })
+
+          personal="https://komus-opt.ru/personal/"
+          r=s.get(personal,timeout=90)
+          print("GET_STATUS="+str(r.status_code))
+          print("GET_FINAL_URL="+r.url)
+          soup=BeautifulSoup(r.text,"html.parser")
+
+          forms=[]
+          for i,form in enumerate(soup.find_all("form")):
+              action=urllib.parse.urljoin(r.url,form.get("action") or "")
+              method=(form.get("method") or "get").lower()
+              inputs=[]
+              for inp in form.find_all("input"):
+                  name=inp.get("name")
+                  typ=(inp.get("type") or "text").lower()
+                  if name:
+                      inputs.append({"name":name,"type":typ,"has_value":bool(inp.get("value"))})
+              forms.append({"index":i,"action":action,"method":method,"inputs":inputs})
+          print("FORMS="+json.dumps(forms,ensure_ascii=False)[:20000])
+
+          auth_forms=[]
+          for i,form in enumerate(soup.find_all("form")):
+              types=[(x.get("type") or "text").lower() for x in form.find_all("input")]
+              if "password" in types:
+                  auth_forms.append((i,form))
+          print("AUTH_FORM_COUNT="+str(len(auth_forms)))
+
+          if not auth_forms:
+              refs=re.findall(r'["\\']([^"\\']*(?:auth|login|ajax)[^"\\']*)["\\']',r.text,re.I)
+              print("AUTH_REFERENCES="+json.dumps(sorted(set(refs))[:100],ensure_ascii=False))
+              raise SystemExit("No password form found")
+
+          success=False
+          for idx,form in auth_forms:
+              action=urllib.parse.urljoin(r.url,form.get("action") or r.url)
+              method=(form.get("method") or "post").lower()
+              data={}
+              login_field=None
+              pass_field=None
+              for inp in form.find_all("input"):
+                  name=(inp.get("name") or "").strip()
+                  typ=(inp.get("type") or "text").lower()
+                  if not name:
+                      continue
+                  if typ in ("hidden","submit"):
+                      data[name]=inp.get("value") or ""
+                  if typ=="password":
+                      pass_field=name
+                  if typ in ("text","email","tel") and not login_field:
+                      login_field=name
+              if not login_field or not pass_field:
+                  continue
+              data[login_field]=login
+              data[pass_field]=password
+              resp=s.request(method.upper(),action,data=data,timeout=90,allow_redirects=True)
+              print("AUTH_ATTEMPT_FORM="+str(idx))
+              print("AUTH_STATUS="+str(resp.status_code))
+              print("AUTH_FINAL_URL="+resp.url)
+              check=s.get(personal,timeout=90)
+              low=check.text.casefold()
+              if (
+                  "полный ассортимент со специальными ценами" in low
+                  or "полный товарный каталог в xml" in low
+                  or "выйти" in low
+              ):
+                  success=True
+                  r=check
+                  break
+
+          print("AUTH_SUCCESS="+str(success))
+          if not success:
+              raise SystemExit("Komus auth failed with detected form")
+
+          soup=BeautifulSoup(r.text,"html.parser")
+          links=[]
+          for a in soup.find_all("a",href=True):
+              label=" ".join(a.stripped_strings)
+              href=urllib.parse.urljoin(r.url,a["href"])
+              low=(label+" "+href).casefold()
+              if (
+                  "полный ассортимент со специальными ценами" in low
+                  or "полный товарный каталог в xml" in low
+                  or "zip" in low
+                  or href.lower().endswith(".zip")
+              ):
+                  links.append({"label":label[:300],"href":href})
+          print("DOWNLOAD_LINKS="+json.dumps(links,ensure_ascii=False)[:30000])
+          PY
