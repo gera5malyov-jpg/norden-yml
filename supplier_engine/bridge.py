@@ -57,17 +57,20 @@ class MegasuppliersBridge:
             raise BridgeError("Megasuppliers bridge returned unexpected payload")
         return data
 
-    def get_links(self, supplier_id, request_id, page_size=1000):
+    def get_links(self, supplier_id, request_id, page_size=1000, type_id=None):
         out = []
         offset = 0
         while True:
-            data = self.call({
+            payload = {
                 "action": "links",
                 "supplier_id": int(supplier_id),
                 "request_id": str(request_id),
                 "offset": offset,
                 "limit": int(page_size),
-            })
+            }
+            if type_id:
+                payload["type_id"] = int(type_id)
+            data = self.call(payload)
             rows = data.get("items") or []
             if not isinstance(rows, list):
                 raise BridgeError("Megasuppliers bridge links payload is invalid")
@@ -77,17 +80,20 @@ class MegasuppliersBridge:
             offset += len(rows)
         return out
 
-    def sync_links(self, supplier_id, request_id, mappings, chunk_size=300):
+    def sync_links(self, supplier_id, request_id, mappings, chunk_size=300, type_id=None):
         total = 0
         mappings = list(mappings or [])
         for offset in range(0, len(mappings), chunk_size):
             chunk = mappings[offset:offset + chunk_size]
-            data = self.call({
+            payload = {
                 "action": "sync_links",
                 "supplier_id": int(supplier_id),
                 "request_id": str(request_id),
                 "items": chunk,
-            })
+            }
+            if type_id:
+                payload["type_id"] = int(type_id)
+            data = self.call(payload)
             total += int(data.get("updated") or 0)
         return total
 
@@ -109,19 +115,22 @@ class MegasuppliersBridge:
         return {str(k): str(v) for k, v in mapping.items() if str(k) and str(v)}
 
 
-    def kit_manifest(self, supplier_id, request_id, stock_id, page_size=200):
+    def kit_manifest(self, supplier_id, request_id, stock_id, page_size=200, type_id=None):
         items = []
         categories = {}
         offset = 0
         while True:
-            data = self.call({
+            payload = {
                 "action": "kit_manifest",
                 "supplier_id": int(supplier_id),
                 "request_id": str(request_id),
                 "stock_id": int(stock_id),
                 "offset": int(offset),
                 "limit": int(page_size),
-            })
+            }
+            if type_id:
+                payload["type_id"] = int(type_id)
+            data = self.call(payload)
             rows = data.get("items") or []
             cats = data.get("categories") or []
             if not isinstance(rows, list) or not isinstance(cats, list):
