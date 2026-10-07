@@ -1,119 +1,323 @@
 {
   "status": "ok",
-  "generated_at": "2026-10-07T16:38:48.119035+00:00",
+  "generated_at": "2026-10-07T17:11:21.758763+00:00",
   "public_yml": "https://price.tetchair.ru/feeds/tetchair-msk-yml.xml",
-  "offers": 1133,
+  "offers": 1132,
   "categories": 121,
-  "cards_seen": 18808,
-  "catalog_pages": 1332,
-  "multi_page_categories": 121,
-  "catalog_unique": 1571,
-  "matched_wholesale": 984,
-  "missing_wholesale": 149,
-  "coverage": 0.868491,
-  "missing_sample": [
-    "21551",
-    "21552",
-    "19662",
-    "19664",
-    "19666",
-    "19667",
-    "19668",
-    "19669",
-    "19670",
-    "19671",
-    "19672",
-    "19799",
-    "20047",
-    "20220",
-    "20221",
-    "20222",
-    "20229",
-    "20244",
-    "20245",
-    "20246",
-    "21372",
-    "21374",
-    "21375",
-    "21376",
-    "21656",
-    "21834",
-    "21837",
-    "24363",
-    "24364",
-    "24365",
-    "24420",
-    "24421",
-    "24422",
-    "24423",
-    "24424",
-    "24425",
-    "24426",
-    "24427",
-    "24494",
-    "24495",
-    "24496",
-    "24497",
-    "24498",
-    "24499",
-    "24500",
-    "24501",
-    "24502",
-    "24506",
-    "24558",
-    "24580",
-    "24584",
-    "24694",
-    "24783",
-    "25220",
-    "25255",
-    "25318",
-    "25320",
-    "25321",
-    "25322",
-    "25324",
-    "25325",
-    "25326",
-    "25327",
-    "25328",
-    "25329",
-    "20467",
-    "20468",
-    "20472",
-    "20473",
-    "20474",
-    "21535",
-    "21536",
-    "21540",
-    "21541",
-    "21542",
-    "21546",
-    "21547",
-    "21548",
-    "21549",
-    "19765",
-    "19767",
-    "19772",
-    "19787",
-    "21635",
-    "21636",
-    "24549",
-    "24550",
-    "19600",
-    "19601",
-    "19602",
-    "19603",
-    "21553",
-    "21554",
-    "21555",
-    "21560",
-    "21565",
-    "21566",
-    "21567",
-    "21569",
-    "21570"
+  "cards_seen": 1063,
+  "catalog_pages": 121,
+  "catalog_unique": 673,
+  "direct_lookup_requested": 686,
+  "direct_lookup_matched": 0,
+  "direct_lookup_errors": 686,
+  "direct_lookup_error_sample": [
+    {
+      "code": "973",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "2271",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "1040",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "12902",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "2151",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "13564",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "11576",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "13591",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "13592",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "12901",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "13565",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "13593",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "13594",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "13859",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "13862",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "13910",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "14433",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "13913",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "13912",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "14448",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "14459",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "14452",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "14445",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "15055",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "14460",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "15056",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "15050",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "15292",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "15294",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "15301",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19027",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "15330",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19269",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19272",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "15143",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19295",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19297",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19298",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19304",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19327",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19299",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19303",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19300",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19366",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19370",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19371",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19374",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19383",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19386",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19378",
+      "error": "wholesale_not_found"
+    }
   ],
-  "retail_mismatch_count": 217,
+  "matched_wholesale": 446,
+  "missing_wholesale": 686,
+  "coverage": 0.393993,
+  "missing_sample": [
+    "973",
+    "1040",
+    "2151",
+    "2271",
+    "11576",
+    "12901",
+    "12902",
+    "13564",
+    "13565",
+    "13591",
+    "13592",
+    "13593",
+    "13594",
+    "13859",
+    "13862",
+    "13910",
+    "13912",
+    "13913",
+    "14433",
+    "14445",
+    "14448",
+    "14452",
+    "14459",
+    "14460",
+    "15050",
+    "15055",
+    "15056",
+    "15143",
+    "15292",
+    "15294",
+    "15301",
+    "15330",
+    "19027",
+    "19269",
+    "19272",
+    "19295",
+    "19297",
+    "19298",
+    "19299",
+    "19300",
+    "19303",
+    "19304",
+    "19327",
+    "19366",
+    "19370",
+    "19371",
+    "19374",
+    "19378",
+    "19382",
+    "19383",
+    "19386",
+    "19387",
+    "19399",
+    "19467",
+    "19515",
+    "19516",
+    "19519",
+    "19520",
+    "19961",
+    "21151",
+    "21153",
+    "21163",
+    "21164",
+    "21671",
+    "24354",
+    "24614",
+    "24615",
+    "24616",
+    "24938",
+    "24939",
+    "24940",
+    "24986",
+    "24987",
+    "24988",
+    "24989",
+    "25019",
+    "25021",
+    "25022",
+    "25023",
+    "25026",
+    "25027",
+    "25034",
+    "25037",
+    "25038",
+    "25039",
+    "25045",
+    "25217",
+    "25218",
+    "25250",
+    "25264",
+    "25265",
+    "25281",
+    "25345",
+    "25346",
+    "25477",
+    "25478",
+    "25479",
+    "25678",
+    "25679",
+    "25680"
+  ],
+  "retail_mismatch_count": 68,
   "retail_mismatch_sample": [
     {
       "code": "25816",
@@ -184,191 +388,6 @@
       "code": "21147",
       "yml": 10420,
       "catalog": 5210
-    },
-    {
-      "code": "21230",
-      "yml": 17360,
-      "catalog": 4340
-    },
-    {
-      "code": "21231",
-      "yml": 17360,
-      "catalog": 4340
-    },
-    {
-      "code": "11724",
-      "yml": 21000,
-      "catalog": 5250
-    },
-    {
-      "code": "12650",
-      "yml": 12160,
-      "catalog": 3040
-    },
-    {
-      "code": "12654",
-      "yml": 7000,
-      "catalog": 3500
-    },
-    {
-      "code": "12829",
-      "yml": 16240,
-      "catalog": 4060
-    },
-    {
-      "code": "12830",
-      "yml": 16240,
-      "catalog": 4060
-    },
-    {
-      "code": "12831",
-      "yml": 16240,
-      "catalog": 4060
-    },
-    {
-      "code": "12832",
-      "yml": 16240,
-      "catalog": 4060
-    },
-    {
-      "code": "14173",
-      "yml": 9400,
-      "catalog": 2350
-    },
-    {
-      "code": "15179",
-      "yml": 17920,
-      "catalog": 4480
-    },
-    {
-      "code": "15225",
-      "yml": 16240,
-      "catalog": 4060
-    },
-    {
-      "code": "15281",
-      "yml": 16240,
-      "catalog": 4060
-    },
-    {
-      "code": "15282",
-      "yml": 16240,
-      "catalog": 4060
-    },
-    {
-      "code": "15368",
-      "yml": 18480,
-      "catalog": 9240
-    },
-    {
-      "code": "19112",
-      "yml": 16240,
-      "catalog": 4060
-    },
-    {
-      "code": "19113",
-      "yml": 16240,
-      "catalog": 4060
-    },
-    {
-      "code": "19256",
-      "yml": 21280,
-      "catalog": 2660
-    },
-    {
-      "code": "19258",
-      "yml": 17920,
-      "catalog": 4480
-    },
-    {
-      "code": "19319",
-      "yml": 6160,
-      "catalog": 3080
-    },
-    {
-      "code": "19416",
-      "yml": 12320,
-      "catalog": 3080
-    },
-    {
-      "code": "19826",
-      "yml": 7840,
-      "catalog": 1960
-    },
-    {
-      "code": "19827",
-      "yml": 7840,
-      "catalog": 1960
-    },
-    {
-      "code": "19828",
-      "yml": 7840,
-      "catalog": 1960
-    },
-    {
-      "code": "19829",
-      "yml": 7840,
-      "catalog": 1960
-    },
-    {
-      "code": "20185",
-      "yml": 14840,
-      "catalog": 3710
-    },
-    {
-      "code": "20186",
-      "yml": 14840,
-      "catalog": 3710
-    },
-    {
-      "code": "20187",
-      "yml": 14840,
-      "catalog": 3710
-    },
-    {
-      "code": "20224",
-      "yml": 4880,
-      "catalog": 1220
-    },
-    {
-      "code": "20437",
-      "yml": 4620,
-      "catalog": 2310
-    },
-    {
-      "code": "20655",
-      "yml": 6280,
-      "catalog": 1570
-    },
-    {
-      "code": "20656",
-      "yml": 6280,
-      "catalog": 1570
-    },
-    {
-      "code": "20658",
-      "yml": 7840,
-      "catalog": 1960
-    },
-    {
-      "code": "21122",
-      "yml": 13040,
-      "catalog": 3260
-    },
-    {
-      "code": "21123",
-      "yml": 15040,
-      "catalog": 3760
-    },
-    {
-      "code": "21244",
-      "yml": 17640,
-      "catalog": 4410
-    },
-    {
-      "code": "21265",
-      "yml": 20650,
-      "catalog": 4130
     },
     {
       "code": "21875",
@@ -461,159 +480,184 @@
       "catalog": 2450
     },
     {
-      "code": "14352",
-      "yml": 14420,
-      "catalog": 7210
-    },
-    {
-      "code": "15091",
-      "yml": 10300,
-      "catalog": 5150
-    },
-    {
-      "code": "15094",
-      "yml": 14000,
-      "catalog": 7000
-    },
-    {
-      "code": "15099",
-      "yml": 14000,
-      "catalog": 7000
-    },
-    {
-      "code": "15100",
-      "yml": 14000,
-      "catalog": 7000
-    },
-    {
-      "code": "15456",
-      "yml": 14420,
-      "catalog": 7210
-    },
-    {
-      "code": "21239",
-      "yml": 18000,
-      "catalog": 4500
-    },
-    {
       "code": "21240",
       "yml": 18000,
       "catalog": 4500
     },
     {
-      "code": "14328",
-      "yml": 23320,
-      "catalog": 5830
+      "code": "26020",
+      "yml": 9400,
+      "catalog": 4700
     },
     {
-      "code": "14332",
-      "yml": 23320,
-      "catalog": 5830
+      "code": "26021",
+      "yml": 9400,
+      "catalog": 4700
     },
     {
-      "code": "15474",
-      "yml": 15680,
-      "catalog": 3920
+      "code": "26022",
+      "yml": 8620,
+      "catalog": 4310
     },
     {
-      "code": "17252",
-      "yml": 8680,
-      "catalog": 2170
+      "code": "26023",
+      "yml": 8620,
+      "catalog": 4310
     },
     {
-      "code": "17278",
-      "yml": 11520,
-      "catalog": 2880
+      "code": "26024",
+      "yml": 8620,
+      "catalog": 4310
     },
     {
-      "code": "19232",
-      "yml": 17640,
-      "catalog": 4410
+      "code": "26025",
+      "yml": 8620,
+      "catalog": 4310
     },
     {
-      "code": "19235",
-      "yml": 17640,
-      "catalog": 4410
+      "code": "26026",
+      "yml": 12340,
+      "catalog": 6170
     },
     {
-      "code": "19236",
-      "yml": 14120,
-      "catalog": 3530
+      "code": "26027",
+      "yml": 12340,
+      "catalog": 6170
     },
     {
-      "code": "19336",
-      "yml": 9840,
-      "catalog": 2460
+      "code": "26028",
+      "yml": 12340,
+      "catalog": 6170
     },
     {
-      "code": "19337",
-      "yml": 9840,
-      "catalog": 2460
+      "code": "26029",
+      "yml": 12340,
+      "catalog": 6170
     },
     {
-      "code": "19453",
-      "yml": 14700,
-      "catalog": 7350
+      "code": "26030",
+      "yml": 12900,
+      "catalog": 6450
     },
     {
-      "code": "19939",
-      "yml": 11520,
-      "catalog": 2880
+      "code": "26031",
+      "yml": 12900,
+      "catalog": 6450
     },
     {
-      "code": "21130",
-      "yml": 11080,
-      "catalog": 2770
+      "code": "26182",
+      "yml": 20320,
+      "catalog": 5080
     },
     {
-      "code": "21131",
-      "yml": 11080,
-      "catalog": 2770
+      "code": "26184",
+      "yml": 20320,
+      "catalog": 5080
     },
     {
-      "code": "21132",
-      "yml": 11080,
-      "catalog": 2770
+      "code": "26185",
+      "yml": 20320,
+      "catalog": 5080
     },
     {
-      "code": "21133",
-      "yml": 11080,
-      "catalog": 2770
+      "code": "24339",
+      "yml": 30600,
+      "catalog": 15300
     },
     {
-      "code": "21135",
-      "yml": 11080,
-      "catalog": 2770
+      "code": "24340",
+      "yml": 30600,
+      "catalog": 15300
     },
     {
-      "code": "21203",
-      "yml": 11080,
-      "catalog": 2770
+      "code": "24518",
+      "yml": 7860,
+      "catalog": 3930
     },
     {
-      "code": "21207",
-      "yml": 12320,
-      "catalog": 3080
+      "code": "24556",
+      "yml": 7560,
+      "catalog": 3780
     },
     {
-      "code": "21208",
-      "yml": 12320,
-      "catalog": 3080
+      "code": "24723",
+      "yml": 9500,
+      "catalog": 4750
     },
     {
-      "code": "21211",
-      "yml": 11080,
-      "catalog": 2770
+      "code": "24776",
+      "yml": 13620,
+      "catalog": 6810
     },
     {
-      "code": "21212",
-      "yml": 11080,
-      "catalog": 2770
+      "code": "24777",
+      "yml": 13620,
+      "catalog": 6810
     },
     {
-      "code": "21247",
-      "yml": 13720,
-      "catalog": 3430
+      "code": "24778",
+      "yml": 13620,
+      "catalog": 6810
+    },
+    {
+      "code": "19251",
+      "yml": 8950,
+      "catalog": 1790
+    },
+    {
+      "code": "19252",
+      "yml": 8950,
+      "catalog": 1790
+    },
+    {
+      "code": "20439",
+      "yml": 20800,
+      "catalog": 10400
+    },
+    {
+      "code": "20440",
+      "yml": 20000,
+      "catalog": 5000
+    },
+    {
+      "code": "20444",
+      "yml": 25600,
+      "catalog": 6400
+    },
+    {
+      "code": "20446",
+      "yml": 25600,
+      "catalog": 6400
+    },
+    {
+      "code": "20447",
+      "yml": 28000,
+      "catalog": 7000
+    },
+    {
+      "code": "20448",
+      "yml": 52800,
+      "catalog": 13200
+    },
+    {
+      "code": "10310",
+      "yml": 229200,
+      "catalog": 76400
+    },
+    {
+      "code": "10630",
+      "yml": 32800,
+      "catalog": 16400
+    },
+    {
+      "code": "13626",
+      "yml": 79200,
+      "catalog": 39600
+    },
+    {
+      "code": "20385",
+      "yml": 69600,
+      "catalog": 34800
     }
   ],
   "output": "tetchair/tetchair-combined.xml"
