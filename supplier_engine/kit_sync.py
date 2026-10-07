@@ -867,6 +867,19 @@ def _select_variant(product, by_sku, by_kit_id, by_supplier_brand, supplier_iden
 
 def _kit_variants(kit, products=None):
     products = list(products or [])
+
+    # Thousands of per-SKU /v1/variants searches trigger KIT rate limits and
+    # can spend hours before the first write. For a large supplier set, scan
+    # the KIT variant collection once in parallel and build the identity
+    # indexes locally. This is bounded by catalog pages rather than product
+    # count and is substantially cheaper for the ~5k Norden batch.
+    if len(products) >= 500 and hasattr(kit, "scan_all_variants_parallel"):
+        print(
+            "KIT identity lookup: bulk catalog scan for %d products" % len(products),
+            flush=True,
+        )
+        return list(kit.scan_all_variants_parallel(workers=10))
+
     if products and hasattr(kit, "search_variants_parallel"):
         sku_terms = list(dict.fromkeys(
             _s(row.get("sku")) for row in products if _s(row.get("sku"))
