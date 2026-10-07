@@ -21,7 +21,7 @@ jobs:
       - name: Checkout fixed supplier sync code
         uses: actions/checkout@v4
         with:
-          ref: c2ea8cf7861679801d6c6c4d69ec9669ea18ef79
+          ref: 86de9602ac65e4aa1388a92000eb487b469784a5
 
       - uses: actions/setup-python@v5
         with:
@@ -55,3 +55,5 @@ jobs:
           path: norden-kit-recovery.json
           if-no-files-found: warn
           retention-days: 14
+
+# bulk lookup v2
