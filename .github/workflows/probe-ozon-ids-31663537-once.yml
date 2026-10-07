@@ -1,4 +1,4 @@
-name: Probe Norden Ozon required attributes
+name: Wait for Norden SKU and bind declaration
 on:
   push:
     branches: [main]
@@ -9,27 +9,45 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
     steps:
-      - name: Probe category dictionaries
-        env:
-          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
-          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      - name: Wait for SKU and bind
         run: |
           python - <<'PY'
-          import json, os, urllib.request, urllib.error
-          h={"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"}
+          import json, os, time, urllib.request, urllib.error, sys
+          BASE="https://api-seller.ozon.ru"
+          H={"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json","Accept":"application/json"}
+          CERT=5483296
+          offers=["AF-31649509","AF-31649510","AF-31652868","31663537"]
           def post(path,body):
-              req=urllib.request.Request("https://api-seller.ozon.ru"+path,data=json.dumps(body).encode(),headers=h,method="POST")
+              req=urllib.request.Request(BASE+path,data=json.dumps(body).encode(),headers=H,method="POST")
               try:
                   with urllib.request.urlopen(req,timeout=60) as r:
-                      data=json.loads(r.read().decode())
-                      print(path, json.dumps(data,ensure_ascii=False))
-                      return data
+                      raw=r.read().decode()
+                      return json.loads(raw) if raw else {}
               except urllib.error.HTTPError as e:
-                  print(path,"HTTP",e.code,e.read().decode())
-          base={"description_category_id":79164512,"type_id":95041}
-          post("/v1/description-category/attribute",{**base,"language":"RU"})
-          post("/v1/description-category/attribute/values/search",{**base,"attribute_id":22232,"limit":100,"value":"9401"})
-          post("/v1/description-category/attribute/values",{**base,"attribute_id":22232,"limit":2000,"last_value_id":0,"language":"RU"})
+                  return {"__error__":{"status":e.code,"body":e.read().decode("utf-8","replace")}}
+          products=[]
+          for i in range(24):
+              d=post("/v3/product/info/list",{"offer_id":offers})
+              products=d.get("items") or []
+              snap=[{"offer_id":p.get("offer_id"),"id":p.get("id"),"sku":p.get("sku"),"status":(p.get("statuses") or {}).get("status"),"description":(p.get("statuses") or {}).get("status_description"),"created":(p.get("statuses") or {}).get("is_created"),"errors":[e.get("code") for e in p.get("errors") or []]} for p in products]
+              print("POLL",i,json.dumps(snap,ensure_ascii=False),flush=True)
+              ready=[int(p.get("id") or 0) for p in products if int(p.get("sku") or 0)>0]
+              if ready:
+                  b=post("/v1/product/certificate/bind",{"certificate_id":CERT,"product_id":ready})
+                  print("BIND",json.dumps(b,ensure_ascii=False),flush=True)
+              cert=post("/v1/product/certificate/products/list",{"certificate_id":CERT,"limit":1000})
+              bound={int(x.get("product_id") or 0) for x in (cert.get("result") or {}).get("items") or []}
+              target={int(p.get("id") or 0) for p in products}
+              missing=target-bound
+              print("BIND_STATE",json.dumps({"bound":sorted(target&bound),"missing":sorted(missing)},ensure_ascii=False),flush=True)
+              if len(target)==4 and not missing:
+                  print("SUCCESS_ALL_4_BOUND",flush=True)
+                  sys.exit(0)
+              time.sleep(10)
+          sys.exit(3)
           PY
