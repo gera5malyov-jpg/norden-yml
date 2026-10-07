@@ -5,7 +5,7 @@ import runpy
 from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse, parse_qs
 
 import requests
 from bs4 import BeautifulSoup
@@ -80,20 +80,51 @@ def main():
     catalog = {}
     cards_seen = 0
     catalog_pages = 0
+    per_category_pages = {}
     for idx, url in enumerate(categories, 1):
-        r = session.get(url, timeout=60)
-        r.raise_for_status()
-        catalog_pages += 1
-        soup = BeautifulSoup(r.text, "html.parser")
-        for a in soup.select('a[href*="?p="]'):
-            item = parse_card(a, base)
-            if not item:
+        queue = [url]
+        seen_pages = set()
+        category_pages = 0
+        base_parts = urlparse(url)
+        while queue and len(seen_pages) < 100:
+            page_url = queue.pop(0)
+            if page_url in seen_pages:
                 continue
-            cards_seen += 1
-            prev = catalog.get(item["code"])
-            if prev is None or (prev.get("wholesale") is None and item.get("wholesale") is not None):
-                catalog[item["code"]] = item
-        print(f"catalog {idx}/{len(categories)} unique={len(catalog)}", flush=True)
+            seen_pages.add(page_url)
+            r = session.get(page_url, timeout=60)
+            r.raise_for_status()
+            catalog_pages += 1
+            category_pages += 1
+            soup = BeautifulSoup(r.text, "html.parser")
+            for a in soup.select('a[href*="?p="]'):
+                item = parse_card(a, base)
+                if not item:
+                    continue
+                cards_seen += 1
+                prev = catalog.get(item["code"])
+                if prev is None or (prev.get("wholesale") is None and item.get("wholesale") is not None):
+                    catalog[item["code"]] = item
+
+            # Follow same-category pagination/filter links, never product links (?p=...).
+            for a in soup.find_all("a", href=True):
+                href = urljoin(page_url, a.get("href") or "")
+                parts = urlparse(href)
+                if parts.scheme not in ("http", "https"):
+                    continue
+                if parts.netloc != base_parts.netloc or parts.path != base_parts.path:
+                    continue
+                query = parse_qs(parts.query, keep_blank_values=True)
+                if "p" in query:
+                    continue
+                if not parts.query:
+                    continue
+                if href not in seen_pages and href not in queue:
+                    queue.append(href)
+        per_category_pages[base_parts.path] = category_pages
+        print(
+            f"catalog {idx}/{len(categories)} pages={category_pages} unique={len(catalog)}",
+            flush=True,
+        )
 
     missing_codes = [code for code in offer_codes if code not in catalog]
     cookies = session.cookies.get_dict()
@@ -170,8 +201,6 @@ def main():
             missing.append(code)
 
     xml_root.set("date", datetime.now().astimezone().strftime("%Y-%m-%d %H:%M"))
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    ET.ElementTree(xml_root).write(OUT, encoding="utf-8", xml_declaration=True)
 
     report = {
         "status": "ok",
@@ -181,6 +210,7 @@ def main():
         "categories": len(categories),
         "cards_seen": cards_seen,
         "catalog_pages": catalog_pages,
+        "multi_page_categories": sum(1 for x in per_category_pages.values() if x > 1),
         "catalog_unique": len(catalog),
         "direct_lookup_requested": len(missing_codes),
         "direct_lookup_matched": direct_matched,
@@ -194,12 +224,20 @@ def main():
         "retail_mismatch_sample": retail_mismatch[:100],
         "output": str(OUT),
     }
-    REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("COMBINED_REPORT")
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
     if not offers or not matched:
         raise SystemExit(2)
+    if report["coverage"] < 0.80:
+        raise SystemExit(
+            "Tetchair wholesale coverage %.1f%% is below safe 80%% threshold; keeping the previous published feed"
+            % (report["coverage"] * 100.0)
+        )
+
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    ET.ElementTree(xml_root).write(OUT, encoding="utf-8", xml_declaration=True)
+    REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
