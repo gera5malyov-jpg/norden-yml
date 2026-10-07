@@ -65,6 +65,15 @@ if (!file_exists($config_path)) { fwrite(STDERR,"CONFIG_NOT_FOUND\n"); exit(2); 
 $config=json_decode(file_get_contents($config_path),true);
 if (!is_array($config)) { fwrite(STDERR,"INVALID_CONFIG\n"); exit(3); }
 
+// Tetchair pricing policy: a genuine wholesale price is mandatory for price writes.
+// Existing items without it may still receive stock/non-price updates; new ones are skipped.
+if (empty($config['rules']) || !is_array($config['rules'])) $config['rules']=array();
+$config['rules']['require_purchase_price']=true;
+if (file_put_contents($config_path,json_encode($config,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT))===false) {
+    fwrite(STDERR,"CONFIG_POLICY_WRITE_FAILED\n");
+    exit(11);
+}
+
 $type_id=(int)ifset($config['webasyst']['type_id']);
 $purchase_field=(string)ifset($config['mapping']['purchase_price']);
 $formulas=ifset($config['rules']['price_formulas'],array());
@@ -218,6 +227,7 @@ echo json_encode(array(
     'dispatch_fix_present'=>$dispatch_fix,
     'type_id'=>$type_id,
     'purchase_price_field'=>$purchase_field,
+    'require_purchase_price'=>(bool)ifset($config['rules']['require_purchase_price']),
     'formulas'=>$formulas,
     'previous_count'=>$previous_count
 ),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
