@@ -2,24 +2,28 @@
   "version": 1,
   "provider": "AtlasPage",
   "protocol": "WireGuard",
-  "baseline": true,
+  "baseline": false,
   "profiles": [
     "VPNTYPE-AMS1.conf",
     "VPNTYPE-AMS5.conf",
     "VPNTYPE-AST1.conf",
     "VPNTYPE-FRA2.conf",
-    "VPNTYPE-IZM1.conf",
     "VPNTYPE-IZM2.conf",
     "VPNTYPE-LON2.conf",
     "VPNTYPE-MAD1.conf",
+    "VPNTYPE-MIN1.conf",
     "VPNTYPE-MOS1.conf",
     "VPNTYPE-MOS3.conf",
-    "VPNTYPE-PAL1.conf",
     "VPNTYPE-PRA1.conf",
     "VPNTYPE-STO1.conf",
     "VPNTYPE-TEL3.conf"
   ],
-  "baseline_date": "2026-10-08",
-  "added_on_last_scan": [],
-  "removed_on_last_scan": []
+  "updated_at": "2026-10-07T22:02:10.446556+00:00",
+  "added_on_last_scan": [
+    "VPNTYPE-MIN1.conf"
+  ],
+  "removed_on_last_scan": [
+    "VPNTYPE-IZM1.conf",
+    "VPNTYPE-PAL1.conf"
+  ]
 }
