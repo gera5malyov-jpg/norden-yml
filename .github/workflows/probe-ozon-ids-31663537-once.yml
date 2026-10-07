@@ -1,4 +1,4 @@
-name: Probe Ozon IDs 31663537 once
+name: Probe four Norden products without SKU
 on:
   push:
     branches: [main]
@@ -11,26 +11,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Probe offer id vs Ozon SKU
+      - name: Probe four Norden products
         env:
           OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
           OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
         run: |
           python - <<'PY'
-          import json, os, urllib.request
+          import json, os, urllib.request, urllib.error
           h={"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"}
           def post(path,body):
               req=urllib.request.Request("https://api-seller.ozon.ru"+path,data=json.dumps(body).encode(),headers=h,method="POST")
               try:
                   with urllib.request.urlopen(req,timeout=60) as r:
                       print(path,"HTTP",r.status,r.read().decode())
-              except Exception as e:
-                  if hasattr(e,"code"):
-                      print(path,"HTTP",e.code,e.read().decode())
-                  else:
-                      print(path,"ERROR",repr(e))
-          post("/v3/product/list",{"filter":{"offer_id":["31663537"],"visibility":"ALL"},"limit":1000})
-          post("/v3/product/info/list",{"sku":["31663537"]})
+              except urllib.error.HTTPError as e:
+                  print(path,"HTTP",e.code,e.read().decode())
+          product_ids=["6533256787","6533257435","6533257484","6533257573"]
+          offer_ids=["AF-31649509","AF-31649510","AF-31652868","31663537"]
+          post("/v3/product/info/list",{"product_id":product_ids})
+          post("/v3/product/info/list",{"offer_id":offer_ids})
+          post("/v4/product/info/attributes",{"filter":{"product_id":[int(x) for x in product_ids],"visibility":"ALL"},"limit":100})
           PY
-
-# trigger
