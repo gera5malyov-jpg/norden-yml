@@ -1,12 +1,13 @@
 {
     "status": "dispatched",
     "supplier_id": 15,
-    "request_id": "tetchair-20261007210808-3de74d8170ca",
+    "request_id": "tetchair-20261007211125-079b73a7bc85",
     "dispatch_http_code": 204,
     "dispatch_uncertain": false,
     "dispatch_fix_present": true,
     "type_id": 1917,
     "purchase_price_field": "purchase_price",
+    "require_purchase_price": true,
     "formulas": {
         "purchase_price": "purchase_price",
         "price": "purchase_price * 1.25",
