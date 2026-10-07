@@ -61,6 +61,8 @@ jobs:
           arts=[int(x["artnumber"]) for x in sample if str(x.get("artnumber","")).isdigit()][:5]
 
           stock=None
+          prices=None
+          props=None
           if arts:
               body=json.dumps({"artnumbers":arts}).encode()
               req=urllib.request.Request(
@@ -70,10 +72,26 @@ jobs:
               )
               with urllib.request.urlopen(req,timeout=90) as r:
                   stock=json.loads(r.read().decode("utf-8"))
+              req=urllib.request.Request(
+                  "https://komus-opt.ru/api2/prices/?format=json",
+                  data=body, method="POST",
+                  headers={**H,"Content-Type":"application/json"},
+              )
+              with urllib.request.urlopen(req,timeout=90) as r:
+                  prices=json.loads(r.read().decode("utf-8"))
+              req=urllib.request.Request(
+                  "https://komus-opt.ru/api2/props/?format=json&fields=parentId,description,baseprops,barcodes,images,specifications",
+                  data=body, method="POST",
+                  headers={**H,"Content-Type":"application/json"},
+              )
+              with urllib.request.urlopen(req,timeout=90) as r:
+                  props=json.loads(r.read().decode("utf-8"))
 
           print("KOMUS_SECRET_NAME="+str(name))
           print("KOMUS_REGIONS="+json.dumps(regions,ensure_ascii=False,sort_keys=True))
           print("KOMUS_ELEMENTS_META="+json.dumps({k:elements.get(k) for k in ("count","page","next","pages")},ensure_ascii=False))
           print("KOMUS_SAMPLE="+json.dumps(sample,ensure_ascii=False)[:4000])
           print("KOMUS_STOCK_SAMPLE="+json.dumps((stock or {}).get("content") or [],ensure_ascii=False)[:4000])
+          print("KOMUS_PRICE_SAMPLE="+json.dumps((prices or {}).get("content") or [],ensure_ascii=False)[:4000])
+          print("KOMUS_PROPS_SAMPLE="+json.dumps((props or {}).get("content") or [],ensure_ascii=False)[:8000])
           PY
