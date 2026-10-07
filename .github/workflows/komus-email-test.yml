@@ -1,0 +1,51 @@
+name: Komus email report test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/komus-email-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Create test report
+        run: |
+          cat > /tmp/komus-email-test.json <<'JSON'
+          {
+            "status": "ok",
+            "catalog_complete": false,
+            "source_rows_seen": 0,
+            "eligible_in_stock": 0,
+            "existing_variants_seen": 0,
+            "new_products_created": 0,
+            "price_changes": 0,
+            "stock_changes": 0,
+            "absent_to_zero": 0,
+            "price_rows": 0,
+            "special_price_used": 0,
+            "base_price_fallback": 0,
+            "duplicate_kit_skus": 0,
+            "next_offset": 0,
+            "error_count": 0,
+            "warning_count": 0
+          }
+          JSON
+      - name: Send test Komus report
+        env:
+          GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: |
+          python komus-kit/send_report_email.py \
+            --report /tmp/komus-email-test.json \
+            --kind scheduled \
+            --run-url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
