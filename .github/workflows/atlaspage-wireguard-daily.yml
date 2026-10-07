@@ -219,11 +219,16 @@ jobs:
           python3 - <<'PY'
           import json
           import os
+          import hashlib
           from datetime import datetime, timezone
           from pathlib import Path
 
           manifest_path = Path('vpn/atlas-wireguard-manifest.json')
           current = sorted(set(json.load(open('/tmp/atlas-wg-profiles.json', encoding='utf-8'))))
+          current_hashes = {
+              name: hashlib.sha256((Path('/tmp/atlas-wg') / name).read_bytes()).hexdigest()
+              for name in current
+          }
 
           old = []
           old_data = {}
@@ -231,14 +236,20 @@ jobs:
               old_data = json.loads(manifest_path.read_text(encoding='utf-8'))
               old = sorted(set(old_data.get('profiles', [])))
 
+          old_hashes = old_data.get('sha256', {}) if isinstance(old_data.get('sha256', {}), dict) else {}
           added = sorted(set(current) - set(old))
           removed = sorted(set(old) - set(current))
-          changed = current != old
+          updated = sorted(
+              name for name in set(current) & set(old)
+              if old_hashes.get(name) and old_hashes.get(name) != current_hashes.get(name)
+          )
+          changed = current != old or current_hashes != old_hashes
 
           print('CURRENT_COUNT=' + str(len(current)))
           print('PREVIOUS_COUNT=' + str(len(old)))
           print('ADDED=' + ','.join(added))
           print('REMOVED=' + ','.join(removed))
+          print('UPDATED=' + ','.join(updated))
           print('CHANGED=' + ('yes' if changed else 'no'))
 
           out = os.environ['GITHUB_OUTPUT']
@@ -246,6 +257,7 @@ jobs:
               f.write('changed=' + ('true' if changed else 'false') + '\n')
               f.write('added=' + ','.join(added) + '\n')
               f.write('removed=' + ','.join(removed) + '\n')
+              f.write('updated=' + ','.join(updated) + '\n')
 
           if changed:
               data = {
@@ -254,9 +266,11 @@ jobs:
                   'protocol': 'WireGuard',
                   'baseline': False,
                   'profiles': current,
+                  'sha256': current_hashes,
                   'updated_at': datetime.now(timezone.utc).isoformat(),
                   'added_on_last_scan': added,
                   'removed_on_last_scan': removed,
+                  'updated_on_last_scan': updated,
               }
               manifest_path.write_text(
                   json.dumps(data, ensure_ascii=False, indent=2) + '\n',
@@ -296,5 +310,6 @@ jobs:
             echo "- Changed: ${{ steps.compare.outputs.changed || 'unknown' }}"
             echo "- Added: ${{ steps.compare.outputs.added || 'none' }}"
             echo "- Removed: ${{ steps.compare.outputs.removed || 'none' }}"
+            echo "- Updated configs: ${{ steps.compare.outputs.updated || 'none' }}"
             echo "- Router changes: none from GitHub runner"
           } >> "$GITHUB_STEP_SUMMARY"
