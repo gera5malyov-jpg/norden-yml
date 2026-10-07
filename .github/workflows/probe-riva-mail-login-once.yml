@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
     steps:
       - name: Check Gmail SMTP login for shop mailbox
@@ -22,7 +23,7 @@ jobs:
         run: |
           python - <<'PY'
           import os, smtplib
-          user='shop@office-mag.com'
+          user=os.environ.get('GMAIL_SMTP_USER','').strip()
           pwd=os.environ.get('GMAIL_APP_PASSWORD','').strip()
           if not pwd:
               raise SystemExit('GMAIL_APP_PASSWORD is empty')
