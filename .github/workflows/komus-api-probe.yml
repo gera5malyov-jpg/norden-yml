@@ -1,0 +1,79 @@
+name: Komus API probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/komus-api-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe Komus API access and regions
+        env:
+          KOMUS_API: ${{ secrets.KOMUS_API }}
+          KOMUS_API_KEY: ${{ secrets.KOMUS_API_KEY }}
+          KOMUS_TOKEN: ${{ secrets.KOMUS_TOKEN }}
+          KOMUS_API_TOKEN: ${{ secrets.KOMUS_API_TOKEN }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request, urllib.parse, urllib.error
+
+          candidates = [
+              ("KOMUS_API", os.getenv("KOMUS_API","")),
+              ("KOMUS_API_KEY", os.getenv("KOMUS_API_KEY","")),
+              ("KOMUS_TOKEN", os.getenv("KOMUS_TOKEN","")),
+              ("KOMUS_API_TOKEN", os.getenv("KOMUS_API_TOKEN","")),
+          ]
+          name, token = next(((n,v.strip()) for n,v in candidates if v and v.strip()), (None,None))
+          if not token:
+              raise SystemExit("No Komus secret found in expected names: KOMUS_API/KOMUS_API_KEY/KOMUS_TOKEN/KOMUS_API_TOKEN")
+
+          H={"token":token,"Accept":"application/json","User-Agent":"Megapolis-Komus-KIT/1.0"}
+          def get(path, params=None):
+              q=urllib.parse.urlencode(params or {})
+              u="https://komus-opt.ru/api2"+path+("?" + q if q else "")
+              req=urllib.request.Request(u,headers=H)
+              with urllib.request.urlopen(req,timeout=90) as r:
+                  return json.loads(r.read().decode("utf-8"))
+
+          ship=get("/shipdata/",{"format":"json"})
+          regions={}
+          for row in ship.get("content") or []:
+              info=(row or {}).get("shipmentInfo") or {}
+              rid=info.get("regionID")
+              rn=str(info.get("regionName") or "").strip()
+              if rid is not None and rn:
+                  regions[str(rid)]=rn
+
+          elements=get("/elements",{"format":"json","page":1,"limit":5})
+          sample=elements.get("content") or []
+          arts=[int(x["artnumber"]) for x in sample if str(x.get("artnumber","")).isdigit()][:5]
+
+          stock=None
+          if arts:
+              body=json.dumps({"artnumbers":arts}).encode()
+              req=urllib.request.Request(
+                  "https://komus-opt.ru/api2/stock/?format=json",
+                  data=body, method="POST",
+                  headers={**H,"Content-Type":"application/json"},
+              )
+              with urllib.request.urlopen(req,timeout=90) as r:
+                  stock=json.loads(r.read().decode("utf-8"))
+
+          print("KOMUS_SECRET_NAME="+str(name))
+          print("KOMUS_REGIONS="+json.dumps(regions,ensure_ascii=False,sort_keys=True))
+          print("KOMUS_ELEMENTS_META="+json.dumps({k:elements.get(k) for k in ("count","page","next","pages")},ensure_ascii=False))
+          print("KOMUS_SAMPLE="+json.dumps(sample,ensure_ascii=False)[:4000])
+          print("KOMUS_STOCK_SAMPLE="+json.dumps((stock or {}).get("content") or [],ensure_ascii=False)[:4000])
+          PY
