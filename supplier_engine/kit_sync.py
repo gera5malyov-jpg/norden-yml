@@ -755,6 +755,27 @@ def _select_variant(product, by_sku, by_kit_id, by_supplier_brand, supplier_iden
     sku = _s(product.get("sku"))
     brand_key = _norm(brand)
 
+    # Tetchair historical KIT cards can have an incorrect brand/manufacturer.
+    # For this supplier the exact Webasyst SKU is the trusted identity key.
+    # A single exact SKU match is safe to relink and its brand is corrected
+    # later by the normal variant delta. Never guess when the SKU is duplicated.
+    if brand_key == _norm("Tetchair") and sku:
+        tetchair_sku_matches = by_sku.get(sku, [])
+        if len(tetchair_sku_matches) > 1:
+            raise KitSyncError(
+                "KIT SKU=%s matches %d variants; Tetchair article match is ambiguous"
+                % (sku, len(tetchair_sku_matches))
+            )
+        if len(tetchair_sku_matches) == 1:
+            return tetchair_sku_matches[0]
+        if expected_kit_id:
+            stored = by_kit_id.get(expected_kit_id, [])
+            if len(stored) == 1:
+                raise KitSyncError(
+                    "Tetchair KIT ID %s points to SKU=%s, but Webasyst article is %s; automatic relink is blocked"
+                    % (expected_kit_id, _s(stored[0].get("sku")), sku)
+                )
+
     if expected_kit_id:
         matches = by_kit_id.get(expected_kit_id, [])
         if len(matches) > 1:
