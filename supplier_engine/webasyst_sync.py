@@ -379,6 +379,10 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
         seen_supplier.add(product.supplier_sku)
         matches = existing.get(product.sku, [])
         desired = asdict(product)
+        missing_required_purchase = bool(
+            rules.get("require_purchase_price", False)
+            and (product.purchase_price is None or product.purchase_price <= 0)
+        )
 
         if not matches and product.supplier_sku:
             supplier_links = links_by_supplier.get(product.supplier_sku, [])
@@ -395,6 +399,15 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
                 key = (str(link.get("product_id")), str(link.get("sku_id")))
                 linked = existing_by_ids.get(key)
                 if linked is None:
+                    # Do not recreate a product when the selected pricing policy
+                    # requires a purchase price that the supplier did not provide.
+                    if missing_required_purchase:
+                        plan["skipped"].append({
+                            "sku": product.sku,
+                            "supplier_sku": product.supplier_sku,
+                            "reason": "missing_purchase_price",
+                        })
+                        continue
                     # The old supplier link points to a SKU that no longer
                     # exists. The catalog-wide exact search above has already
                     # looked for this supplier article / internal SKU / exact
@@ -434,6 +447,13 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
             })
             continue
 
+        if missing_required_purchase:
+            plan["skipped"].append({
+                "sku": product.sku,
+                "supplier_sku": product.supplier_sku,
+                "reason": "missing_purchase_price",
+            })
+            continue
         if not rules.get("create_new", False):
             plan["skipped"].append({"sku": product.sku, "reason": "create_disabled"})
             continue
