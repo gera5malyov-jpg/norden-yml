@@ -7,7 +7,7 @@ from supplier_engine.formulas import evaluate_formula
 from supplier_engine.models import Product
 from supplier_engine.runner import load_config, normalize, config_sha256, fetch_source, _characteristic_names_for_plan, _unique_image_aliases
 from supplier_engine import norden
-from supplier_engine.kit_sync import sync_manifest, _price_pair, _webasyst_category_paths, _variant_indexes, _select_variant, _kit_characteristics, _identity_preflight, SUPPLIER_ARTICLE_CHARACTERISTIC, LEGACY_CODE_SITE_CHARACTERISTIC
+from supplier_engine.kit_sync import sync_manifest, _price_pair, _webasyst_category_paths, _variant_indexes, _select_variant, _kit_characteristics, _identity_preflight, _kit_variants, SUPPLIER_ARTICLE_CHARACTERISTIC, LEGACY_CODE_SITE_CHARACTERISTIC
 from supplier_engine.bridge import MegasuppliersBridge
 from supplier_engine.validators import validate_run
 from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan, webasyst_sku_mode
@@ -2095,3 +2095,25 @@ def test_kit_apply_max_create_blocks_before_product_creation():
     assert report["errors"][0]["error"] == "Planned KIT creates exceed safety limit"
     assert not kit.created_products
     assert not kit.created_variants
+
+
+def test_large_kit_batch_uses_one_bulk_catalog_scan():
+    class FakeKit:
+        def __init__(self):
+            self.bulk_workers = None
+            self.targeted_called = False
+
+        def scan_all_variants_parallel(self, workers=6):
+            self.bulk_workers = workers
+            return iter([{"id": "v1", "sku": "1"}])
+
+        def search_variants_parallel(self, names, workers=6, skip_broad=False):
+            self.targeted_called = True
+            raise AssertionError("large batches must not use per-SKU KIT searches")
+
+    kit = FakeKit()
+    products = [{"sku": str(i), "supplier_sku": "N-%d" % i} for i in range(500)]
+    rows = _kit_variants(kit, products)
+    assert rows == [{"id": "v1", "sku": "1"}]
+    assert kit.bulk_workers == 10
+    assert kit.targeted_called is False
