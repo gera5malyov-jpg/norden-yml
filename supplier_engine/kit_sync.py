@@ -1281,7 +1281,7 @@ def _variant_delta(current, desired):
     return out
 
 
-def sync_manifest(manifest, config, *, kit=None, wa=None):
+def sync_manifest(manifest, config, *, kit=None, wa=None, max_create=None, max_eligible=None):
     rules = config.get("rules") or {}
     if not rules.get("export_to_kit", False):
         return {
@@ -1319,6 +1319,15 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
     if not eligible:
         return report
 
+    if max_eligible is not None and len(eligible) > int(max_eligible):
+        report["status"] = "blocked"
+        report["errors"].append({
+            "error": "Eligible product count exceeds safety limit",
+            "eligible": len(eligible),
+            "max_eligible": int(max_eligible),
+        })
+        return report
+
     # One bulk read builds the complete identity index before writes.
     warehouses = _warehouse_ids(kit)
     kit_characteristics = kit.characteristics()
@@ -1334,6 +1343,14 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
     if preflight.get("status") != "ok":
         report["status"] = "blocked"
         report["errors"] = list(preflight.get("conflict_sample") or [])
+        return report
+    if max_create is not None and int(preflight.get("create_new") or 0) > int(max_create):
+        report["status"] = "blocked"
+        report["errors"].append({
+            "error": "Planned KIT creates exceed safety limit",
+            "would_create": int(preflight.get("create_new") or 0),
+            "max_create": int(max_create),
+        })
         return report
 
     supplier_article_id = identity["supplier_article_id"]
@@ -1459,6 +1476,12 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
         kit_id = _s(full.get("kit_id"))
         if not kit_id or not kit_id.isdigit():
             raise KitSyncError("KIT variant %s has no numeric kit_id" % variant_id)
+        current_media = [
+            item for item in (full.get("media") or [])
+            if isinstance(item, dict)
+            and _s(item.get("type")).upper() == "IMAGE"
+            and _s(item.get("image_id"))
+        ]
 
         previous_kit_id = _feature_kit_id(product.get("features"))
         kit_id_written = False
@@ -1482,8 +1505,7 @@ def sync_manifest(manifest, config, *, kit=None, wa=None):
             # products with both KIT ID and summary can skip the expensive
             # file-url pass on ordinary delta updates.
             "needs_media": bool(product.get("image_urls")) and (
-                created
-                or previous_kit_id != kit_id
+                not current_media
                 or not _s(product.get("summary"))
             ),
         }
