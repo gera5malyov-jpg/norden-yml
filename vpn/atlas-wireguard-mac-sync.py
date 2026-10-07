@@ -25,7 +25,7 @@ ROUTER_LOGIN = "chatgpt"
 PROFILE_RE = re.compile(r"^VPNTYPE-[A-Za-z0-9._-]+\.conf$")
 
 RUSSIAN_CODE_RE = re.compile(
-    r"^(?:MOS|MSK|MOW|LED|SPB|KZN|EKB|SVX|NSK|OVB|KGD|VVO|AER|SOC|UFA|KRR)\\d*$",
+    r"^(?:MOS|MSK|MOW|LED|SPB|KZN|EKB|SVX|NSK|OVB|KGD|VVO|AER|SOC|UFA|KRR)\d*$",
     re.IGNORECASE,
 )
 RUSSIAN_LABEL_MARKERS = (
