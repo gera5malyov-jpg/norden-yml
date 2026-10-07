@@ -1,0 +1,66 @@
+name: Komus to Yandex KIT daily
+
+on:
+  schedule:
+    - cron: '37 3 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run: do not write to KIT'
+        required: true
+        default: true
+        type: boolean
+      max_new:
+        description: 'Maximum new Komus products this run; 0 means unlimited'
+        required: true
+        default: '200'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: komus-kit-write
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt beautifulsoup4
+      - name: Run Komus daily sync
+        env:
+          KOMUS_LOGIN: ${{ secrets.KOMUS_LOGIN }}
+          KOMUS_PASSWORD: ${{ secrets.KOMUS_PASSWORD }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--report /tmp/komus-daily.json)
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
+            if [[ "${{ inputs.max_new }}" != "0" ]]; then args+=(--max-new "${{ inputs.max_new }}"); fi
+          else
+            args+=(--max-new "200")
+          fi
+          PYTHONPATH=samson-kit python komus-kit/sync_komus_kit.py "${args[@]}"
+      - name: Print compact report
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          p="/tmp/komus-daily.json"
+          if not os.path.exists(p):
+              raise SystemExit
+          r=json.load(open(p,encoding="utf-8"))
+          keys=("status","catalog_complete","source_rows_seen","eligible_in_stock","price_rows","special_price_used","base_price_fallback","existing_variants_seen","new_products_created","new_limit_skipped","price_changes","stock_changes","absent_to_zero","duplicate_kit_skus","error_count","warning_count")
+          print(json.dumps({k:r.get(k) for k in keys},ensure_ascii=False,indent=2))
+          if r.get("errors"):
+              print(json.dumps(r["errors"][:20],ensure_ascii=False,indent=2))
+          PY
