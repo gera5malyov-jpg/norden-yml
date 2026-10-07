@@ -121,4 +121,23 @@ jobs:
               page=int(nxt)
           print("KOMUS_V2_SCAN_TOTAL="+str(total))
           print("KOMUS_V2_SCAN_HITS="+json.dumps(hits,ensure_ascii=False)[:30000])
+
+          # Legacy API v1: first try the token in the request header.
+          def get_v1_header(path, params=None):
+              q=urllib.parse.urlencode(params or {})
+              u="https://komus-opt.ru/api"+path+("?" + q if q else "")
+              req=urllib.request.Request(u,headers=H)
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      return r.status,json.loads(r.read().decode("utf-8"))
+              except urllib.error.HTTPError as exc:
+                  raw=exc.read().decode("utf-8","replace")
+                  return exc.code,raw
+
+          for value in ("2505358","PP1002NG"):
+              status,payload=get_v1_header("/elements/"+value+"/",{"format":"json"})
+              print("KOMUS_V1_HEADER_DIRECT_"+value+"="+json.dumps({"status":status,"payload":payload},ensure_ascii=False)[:12000])
+
+          status,payload=get_v1_header("/elements/",{"format":"json","count":250,"page":1})
+          print("KOMUS_V1_HEADER_SCAN="+json.dumps({"status":status,"payload":payload},ensure_ascii=False)[:20000])
           PY
