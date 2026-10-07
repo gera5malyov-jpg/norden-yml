@@ -17,7 +17,7 @@ HEADERS = {
     "Api-Key": KEY,
     "Content-Type": "application/json",
     "Accept": "application/json",
-    "User-Agent": "megapolis-norden-certificate-bind/1.1",
+    "User-Agent": "megapolis-norden-certificate-bind/1.2",
 }
 
 def normalize_certificate_number(value):
@@ -159,3 +159,111 @@ def list_bound_products(certificate_id):
     result = data.get("result") or {}
     return result.get("items") or []
 
+def bind_batch(certificate_id, product_ids, failures, responses):
+    if not product_ids:
+        return
+    data = post(
+        "/v1/product/certificate/bind",
+        {"certificate_id": certificate_id, "product_id": product_ids},
+    )
+    responses.append({"product_ids": product_ids, "response": data})
+    if "__error__" not in data and data.get("result") is True:
+        return
+    if len(product_ids) == 1:
+        failures.append({"product_id": product_ids[0], "response": data})
+        return
+    midpoint = len(product_ids) // 2
+    bind_batch(certificate_id, product_ids[:midpoint], failures, responses)
+    bind_batch(certificate_id, product_ids[midpoint:], failures, responses)
+
+def main():
+    certificate_id, certificate = resolve_certificate()
+    number = str(certificate.get("certificate_number") or "")
+
+    products = list_products()
+    product_ids = [
+        int(item.get("product_id") or 0)
+        for item in products
+        if int(item.get("product_id") or 0)
+    ]
+    attributes = get_attributes(product_ids)
+
+    norden = []
+    brand_counts = {}
+    for product in attributes:
+        brand = get_brand(product).strip()
+        if brand:
+            brand_counts[brand] = brand_counts.get(brand, 0) + 1
+        if brand.casefold() == TARGET_BRAND:
+            pid = int(product.get("id") or product.get("product_id") or 0)
+            if pid:
+                norden.append({
+                    "product_id": pid,
+                    "offer_id": str(product.get("offer_id") or ""),
+                    "name": str(product.get("name") or ""),
+                    "brand": brand,
+                })
+
+    if not norden:
+        raise RuntimeError("No products with exact Ozon brand Norden were found. No changes made.")
+
+    bound_before_rows = list_bound_products(certificate_id)
+    bound_before = {int(item.get("product_id") or 0) for item in bound_before_rows}
+    target_ids = sorted({item["product_id"] for item in norden})
+    missing_before = [pid for pid in target_ids if pid not in bound_before]
+
+    failures = []
+    responses = []
+    for batch in chunks(missing_before, 100):
+        bind_batch(certificate_id, batch, failures, responses)
+        time.sleep(0.25)
+
+    bound_after_rows = list_bound_products(certificate_id)
+    bound_after = {int(item.get("product_id") or 0) for item in bound_after_rows}
+    still_missing = [pid for pid in target_ids if pid not in bound_after]
+    newly_bound = [pid for pid in target_ids if pid in bound_after and pid not in bound_before]
+
+    by_id = {item["product_id"]: item for item in norden}
+    report = {
+        "certificate": certificate,
+        "certificate_id": certificate_id,
+        "target_brand": "Norden",
+        "catalog_product_count": len(product_ids),
+        "norden_product_count": len(target_ids),
+        "certificate_products_before": len(bound_before),
+        "norden_already_bound_before": len(target_ids) - len(missing_before),
+        "norden_missing_before": len(missing_before),
+        "norden_newly_bound": len(newly_bound),
+        "norden_still_missing": len(still_missing),
+        "all_norden_bound": len(still_missing) == 0,
+        "missing_before_products": [by_id[pid] for pid in missing_before],
+        "newly_bound_products": [by_id[pid] for pid in newly_bound],
+        "still_missing_products": [by_id[pid] for pid in still_missing],
+        "failures": failures,
+        "bind_responses": responses,
+        "brand_counts_matching_nord": {
+            brand: count for brand, count in brand_counts.items()
+            if "nord" in brand.casefold()
+        },
+    }
+    os.makedirs(os.path.dirname(REPORT_PATH), exist_ok=True)
+    with open(REPORT_PATH, "w", encoding="utf-8") as handle:
+        json.dump(report, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+
+    print(json.dumps({
+        "certificate_id": certificate_id,
+        "certificate_number": number,
+        "norden_product_count": len(target_ids),
+        "already_bound_before": len(target_ids) - len(missing_before),
+        "missing_before": len(missing_before),
+        "newly_bound": len(newly_bound),
+        "still_missing": len(still_missing),
+        "all_norden_bound": len(still_missing) == 0,
+    }, ensure_ascii=False))
+
+    if still_missing:
+        raise SystemExit(2)
+
+if __name__ == "__main__":
+    main()
