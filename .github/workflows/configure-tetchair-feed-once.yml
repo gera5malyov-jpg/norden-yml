@@ -77,6 +77,11 @@ jobs:
           $cfg['mapping']['category']='categoryId';
           $cfg['mapping']['images']=array('pictures');
 
+          // Combined feed already contains the official retail price in <price>
+          // and the authenticated wholesale price in <purchase_price>.
+          // Do not recalculate either from supplier_price (which points to <price>).
+          $cfg['rules']['price_formulas']=array();
+
           $cfg['webasyst']['type_id']=1917;
 
           $json=json_encode($cfg,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
@@ -112,3 +117,5 @@ jobs:
                   except Exception as e:
                       print('cleanup warning:',e)
           PY
+
+# rerun price formulas v2
