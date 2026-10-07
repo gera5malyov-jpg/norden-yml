@@ -1,0 +1,75 @@
+name: CDEK Calc Moscow Sochi 2 packages
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cdek-calc-moscow-sochi-temp.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  calc:
+    runs-on: ubuntu-latest
+    env:
+      CDEK_CLIENT_ID: ${{ secrets.CDEK_CLIENT_ID }}
+      CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
+    steps:
+      - name: Calculate live CDEK tariffs
+        shell: python
+        run: |
+          import os, requests, json, sys
+
+          base = "https://api.cdek.ru/v2"
+          r = requests.post(
+              base + "/oauth/token",
+              data={
+                  "grant_type": "client_credentials",
+                  "client_id": os.environ["CDEK_CLIENT_ID"],
+                  "client_secret": os.environ["CDEK_CLIENT_SECRET"],
+              },
+              timeout=30,
+          )
+          r.raise_for_status()
+          token = r.json()["access_token"]
+          headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
+          def city_code(name):
+              rr = requests.get(
+                  base + "/location/cities",
+                  headers=headers,
+                  params={"city": name, "country_codes": "RU", "size": 20},
+                  timeout=30,
+              )
+              rr.raise_for_status()
+              items = rr.json()
+              print("CITY_CANDIDATES", name, json.dumps(items, ensure_ascii=False))
+              exact = [x for x in items if str(x.get("city","")).strip().lower() == name.lower()]
+              if not exact:
+                  raise RuntimeError(f"City not found: {name}")
+              return exact[0]["code"]
+
+          from_code = city_code("Москва")
+          to_code = city_code("Сочи")
+          print("FROM_CODE", from_code)
+          print("TO_CODE", to_code)
+
+          packages = [
+              {"weight": 2100, "length": 46, "width": 49, "height": 45},
+              {"weight": 2300, "length": 65, "width": 47, "height": 10},
+          ]
+          payload = {
+              "type": 1,
+              "from_location": {"code": from_code},
+              "to_location": {"code": to_code},
+              "packages": packages,
+          }
+          print("PAYLOAD", json.dumps(payload, ensure_ascii=False))
+          rr = requests.post(base + "/calculator/tarifflist", headers=headers, json=payload, timeout=45)
+          print("HTTP", rr.status_code)
+          print("RAW", rr.text)
+          rr.raise_for_status()
+          data = rr.json()
+          tariffs = data.get("tariff_codes", data if isinstance(data, list) else [])
+          door_door = [t for t in tariffs if t.get("delivery_mode") == 1]
+          print("DOOR_DOOR", json.dumps(door_door, ensure_ascii=False, indent=2))
