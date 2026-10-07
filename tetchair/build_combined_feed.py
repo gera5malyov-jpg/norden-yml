@@ -4,7 +4,7 @@ import re
 import runpy
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse, parse_qs
 
 import requests
 from bs4 import BeautifulSoup
@@ -67,19 +67,52 @@ def main():
 
     catalog = {}
     cards_seen = 0
+    catalog_pages = 0
+    per_category_pages = {}
     for idx, url in enumerate(categories, 1):
-        r = session.get(url, timeout=60)
-        r.raise_for_status()
-        soup = BeautifulSoup(r.text, "html.parser")
-        for a in soup.select('a[href*="?p="]'):
-            item = parse_card(a, base)
-            if not item:
+        queue = [url]
+        seen_pages = set()
+        category_pages = 0
+        base_parts = urlparse(url)
+        while queue and len(seen_pages) < 100:
+            page_url = queue.pop(0)
+            if page_url in seen_pages:
                 continue
-            cards_seen += 1
-            prev = catalog.get(item["code"])
-            if prev is None or (prev.get("wholesale") is None and item.get("wholesale") is not None):
-                catalog[item["code"]] = item
-        print(f"catalog {idx}/{len(categories)} unique={len(catalog)}", flush=True)
+            seen_pages.add(page_url)
+            r = session.get(page_url, timeout=60)
+            r.raise_for_status()
+            catalog_pages += 1
+            category_pages += 1
+            soup = BeautifulSoup(r.text, "html.parser")
+            for a in soup.select('a[href*="?p="]'):
+                item = parse_card(a, base)
+                if not item:
+                    continue
+                cards_seen += 1
+                prev = catalog.get(item["code"])
+                if prev is None or (prev.get("wholesale") is None and item.get("wholesale") is not None):
+                    catalog[item["code"]] = item
+
+            # Follow any same-category navigation links, but never product detail links.
+            for a in soup.find_all("a", href=True):
+                href = urljoin(page_url, a.get("href") or "")
+                parts = urlparse(href)
+                if parts.scheme not in ("http", "https"):
+                    continue
+                if parts.netloc != base_parts.netloc or parts.path != base_parts.path:
+                    continue
+                q = parse_qs(parts.query, keep_blank_values=True)
+                if "p" in q:
+                    continue
+                if not parts.query:
+                    continue
+                if href not in seen_pages and href not in queue:
+                    queue.append(href)
+        per_category_pages[base_parts.path] = category_pages
+        print(
+            f"catalog {idx}/{len(categories)} pages={category_pages} unique={len(catalog)}",
+            flush=True,
+        )
 
     yml = requests.get(PUBLIC_YML, timeout=120)
     yml.raise_for_status()
@@ -121,6 +154,8 @@ def main():
         "offers": len(offers),
         "categories": len(categories),
         "cards_seen": cards_seen,
+        "catalog_pages": catalog_pages,
+        "multi_page_categories": sum(1 for x in per_category_pages.values() if x > 1),
         "catalog_unique": len(catalog),
         "matched_wholesale": matched,
         "missing_wholesale": len(missing),
