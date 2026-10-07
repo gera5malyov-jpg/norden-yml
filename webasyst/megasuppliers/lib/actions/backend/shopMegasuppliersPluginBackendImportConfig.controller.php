@@ -112,6 +112,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
             ),
             'mapping' => array(
                 'name' => (string)waRequest::post('name_field', '', waRequest::TYPE_STRING_TRIM),
+                'description' => (string)waRequest::post('description_field', '', waRequest::TYPE_STRING_TRIM),
                 'purchase_price' => (string)waRequest::post('purchase_price_field', '', waRequest::TYPE_STRING_TRIM),
                 'price' => (string)waRequest::post('price_field', '', waRequest::TYPE_STRING_TRIM),
                 'compare_price' => (string)waRequest::post('compare_price_field', '', waRequest::TYPE_STRING_TRIM),
@@ -125,6 +126,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
                 'update_prices' => true,
                 'update_stock' => true,
                 'update_images' => (bool)waRequest::post('update_images', 0, waRequest::TYPE_INT),
+                'update_description' => (bool)waRequest::post('update_description', 0, waRequest::TYPE_INT),
                 'update_characteristics' => (bool)waRequest::post('update_characteristics', 0, waRequest::TYPE_INT),
                 'auto_features' => (bool)waRequest::post('auto_features', 0, waRequest::TYPE_INT),
                 'export_to_kit' => (bool)waRequest::post('export_to_kit', 0, waRequest::TYPE_INT),
@@ -155,6 +157,10 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
             ),
         );
 
+        if (in_array($format, array('yml', 'xml'), true) && trim((string)$config['mapping']['description']) === '') {
+            $config['mapping']['description'] = 'description';
+        }
+
         if ($format === 'norden') {
             $config['source']['location'] = '';
             $config['source']['location_secret'] = '';
@@ -162,6 +168,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
             $config['identity']['sku_prefix'] = '';
             $config['identity']['brand'] = 'Norden';
             $config['mapping']['name'] = 'name';
+            $config['mapping']['description'] = '';
             $config['mapping']['purchase_price'] = 'price';
             $config['mapping']['price'] = '';
             $config['mapping']['compare_price'] = '';
