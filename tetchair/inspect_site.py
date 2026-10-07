@@ -219,3 +219,26 @@ for a in ss.find_all("a", href=True):
         pagination.append({"text": txt, "href": href, "class": a.get("class")})
 print("SKLAD_ROW_MARKUP")
 print(json.dumps({"sample_html": sample_html, "pagination": pagination[:50]}, ensure_ascii=False, indent=2))
+
+
+print("CATALOG_PRICE_DIAGNOSTIC")
+diag={}
+for diag_path in ("/catalog/2943/","/catalog/3009/","/catalog/3829/","/search/?q=19248"):
+    rr=s.get(BASE+diag_path,timeout=60)
+    rr.raise_for_status()
+    soup=BeautifulSoup(rr.text,"html.parser")
+    hits=[]
+    for el in soup.find_all(["tr","div","li","article"]):
+        txt=" ".join(el.get_text(" ",strip=True).split())
+        if ("руб" in txt or "19248" in txt) and len(txt)<2400:
+            hits.append({
+                "tag":el.name,
+                "class":el.get("class"),
+                "attrs":{k:v for k,v in el.attrs.items() if k.startswith("data-") or k in ("id","class")},
+                "text":txt[:1800],
+                "html":str(el)[:6000],
+            })
+            if len(hits)>=12:
+                break
+    diag[diag_path]={"length":len(rr.text),"hits":hits}
+print(json.dumps(diag,ensure_ascii=False,indent=2))
