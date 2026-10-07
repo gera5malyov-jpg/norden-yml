@@ -135,6 +135,10 @@ def normalize(c, rows):
     characteristic_map = m.get("characteristics") or {}
     if not isinstance(characteristic_map, dict):
         characteristic_map = {}
+    description_field = m.get("description")
+    if not description_field and str(c.get("code") or "").strip().upper() == "TETCHAIR":
+        description_field = "description"
+
     out = []
     for row in rows:
         ss = str(_get(row, ident.get("supplier_sku_field"), "")).strip()
@@ -166,6 +170,7 @@ def normalize(c, rows):
             category=str(_get(row, m.get("category"), "")).strip(),
             images=imgs,
             characteristics=chars,
+            description=str(_get(row, description_field, "")).strip() if description_field else "",
         )
         is_norden = c.get("source", {}).get("format", "").lower() == "norden"
         missing_purchase = product.purchase_price is None or product.purchase_price <= 0
@@ -248,6 +253,7 @@ def build_payload(c, rows, products, report, source_sha, mode, plan=None, source
                 "supplier_sku": p.supplier_sku,
                 "sku": p.sku,
                 "name": p.name,
+                "description": p.description[:500],
                 "purchase_price": p.purchase_price,
                 "price": p.price,
                 "compare_price": p.compare_price,
