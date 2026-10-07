@@ -1,4 +1,4 @@
-name: Inspect Tetchair authenticated catalog once
+name: Tetchair combined feed
 
 on:
   push:
@@ -6,26 +6,57 @@ on:
     paths:
       - 'tetchair/inspect_site.py'
       - 'tetchair/show_queries.py'
+      - 'tetchair/build_combined_feed.py'
       - '.github/workflows/inspect-tetchair-once.yml'
   workflow_dispatch:
+  schedule:
+    - cron: '37 2,8,14,20 * * *'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  inspect:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     env:
       TETCHAIR_LOGIN: ${{ secrets.TETCHAIR_LOGIN }}
       TETCHAIR_PASSWORD: ${{ secrets.TETCHAIR_PASPORT }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install --disable-pip-version-check requests beautifulsoup4
-      - name: Inspect authenticated catalog
-        run: python tetchair/show_queries.py
+      - name: Build combined Tetchair YML
+        run: python tetchair/build_combined_feed.py
 
-# probe v2
+      - name: Validate combined feed
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+          p=Path("tetchair/tetchair-combined.xml")
+          r=json.loads(Path("tetchair/tetchair-combined-report.json").read_text(encoding="utf-8"))
+          root=ET.parse(p).getroot()
+          offers=root.findall(".//offer")
+          priced=sum(1 for x in offers if (x.findtext("purchase_price") or "").strip())
+          print("offers=",len(offers),"purchase_prices=",priced,"coverage=",r.get("coverage"))
+          if not offers or not priced:
+              raise SystemExit(2)
+          PY
+
+      - name: Publish updated feed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tetchair/tetchair-combined.xml tetchair/tetchair-combined-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update Tetchair combined feed [skip ci]"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
