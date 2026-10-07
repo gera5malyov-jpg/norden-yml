@@ -58,7 +58,7 @@ jobs:
 
           elements=get("/elements",{"format":"json","page":1,"limit":5})
           sample=elements.get("content") or []
-          arts=[int(x["artnumber"]) for x in sample if str(x.get("artnumber","")).isdigit()][:5]
+          arts=[2505358]
 
           stock=None
           prices=None
@@ -92,6 +92,7 @@ jobs:
           print("KOMUS_ELEMENTS_META="+json.dumps({k:elements.get(k) for k in ("count","page","next","pages")},ensure_ascii=False))
           print("KOMUS_SAMPLE="+json.dumps(sample,ensure_ascii=False)[:4000])
           print("KOMUS_STOCK_SAMPLE="+json.dumps((stock or {}).get("content") or [],ensure_ascii=False)[:4000])
+          print("KOMUS_TARGET_ARTICLE=2505358")
           print("KOMUS_PRICE_SAMPLE="+json.dumps((prices or {}).get("content") or [],ensure_ascii=False)[:4000])
           print("KOMUS_PROPS_SAMPLE="+json.dumps((props or {}).get("content") or [],ensure_ascii=False)[:8000])
           PY
