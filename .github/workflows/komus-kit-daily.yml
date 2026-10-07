@@ -64,3 +64,21 @@ jobs:
           if r.get("errors"):
               print(json.dumps(r["errors"][:20],ensure_ascii=False,indent=2))
           PY
+
+      - name: Email Komus daily report to shop
+        if: always()
+        env:
+          GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        shell: bash
+        run: |
+          set +e
+          python komus-kit/send_report_email.py \
+            --report /tmp/komus-daily.json \
+            --kind scheduled \
+            --run-url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          rc=$?
+          if [[ "$rc" != "0" ]]; then
+            echo "::warning::Komus daily report email failed with exit code $rc"
+          fi
+          exit 0
