@@ -334,6 +334,8 @@ class KomusSyncRunner:
         self.kit_categories = []
         self.kit_characteristics = []
         self.category_cache = {}
+        self.category_index = {}
+        self.characteristic_index = {}
         self.report = {
             "status": "running",
             "dry_run": self.dry_run,
@@ -402,11 +404,7 @@ class KomusSyncRunner:
                 parent = self.category_cache[sid]
                 continue
             title = str(src.get("title") or "").strip()
-            matches = [
-                x for x in self.kit_categories
-                if _norm(x.get("title")) == _norm(title)
-                and str(x.get("parent_id") or "") == parent
-            ]
+            matches = list(self.category_index.get((parent, _norm(title)), []))
             if len(matches) > 1:
                 matches = sorted(matches, key=lambda x: str(x.get("id") or ""))
                 self._warn(f"ambiguous KIT category reused: {title}")
@@ -414,11 +412,13 @@ class KomusSyncRunner:
                 category_id = str(matches[0].get("id") or "").strip()
             elif self.dry_run:
                 category_id = "dry-komus-category-" + sid
-                self.kit_categories.append({
+                created_row = {
                     "id": category_id,
                     "title": title,
                     "parent_id": parent,
-                })
+                }
+                self.kit_categories.append(created_row)
+                self.category_index.setdefault((parent, _norm(title)), []).append(created_row)
             else:
                 created = self.kit.create_category(title, parent or None)
                 category_id = str(created.get("id") or "").strip()
@@ -427,16 +427,14 @@ class KomusSyncRunner:
                 normalized = dict(created)
                 normalized.setdefault("parent_id", parent)
                 self.kit_categories.append(normalized)
+                self.category_index.setdefault((parent, _norm(title)), []).append(normalized)
             self.category_cache[sid] = category_id
             parent = category_id
         self.category_cache[source_id] = parent
         return parent
 
     def _find_characteristic(self, title):
-        candidates = [
-            x for x in self.kit_characteristics
-            if _norm(x.get("title")) == _norm(title)
-        ]
+        candidates = list(self.characteristic_index.get(_norm(title), []))
         if not candidates:
             return None
         preferred = [
@@ -464,12 +462,14 @@ class KomusSyncRunner:
             elif self.dry_run:
                 char_id = "dry-komus-char-" + str(len(self.kit_characteristics) + 1)
                 char_type = "STRING"
-                self.kit_characteristics.append({
+                created_row = {
                     "id": char_id,
                     "title": title,
                     "type": char_type,
                     "select_mode": "SINGLE",
-                })
+                }
+                self.kit_characteristics.append(created_row)
+                self.characteristic_index.setdefault(_norm(title), []).append(created_row)
             else:
                 created = self.kit.create_characteristic(title, "STRING", "SINGLE")
                 char_id = str(created.get("id") or "").strip()
@@ -478,6 +478,7 @@ class KomusSyncRunner:
                     continue
                 char_type = str(created.get("type") or "STRING").strip().upper()
                 self.kit_characteristics.append(created)
+                self.characteristic_index.setdefault(_norm(title), []).append(created)
 
             if char_type == "MULTIPLE_STRING":
                 result.append({
@@ -621,6 +622,13 @@ class KomusSyncRunner:
         self.report["duplicate_kit_skus"] = len(duplicates)
         self.kit_categories = self.kit.list_categories()
         self.kit_characteristics = self.kit.list_characteristics()
+        self.category_index = {}
+        for row in self.kit_categories:
+            key = (str(row.get("parent_id") or ""), _norm(row.get("title")))
+            self.category_index.setdefault(key, []).append(row)
+        self.characteristic_index = {}
+        for row in self.kit_characteristics:
+            self.characteristic_index.setdefault(_norm(row.get("title")), []).append(row)
 
         seen_eligible = set()
         price_batch = []
