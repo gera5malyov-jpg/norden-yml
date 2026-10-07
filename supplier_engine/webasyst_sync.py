@@ -166,7 +166,7 @@ def _delta_product_data(data, current_product):
         return {}
     out = dict(data)
     current_product = current_product or {}
-    for field in ("name", "summary", "status"):
+    for field in ("name", "summary", "description", "status"):
         if field not in out:
             continue
         current = current_product.get(field)
@@ -265,7 +265,7 @@ def index_by_supplier_sku_name(wa: WebasystClient, type_id, supplier_codes, sku_
                 "hash": "type/%s" % type_id,
                 "offset": offset,
                 "limit": 1000,
-                "fields": "id,name,summary,status,type_id,features,skus,stock_counts",
+                "fields": "id,name,summary,description,status,type_id,features,skus,stock_counts",
             },
         )
         rows = _listify(payload)
@@ -560,6 +560,8 @@ def _product_write_data(desired, rules, web, *, creating=False):
     # the product short description, where the existing [extimg] handler can use them.
     if (creating or rules.get("update_images", False)) and desired.get("images"):
         data["summary"] = extimg_summary(desired["images"])
+    if (creating or rules.get("update_description", False)) and desired.get("description"):
+        data["description"] = str(desired["description"]).strip()
     if creating or rules.get("update_characteristics", False):
         feature_codes = web.get("feature_codes") or {}
         features = {}
@@ -636,7 +638,9 @@ def apply_plan(wa: WebasystClient, plan, config):
     if errors:
         raise ApplyError("; ".join(errors), {"created": 0, "updated": 0, "zeroed": 0, "mappings": []})
 
-    rules = config.get("rules") or {}
+    rules = dict(config.get("rules") or {})
+    if str(config.get("code") or "").strip().upper() == "TETCHAIR":
+        rules["update_description"] = True
     web = config.get("webasyst") or {}
     stock_id = web.get("stock_id")
     stock_ids = web.get("stock_ids") or []
