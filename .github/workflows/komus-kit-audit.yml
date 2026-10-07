@@ -1,0 +1,54 @@
+name: Komus KIT audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/komus-kit-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: komus-kit-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt beautifulsoup4
+      - name: Compare Komus source with KIT
+        env:
+          KOMUS_LOGIN: ${{ secrets.KOMUS_LOGIN }}
+          KOMUS_PASSWORD: ${{ secrets.KOMUS_PASSWORD }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+          KOMUS_MAX_IMAGES: '1'
+        run: |
+          PYTHONPATH=samson-kit python komus-kit/sync_komus_kit.py \
+            --dry-run \
+            --report /tmp/komus-audit.json
+      - name: Print audit
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          p="/tmp/komus-audit.json"
+          if not os.path.exists(p):
+              raise SystemExit
+          r=json.load(open(p,encoding="utf-8"))
+          keys=(
+              "status","catalog_complete","source_rows_seen","eligible_in_stock",
+              "price_rows","special_price_used","base_price_fallback",
+              "existing_variants_seen","new_products_created",
+              "duplicate_kit_skus","error_count","warning_count"
+          )
+          print(json.dumps({k:r.get(k) for k in keys},ensure_ascii=False,indent=2))
+          PY
