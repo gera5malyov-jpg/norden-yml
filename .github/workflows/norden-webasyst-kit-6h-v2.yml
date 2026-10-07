@@ -25,7 +25,7 @@ jobs:
       - name: Checkout pinned supplier sync code
         uses: actions/checkout@v4
         with:
-          ref: 0af6665f3da23b7ab6e976b2a5981b920e8e7c3b
+          ref: 9465b069f2a275fbc840eb4d1ee2dc673aca379e
 
       - uses: actions/setup-python@v5
         with:
@@ -72,7 +72,7 @@ jobs:
             --type-name NORDEN-100 \
             --brand Norden \
             --max-create 5000 \
-            --max-eligible 5000 \
+            --max-eligible 6000 \
             --output scheduled-kit-sync.json
 
       - name: Save run reports
