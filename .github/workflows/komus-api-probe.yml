@@ -107,7 +107,7 @@ jobs:
                   print("KOMUS_TARGET_DIRECT_"+label.upper()+"_HTTP="+str(exc.code)+" BODY="+body[:2000])
           print("KOMUS_PRICE_SAMPLE="+json.dumps((prices or {}).get("content") or [],ensure_ascii=False)[:4000])
           print("KOMUS_PROPS_SAMPLE="+json.dumps((props or {}).get("content") or [],ensure_ascii=False)[:8000])
-          targets=("pp1002ng","2505358","ct_brava","brava")
+          targets=("pp1002ng",)
           hits=[]
           page=1
           total=0
