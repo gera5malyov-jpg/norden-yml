@@ -242,3 +242,15 @@ for diag_path in ("/catalog/2943/","/catalog/3009/","/catalog/3829/","/search/?q
                 break
     diag[diag_path]={"length":len(rr.text),"hits":hits}
 print(json.dumps(diag,ensure_ascii=False,indent=2))
+
+
+print("CATALOG_PAGINATION_DIAGNOSTIC")
+rr=s.get(BASE+"/catalog/3009/",timeout=60)
+rr.raise_for_status()
+soup=BeautifulSoup(rr.text,"html.parser")
+pg=[]
+for a in soup.find_all("a",href=True):
+    txt=" ".join(a.get_text(" ",strip=True).split())
+    if txt in ("Предыдущая","Следующая") or re.fullmatch(r"\d+",txt or ""):
+        pg.append({"text":txt,"href":a.get("href"),"class":a.get("class")})
+print(json.dumps(pg,ensure_ascii=False,indent=2))
