@@ -51,4 +51,25 @@ jobs:
                   print('ELEMENT_REGION='+str(region)+' STATUS='+str(st)+' BODY='+json.dumps(body,ensure_ascii=False)[:4000])
               except Exception as e:
                   print('ELEMENT_REGION='+str(region)+' ERROR='+repr(e))
+
+          # Legacy API documented by Komus: token is a query parameter and response includes remains.
+          for suffix in (f'/api/elements/{art}/', '/api/elements/'):
+              params={'token':token,'format':'json'}
+              if suffix.endswith('/elements/'):
+                  params.update({'count':250,'page':1})
+              url='https://komus-opt.ru'+suffix+'?'+urllib.parse.urlencode(params)
+              try:
+                  req=urllib.request.Request(url,headers={'Accept':'application/json','User-Agent':'Megapolis-Komus-Probe/1.0'})
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      body=json.loads(r.read().decode('utf-8'))
+                  if suffix.endswith('/elements/'):
+                      rows=body.get('content') or []
+                      matches=[x for x in rows if str(x.get('artnumber'))==str(art)]
+                      print('LEGACY_LIST_FIRST_PAGE_MATCH='+json.dumps(matches,ensure_ascii=False)[:4000])
+                  else:
+                      print('LEGACY_ELEMENT='+json.dumps(body,ensure_ascii=False)[:6000])
+              except urllib.error.HTTPError as e:
+                  print('LEGACY_'+suffix+' HTTP='+str(e.code)+' BODY='+e.read().decode('utf-8','replace')[:2000])
+              except Exception as e:
+                  print('LEGACY_'+suffix+' ERROR='+repr(e))
           PY
