@@ -97,7 +97,7 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
                 $this->fail('writes_disabled', 403);
                 return;
             }
-            $this->syncLinks($supplier_id, ifset($payload['items'], array()));
+            $this->syncLinks($supplier_id, ifset($payload['items'], array()), $payload);
             return;
         }
 
@@ -108,10 +108,22 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
     {
         $limit = min(2000, max(1, (int)ifset($payload['limit'], 1000)));
         $offset = max(0, (int)ifset($payload['offset'], 0));
+        $type_id = (int)ifset($payload['type_id']);
+        if (!$type_id) {
+            $this->fail('type_id_required', 422);
+            return;
+        }
+        $type = (new shopTypeModel())->getById($type_id);
+        if (!$type) {
+            $this->fail('product_type_not_found', 422);
+            return;
+        }
         $model = new shopMegasuppliersProductModel();
-        $sql = 'SELECT supplier_sku,product_id,sku_id,purchase_price,stock '
-            .'FROM shop_megasuppliers_product WHERE supplier_id='.(int)$supplier_id
-            .' ORDER BY id LIMIT '.$limit.' OFFSET '.$offset;
+        $sql = 'SELECT m.supplier_sku,m.product_id,m.sku_id,m.purchase_price,m.stock,p.type_id '
+            .'FROM shop_megasuppliers_product m '
+            .'JOIN shop_product p ON p.id=m.product_id '
+            .'WHERE m.supplier_id='.(int)$supplier_id.' AND p.type_id='.(int)$type_id
+            .' ORDER BY m.id LIMIT '.$limit.' OFFSET '.$offset;
         $rows = $model->query($sql)->fetchAll();
         $this->response = array(
             'status' => 'ok',
@@ -207,15 +219,27 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
         $limit = min(200, max(1, (int)ifset($payload['limit'], 100)));
         $offset = max(0, (int)ifset($payload['offset'], 0));
         $stock_id = (int)ifset($payload['stock_id']);
+        $type_id = (int)ifset($payload['type_id']);
         if (!$stock_id) {
             $this->fail('stock_id_required', 422);
             return;
         }
+        if (!$type_id) {
+            $this->fail('type_id_required', 422);
+            return;
+        }
+        $type = (new shopTypeModel())->getById($type_id);
+        if (!$type) {
+            $this->fail('product_type_not_found', 422);
+            return;
+        }
 
         $link_model = new shopMegasuppliersProductModel();
-        $sql = 'SELECT supplier_sku,product_id,sku_id,purchase_price,stock '
-            .'FROM shop_megasuppliers_product WHERE supplier_id='.(int)$supplier_id
-            .' ORDER BY id LIMIT '.$limit.' OFFSET '.$offset;
+        $sql = 'SELECT m.supplier_sku,m.product_id,m.sku_id,m.purchase_price,m.stock,p.type_id '
+            .'FROM shop_megasuppliers_product m '
+            .'JOIN shop_product p ON p.id=m.product_id '
+            .'WHERE m.supplier_id='.(int)$supplier_id.' AND p.type_id='.(int)$type_id
+            .' ORDER BY m.id LIMIT '.$limit.' OFFSET '.$offset;
         $links = $link_model->query($sql)->fetchAll();
 
         $product_model = new shopProductModel();
@@ -381,10 +405,20 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
         return $out;
     }
 
-    private function syncLinks($supplier_id, $items)
+    private function syncLinks($supplier_id, $items, array $payload)
     {
         if (!is_array($items)) {
             $this->fail('items_required', 422);
+            return;
+        }
+        $type_id = (int)ifset($payload['type_id']);
+        if (!$type_id) {
+            $this->fail('type_id_required', 422);
+            return;
+        }
+        $type = (new shopTypeModel())->getById($type_id);
+        if (!$type) {
+            $this->fail('product_type_not_found', 422);
             return;
         }
         if (count($items) > 500) {
@@ -393,6 +427,7 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
         }
         $model = new shopMegasuppliersProductModel();
         $sku_model = new shopProductSkusModel();
+        $product_model = new shopProductModel();
         $validated = array();
         foreach ($items as $item) {
             if (!is_array($item)) {
@@ -409,6 +444,11 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
             $sku = $sku_model->getById($sku_id);
             if (!$sku || (int)ifset($sku['product_id']) !== $product_id) {
                 $this->fail('invalid_product_sku_mapping', 422);
+                return;
+            }
+            $product = $product_model->getById($product_id);
+            if (!$product || (int)ifset($product['type_id']) !== $type_id) {
+                $this->fail('product_type_mismatch', 422);
                 return;
             }
             $validated[] = array($item, $supplier_sku, $product_id, $sku_id);
