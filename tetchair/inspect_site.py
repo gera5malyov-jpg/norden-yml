@@ -196,3 +196,26 @@ print(json.dumps({
     "data_p_count": len(ss.select("[data-p]")),
     "data_pr_count": len(ss.select("[data-pr]")),
 }, ensure_ascii=False, indent=2))
+
+
+# Inspect exact stock row markup and pagination.
+sample_code = "26290"
+node = ss.find(string=lambda x: x and sample_code in x)
+sample_html = ""
+if node:
+    parent = node.parent
+    for _ in range(6):
+        if parent is None:
+            break
+        html = str(parent)
+        if len(html) > 500 and ("Скачать" in html or sample_code in html):
+            sample_html = html[:12000]
+        parent = parent.parent
+pagination = []
+for a in ss.find_all("a", href=True):
+    txt = " ".join(a.get_text(" ", strip=True).split())
+    href = urljoin(BASE, a["href"])
+    if txt in ("Предыдущая", "Следующая") or "page" in href.lower() or "start" in href.lower():
+        pagination.append({"text": txt, "href": href, "class": a.get("class")})
+print("SKLAD_ROW_MARKUP")
+print(json.dumps({"sample_html": sample_html, "pagination": pagination[:50]}, ensure_ascii=False, indent=2))
