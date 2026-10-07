@@ -1,5 +1,5 @@
 name: Samson efficient initial bootstrap
-# Missing-SKU bootstrap; safe to restart after timeout.
+# Resume-safe source-offset bootstrap for all missing SAMS-* SKUs.
 
 on:
   push:
@@ -8,10 +8,20 @@ on:
       - '.github/workflows/samson-efficient-bootstrap.yml'
   workflow_dispatch:
     inputs:
-      batch_size:
-        description: 'Missing Samson products to create this run'
+      start_offset:
+        description: 'Source SKU offset to continue from'
         required: true
-        default: '600'
+        default: '0'
+        type: string
+      source_batch:
+        description: 'Maximum Samson source rows to scan in this run'
+        required: true
+        default: '5000'
+        type: string
+      max_new:
+        description: 'Maximum new KIT products to create in this run'
+        required: true
+        default: '550'
         type: string
 
 permissions:
@@ -20,7 +30,7 @@ permissions:
 
 concurrency:
   group: samson-kit-write
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   import:
@@ -33,19 +43,23 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Resolve batch size
-        id: batch
+      - name: Resolve continuation parameters
+        id: params
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "size=${{ inputs.batch_size }}" >> "$GITHUB_OUTPUT"
+            echo "offset=${{ inputs.start_offset }}" >> "$GITHUB_OUTPUT"
+            echo "batch=${{ inputs.source_batch }}" >> "$GITHUB_OUTPUT"
+            echo "max_new=${{ inputs.max_new }}" >> "$GITHUB_OUTPUT"
           else
-            echo "size=600" >> "$GITHUB_OUTPUT"
+            echo "offset=0" >> "$GITHUB_OUTPUT"
+            echo "batch=5000" >> "$GITHUB_OUTPUT"
+            echo "max_new=550" >> "$GITHUB_OUTPUT"
           fi
-      - name: Regression tests on first run only
+      - name: Run tests on push trigger
         if: github.event_name == 'push'
         run: PYTHONPATH=samson-kit python -m unittest discover -s samson-kit/tests -v
-      - name: Create next missing Samson products
+      - name: Create missing Samson products in current source window
         env:
           SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
@@ -54,9 +68,11 @@ jobs:
           set -euo pipefail
           PYTHONPATH=samson-kit python -m samson_kit.cli \
             --new-only \
-            --max-new "${{ steps.batch.outputs.size }}" \
+            --skip-items "${{ steps.params.outputs.offset }}" \
+            --max-items "${{ steps.params.outputs.batch }}" \
+            --max-new "${{ steps.params.outputs.max_new }}" \
             --report /tmp/samson-bootstrap.json
-      - name: Decide whether to continue
+      - name: Evaluate progress
         id: next
         if: always()
         shell: bash
@@ -66,28 +82,55 @@ jobs:
           path='/tmp/samson-bootstrap.json'
           if not os.path.exists(path):
               print('continue=false')
+              print('reason=no_report')
               raise SystemExit
           r=json.load(open(path,encoding='utf-8'))
+          offset=int('${{ steps.params.outputs.offset }}')
+          batch=int('${{ steps.params.outputs.batch }}')
+          max_new=int('${{ steps.params.outputs.max_new }}')
+          seen=int(r.get('samson_products_seen') or 0)
           created=int(r.get('new_products_created') or 0)
           errors=int(r.get('error_count') or 0)
-          size=int('${{ steps.batch.outputs.size }}')
-          ok=(r.get('status')=='ok' and errors==0)
-          print('continue=' + ('true' if ok and created>=size else 'false'))
+          status=str(r.get('status') or '')
+          next_offset=offset+seen
+          more=(seen>=batch or created>=max_new)
+          ok=(status=='ok' and errors==0 and seen>0)
+          print('continue=' + ('true' if ok and more else 'false'))
+          print('next_offset=' + str(next_offset))
+          print('seen=' + str(seen))
           print('created=' + str(created))
           print('errors=' + str(errors))
+          print('status=' + status)
+          print('reason=' + ('continue' if ok and more else 'complete_or_needs_review'))
           PY
-      - name: Queue next Samson missing-only batch
+      - name: Print compact report
+        if: always()
+        shell: bash
+        run: |
+          cat /tmp/samson-bootstrap.json || true
+          echo "next_offset=${{ steps.next.outputs.next_offset }}"
+          echo "continue=${{ steps.next.outputs.continue }}"
+      - name: Queue next Samson source window
         if: steps.next.outputs.continue == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          BATCH_SIZE: ${{ steps.batch.outputs.size }}
+          NEXT_OFFSET: ${{ steps.next.outputs.next_offset }}
+          SOURCE_BATCH: ${{ steps.params.outputs.batch }}
+          MAX_NEW: ${{ steps.params.outputs.max_new }}
         shell: bash
         run: |
           python - <<'PY'
           import json, os, urllib.request
           repo=os.environ['GITHUB_REPOSITORY']
           url=f"https://api.github.com/repos/{repo}/actions/workflows/samson-efficient-bootstrap.yml/dispatches"
-          body=json.dumps({'ref':'main','inputs':{'batch_size':os.environ['BATCH_SIZE']}}).encode()
+          body=json.dumps({
+              'ref':'main',
+              'inputs':{
+                  'start_offset':os.environ['NEXT_OFFSET'],
+                  'source_batch':os.environ['SOURCE_BATCH'],
+                  'max_new':os.environ['MAX_NEW'],
+              }
+          }).encode()
           req=urllib.request.Request(url,data=body,method='POST',headers={
               'Authorization':'Bearer '+os.environ['GH_TOKEN'],
               'Accept':'application/vnd.github+json',
