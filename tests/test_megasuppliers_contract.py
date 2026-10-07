@@ -287,3 +287,21 @@ def test_supplier_matching_is_strictly_scoped_to_configured_product_type():
     assert "p.type_id=" in bridge_php
     assert "product_type_mismatch" in bridge_php
     assert "current_type_id != target_type_id" in sync
+
+
+def test_supplier_profile_exposes_full_description_mapping_and_rule():
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    controller = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php").read_text(encoding="utf-8")
+    runner = (ROOT / "supplier_engine/runner.py").read_text(encoding="utf-8")
+    sync = (ROOT / "supplier_engine/webasyst_sync.py").read_text(encoding="utf-8")
+
+    assert 'name="description_field"' in panel
+    assert 'name="update_description"' in panel
+    assert "Поле описания" in panel
+    assert "Обновлять полное описание" in panel
+    assert "'description' => (string)waRequest::post('description_field'" in controller
+    assert "'update_description' => (bool)waRequest::post('update_description'" in controller
+    assert "array('yml', 'xml')" in controller
+    assert "$config['mapping']['description'] = 'description';" in controller
+    assert 'description_field = m.get("description")' in runner
+    assert 'data["description"]' in sync
