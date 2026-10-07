@@ -71,7 +71,7 @@ jobs:
           print("AUTH_FORM_COUNT="+str(len(auth_forms)))
 
           if not auth_forms:
-              refs=re.findall(r'["\\']([^"\\']*(?:auth|login|ajax)[^"\\']*)["\\']',r.text,re.I)
+              refs=re.findall(r"(?:href|src)=[\"']([^\"']*(?:auth|login|ajax)[^\"']*)[\"']",r.text,re.I)
               print("AUTH_REFERENCES="+json.dumps(sorted(set(refs))[:100],ensure_ascii=False))
               raise SystemExit("No password form found")
 
