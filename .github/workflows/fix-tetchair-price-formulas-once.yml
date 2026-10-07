@@ -1,0 +1,99 @@
+name: Fix Tetchair price formulas once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-tetchair-price-formulas-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix Tetchair formulas in Webasyst profile
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip()
+          VM_ID=44780
+          VM_IP='45.86.180.49'
+          def req(url, method='GET', data=None, headers=None):
+              q=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(q,timeout=30) as r:
+                  raw=r.read().decode('utf-8')
+                  return r.status, (json.loads(raw) if raw else {})
+          _,tok=req(
+              'https://panel.netangels.ru/api/gateway/token/',
+              'POST',
+              urllib.parse.urlencode({'api_key':API_KEY}).encode(),
+              {'Content-Type':'application/x-www-form-urlencoded','User-Agent':'tetchair-formula-fix/1.0'},
+          )
+          headers={'Authorization':'Bearer '+tok['token'],'Content-Type':'application/json','Accept':'application/json','User-Agent':'tetchair-formula-fix/1.0'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=open(key+'.pub',encoding='utf-8').read().strip()
+              _,created=req(
+                  f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/',
+                  'POST',
+                  json.dumps({'key':pub,'name':'chatgpt-tetchair-formulas-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),
+                  headers,
+              )
+              key_id=created['id']
+              try:
+                  php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';
+          chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());
+          wa('shop');
+          $dir=wa()->getDataPath('plugins/megasuppliers/import-config',false,'shop',true);
+          $path=$dir.'/15.json';
+          if (!file_exists($path)) { fwrite(STDERR,"CONFIG_NOT_FOUND\n"); exit(2); }
+          $cfg=json_decode(file_get_contents($path),true);
+          if (!is_array($cfg)) { fwrite(STDERR,"CONFIG_INVALID\n"); exit(3); }
+          $backup=$path.'.bak-formulas-'.date('Ymd-His');
+          if (!copy($path,$backup)) { fwrite(STDERR,"BACKUP_FAILED\n"); exit(4); }
+
+          if (empty($cfg['rules']) || !is_array($cfg['rules'])) $cfg['rules']=array();
+          $cfg['rules']['price_formulas']=array(
+              'purchase_price'=>'purchase_price',
+              'price'=>'purchase_price * 1.25',
+              'compare_price'=>'purchase_price * 1.80'
+          );
+
+          $json=json_encode($cfg,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+          if ($json===false || file_put_contents($path,$json)===false) {
+              fwrite(STDERR,"CONFIG_WRITE_FAILED\n"); exit(5);
+          }
+          $check=json_decode(file_get_contents($path),true);
+          echo json_encode(array(
+              'status'=>'ok',
+              'supplier_id'=>15,
+              'type_id'=>(int)ifset($check['webasyst']['type_id']),
+              'source_location'=>(string)ifset($check['source']['location']),
+              'purchase_price_field'=>(string)ifset($check['mapping']['purchase_price']),
+              'formulas'=>ifset($check['rules']['price_formulas'],array()),
+              'backup'=>basename($backup)
+          ),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+          ?>'''
+                  remote="cat >/tmp/fix_tetchair_formulas.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/fix_tetchair_formulas.php\nsu -s /bin/bash web -c 'php /tmp/fix_tetchair_formulas.php'\nrm -f /tmp/fix_tetchair_formulas.php"
+                  p=subprocess.run(['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@'+VM_IP,remote],text=True,capture_output=True,timeout=90)
+                  print(p.stdout)
+                  if p.returncode:
+                      print(p.stderr)
+                      raise SystemExit(p.returncode)
+              finally:
+                  try:
+                      req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{key_id}/','DELETE',None,headers)
+                  except Exception as e:
+                      print('cleanup warning:',e)
+          PY
