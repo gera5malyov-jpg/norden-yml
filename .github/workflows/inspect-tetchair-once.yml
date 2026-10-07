@@ -1,0 +1,28 @@
+name: Inspect Tetchair authenticated catalog once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tetchair/inspect_site.py'
+      - '.github/workflows/inspect-tetchair-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TETCHAIR_LOGIN: ${{ secrets.TETCHAIR_LOGIN }}
+      TETCHAIR_PASSWORD: ${{ secrets.TETCHAIR_PASPORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check requests beautifulsoup4
+      - name: Inspect authenticated catalog
+        run: python tetchair/inspect_site.py
