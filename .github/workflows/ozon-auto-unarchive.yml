@@ -5,9 +5,10 @@ on:
   workflow_dispatch:
   schedule:
     # Ozon autoarchive restore limit resets at 03:00 Moscow time.
-    # Primary run at 03:27 MSK; fallback at 04:37 MSK in case GitHub misses/delays the first schedule.
+    # Primary run at 03:27 MSK; fallbacks at 04:37 and 06:07 MSK.
     - cron: '27 0 * * *'
     - cron: '37 1 * * *'
+    - cron: '07 3 * * *'
   push:
     branches: [main]
     paths:
@@ -52,10 +53,12 @@ jobs:
                   report = json.loads(path.read_text(encoding="utf-8"))
                   started = report.get("started_at_utc")
                   restored = int(report.get("restored_count", 0) or 0)
+                  limit_hit = str(report.get("limit_hit") or "")
                   if started:
                       run_dt = datetime.fromisoformat(started.replace("Z", "+00:00"))
                       msk = timezone(timedelta(hours=3))
-                      if run_dt.astimezone(msk).date() == datetime.now(msk).date() and restored >= 100:
+                      same_day = run_dt.astimezone(msk).date() == datetime.now(msk).date()
+                      if same_day and (restored >= 100 or limit_hit == "restore_limit_exceeded"):
                           skip = True
               except Exception:
                   pass
