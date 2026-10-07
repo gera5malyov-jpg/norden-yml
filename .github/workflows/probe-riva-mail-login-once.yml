@@ -27,9 +27,7 @@ jobs:
           if not pwd:
               raise SystemExit('GMAIL_APP_PASSWORD is empty')
           try:
-              with smtplib.SMTP('smtp.gmail.com',587,timeout=30) as s:
-                  s.ehlo()
-                  s.starttls()
+              with smtplib.SMTP_SSL('smtp.gmail.com',465,timeout=30) as s:
                   s.ehlo()
                   s.login(user,pwd)
                   s.noop()
