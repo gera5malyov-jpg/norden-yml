@@ -43,7 +43,6 @@ def main():
 
     try:
         manifest = build_manifest(wa, helpers, args.type_name)
-        preflight = plan_manifest(manifest, config, kit=kit)
         payload["source"] = {
             "type_id": manifest["type_id"],
             "type_name": manifest["type_name"],
@@ -51,53 +50,72 @@ def main():
             "manifest_items": len(manifest["items"]),
             "skipped_no_supplier_article": len(manifest["skipped_no_supplier_article"]),
         }
-        payload["preflight"] = preflight
 
-        errors = list(preflight.get("errors") or [])
-        identity = preflight.get("preflight") or {}
-        eligible = int(preflight.get("eligible") or 0)
-        would_create = int(preflight.get("would_create") or 0)
-        would_update = int(preflight.get("would_update") or 0)
-
-        if preflight.get("status") != "ok":
-            errors.append({"error": "KIT preflight status is not ok"})
-        if int(identity.get("conflicts") or 0) != 0:
-            errors.append({"error": "KIT identity conflicts detected"})
+        eligible = sum(
+            1 for row in (manifest.get("items") or [])
+            if isinstance(row, dict) and row.get("category_ids")
+        )
         if eligible <= 0:
-            errors.append({"error": "No categorized Webasyst products are eligible"})
+            payload["status"] = "blocked"
+            payload["errors"] = [{"error": "No categorized Webasyst products are eligible"}]
+            _write(args.output, payload)
+            raise SystemExit(2)
         if eligible > args.max_eligible:
-            errors.append({
+            payload["status"] = "blocked"
+            payload["errors"] = [{
                 "error": "Eligible product count exceeds safety limit",
                 "eligible": eligible,
                 "max_eligible": args.max_eligible,
-            })
-        if would_create > args.max_create:
-            errors.append({
-                "error": "Planned KIT creates exceed safety limit",
-                "would_create": would_create,
-                "max_create": args.max_create,
-            })
-        if would_create + would_update != eligible:
-            errors.append({
-                "error": "Preflight identity accounting mismatch",
-                "eligible": eligible,
-                "would_create": would_create,
-                "would_update": would_update,
-            })
-
-        if errors:
-            payload["status"] = "blocked"
-            payload["errors"] = errors
+            }]
             _write(args.output, payload)
             raise SystemExit(2)
 
         if args.mode == "dry-run":
+            preflight = plan_manifest(manifest, config, kit=kit)
+            payload["preflight"] = preflight
+            errors = list(preflight.get("errors") or [])
+            identity = preflight.get("preflight") or {}
+            would_create = int(preflight.get("would_create") or 0)
+            would_update = int(preflight.get("would_update") or 0)
+            if preflight.get("status") != "ok":
+                errors.append({"error": "KIT preflight status is not ok"})
+            if int(identity.get("conflicts") or 0) != 0:
+                errors.append({"error": "KIT identity conflicts detected"})
+            if would_create > args.max_create:
+                errors.append({
+                    "error": "Planned KIT creates exceed safety limit",
+                    "would_create": would_create,
+                    "max_create": args.max_create,
+                })
+            if would_create + would_update != eligible:
+                errors.append({
+                    "error": "Preflight identity accounting mismatch",
+                    "eligible": eligible,
+                    "would_create": would_create,
+                    "would_update": would_update,
+                })
+            if errors:
+                payload["status"] = "blocked"
+                payload["errors"] = errors
+                _write(args.output, payload)
+                raise SystemExit(2)
             payload["status"] = "ok"
             payload["readonly"] = True
             _write(args.output, payload)
             return
 
-        result = sync_manifest(manifest, config, kit=kit, wa=wa)
+        # Apply performs the identity preflight inside sync_manifest and reuses
+        # that same lookup for writes. The previous implementation ran the full
+        # ~5k KIT variant lookup twice before the first product could be changed.
+        result = sync_manifest(
+            manifest,
+            config,
+            kit=kit,
+            wa=wa,
+            max_create=args.max_create,
+            max_eligible=args.max_eligible,
+        )
+        payload["preflight"] = result.get("preflight") or {}
         payload["apply"] = result
         payload["status"] = result.get("status") or "failed"
         if payload["status"] != "ok" or result.get("errors"):
