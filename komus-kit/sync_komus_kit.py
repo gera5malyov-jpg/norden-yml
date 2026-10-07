@@ -25,7 +25,7 @@ from samson_kit.rules import calculate_prices
 PERSONAL_URL = "https://komus-opt.ru/personal/"
 TARGET_WAREHOUSE = "СПБ"
 SKU_PREFIX = "kom-"
-MAX_IMAGES = 20
+MAX_IMAGES = max(1, int(os.environ.get("KOMUS_MAX_IMAGES", "1") or "1"))
 
 
 def _tag(elem):
