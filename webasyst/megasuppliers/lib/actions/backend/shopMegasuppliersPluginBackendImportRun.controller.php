@@ -174,6 +174,22 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
         $error = curl_error($ch);
         curl_close($ch);
         if ($code !== 204) {
+            if ($code >= 500 && $code <= 599) {
+                $pending['status'] = 'queued';
+                $pending['dispatch_uncertain'] = true;
+                $pending['dispatch_http_code'] = $code;
+                $pending['dispatch_error'] = $error;
+                waFiles::write($status_path, json_encode($pending, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));
+                $this->response = array(
+                    'status' => 'ok',
+                    'mode' => $mode,
+                    'supplier_id' => $supplier_id,
+                    'request_id' => $request_id,
+                    'dispatch_uncertain' => true,
+                    'dispatch_http_code' => $code,
+                );
+                return;
+            }
             $message = 'GITHUB_DISPATCH_FAILED_'.$code.($error ? '_'.$error : '');
             $this->markDispatchFailure($status_path, $pending, $message);
             $this->errors[] = $message;
