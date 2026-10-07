@@ -93,6 +93,17 @@ jobs:
           print("KOMUS_SAMPLE="+json.dumps(sample,ensure_ascii=False)[:4000])
           print("KOMUS_STOCK_SAMPLE="+json.dumps((stock or {}).get("content") or [],ensure_ascii=False)[:4000])
           print("KOMUS_TARGET_ARTICLE=2505358")
+          for label, params in (
+              ("default", {"format":"json"}),
+              ("region0", {"format":"json","region":0}),
+              ("region1", {"format":"json","region":1}),
+          ):
+              try:
+                  target=get("/elements/2505358", params)
+                  print("KOMUS_TARGET_DIRECT_"+label.upper()+"="+json.dumps(target,ensure_ascii=False)[:8000])
+              except urllib.error.HTTPError as exc:
+                  body=exc.read().decode("utf-8","replace")
+                  print("KOMUS_TARGET_DIRECT_"+label.upper()+"_HTTP="+str(exc.code)+" BODY="+body[:2000])
           print("KOMUS_PRICE_SAMPLE="+json.dumps((prices or {}).get("content") or [],ensure_ascii=False)[:4000])
           print("KOMUS_PROPS_SAMPLE="+json.dumps((props or {}).get("content") or [],ensure_ascii=False)[:8000])
           PY
