@@ -123,6 +123,17 @@ def test_supplier_run_prevents_concurrent_dispatch_and_ui_follows_current_run():
     assert "пропустить '+plan.skipped" in panel
 
 
+def test_dispatch_5xx_is_reconciled_by_request_id_without_false_failure():
+    controller = RUN_CONTROLLER.read_text(encoding="utf-8")
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    assert "findDispatchRun" in controller
+    assert "dispatch_recovered" in controller
+    assert "dispatch_uncertain" in controller
+    assert "run-name: Supplier ${{ inputs.supplier_id || 'ci' }} ${{ inputs.request_id || github.run_id }}" in workflow
+    assert "Запуск GitHub подтверждён" in panel
+    assert "GitHub вернул временную ошибку" in panel
+
 def test_autoimport_ui_is_compact_and_hides_legacy_admin_blocks():
     panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
     assert "Обновление прайсов поставщиков" in panel
