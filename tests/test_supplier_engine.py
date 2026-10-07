@@ -1684,6 +1684,68 @@ def test_kit_same_supplier_article_and_brand_under_other_sku_is_blocked():
     assert "under another SKU" in str(exc.value)
 
 
+def test_tetchair_exact_webasyst_article_ignores_wrong_kit_brand_and_repairs_it():
+    supplier_char_id = "f-supplier"
+    variant = _kit_variant(
+        "v1",
+        "103590",
+        "973",
+        "Профи",
+        supplier_char_id,
+        "973",
+    )
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(
+        [variant],
+        [supplier_char_id],
+    )
+    found = _select_variant(
+        {
+            "sku": "973",
+            "supplier_sku": "973",
+            "features": [
+                {"code": "kit_id", "name": "KIT ID", "values": ["103590"]}
+            ],
+        },
+        by_sku,
+        by_kit_id,
+        by_supplier_brand,
+        [supplier_char_id],
+        "Tetchair",
+    )
+    assert found["id"] == "v1"
+    from supplier_engine.kit_sync import _variant_delta
+    delta = _variant_delta(found, {"sku": "973", "brand": "Tetchair"})
+    assert delta["brand"] == "Tetchair"
+
+
+def test_tetchair_stored_kit_id_with_different_article_stays_blocked():
+    variant = {
+        "id": "v1",
+        "kit_id": "103590",
+        "sku": "WRONG",
+        "brand": "Профи",
+        "product_id": "p1",
+        "characteristics": [],
+    }
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes([variant], [])
+    with pytest.raises(Exception) as exc:
+        _select_variant(
+            {
+                "sku": "973",
+                "supplier_sku": "973",
+                "features": [
+                    {"code": "kit_id", "name": "KIT ID", "values": ["103590"]}
+                ],
+            },
+            by_sku,
+            by_kit_id,
+            by_supplier_brand,
+            [],
+            "Tetchair",
+        )
+    assert "Webasyst article is 973" in str(exc.value)
+
+
 def test_kit_id_is_authoritative_and_missing_id_never_creates_duplicate():
     supplier_char_id = "f-supplier"
     by_sku, by_kit_id, by_supplier_brand = _variant_indexes([], [supplier_char_id])
