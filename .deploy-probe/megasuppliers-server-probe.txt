@@ -1,17 +1,17 @@
 ssh_user=root exit=0
 hostname=vm-23f9aff9
 root_exists=yes
-drwxr-xr-x 18 web web 4096 Oct  4 16:51 /home/web/vm-23f9aff9.na4u.ru/www
-drwxr-xr-x 17 web web 4096 Sep 26 20:26 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps
+drwxr-xr-x 18 web web 4096 Oct  6 22:48 /home/web/vm-23f9aff9.na4u.ru/www
+drwxr-xr-x 17 web web 4096 Oct  4 19:34 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps
 drwxr-xr-x 14 web web 4096 Aug 27 10:39 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop
-drwxr-xr-x 81 web web 4096 Oct  4 16:51 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
+drwxr-xr-x 81 web web 4096 Oct  6 22:48 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins
 --- php ---
 PHP 7.3.19 (cli) (built: Jun 25 2020 05:00:00) ( NTS )
 Copyright (c) 1997-2018 The PHP Group
 Zend Engine v3.3.19, Copyright (c) 1998-2018 Zend Technologies
 --- plugin ---
 plugin_exists=yes
-drwxr-xr-x 5 web web 4096 Oct  4 16:51 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
+drwxr-xr-x 5 web web 4096 Oct  6 22:48 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersFileReader.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/classes/shopMegasuppliersImportService.class.php
 web:web 644 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersProduct.model.php
@@ -36,6 +36,7 @@ No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plug
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackend.action.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImport.controller.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportStatus.controller.php
+No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportCancel.controller.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendRegenerateKey.controller.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendSaveSupplier.controller.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendExport.controller.php
@@ -55,7 +56,7 @@ No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plug
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/shopMegasuppliers.plugin.php
 --- plugin config registration ---
 84:  'megasuppliers' => true,
--rw-rw-r-- 1 web web 1980 Oct  4 16:51 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
+-rw-rw-r-- 1 web web 1980 Oct  6 22:48 /home/web/vm-23f9aff9.na4u.ru/www/wa-config/apps/shop/plugins.php
 --- plugins.php contents ---
 <?php
 
@@ -2115,6 +2116,7 @@ try {
 require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php';
 require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportRun.controller.php';
 require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportStatus.controller.php';
+require_once dirname(__FILE__).'/actions/backend/shopMegasuppliersPluginBackendImportCancel.controller.php';
 
 class shopMegasuppliersPlugin extends shopPlugin
 {
@@ -2174,6 +2176,24 @@ class shopMegasuppliersPlugin extends shopPlugin
             );
         }
         return array();
+    }
+
+    private function legacySupplierTypeMap()
+    {
+        return array(
+            'NORDEN' => array(142),
+            'TD_ANDREY' => array(126),
+            'DEEPHOUSE' => array(24),
+            'LEVMAR' => array(125),
+            'TREEZ' => array(199),
+            'YOURROOM' => array(26),
+            'AFINA' => array(63),
+            'ALETAN' => array(46, 122, 202),
+            'RED_BLACK' => array(150),
+            'B2B_FABRIKA' => array(204),
+            'KENNER' => array(203),
+            '4SIS' => array(11)
+        );
     }
 
     private function supplierCodeFromExistingProduct($product_id)
@@ -2411,25 +2431,6 @@ class shopMegasuppliersPlugin extends shopPlugin
             .'</section>';
 
         $section_json = json_encode($section, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-        $html = '<span id="s-megasuppliers-new-bootstrap" style="display:none"></span>'
-            .'<script>(function($){'
-            .'var markup='.$section_json.';'
-            .'function install(){'
-            .'var host=$(".s-filter-categories-section").first();'
-            .'if(!host.length){return false;}'
-            .'if(!host.find("#s-megasuppliers-new-list").length){host.append(markup);}'
-            .'var box=host.find("#s-megasuppliers-new-list");'
-            .'box.find("header.heading").off("click.megasuppliers").on("click.megasuppliers",function(){'
-            .'var body=box.find(".s-sidebar-list-wrapper");'
-            .'var open=body.is(":visible");'
-            .'body.toggle(!open);'
-            .'box.toggleClass("is-expanded",!open);'
-            .'box.find(".caret i").toggleClass("fa-caret-right",open).toggleClass("fa-caret-down",!open);'
-            .'});'
-            .'box.find("a[data-megasupplier-id]").off("click.megasuppliers").on("click.megasuppliers",function(e){'
-            .'e.preventDefault();window.location.href=this.href;'
-            .'});'
 ### /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/megasuppliers/lib/models/shopMegasuppliersMeta.model.php
 <?php
 class shopMegasuppliersMetaModel extends waModel
@@ -3195,21 +3196,22 @@ shopYmlPluginBackendSetup.action.php
 --- existing supplier metadata sources ---
 [types]
 61	14434	Тайпит
-126	10923	ТД Андрей автовыгрузка
+126	10942	ТД Андрей автовыгрузка
 22	5855	Roomers
-21	4153	stoolgroup
-144	4052	miomarket
+142	5111	NORDEN-100
+21	4183	stoolgroup
+144	4053	miomarket
 141	3237	UTFC STORE
 79	2776	33 Кровати-333
 164	2710	sheffilton
 132	2607	enjoyme
 124	2231	samsonopt.ru
-150	2228	RED-Black1
+150	2229	RED-Black1
 58	2191	Logomebel
 20	2100	Weekend-billiard
 42	2013	Столлайн
 52	1917	Тетчер
-24	1892	deephouse-336
+24	1894	deephouse-336
 188	1886	neopoliscasa
 19	1861	Этажерка
 23	1749	barcelonadesign
@@ -3218,12 +3220,12 @@ shopYmlPluginBackendSetup.action.php
 199	1488	Treez.ru
 35	1477	Louvrehome
 84	1451	Просто купи Бувардо
-67	1399	reehouse
+67	1400	reehouse
 14	1384	miralls.ru
 145	1283	blago-mebel.ru
 190	1256	zip-mebel
 31	1131	mebelik
-28	1059	montre-vip
+28	1062	montre-vip
 136	1057	Riva
 192	1032	Garda Decor
 202	979	aletan.ru
@@ -3238,9 +3240,8 @@ shopYmlPluginBackendSetup.action.php
 93	783	idcollection
 37	706	tothome
 147	702	Натурмебель
-142	662	NORDEN-100
 45	582	Artikul-mebel
-120	573	rotang.spb.ru
+120	582	rotang.spb.ru
 125	571	Левмар-337
 39	567	Трия
 68	542	mebwill
@@ -3277,8 +3278,8 @@ shopYmlPluginBackendSetup.action.php
 115	97	Good-kresla
 86	97	СПб-Офис Директория Кресла
 198	92	Евроформа
+203	86	kennermebel-334
 98	82	Belsi-home
-203	80	kennermebel-334
 154	61	Эколайн
 139	60	rattan-mebel.ru
 97	44	Тайпит Диваны
@@ -3311,15 +3312,15 @@ shopYmlPluginBackendSetup.action.php
 122	0	aletan-мрамор
 202	979	aletan.ru
 166	0	Arredo Classic 
-24	1892	deephouse-336
-203	80	kennermebel-334
-142	662	NORDEN-100
-150	2228	RED-Black1
+24	1894	deephouse-336
+203	86	kennermebel-334
+142	5111	NORDEN-100
+150	2229	RED-Black1
 199	1488	Treez.ru
 26	0	yourroom
 125	571	Левмар-337
 204	112	Мебельная фабрика В2В-335
-126	10923	ТД Андрей автовыгрузка
+126	10942	ТД Андрей автовыгрузка
 [feature_681_values]
 151490	0	33 Кровати
 429480	2776	33кровати
@@ -3348,7 +3349,7 @@ shopYmlPluginBackendSetup.action.php
 106507	0	cosmorelax
 151409	104	Deccon.ru
 452937	0	decorumdesign
-106514	1890	Deephouse
+106514	1892	Deephouse
 211777	0	dekomo
 472962	301	demimebel
 104196	1	desperadosport
@@ -3403,7 +3404,7 @@ shopYmlPluginBackendSetup.action.php
 106496	1384	miralls.ru
 439118	0	mistyofficial
 104341	0	mobilicasa.ru
-104203	1059	montre-vip
+104203	1062	montre-vip
 453394	1886	neopoliscasa
 247364	659	NORDEN
 160173	0	objectmechty
@@ -3414,11 +3415,11 @@ shopYmlPluginBackendSetup.action.php
 106882	0	r-home.ru
 245211	60	rattan-mebel.ru
 120405	2188	red-black
-106506	1399	reehouse
+106506	1400	reehouse
 160137	0	RIFFORMA
 243865	1057	Riva
 106518	5855	Roomers
-104350	573	rotang.spb.ru
+104350	581	rotang.spb.ru
 210736	0	sale@podstolia.ru
 437571	2231	Samsonopt
 250180	0	samsonopt.
@@ -3428,11 +3429,11 @@ shopYmlPluginBackendSetup.action.php
 399899	0	Semka
 365687	2710	Sheffilton
 151407	23	Shelf-on.ru
-518000	3163	signal-halmar
+518000	3164	signal-halmar
 185817	168	Sonum
 104199	165	Spbmebel.ru
 151408	5	Starbarrel
-106516	4153	Stoolgroup
+106516	4183	Stoolgroup
 405504	0	Stoolgroup Свет
 181953	0	td-arnika
 312463	0	thefurny.ru
@@ -3454,7 +3455,7 @@ shopYmlPluginBackendSetup.action.php
 460799	1256	zip-mebel
 336304	0	 вам свет
 160315	0	Аквилон
-477355	10587	Андрей
+477355	10606	Андрей
 461696	0	Арника
 160146	0	Аскона
 484536	0	Бит байт
@@ -3522,8 +3523,9 @@ shopYmlPluginBackendSetup.action.php
 4	DEEPHOUSE	DEEPHOUSE	1889
 13	KENNER	Kenner	75
 5	LEVMAR	Levmar	571
-1	NORDEN	Norden	664
+1	NORDEN	Norden	5113
 10	RED_BLACK	Red-Black	2221
+15	TETCHAIR	Tetchair	0
 6	TREEZ	Treez	1488
 7	YOURROOM	Yourroom	0
 2	TD_ANDREY	ТД Андрей	9427
@@ -3531,7 +3533,7 @@ shopYmlPluginBackendSetup.action.php
 --- navigation/filter runtime diagnostic ---
 version=1.1.0
 handlers={"backend_extended_menu":"backendExtendedMenu","backend_menu":"backendMenu","backend_prod":"backendProd","backend_prod_list":"backendProdList","products_collection.filter":"productsCollectionFilter","backend_prod_content":"backendProdContent","backend_product_edit":"backendProductEdit","backend_products":"backendProducts","routing":"routing"}
-direct_sidebar=yes len=8167
+direct_sidebar=yes len=9273
 event_plugins=yandexmarket-plugin,nullcat-plugin,yml-plugin,lostproducts-plugin,xml-plugin,massedit-plugin,bwsimplesearch-plugin,megasuppliers-plugin
 event_sidebar=no len=0
 4sis_id=14
@@ -3546,7 +3548,7 @@ Stack trace:
 plugin=shopMegasuppliersPlugin
 backend_class_exists=yes
 supplier_model_exists=yes
-supplier_count=14
+supplier_count=15
 sidebar_render=yes
 sidebar_filter_link=no
 sidebar_norden=yes
@@ -3604,129 +3606,293 @@ Stack trace:
     </div>
 
 <hr>
+{literal}
+<style>
+#s-megasuppliers-autoimport{max-width:980px;margin:0 auto;padding:8px 0 24px}
+#s-megasuppliers-autoimport .s-ms-lead{margin:4px 0 18px;color:#777}
+#s-megasuppliers-autoimport .s-ms-card{border:1px solid #ddd;border-radius:10px;padding:18px 20px;margin:0 0 14px;background:#fff}
+#s-megasuppliers-autoimport .s-ms-card h3{margin:0 0 12px}
+#s-megasuppliers-autoimport .s-ms-statusbox{border-radius:8px;padding:12px 14px;margin-top:12px;background:#f5f5f5;line-height:1.45}
+#s-megasuppliers-autoimport .s-ms-statusbox[data-tone="ok"]{background:#f0f8f1}
+#s-megasuppliers-autoimport .s-ms-statusbox[data-tone="busy"]{background:#fff8e7}
+#s-megasuppliers-autoimport .s-ms-statusbox[data-tone="error"]{background:#fff0f0}
+#s-megasuppliers-autoimport .s-ms-run-meta{display:block;margin-top:5px;color:#777;font-size:12px}
+#s-megasuppliers-autoimport .s-ms-rules label{display:block;margin:8px 0}
+#s-megasuppliers-autoimport .s-ms-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#s-megasuppliers-autoimport details{border:1px solid #ddd;border-radius:10px;margin:0 0 14px;background:#fff}
+#s-megasuppliers-autoimport details>summary{cursor:pointer;padding:15px 18px;font-weight:600}
+#s-megasuppliers-autoimport details[open]>summary{border-bottom:1px solid #eee}
+#s-megasuppliers-autoimport .s-ms-details-body{padding:16px 18px}
+#s-megasuppliers-autoimport .s-ms-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
+#s-megasuppliers-autoimport .s-ms-grid .field{margin:0}
+#s-megasuppliers-autoimport .s-ms-grid .field.full{grid-column:1/-1}
+#s-megasuppliers-autoimport .s-ms-grid .name{font-weight:600;margin-bottom:5px}
+#s-megasuppliers-autoimport .s-ms-grid input[type="text"],
+#s-megasuppliers-autoimport .s-ms-grid input[type="number"],
+#s-megasuppliers-autoimport .s-ms-grid select{width:100%;max-width:none;box-sizing:border-box}
+#s-megasuppliers-autoimport .s-ms-supplier-select{font-size:16px;min-width:320px;max-width:100%;padding:7px}
+#s-megasuppliers-autoimport .s-ms-supplier-list{width:100%;border-collapse:collapse}
+#s-megasuppliers-autoimport .s-ms-supplier-list td{padding:7px 6px;border-bottom:1px solid #eee;vertical-align:middle}
+#s-megasuppliers-autoimport .s-ms-supplier-list td:last-child{text-align:right}
+#s-megasuppliers-autoimport .s-ms-muted{color:#777;font-size:12px}
+#s-megasuppliers-autoimport .s-ms-danger-note{display:block;margin-top:7px;color:#8a6d3b}
+@media(max-width:700px){
+  #s-megasuppliers-autoimport{padding:4px 0 18px}
+  #s-megasuppliers-autoimport .s-ms-card{padding:14px}
+  #s-megasuppliers-autoimport .s-ms-grid{grid-template-columns:1fr}
+  #s-megasuppliers-autoimport .s-ms-grid .field.full{grid-column:auto}
+  #s-megasuppliers-autoimport .s-ms-actions .button{width:100%;margin:0}
+  #s-megasuppliers-autoimport .s-ms-supplier-select{width:100%;min-width:0}
+}
+</style>
+{/literal}
+
 <div class="fields form" id="s-megasuppliers-autoimport">
-    <h2>Автоматические прайсы</h2>
-    <p class="hint">Укажите источник и поля прайса. Проверка запускается только как dry-run и не меняет каталог Webasyst. GitHub token и callback secret задаются в настройках плагина.</p>
+    <h2>Обновление прайсов поставщиков</h2>
+    <p class="s-ms-lead">Выберите поставщика, проверьте правила и сначала запустите безопасную проверку. Каталог изменяется только после отдельного нажатия «Применить».</p>
+
     <form class="s-ms-config-form">
         {$wa->csrf()}
-        <div class="field"><div class="name">Поставщик</div><div class="value"><select name="supplier_id" required><option value="">— выберите —</option>{foreach $suppliers as $supplier}{if $supplier.active}<option value="{$supplier.id}">{$supplier.name|escape} ({$supplier.code|escape})</option>{/if}{/foreach}</select></div></div>
-        <div class="field"><div class="name">Формат</div><div class="value"><select name="format"><option value="yml">YML</option><option value="norden">Norden API + резерв XML</option><option value="xml">XML</option><option value="xlsx">Excel XLSX</option><option value="csv">CSV</option><option value="pdf">PDF (табличный текстовый)</option></select></div></div>
-        <div class="field"><div class="name">Ссылка на прайс</div><div class="value"><input type="text" name="source_location" class="long" placeholder="https://..."><p class="hint">Для Norden выберите «Norden API + резерв XML»: URL и secret URL не заполняются, API-ключ берётся из GitHub, а при сбое используется резервный XML. Для других приватных URL укажите GitHub Secret с именем MEGASUPPLIERS_SOURCE_*. PDF поддерживается для текстовых таблиц; сканы требуют отдельного адаптера.</p></div></div>
-        <div class="field"><div class="name">GitHub Secret URL</div><div class="value"><input type="text" name="location_secret" placeholder="MEGASUPPLIERS_SOURCE_LIGA"></div></div>
-        <div class="field"><div class="name">Лист Excel</div><div class="value"><input type="text" name="sheet"></div></div>
-        <div class="field"><div class="name">Артикул поставщика</div><div class="value"><input type="text" name="supplier_sku_field" placeholder="vendorCode" required> <input type="text" name="sku_prefix" placeholder="Префикс, например Liga-"></div></div>
-        <div class="field"><div class="name">Название / бренд</div><div class="value"><input type="text" name="name_field" placeholder="name" required> <input type="text" name="brand" placeholder="Бренд"></div></div>
-        <div class="field"><div class="name">Поля цен</div><div class="value"><input type="text" name="purchase_price_field" placeholder="закупка"> <input type="text" name="price_field" placeholder="цена"> <input type="text" name="compare_price_field" placeholder="до скидки"></div></div>
-        <div class="field"><div class="name">Остаток / категория</div><div class="value"><input type="text" name="stock_field" placeholder="stock / available"> <input type="text" name="category_field" placeholder="categoryId"></div></div>
-        <div class="field"><div class="name">Изображения</div><div class="value"><input type="text" name="images" class="long" placeholder="pictures"><p class="hint">Несколько полей — через запятую.</p></div></div>
-        <div class="field"><div class="name">Формулы цен</div><div class="value"><input type="text" name="purchase_price_formula" placeholder="закупка"> <input type="text" name="price_formula" placeholder="supplier_price * 1.25"> <input type="text" name="compare_price_formula" placeholder="supplier_price * 1.60"><p class="hint">Разрешены только числа, supplier_price, purchase_price, price, compare_price, stock и + − × ÷.</p></div></div>
-        <div class="field"><div class="name">Правила</div><div class="value">
-            <label><input type="checkbox" name="enabled" value="1"> профиль активен</label><br>
-            <label><input type="checkbox" name="create_new" value="1"> создавать новые</label><br>
-            <label><input type="checkbox" name="zero_if_missing" value="1" checked> ставить 0, если товар исчез из остатков</label><br>
-            <label><input type="checkbox" name="only_create_in_stock" value="1"> новые — только при наличии</label><br>
-            <label><input type="checkbox" name="update_images" value="1"> обновлять изображения</label><br>
-            <label><input type="checkbox" name="update_characteristics" value="1"> обновлять характеристики</label>
-        </div></div>
-        <div class="field"><div class="name">Webasyst ID</div><div class="value"><input type="number" min="0" name="type_id" placeholder="type_id"> <input type="number" min="0" name="stock_id" placeholder="stock_id"> <input type="number" min="0" name="category_id" placeholder="category_id"></div></div>
-        <div class="field"><div class="value submit"><button type="button" class="button s-ms-save">Сохранить профиль</button> <button type="button" class="button green s-ms-check">Сохранить и проверить прайс</button> <button type="button" class="button yellow s-ms-apply">Применить проверенный прайс</button> <span class="hint s-ms-status"></span></div></div>
+
+        <div class="s-ms-card">
+            <h3>1. Поставщик</h3>
+            <select name="supplier_id" class="s-ms-supplier-select" required>
+                <option value="">— выберите поставщика —</option>
+                {foreach $suppliers as $supplier}
+                    {if $supplier.active}<option value="{$supplier.id}">{$supplier.name|escape}</option>{/if}
+                {/foreach}
+            </select>
+            <div class="s-ms-statusbox" data-tone="neutral">
+                <strong class="s-ms-status">Выберите поставщика</strong>
+                <span class="s-ms-run-meta"></span>
+            </div>
+        </div>
+
+        <div class="s-ms-card s-ms-rules">
+            <h3>2. Что делать с товарами</h3>
+            <label><input type="checkbox" name="enabled" value="1"> Разрешить применение этого профиля</label>
+            <label><input type="checkbox" name="create_new" value="1"> Создавать новые товары</label>
+            <label><input type="checkbox" name="only_create_in_stock" value="1"> Создавать новые только при наличии</label>
+            <label><input type="checkbox" name="zero_if_missing" value="1" checked> Ставить остаток 0, если товар исчез из остатков поставщика</label>
+            <label><input type="checkbox" name="zero_other_stocks" value="1"> На остальных складах Webasyst ставить 0</label>
+            <label><input type="checkbox" name="update_images" value="1"> Обновлять ссылки изображений в «Кратком описании» существующих товаров</label>
+            <label><input type="checkbox" name="update_characteristics" value="1"> Обновлять характеристики существующих товаров</label>
+            <label><input type="checkbox" name="auto_features" value="1"> Автоматически создавать и сопоставлять характеристики Webasyst</label>
+            <label><input type="checkbox" name="export_to_kit" value="1"> Выгружать в KIT <span class="hint">— только товары, разложенные по категориям Webasyst</span></label>
+            <p class="hint">Новые товары создаются сразу опубликованными. Файлы изображений не скачиваются: ссылки записываются в «Краткое описание».</p>
+        </div>
+
+        <details class="s-ms-advanced">
+            <summary>Настройка источника и сопоставления</summary>
+            <div class="s-ms-details-body">
+                <p class="hint">Эти поля обычно настраиваются один раз. Если профиль уже работает, менять их не нужно.</p>
+                <div class="s-ms-grid">
+                    <div class="field">
+                        <div class="name">Формат источника</div>
+                        <div class="value">
+                            <select name="format">
+                                <option value="yml">YML</option>
+                                <option value="norden">Norden API + резерв XML</option>
+                                <option value="xml">XML</option>
+                                <option value="xlsx">Excel XLSX</option>
+                                <option value="csv">CSV</option>
+                                <option value="pdf">PDF</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">Лист Excel</div>
+                        <div class="value"><input type="text" name="sheet" placeholder="если нужен"></div>
+                    </div>
+                    <div class="field full">
+                        <div class="name">Ссылка на прайс</div>
+                        <div class="value"><input type="text" name="source_location" placeholder="https://..."></div>
+                    </div>
+                    <div class="field full">
+                        <div class="name">Секрет источника</div>
+                        <div class="value"><input type="text" name="location_secret" placeholder="MEGASUPPLIERS_SOURCE_..."><p class="hint">Нужен только для приватного URL. Для Norden оставьте пустым.</p></div>
+                    </div>
+
+                    <div class="field"><div class="name">Поле артикула</div><div class="value"><input type="text" name="supplier_sku_field" placeholder="vendorCode" required></div></div>
+                    <div class="field"><div class="name">Префикс артикула</div><div class="value"><input type="text" name="sku_prefix" placeholder="например Liga-"></div></div>
+                    <div class="field"><div class="name">Поле названия</div><div class="value"><input type="text" name="name_field" placeholder="name" required></div></div>
+                    <div class="field"><div class="name">Бренд</div><div class="value"><input type="text" name="brand" placeholder="бренд"></div></div>
+
+                    <div class="field"><div class="name">Закупочная цена</div><div class="value"><input type="text" name="purchase_price_field" placeholder="поле источника"></div></div>
+                    <div class="field"><div class="name">Цена продажи</div><div class="value"><input type="text" name="price_field" placeholder="поле источника"></div></div>
+                    <div class="field"><div class="name">Цена до скидки</div><div class="value"><input type="text" name="compare_price_field" placeholder="поле источника"></div></div>
+                    <div class="field"><div class="name">Остаток</div><div class="value"><input type="text" name="stock_field" placeholder="stock / available"></div></div>
+                    <div class="field"><div class="name">Категория</div><div class="value"><input type="text" name="category_field" placeholder="categoryId"></div></div>
+                    <div class="field"><div class="name">Изображения</div><div class="value"><input type="text" name="images" placeholder="pictures"><p class="hint">Несколько полей — через запятую.</p></div></div>
+
+                    <div class="field"><div class="name">Формула закупки</div><div class="value"><input type="text" name="purchase_price_formula" placeholder="supplier_price"></div></div>
+                    <div class="field"><div class="name">Формула цены</div><div class="value"><input type="text" name="price_formula" placeholder="supplier_price * 1.25"></div></div>
+                    <div class="field"><div class="name">Формула до скидки</div><div class="value"><input type="text" name="compare_price_formula" placeholder="supplier_price * 1.60"></div></div>
+
+                    <div class="field"><div class="name">Тип товара Webasyst</div><div class="value"><select name="type_id"><option value="">— выберите тип товара —</option></select><p class="hint">Отображается название типа. Внутренний ID сохраняется автоматически.</p></div></div>
+                    <div class="field"><div class="name">Артикул Webasyst</div><div class="value"><select name="sku_mode"><option value="numeric">Автоматический цифровой</option><option value="supplier">Артикул поставщика</option></select><p class="hint">«Наименование артикула» всегда хранит код поставщика. Режим можно задать отдельно для каждого поставщика.</p></div></div>
+                    <div class="field"><div class="name">Склад Webasyst</div><div class="value"><select name="stock_id"><option value="">— выберите склад —</option></select><p class="hint">Отображается название склада. Внутренний ID сохраняется автоматически.</p></div></div>
+                    <div class="field"><div class="name">Категория Webasyst</div><div class="value"><input type="number" min="0" name="category_id" placeholder="ID категории"></div></div>
+                </div>
+            </div>
+        </details>
+
+        <div class="s-ms-card">
+            <h3>3. Проверка и запуск</h3>
+            <div class="s-ms-actions">
+                <button type="button" class="button s-ms-save">Сохранить</button>
+                <button type="button" class="button green s-ms-check">Проверить прайс</button>
+                <button type="button" class="button yellow s-ms-apply" data-guard="enable_writes">Применить</button>
+            </div>
+            <span class="s-ms-danger-note">«Проверить прайс» ничего не меняет. «Применить» меняет каталог и всегда требует отдельного подтверждения.</span>
+        </div>
     </form>
+
+    <details class="s-ms-suppliers">
+        <summary>Управление поставщиками</summary>
+        <div class="s-ms-details-body">
+            <table class="s-ms-supplier-list">
+                <tbody>
+                {foreach $suppliers as $supplier}
+                    <tr>
+                        <td><strong>{$supplier.name|escape}</strong><div class="s-ms-muted">{$supplier.code|escape} · товаров: {$supplier.product_count}</div></td>
+                        <td>
+                            <form method="post" action="{$backend_url}?plugin=megasuppliers&action=toggleSupplier">
+                                {$wa->csrf()}<input type="hidden" name="id" value="{$supplier.id}">
+                                <button type="submit" class="button light-gray">{if $supplier.active}Отключить{else}Включить{/if}</button>
+                            </form>
+                        </td>
+                    </tr>
+                {/foreach}
+                </tbody>
+            </table>
+            <h4>Добавить поставщика</h4>
+            <form method="post" action="{$backend_url}?plugin=megasuppliers&action=saveSupplier" class="fields form">
+                {$wa->csrf()}
+                <div class="field"><div class="name">Название</div><div class="value"><input type="text" name="name" required></div></div>
+                <div class="field"><div class="name">Код</div><div class="value"><input type="text" name="code" placeholder="NORDEN" required><p class="hint">Латиница, цифры, _ или -.</p></div></div>
+                <div class="field"><div class="value"><button class="button" type="submit">Добавить</button></div></div>
+            </form>
+        </div>
+    </details>
 </div>
+
 <script>
 (function(){
     var box=document.getElementById('s-megasuppliers-autoimport');
     if(!box)return;
     var form=box.querySelector('.s-ms-config-form');
     var status=box.querySelector('.s-ms-status');
+    var runMeta=box.querySelector('.s-ms-run-meta');
+    var statusBox=box.querySelector('.s-ms-statusbox');
+    var saveBtn=box.querySelector('.s-ms-save'),checkBtn=box.querySelector('.s-ms-check'),applyBtn=box.querySelector('.s-ms-apply');
     var configUrl='{$backend_url}?plugin=megasuppliers&action=importConfig',runUrl='{$backend_url}?plugin=megasuppliers&action=importRun',statusUrl='{$backend_url}?plugin=megasuppliers&action=importStatus';
 {literal}
-    function setStatus(text){if(status)status.textContent=text||'';}
+    var pollTimer=null;
+
+    function tidyLegacyUi(){
+        var root=document.getElementById('s-megasuppliers');
+        if(!root)return;
+        Array.prototype.forEach.call(root.children,function(el){
+            if(el===box||el.tagName==='SCRIPT'||el.tagName==='H1'||(el.classList&&el.classList.contains('alert')))return;
+            el.style.display='none';
+        });
+        var title=root.querySelector('h1');
+        if(title)title.textContent='Поставщики';
+    }
+    setTimeout(tidyLegacyUi,0);
+
+    function setStatus(text,tone,meta){
+        if(status)status.textContent=text||'';
+        if(statusBox)statusBox.setAttribute('data-tone',tone||'neutral');
+        if(runMeta)runMeta.textContent=meta||'';
+    }
     function field(name){return form.querySelector('[name="'+name+'"]');}
     function setField(name,value){var el=field(name);if(!el)return;if(el.type==='checkbox'){el.checked=Boolean(value);}else{el.value=(value===null||typeof value==='undefined')?'':value;}}
-    function fill(c){if(!c)return;setField('format',c.source&&c.source.format);setField('source_location',c.source&&c.source.location);setField('location_secret',c.source&&c.source.location_secret);setField('sheet',c.source&&c.source.sheet);setField('supplier_sku_field',c.identity&&c.identity.supplier_sku_field);setField('sku_prefix',c.identity&&c.identity.sku_prefix);setField('brand',c.identity&&c.identity.brand);setField('name_field',c.mapping&&c.mapping.name);setField('purchase_price_field',c.mapping&&c.mapping.purchase_price);setField('price_field',c.mapping&&c.mapping.price);setField('compare_price_field',c.mapping&&c.mapping.compare_price);setField('stock_field',c.mapping&&c.mapping.stock);setField('category_field',c.mapping&&c.mapping.category);setField('images',(c.mapping&&c.mapping.images||[]).join(', '));var pf=c.rules&&c.rules.price_formulas||{};setField('purchase_price_formula',pf.purchase_price);setField('price_formula',pf.price);setField('compare_price_formula',pf.compare_price);setField('enabled',c.enabled);['create_new','zero_if_missing','only_create_in_stock','update_images','update_characteristics'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});setField('type_id',c.webasyst&&c.webasyst.type_id);setField('stock_id',c.webasyst&&c.webasyst.stock_id);setField('category_id',c.webasyst&&c.webasyst.category_id);}
+    function setRunBusy(busy){if(checkBtn)checkBtn.disabled=!!busy;if(applyBtn)applyBtn.disabled=!!busy;}
+    function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
+    function setTypeOptions(types,selected){
+        var el=field('type_id');
+        if(!el)return;
+        el.innerHTML='<option value="">— выберите тип товара —</option>';
+        var found=false;
+        (types||[]).forEach(function(type){
+            var option=document.createElement('option');
+            option.value=String(type.id);
+            option.textContent=type.name||('Тип '+type.id);
+            if(String(type.id)===String(selected)){found=true;}
+            el.appendChild(option);
+        });
+        if(selected!==null&&typeof selected!=='undefined'&&String(selected)!==''&&!found){
+            var fallback=document.createElement('option');
+            fallback.value=String(selected);
+            fallback.textContent='Тип #'+selected+' (не найден)';
+            el.appendChild(fallback);
+        }
+        el.value=(selected===null||typeof selected==='undefined')?'':String(selected);
+    }
+
+    function setStockOptions(stocks,selected){
+        var el=field('stock_id');
+        if(!el)return;
+        el.innerHTML='<option value="">— выберите склад —</option>';
+        var found=false;
+        (stocks||[]).forEach(function(stock){
+            var option=document.createElement('option');
+            option.value=String(stock.id);
+            option.textContent=stock.name||('Склад '+stock.id);
+            if(String(stock.id)===String(selected)){found=true;}
+            el.appendChild(option);
+        });
+        if(selected!==null&&typeof selected!=='undefined'&&String(selected)!==''&&!found){
+            var fallback=document.createElement('option');
+            fallback.value=String(selected);
+            fallback.textContent='Склад #'+selected+' (не найден)';
+            el.appendChild(fallback);
+        }
+        el.value=(selected===null||typeof selected==='undefined')?'':String(selected);
+    }
+    function fill(c,stocks,types){
+        if(!c)return;
+        setField('format',c.source&&c.source.format);
+        setField('source_location',c.source&&c.source.location);
+        setField('location_secret',c.source&&c.source.location_secret);
+        setField('sheet',c.source&&c.source.sheet);
+        setField('supplier_sku_field',c.identity&&c.identity.supplier_sku_field);
+        setField('sku_prefix',c.identity&&c.identity.sku_prefix);
+        setField('brand',c.identity&&c.identity.brand);
+        setField('name_field',c.mapping&&c.mapping.name);
+        setField('purchase_price_field',c.mapping&&c.mapping.purchase_price);
+        setField('price_field',c.mapping&&c.mapping.price);
+        setField('compare_price_field',c.mapping&&c.mapping.compare_price);
+        setField('stock_field',c.mapping&&c.mapping.stock);
+        setField('category_field',c.mapping&&c.mapping.category);
+        setField('images',(c.mapping&&c.mapping.images||[]).join(', '));
+        var pf=c.rules&&c.rules.price_formulas||{};
+        setField('purchase_price_formula',pf.purchase_price);
+        setField('price_formula',pf.price);
+        setField('compare_price_formula',pf.compare_price);
+        setField('enabled',c.enabled);
+        ['create_new','zero_if_missing','only_create_in_stock','update_images','update_characteristics','export_to_kit'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});
+        var autoFeatures=c.rules&&typeof c.rules.auto_features!=='undefined'?c.rules.auto_features:(c.source&&c.source.format==='norden');
+        setField('auto_features',autoFeatures);
+        var zeroOther=c.rules&&typeof c.rules.zero_other_stocks!=='undefined'?c.rules.zero_other_stocks:(c.source&&c.source.format==='norden');
+        setField('zero_other_stocks',zeroOther);
+        setTypeOptions(types,c.webasyst&&c.webasyst.type_id);
+        var skuMode=c.webasyst&&c.webasyst.sku_mode;
+        if(skuMode!=='numeric'&&skuMode!=='supplier'){skuMode=(c.source&&c.source.format==='norden')?'numeric':'supplier';}
+        setField('sku_mode',skuMode);
+        setStockOptions(stocks,c.webasyst&&c.webasyst.stock_id);
+        setField('category_id',c.webasyst&&c.webasyst.category_id);
+    }
     function paramsFromForm(){return new URLSearchParams(new FormData(form));}
-    async function requestJson(url,options){var res=await fetch(url,options||{credentials:'same-origin'});var text=await res.text();var data=null;try{data=JSON.parse(text);}catch(e){}if(!res.ok){var err=new Error('HTTP '+res.status);err.data=data;throw err;}if(!data){throw new Error('INVALID_JSON');}return data;}
-    form.addEventListener('change',async function(e){if(!e.target||e.target.name!=='supplier_id')return;var id=e.target.value;if(!id)return;form.reset();field('supplier_id').value=id;setStatus('загрузка…');try{var r=await requestJson(configUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});fill(r.data?r.data.config:r.config);setStatus('');}catch(err){setStatus('не удалось загрузить профиль');}});
-    async function save(next){var id=field('supplier_id').value;if(!id){setStatus('выберите поставщика');return;}setStatus('сохранение…');try{var r=await requestJson(configUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:paramsFromForm()});if(r&&r.status==='ok'){setStatus('профиль сохранён');if(next)await next(id);}else{setStatus('ошибка сохранения');}}catch(err){setStatus('ошибка сохранения');}}
-    function poll(id,requestId){var tries=0,busy=false;var timer=setInterval(async function(){if(busy)return;busy=true;tries++;try{var r=await requestJson(statusUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin'});var run=r.data?r.data.run:r.run;if(run&&run.request_id===requestId){if(run.status==='queued'){setStatus('проверка выполняется…');}else{clearInterval(timer);if(run.report){setStatus(run.report.blocked?'проверка заблокирована: '+(run.report.errors||[]).join('; '):'проверка пройдена: '+run.report.products+' товаров');}else{setStatus('проверка завершена: '+run.status);}}}}catch(err){}finally{busy=false;}if(tries>100){clearInterval(timer);setStatus('проверка ещё выполняется; статус можно открыть позже');}},3000);}
-    async function run(id,mode){setStatus(mode==='apply'?'запуск применения…':'запуск проверки…');var body=new URLSearchParams();body.set('supplier_id',id);body.set('mode',mode);var csrf=field('_csrf');body.set('_csrf',csrf?csrf.value:'');try{var r=await requestJson(runUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body});var d=r&&r.data?r.data:r;var errs=r&&r.errors?r.errors:[];if(r&&r.status==='ok'&&d.request_id){setStatus(mode==='apply'?'применение запущено':'проверка запущена');poll(id,d.request_id);}else{setStatus((mode==='apply'?'применение заблокировано':'ошибка запуска')+(errs.length?': '+errs.join('; '):''));}}catch(err){var errs=err.data&&err.data.errors?err.data.errors:[];setStatus((mode==='apply'?'применение заблокировано':'ошибка запуска')+(errs.length?': '+errs.join('; '):''));}}
-    var saveBtn=box.querySelector('.s-ms-save'),checkBtn=box.querySelector('.s-ms-check'),applyBtn=box.querySelector('.s-ms-apply');
-    if(saveBtn)saveBtn.addEventListener('click',function(){save();});
-    if(checkBtn)checkBtn.addEventListener('click',function(){save(function(id){return run(id,'dry-run');});});
-    if(applyBtn)applyBtn.addEventListener('click',function(){var id=field('supplier_id').value;if(!id){setStatus('выберите поставщика');return;}if(!confirm('Применить последний успешно проверенный прайс в каталог Webasyst? Запись будет разрешена только если включён enable_writes и прайс не изменился после dry-run.'))return;run(id,'apply');});
-})();
-{/literal}
-</script>
-
-    <hr>
-    <h2>Справочник поставщиков</h2>
-    <table class="zebra full-width">
-        <thead><tr><th>Поставщик</th><th>Код API</th><th>Товаров</th><th>Статус</th><th>Экспорт</th><th></th></tr></thead>
-        <tbody>
-        {foreach $suppliers as $supplier}
-            <tr>
-                <td><strong>{$supplier.name|escape}</strong></td>
-                <td><code>{$supplier.code|escape}</code></td>
-                <td>{$supplier.product_count}</td>
-                <td>{if $supplier.active}<span class="badge green">активен</span>{else}<span class="badge gray">отключён</span>{/if}</td>
-                <td><a href="{$backend_url}?plugin=megasuppliers&action=export&supplier_id={$supplier.id}">CSV для Excel</a></td>
-                <td>
-                    <form method="post" action="{$backend_url}?plugin=megasuppliers&action=toggleSupplier" style="display:inline">
-                        {$wa->csrf()}<input type="hidden" name="id" value="{$supplier.id}">
-                        <button type="submit" class="button light-gray">{if $supplier.active}Отключить{else}Включить{/if}</button>
-                    </form>
-                </td>
-            </tr>
-        {/foreach}
-        </tbody>
-    </table>
-
-    <h3>Добавить поставщика</h3>
-    <form method="post" action="{$backend_url}?plugin=megasuppliers&action=saveSupplier" class="fields form">
-        {$wa->csrf()}
-        <div class="field"><div class="name">Название</div><div class="value"><input type="text" name="name" required></div></div>
-        <div class="field"><div class="name">Код API</div><div class="value"><input type="text" name="code" placeholder="NORDEN" required><p class="hint">Латиница, цифры, _ или -. Код используется в supplier_code.</p></div></div>
-        <div class="field"><div class="value"><button class="button" type="submit">Добавить</button></div></div>
-    </form>
-
-    <hr>
-    <h2>API</h2>
-    <p>Endpoint: <code>/megasuppliers-api/</code></p>
-    <p>Заголовок: <code>X-Megasuppliers-Key: {$api_key|escape}</code></p>
-    <p>В JSON обязательно передавать <code>supplier_code</code>. Без него API отвечает <code>SUPPLIER_REQUIRED</code> и HTTP 422.</p>
-    <pre>{literal}{
-  "supplier_code": "NORDEN",
-  "update_catalog": true,
-  "create_missing": false,
-  "items": [
-    {"артикул": "A321.300.W", "название": "Кресло", "закупка": "12500", "остаток": "14"}
-  ]
-}{/literal}</pre>
-    <form method="post" action="{$backend_url}?plugin=megasuppliers&action=regenerateKey" onsubmit="return confirm('Старый API-ключ перестанет работать. Продолжить?');">
-        {$wa->csrf()}<button type="submit" class="button red">Сменить API-ключ</button>
-    </form>
-
-    <hr>
-    <h2>Последние импорты</h2>
-    <table class="zebra full-width">
-        <thead><tr><th>Дата</th><th>Поставщик</th><th>Источник</th><th>Файл</th><th>Статус</th><th>Создано</th><th>Обновлено</th><th>Привязано</th><th>Пропущено</th><th>Ошибки</th></tr></thead>
-        <tbody>
-        {foreach $imports as $row}
-            <tr>
-                <td>{$row.created_at|escape}</td><td>{$row.supplier_name|escape}</td><td>{$row.source|escape}</td><td>{$row.filename|escape}</td><td>{$row.status|escape}</td>
-                <td>{$row.created_count}</td><td>{$row.updated_count}</td><td>{$row.linked_count}</td><td>{$row.skipped_count}</td><td>{$row.error_count}</td>
-            </tr>
-        {foreachelse}
-            <tr><td colspan="10" class="gray">Импортов ещё нет.</td></tr>
-        {/foreach}
-        </tbody>
-    </table>
-</div>
+    async function requestJson(url,options){
+        var res=await fetch(url,options||{credentials:'same-origin'});
 --- megasuppliers backend direct probe ---
 plugin=shopMegasuppliersPlugin
 backend_action_class=yes
 meta_read=yes
-supplier_count=14
+supplier_count=15
 import_count=3
 --- megasuppliers performance benchmark (read-only) ---
 [indexes]
@@ -3739,20 +3905,101 @@ external_id	1	external_id
 supplier_product	1	supplier_id
 supplier_product	2	product_id
 [sizes]
-mapping_rows=18665
-mapped_products=18665
+mapping_rows=23465
+mapped_products=23114
 benchmark_supplier_id=2 products=9427
-group_counts_ms=5.16 suppliers=11
-per_supplier_counts_ms=12.23 suppliers=14
-backendProdList_ms=0.17 len=10320
-backendProducts_ms=0.13 len=8167
-filter_exists_count=9427 ms=22.62,14.79,14.47
+group_counts_ms=6.21 suppliers=11
+per_supplier_counts_ms=14.67 suppliers=15
+backendProdList_ms=0.18 len=10593
+backendProducts_ms=0.14 len=9273
+filter_exists_count=9427 ms=30.36,16.28,16.23
 
 Fatal error: Uncaught Error: Call to undefined method mysqli_result::fetchAll() in /tmp/ms_perf_probe.php:65
 Stack trace:
 #0 {main}
   thrown in /tmp/ms_perf_probe.php on line 65
 --- recent megasuppliers/errors in wa-log ---
+### /home/web/vm-23f9aff9.na4u.ru/www/wa-log/error.log
+1122:#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+1123:#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+1124:#2 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_smartytemplatecompiler.php(105): Smarty_Internal_Templateparser->doParse(2, ': ')
+1125:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatecompilerbase.php(207): Smarty_Internal_SmartyTemplateCompiler->doCompile('\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE\xD1\x82\xD0\xB0: 8...')
+1126:#4 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_template.php(188): Smarty_Internal_TemplateCompilerBase->compileTemplate(Object(Smarty_Internal_Template))
+1127:#5 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatebase.php(161): Smarty_Internal_Template->compileTemplateSource()
+1128:#6 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/view/waSmarty3View.class.php(144): Smarty_Internal_TemplateBase->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...', NULL)
+1129:#7 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendProduct.action.php(136): waSmarty3View->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...')
+1149:Uncaught exception SmartyCompilerException:
+1151:#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+1152:#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+1153:#2 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_smartytemplatecompiler.php(105): Smarty_Internal_Templateparser->doParse(2, ': ')
+1154:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatecompilerbase.php(207): Smarty_Internal_SmartyTemplateCompiler->doCompile('\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE\xD1\x82\xD0\xB0: 8...')
+1155:#4 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_template.php(188): Smarty_Internal_TemplateCompilerBase->compileTemplate(Object(Smarty_Internal_Template))
+1156:#5 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatebase.php(161): Smarty_Internal_Template->compileTemplateSource()
+1157:#6 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/view/waSmarty3View.class.php(144): Smarty_Internal_TemplateBase->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...', NULL)
+1158:#7 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendProduct.action.php(136): waSmarty3View->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...')
+1178:Uncaught exception SmartyCompilerException:
+1180:#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+1181:#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+1182:#2 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_smartytemplatecompiler.php(105): Smarty_Internal_Templateparser->doParse(2, ': ')
+1183:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatecompilerbase.php(207): Smarty_Internal_SmartyTemplateCompiler->doCompile('\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE\xD1\x82\xD0\xB0: 8...')
+1184:#4 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_template.php(188): Smarty_Internal_TemplateCompilerBase->compileTemplate(Object(Smarty_Internal_Template))
+1185:#5 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatebase.php(161): Smarty_Internal_Template->compileTemplateSource()
+1186:#6 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/view/waSmarty3View.class.php(144): Smarty_Internal_TemplateBase->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...', NULL)
+1187:#7 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendProduct.action.php(136): waSmarty3View->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...')
+1207:Uncaught exception SmartyCompilerException:
+1209:#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+1210:#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+1211:#2 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_smartytemplatecompiler.php(105): Smarty_Internal_Templateparser->doParse(2, ': ')
+1212:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatecompilerbase.php(207): Smarty_Internal_SmartyTemplateCompiler->doCompile('\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE\xD1\x82\xD0\xB0: 8...')
+1213:#4 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_template.php(188): Smarty_Internal_TemplateCompilerBase->compileTemplate(Object(Smarty_Internal_Template))
+1214:#5 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatebase.php(161): Smarty_Internal_Template->compileTemplateSource()
+1215:#6 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/view/waSmarty3View.class.php(144): Smarty_Internal_TemplateBase->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...', NULL)
+1216:#7 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendProduct.action.php(136): waSmarty3View->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...')
+1236:Uncaught exception SmartyCompilerException:
+1238:#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+1239:#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+1240:#2 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_smartytemplatecompiler.php(105): Smarty_Internal_Templateparser->doParse(2, ': ')
+1241:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatecompilerbase.php(207): Smarty_Internal_SmartyTemplateCompiler->doCompile('\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE\xD1\x82\xD0\xB0: 8...')
+1242:#4 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_template.php(188): Smarty_Internal_TemplateCompilerBase->compileTemplate(Object(Smarty_Internal_Template))
+1243:#5 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatebase.php(161): Smarty_Internal_Template->compileTemplateSource()
+1244:#6 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/view/waSmarty3View.class.php(144): Smarty_Internal_TemplateBase->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...', NULL)
+1245:#7 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendProduct.action.php(136): waSmarty3View->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...')
+1265:Uncaught exception SmartyCompilerException:
+1267:#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+1268:#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+1269:#2 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_smartytemplatecompiler.php(105): Smarty_Internal_Templateparser->doParse(2, ': ')
+1270:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatecompilerbase.php(207): Smarty_Internal_SmartyTemplateCompiler->doCompile('\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE\xD1\x82\xD0\xB0: 8...')
+1271:#4 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_template.php(188): Smarty_Internal_TemplateCompilerBase->compileTemplate(Object(Smarty_Internal_Template))
+1272:#5 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatebase.php(161): Smarty_Internal_Template->compileTemplateSource()
+1273:#6 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/view/waSmarty3View.class.php(144): Smarty_Internal_TemplateBase->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...', NULL)
+1274:#7 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendProduct.action.php(136): waSmarty3View->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...')
+1294:Uncaught exception SmartyCompilerException:
+1296:#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+1297:#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+1298:#2 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_smartytemplatecompiler.php(105): Smarty_Internal_Templateparser->doParse(2, ': ')
+1299:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatecompilerbase.php(207): Smarty_Internal_SmartyTemplateCompiler->doCompile('\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE\xD1\x82\xD0\xB0: 8...')
+1300:#4 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_template.php(188): Smarty_Internal_TemplateCompilerBase->compileTemplate(Object(Smarty_Internal_Template))
+1301:#5 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatebase.php(161): Smarty_Internal_Template->compileTemplateSource()
+1302:#6 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/view/waSmarty3View.class.php(144): Smarty_Internal_TemplateBase->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...', NULL)
+1303:#7 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendProduct.action.php(136): waSmarty3View->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...')
+1323:Uncaught exception SmartyCompilerException:
+1325:#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+1326:#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+1327:#2 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_smartytemplatecompiler.php(105): Smarty_Internal_Templateparser->doParse(2, ': ')
+1328:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatecompilerbase.php(207): Smarty_Internal_SmartyTemplateCompiler->doCompile('\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE\xD1\x82\xD0\xB0: 8...')
+1329:#4 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_template.php(188): Smarty_Internal_TemplateCompilerBase->compileTemplate(Object(Smarty_Internal_Template))
+1330:#5 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatebase.php(161): Smarty_Internal_Template->compileTemplateSource()
+1331:#6 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/view/waSmarty3View.class.php(144): Smarty_Internal_TemplateBase->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...', NULL)
+1332:#7 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendProduct.action.php(136): waSmarty3View->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...')
+1352:Uncaught exception SmartyCompilerException:
+1354:#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3155): Smarty_Internal_TemplateCompilerBase->trigger_template_error()
+1355:#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templateparser.php(3220): Smarty_Internal_Templateparser->yy_syntax_error(2, ': ')
+1356:#2 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_smartytemplatecompiler.php(105): Smarty_Internal_Templateparser->doParse(2, ': ')
+1357:#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatecompilerbase.php(207): Smarty_Internal_SmartyTemplateCompiler->doCompile('\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE\xD1\x82\xD0\xB0: 8...')
+1358:#4 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_template.php(188): Smarty_Internal_TemplateCompilerBase->compileTemplate(Object(Smarty_Internal_Template))
+1359:#5 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/vendors/smarty3/sysplugins/smarty_internal_templatebase.php(161): Smarty_Internal_Template->compileTemplateSource()
+1360:#6 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/view/waSmarty3View.class.php(144): Smarty_Internal_TemplateBase->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...', NULL)
+1361:#7 /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib/actions/frontend/shopFrontendProduct.action.php(136): waSmarty3View->fetch('string:\xD0\x92\xD1\x8B\xD1\x81\xD0\xBE...')
 
 stderr=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
 
