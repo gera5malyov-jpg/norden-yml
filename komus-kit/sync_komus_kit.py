@@ -6,6 +6,7 @@ import html
 import json
 import os
 import re
+import hashlib
 import tempfile
 import urllib.parse
 import xml.etree.ElementTree as ET
@@ -303,6 +304,80 @@ def iter_offers(xml_path):
             }
         finally:
             elem.clear()
+
+
+
+def _csv_category_id(parts):
+    key=" > ".join(str(x or "").strip() for x in parts if str(x or "").strip())
+    return "komus-csv-" + hashlib.sha1(key.encode("utf-8")).hexdigest()[:20]
+
+
+def _add_csv_category_path(categories, row):
+    direction=str(row.get("Товарное направление") or "").strip()
+    category=str(row.get("Товарная категория") or "").strip()
+    group=str(row.get("Товарная группа") or "").strip()
+    titles=[x for x in (direction,category,group) if x]
+    if not titles:
+        titles=["Комус"]
+    parent=None
+    parts=[]
+    last=None
+    for title in titles:
+        parts.append(title)
+        cid=_csv_category_id(parts)
+        categories.setdefault(cid,{
+            "id":cid,
+            "title":title,
+            "parent_id":parent,
+        })
+        parent=cid
+        last=cid
+    return last
+
+
+def _price_only_offer(art, row, categories):
+    category_id=_add_csv_category_path(categories,row)
+    image=str(row.get("Изображние товара") or "").strip()
+    barcodes=[
+        x.strip() for x in str(row.get("Штрих-код") or "").split(",")
+        if x.strip()
+    ]
+    params={}
+    for title in ("Товарное направление","Товарная категория","Товарная группа"):
+        value=str(row.get(title) or "").strip()
+        if value:
+            params[title]=[value]
+    return {
+        "art":art,
+        "sku":SKU_PREFIX+art,
+        "name":str(row.get("Наименование товара") or art).strip() or art,
+        "vendor_code":str(row.get("Код производителя") or "").strip(),
+        "category_id":category_id,
+        "base_price":str(row.get("Базовая цена, руб.") or "").strip(),
+        "quantity":_safe_int(row.get("Наличие на складе") or "0"),
+        "brand":str(row.get("Торговая марка") or "").strip(),
+        "model":str(row.get("Код производителя") or "").strip(),
+        "description":_clean_html(row.get("Доп. информация") or ""),
+        "country":str(row.get("Страна-производитель") or "").strip(),
+        "tnved":str(row.get("Код ТНВЭД") or "").strip(),
+        "vat":str(row.get("НДС") or "").strip(),
+        "type_prefix":str(row.get("Товарная группа") or "").strip(),
+        "source_url":"",
+        "images":[image] if image else [],
+        "barcodes":barcodes,
+        "params":params,
+    }
+
+
+def iter_all_offers(xml_path, price_rows, categories):
+    xml_arts=set()
+    for offer in iter_offers(xml_path):
+        xml_arts.add(offer["art"])
+        yield offer
+    for art,row in price_rows.items():
+        if art in xml_arts:
+            continue
+        yield _price_only_offer(art,row,categories)
 
 
 class KomusSyncRunner:
@@ -638,7 +713,7 @@ class KomusSyncRunner:
         source_pos = 0
 
         try:
-            for offer in iter_offers(self.xml_path):
+            for offer in iter_all_offers(self.xml_path, special_prices, source_categories):
                 if self.only_art and offer["art"] != self.only_art:
                     source_pos += 1
                     continue
