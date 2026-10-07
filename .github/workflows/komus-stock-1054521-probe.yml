@@ -1,0 +1,54 @@
+name: Komus stock 1054521 probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/komus-stock-1054521-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe Moscow and SPB stock for 1054521
+        env:
+          KOMUS_API: ${{ secrets.KOMUS_API }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request, urllib.parse, urllib.error
+          token=os.environ['KOMUS_API']
+          H={'token':token,'Accept':'application/json','Content-Type':'application/json','User-Agent':'Megapolis-Komus-Probe/1.0'}
+          art=1054521
+          def get(url):
+              req=urllib.request.Request(url,headers=H)
+              with urllib.request.urlopen(req,timeout=90) as r:
+                  return r.status, json.loads(r.read().decode('utf-8'))
+          def post(path, params=None):
+              q=urllib.parse.urlencode({'format':'json', **(params or {})})
+              req=urllib.request.Request('https://komus-opt.ru/api2'+path+'?'+q,data=json.dumps({'artnumbers':[art]}).encode(),method='POST',headers=H)
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      return r.status, json.loads(r.read().decode('utf-8'))
+              except urllib.error.HTTPError as e:
+                  return e.code, e.read().decode('utf-8','replace')[:2000]
+
+          for params in ({}, {'region':0}, {'region':1}, {'regionId':0}, {'regionId':1}):
+              st,body=post('/stock/',params)
+              print('STOCK_PARAMS='+json.dumps(params,ensure_ascii=False)+' STATUS='+str(st)+' BODY='+json.dumps(body,ensure_ascii=False)[:4000] if not isinstance(body,str) else 'STOCK_PARAMS='+json.dumps(params)+' STATUS='+str(st)+' BODY='+body)
+          for region in (0,1):
+              url='https://komus-opt.ru/api2/elements/'+str(art)+'?'+urllib.parse.urlencode({'format':'json','region':region})
+              try:
+                  st,body=get(url)
+                  print('ELEMENT_REGION='+str(region)+' STATUS='+str(st)+' BODY='+json.dumps(body,ensure_ascii=False)[:4000])
+              except Exception as e:
+                  print('ELEMENT_REGION='+str(region)+' ERROR='+repr(e))
+          PY
