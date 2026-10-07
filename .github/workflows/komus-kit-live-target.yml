@@ -1,0 +1,48 @@
+name: Komus KIT live target 2505358
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/komus-kit-live-target.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: komus-kit-write
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt beautifulsoup4
+      - name: Create or update Komus target
+        env:
+          KOMUS_LOGIN: ${{ secrets.KOMUS_LOGIN }}
+          KOMUS_PASSWORD: ${{ secrets.KOMUS_PASSWORD }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          PYTHONPATH=samson-kit python komus-kit/sync_komus_kit.py \
+            --only-art 2505358 \
+            --report /tmp/komus-target.json
+      - name: Verify report
+        run: |
+          python - <<'PY'
+          import json
+          r=json.load(open("/tmp/komus-target.json",encoding="utf-8"))
+          keys=("status","eligible_in_stock","existing_variants_seen","new_products_created","price_changes","stock_changes","error_count","warning_count")
+          print(json.dumps({k:r.get(k) for k in keys},ensure_ascii=False,indent=2))
+          if r.get("status")=="failed" or r.get("error_count"):
+              raise SystemExit(1)
+          if int(r.get("eligible_in_stock") or 0)!=1:
+              raise SystemExit("target not found in live source")
+          PY
