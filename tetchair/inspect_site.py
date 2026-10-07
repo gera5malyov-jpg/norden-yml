@@ -26,3 +26,8 @@ for a in soup.select('a[href*="?p="]')[:30]:
     txt=" ".join(a.get_text(" ",strip=True).split())
     cards.append({"href":urljoin(BASE,a.get("href")),"text":txt[:500]})
 print(json.dumps({"pagination":pg,"cards":cards},ensure_ascii=False,indent=2))
+
+
+print("QUERY_URLS")
+matches=sorted(set(re.findall(r"/catalog/3009/\\?[^\\\"'<> ]+", rr.text)))
+print(json.dumps(matches[:100],ensure_ascii=False,indent=2))
