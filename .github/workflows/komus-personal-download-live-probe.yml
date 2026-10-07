@@ -1,0 +1,124 @@
+name: Komus personal live download probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/komus-personal-download-live-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install deps
+        run: pip install requests beautifulsoup4
+      - name: Login, download and inspect archives
+        env:
+          KOMUS_LOGIN: ${{ secrets.KOMUS_LOGIN }}
+          KOMUS_PASSWORD: ${{ secrets.KOMUS_PASSWORD }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, re, json, zipfile, urllib.parse
+          import requests
+          from bs4 import BeautifulSoup
+
+          login=os.environ["KOMUS_LOGIN"].strip()
+          password=os.environ["KOMUS_PASSWORD"].strip()
+          s=requests.Session()
+          s.headers.update({
+              "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130 Safari/537.36",
+              "Accept-Language":"ru-RU,ru;q=0.9,en;q=0.8",
+          })
+
+          personal="https://komus-opt.ru/personal/"
+          r=s.get(personal,timeout=90)
+          soup=BeautifulSoup(r.text,"html.parser")
+          form=next(
+              f for f in soup.find_all("form")
+              if any((x.get("type") or "").lower()=="password" for x in f.find_all("input"))
+          )
+          data={}
+          for inp in form.find_all("input"):
+              name=(inp.get("name") or "").strip()
+              if not name:
+                  continue
+              typ=(inp.get("type") or "text").lower()
+              if typ in ("hidden","submit","checkbox"):
+                  data[name]=inp.get("value") or ""
+          data["USER_LOGIN"]=login
+          data["USER_PASSWORD"]=password
+          action=urllib.parse.urljoin(r.url,form.get("action") or r.url)
+          s.post(action,data=data,timeout=90,allow_redirects=True).raise_for_status()
+
+          page=s.get(personal,timeout=90)
+          if "полный товарный каталог в xml" not in page.text.casefold():
+              raise SystemExit("Komus authenticated personal page not available")
+
+          soup=BeautifulSoup(page.text,"html.parser")
+          wanted={
+              "price":"полный ассортимент со специальными ценами",
+              "xml":"полный товарный каталог в xml",
+          }
+          links={}
+          for a in soup.find_all("a",href=True):
+              label=" ".join(a.stripped_strings).casefold()
+              for key,phrase in wanted.items():
+                  if phrase in label:
+                      links[key]=urllib.parse.urljoin(page.url,a["href"])
+          if set(links)!={"price","xml"}:
+              raise SystemExit("Required Komus download links not found")
+
+          os.makedirs("/tmp/komus",exist_ok=True)
+          summary={}
+          for key,url in links.items():
+              resp=s.get(url,timeout=180,allow_redirects=True)
+              resp.raise_for_status()
+              target="/tmp/komus/"+key+".zip"
+              with open(target,"wb") as fh:
+                  fh.write(resp.content)
+              if not zipfile.is_zipfile(target):
+                  raise SystemExit(key+" response is not ZIP")
+              with zipfile.ZipFile(target) as z:
+                  members=[x for x in z.namelist() if not x.endswith("/")]
+                  item={
+                      "zip_bytes":len(resp.content),
+                      "members":members[:20],
+                      "member_count":len(members),
+                  }
+                  if key=="xml":
+                      xml_member=next((m for m in members if m.lower().endswith((".xml",".yml"))),None)
+                      if not xml_member:
+                          raise SystemExit("No XML/YML in Komus XML archive")
+                      raw=z.read(xml_member)
+                      text=raw.decode("utf-8","replace")
+                      item["offer_count"]=len(re.findall(r"<offer\\b",text,re.I))
+                      item["target_2505358"]=("2505358" in text and "PP1002NG" in text)
+                  else:
+                      member=members[0] if members else None
+                      if not member:
+                          raise SystemExit("Empty Komus price archive")
+                      raw=z.read(member)
+                      try:
+                          txt=raw.decode("utf-8-sig")
+                          enc="utf-8-sig"
+                      except UnicodeDecodeError:
+                          txt=raw.decode("cp1251","replace")
+                          enc="cp1251"
+                      lines=txt.splitlines()
+                      item["line_count"]=len(lines)
+                      item["target_2505358"]=any("2505358" in ln and "PP1002NG" in ln for ln in lines)
+                      item["encoding"]=enc
+                  summary[key]=item
+
+          print("KOMUS_DOWNLOAD_OK=true")
+          print("KOMUS_ARCHIVE_SUMMARY="+json.dumps(summary,ensure_ascii=False))
+          PY
