@@ -303,12 +303,14 @@
         return parts.join(' · ');
     }
     function reportMeta(run){
-        var report=run&&run.report;
-        if(!report)return '';
+        if(!run)return '';
+        var report=run.report;
         var out=[];
-        if(report.source&&report.source.fallback_used)out.push('Источник: резервный XML, API недоступен');
-        else if(report.source&&report.source.origin)out.push('Источник: '+report.source.origin);
-        if(report.warnings&&report.warnings.length)out.push(report.warnings.join(' '));
+        if(run.dispatch_recovered)out.push('Запуск GitHub подтверждён'+(run.github_run_id?' #'+run.github_run_id:''));
+        else if(run.dispatch_uncertain)out.push('GitHub вернул временную ошибку, проверяем созданный запуск');
+        if(report&&report.source&&report.source.fallback_used)out.push('Источник: резервный XML, API недоступен');
+        else if(report&&report.source&&report.source.origin)out.push('Источник: '+report.source.origin);
+        if(report&&report.warnings&&report.warnings.length)out.push(report.warnings.join(' '));
         return out.join(' · ');
     }
     function handleRun(run){
