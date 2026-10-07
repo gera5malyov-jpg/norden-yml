@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'tetchair/inspect_site.py'
+      - 'tetchair/show_queries.py'
       - '.github/workflows/inspect-tetchair-once.yml'
   workflow_dispatch:
 
@@ -25,6 +26,6 @@ jobs:
           python-version: '3.12'
       - run: pip install --disable-pip-version-check requests beautifulsoup4
       - name: Inspect authenticated catalog
-        run: python tetchair/inspect_site.py
+        run: python tetchair/show_queries.py
 
 # probe v2
