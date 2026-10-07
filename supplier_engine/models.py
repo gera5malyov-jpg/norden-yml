@@ -6,6 +6,7 @@ class Product:
     supplier_sku: str
     sku: str
     name: str
+    description: str = ""
     purchase_price: float | None = None
     price: float | None = None
     compare_price: float | None = None
