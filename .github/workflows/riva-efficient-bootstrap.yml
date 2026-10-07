@@ -99,6 +99,18 @@ jobs:
             echo "::warning::Riva report email failed with exit code $rc"
           fi
           exit 0
+      - name: Send intermediate Riva email
+        if: steps.next.outputs.continue == 'true'
+        shell: bash
+        run: |
+          python riva-kit/send_report_email.py             --report /tmp/riva-bootstrap.json             --kind intermediate             --run-url "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Send final Riva email
+        if: always() && steps.next.outputs.continue != 'true'
+        shell: bash
+        run: |
+          python riva-kit/send_report_email.py             --report /tmp/riva-bootstrap.json             --kind final             --run-url "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
       - name: Queue next Riva missing-only batch
         if: steps.next.outputs.continue == 'true'
         env:
