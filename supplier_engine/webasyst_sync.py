@@ -767,6 +767,14 @@ def apply_plan(wa: WebasystClient, plan, config):
                 try:
                     info = wa.call("shop.product.getInfo", params={"id": original_product_id})
                     product_exists = bool(isinstance(info, dict) and str(info.get("id") or original_product_id))
+                    target_type_id = int(web.get("type_id") or 0)
+                    current_type_id = int((info or {}).get("type_id") or 0) if isinstance(info, dict) else 0
+                    if target_type_id and current_type_id != target_type_id:
+                        # Historical supplier links may point to a product from
+                        # another supplier/type. Never repair that card. Treat
+                        # the link as stale and recreate inside the configured
+                        # supplier product type instead.
+                        product_exists = False
                 except Exception as exc:
                     text = str(exc or "").casefold()
                     if "http 404" not in text and "товар не найден" not in text:
