@@ -1,0 +1,84 @@
+name: Inspect Norden 31663620 once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-norden-31663620-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check requests
+      - name: Inspect Webasyst and KIT mapping
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, requests
+          base=os.environ["WEBASYST_BASE_URL"].rstrip("/")
+          token=os.environ["WEBASYST_API_TOKEN"]
+          s=requests.Session()
+          def wa(method, params=None):
+              p=dict(params or {})
+              p["format"]="json"; p["access_token"]=token
+              r=s.get(f"{base}/api.php/{method}", params=p, timeout=90)
+              print("WA", method, r.status_code)
+              r.raise_for_status()
+              return r.json()
+          types=wa("shop.type.getList")
+          rows=types if isinstance(types,list) else list(types.values()) if isinstance(types,dict) else []
+          type_id=None
+          for row in rows:
+              if str(row.get("name") or row.get("title") or "").strip().casefold()=="norden-100":
+                  type_id=row.get("id")
+          print("TYPE_ID",type_id)
+          matches=[]
+          off=0
+          while True:
+              p=wa("shop.product.search",{"hash":f"type/{type_id}","offset":off,"limit":1000,"fields":"id,name,summary,status,type_id,features,skus,stock_counts"})
+              batch=p.get("products") if isinstance(p,dict) and isinstance(p.get("products"),list) else p if isinstance(p,list) else []
+              for product in batch:
+                  skus=product.get("skus") or []
+                  if isinstance(skus,dict): skus=list(skus.values())
+                  for sku in skus:
+                      vals={str(product.get("id") or ""),str(sku.get("id") or ""),str(sku.get("sku") or ""),str(sku.get("name") or "")}
+                      if "31663620" in vals:
+                          matches.append({"product":product,"sku":sku})
+              if len(batch)<1000: break
+              off += len(batch)
+          print("MATCH_COUNT",len(matches))
+          for m in matches:
+              product=m["product"]; sku=m["sku"]
+              info=wa("shop.product.getInfo",{"id":product.get("id")})
+              print("MATCH",json.dumps({
+                  "product_id":product.get("id"),
+                  "name":product.get("name"),
+                  "sku_id":sku.get("id"),
+                  "sku":sku.get("sku"),
+                  "sku_name":sku.get("name"),
+                  "features":(info or {}).get("features"),
+                  "summary":(info or {}).get("summary"),
+              },ensure_ascii=False))
+          h={"Authorization":"Bearer "+os.environ["YANDEX_KIT_TOKEN"],"Accept":"application/json"}
+          rr=requests.get("https://api.kit.yandex.net/v1/variants",headers=h,params={"kit_id":"1603537","page":1,"per_page":100},timeout=120)
+          print("KIT_QUERY_HTTP",rr.status_code)
+          if rr.ok:
+              data=rr.json()
+              items=data if isinstance(data,list) else next((data[k] for k in ("items","results","variants") if isinstance(data.get(k),list)),[])
+              exact=[x for x in items if str(x.get("kit_id") or "")=="1603537"]
+              print("KIT_EXACT",json.dumps(exact[:5],ensure_ascii=False))
+          else:
+              print(rr.text[:1000])
+          PY
