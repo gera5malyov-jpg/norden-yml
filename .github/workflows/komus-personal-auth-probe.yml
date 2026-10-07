@@ -24,8 +24,8 @@ jobs:
 
       - name: Inspect and authenticate Komus personal account
         env:
-          KOMUS_LOGIN: \${{ secrets.KOMUS_LOGIN }}
-          KOMUS_PASSWORD: \${{ secrets.KOMUS_PASSWORD }}
+          KOMUS_LOGIN: ${{ secrets.KOMUS_LOGIN }}
+          KOMUS_PASSWORD: ${{ secrets.KOMUS_PASSWORD }}
         shell: bash
         run: |
           python - <<'PY'
