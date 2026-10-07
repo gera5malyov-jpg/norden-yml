@@ -157,3 +157,42 @@ print(json.dumps({
     "category_samples": report.get("category_samples"),
     "product_detail_sample": report.get("product_detail_sample"),
 }, ensure_ascii=False, indent=2))
+
+
+sklad = s.get(BASE + "/sklad/", timeout=60)
+sklad.raise_for_status()
+ss = BeautifulSoup(sklad.text, "html.parser")
+selects = []
+for sel in ss.find_all("select"):
+    selects.append({
+        "name": sel.get("name"),
+        "id": sel.get("id"),
+        "class": sel.get("class"),
+        "options": [
+            {
+                "value": opt.get("value"),
+                "text": " ".join(opt.get_text(" ", strip=True).split()),
+                "data": {k: v for k, v in opt.attrs.items() if k.startswith("data-")},
+            }
+            for opt in sel.find_all("option")[:300]
+        ],
+    })
+forms = []
+for form in ss.find_all("form"):
+    forms.append({
+        "action": form.get("action"),
+        "method": form.get("method"),
+        "inputs": [
+            {"name": x.get("name"), "value": x.get("value"), "type": x.get("type")}
+            for x in form.find_all(["input","select"])
+            if x.get("name")
+        ][:100],
+    })
+print("SKLAD_STRUCTURE")
+print(json.dumps({
+    "selects": selects,
+    "forms": forms,
+    "text_tail": " ".join(ss.get_text(" ", strip=True).split())[-5000:],
+    "data_p_count": len(ss.select("[data-p]")),
+    "data_pr_count": len(ss.select("[data-pr]")),
+}, ensure_ascii=False, indent=2))
