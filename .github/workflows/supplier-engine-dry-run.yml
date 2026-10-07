@@ -1,4 +1,5 @@
 name: Supplier engine validation
+run-name: Supplier ${{ inputs.supplier_id || 'ci' }} ${{ inputs.request_id || github.run_id }} ${{ inputs.mode || github.event_name }}
 
 on:
   pull_request:
