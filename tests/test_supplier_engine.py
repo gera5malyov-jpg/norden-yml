@@ -2004,3 +2004,94 @@ def test_kit_characteristics_collapse_new_string_multivalue():
         "value": "Сетка | Ткань",
         "values": ["Сетка | Ткань"],
     }]
+
+
+def test_kit_existing_card_without_media_gets_images_even_when_summary_exists():
+    class ExistingKit(_FakeKitForSupplierExport):
+        def variants(self):
+            return [{
+                "id": "v-existing",
+                "kit_id": "987654",
+                "sku": "12345",
+                "brand": "Norden",
+                "product_id": "p-kit",
+                "characteristics": [],
+                "media": [],
+            }]
+
+    kit = ExistingKit()
+    wa = _FakeWaForKit()
+    manifest = {
+        "categories": [{"id": 2, "name": "Кресла", "parent_id": 0}],
+        "items": [{
+            "supplier_sku": "NS-1",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "12345",
+            "name": "Кресло",
+            "description": "",
+            "summary": "[extimg]\nhttps://old.example/1.jpg\n[/extimg]",
+            "status": 1,
+            "purchase_price": 1000,
+            "stock": 3,
+            "category_ids": [2],
+            "features": [{
+                "code": "kit_id",
+                "name": "KIT ID",
+                "values": ["987654"],
+            }],
+            "image_urls": ["https://supplier.example/1.jpg"],
+        }],
+    }
+    report = sync_manifest(
+        manifest,
+        {
+            "identity": {"brand": "Norden"},
+            "rules": {"export_to_kit": True},
+        },
+        kit=kit,
+        wa=wa,
+    )
+    assert report["status"] == "ok"
+    assert report["created"] == 0
+    assert report["updated"] == 1
+    assert report["images_uploaded"] == 1
+
+
+def test_kit_apply_max_create_blocks_before_product_creation():
+    kit = _FakeKitForSupplierExport()
+    wa = _FakeWaForKit()
+    manifest = {
+        "categories": [{"id": 2, "name": "Кресла", "parent_id": 0}],
+        "items": [{
+            "supplier_sku": "NS-NEW",
+            "product_id": 101,
+            "sku_id": 201,
+            "sku": "12345",
+            "name": "Новое кресло",
+            "description": "",
+            "summary": "",
+            "status": 1,
+            "purchase_price": 1000,
+            "stock": 3,
+            "category_ids": [2],
+            "features": [],
+            "image_urls": [],
+        }],
+    }
+    report = sync_manifest(
+        manifest,
+        {
+            "identity": {"brand": "Norden"},
+            "rules": {"export_to_kit": True},
+        },
+        kit=kit,
+        wa=wa,
+        max_create=0,
+        max_eligible=10,
+    )
+    assert report["status"] == "blocked"
+    assert report["preflight"]["create_new"] == 1
+    assert report["errors"][0]["error"] == "Planned KIT creates exceed safety limit"
+    assert not kit.created_products
+    assert not kit.created_variants
