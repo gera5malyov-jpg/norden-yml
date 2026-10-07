@@ -118,9 +118,11 @@ def normalize(c, rows):
     m = c["mapping"]
     ident = c["identity"]
     prefix = ident.get("sku_prefix", "")
-    formulas = c.get("rules", {}).get("price_formulas") or {}
+    rules = c.get("rules", {}) or {}
+    formulas = rules.get("price_formulas") or {}
     if not isinstance(formulas, dict):
         formulas = {}
+    require_purchase_price = bool(rules.get("require_purchase_price", False))
     characteristic_map = m.get("characteristics") or {}
     if not isinstance(characteristic_map, dict):
         characteristic_map = {}
@@ -157,7 +159,16 @@ def normalize(c, rows):
             characteristics=chars,
         )
         is_norden = c.get("source", {}).get("format", "").lower() == "norden"
-        if is_norden and (product.purchase_price is None or product.purchase_price <= 0):
+        missing_purchase = product.purchase_price is None or product.purchase_price <= 0
+        if require_purchase_price and missing_purchase:
+            # Never substitute a retail/RRP field for a missing wholesale price.
+            # Existing products may still receive non-price updates; new products
+            # are skipped later by build_plan until a real purchase price exists.
+            product.purchase_price = None
+            product.price = None
+            product.compare_price = None
+            out.append(product)
+        elif is_norden and missing_purchase:
             out.append(product)
         else:
             out.append(apply_price_formulas(product, formulas))
@@ -345,6 +356,16 @@ def main():
                 "У %d позиций Norden нет положительной закупочной цены; их цены не будут изменяться."
                 % source_meta["missing_purchase_price"]
             )
+        if (config.get("rules") or {}).get("require_purchase_price"):
+            missing_required_purchase = sum(
+                1 for product in products
+                if product.purchase_price is None or product.purchase_price <= 0
+            )
+            if missing_required_purchase:
+                report.warnings.append(
+                    "У %d позиций нет закупочной цены: цены существующих товаров не меняются, новые товары без закупки пропускаются."
+                    % missing_required_purchase
+                )
 
         plan = build_plan(products, existing, links, config.get("rules") or {})
         characteristic_names = _characteristic_names_for_plan(plan, config.get("rules") or {})
