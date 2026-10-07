@@ -349,6 +349,10 @@ def main():
         elif args.mode == "apply":
             raise ValueError("Signed Megasuppliers bridge is required for apply")
 
+        effective_rules = dict(config.get("rules") or {})
+        if _price_formulas_require_purchase_price(effective_rules.get("price_formulas") or {}):
+            effective_rules["require_purchase_price"] = True
+
         report = validate_run(
             products,
             args.previous_count,
@@ -375,10 +379,6 @@ def main():
                     "У %d позиций нет закупочной цены: цены существующих товаров не меняются, новые товары без закупки пропускаются."
                     % missing_required_purchase
                 )
-
-        effective_rules = dict(config.get("rules") or {})
-        if _price_formulas_require_purchase_price(effective_rules.get("price_formulas") or {}):
-            effective_rules["require_purchase_price"] = True
 
         plan = build_plan(products, existing, links, effective_rules)
         characteristic_names = _characteristic_names_for_plan(plan, effective_rules)
