@@ -24,6 +24,27 @@ ROUTER = "http://192.168.1.1"
 ROUTER_LOGIN = "chatgpt"
 PROFILE_RE = re.compile(r"^VPNTYPE-[A-Za-z0-9._-]+\.conf$")
 
+RUSSIAN_CODE_RE = re.compile(
+    r"^(?:MOS|MSK|MOW|LED|SPB|KZN|EKB|SVX|NSK|OVB|KGD|VVO|AER|SOC|UFA|KRR)\\d*$",
+    re.IGNORECASE,
+)
+RUSSIAN_LABEL_MARKERS = (
+    "россия", "russia", "москва", "moscow", "санкт-петербург",
+    "saint petersburg", "st petersburg", "казань", "kazan",
+    "екатеринбург", "yekaterinburg", "новосибирск", "novosibirsk",
+    "калининград", "kaliningrad", "владивосток", "vladivostok",
+    "сочи", "sochi", "уфа", "ufa", "краснодар", "krasnodar",
+)
+
+
+def is_russian_profile(filename, label=""):
+    text = str(label or "").casefold()
+    if any(marker in text for marker in RUSSIAN_LABEL_MARKERS):
+        return True
+    stem = pathlib.Path(filename).stem
+    code = stem[len("VPNTYPE-"):] if stem.upper().startswith("VPNTYPE-") else stem
+    return bool(RUSSIAN_CODE_RE.fullmatch(code))
+
 
 def log(message):
     line = f"[{datetime.now(timezone.utc).isoformat()}] {message}"
@@ -170,6 +191,7 @@ def import_profile(session, filename, raw_bytes):
 def main():
     manifest = fetch_repo_json("atlas-wireguard-manifest.json")
     current = sorted({x for x in manifest.get("profiles", []) if PROFILE_RE.fullmatch(str(x))})
+    labels = manifest.get("labels") if isinstance(manifest.get("labels"), dict) else {}
     if not current:
         raise RuntimeError("manifest contains no valid WireGuard profiles")
 
@@ -203,6 +225,20 @@ def main():
         and state_hashes.get(x) != current_hashes.get(x)
     ]
     pending_profiles = new_profiles + [x for x in updated_profiles if x not in new_profiles]
+    russian_profiles = [x for x in pending_profiles if is_russian_profile(x, labels.get(x, ""))]
+    if russian_profiles:
+        log("SKIP_RUSSIAN " + ",".join(russian_profiles))
+        for filename in russian_profiles:
+            seen.add(filename)
+            if filename in current_hashes:
+                state_hashes[filename] = current_hashes[filename]
+        state["seen"] = sorted(seen)
+        state["hashes"] = dict(sorted(state_hashes.items()))
+        state["last_russian_skip_at"] = datetime.now(timezone.utc).isoformat()
+        save_state(state)
+        pending_profiles = [x for x in pending_profiles if x not in russian_profiles]
+        new_profiles = [x for x in new_profiles if x not in russian_profiles]
+        updated_profiles = [x for x in updated_profiles if x not in russian_profiles]
 
     if not pending_profiles:
         log("NO_NEW_OR_UPDATED_CONFIGS manifest_count=" + str(len(current)))
