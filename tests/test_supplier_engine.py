@@ -51,6 +51,41 @@ def test_safe_price_formulas_are_applied():
     assert p.images==["https://x/1.jpg","https://x/2.jpg"]
 
 
+def test_supplier_price_formula_prefers_mapped_purchase_price():
+    c = {
+        "source": {"format": "yml"},
+        "identity": {"supplier_sku_field": "vendorCode", "sku_prefix": "tet-", "brand": "Tetchair"},
+        "mapping": {
+            "name": "name",
+            "purchase_price": "purchase_price",
+            "price": "price",
+            "compare_price": "",
+            "stock": "qty",
+            "category": "categoryId",
+            "images": ["pictures"],
+            "characteristics": {},
+        },
+        "rules": {
+            "price_formulas": {
+                "purchase_price": "supplier_price",
+                "price": "supplier_price * 1.25",
+                "compare_price": "supplier_price * 1.80",
+            }
+        },
+    }
+    p = normalize(c, [{
+        "vendorCode": "19248",
+        "name": "Chair",
+        "purchase_price": "4610",
+        "price": "6150",
+        "qty": "3",
+        "categoryId": "1",
+    }])[0]
+    assert p.purchase_price == 4610
+    assert p.price == 5762.5
+    assert p.compare_price == 8298
+
+
 def test_normalize_accepts_php_empty_array_mappings():
     c = {
         "identity": {"supplier_sku_field": "Артикул", "sku_prefix": "", "brand": "Norden"},
