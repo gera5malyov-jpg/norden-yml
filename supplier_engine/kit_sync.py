@@ -771,12 +771,32 @@ def _select_variant(product, by_sku, by_kit_id, by_supplier_brand, supplier_iden
                 "KIT ID %s brand conflict: KIT=%s, Webasyst=%s"
                 % (expected_kit_id, _s(variant.get("brand")), brand)
             )
-        existing_supplier = _variant_supplier_article(variant, supplier_identity_ids)
-        if existing_supplier and supplier_sku and existing_supplier != supplier_sku:
-            raise KitSyncError(
-                "KIT ID %s supplier article conflict: KIT=%s, Webasyst=%s"
-                % (expected_kit_id, existing_supplier, supplier_sku)
-            )
+        existing_suppliers = _variant_supplier_articles(
+            variant,
+            supplier_identity_ids,
+        )
+        if existing_suppliers and supplier_sku:
+            # Historical Norden exports sometimes wrote the Webasyst SKU
+            # (AF-...) into KIT's supplier-article identity fields. When the
+            # stored KIT ID and brand already point to this exact card, that
+            # legacy value is safe to migrate to the real Norden supplier SKU.
+            # Any third/unrelated identity still blocks the write.
+            allowed_legacy = {supplier_sku}
+            if sku:
+                allowed_legacy.add(sku)
+            unexpected = [
+                value for value in existing_suppliers
+                if value not in allowed_legacy
+            ]
+            if unexpected:
+                raise KitSyncError(
+                    "KIT ID %s supplier article conflict: KIT=%s, Webasyst=%s"
+                    % (
+                        expected_kit_id,
+                        ",".join(existing_suppliers),
+                        supplier_sku,
+                    )
+                )
         return variant
 
     if not sku or not supplier_sku or not brand_key:
