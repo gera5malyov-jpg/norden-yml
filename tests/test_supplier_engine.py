@@ -86,6 +86,42 @@ def test_supplier_price_formula_prefers_mapped_purchase_price():
     assert p.compare_price == 8298
 
 
+def test_purchase_price_formula_implicitly_requires_wholesale_price():
+    c = {
+        "source": {"format": "yml"},
+        "identity": {"supplier_sku_field": "vendorCode", "sku_prefix": "tet-", "brand": "Tetchair"},
+        "mapping": {
+            "name": "name",
+            "purchase_price": "purchase_price",
+            "price": "price",
+            "compare_price": "",
+            "stock": "qty",
+            "category": "categoryId",
+            "images": [],
+            "characteristics": {},
+        },
+        "rules": {
+            "price_formulas": {
+                "purchase_price": "purchase_price",
+                "price": "purchase_price * 1.25",
+                "compare_price": "purchase_price * 1.80",
+            },
+        },
+    }
+    p = normalize(c, [{
+        "vendorCode": "NO-WHOLESALE",
+        "name": "Chair",
+        "purchase_price": "",
+        "price": "6150",
+        "qty": "3",
+        "categoryId": "1",
+    }])[0]
+    assert p.purchase_price is None
+    assert p.price is None
+    assert p.compare_price is None
+    assert p.stock == 3
+
+
 def test_required_purchase_price_never_falls_back_to_retail_price():
     c = {
         "source": {"format": "yml"},
