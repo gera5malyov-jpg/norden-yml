@@ -69,6 +69,7 @@
             <label><input type="checkbox" name="zero_if_missing" value="1" checked> Ставить остаток 0, если товар исчез из остатков поставщика</label>
             <label><input type="checkbox" name="zero_other_stocks" value="1"> На остальных складах Webasyst ставить 0</label>
             <label><input type="checkbox" name="update_images" value="1"> Обновлять ссылки изображений в «Кратком описании» существующих товаров</label>
+            <label><input type="checkbox" name="update_description" value="1" checked> Обновлять полное описание существующих товаров</label>
             <label><input type="checkbox" name="update_characteristics" value="1"> Обновлять характеристики существующих товаров</label>
             <label><input type="checkbox" name="auto_features" value="1"> Автоматически создавать и сопоставлять характеристики Webasyst</label>
             <label><input type="checkbox" name="export_to_kit" value="1"> Выгружать в KIT <span class="hint">— только товары, разложенные по категориям Webasyst</span></label>
@@ -109,6 +110,7 @@
                     <div class="field"><div class="name">Поле артикула</div><div class="value"><input type="text" name="supplier_sku_field" placeholder="vendorCode" required></div></div>
                     <div class="field"><div class="name">Префикс артикула</div><div class="value"><input type="text" name="sku_prefix" placeholder="например Liga-"></div></div>
                     <div class="field"><div class="name">Поле названия</div><div class="value"><input type="text" name="name_field" placeholder="name" required></div></div>
+                    <div class="field"><div class="name">Поле описания</div><div class="value"><input type="text" name="description_field" placeholder="description"><p class="hint">Для YML/XML по умолчанию используется description.</p></div></div>
                     <div class="field"><div class="name">Бренд</div><div class="value"><input type="text" name="brand" placeholder="бренд"></div></div>
 
                     <div class="field"><div class="name">Закупочная цена</div><div class="value"><input type="text" name="purchase_price_field" placeholder="поле источника"></div></div>
@@ -255,6 +257,7 @@
         setField('sku_prefix',c.identity&&c.identity.sku_prefix);
         setField('brand',c.identity&&c.identity.brand);
         setField('name_field',c.mapping&&c.mapping.name);
+        setField('description_field',c.mapping&&c.mapping.description);
         setField('purchase_price_field',c.mapping&&c.mapping.purchase_price);
         setField('price_field',c.mapping&&c.mapping.price);
         setField('compare_price_field',c.mapping&&c.mapping.compare_price);
@@ -266,7 +269,8 @@
         setField('price_formula',pf.price);
         setField('compare_price_formula',pf.compare_price);
         setField('enabled',c.enabled);
-        ['create_new','zero_if_missing','only_create_in_stock','update_images','update_characteristics','export_to_kit'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});
+        ['create_new','zero_if_missing','only_create_in_stock','update_images','update_description','update_characteristics','export_to_kit'].forEach(function(k){setField(k,c.rules&&c.rules[k]);});
+        if(c.rules&&typeof c.rules.update_description==='undefined'){setField('update_description',true);}
         var autoFeatures=c.rules&&typeof c.rules.auto_features!=='undefined'?c.rules.auto_features:(c.source&&c.source.format==='norden');
         setField('auto_features',autoFeatures);
         var zeroOther=c.rules&&typeof c.rules.zero_other_stocks!=='undefined'?c.rules.zero_other_stocks:(c.source&&c.source.format==='norden');
