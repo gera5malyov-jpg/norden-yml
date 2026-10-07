@@ -1,0 +1,75 @@
+name: Samson KIT audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/samson-kit-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Compare Samson catalog with KIT
+        env:
+          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python - <<'PY'
+          import json
+          from samson_kit.config import Settings
+          from samson_kit.http import SafeSession
+          from samson_kit.samson_client import SamsonClient
+          from samson_kit.kit_client import KitClient
+          from samson_kit.mapper import normalize_sku
+
+          settings = Settings.from_env()
+          http = SafeSession(max_attempts=10, timeout=(15,120))
+          samson = SamsonClient(settings.samson_api_key, http, settings.samson_base_url)
+          kit = KitClient(settings.kit_token, http, settings.kit_base_url, min_request_interval=0.25)
+
+          source = set()
+          source_rows = 0
+          for raw in samson.iter_skus():
+              source_rows += 1
+              try:
+                  source.add(normalize_sku(raw).kit_sku)
+              except Exception:
+                  pass
+
+          kit_index, duplicates = kit.index_samson_variants()
+          kit_unique = set(kit_index)
+          kit_dupe_skus = set(duplicates)
+          kit_all = kit_unique | kit_dupe_skus
+
+          missing = sorted(source - kit_all)
+          extra = sorted(kit_all - source)
+
+          result = {
+              "source_rows": source_rows,
+              "source_unique_skus": len(source),
+              "kit_unique_skus": len(kit_unique),
+              "kit_duplicate_skus": len(kit_dupe_skus),
+              "kit_all_skus": len(kit_all),
+              "missing_in_kit": len(missing),
+              "extra_in_kit": len(extra),
+              "missing_first_200": missing[:200],
+              "duplicate_skus_first_100": sorted(kit_dupe_skus)[:100],
+              "extra_first_100": extra[:100],
+              "complete": len(missing) == 0 and len(kit_dupe_skus) == 0,
+          }
+          print("SAMSON_KIT_AUDIT_RESULT=" + json.dumps(result, ensure_ascii=False))
+          PY
