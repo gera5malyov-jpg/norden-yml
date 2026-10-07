@@ -1,0 +1,163 @@
+name: AtlasPage OpenVPN secure export
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/atlaspage-openvpn-secure-export.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ATLASPAGE_ID: ${{ secrets.ATLASPAGE_ID }}
+      TRANSFER_PUB_B64: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQm9qQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FZOEFNSUlCaWdLQ0FZRUFwOExtdlJqbUd4K2hDdEJ3ODhjYgpSdkpNNUUrQXh1dklGUGpkQ0dWYkd5YUF1Vkt0TEYxZXdRYjRhWnVIOHJtanUxeFhhYTRuSlJ1bTlEdThWenUzCnZ4dDRwd1ZZN0l2aGNEOGt5VWJ0VmRrRVdRM1B0cHUwcWpmb1lmMElTRVFGM0plVmQxeTN1NlFTWmZuVVNmcUMKTGxXY0twQkRSRk55T05XRHorUDVLUld0c0gyeHZYWDBsc3I4ekhjc2VNS3ZhdDNhTlVYS25DUWFLSHRSTis5aAowOUtDdEpoamYxaWxZMGN1cnFvbERSSEYzcHJDNnpGQXNNSFlsc3ZmdzFGRXBSSVhUN0VKZXlyakxQR2VWYkt5CmVlOGVYMnBPTFptaEJ2eUdSTitwNlE3UDN5YmltUzJ5aWRhUko4by9GWXJLalU0bTlpcFFrU2tNYmJhakdRcE0KNnArVjVYSDlvTFdTa24vS203d01IUW1oU1VuR3JibGV5cU9hSkdoc003R05vTU56L0k5NzNxV1VxL0xnK3NIVQoyR0FUYW5RQWlPbk16VnBwYlJJZGMrbkhmY1V4NzFIK3krMU83WHpxS0hHY3lqTHg2KzdzYjhKWDdXOVdxZlNnCjhzY0IvQUoyTFZvMzAyRGFqYUNLV0JkdkFib0FWem4wdGtrb2N6T2Y2S2hCQWdNQkFBRT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==
+
+    steps:
+      - name: Install Playwright
+        shell: bash
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null
+          npx playwright install chromium --with-deps >/dev/null
+
+      - name: Download all OpenVPN profiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/openvpn
+          cat > /tmp/export-openvpn.js <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+
+          const userId = process.env.ATLASPAGE_ID || '';
+          if (!userId) throw new Error('ATLASPAGE_ID missing');
+          const sleep = ms => new Promise(r => setTimeout(r, ms));
+          const clean = s => (s || '').replace(/\s+/g,' ').trim();
+
+          async function clickText(page,re) {
+            const candidates = [
+              page.getByRole('button',{name:re}).first(),
+              page.getByRole('tab',{name:re}).first(),
+              page.getByText(re,{exact:true}).first()
+            ];
+            for (const el of candidates) {
+              if (await el.isVisible({timeout:800}).catch(()=>false)) {
+                await el.click({timeout:4000});
+                return true;
+              }
+            }
+            return false;
+          }
+
+          (async()=>{
+            const browser = await chromium.launch({headless:true});
+            const context = await browser.newContext({locale:'ru-RU',acceptDownloads:true});
+            const page = await context.newPage();
+
+            await page.goto('https://atlaspage51.com/lk',{waitUntil:'domcontentloaded',timeout:45000});
+            await sleep(1400);
+            if (!await clickText(page,/^По\s+ID$/i)) throw new Error('ID login mode not found');
+
+            let input = page.locator('input:visible[placeholder*="ID" i],input:visible[name*="id" i]').first();
+            if (!(await input.isVisible().catch(()=>false))) input = page.locator('input:visible').first();
+            await input.fill(userId);
+
+            let submit = page.locator('button:visible[type="submit"]').first();
+            if (!(await submit.isVisible().catch(()=>false))) submit = page.getByRole('button',{name:/войти|далее|продолжить/i}).first();
+            await submit.click({timeout:5000});
+            await Promise.race([page.waitForLoadState('networkidle',{timeout:15000}).catch(()=>{}),page.waitForTimeout(4000)]);
+
+            await page.goto('https://atlaspage51.com/lk/connect',{waitUntil:'domcontentloaded',timeout:45000});
+            await sleep(1400);
+            if (/\/login(?:\?|$)/i.test(page.url())) throw new Error('login did not persist');
+
+            let selected = await clickText(page,/^OpenVPN$/i);
+            if (!selected) {
+              const choose = page.getByRole('button',{name:/выбрать протокол/i}).first();
+              if (await choose.isVisible({timeout:1200}).catch(()=>false)) {
+                await choose.click();
+                await sleep(700);
+                selected = await clickText(page,/^OpenVPN$/i);
+              }
+            }
+            if (!selected) throw new Error('OpenVPN protocol not found');
+            await sleep(1000);
+
+            const rows = page.locator('button[class*="serverItemClickable"]');
+            const count = await rows.count();
+            console.log('OPENVPN_SERVER_ROWS='+count);
+            if (!count) throw new Error('No OpenVPN servers found');
+
+            let downloaded = 0;
+            for (let i=0;i<count;i++) {
+              const row = rows.nth(i);
+              const label = clean(await row.innerText().catch(()=>''));
+              await row.scrollIntoViewIfNeeded().catch(()=>{});
+              await row.click({timeout:5000});
+              await sleep(600);
+
+              const overlay = page.locator('div[class*="popupOverlay"]:visible').last();
+              const scope = await overlay.isVisible({timeout:1200}).catch(()=>false) ? overlay : page;
+              const dl = scope.locator('button,a').filter({hasText:/Скачать\s+VPNTYPE-.*\.ovpn/i}).first();
+
+              if (!(await dl.isVisible({timeout:1500}).catch(()=>false))) {
+                console.log('NO_DOWNLOAD_BUTTON',i+1,label);
+              } else {
+                const [download] = await Promise.all([
+                  page.waitForEvent('download',{timeout:10000}),
+                  dl.click({timeout:5000})
+                ]);
+                const suggested = download.suggestedFilename();
+                const safe = suggested.endsWith('.ovpn') ? suggested : ('server_'+(i+1)+'.ovpn');
+                await download.saveAs('/tmp/openvpn/'+safe);
+                downloaded++;
+                console.log('DOWNLOADED',safe);
+              }
+
+              await page.keyboard.press('Escape').catch(()=>{});
+              await sleep(250);
+              if (await overlay.isVisible().catch(()=>false)) {
+                const close = overlay.locator('button[aria-label*="close" i],button[aria-label*="закры" i],button[class*="close" i]').first();
+                if (await close.isVisible({timeout:400}).catch(()=>false)) await close.click({force:true}).catch(()=>{});
+              }
+              await sleep(250);
+            }
+
+            console.log('OPENVPN_DOWNLOADED='+downloaded);
+            if (downloaded < 1) throw new Error('No profiles downloaded');
+            await browser.close();
+          })().catch(e=>{console.error('EXPORT_ERROR='+e.message);process.exit(1)});
+          NODE
+          NODE_PATH="$(npm root)" node /tmp/export-openvpn.js
+          (cd /tmp/openvpn && zip -q -r /tmp/openvpn.zip .)
+          echo "OPENVPN_ZIP_BYTES=$(stat -c%s /tmp/openvpn.zip)"
+
+      - name: Encrypt profiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p transfer
+          printf '%s' "$TRANSFER_PUB_B64" | base64 -d > /tmp/pub.pem
+          openssl rand 32 > /tmp/key
+          openssl rand 16 > /tmp/iv
+          cat /tmp/key /tmp/iv > /tmp/keyiv
+          K="$(xxd -p -c 256 /tmp/key)"
+          IV="$(xxd -p -c 256 /tmp/iv)"
+          openssl enc -aes-256-cbc -K "$K" -iv "$IV" -in /tmp/openvpn.zip -out transfer/openvpn.enc
+          openssl pkeyutl -encrypt -pubin -inkey /tmp/pub.pem \
+            -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 \
+            -in /tmp/keyiv -out transfer/keyiv.enc
+          rm -f /tmp/key /tmp/iv /tmp/keyiv /tmp/openvpn.zip
+
+      - name: Upload encrypted artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlaspage-openvpn-encrypted
+          path: transfer/
+          retention-days: 1
+          if-no-files-found: error
