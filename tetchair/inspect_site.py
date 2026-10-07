@@ -82,25 +82,28 @@ for a in catalog_soup.find_all("a", href=True):
 report["category_count"] = len(category_urls)
 report["category_samples"] = []
 first_product_id = None
+hits = 0
 
-for url in category_urls[:12]:
+for url in category_urls:
     resp = s.get(url, timeout=60)
     resp.raise_for_status()
     page = BeautifulSoup(resp.text, "html.parser")
-    product_nodes = page.select(".product_table_item, .product_item, [data-p][data-pr]")
+    product_nodes = page.select(".product_table_item, .product_item, [data-p][data-pr], [data-p]")
+    ids = sorted(set(re.findall(r"data-p=[\\\"'](\\d+)", resp.text)))[:100]
+    if not product_nodes and not ids:
+        continue
     sample_nodes = []
-    for el in product_nodes[:5]:
+    for el in product_nodes[:8]:
         attrs = {
             k: v for k, v in el.attrs.items()
             if k.startswith("data-") or k in ("class", "id")
         }
-        text_value = " ".join(el.get_text(" ", strip=True).split())[:1600]
+        text_value = " ".join(el.get_text(" ", strip=True).split())[:1800]
         sample_nodes.append({"attrs": attrs, "text": text_value})
         if first_product_id is None:
             pid = el.get("data-p")
             if pid and str(pid).isdigit():
                 first_product_id = str(pid)
-    ids = sorted(set(re.findall(r"data-p=[\"'](\d+)", resp.text)))[:50]
     if first_product_id is None and ids:
         first_product_id = ids[0]
     report["category_samples"].append({
@@ -109,9 +112,10 @@ for url in category_urls[:12]:
         "product_nodes": len(product_nodes),
         "product_ids_sample": ids,
         "nodes_sample": sample_nodes,
-        "text_sample": " ".join(page.get_text(" ", strip=True).split())[:2500],
+        "text_sample": " ".join(page.get_text(" ", strip=True).split())[-3500:],
     })
-    if first_product_id and product_nodes:
+    hits += 1
+    if hits >= 5:
         break
 
 if first_product_id:
@@ -122,7 +126,7 @@ if first_product_id:
         "product_id": first_product_id,
         "url": detail.url,
         "title": ds.title.get_text(" ", strip=True) if ds.title else "",
-        "text": " ".join(ds.get_text(" ", strip=True).split())[:5000],
+        "text": " ".join(ds.get_text(" ", strip=True).split())[:6000],
         "images": [
             urljoin(BASE, x.get("src"))
             for x in ds.find_all("img", src=True)
@@ -134,9 +138,16 @@ if first_product_id:
                     k: v for k, v in el.attrs.items()
                     if k.startswith("data-") or k in ("class", "id")
                 },
-                "text": " ".join(el.get_text(" ", strip=True).split())[:500],
+                "text": " ".join(el.get_text(" ", strip=True).split())[:800],
             }
             for el in ds.find_all(attrs={"data-p": True})[:20]
+        ],
+        "tables": [
+            [
+                [" ".join(cell.get_text(" ", strip=True).split()) for cell in row.find_all(["th","td"])]
+                for row in table.find_all("tr")[:30]
+            ]
+            for table in ds.find_all("table")[:5]
         ],
     }
 
