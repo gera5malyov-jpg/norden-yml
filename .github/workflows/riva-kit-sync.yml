@@ -40,6 +40,8 @@ jobs:
     env:
       YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
       RIVA_FEED_URL: ${{ secrets.RIVA_FEED_URL }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -64,3 +66,18 @@ jobs:
       - name: Print compact report
         if: always()
         run: cat riva-kit/state/last_sync.json || true
+
+      - name: Email scheduled Riva report to shop
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          python riva-kit/send_report_email.py \
+            --report riva-kit/state/last_sync.json \
+            --kind scheduled \
+            --run-url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          rc=$?
+          if [[ "$rc" != "0" ]]; then
+            echo "::warning::Scheduled Riva report email failed with exit code $rc"
+          fi
+          exit 0
