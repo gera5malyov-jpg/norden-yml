@@ -1,18 +1,141 @@
 {
-    "status": "dispatched",
-    "supplier_id": 15,
-    "request_id": "tetchair-20261007211125-079b73a7bc85",
-    "dispatch_http_code": 204,
-    "dispatch_uncertain": false,
-    "dispatch_fix_present": true,
-    "type_id": 1917,
-    "purchase_price_field": "purchase_price",
-    "require_purchase_price": true,
-    "formulas": {
-        "purchase_price": "purchase_price",
-        "price": "purchase_price * 1.25",
-        "compare_price": "purchase_price * 1.80"
-    },
-    "previous_count": "1133"
+    "type_1917": null,
+    "type_1917_products": 0,
+    "type_1917_skus": 0,
+    "type_1917_tet_skus": 0,
+    "type_1917_numeric_names": 0,
+    "supplier15_links": 0,
+    "supplier15_linked_products": 0,
+    "supplier15_types": [],
+    "article_19248": [
+        {
+            "product_id": "791415",
+            "type_id": "52",
+            "product_name": "Вешалка JET металл, пластик, 86*44*166 см, темно-серый/светло-серый/хром",
+            "sku_id": "30965437",
+            "sku": "19248",
+            "sku_name": "19248",
+            "purchase_price": "6150.0000",
+            "price": "7564.0000",
+            "compare_price": "6815.0000"
+        }
+    ],
+    "type1917_sample": [],
+    "status": {
+        "status": "completed",
+        "request_id": "tetchair-20261007211125-079b73a7bc85",
+        "mode": "dry-run",
+        "report_plan": {
+            "create": 446,
+            "repair_sku": 0,
+            "update": 0,
+            "zero_stock": 0,
+            "skipped": 686,
+            "blocked": 0,
+            "blocked_sample": [],
+            "skipped_sample": [
+                {
+                    "sku": "tet-973",
+                    "supplier_sku": "973",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-1040",
+                    "supplier_sku": "1040",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-2151",
+                    "supplier_sku": "2151",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-2271",
+                    "supplier_sku": "2271",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-11576",
+                    "supplier_sku": "11576",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-12901",
+                    "supplier_sku": "12901",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-12902",
+                    "supplier_sku": "12902",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-13564",
+                    "supplier_sku": "13564",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-13565",
+                    "supplier_sku": "13565",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-13591",
+                    "supplier_sku": "13591",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-13592",
+                    "supplier_sku": "13592",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-13593",
+                    "supplier_sku": "13593",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-13594",
+                    "supplier_sku": "13594",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-13859",
+                    "supplier_sku": "13859",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-13862",
+                    "supplier_sku": "13862",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-13910",
+                    "supplier_sku": "13910",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-13912",
+                    "supplier_sku": "13912",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-13913",
+                    "supplier_sku": "13913",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-14433",
+                    "supplier_sku": "14433",
+                    "reason": "missing_purchase_price"
+                },
+                {
+                    "sku": "tet-14445",
+                    "supplier_sku": "14445",
+                    "reason": "missing_purchase_price"
+                }
+            ]
+        },
+        "report_errors": []
+    }
 }
-stderr=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
