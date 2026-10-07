@@ -1,0 +1,52 @@
+name: Repair Webasyst KIT ID 31663620 once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-webasyst-kit-id-31663620-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check requests
+      - name: Write and verify KIT ID
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, sys
+          from webasyst.client import WebasystClient
+
+          PRODUCT_ID="1484482"
+          EXPECTED_KIT_ID="1603537"
+          wa=WebasystClient()
+
+          before=wa.call("shop.product.getInfo", params={"id": PRODUCT_ID})
+          print("BEFORE_KIT_ID", json.dumps((before or {}).get("features",{}).get("kit_id"), ensure_ascii=False))
+
+          wa.call(
+              "shop.product.update",
+              http_method="POST",
+              params={"id": PRODUCT_ID},
+              data={"features": {"kit_id": EXPECTED_KIT_ID}},
+          )
+
+          after=wa.call("shop.product.getInfo", params={"id": PRODUCT_ID})
+          actual=str(((after or {}).get("features") or {}).get("kit_id") or "").strip()
+          print("AFTER_KIT_ID", actual)
+          if actual != EXPECTED_KIT_ID:
+              print("VERIFY_FAILED", json.dumps((after or {}).get("features"), ensure_ascii=False))
+              sys.exit(2)
+          print("VERIFY_OK")
+          PY
