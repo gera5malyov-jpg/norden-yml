@@ -360,6 +360,94 @@ def test_formula_rejects_code_execution():
         evaluate_formula("__import__('os').system('id')", {"supplier_price":100})
 
 
+def test_tetchair_yml_description_is_preserved_and_normalized():
+    data = b'''<?xml version="1.0" encoding="UTF-8"?><yml_catalog><shop><offers><offer id="19248" available="true"><name>Chair</name><vendorCode>19248</vendorCode><price>6150</price><purchase_price>4610</purchase_price><description><![CDATA[Full Tetchair description]]></description></offer></offers></shop></yml_catalog>'''
+    row = load_xml_yml(data)[0]
+    assert row["description"] == "Full Tetchair description"
+
+    config = {
+        "code": "TETCHAIR",
+        "source": {"format": "yml"},
+        "identity": {"supplier_sku_field": "vendorCode", "sku_prefix": "tet-", "brand": "Tetchair"},
+        "mapping": {
+            "name": "name",
+            "purchase_price": "purchase_price",
+            "price": "price",
+            "compare_price": "",
+            "stock": "available",
+            "category": "categoryId",
+            "images": [],
+            "characteristics": {},
+        },
+        "rules": {"price_formulas": {}},
+    }
+    product = normalize(config, [row])[0]
+    assert product.description == "Full Tetchair description"
+
+
+def test_tetchair_existing_product_updates_full_description_only():
+    class Fake:
+        def __init__(self):
+            self.calls = []
+
+        def call(self, method, *, http_method="GET", params=None, data=None, files=None):
+            self.calls.append({
+                "method": method,
+                "http_method": http_method,
+                "params": params or {},
+                "data": data or {},
+            })
+            return {}
+
+    product = Product(
+        supplier_sku="19248",
+        sku="tet-19248",
+        name="Chair",
+        stock=3,
+        description="New full description",
+    )
+    current_product = {
+        "id": 101,
+        "name": "Chair",
+        "summary": "[extimg]\nhttps://x/1.jpg\n[/extimg]",
+        "description": "Old description",
+        "status": 1,
+        "type_id": 1917,
+    }
+    current_sku = {
+        "id": 201,
+        "sku": "tet-19248",
+        "name": "19248",
+        "stock": {"1": 3},
+    }
+    plan = build_plan(
+        [product],
+        {"tet-19248": [(current_product, current_sku)]},
+        [],
+        {"create_new": True},
+    )
+    config = {
+        "code": "TETCHAIR",
+        "rules": {
+            "update_prices": False,
+            "update_stock": False,
+            "update_images": False,
+        },
+        "webasyst": {
+            "type_id": 1917,
+            "stock_id": 1,
+            "sku_mode": "supplier",
+        },
+    }
+    fake = Fake()
+    result = apply_plan(fake, plan, config)
+    updates = [x for x in fake.calls if x["method"] == "shop.product.update"]
+    assert len(updates) == 1
+    assert updates[0]["data"]["description"] == "New full description"
+    assert "summary" not in updates[0]["data"]
+    assert result["updated"] == 1
+
+
 def test_yml_parser_preserves_vendor_code_pictures_and_available():
     data=b'''<?xml version="1.0" encoding="UTF-8"?><yml_catalog><shop><offers><offer id="7" available="true"><name>Sofa</name><vendorCode>109775</vendorCode><price>999</price><picture>https://x/1.jpg</picture><picture>https://x/2.jpg</picture></offer></offers></shop></yml_catalog>'''
     row=load_xml_yml(data)[0]
