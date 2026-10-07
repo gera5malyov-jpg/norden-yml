@@ -67,3 +67,82 @@ for path in ("/catalog/", "/sklad/"):
 print(json.dumps(report, ensure_ascii=False, indent=2))
 if not report["login_ok"]:
     raise SystemExit("Tetchair login failed")
+
+
+catalog = s.get(BASE + "/catalog/", timeout=60)
+catalog.raise_for_status()
+catalog_soup = BeautifulSoup(catalog.text, "html.parser")
+category_urls = []
+for a in catalog_soup.find_all("a", href=True):
+    href = urljoin(BASE, a["href"])
+    if re.fullmatch(r"https://price\.tetchair\.ru/catalog/\d+/", href):
+        if href not in category_urls:
+            category_urls.append(href)
+
+report["category_count"] = len(category_urls)
+report["category_samples"] = []
+first_product_id = None
+
+for url in category_urls[:12]:
+    resp = s.get(url, timeout=60)
+    resp.raise_for_status()
+    page = BeautifulSoup(resp.text, "html.parser")
+    product_nodes = page.select(".product_table_item, .product_item, [data-p][data-pr]")
+    sample_nodes = []
+    for el in product_nodes[:5]:
+        attrs = {
+            k: v for k, v in el.attrs.items()
+            if k.startswith("data-") or k in ("class", "id")
+        }
+        text_value = " ".join(el.get_text(" ", strip=True).split())[:1600]
+        sample_nodes.append({"attrs": attrs, "text": text_value})
+        if first_product_id is None:
+            pid = el.get("data-p")
+            if pid and str(pid).isdigit():
+                first_product_id = str(pid)
+    ids = sorted(set(re.findall(r"data-p=[\"'](\d+)", resp.text)))[:50]
+    if first_product_id is None and ids:
+        first_product_id = ids[0]
+    report["category_samples"].append({
+        "url": url,
+        "title": page.title.get_text(" ", strip=True) if page.title else "",
+        "product_nodes": len(product_nodes),
+        "product_ids_sample": ids,
+        "nodes_sample": sample_nodes,
+        "text_sample": " ".join(page.get_text(" ", strip=True).split())[:2500],
+    })
+    if first_product_id and product_nodes:
+        break
+
+if first_product_id:
+    detail = s.get(BASE + "/product/?p=" + first_product_id, timeout=60)
+    detail.raise_for_status()
+    ds = BeautifulSoup(detail.text, "html.parser")
+    report["product_detail_sample"] = {
+        "product_id": first_product_id,
+        "url": detail.url,
+        "title": ds.title.get_text(" ", strip=True) if ds.title else "",
+        "text": " ".join(ds.get_text(" ", strip=True).split())[:5000],
+        "images": [
+            urljoin(BASE, x.get("src"))
+            for x in ds.find_all("img", src=True)
+        ][:30],
+        "data_attrs": [
+            {
+                "tag": el.name,
+                "attrs": {
+                    k: v for k, v in el.attrs.items()
+                    if k.startswith("data-") or k in ("class", "id")
+                },
+                "text": " ".join(el.get_text(" ", strip=True).split())[:500],
+            }
+            for el in ds.find_all(attrs={"data-p": True})[:20]
+        ],
+    }
+
+print("DEEP_INSPECTION")
+print(json.dumps({
+    "category_count": report.get("category_count"),
+    "category_samples": report.get("category_samples"),
+    "product_detail_sample": report.get("product_detail_sample"),
+}, ensure_ascii=False, indent=2))
