@@ -152,6 +152,7 @@ jobs:
             if (count < 1) throw new Error('No WireGuard server rows found');
 
             const profiles = [];
+            const labels = {};
             for (let i = 0; i < count; i++) {
               const row = rows.nth(i);
               const label = clean(await row.innerText().catch(() => ''));
@@ -191,7 +192,8 @@ jobs:
               }
               await download.saveAs('/tmp/atlas-wg/' + finalName);
               profiles.push(finalName);
-              console.log('DOWNLOADED=' + finalName);
+              labels[finalName] = label;
+              console.log('DOWNLOADED=' + finalName + ' LABEL=' + label);
               await closeOverlay(page);
             }
 
@@ -200,6 +202,7 @@ jobs:
               throw new Error('WireGuard profile count mismatch: rows=' + count + ' unique=' + unique.length);
             }
             fs.writeFileSync('/tmp/atlas-wg-profiles.json', JSON.stringify(unique, null, 2));
+            fs.writeFileSync('/tmp/atlas-wg-labels.json', JSON.stringify(labels, null, 2));
             console.log('WIREGUARD_COUNT=' + unique.length);
             await browser.close();
           })().catch(err => {
@@ -229,6 +232,7 @@ jobs:
               name: hashlib.sha256((Path('/tmp/atlas-wg') / name).read_bytes()).hexdigest()
               for name in current
           }
+          labels = json.load(open('/tmp/atlas-wg-labels.json', encoding='utf-8'))
 
           old = []
           old_data = {}
@@ -267,6 +271,7 @@ jobs:
                   'baseline': False,
                   'profiles': current,
                   'sha256': current_hashes,
+                  'labels': {name: str(labels.get(name, '')) for name in current},
                   'updated_at': datetime.now(timezone.utc).isoformat(),
                   'added_on_last_scan': added,
                   'removed_on_last_scan': removed,
