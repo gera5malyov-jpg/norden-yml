@@ -175,18 +175,41 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
         curl_close($ch);
         if ($code !== 204) {
             if ($code >= 500 && $code <= 599) {
-                $pending['status'] = 'queued';
-                $pending['dispatch_uncertain'] = true;
+                // GitHub may return a transient 5xx after accepting workflow_dispatch.
+                // Reconcile by request_id before reporting a launch failure. The workflow
+                // run-name contains request_id, so a retry click cannot create a second
+                // request while this one is still marked queued/running.
+                $found_run = null;
+                for ($attempt = 0; $attempt < 4; $attempt++) {
+                    if ($attempt) {
+                        usleep(750000);
+                    }
+                    $found_run = $this->findDispatchRun($repo, $ref, $token, $request_id);
+                    if ($found_run) {
+                        break;
+                    }
+                }
+
+                $pending['status'] = !empty($found_run['status']) && $found_run['status'] === 'in_progress' ? 'running' : 'queued';
                 $pending['dispatch_http_code'] = $code;
                 $pending['dispatch_error'] = $error;
+                $pending['dispatch_recovered'] = (bool)$found_run;
+                $pending['dispatch_uncertain'] = !$found_run;
+                if ($found_run) {
+                    $pending['github_run_id'] = (int)ifset($found_run['id']);
+                    $pending['github_run_url'] = (string)ifset($found_run['html_url']);
+                }
                 waFiles::write($status_path, json_encode($pending, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));
+
                 $this->response = array(
                     'status' => 'ok',
                     'mode' => $mode,
                     'supplier_id' => $supplier_id,
                     'request_id' => $request_id,
-                    'dispatch_uncertain' => true,
+                    'dispatch_recovered' => (bool)$found_run,
+                    'dispatch_uncertain' => !$found_run,
                     'dispatch_http_code' => $code,
+                    'github_run_id' => $found_run ? (int)ifset($found_run['id']) : null,
                 );
                 return;
             }
@@ -271,6 +294,49 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
     {
         $name = mb_strtolower(trim((string)$name), 'UTF-8');
         return $name !== '' && (strpos($name, 'norden') !== false || strpos($name, 'норден') !== false);
+    }
+
+    private function findDispatchRun($repo, $ref, $token, $request_id)
+    {
+        $parts = explode('/', $repo, 2);
+        if (count($parts) !== 2 || $request_id === '') {
+            return null;
+        }
+        $url = 'https://api.github.com/repos/'.rawurlencode($parts[0]).'/'.rawurlencode($parts[1])
+            .'/actions/workflows/supplier-engine-dry-run.yml/runs?event=workflow_dispatch&branch='
+            .rawurlencode($ref).'&per_page=20';
+        $ch = curl_init($url);
+        curl_setopt_array($ch, array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => array(
+                'Accept: application/vnd.github+json',
+                'Authorization: Bearer '.$token,
+                'X-GitHub-Api-Version: 2022-11-28',
+                'User-Agent: Webasyst-Megasuppliers',
+            ),
+            CURLOPT_TIMEOUT => 10,
+        ));
+        $body = curl_exec($ch);
+        $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($code !== 200 || !$body) {
+            return null;
+        }
+        $data = json_decode($body, true);
+        if (!is_array($data) || empty($data['workflow_runs']) || !is_array($data['workflow_runs'])) {
+            return null;
+        }
+        foreach ($data['workflow_runs'] as $run) {
+            if (!is_array($run)) {
+                continue;
+            }
+            $title = (string)ifset($run['display_title'], '');
+            $name = (string)ifset($run['name'], '');
+            if (strpos($title, $request_id) !== false || strpos($name, $request_id) !== false) {
+                return $run;
+            }
+        }
+        return null;
     }
 
     private function markDispatchFailure($path, array $pending, $message)
