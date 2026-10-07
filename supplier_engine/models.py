@@ -6,7 +6,6 @@ class Product:
     supplier_sku: str
     sku: str
     name: str
-    description: str = ""
     purchase_price: float | None = None
     price: float | None = None
     compare_price: float | None = None
@@ -15,6 +14,7 @@ class Product:
     category: str = ""
     images: list[str] = field(default_factory=list)
     characteristics: dict[str, Any] = field(default_factory=dict)
+    description: str = ""
 
 @dataclass
 class ValidationReport:
