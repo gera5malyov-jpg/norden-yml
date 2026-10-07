@@ -1497,6 +1497,76 @@ def test_kit_id_match_rejects_conflicting_supplier_article():
     assert "supplier article conflict" in str(exc.value)
 
 
+def test_kit_id_match_accepts_legacy_webasyst_sku_as_supplier_article():
+    supplier_char_id = "f-supplier"
+    variants = [
+        _kit_variant(
+            "v1",
+            "7001",
+            "AF-30539622",
+            "Norden",
+            supplier_char_id,
+            "AF-30539622",
+        ),
+    ]
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(
+        variants,
+        [supplier_char_id],
+    )
+    found = _select_variant(
+        {
+            "sku": "AF-30539622",
+            "supplier_sku": "CX0898H-1-203",
+            "features": [
+                {"code": "kit_id", "name": "KIT ID", "values": ["7001"]}
+            ],
+        },
+        by_sku,
+        by_kit_id,
+        by_supplier_brand,
+        [supplier_char_id],
+        "Norden",
+    )
+    assert found["id"] == "v1"
+
+
+def test_kit_id_match_accepts_mixed_legacy_and_correct_identity_values():
+    supplier_char_id = "f-supplier"
+    legacy_id = "f-code-site"
+    variant = _kit_variant(
+        "v1",
+        "7001",
+        "AF-30539622",
+        "Norden",
+        supplier_char_id,
+        "CX0898H-1-203",
+    )
+    variant["characteristics"].append({
+        "characteristic_id": legacy_id,
+        "value": "AF-30539622",
+        "values": ["AF-30539622"],
+    })
+    by_sku, by_kit_id, by_supplier_brand = _variant_indexes(
+        [variant],
+        [supplier_char_id, legacy_id],
+    )
+    found = _select_variant(
+        {
+            "sku": "AF-30539622",
+            "supplier_sku": "CX0898H-1-203",
+            "features": [
+                {"code": "kit_id", "name": "KIT ID", "values": ["7001"]}
+            ],
+        },
+        by_sku,
+        by_kit_id,
+        by_supplier_brand,
+        [supplier_char_id, legacy_id],
+        "Norden",
+    )
+    assert found["id"] == "v1"
+
+
 def test_supplier_article_characteristic_title_is_fixed():
     assert SUPPLIER_ARTICLE_CHARACTERISTIC == "Артикул поставщика"
 
