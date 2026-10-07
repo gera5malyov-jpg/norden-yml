@@ -29,6 +29,8 @@ jobs:
     env:
       YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
       RIVA_FEED_URL: ${{ secrets.RIVA_FEED_URL }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -79,6 +81,24 @@ jobs:
           print('indexed=' + str(int(r.get('riva_variants_indexed') or 0)))
           print('reason=' + ('continue' if ok and created>=size else 'complete_or_needs_review'))
           PY
+      - name: Email Riva batch report to shop
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          kind="final"
+          if [[ "${{ steps.next.outputs.continue }}" == "true" ]]; then
+            kind="intermediate"
+          fi
+          python riva-kit/send_report_email.py \
+            --report /tmp/riva-bootstrap.json \
+            --kind "$kind" \
+            --run-url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          rc=$?
+          if [[ "$rc" != "0" ]]; then
+            echo "::warning::Riva report email failed with exit code $rc"
+          fi
+          exit 0
       - name: Queue next Riva missing-only batch
         if: steps.next.outputs.continue == 'true'
         env:
