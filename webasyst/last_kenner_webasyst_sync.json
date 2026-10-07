@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-10-06T11:36:00.322479+00:00",
+  "started_at": "2026-10-07T11:12:01.272861+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=334",
   "type_name": "kennermebel-334",
@@ -8,89 +8,162 @@
   "webasyst_stock_id": "66",
   "kit_stock": "МСК",
   "kit_stock_id": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
-  "kit_variants_scanned": 103,
-  "kit_webasyst_334_variants": 85,
+  "kit_variants_scanned": 106,
+  "kit_webasyst_334_variants": 87,
   "kit_duplicate_skus": 0,
-  "webasyst_products": 81,
+  "webasyst_products": 85,
   "webasyst_duplicate_skus": 0,
-  "processed": 85,
-  "created": 4,
-  "updated_prices_stock": 14,
+  "processed": 86,
+  "created": 1,
+  "updated_prices_stock": 30,
   "summaries_updated_from_kit": 0,
   "kit_variants_without_images": 0,
-  "unchanged": 67,
-  "features_created": 1,
-  "feature_values_written": 84,
-  "file_urls_resolved": 1411,
+  "unchanged": 55,
+  "features_created": 0,
+  "feature_values_written": 12,
+  "file_urls_resolved": 1426,
   "image_source": "Yandex KIT media only",
   "webasyst_routing": "Webasyst=334",
-  "errors": [],
+  "errors": [
+    {
+      "sku": "334-322299",
+      "variant_id": "01a1160f-3916-706d-9d10-e46fd90ef936",
+      "message": "invalid_param: Код kenner_bc9ffdbb06f3 уже существует."
+    }
+  ],
   "sample_new": [
     {
-      "sku": "334-323309",
-      "product_id": "1488851",
-      "name": "Стол Kenner R1100s, черный/керамика BAOLAI арт.170114",
-      "url": "stol-kenner-r1100s-chernyy-keramika-baolai-art-170114-334-323309",
-      "price": "35740.00",
-      "compare_price": "49400.00",
-      "stock": 1,
-      "features": 21,
-      "images_in_summary": 17
-    },
-    {
-      "sku": "334-323310",
-      "product_id": "1488852",
-      "name": "Стол Kenner R1100s, черный/керамика CARLA LARKIN арт.170116",
-      "url": "stol-kenner-r1100s-chernyy-keramika-carla-larkin-art-170116-334-323310",
-      "price": "35740.00",
-      "compare_price": "35740.00",
-      "stock": 5,
-      "features": 21,
-      "images_in_summary": 26
-    },
-    {
-      "sku": "334-323311",
-      "product_id": "1488853",
-      "name": "Стол Kenner R1100s, белый/керамика CARLA LARKIN арт.170116",
-      "url": "stol-kenner-r1100s-belyy-keramika-carla-larkin-art-170116-334-323311",
-      "price": "35470.00",
-      "compare_price": "35470.00",
-      "stock": 7,
-      "features": 21,
-      "images_in_summary": 22
-    },
-    {
-      "sku": "334-323460",
-      "product_id": "1488854",
-      "name": "Стол Kenner R900, белый/керамика TOP ALPINE WHITE арт.170118",
-      "url": "stol-kenner-r900-belyy-keramika-top-alpine-white-art-170118-334-323460",
-      "price": "30980.00",
-      "compare_price": "30980.00",
-      "stock": 9,
-      "features": 21,
-      "images_in_summary": 28
+      "sku": "334-320833",
+      "product_id": "1488889",
+      "name": "Комплект стульев 2шт KENNER 306SD черный/капучино",
+      "url": "komplekt-stulev-2sht-kenner-306sd-chernyy-kapuchino-334-320833",
+      "price": "20180.00",
+      "compare_price": "20180.00",
+      "stock": 4,
+      "features": 12,
+      "images_in_summary": 16
     }
   ],
   "sample_updates": [
     {
-      "sku": "334-320826",
+      "sku": "334-320822",
+      "fields": [
+        "stock"
+      ],
+      "price": "18480.00",
+      "compare_price": "18480.00",
+      "stock": 24,
+      "images_in_summary": 13
+    },
+    {
+      "sku": "334-320825",
       "fields": [
         "stock"
       ],
       "price": "19760.00",
       "compare_price": "19760.00",
-      "stock": 10,
-      "images_in_summary": 19
+      "stock": 12,
+      "images_in_summary": 20
     },
     {
-      "sku": "334-321127",
+      "sku": "334-320827",
       "fields": [
         "stock"
       ],
-      "price": "10200.00",
-      "compare_price": "10200.00",
-      "stock": 3,
+      "price": "19760.00",
+      "compare_price": "19760.00",
+      "stock": 14,
+      "images_in_summary": 15
+    },
+    {
+      "sku": "334-320828",
+      "fields": [
+        "stock"
+      ],
+      "price": "19760.00",
+      "compare_price": "19760.00",
+      "stock": 6,
+      "images_in_summary": 17
+    },
+    {
+      "sku": "334-320832",
+      "fields": [
+        "stock"
+      ],
+      "price": "20180.00",
+      "compare_price": "20180.00",
+      "stock": 80,
+      "images_in_summary": 16
+    },
+    {
+      "sku": "334-320844",
+      "fields": [
+        "stock"
+      ],
+      "price": "26280.00",
+      "compare_price": "26280.00",
+      "stock": 60,
+      "images_in_summary": 16
+    },
+    {
+      "sku": "334-320848",
+      "fields": [
+        "stock"
+      ],
+      "price": "26280.00",
+      "compare_price": "26280.00",
+      "stock": 16,
       "images_in_summary": 12
+    },
+    {
+      "sku": "334-320850",
+      "fields": [
+        "stock"
+      ],
+      "price": "17340.00",
+      "compare_price": "17340.00",
+      "stock": 50,
+      "images_in_summary": 16
+    },
+    {
+      "sku": "334-320851",
+      "fields": [
+        "stock"
+      ],
+      "price": "17340.00",
+      "compare_price": "17340.00",
+      "stock": 94,
+      "images_in_summary": 17
+    },
+    {
+      "sku": "334-320852",
+      "fields": [
+        "stock"
+      ],
+      "price": "17340.00",
+      "compare_price": "17340.00",
+      "stock": 32,
+      "images_in_summary": 13
+    },
+    {
+      "sku": "334-321927",
+      "fields": [
+        "stock"
+      ],
+      "price": "35400.00",
+      "compare_price": "58500.00",
+      "stock": 2,
+      "images_in_summary": 17
+    },
+    {
+      "sku": "334-321998",
+      "fields": [
+        "stock"
+      ],
+      "price": "34480.00",
+      "compare_price": "34480.00",
+      "stock": 2,
+      "images_in_summary": 17
     },
     {
       "sku": "334-322001",
@@ -99,8 +172,38 @@
       ],
       "price": "33720.00",
       "compare_price": "33720.00",
-      "stock": 3,
+      "stock": 2,
       "images_in_summary": 13
+    },
+    {
+      "sku": "334-322300",
+      "fields": [
+        "stock"
+      ],
+      "price": "42850.00",
+      "compare_price": "96367.00",
+      "stock": 3,
+      "images_in_summary": 24
+    },
+    {
+      "sku": "334-322303",
+      "fields": [
+        "stock"
+      ],
+      "price": "43570.00",
+      "compare_price": "96367.00",
+      "stock": 3,
+      "images_in_summary": 26
+    },
+    {
+      "sku": "334-322384",
+      "fields": [
+        "stock"
+      ],
+      "price": "12240.00",
+      "compare_price": "12240.00",
+      "stock": 21,
+      "images_in_summary": 12
     },
     {
       "sku": "334-323229",
@@ -109,7 +212,7 @@
       ],
       "price": "37360.00",
       "compare_price": "37360.00",
-      "stock": 1,
+      "stock": 2,
       "images_in_summary": 26
     },
     {
@@ -119,28 +222,18 @@
       ],
       "price": "37360.00",
       "compare_price": "37360.00",
-      "stock": 1,
+      "stock": 2,
       "images_in_summary": 25
     },
     {
-      "sku": "334-323231",
+      "sku": "334-323310",
       "fields": [
         "stock"
       ],
-      "price": "37360.00",
-      "compare_price": "37360.00",
-      "stock": 8,
-      "images_in_summary": 28
-    },
-    {
-      "sku": "334-323458",
-      "fields": [
-        "stock"
-      ],
-      "price": "32430.00",
-      "compare_price": "32430.00",
-      "stock": 10,
-      "images_in_summary": 22
+      "price": "35740.00",
+      "compare_price": "35740.00",
+      "stock": 4,
+      "images_in_summary": 26
     },
     {
       "sku": "334-323459",
@@ -149,73 +242,13 @@
       ],
       "price": "31490.00",
       "compare_price": "31490.00",
-      "stock": 17,
+      "stock": 14,
       "images_in_summary": 13
-    },
-    {
-      "sku": "334-323467",
-      "fields": [
-        "stock"
-      ],
-      "price": "47710.00",
-      "compare_price": "47710.00",
-      "stock": 1,
-      "images_in_summary": 21
-    },
-    {
-      "sku": "334-323468",
-      "fields": [
-        "stock"
-      ],
-      "price": "46270.00",
-      "compare_price": "46270.00",
-      "stock": 8,
-      "images_in_summary": 29
-    },
-    {
-      "sku": "334-324440",
-      "fields": [
-        "stock"
-      ],
-      "price": "27840.00",
-      "compare_price": "27840.00",
-      "stock": 6,
-      "images_in_summary": 29
-    },
-    {
-      "sku": "334-324794",
-      "fields": [
-        "stock"
-      ],
-      "price": "42190.00",
-      "compare_price": "64500.00",
-      "stock": 8,
-      "images_in_summary": 18
-    },
-    {
-      "sku": "334-324878",
-      "fields": [
-        "stock"
-      ],
-      "price": "42440.00",
-      "compare_price": "64500.00",
-      "stock": 12,
-      "images_in_summary": 21
-    },
-    {
-      "sku": "334-325185",
-      "fields": [
-        "stock"
-      ],
-      "price": "42170.00",
-      "compare_price": "64500.00",
-      "stock": 8,
-      "images_in_summary": 19
     }
   ],
-  "complete": true,
+  "complete": false,
   "webasyst_routing_feature_code": "kenner_f93046718124",
-  "webasyst_334_products": 81,
-  "finished_at": "2026-10-06T12:18:04.698947+00:00",
-  "status": "ok"
+  "webasyst_334_products": 85,
+  "finished_at": "2026-10-07T11:41:05.691763+00:00",
+  "status": "degraded"
 }
