@@ -122,6 +122,34 @@ jobs:
           print("KOMUS_V2_SCAN_TOTAL="+str(total))
           print("KOMUS_V2_SCAN_HITS="+json.dumps(hits,ensure_ascii=False)[:30000])
 
+          all_arts=[int(x["artnumber"]) for x in rows if str(x.get("artnumber","")).isdigit()]
+          # rows above only contains the final page; rebuild all article numbers once for a full property scan.
+          all_arts=[]
+          page=1
+          while True:
+              payload=get("/elements",{"format":"json","page":page,"limit":1000})
+              batch=payload.get("content") or []
+              all_arts.extend(int(x["artnumber"]) for x in batch if str(x.get("artnumber","")).isdigit())
+              nxt=payload.get("next")
+              if not nxt: break
+              page=int(nxt)
+
+          prop_hits=[]
+          for start in range(0,len(all_arts),1000):
+              batch=all_arts[start:start+1000]
+              body=json.dumps({"artnumbers":batch}).encode()
+              req=urllib.request.Request(
+                  "https://komus-opt.ru/api2/props/?format=json&fields=parentId,description,baseprops,barcodes,images,specifications",
+                  data=body,method="POST",
+                  headers={**H,"Content-Type":"application/json"},
+              )
+              with urllib.request.urlopen(req,timeout=90) as r:
+                  pp=json.loads(r.read().decode("utf-8"))
+              for row in pp.get("content") or []:
+                  if any(t in json.dumps(row,ensure_ascii=False).casefold() for t in targets):
+                      prop_hits.append(row)
+          print("KOMUS_V2_PROPS_HITS="+json.dumps(prop_hits,ensure_ascii=False)[:50000])
+
           # Legacy API v1: first try the token in the request header.
           def get_v1_header(path, params=None):
               q=urllib.parse.urlencode(params or {})
