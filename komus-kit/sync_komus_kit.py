@@ -314,6 +314,14 @@ class Runner:
         target_region_ids = sorted(rid for rid, name in regions.items() if name in TARGET_REGION_NAMES)
         if not target_region_ids:
             raise RuntimeError(f"Komus token has no target regions {sorted(TARGET_REGION_NAMES)}")
+        # User requires union of Moscow + Saint Petersburg availability.
+        # Komus API only returns stock for regions enabled for this partner token.
+        # Do not silently run an incomplete live sync when Moscow (region 0) is unavailable.
+        if not self.dry_run and 0 not in regions:
+            raise RuntimeError(
+                "Komus API token does not expose Moscow stock region 0; "
+                "live sync is blocked to avoid missing Moscow-only products"
+            )
         self.report["target_region_ids"] = target_region_ids
 
         # Categories are requested from all target regions and merged by id.
