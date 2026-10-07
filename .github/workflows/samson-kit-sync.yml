@@ -1,6 +1,8 @@
 name: Samson to Yandex KIT
 
 on:
+  schedule:
+    - cron: '23 2 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -18,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: kit-api-write
+  group: samson-kit-write
   cancel-in-progress: false
 
 jobs:
@@ -42,8 +44,10 @@ jobs:
         run: |
           set -euo pipefail
           args=(--report samson-kit/state/last_sync.json)
-          if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
-          if [[ "${{ inputs.max_items }}" != "0" ]]; then args+=(--max-items "${{ inputs.max_items }}"); fi
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
+            if [[ "${{ inputs.max_items }}" != "0" ]]; then args+=(--max-items "${{ inputs.max_items }}"); fi
+          fi
           PYTHONPATH=samson-kit python -m samson_kit.cli "${args[@]}"
       - name: Print compact report
         if: always()
