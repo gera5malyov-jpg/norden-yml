@@ -289,9 +289,9 @@ def main():
         catalog_warning = None
         source_format = str((config.get("source") or {}).get("format") or "").strip().lower()
         type_id = (config.get("webasyst") or {}).get("type_id")
-        if source_format == "norden" and not type_id:
+        if not type_id:
             raise ValueError(
-                "Для Norden не задан webasyst.type_id; полный каталог Webasyst сканировать запрещено."
+                "Для профиля поставщика не задан webasyst.type_id; сверка товаров вне выбранного типа запрещена."
             )
         if os.getenv("WEBASYST_API_TOKEN", "").strip():
             wa = WebasystClient()
@@ -321,7 +321,11 @@ def main():
 
         if args.supplier_id and args.request_id and os.getenv("MEGASUPPLIERS_BRIDGE_URL", "").strip() and os.getenv("MEGASUPPLIERS_CALLBACK_SECRET", "").strip():
             bridge = MegasuppliersBridge()
-            links = bridge.get_links(args.supplier_id, args.request_id)
+            links = bridge.get_links(
+                args.supplier_id,
+                args.request_id,
+                type_id=type_id,
+            )
         elif args.mode == "apply":
             raise ValueError("Signed Megasuppliers bridge is required for apply")
 
@@ -376,7 +380,12 @@ def main():
                     web_cfg["feature_codes"] = feature_codes
                     features_resolved = len(resolved)
                 result = apply_plan(wa, plan, config)
-                synced = bridge.sync_links(args.supplier_id, args.request_id, result.get("mappings") or [])
+                synced = bridge.sync_links(
+                    args.supplier_id,
+                    args.request_id,
+                    result.get("mappings") or [],
+                    type_id=type_id,
+                )
                 kit_result = None
                 if rules.get("export_to_kit", False):
                     stock_id = (config.get("webasyst") or {}).get("stock_id")
@@ -386,6 +395,7 @@ def main():
                         args.supplier_id,
                         args.request_id,
                         stock_id,
+                        type_id=type_id,
                     )
                     kit_result = sync_manifest(manifest, config, wa=wa)
                 payload["apply"] = {
