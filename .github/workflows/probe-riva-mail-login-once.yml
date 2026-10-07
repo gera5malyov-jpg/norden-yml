@@ -1,0 +1,40 @@
+name: Probe Riva mail login once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-riva-mail-login-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+    steps:
+      - name: Check Gmail SMTP login for shop mailbox
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, smtplib
+          user='shop@office-mag.com'
+          pwd=os.environ.get('GMAIL_APP_PASSWORD','').strip()
+          if not pwd:
+              raise SystemExit('GMAIL_APP_PASSWORD is empty')
+          try:
+              with smtplib.SMTP('smtp.gmail.com',587,timeout=30) as s:
+                  s.ehlo()
+                  s.starttls()
+                  s.ehlo()
+                  s.login(user,pwd)
+                  s.noop()
+              print('RIVA_MAIL_SMTP_LOGIN=OK')
+          except Exception as e:
+              print('RIVA_MAIL_SMTP_LOGIN=FAILED:'+type(e).__name__+':'+str(e))
+              raise
+          PY
