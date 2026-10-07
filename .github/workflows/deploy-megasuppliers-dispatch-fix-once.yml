@@ -1,0 +1,38 @@
+name: Deploy megasuppliers dispatch fix once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-megasuppliers-dispatch-fix-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      DRIVE_FILE_ID: '129zSQGB1FKGrn1AgkbJg-EGIvQYylfxQ'
+      EXPECTED_SHA256: '5538d704c8f40a5e3b3743a3af507f3b03e14356be789dcf2d8ef427245afa42'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate plugin PHP
+        run: find webasyst/megasuppliers/lib -name '*.php' -type f -print0 | xargs -0 -n1 php -l
+      - name: Install Google client
+        run: pip -q install google-api-python-client google-auth
+      - name: Wait for NetAngels
+        run: python3 scripts/wait_netangels_ready.py
+      - name: Augment deployer
+        run: python3 scripts/augment_deploy_megasuppliers.py
+      - name: Deploy plugin
+        run: python3 scripts/deploy_megasuppliers.py
