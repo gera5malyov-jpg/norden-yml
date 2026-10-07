@@ -3,8 +3,9 @@ import json
 import re
 import runpy
 from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from urllib.parse import urljoin, urlparse, parse_qs
+from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
@@ -65,59 +66,84 @@ def main():
         if re.fullmatch(r"https://price\.tetchair\.ru/catalog/\d+/", href) and href not in categories:
             categories.append(href)
 
-    catalog = {}
-    cards_seen = 0
-    catalog_pages = 0
-    per_category_pages = {}
-    for idx, url in enumerate(categories, 1):
-        queue = [url]
-        seen_pages = set()
-        category_pages = 0
-        base_parts = urlparse(url)
-        while queue and len(seen_pages) < 100:
-            page_url = queue.pop(0)
-            if page_url in seen_pages:
-                continue
-            seen_pages.add(page_url)
-            r = session.get(page_url, timeout=60)
-            r.raise_for_status()
-            catalog_pages += 1
-            category_pages += 1
-            soup = BeautifulSoup(r.text, "html.parser")
-            for a in soup.select('a[href*="?p="]'):
-                item = parse_card(a, base)
-                if not item:
-                    continue
-                cards_seen += 1
-                prev = catalog.get(item["code"])
-                if prev is None or (prev.get("wholesale") is None and item.get("wholesale") is not None):
-                    catalog[item["code"]] = item
-
-            # Follow any same-category navigation links, but never product detail links.
-            for a in soup.find_all("a", href=True):
-                href = urljoin(page_url, a.get("href") or "")
-                parts = urlparse(href)
-                if parts.scheme not in ("http", "https"):
-                    continue
-                if parts.netloc != base_parts.netloc or parts.path != base_parts.path:
-                    continue
-                q = parse_qs(parts.query, keep_blank_values=True)
-                if "p" in q:
-                    continue
-                if not parts.query:
-                    continue
-                if href not in seen_pages and href not in queue:
-                    queue.append(href)
-        per_category_pages[base_parts.path] = category_pages
-        print(
-            f"catalog {idx}/{len(categories)} pages={category_pages} unique={len(catalog)}",
-            flush=True,
-        )
-
     yml = requests.get(PUBLIC_YML, timeout=120)
     yml.raise_for_status()
     xml_root = ET.fromstring(yml.content)
     offers = xml_root.findall(".//offer")
+    offer_codes = []
+    for offer in offers:
+        vc = offer.find("vendorCode")
+        code = (vc.text or "").strip() if vc is not None else str(offer.get("id") or "").strip()
+        if code:
+            offer_codes.append(code)
+
+    catalog = {}
+    cards_seen = 0
+    catalog_pages = 0
+    for idx, url in enumerate(categories, 1):
+        r = session.get(url, timeout=60)
+        r.raise_for_status()
+        catalog_pages += 1
+        soup = BeautifulSoup(r.text, "html.parser")
+        for a in soup.select('a[href*="?p="]'):
+            item = parse_card(a, base)
+            if not item:
+                continue
+            cards_seen += 1
+            prev = catalog.get(item["code"])
+            if prev is None or (prev.get("wholesale") is None and item.get("wholesale") is not None):
+                catalog[item["code"]] = item
+        print(f"catalog {idx}/{len(categories)} unique={len(catalog)}", flush=True)
+
+    missing_codes = [code for code in offer_codes if code not in catalog]
+    cookies = session.cookies.get_dict()
+    headers = dict(session.headers)
+    direct_errors = []
+
+    def lookup_product(code):
+        try:
+            r = requests.get(
+                base + "/product/",
+                params={"p": code},
+                cookies=cookies,
+                headers=headers,
+                timeout=35,
+            )
+            r.raise_for_status()
+            soup = BeautifulSoup(r.text, "html.parser")
+            text = " ".join(soup.get_text(" ", strip=True).split())
+            wholesale = re.search(r"Цена\s*опт:\s*([0-9\s\u00a0]+)\s*р", text, re.I)
+            retail = re.search(r"СЦ:\s*([0-9\s\u00a0]+)\s*р", text, re.I)
+            msk = re.search(r"МСК:\s*(.*?)\s+СПБ:", text, re.I)
+            w = number(wholesale.group(1)) if wholesale else None
+            if w is None:
+                return code, None, "wholesale_not_found"
+            return code, {
+                "code": code,
+                "wholesale": w,
+                "catalog_retail": number(retail.group(1)) if retail else None,
+                "msk": (msk.group(1).strip() if msk else ""),
+                "url": base + "/product/?p=" + code,
+            }, None
+        except Exception as exc:
+            return code, None, str(exc)
+
+    direct_matched = 0
+    if missing_codes:
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            futures = [pool.submit(lookup_product, code) for code in missing_codes]
+            for idx, fut in enumerate(as_completed(futures), 1):
+                code, item, error = fut.result()
+                if item:
+                    catalog[code] = item
+                    direct_matched += 1
+                elif error:
+                    direct_errors.append({"code": code, "error": error})
+                if idx % 100 == 0 or idx == len(futures):
+                    print(
+                        f"direct product lookup {idx}/{len(futures)} matched={direct_matched}",
+                        flush=True,
+                    )
 
     matched = 0
     missing = []
@@ -155,8 +181,11 @@ def main():
         "categories": len(categories),
         "cards_seen": cards_seen,
         "catalog_pages": catalog_pages,
-        "multi_page_categories": sum(1 for x in per_category_pages.values() if x > 1),
         "catalog_unique": len(catalog),
+        "direct_lookup_requested": len(missing_codes),
+        "direct_lookup_matched": direct_matched,
+        "direct_lookup_errors": len(direct_errors),
+        "direct_lookup_error_sample": direct_errors[:50],
         "matched_wholesale": matched,
         "missing_wholesale": len(missing),
         "coverage": round(matched / len(offers), 6) if offers else 0,
