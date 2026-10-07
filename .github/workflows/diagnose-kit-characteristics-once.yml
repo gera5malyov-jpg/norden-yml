@@ -23,4 +23,4 @@ jobs:
         run: python -m py_compile supplier_engine/kit_sync.py
       - name: Full supplier regression suite
         run: python -m pytest -q tests/test_supplier_engine.py tests/test_megasuppliers_contract.py
-# trigger validation v5
+# trigger validation v6
