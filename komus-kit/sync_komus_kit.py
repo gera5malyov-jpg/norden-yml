@@ -348,6 +348,8 @@ class Runner:
         seen_eligible = set()
         complete = True
         processed_after_skip = 0
+        price_batch = []
+        stock_batch = []
 
         for source_pos, base in enumerate(source_rows):
             if source_pos < self.skip_items:
@@ -399,29 +401,29 @@ class Runner:
                     pricing = variant.get("pricing") or {}
                     if money_int(pricing.get("price")) != money_int(prices.old) or money_int(pricing.get("manual_discount_price")) != money_int(prices.sale):
                         self.report["price_changes"] += 1
-                        if not self.dry_run:
-                            vid = str(variant.get("id") or "").strip()
-                            if vid:
-                                self.kit.bulk_update_prices([{
-                                    "variant_id": vid,
-                                    "price": f"{prices.old:.2f}",
-                                    "manual_discount_price": f"{prices.sale:.2f}",
-                                }])
-                if current_stock(variant, warehouse_id) != desired_stock:
-                    self.report["stock_changes"] += 1
-                    if not self.dry_run:
                         vid = str(variant.get("id") or "").strip()
                         if vid:
-                            self.kit.bulk_update_stocks([{
+                            price_batch.append({
                                 "variant_id": vid,
-                                "warehouse_id": str(warehouse_id),
-                                "quantity": int(desired_stock),
-                            }])
+                                "price": f"{prices.old:.2f}",
+                                "manual_discount_price": f"{prices.sale:.2f}",
+                            })
+                            if len(price_batch) >= 500 and not self.dry_run:
+                                self.kit.bulk_update_prices(price_batch)
+                                price_batch.clear()
+                if current_stock(variant, warehouse_id) != desired_stock:
+                    self.report["stock_changes"] += 1
+                    vid = str(variant.get("id") or "").strip()
+                    if vid:
+                        stock_batch.append({
+                            "variant_id": vid,
+                            "warehouse_id": str(warehouse_id),
+                            "quantity": int(desired_stock),
+                        })
+                        if len(stock_batch) >= 500 and not self.dry_run:
+                            self.kit.bulk_update_stocks(stock_batch)
+                            stock_batch.clear()
                 continue
-
-            if self.max_new is not None and self.report["new_products_created"] >= self.max_new:
-                complete = False
-                break
 
             try:
                 prop = prop_map.get(art)
@@ -474,8 +476,16 @@ class Runner:
                     normalized = dict(payload)
                     normalized.update(created)
                     kit_index[key] = normalized
+                if self.max_new is not None and self.report["new_products_created"] >= self.max_new:
+                    complete = False
+                    break
             except Exception as exc:
                 self.error(sku, exc)
+
+        if price_batch and not self.dry_run:
+            self.kit.bulk_update_prices(price_batch)
+        if stock_batch and not self.dry_run:
+            self.kit.bulk_update_stocks(stock_batch)
 
         self.report["source_complete"] = bool(complete and self.skip_items == 0 and self.max_items is None and self.max_new is None)
 
