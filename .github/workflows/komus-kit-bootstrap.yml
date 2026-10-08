@@ -24,7 +24,7 @@ permissions:
 
 concurrency:
   group: komus-kit-write
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   import:
@@ -85,11 +85,13 @@ jobs:
           next_offset=int(r.get("next_offset") or 0)
           current=int("${{ steps.params.outputs.offset }}")
           batch=int("${{ steps.params.outputs.batch }}")
-          keep=(status!="failed" and next_offset>current and created>=batch and errors<50)
+          image_failures=int(r.get("image_upload_failures") or 0)
+          keep=(status=="ok" and next_offset>current and created>=batch and errors==0 and image_failures==0)
           print("continue="+("true" if keep else "false"))
           print("next_offset="+str(next_offset))
           print("created="+str(created))
           print("errors="+str(errors))
+          print("image_failures="+str(image_failures))
           PY
 
       - name: Print compact report
@@ -102,7 +104,7 @@ jobs:
           if not os.path.exists(p):
               raise SystemExit
           r=json.load(open(p,encoding="utf-8"))
-          keys=("status","source_rows_seen","eligible_in_stock","existing_variants_seen","new_products_created","duplicate_kit_skus","error_count","warning_count","skip_items","next_offset")
+          keys=("status","source_rows_seen","eligible_in_stock","existing_variants_seen","new_products_created","duplicate_kit_skus","image_upload_attempts","image_upload_success","image_upload_failures","error_count","warning_count","skip_items","next_offset")
           print(json.dumps({k:r.get(k) for k in keys},ensure_ascii=False,indent=2))
           if r.get("errors"):
               print(json.dumps(r["errors"][:20],ensure_ascii=False,indent=2))
@@ -131,7 +133,7 @@ jobs:
           exit 0
 
       - name: Queue next Komus batch
-        if: ${{ steps.next.outputs.continue }} == 'true'
+        if: ${{ steps.next.outputs.continue == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
