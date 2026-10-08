@@ -4,11 +4,18 @@ name: Restore Ozon autoarchived products
 on:
   workflow_dispatch:
   schedule:
-    # Ozon autoarchive restore limit resets at 03:00 Moscow time.
-    # Primary run at 03:27 MSK; fallbacks at 04:37 and 06:07 MSK.
-    - cron: '27 0 * * *'
-    - cron: '37 1 * * *'
-    - cron: '07 3 * * *'
+    # GitHub can delay/drop schedule events. All attempts are after 03:00 MSK.
+    - cron: '27 0 * * *'  # 03:27 MSK
+    - cron: '37 1 * * *'  # 04:37 MSK
+    - cron: '07 3 * * *'  # 06:07 MSK
+    - cron: '19 4 * * *'  # 07:19 MSK
+    - cron: '41 5 * * *'  # 08:41 MSK
+    - cron: '53 6 * * *'  # 09:53 MSK
+  # Independent trigger from a reliable, recurring workflow.
+  workflow_run:
+    workflows: ["Marketplace orders to Webasyst"]
+    types: [completed]
+    branches: [main]
   push:
     branches: [main]
     paths:
@@ -24,6 +31,11 @@ concurrency:
 
 jobs:
   restore:
+    # The parent also runs on push/dispatch: allow only its scheduled runs.
+    if: >-
+      ${{ github.event_name != 'workflow_run' ||
+          (github.event.workflow_run.event == 'schedule' &&
+           github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -36,7 +48,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Verify script and read-only Ozon API on code changes
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -e
+          python3 -m py_compile scripts/ozon_restore_autoarchived.py
+          python3 - <<'PY'
+          from scripts import ozon_restore_autoarchived as ozon
+          if not ozon.CLIENT_ID or not ozon.API_KEY:
+              raise SystemExit("Ozon API secrets missing")
+          items, cursor, total = ozon.list_archived_page()
+          ids = [int(x["product_id"]) for x in items[:5] if x.get("product_id")]
+          info = ozon.get_info(ids) if ids else []
+          print(f"Ozon read-only probe OK: archived_in_first_page={len(items)}, total={total}, info_records={len(info)}")
+          PY
+
       - name: Check whether today's 100 were already restored
+        if: github.event_name != 'push'
         id: quota
         shell: bash
         run: |
@@ -69,7 +98,7 @@ jobs:
           PY
 
       - name: Restore only automatically archived products
-        if: steps.quota.outputs.skip != 'true'
+        if: github.event_name != 'push' && steps.quota.outputs.skip != 'true'
         id: restore
         shell: bash
         run: |
@@ -80,7 +109,7 @@ jobs:
           exit 0
 
       - name: Save redacted report
-        if: steps.quota.outputs.skip != 'true'
+        if: github.event_name != 'push' && steps.quota.outputs.skip != 'true'
         shell: bash
         run: |
           test -f results/ozon-auto-unarchive-latest.json
@@ -95,7 +124,16 @@ jobs:
             git push
           fi
 
+      - name: Attach latest restore report
+        if: always() && github.event_name != 'push' && steps.quota.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozon-autoarchive-report-${{ github.run_id }}
+          path: results/ozon-auto-unarchive-latest.json
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Fail if restore job failed
-        if: steps.quota.outputs.skip != 'true' && steps.restore.outputs.exit_code != '0'
+        if: github.event_name != 'push' && steps.quota.outputs.skip != 'true' && steps.restore.outputs.exit_code != '0'
         shell: bash
         run: exit "${{ steps.restore.outputs.exit_code }}"
