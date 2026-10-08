@@ -1,0 +1,69 @@
+name: Komus image probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/komus-image-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt beautifulsoup4
+      - name: Inspect Komus source images without KIT writes
+        env:
+          KOMUS_LOGIN: ${{ secrets.KOMUS_LOGIN }}
+          KOMUS_PASSWORD: ${{ secrets.KOMUS_PASSWORD }}
+        shell: bash
+        run: |
+          PYTHONPATH=samson-kit python - <<'PY'
+          import csv, os, tempfile, requests
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import sys
+          sys.path.insert(0,'.')
+          exec(compile(open('komus-kit/sync_komus_kit.py','rb').read(),'sync_komus_kit.py','exec'),globals())
+
+          with tempfile.TemporaryDirectory(prefix='komus-probe-') as td:
+              src=KomusPersonalSource(os.environ['KOMUS_LOGIN'],os.environ['KOMUS_PASSWORD'])
+              xml_path, price_path=src.download(td)
+              raw=Path(price_path).read_bytes()
+              try: text=raw.decode('utf-8-sig')
+              except UnicodeDecodeError: text=raw.decode('cp1251','replace')
+              lines=text.splitlines()
+              hi=next(i for i,l in enumerate(lines[:20]) if 'Артикул' in l and 'Спец.ЦЕНА' in l)
+              reader=csv.DictReader(lines[hi:],delimiter=';')
+              print('CSV_IMAGE_COLUMNS='+repr([x for x in (reader.fieldnames or []) if 'изображ' in str(x).casefold() or 'фото' in str(x).casefold()]))
+
+              samples=[]
+              for offer in iter_offers(xml_path):
+                  if int(offer.get('quantity') or 0)<=0:
+                      continue
+                  if offer.get('images'):
+                      samples.append((offer['sku'],offer['images'][0]))
+                  if len(samples)>=12: break
+              print('XML_IMAGE_SAMPLES='+repr(samples))
+              for sku,url in samples[:8]:
+                  candidates=[url, urljoin('https://komus-opt.ru/',url), urljoin('https://www.komus.ru/',url)]
+                  seen=set()
+                  for candidate in candidates:
+                      if candidate in seen: continue
+                      seen.add(candidate)
+                      try:
+                          rr=requests.get(candidate,timeout=30,allow_redirects=True,stream=True,headers={'User-Agent':'Mozilla/5.0'})
+                          print('IMG_TEST',sku,repr(url),'->',candidate,'status',rr.status_code,'type',rr.headers.get('content-type'),'final',rr.url)
+                          rr.close()
+                      except Exception as exc:
+                          print('IMG_TEST',sku,repr(url),'->',candidate,'ERROR',type(exc).__name__,str(exc)[:300])
+          PY
