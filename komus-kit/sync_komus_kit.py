@@ -427,6 +427,9 @@ class KomusSyncRunner:
             "stock_changes": 0,
             "absent_to_zero": 0,
             "duplicate_kit_skus": 0,
+            "image_upload_attempts": 0,
+            "image_upload_success": 0,
+            "image_upload_failures": 0,
             "warning_count": 0,
             "warnings": [],
             "error_count": 0,
@@ -555,19 +558,16 @@ class KomusSyncRunner:
                 self.kit_characteristics.append(created)
                 self.characteristic_index.setdefault(_norm(title), []).append(created)
 
-            if char_type == "MULTIPLE_STRING":
-                result.append({
-                    "characteristic_id": char_id,
-                    "value": clean[0],
-                    "values": clean,
-                })
-            else:
-                joined = "; ".join(clean)
-                result.append({
-                    "characteristic_id": char_id,
-                    "value": joined,
-                    "values": [joined],
-                })
+            # KIT validation is strict about STRING characteristics. Some stores
+            # contain duplicate characteristic titles with inconsistent historical
+            # type metadata, so always send one flattened value. MULTIPLE_STRING
+            # also accepts one value, while STRING rejects 2+ values.
+            joined = "; ".join(clean)
+            result.append({
+                "characteristic_id": char_id,
+                "value": joined,
+                "values": [joined],
+            })
         return result
 
     def _characteristic_values(self, offer, price_row):
@@ -596,10 +596,16 @@ class KomusSyncRunner:
         return out
 
     def _prepare_media(self, offer):
+        images = list(offer.get("images") or [])
         if self.dry_run:
             return []
+        if not images:
+            raise RuntimeError("Komus source has no image; product creation blocked")
+
         media = []
-        for url in offer.get("images") or []:
+        failures = []
+        for url in images:
+            self.report["image_upload_attempts"] += 1
             try:
                 suffix = os.path.splitext(urlparse(url).path)[1] or ".jpg"
                 with tempfile.TemporaryDirectory(prefix="komus-img-") as td:
@@ -614,8 +620,16 @@ class KomusSyncRunner:
                         "display_sequence": len(media),
                         "image_id": image_id,
                     })
+                    self.report["image_upload_success"] += 1
             except Exception as exc:
+                self.report["image_upload_failures"] += 1
+                failures.append(str(exc))
                 self._warn(f"image skipped for {offer.get('sku')}: {exc}")
+
+        # Never create another Komus card without an image.
+        if not media:
+            detail = failures[0] if failures else "no usable image"
+            raise RuntimeError(f"image is required; KIT media upload failed: {detail}")
         return media
 
     def _purchase_price(self, offer, price_row):
@@ -917,7 +931,8 @@ def main():
         "eligible_in_stock", "price_rows", "special_price_used",
         "base_price_fallback", "existing_variants_seen", "new_products_created",
         "new_limit_skipped", "price_changes", "stock_changes",
-        "absent_to_zero", "duplicate_kit_skus", "error_count",
+        "absent_to_zero", "duplicate_kit_skus", "image_upload_attempts",
+        "image_upload_success", "image_upload_failures", "error_count",
         "warning_count", "skip_items", "next_offset", "max_new",
         "new_only", "only_art",
     ]
