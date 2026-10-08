@@ -61,7 +61,7 @@ jobs:
                   name=str(p.get("name") or "")
                   offer=str(p.get("offer_id") or "")
                   needle=norm(name+" "+offer)
-                  if not any(s in needle for s in ["варио2","vario2","ys0816h"]):
+                  if offer != "AF-31364181" and not any(s in needle for s in ["варио2","vario2","ys0816h"]):
                       continue
                   attrs=p.get("attributes") or []
                   brands=[]
@@ -83,8 +83,8 @@ jobs:
               ci=int(cert.get("certificate_id") or 0)
               if not ci:continue
               bound[ci]={}
-              for pg in range(1,30):
-                  d=post("/v1/product/certificate/products/list",{"certificate_id":ci,"page":pg,"page_size":1000})
+              for pg in range(1,2):
+                  d=post("/v1/product/certificate/products/list",{"certificate_id":ci,"limit":1000})
                   res=d.get("result") or {}
                   rows=res.get("items") or []
                   for x in rows:
