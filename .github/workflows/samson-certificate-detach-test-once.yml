@@ -1,0 +1,113 @@
+name: Samson certificate detachment file-limit test once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/samson-certificate-detach-test-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Detach up to two Samson certificates, verify file count, restore links
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=samson-kit python - <<'PY'
+          import json,os,time
+          from samson_kit.http import SafeSession
+          from samson_kit.kit_client import KitClient
+          kit=KitClient(os.environ["YANDEX_KIT_TOKEN"],SafeSession(max_attempts=9,timeout=(10,75)),min_request_interval=0.9)
+          def total():
+              obj=kit._get('/v1/files',{'page':1,'per_page':1})
+              count=obj.get('total_count',obj.get('total'))
+              if not isinstance(count,int):raise RuntimeError("KIT file count field missing: "+str(list(obj)))
+              return count
+          before=total()
+          print("KIT_FILES_BEFORE="+str(before),flush=True)
+          candidates=[]; scanned=0; warnings=[]
+          # Sample spread across the Samson catalog; only nonarchived SAMS-* variants.
+          # Every certificate deletion is reverted immediately after observing its effect.
+          for page in (1,15,30,45,60,75,90,105,118):
+              try:
+                  listing=kit._get('/v1/variants',{'name':'SAMS-','page':page,'per_page':100})
+              except Exception as e:
+                  warnings.append('page '+str(page)+': '+str(e)[:150])
+                  continue
+              rows=listing.get('variants') or listing.get('items') or []
+              for row in rows[:25]:
+                  sku=str(row.get('sku') or '').strip()
+                  if not sku.upper().startswith('SAMS-') or str(row.get('status') or '').upper()=='ARCHIVED':continue
+                  vid=str(row.get('id') or '').strip()
+                  if not vid:continue
+                  scanned+=1
+                  try:docs=kit.list_variant_attachments(vid)
+                  except Exception as e:
+                      warnings.append('attachments '+sku+': '+str(e)[:150])
+                      continue
+                  for doc in docs:
+                      fid=str(doc.get('file_id') or '').strip()
+                      if not fid:continue
+                      candidates.append({
+                          'sku':sku,'variant_id':vid,'file_id':fid,
+                          'title':str(doc.get('title') or '').strip(),
+                          'display_sequence':doc.get('display_sequence'),
+                      })
+                      break
+                  if len(candidates)>=2:break
+              if len(candidates)>=2:break
+
+          results=[]
+          print("CERTIFICATE_CANDIDATES="+json.dumps({'scanned':scanned,'found':len(candidates),'items':candidates,'warnings':warnings[-5:]},ensure_ascii=False),flush=True)
+          for doc in candidates[:2]:
+              sku=doc['sku']; vid=doc['variant_id']; fid=doc['file_id']
+              row={'sku':sku,'title':doc['title'],'file_id':fid,'before_files':total(),'detached':False,'restored':False}
+              try:
+                  kit.http.request_json(
+                      'DELETE',kit.base_url+'/v1/variants/'+vid+'/attachments/'+fid,
+                      headers=kit.headers,
+                  )
+                  row['detached']=True
+                  remaining=kit.list_variant_attachments(vid)
+                  row['link_removed']=not any(str(x.get('file_id') or '')==fid for x in remaining)
+                  row['after_detach_files']=total()
+                  try:
+                      info=kit._get('/v1/files/'+fid)
+                      row['file_still_exists']=bool(info)
+                  except Exception as e:
+                      row['file_still_exists']=False
+                      row['file_lookup_error']=str(e)[:250]
+              except Exception as e:
+                  row['error']=str(e)[:350]
+              finally:
+                  if row['detached']:
+                      try:
+                          kit.create_variant_attachment(vid,fid,doc['title'] or 'Сертификат Самсон',doc['display_sequence'] if isinstance(doc['display_sequence'],int) else None)
+                          row['restored']=any(str(x.get('file_id') or '')==fid for x in kit.list_variant_attachments(vid))
+                      except Exception as e:
+                          row['restore_error']=str(e)[:400]
+              results.append(row)
+              print('TEST_RESULT='+json.dumps(row,ensure_ascii=False),flush=True)
+
+          after=total()
+          report={'original_file_count':before,'final_file_count':after,'count_change':after-before,
+                  'tested_links':len(results),'restored_links':sum(bool(x['restored']) for x in results),
+                  'results':results,'scanned_variants':scanned,'warnings':warnings[:15]}
+          print('SAMSON_CERTIFICATE_LIMIT_TEST='+json.dumps(report,ensure_ascii=False),flush=True)
+          if any(x['detached'] and not x['restored'] for x in results):
+              raise SystemExit('ERROR: at least one certificate link was not restored')
+          PY
