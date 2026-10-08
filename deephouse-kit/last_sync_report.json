@@ -2,9 +2,9 @@
   "status": "ok",
   "feed_url_requested": "http://deephouse.pro/upload/cutcat.xml",
   "feed_url_effective": "http://deephouse.pro/upload/cutcat.xml",
-  "source_products": 1054,
+  "source_products": 1066,
   "source_categories": 7,
-  "stock_exact_products": 1054,
+  "stock_exact_products": 1066,
   "stock_boolean_products": 0,
   "stock_missing_products": 0,
   "price_missing_products": 0,
@@ -145,15 +145,22 @@
       "pictures_count": 11
     }
   ],
-  "processed": 1054,
-  "created": 4,
-  "updated_existing": 1050,
+  "processed": 1066,
+  "created": 6,
+  "updated_existing": 1060,
   "duplicate_variants_archived": 0,
-  "images_uploaded": 41,
-  "image_errors": 0,
-  "price_updates": 1050,
-  "stock_updates": 2100,
+  "images_uploaded": 6,
+  "image_errors": 6,
+  "price_updates": 1060,
+  "stock_updates": 2120,
   "errors": [],
-  "warnings": [],
+  "warnings": [
+    "DEEP-66580: image failed https://deephouse.pro/upload/iblock/68f/rx03m1kgkzd9xheo87nvr13ttbkxhh60.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
+    "DEEP-67108: image failed https://deephouse.pro/upload/iblock/fa0/1n9e1oe1y4jzkyltu1k4af2gfeat3ia7.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
+    "DEEP-67614: image failed https://deephouse.pro/upload/iblock/61a/1f3adg2y28x5kxl3bd9rbawsyenh0oxb.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
+    "DEEP-67615: image failed https://deephouse.pro/upload/iblock/3d2/jdi75gps8qjyj6e2odtdah4oxv36lt8d.jpeg: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
+    "DEEP-66585: image failed https://deephouse.pro/upload/iblock/37c/07lip9jgiq9zzdt1kazgr9s8ko91borv.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
+    "DEEP-66587: image failed https://deephouse.pro/upload/iblock/d68/4f3hsb5m3j5kwvs2gmx56f6lth1my2e1.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+  ],
   "complete": true
 }
