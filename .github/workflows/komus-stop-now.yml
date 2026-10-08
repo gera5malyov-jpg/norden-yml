@@ -1,0 +1,18 @@
+name: Pause Komus KIT bootstrap now
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/komus-stop-now.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: komus-kit-write
+  cancel-in-progress: true
+
+jobs:
+  pause:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Komus bootstrap paused because KIT file limit 300000 is reached."
