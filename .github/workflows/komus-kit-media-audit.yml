@@ -1,0 +1,54 @@
+name: Komus KIT media audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/komus-kit-media-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Audit kom-* media
+        env:
+          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+        shell: bash
+        run: |
+          PYTHONPATH=samson-kit python - <<'PY'
+          import json, os
+          from samson_kit.http import SafeSession
+          from samson_kit.kit_client import KitClient
+
+          http=SafeSession(max_attempts=8,timeout=(15,120))
+          kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],http,min_request_interval=0.25)
+          total=0; no_media=[]; with_media=0
+          seen=set()
+          for row in kit.iter_variants({'name':'kom-'}):
+              sku=str(row.get('sku') or '').strip()
+              if not sku.lower().startswith('kom-'): continue
+              vid=str(row.get('id') or '').strip()
+              key=vid or sku.lower()
+              if key in seen: continue
+              seen.add(key); total+=1
+              media=[x for x in (row.get('media') or []) if isinstance(x,dict) and x.get('type')=='IMAGE' and x.get('image_id')]
+              if media: with_media+=1
+              elif len(no_media)<5000: no_media.append(sku)
+          print('KOMUS_MEDIA_AUDIT='+json.dumps({
+              'total_komus_variants':total,
+              'with_image':with_media,
+              'without_image':total-with_media,
+              'without_image_first_5000':no_media
+          },ensure_ascii=False))
+          PY
