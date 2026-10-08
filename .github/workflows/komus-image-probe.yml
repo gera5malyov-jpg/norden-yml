@@ -31,9 +31,13 @@ jobs:
           import csv, os, tempfile, requests
           from pathlib import Path
           from urllib.parse import urljoin
-          import sys
+          import sys, importlib.util
           sys.path.insert(0,'.')
-          exec(compile(open('komus-kit/sync_komus_kit.py','rb').read(),'sync_komus_kit.py','exec'),globals())
+          spec=importlib.util.spec_from_file_location('komus_sync','komus-kit/sync_komus_kit.py')
+          mod=importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(mod)
+          KomusPersonalSource=mod.KomusPersonalSource
+          iter_offers=mod.iter_offers
 
           with tempfile.TemporaryDirectory(prefix='komus-probe-') as td:
               src=KomusPersonalSource(os.environ['KOMUS_LOGIN'],os.environ['KOMUS_PASSWORD'])
