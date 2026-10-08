@@ -1,0 +1,105 @@
+name: Ozon Vario 2 quality-document check
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-vario2-quality-check.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify Vario 2 card, declaration and binding (read-only)
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os,json,time,urllib.request,urllib.error,re,sys
+          c=os.environ.get("OZON_CLIENT_ID","").strip()
+          k=os.environ.get("OZON_API_KEY","").strip()
+          if not c or not k: sys.exit("Missing Ozon secrets")
+          H={"Client-Id":c,"Api-Key":k,"Content-Type":"application/json"}
+          def post(path,data):
+              for tries in range(4):
+                  rq=urllib.request.Request("https://api-seller.ozon.ru"+path, data=json.dumps(data,ensure_ascii=False).encode(),headers=H,method="POST")
+                  try:
+                      with urllib.request.urlopen(rq,timeout=90) as f:
+                          return json.load(f)
+                  except urllib.error.HTTPError as e:
+                      body=e.read().decode("utf-8","replace")[:500]
+                      if e.code in [429,500,502,503,504] and tries < 3:
+                          time.sleep(2**tries);continue
+                      raise RuntimeError(f"{path}: HTTP {e.code}: {body}")
+          def norm(x):
+              return re.sub(r"[^a-zа-я0-9]","",str(x or "").lower())
+          def chunks(xs,n):
+              for i in range(0,len(xs),n):yield xs[i:i+n]
+          products=[];last="";seen=set()
+          for page in range(100):
+              req={"filter":{"visibility":"ALL"},"limit":1000}
+              if last:req["last_id"]=last
+              d=post("/v3/product/list",req).get("result") or {}
+              rows=d.get("items") or []
+              products.extend(rows)
+              nxt=d.get("last_id") or ""
+              if not rows or not nxt or nxt==last or nxt in seen or len(products)>=int(d.get("total") or 10**9):break
+              seen.add(last);last=nxt
+          ids=[int(x.get("product_id") or 0) for x in products if int(x.get("product_id") or 0)]
+          found=[]
+          for batch in chunks(ids,500):
+              d=post("/v4/product/info/attributes",{"filter":{"product_id":batch,"visibility":"ALL"},"limit":1000})
+              rows=d.get("result") or []
+              for p in rows:
+                  name=str(p.get("name") or "")
+                  offer=str(p.get("offer_id") or "")
+                  needle=norm(name+" "+offer)
+                  if not any(s in needle for s in ["варио2","vario2","ys0816h"]):
+                      continue
+                  attrs=p.get("attributes") or []
+                  brands=[]
+                  for a in attrs:
+                      if int(a.get("id") or 0)==85:
+                          brands=[str(x.get("value") or "") for x in a.get("values") or []]
+                  found.append({"id":int(p.get("id") or p.get("product_id") or 0),"offer_id":offer,"name":name,"brand":"; ".join(brands)})
+          certs=[]
+          for pg in range(1,30):
+              r=post("/v1/product/certificate/list",{"page":pg,"page_size":100})
+              obj=r.get("result") or []
+              items=(obj.get("items") or obj.get("certificates") or []) if isinstance(obj,dict) else obj
+              if not isinstance(items,list):items=[]
+              certs.extend(items)
+              if len(items)<100:break
+          relevant=[c for c in certs if "22429/25" in str(c.get("certificate_number") or "")]
+          bound={}
+          for cert in relevant:
+              ci=int(cert.get("certificate_id") or 0)
+              if not ci:continue
+              bound[ci]={}
+              for pg in range(1,30):
+                  d=post("/v1/product/certificate/products/list",{"certificate_id":ci,"page":pg,"page_size":1000})
+                  res=d.get("result") or {}
+                  rows=res.get("items") or []
+                  for x in rows:
+                      bound[ci][int(x.get("product_id") or 0)]=str(x.get("product_status_code") or "unspecified")
+                  if len(rows)<1000:break
+          full=[]
+          for batch in chunks([x["id"] for x in found if x["id"]],50):
+              d=post("/v3/product/info/list",{"product_id":batch})
+              full.extend(d.get("items") or (d.get("result") or {}).get("items") or [])
+          byid={int(x.get("id") or x.get("product_id") or 0):x for x in full}
+          out=[]
+          for x in found:
+              p=byid.get(x["id"],{})
+              s=p.get("statuses") or {}
+              out.append({**x,"sku":p.get("sku"),"status":s.get("status"),"status_name":s.get("status_name"),"visibility_details":p.get("visibility_details"),"errors":[{"code":e.get("code"),"message":e.get("message")} for e in (p.get("errors") or [])][:5],"declarations":{str(cert.get("certificate_id")):bound.get(int(cert.get("certificate_id") or 0),{}).get(x["id"],"NOT_LINKED") for cert in relevant}})
+          print("DIAGNOSTIC="+json.dumps({"catalog_count":len(products),"matched_count":len(found),"certificates":[{"id":a.get("certificate_id"),"number":a.get("certificate_number"),"status":a.get("status_code"),"linked_product_count":len(bound.get(int(a.get("certificate_id") or 0),{}))} for a in relevant],"products":out[:35]},ensure_ascii=False))
+          if not found:sys.exit("No Vario 2 candidate found in Ozon catalog")
+          PY
