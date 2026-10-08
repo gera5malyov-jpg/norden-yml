@@ -241,7 +241,10 @@ class SyncRunner:
                             if not variant_id: raise RuntimeError('KIT did not return variant id')
                             self.report['new_products_created']+=1
                             normalized=dict(payload); normalized.update(created); kit_index[item.kit_sku]=normalized
-                            self._attach_documents(item,variant_id)
+                            # Per owner request (2026-10-08), do not attach Samson
+                            # certificates/declarations to new KIT variants.
+                            # They are retained in Samson source but not in KIT.
+                            self.report['documents_skipped'] += len(item.document_urls)
                     except Exception as exc: self._record_error(item.kit_sku,exc)
                 if self.max_items and self.report['samson_products_seen']>=self.max_items: break
             else: complete=True
