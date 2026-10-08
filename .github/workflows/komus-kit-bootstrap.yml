@@ -7,6 +7,11 @@ on:
       - '.github/workflows/komus-kit-bootstrap.yml'
   workflow_dispatch:
     inputs:
+      allow_live:
+        description: 'Allow live Komus creation after KIT file capacity is restored'
+        required: true
+        default: false
+        type: boolean
       skip_items:
         description: 'Source offer offset'
         required: true
@@ -28,6 +33,7 @@ concurrency:
 
 jobs:
   import:
+    if: github.event_name == 'workflow_dispatch' && inputs.allow_live == true
     runs-on: ubuntu-latest
     timeout-minutes: 330
     steps:
