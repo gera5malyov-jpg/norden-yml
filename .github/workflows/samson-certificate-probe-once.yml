@@ -31,30 +31,34 @@ jobs:
           import os,json,re
           from samson_kit.http import SafeSession
           from samson_kit.kit_client import KitClient
-          kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],SafeSession(max_attempts=3,timeout=(10,60)),min_request_interval=0.07)
+          kit=KitClient(os.environ['YANDEX_KIT_TOKEN'],SafeSession(max_attempts=8,timeout=(10,60)),min_request_interval=0.65)
           f=kit._get('/v1/files',{'page':1,'per_page':1})
           print('FILES_COUNTER='+json.dumps({k:v for k,v in f.items() if k!='files'},ensure_ascii=False))
-          kit_index, duplicates=kit.index_samson_variants()
-          print('SAMSON_INDEX='+json.dumps({'sku_count':len(kit_index),'duplicate_skus':len(duplicates)},ensure_ascii=False))
-          found=[]; scanned=0; samples=[]
-          pat=re.compile(r'сертиф|certif|деклар|соответств|certificate|дс|еу|eac',re.I)
-          for sku,variant in kit_index.items():
+          payload=kit._get('/v1/variants',{'name':'SAMS-','page':1,'per_page':100})
+          variants=payload.get('variants') or payload.get('items') or []
+          print('SAMSON_PAGE_1='+json.dumps({'returned':len(variants),'total_count':payload.get('total_count')},ensure_ascii=False),flush=True)
+          found=[]; scanned=0; samples=[]; errors=[]
+          pat=re.compile(r'сертиф|certif|деклар|соответств|certificate',re.I)
+          for variant in variants:
+              sku=str(variant.get('sku') or '')
+              if not sku.upper().startswith('SAMS-'):continue
               if str(variant.get('status') or '').upper()=='ARCHIVED':continue
               vid=str(variant.get('id') or '').strip()
               if not vid:continue
               try:
                   docs=kit.list_variant_attachments(vid)
               except Exception as e:
-                  print('LOOKUP_ERROR='+json.dumps({'sku':sku,'message':str(e)[:250]},ensure_ascii=False))
+                  errors.append({'sku':sku,'message':str(e)[:250]})
+                  if len(errors)>=3:break
                   continue
               scanned+=1
               for d in docs:
                   title=str(d.get('title') or '')
-                  if len(samples)<10:
+                  if len(samples)<15:
                       samples.append({'sku':sku,'title':title,'file_id':d.get('file_id'),'keys':sorted(d.keys())})
-                  if pat.search(title) or title.casefold().endswith(('.pdf','.doc','.docx')):
+                  if pat.search(title) and d.get('file_id'):
                       if not any(x['sku']==sku for x in found):
-                          found.append({'sku':sku,'variant_id':vid,'title':title,'file_id':d.get('file_id')})
-              if len(found)>=10 or scanned>=700:break
-          print('CERTIFICATE_CANDIDATES='+json.dumps({'scanned_variants':scanned,'candidates':found[:10],'samples':samples},ensure_ascii=False))
+                          found.append({'sku':sku,'variant_id':vid,'title':title,'file_id':d.get('file_id'),'display_sequence':d.get('display_sequence')})
+              if len(found)>=8 or scanned>=75:break
+          print('CERTIFICATE_CANDIDATES='+json.dumps({'scanned_variants':scanned,'candidates':found[:10],'samples':samples,'errors':errors},ensure_ascii=False))
           PY
