@@ -147,7 +147,7 @@ def run():
                  "root@"+VM_IP,"bash -s"],
                  input=REMOTE,text=True,capture_output=True,timeout=160)
             for line in p.stdout.splitlines():
-                if line.startswith("STOREFRONT_STAGE2_"):print(line,flush=True)
+                if line.startswith("STOREFRONT_"):print(line,flush=True)
             if p.returncode:raise RuntimeError("Stage2 audit failed: "+p.stderr[-800:])
         finally:
             try:
