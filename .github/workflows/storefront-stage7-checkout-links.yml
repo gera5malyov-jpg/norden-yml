@@ -1,0 +1,24 @@
+name: Storefront Stage 7 - Fix checkout consent sources
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage7-checkout-links.yml'
+permissions:
+  contents: read
+jobs:
+  checkout-legal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate fix script
+        run: python3 -m py_compile storefront/stage7_fix_checkout_config_links.py
+      - name: Backup and correct only Webasyst checkout2 consent source links
+        run: python3 storefront/stage7_fix_checkout_config_links.py
