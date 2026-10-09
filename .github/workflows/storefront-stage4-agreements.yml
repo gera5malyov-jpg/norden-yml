@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/storefront-stage4-agreements.yml'
       - 'storefront/stage4_fix_agreements.py'
+      - 'storefront/privacy_policy_profikompany.html'
 permissions:
   contents: read
 concurrency:
