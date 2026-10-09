@@ -1,11 +1,6 @@
 name: Storefront Stage 1 deploy (backed up)
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/storefront-stage1-deploy.yml'
-      - 'storefront/stage1_apply_home.py'
 permissions:
   contents: read
 concurrency:
