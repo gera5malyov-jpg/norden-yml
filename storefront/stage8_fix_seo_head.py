@@ -5,7 +5,7 @@ import os,json,subprocess,tempfile,urllib.parse
 from pathlib import Path
 from stage1_readonly_audit import VM_ID,VM_IP,request_json
 
-REMOTE=r'''set -eu
+REMOTE=r"""set -eu
 python3 - <<'PY'
 import json,os,pathlib,shutil,subprocess,tempfile,time
 from datetime import datetime,timezone
@@ -75,7 +75,7 @@ except Exception as e:
     print('SEO_STAGE8_ROLLBACK='+json.dumps({'reason':str(e),'restored':written},ensure_ascii=False))
     raise
 PY
-'''
+"""
 
 def run():
  key=os.getenv('NETANGELS_API_KEY','').strip()
