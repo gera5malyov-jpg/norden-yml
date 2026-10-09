@@ -18,13 +18,24 @@ anchor='''    {* CANONICAL *}
     {/if}'''
 if before.count(anchor)!=1:
     raise RuntimeError('SEO head structure changed - deployment cancelled')
-addition='''    {* Scoped search indexing rules; no changes to products, URLs or category data *}
+addition='''    {* Scoped search indexing rules; preserve product and category URLs *}
     {if $wa->domainUrl() == 'https://profikompany.ru'}
       {$_seo_url = $wa->currentUrl(false, true)}
       {if $_seo_url == '/order/'}
         <meta name="robots" content="noindex,follow" />
-      {elseif empty($canonical) && ($_seo_url == '/' || $wa->param('action') == 'product' || ($wa->param('action') == 'category' && !$wa->get('page') && !$wa->get('sort') && !$wa->get('order'))}
-        <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
+      {/if}
+      {if empty($canonical)}
+        {if $_seo_url == '/'}
+          <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
+        {/if}
+        {if $wa->param('action') == 'product'}
+          <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
+        {/if}
+        {if $wa->param('action') == 'category'}
+          {if $wa->currentUrl(false) == $_seo_url}
+            <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
+          {/if}
+        {/if}
       {/if}
     {/if}'''
 edited=before.replace(anchor,anchor+'\n'+addition,1)
