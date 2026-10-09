@@ -78,7 +78,7 @@ try{
  $body=@file_get_contents('/tmp/storefront-stage4-check-'.getmypid());
  @unlink('/tmp/storefront-stage4-check-'.getmypid());
  $status=trim(implode('',$out));
- if($rc!==0 || $status!=='200' || $body===false || strpos($body,'href="https://profikompany.ru/privacy-policy/"')===false){
+ if($rc!==0 || $status!=='200' || $body===false || (strpos($body,'/privacy-policy/')===false || strpos($body,'Политика обработки персональных данных')===false)){
   throw new Exception('Homepage footer smoke check failed, http='.$status);
  }
  echo 'STOREFRONT_AGREEMENTS_APPLY='.json_encode(array('ok'=>true,'docs'=>array(2,4,6),
