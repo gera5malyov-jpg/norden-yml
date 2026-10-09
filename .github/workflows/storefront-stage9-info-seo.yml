@@ -1,10 +1,6 @@
 name: Storefront Stage 9 - Info SEO metadata
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/storefront-stage9-info-seo.yml'
 permissions:
   contents: read
 concurrency:
