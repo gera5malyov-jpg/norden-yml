@@ -23,6 +23,14 @@ for rel,first,last in files:
   lines=p.read_text(encoding='utf-8',errors='replace').splitlines()
   rows=[{'n':i+1,'line':lines[i][:450]} for i in range(first-1,min(len(lines),last))]
   print('STOREFRONT_STAGE2_TEMPLATE='+json.dumps({'file':rel,'lines':rows},ensure_ascii=False))
+for d in (root/'wa-data/public/site/themes/pureMegapolis42', root/'wa-data/public/shop/themes/pureMegapolis42'):
+  if not d.is_dir():continue
+  for p in d.rglob('*.html'):
+    if not p.is_file() or p.stat().st_size>100000:continue
+    lines=p.read_text(encoding='utf-8',errors='replace').splitlines()
+    hits=[{'n':i+1,'line':line[:420]} for i,line in enumerate(lines)
+          if any(w.lower() in line.lower() for w in ('условия оплаты','условия доставки','политика обработки','footer__link'))]
+    if hits:print('STOREFRONT_LEGAL_TEMPLATE='+json.dumps({'file':str(p.relative_to(root)),'lines':hits[:12]},ensure_ascii=False))
 PY
 tmp=$(mktemp /tmp/storefront-stage2-read-XXXXXX.php)
 trap 'rm -f "$tmp"' EXIT
@@ -34,6 +42,40 @@ require_once $root.'/wa-config/SystemConfig.class.php';
 waSystem::getInstance(null,new SystemConfig());
 wa('shop');
 $m=new waModel();
+try {
+  $diag=array();
+  $diag['settings_columns']=$m->query("SHOW COLUMNS FROM wa_app_settings")->fetchAll();
+  $diag['page_columns']=$m->query("SHOW COLUMNS FROM site_page")->fetchAll();
+  $diag['auth_tables']=array();
+  foreach($m->query("SHOW TABLES")->fetchAll() as $r){foreach($r as $name){
+    if(stripos((string)$name,'auth')!==false || stripos((string)$name,'checkout')!==false)
+      $diag['auth_tables'][]=$name;
+  }}
+  $diag['settings_public_policies']=array();
+  $cols=array();
+  foreach($diag['settings_columns'] as $row){$cols[]=$row['Field'];}
+  $appCol=in_array('app_id',$cols)?'app_id':(in_array('app',$cols)?'app':null);
+  if($appCol && in_array('name',$cols) && in_array('value',$cols)){
+    foreach($m->query("SELECT ". $appCol ." AS app, name, value FROM wa_app_settings
+      WHERE name LIKE '%agreement%' OR name LIKE '%privacy%' OR name LIKE '%policy%'
+      ORDER BY app,name LIMIT 60")->fetchAll() as $row){
+      $val=(string)$row['value'];
+      $diag['settings_public_policies'][]=array('app'=>$row['app'],'name'=>$row['name'],
+        'value_if_public_url'=>(strlen($val)<350 && strpos($val,'http')!==false)?$val:null,
+        'value_length'=>strlen($val));
+    }
+  }
+  $diag['existing_public_pages']=array();
+  $pageCols=array();
+  foreach($diag['page_columns'] as $row){$pageCols[]=$row['Field'];}
+  if(in_array('url',$pageCols) && in_array('name',$pageCols)){
+    $diag['existing_public_pages']=$m->query("SELECT name,url FROM site_page
+      WHERE LOWER(name) LIKE '%персон%' OR LOWER(name) LIKE '%политик%'
+      OR LOWER(url) LIKE '%privacy%' OR LOWER(url) LIKE '%offer%'
+      LIMIT 40")->fetchAll();
+  }
+  echo 'STOREFRONT_LEGAL_DB='.json_encode($diag,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\\n";
+} catch(Throwable $e){echo 'STOREFRONT_LEGAL_DB_ERROR='.get_class($e).': '.$e->getMessage()."\\n";}
 $out=array('samples'=>array());
 $ids=array(1489211,392940,763100,1186404,148303);
 foreach($ids as $id){
