@@ -65,6 +65,21 @@ try {
         'value_length'=>strlen($val));
     }
   }
+  $diag['existing_shop_policy_pages']=array();
+  try {
+    $diag['shop_page_columns']=$m->query("SHOW COLUMNS FROM shop_page")->fetchAll();
+    $diag['existing_shop_policy_pages']=$m->query("SELECT id,name,url,title FROM shop_page
+      WHERE LOWER(name) LIKE '%политик%' OR LOWER(name) LIKE '%персон%'
+         OR LOWER(name) LIKE '%конфиденц%' OR LOWER(name) LIKE '%оферт%'
+         OR LOWER(url) LIKE '%policy%' OR LOWER(url) LIKE '%privac%'
+      LIMIT 30")->fetchAll();
+  } catch(Throwable $e){$diag['shop_page_error']=get_class($e).': '.$e->getMessage();}
+  $diag['malformed_agreement_settings']=array();
+  try{
+    $diag['malformed_agreement_settings']=$m->query(
+      "SELECT app_id,name,CHAR_LENGTH(value) AS value_length FROM wa_app_settings
+       WHERE value LIKE '%---https://profikompany.ru/dostavka/---%' LIMIT 30")->fetchAll();
+  } catch(Throwable $e){$diag['malformed_settings_error']=get_class($e).': '.$e->getMessage();}
   $diag['existing_public_pages']=array();
   $pageCols=array();
   foreach($diag['page_columns'] as $row){$pageCols[]=$row['Field'];}
