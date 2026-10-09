@@ -1,0 +1,22 @@
+name: Storefront Stage 6 - Payment and delivery SEO
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage6-page-titles.yml'
+permissions:
+  contents: read
+jobs:
+  seo-page-titles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m py_compile storefront/stage6_page_titles.py
+      - run: python3 storefront/stage6_page_titles.py
