@@ -23,6 +23,20 @@ for rel,first,last in files:
   lines=p.read_text(encoding='utf-8',errors='replace').splitlines()
   rows=[{'n':i+1,'line':lines[i][:450]} for i in range(first-1,min(len(lines),last))]
   print('STOREFRONT_STAGE2_TEMPLATE='+json.dumps({'file':rel,'lines':rows},ensure_ascii=False))
+for rel_dir in ('wa-apps/shop/lib','wa-system/webasyst/lib','wa-apps/shop/templates','wa-system/auth','wa-config'):
+  rp=root/rel_dir
+  if not rp.is_dir():continue
+  try:
+    import subprocess
+    p=subprocess.Popen(['grep','-RIl','--include=*.php','--include=*.html','-E',
+      'shipping_agreement|service_agreement|getDocumentId\\(',str(rp)],
+      stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    stdout,stderr=p.communicate(timeout=12)
+    print('STOREFRONT_CONSENT_SOURCE='+json.dumps({'directory':rel_dir,'files':[x.replace(str(root)+'/','') for x in stdout.decode('utf-8','replace').splitlines()[:30]]},ensure_ascii=False))
+  except Exception as e:
+    try:p.kill()
+    except Exception:pass
+    print('STOREFRONT_CONSENT_SOURCE='+json.dumps({'directory':rel_dir,'error':type(e).__name__},ensure_ascii=False))
 for rel in ('wa-system/webasyst/lib/models/waAgreementDocument.model.php',):
   path=root/rel
   if path.is_file():
