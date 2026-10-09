@@ -1,0 +1,27 @@
+name: Storefront Stage 4 - Fix native legal agreements
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage4-agreements.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-legal-policy-deploy
+  cancel-in-progress: false
+jobs:
+  consent-links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate deployment script
+        run: python3 -m py_compile storefront/stage4_fix_agreements.py
+      - name: Back up and fix native Webasyst agreement documents
+        run: python3 storefront/stage4_fix_agreements.py
