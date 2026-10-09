@@ -1,10 +1,6 @@
 name: Storefront Stage 3 - Footer links
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/storefront-stage3-footer.yml'
 permissions:
   contents: read
 jobs:
