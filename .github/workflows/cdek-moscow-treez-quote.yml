@@ -1,0 +1,86 @@
+name: CDEK Moscow Treez branches quote
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cdek-moscow-treez-quote.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CDEK_CLIENT_ID: ${{ secrets.CDEK_CLIENT_ID }}
+      CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
+    steps:
+      - name: Quote Moscow courier pickup to CDEK point
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.parse, urllib.error, datetime
+          base="https://api.cdek.ru/v2"
+          cid=os.getenv("CDEK_CLIENT_ID")
+          sec=os.getenv("CDEK_CLIENT_SECRET")
+          if not cid or not sec:
+              raise RuntimeError("CDEK credentials not present")
+          def request(path, body=None, token=None, form=False):
+              headers={"Accept":"application/json"}
+              if token: headers["Authorization"]="Bearer "+token
+              raw=None
+              if body is not None:
+                  if form:
+                      raw=urllib.parse.urlencode(body).encode()
+                      headers["Content-Type"]="application/x-www-form-urlencoded"
+                  else:
+                      raw=json.dumps(body,ensure_ascii=False).encode()
+                      headers["Content-Type"]="application/json; charset=utf-8"
+              r=urllib.request.Request(base+path,data=raw,headers=headers)
+              try:
+                  with urllib.request.urlopen(r,timeout=60) as z:
+                      return z.status,json.loads(z.read().decode())
+              except urllib.error.HTTPError as e:
+                  return e.code,json.loads(e.read().decode())
+          http,auth=request("/oauth/token",{"grant_type":"client_credentials","client_id":cid,"client_secret":sec},form=True)
+          if http!=200 or not auth.get("access_token"):
+              raise RuntimeError("CDEK OAuth failed HTTP "+str(http))
+          token=auth["access_token"]
+          url="/location/cities?"+urllib.parse.urlencode({"city":"Москва","country_codes":"RU","size":100})
+          http,cities=request(url,token=token)
+          exact=[x for x in cities if x.get("city")=="Москва" and x.get("region")=="Москва"]
+          if not exact: exact=[x for x in cities if x.get("city")=="Москва"]
+          if not exact: raise RuntimeError("Moscow city code not found")
+          code=int(exact[0]["code"])
+          scenarios=[
+             {"name":"one_box_140x20x15_2kg","packages":[{"weight":2000,"length":140,"width":20,"height":15}]},
+             {"name":"two_boxes_117x18x8_138x18x7_2kg","packages":[{"weight":1000,"length":117,"width":18,"height":8},{"weight":1000,"length":138,"width":18,"height":7}]},
+             {"name":"one_box_140x25x25_3kg","packages":[{"weight":3000,"length":140,"width":25,"height":25}]},
+          ]
+          results=[]
+          for x in scenarios:
+              body={"type":1,"from_location":{"code":code},"to_location":{"code":code},"packages":x["packages"],"lang":"rus"}
+              http,d=request("/calculator/tarifflist",body,token)
+              tariffs=d.get("tariff_codes",[]) if isinstance(d,dict) else []
+              entries=[]
+              for t in tariffs:
+                  entries.append({
+                    "tariff_code":t.get("tariff_code"),
+                    "tariff_name":t.get("tariff_name"),
+                    "delivery_mode":t.get("delivery_mode"),
+                    "delivery_sum":t.get("delivery_sum"),
+                    "period_min":t.get("period_min"),
+                    "period_max":t.get("period_max"),
+                    "tariff_description":t.get("tariff_description"),
+                    "services":t.get("services"),
+                  })
+              results.append({"scenario":x["name"],"http":http,"packages":x["packages"],
+                  "door_to_warehouse":[t for t in entries if t["delivery_mode"]==2],
+                  "all_tariffs":entries,
+                  "errors":d.get("errors") if isinstance(d,dict) else None})
+          print(json.dumps({"date":datetime.datetime.now(datetime.timezone.utc).isoformat(),
+             "moscow_code":code,"from":"Москва","to":"Москва","shipper":"courier from supplier warehouse",
+             "receiver":"CDEK pickup point","results":results},ensure_ascii=False,indent=2))
+          PY
