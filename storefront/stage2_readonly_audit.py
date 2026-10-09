@@ -80,6 +80,17 @@ try {
       "SELECT app_id,name,CHAR_LENGTH(value) AS value_length FROM wa_app_settings
        WHERE value LIKE '%---https://profikompany.ru/dostavka/---%' LIMIT 30")->fetchAll();
   } catch(Throwable $e){$diag['malformed_settings_error']=get_class($e).': '.$e->getMessage();}
+  $diag['pages_meta']=array();
+  try{
+    $diag['shop_info_pages']=$m->query("SELECT id,domain,route,full_url,url,name,status FROM shop_page WHERE LOWER(url) LIKE '%dostav%' OR LOWER(url) LIKE '%oplat%' OR LOWER(name) LIKE '%достав%' OR LOWER(name) LIKE '%оплат%' LIMIT 20")->fetchAll();
+    $diag['site_info_pages']=$m->query("SELECT id,domain_id,route,full_url,url,name,status FROM site_page WHERE LOWER(url) LIKE '%dostav%' OR LOWER(url) LIKE '%oplat%' OR LOWER(name) LIKE '%достав%' OR LOWER(name) LIKE '%оплат%' LIMIT 20")->fetchAll();
+    $diag['domain_examples']=$m->query("SELECT id,name FROM site_domain ORDER BY id LIMIT 20")->fetchAll();
+    $diag['agreement_like_tables']=array();
+    foreach($m->query("SHOW TABLES")->fetchAll() as $r){foreach($r as $table){
+      if(stripos((string)$table,'setting')!==false || stripos((string)$table,'agreement')!==false) $diag['agreement_like_tables'][]=$table;
+    }}
+    $diag['config_related_settings']=$m->query("SELECT app_id,name,CHAR_LENGTH(value) AS value_length FROM wa_app_settings WHERE name LIKE '%auth%' OR name LIKE '%consent%' OR name LIKE '%agreement%' ORDER BY app_id,name LIMIT 100")->fetchAll();
+  }catch(Throwable $e){$diag['pages_meta_error']=get_class($e).': '.$e->getMessage();}
   $diag['existing_public_pages']=array();
   $pageCols=array();
   foreach($diag['page_columns'] as $row){$pageCols[]=$row['Field'];}
