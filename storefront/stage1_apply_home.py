@@ -61,7 +61,7 @@ backup_base.mkdir(mode=0o700,parents=True,exist_ok=True)
 backup_dir=backup_base/('stage1-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+str(os.getpid()))
 backup_dir.mkdir(mode=0o700)
 for f in changes:
-    shutil.copy2(f,backup_dir/f.name)
+    shutil.copy2(str(f),str(backup_dir/f.name))
     (backup_dir/f.name).chmod(0o600)
 written=[]
 try:
@@ -69,9 +69,9 @@ try:
         stat=f.stat()
         with tempfile.NamedTemporaryFile('w',encoding='utf-8',dir=str(f.parent),prefix='.storefront-',delete=False) as t:
             t.write(new);tmp=pathlib.Path(t.name)
-        os.chown(tmp,stat.st_uid,stat.st_gid)
-        os.chmod(tmp,stat.st_mode)
-        os.replace(tmp,f);written.append(f)
+        os.chown(str(tmp),stat.st_uid,stat.st_gid)
+        os.chmod(str(tmp),stat.st_mode)
+        os.replace(str(tmp),str(f));written.append(f)
     url='https://profikompany.ru/?storefront_stage1_verify='+str(int(time.time()))
     proc=subprocess.run(['curl','-k','-sS','-L','--max-time','35','-w','\n%{http_code}',url],
                         text=True,capture_output=True,timeout=40)
@@ -84,7 +84,7 @@ try:
     print('STOREFRONT_APPLY='+json.dumps({'status':'success','files':[str(f.relative_to(root)) for f in written],
       'backup_path':str(backup_dir),'smoke':smoke},ensure_ascii=False))
 except Exception as e:
-    for f in written: shutil.copy2(backup_dir/f.name,f)
+    for f in written: shutil.copy2(str(backup_dir/f.name),str(f))
     print('STOREFRONT_ROLLBACK='+json.dumps({'reason':str(e),'files_restored':[str(f.relative_to(root)) for f in written]},ensure_ascii=False))
     raise
 PY
