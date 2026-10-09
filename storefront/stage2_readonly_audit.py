@@ -91,6 +91,20 @@ try {
     }}
     $diag['config_related_settings']=$m->query("SELECT app_id,name,CHAR_LENGTH(value) AS value_length FROM wa_app_settings WHERE name LIKE '%auth%' OR name LIKE '%consent%' OR name LIKE '%agreement%' ORDER BY app_id,name LIMIT 100")->fetchAll();
   }catch(Throwable $e){$diag['pages_meta_error']=get_class($e).': '.$e->getMessage();}
+  $diag['agreement_native']=array();
+  try{
+    foreach(array('wa_agreement_document','wa_contact_settings','shop_checkout_flow') as $tn){
+      $columns=$m->query("SHOW COLUMNS FROM `".$tn."`")->fetchAll();
+      $names=array();
+      foreach($columns as $col){$names[]=$col['Field'];}
+      $allow=array('id','name','title','type','url','domain','route','app_id','status','scope','version','contact_id','key');
+      $safe=array_intersect($allow,$names);
+      $rows=$safe ? $m->query("SELECT ".implode(',',$safe)." FROM `".$tn."` LIMIT 35")->fetchAll() : array();
+      $diag['agreement_native'][$tn]=array('columns'=>$names,'rows'=>$rows);
+    }
+  }catch(Throwable $e){$diag['agreement_native_error']=get_class($e).': '.$e->getMessage();}
+  $diag['shop_page_example']=$m->query("SELECT id,name,url,full_url,domain,route,status,create_contact_id,sort,parent_id
+      FROM shop_page WHERE domain='profikompany.ru' AND route='*' ORDER BY id LIMIT 12")->fetchAll();
   $diag['existing_public_pages']=array();
   $pageCols=array();
   foreach($diag['page_columns'] as $row){$pageCols[]=$row['Field'];}
