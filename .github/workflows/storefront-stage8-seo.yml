@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage8-seo.yml'
+      - 'storefront/stage8_fix_seo_head.py'
 permissions:
   contents: read
 concurrency:
