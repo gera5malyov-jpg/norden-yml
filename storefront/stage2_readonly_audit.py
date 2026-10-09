@@ -96,6 +96,15 @@ for d in (root/'wa-data/public/site/themes/pureMegapolis42', root/'wa-data/publi
     hits=[{'n':i+1,'line':line[:420]} for i,line in enumerate(lines)
           if any(w.lower() in line.lower() for w in ('условия оплаты','условия доставки','политика обработки','footer__link'))]
     if hits:print('STOREFRONT_LEGAL_TEMPLATE='+json.dumps({'file':str(p.relative_to(root)),'lines':hits[:12]},ensure_ascii=False))
+for base in ('wa-data/public/site/themes/pureMegapolis42','wa-data/public/shop/themes/pureMegapolis42'):
+ d=root/base
+ if not d.is_dir(): continue
+ for rel in ('index.html','head.html','product.html','category.html','page.html','layouts/layout.head.html','layouts/layout.meta.html'):
+  p=d/rel
+  if not p.is_file(): continue
+  ls=p.read_text(encoding='utf-8',errors='replace').splitlines()
+  matches=[{'n':i+1,'v':line[:400]} for i,line in enumerate(ls) if any(w in line.lower() for w in ('<head','</head>','wa->head','canonical','name="robots"','wa->title','schema','json-ld','og:','meta name'))]
+  print('STOREFRONT_SEO_TEMPLATE='+json.dumps({'file':str(p.relative_to(root)),'lines':matches[:60]},ensure_ascii=False))
 PY
 printf 'STOREFRONT_AGREEMENT_SOURCES='
 grep -RIl --include='*.php' -E 'wa_agreement_document|class waAgreementDocument' /home/web/vm-23f9aff9.na4u.ru/www/wa-system /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib 2>/dev/null | head -18 | tr '\n' ',' || true
