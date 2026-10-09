@@ -57,6 +57,16 @@ for d in directions:
         if matches:
             out['template_matches'].append({'file': str(path.relative_to(root)), 'line_numbers': matches})
 out['template_matches'] = out['template_matches'][:100]
+for rel, start, end in [
+    ('wa-data/public/site/themes/pureMegapolis42/layouts/layout.sets.html', 1, 85),
+    ('wa-data/public/site/themes/pureMegapolis42/layouts/layout.contact.html', 65, 130),
+    ('wa-data/public/shop/themes/pureMegapolis42/product.info.html', 392, 432),
+]:
+    path = root / rel
+    if not path.is_file(): continue
+    content = path.read_text(encoding='utf-8',errors='replace').splitlines()
+    excerpt = [{'n':i+1,'line':content[i][:500]} for i in range(start-1,min(end,len(content)))]
+    print('STOREFRONT_TEMPLATE_SNIPPET=' + json.dumps({'file':rel,'lines':excerpt},ensure_ascii=False))
 print('STOREFRONT_THEME_AUDIT=' + json.dumps(out,ensure_ascii=False))
 PY
 p=$(mktemp /tmp/storefront-stage1-audit-XXXXXX.php)
