@@ -105,6 +105,13 @@ for base in ('wa-data/public/site/themes/pureMegapolis42','wa-data/public/shop/t
   ls=p.read_text(encoding='utf-8',errors='replace').splitlines()
   matches=[{'n':i+1,'v':line[:400]} for i,line in enumerate(ls) if any(w in line.lower() for w in ('<head','</head>','wa->head','canonical','name="robots"','wa->title','schema','json-ld','og:','meta name'))]
   print('STOREFRONT_SEO_TEMPLATE='+json.dumps({'file':str(p.relative_to(root)),'lines':matches[:60]},ensure_ascii=False))
+for rel,first,last in (('wa-data/public/site/themes/pureMegapolis42/index.html',28,99),
+                        ('wa-data/public/shop/themes/pureMegapolis42/product.html',23,100),
+                        ('wa-data/public/shop/themes/pureMegapolis42/category.html',1,68)):
+ p=root/rel
+ if p.is_file():
+  ls=p.read_text(encoding='utf-8',errors='replace').splitlines()
+  print('STOREFRONT_SEO_CONTEXT='+json.dumps({'file':rel,'lines':[{'n':i+1,'v':ls[i][:440]} for i in range(first-1,min(last,len(ls)))]},ensure_ascii=False))
 PY
 printf 'STOREFRONT_AGREEMENT_SOURCES='
 grep -RIl --include='*.php' -E 'wa_agreement_document|class waAgreementDocument' /home/web/vm-23f9aff9.na4u.ru/www/wa-system /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib 2>/dev/null | head -18 | tr '\n' ',' || true
