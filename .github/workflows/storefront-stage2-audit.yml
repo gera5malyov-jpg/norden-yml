@@ -1,0 +1,25 @@
+name: Storefront Stage 2 - Recommendations Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage2-audit.yml'
+      - 'storefront/stage2_readonly_audit.py'
+permissions:
+  contents: read
+jobs:
+  recommendations-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate audit code
+        run: python3 -m py_compile storefront/stage2_readonly_audit.py
+      - name: Inspect recommendations without changing store data
+        run: python3 storefront/stage2_readonly_audit.py
