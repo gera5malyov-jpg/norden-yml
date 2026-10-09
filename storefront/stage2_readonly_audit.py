@@ -37,6 +37,16 @@ for rel_dir in ('wa-apps/shop/lib','wa-system/webasyst/lib','wa-apps/shop/templa
     try:p.kill()
     except Exception:pass
     print('STOREFRONT_CONSENT_SOURCE='+json.dumps({'directory':rel_dir,'error':type(e).__name__},ensure_ascii=False))
+for rel in ('wa-config/apps/shop/checkout2.php','wa-config/apps/shop/checkout.php'):
+  file=root/rel
+  if file.is_file():
+    data=file.read_text(encoding='utf-8',errors='replace')
+    print('STOREFRONT_CONFIG_LINK_COUNTS='+json.dumps({
+      'file':rel,
+      'bad_prof_link_count':data.count('---https://profikompany.ru/dostavka/---'),
+      'empty_privacy_link_count':data.count('<a href="">условиями обработки персональных данных</a>'),
+      'privacy_link_count':data.count('/privacy-policy/')
+    },ensure_ascii=False))
 for rel in (
   'wa-apps/shop/lib/classes/checkout2/shopCheckoutConfig.class.php',
   'wa-apps/shop/lib/classes/checkout2/shopCheckoutAuthStep.class.php',
