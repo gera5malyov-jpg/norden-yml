@@ -112,6 +112,21 @@ for rel,first,last in (('wa-data/public/site/themes/pureMegapolis42/index.html',
  if p.is_file():
   ls=p.read_text(encoding='utf-8',errors='replace').splitlines()
   print('STOREFRONT_SEO_CONTEXT='+json.dumps({'file':rel,'lines':[{'n':i+1,'v':ls[i][:440]} for i in range(first-1,min(last,len(ls)))]},ensure_ascii=False))
+import os,time
+logdir=root/'wa-log'
+if logdir.is_dir():
+ for file in sorted(logdir.glob('*.log'),key=lambda p:p.stat().st_mtime,reverse=True)[:12]:
+  if time.time()-file.stat().st_mtime>3*3600:continue
+  try:
+   with file.open(encoding='utf-8',errors='replace') as fp:
+    from collections import deque
+    tail=list(deque(fp,maxlen=120))
+   hits=[]
+   for line in tail:
+    if ('Smarty' in line or 'index.html' in line or 'template' in line.lower()) and ('error' in line.lower() or 'syntax' in line.lower() or 'index.html' in line):
+     hits.append(line[:350].strip())
+   if hits:print('STOREFRONT_SEO_ERRORS='+json.dumps({'log_name':file.name,'matches':hits[-8:]},ensure_ascii=False))
+  except Exception: pass
 PY
 printf 'STOREFRONT_AGREEMENT_SOURCES='
 grep -RIl --include='*.php' -E 'wa_agreement_document|class waAgreementDocument' /home/web/vm-23f9aff9.na4u.ru/www/wa-system /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib 2>/dev/null | head -18 | tr '\n' ',' || true
