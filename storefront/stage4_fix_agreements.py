@@ -126,7 +126,7 @@ def run():
                 input=REMOTE,text=True,capture_output=True,timeout=170)
             for line in p.stdout.splitlines():
                 if line.startswith("STOREFRONT_"):print(line,flush=True)
-            if p.returncode:raise RuntimeError("Agreement deploy failed: "+p.stderr[-1000:])
+            if p.returncode:raise RuntimeError("Agreement deploy failed: STDOUT="+p.stdout[-1600:]+" STDERR="+p.stderr[-650:])
         finally:
             try:
                 request_json("https://api-ms.netangels.ru/api/v1/cloud/vms/{}/ssh/{}/".format(VM_ID,kid),"DELETE",None,headers)
