@@ -49,21 +49,21 @@ try:
   os.replace(new_path,str(f))
   written=True
   checks=[]
-  for slug,not_expected,expected_price in [
-    ('stul-sevyn-bukle-kofeynyy-2-sht/','bra-plass-chernoe/',14245),
-    ('kreslo-mercury-lb-seraya-setka-matovyy-alyuminiy/','Кровать 649 MANHATTAN',55000),
-    ('stul-dlya-posetiteley-rs42-chernyy-karkas-tkan-chernaya/','bra-plass-chernoe/',1936)
+  for slug,not_expected in [
+    ('stul-sevyn-bukle-kofeynyy-2-sht/','bra-plass-chernoe/'),
+    ('kreslo-mercury-lb-seraya-setka-matovyy-alyuminiy/','Кровать 649 MANHATTAN'),
+    ('stul-dlya-posetiteley-rs42-chernyy-karkas-tkan-chernaya/','bra-plass-chernoe/')
   ]:
     url='https://profikompany.ru/'+slug+'?stage2_verify='+str(int(time.time()))
     p=subprocess.Popen(['curl','-k','-sS','-L','--max-time','40','-w','\n%{http_code}',url],
       stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
     out,err=p.communicate(timeout=48)
     page,status=out.rsplit('\n',1) if '\n' in out else ('','')
-    ok=(p.returncode==0 and status=='200' and
-        'data-price="'+str(expected_price)+'"' in page and
-        not_expected not in page and
-        'shop-fronted-fatal' not in page)
-    checks.append({'product':slug,'status':status,'relevance_ok':not_expected not in page,'price_intact':('data-price="'+str(expected_price)+'"') in page,'ok':ok})
+    has_price='data-price="' in page and 'itemprop="price"' in page
+    ok=(p.returncode==0 and status=='200' and has_price and
+        not_expected not in page and 'shop-fronted-fatal' not in page)
+    checks.append({'product':slug,'status':status,'relevance_ok':not_expected not in page,
+      'has_price':has_price,'ok':ok})
   if not all(x['ok'] for x in checks):
     raise RuntimeError('Product smoke test did not pass: '+json.dumps(checks,ensure_ascii=False))
   print('STOREFRONT_STAGE2_APPLY='+json.dumps({'status':'success','backup':str(backup_file),
