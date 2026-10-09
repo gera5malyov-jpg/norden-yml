@@ -93,7 +93,7 @@ try{
 PHP
 chmod 644 "$p"
 set +e
-su -s /bin/bash web -c "STOREFRONT_BACKUP_TEMP='$tmpdir/agreements.json' php '$p'"
+su -s /bin/bash web -c "STOREFRONT_BACKUP_TEMP='$tmpdir/agreements.json' php -d display_errors=1 -d log_errors=0 -d error_reporting=32767 '$p'"
 status=$?
 set -e
 if test -f "$tmpdir/agreements.json"; then
