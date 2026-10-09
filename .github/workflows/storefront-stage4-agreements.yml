@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage4-agreements.yml'
+      - 'storefront/stage4_fix_agreements.py'
 permissions:
   contents: read
 concurrency:
