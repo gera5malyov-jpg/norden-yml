@@ -32,6 +32,12 @@ for d in (root/'wa-data/public/site/themes/pureMegapolis42', root/'wa-data/publi
           if any(w.lower() in line.lower() for w in ('условия оплаты','условия доставки','политика обработки','footer__link'))]
     if hits:print('STOREFRONT_LEGAL_TEMPLATE='+json.dumps({'file':str(p.relative_to(root)),'lines':hits[:12]},ensure_ascii=False))
 PY
+printf 'STOREFRONT_AGREEMENT_SOURCES='
+grep -RIl --include='*.php' -E 'wa_agreement_document|class waAgreementDocument' /home/web/vm-23f9aff9.na4u.ru/www/wa-system /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib 2>/dev/null | head -18 | tr '\n' ',' || true
+echo
+printf 'STOREFRONT_CACHE_DIRS='
+find /home/web/vm-23f9aff9.na4u.ru/www/wa-cache -maxdepth 2 -type d 2>/dev/null | head -25 | tr '\n' ',' || true
+echo
 tmp=$(mktemp /tmp/storefront-stage2-read-XXXXXX.php)
 trap 'rm -f "$tmp"' EXIT
 cat > "$tmp" <<'PHP'
