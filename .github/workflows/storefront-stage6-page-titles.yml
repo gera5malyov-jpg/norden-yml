@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage6-page-titles.yml'
+      - 'storefront/stage6_page_titles.py'
 permissions:
   contents: read
 jobs:
