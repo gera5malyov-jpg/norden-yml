@@ -105,6 +105,14 @@ try {
   }catch(Throwable $e){$diag['agreement_native_error']=get_class($e).': '.$e->getMessage();}
   $diag['shop_page_example']=$m->query("SELECT id,name,url,full_url,domain,route,status,create_contact_id,sort,parent_id
       FROM shop_page WHERE domain='profikompany.ru' AND route='*' ORDER BY id LIMIT 12")->fetchAll();
+  $diag['agreement_documents']=array();
+  try {
+    $diag['agreement_documents']=$m->query(
+      "SELECT id,app_id,context,domain,locale,document_name,CHAR_LENGTH(document_text) AS content_length,
+       LEFT(document_text,400) AS preview,
+       LOCATE('---https://profikompany.ru/dostavka/---',document_text) AS broken_link_pos
+       FROM wa_agreement_document WHERE domain='profikompany.ru' ORDER BY id")->fetchAll();
+  }catch(Throwable $e){$diag['agreement_docs_error']=get_class($e).': '.$e->getMessage();}
   $diag['existing_public_pages']=array();
   $pageCols=array();
   foreach($diag['page_columns'] as $row){$pageCols[]=$row['Field'];}
