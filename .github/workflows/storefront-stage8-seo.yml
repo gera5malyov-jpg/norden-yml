@@ -1,0 +1,26 @@
+name: Storefront Stage 8 - SEO Canonical and Noindex
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage8-seo.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  seo-layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m py_compile storefront/stage8_fix_seo_head.py
+      - name: Backup theme and validate live SEO changes
+        run: python3 storefront/stage8_fix_seo_head.py
