@@ -23,6 +23,16 @@ for rel,first,last in files:
   lines=p.read_text(encoding='utf-8',errors='replace').splitlines()
   rows=[{'n':i+1,'line':lines[i][:450]} for i in range(first-1,min(len(lines),last))]
   print('STOREFRONT_STAGE2_TEMPLATE='+json.dumps({'file':rel,'lines':rows},ensure_ascii=False))
+for rel in ('wa-system/webasyst/lib/models/waAgreementDocument.model.php',):
+  path=root/rel
+  if path.is_file():
+    ls=path.read_text(encoding='utf-8',errors='replace').splitlines()
+    print('STOREFRONT_AGREEMENT_MODEL='+json.dumps({'file':rel,'lines':[{'n':i+1,'v':ls[i][:290]} for i in range(min(180,len(ls)))]},ensure_ascii=False))
+for relative in ('wa-system/webasyst','wa-apps/shop/lib'):
+  import subprocess
+  p=subprocess.Popen(['grep','-Rln','--include=*.php','getAgreementDocument',str(root/relative)],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+  out,_=p.communicate()
+  print('STOREFRONT_AGREEMENT_GETTERS='+json.dumps({'root':relative,'paths':out.decode('utf-8','replace').splitlines()[:20]},ensure_ascii=False))
 for d in (root/'wa-data/public/site/themes/pureMegapolis42', root/'wa-data/public/shop/themes/pureMegapolis42'):
   if not d.is_dir():continue
   for p in d.rglob('*.html'):
