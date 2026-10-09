@@ -1,0 +1,26 @@
+name: Storefront Stage 9 - Info SEO metadata
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage9-info-seo.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m py_compile storefront/stage9_fix_info_meta.py
+      - name: Backup and verify three information page SEO titles
+        run: python3 storefront/stage9_fix_info_meta.py
