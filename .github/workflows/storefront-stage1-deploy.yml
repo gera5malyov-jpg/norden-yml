@@ -1,0 +1,27 @@
+name: Storefront Stage 1 deploy (backed up)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage1-deploy.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-stage1-deploy
+  cancel-in-progress: false
+jobs:
+  fix-homepage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate Stage 1 script
+        run: python -m py_compile storefront/stage1_apply_home.py storefront/stage1_readonly_audit.py
+      - name: Back up templates and apply bounded homepage fixes
+        run: python storefront/stage1_apply_home.py
