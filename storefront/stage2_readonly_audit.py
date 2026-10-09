@@ -111,7 +111,7 @@ try {
       "SELECT id,app_id,context,domain,locale,document_name,CHAR_LENGTH(document_text) AS content_length,
        LEFT(document_text,400) AS preview,
        LOCATE('---https://profikompany.ru/dostavka/---',document_text) AS broken_link_pos,
-       LOCATE('href="/privacy-policy/"',document_text) AS fixed_link_pos
+       LOCATE('privacy-policy/',document_text) AS fixed_link_pos
        FROM wa_agreement_document WHERE domain='profikompany.ru' ORDER BY id")->fetchAll();
   }catch(Throwable $e){$diag['agreement_docs_error']=get_class($e).': '.$e->getMessage();}
   $diag['existing_public_pages']=array();
