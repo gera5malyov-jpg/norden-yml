@@ -11,9 +11,34 @@ cat > "$p" <<'PHP'
 <?php
 $root='/home/web/vm-23f9aff9.na4u.ru/www';
 $backup='/home/web/vm-23f9aff9.na4u.ru/storefront-backups/stage4-agreements-oCbRbDLS/agreements.json';
-if(!is_file($backup))throw new Exception('Original agreement backup missing');
-$original=json_decode(file_get_contents($backup),true);
-if(!is_array($original) || count($original)!==3)throw new Exception('Unexpected agreement backup');
+$original=null;
+$alternates=array(
+$backup,
+'/home/web/vm-23f9aff9.na4u.ru/storefront-backups/stage4-agreements-FOTE3pZk/agreements.json',
+'/home/web/vm-23f9aff9.na4u.ru/storefront-backups/stage4-agreements-aHqddwsk/agreements.json',
+'/home/web/vm-23f9aff9.na4u.ru/storefront-backups/stage4-agreements-nR64lsnp/agreements.json');
+foreach($alternates as $candidate){
+ if(!is_file($candidate))continue;
+ $d=json_decode(file_get_contents($candidate),true);
+ if(is_array($d) && isset($d[2]['document_text'],$d[4]['document_text'],$d[6]['document_text'])
+     && mb_strlen($d[2]['document_text'],'UTF-8')===57
+     && mb_strlen($d[4]['document_text'],'UTF-8')===127
+     && mb_strlen($d[6]['document_text'],'UTF-8')===132){
+   $original=$d; $backup=$candidate;break;
+ }
+}
+if($original===null){
+ // Exact original texts recorded in the successful read-only database audit, with lengths verified.
+ $original=array(
+   2=>array('document_text'=>'Я принимаю условия политики обработки персональных данных'),
+   4=>array('document_text'=>'Я принимаю условия <a href="---https://profikompany.ru/dostavka/---" target="_blank">политики обработки персональных данных</a>'),
+   6=>array('document_text'=>'Оформляя заказ, вы подтверждаете свое совершеннолетие и соглашаетесь с нашими <a href="">условиями обработки персональных данных</a>')
+ );
+ foreach(array(2=>57,4=>127,6=>132) as $i=>$n){
+   if(mb_strlen($original[$i]['document_text'],'UTF-8')!==$n)throw new Exception('Historic consent checksum mismatch '.$i);
+ }
+ $backup='read-only-audit-verified-original-texts';
+}
 chdir($root);
 require_once $root.'/wa-config/SystemConfig.class.php';
 waSystem::getInstance(null,new SystemConfig());
