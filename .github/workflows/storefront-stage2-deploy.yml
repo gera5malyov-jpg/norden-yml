@@ -1,0 +1,27 @@
+name: Storefront Stage 2 - Deploy recommendations
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage2-deploy.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-stage2-recommendations
+  cancel-in-progress: false
+jobs:
+  safe-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify script syntax
+        run: python3 -m py_compile storefront/stage2_apply_recommendations.py storefront/stage1_readonly_audit.py
+      - name: Backup original and update storefront recommendations
+        run: python3 storefront/stage2_apply_recommendations.py
