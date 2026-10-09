@@ -51,11 +51,13 @@ foreach(array(2,4,6) as $id){
  $entry=$m->getById($id);
  if(!$entry || $entry['domain']!=='profikompany.ru' || $entry['app_id']!=='shop')
    throw new Exception('Agreement identity changed '.$id);
- if(strpos($entry['document_text'],'/privacy-policy/')===false)
-   throw new Exception('Current agreement content differs from expected modified text '.$id);
+ if($entry['document_text']!==$original[$id]['document_text']
+    && strpos($entry['document_text'],'/privacy-policy/')===false)
+   throw new Exception('Current agreement content differs from expected modified or restored text '.$id);
 }
 foreach(array(2,4,6) as $id){
- $m->updateById($id,array('document_text'=>$original[$id]['document_text']));
+ if($m->getById($id)['document_text']!==$original[$id]['document_text'])
+   $m->updateById($id,array('document_text'=>$original[$id]['document_text']));
  $r=$m->getById($id);
  if($r['document_text']!==$original[$id]['document_text'])throw new Exception('Agreement restore readback failed '.$id);
  $restored[]=$id;
@@ -66,12 +68,7 @@ echo 'STOREFRONT_HISTORY_RESTORE='.json_encode(array('ok'=>true,'ids'=>$restored
 PHP
 chmod 644 "$p"
 su -s /bin/bash web -c "php -d display_errors=1 -d log_errors=0 '$p'"
-printf 'STOREFRONT_SOURCE_PATHS='
-grep -RIl --include='*.php' -E "getDocumentId\\(|service_agreement|shipping_agreement" /home/web/vm-23f9aff9.na4u.ru/www/wa-system /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib 2>/dev/null | head -40 | tr '\n' ',' || true
-echo
-printf 'STOREFRONT_BAD_LINK_FILES='
-grep -RIl --exclude-dir=wa-cache -E -- '---https://profikompany.ru/dostavka/---' /home/web/vm-23f9aff9.na4u.ru/www/wa-config /home/web/vm-23f9aff9.na4u.ru/www/wa-data /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop 2>/dev/null | head -20 | tr '\n' ',' || true
-echo
+
 '''
 def run():
   key=os.environ.get("NETANGELS_API_KEY","").strip()
