@@ -24,15 +24,16 @@ addition='''    {* Scoped search indexing rules; preserve product and category U
       {if $_seo_url == '/order/'}
         <meta name="robots" content="noindex,follow" />
       {/if}
+      {* The Shop-Script core already emits canonical for parameterized requests. *}
       {if empty($canonical)}
-        {if $_seo_url == '/'}
-          <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
-        {/if}
-        {if $wa->param('action') == 'product'}
-          <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
-        {/if}
-        {if $wa->param('action') == 'category'}
-          {if $wa->currentUrl(false) == $_seo_url}
+        {if $wa->currentUrl(false) == $_seo_url}
+          {if $_seo_url == '/'}
+            <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
+          {/if}
+          {if $wa->param('action') == 'product'}
+            <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
+          {/if}
+          {if $wa->param('action') == 'category'}
             <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
           {/if}
         {/if}
