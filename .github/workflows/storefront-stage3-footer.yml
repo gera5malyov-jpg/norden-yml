@@ -1,0 +1,24 @@
+name: Storefront Stage 3 - Footer links
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage3-footer.yml'
+permissions:
+  contents: read
+jobs:
+  fix-footer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate script
+        run: python3 -m py_compile storefront/stage3_apply_footer.py
+      - name: Backup footer and fix confirmed broken links
+        run: python3 storefront/stage3_apply_footer.py
