@@ -57,6 +57,19 @@ foreach($ids as $id){
   $out['samples'][]=$entry;
 }
 try{
+  $out['catalog_coverage']=$m->query("SELECT COUNT(*) AS public_products,
+    SUM(CASE WHEN category_id IS NULL OR category_id=0 THEN 1 ELSE 0 END) AS no_primary_category
+    FROM shop_product WHERE status=1")->fetch();
+  $out['sample_category_membership']=$m->query("SELECT product_id,category_id
+    FROM shop_category_products WHERE product_id IN (1489211,392940,763100,1186404,148303)
+    ORDER BY product_id,category_id LIMIT 100")->fetchAll();
+  $out['type_upselling']=$m->query("SELECT id,name,upselling FROM shop_type
+    WHERE id IN (21,23,124,57) ORDER BY id")->fetchAll();
+  $out['no_primary_categories_by_type']=$m->query("SELECT type_id,COUNT(*) AS products
+    FROM shop_product WHERE status=1 AND (category_id IS NULL OR category_id=0)
+    GROUP BY type_id ORDER BY products DESC LIMIT 15")->fetchAll();
+}catch(Throwable $e){$out['catalog_coverage_error']=get_class($e).': '.$e->getMessage();}
+try{
  $out['theme_table_names']=array();
  foreach($m->query("SHOW TABLES")->fetchAll() as $r){
    foreach($r as $name){if(stripos((string)$name,'theme')!==false)$out['theme_table_names'][]=$name;}
