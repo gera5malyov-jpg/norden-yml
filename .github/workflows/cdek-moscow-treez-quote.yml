@@ -55,9 +55,9 @@ jobs:
           if not exact: raise RuntimeError("Moscow city code not found")
           code=int(exact[0]["code"])
           scenarios=[
-             {"name":"one_box_140x20x15_2kg","packages":[{"weight":2000,"length":140,"width":20,"height":15}]},
-             {"name":"two_boxes_117x18x8_138x18x7_2kg","packages":[{"weight":1000,"length":117,"width":18,"height":8},{"weight":1000,"length":138,"width":18,"height":7}]},
-             {"name":"one_box_140x25x25_3kg","packages":[{"weight":3000,"length":140,"width":25,"height":25}]},
+             {"name":"two_cartons_exact_117x18x8_138x18x7_1kg_each","packages":[{"weight":1000,"length":117,"width":18,"height":8},{"weight":1000,"length":138,"width":18,"height":7}]},
+             {"name":"one_combined_carton_138x18x8_2kg_unconfirmed","packages":[{"weight":2000,"length":138,"width":18,"height":8}]},
+             {"name":"one_combined_carton_138x18x8_1kg_unconfirmed","packages":[{"weight":1000,"length":138,"width":18,"height":8}]},
           ]
           results=[]
           for x in scenarios:
@@ -78,7 +78,6 @@ jobs:
                   })
               results.append({"scenario":x["name"],"http":http,"packages":x["packages"],
                   "door_to_warehouse":[t for t in entries if t["delivery_mode"]==2],
-                  "all_tariffs":entries,
                   "errors":d.get("errors") if isinstance(d,dict) else None})
           print(json.dumps({"date":datetime.datetime.now(datetime.timezone.utc).isoformat(),
              "moscow_code":code,"from":"Москва","to":"Москва","shipper":"courier from supplier warehouse",
