@@ -1,0 +1,26 @@
+name: Storefront conversion audit (read-only)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'storefront/stage1_readonly_audit.py'
+      - '.github/workflows/storefront-conversion-audit.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-conversion-audit
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Audit theme and storefront settings without writes
+        run: python3 storefront/stage1_readonly_audit.py
