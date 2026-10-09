@@ -74,7 +74,7 @@ try:
         os.replace(str(tmp),str(f));written.append(f)
     url='https://profikompany.ru/?storefront_stage1_verify='+str(int(time.time()))
     proc=subprocess.run(['curl','-k','-sS','-L','--max-time','35','-w','\n%{http_code}',url],
-                        text=True,capture_output=True,timeout=40)
+                        universal_newlines=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=40)
     page,status=proc.stdout.rsplit('\n',1) if '\n' in proc.stdout else ('','')
     smoke={'status':status,'has_legal_address':'Юридический адрес:' in page,
            'has_empty_message':'Список товаров пустой или его не существует' in page,
@@ -108,7 +108,7 @@ def run():
         try:
             args=['ssh','-i',ssh_key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no',
                   '-o','UserKnownHostsFile=/dev/null','-o','ConnectTimeout=15','root@'+VM_IP,'bash -s']
-            result=subprocess.run(args,input=REMOTE,text=True,capture_output=True,timeout=160)
+            result=subprocess.run(args,input=REMOTE,universal_newlines=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=160)
             for line in result.stdout.splitlines():
                 if line.startswith('STOREFRONT_'): print(line,flush=True)
             if result.returncode: raise RuntimeError('Server script exit '+str(result.returncode)+' '+result.stderr[-450:])
