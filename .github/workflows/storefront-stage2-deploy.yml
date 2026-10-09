@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage2-deploy.yml'
+      - 'storefront/stage2_apply_recommendations.py'
 permissions:
   contents: read
 concurrency:
