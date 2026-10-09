@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-restore-historical-consents.yml'
+      - 'storefront/stage5_restore_history.py'
 permissions:
   contents: read
 jobs:
