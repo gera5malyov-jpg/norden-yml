@@ -3,7 +3,7 @@
 import os, subprocess, tempfile, json, urllib.parse
 from stage1_readonly_audit import VM_ID, VM_IP, request_json
 
-REMOTE = r"""set -eu
+REMOTE = r'''set -eu
 python3 - <<'PY'
 import json,os,pathlib,shutil,subprocess,tempfile,time
 from datetime import datetime,timezone
@@ -88,7 +88,7 @@ except Exception as e:
     print('STOREFRONT_ROLLBACK='+json.dumps({'reason':str(e),'files_restored':[str(f.relative_to(root)) for f in written]},ensure_ascii=False))
     raise
 PY
-"""
+'''
 
 def run():
     key=os.environ.get('NETANGELS_API_KEY','').strip()
