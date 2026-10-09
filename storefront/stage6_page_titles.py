@@ -7,13 +7,12 @@ from stage1_readonly_audit import VM_ID,VM_IP,request_json
 REMOTE=r'''set -eu
 root=/home/web/vm-23f9aff9.na4u.ru
 backup=$(mktemp -d "$root/storefront-backups/stage6-page-titles-XXXXXXXX")
-chown root:web "$backup"
-chmod 750 "$backup"
-touch "$backup/old-pages.json"
-chown web:web "$backup/old-pages.json"
-chmod 600 "$backup/old-pages.json"
+chmod 700 "$backup"
+tmp_backup=$(mktemp /tmp/storefront-page-title-backup-XXXXXXXX.json)
+chown web:web "$tmp_backup"
+chmod 600 "$tmp_backup"
 p=$(mktemp /tmp/storefront-meta-XXXXXX.php)
-trap 'rm -f "$p"; chmod 700 "$backup"; chown root:root "$backup"; chown root:root "$backup/old-pages.json"' EXIT
+trap 'rm -f "$p" "$tmp_backup"' EXIT
 cat > "$p" <<'PHP'
 <?php
 $root='/home/web/vm-23f9aff9.na4u.ru/www';
@@ -71,9 +70,13 @@ try {
 PHP
 chmod 644 "$p"
 set +e
-su -s /bin/bash web -c "STOREFRONT_META_BACKUP='$backup/old-pages.json' php -d display_errors=1 -d log_errors=0 '$p'"
+su -s /bin/bash web -c "STOREFRONT_META_BACKUP='$tmp_backup' php -d display_errors=1 -d log_errors=0 '$p'"
 status=$?
 set -e
+if test -s "$tmp_backup"; then
+  cp "$tmp_backup" "$backup/old-pages.json"
+  chmod 600 "$backup/old-pages.json"
+fi
 printf 'STOREFRONT_META_BACKUP=%s\n' "$backup"
 exit "$status"
 '''
