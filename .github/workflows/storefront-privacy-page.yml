@@ -1,0 +1,26 @@
+name: Storefront privacy page publisher
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-privacy-page.yml'
+permissions:
+  contents: read
+jobs:
+  create-privacy-page:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Preflight syntax and policy contents
+        run: |
+          python3 -m py_compile storefront/stage4_create_privacy_page.py
+          test -s storefront/privacy_policy_profikompany.html
+      - name: Create privacy page and verify, delete on failure
+        run: python3 storefront/stage4_create_privacy_page.py
