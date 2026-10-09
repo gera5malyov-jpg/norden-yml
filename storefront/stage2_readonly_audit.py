@@ -37,6 +37,26 @@ for rel_dir in ('wa-apps/shop/lib','wa-system/webasyst/lib','wa-apps/shop/templa
     try:p.kill()
     except Exception:pass
     print('STOREFRONT_CONSENT_SOURCE='+json.dumps({'directory':rel_dir,'error':type(e).__name__},ensure_ascii=False))
+for rel in (
+  'wa-apps/shop/lib/classes/checkout2/shopCheckoutConfig.class.php',
+  'wa-apps/shop/lib/classes/checkout2/shopCheckoutAuthStep.class.php',
+  'wa-apps/shop/lib/classes/checkout2/shopCheckoutRegionStep.class.php',
+  'wa-system/webasyst/lib/classes/webasystHelper.class.php',
+  'wa-config/apps/shop/checkout2.php',
+  'wa-config/apps/shop/checkout.php',
+  'wa-config/auth.php'):
+  p=root/rel
+  if not p.is_file():continue
+  ls=p.read_text(encoding='utf-8',errors='replace').splitlines()
+  hits=[]
+  for i,line in enumerate(ls):
+    if any(x in line.lower() for x in ('service_agreement','shipping_agreement','getdocumentid','agreement_document','---https://profikompany.ru/dostavka/---')):
+      if rel.startswith('wa-config'):
+        hits.append({'n':i+1,'contains_bad_url':'---https://profikompany.ru/dostavka/---' in line,
+          'length':len(line),'key_only':line.split('=>')[0][:90]})
+      else:
+        hits.append({'n':i+1,'lines':[{'n':j+1,'v':ls[j][:270]} for j in range(max(0,i-3),min(len(ls),i+6))]})
+  if hits: print('STOREFRONT_CONSENT_LINES='+json.dumps({'file':rel,'matches':hits[:15]},ensure_ascii=False))
 for rel in ('wa-system/webasyst/lib/models/waAgreementDocument.model.php',):
   path=root/rel
   if path.is_file():
