@@ -24,7 +24,8 @@ chdir($root);
 require_once $root.'/wa-config/SystemConfig.class.php';
 waSystem::getInstance(null,new SystemConfig());
 wa('shop');
-$m=new waModel('wa_agreement_document');
+class storefrontAgreementDocumentModel extends waModel { protected $table='wa_agreement_document'; }
+$m=new storefrontAgreementDocumentModel();
 $ids=array(2,4,6);
 $old=array();
 foreach($ids as $id){
