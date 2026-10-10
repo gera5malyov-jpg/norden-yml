@@ -58,6 +58,33 @@ jobs:
                  'radio_options':options,'browser_errors_count':len(errors),
                  'browser_error_categories':list(dict.fromkeys(errors))[:8]
               },ensure_ascii=False))
+              region=page.locator('select[name="region[region]"]')
+              options_by_region=region.locator('option').evaluate_all("(xs)=>xs.map(e=>({text:(e.textContent||'').trim(),value:e.value}))")
+              saint=next((x for x in options_by_region if 'Санкт-Петербург' in x['text'] and x['value']),None)
+              if not saint:
+                print('STAGE26_CITY_TEST='+json.dumps({'mode':mode,'result':'skipped','reason':'Saint Petersburg region not in select','region_option_count':len(options_by_region)},ensure_ascii=False))
+              else:
+                try:
+                  region.select_option(value=saint['value'])
+                  page.locator('input[name="region[city]"]').fill('Санкт-Петербург')
+                  page.locator('input[name="region[city]"]').press('Tab')
+                  page.wait_for_timeout(1700)
+                  choose=page.get_by_role('button',name='Выбрать доставку')
+                  clicked=False
+                  if choose.count() and choose.first.is_visible():
+                    choose.first.click(timeout=12000)
+                    clicked=True
+                  page.wait_for_timeout(3500)
+                  newlines=page.locator('body').inner_text().splitlines()
+                  relevant=[v.strip()[:120] for v in newlines if any(k in v.strip().lower() for k in ['доставк','курьер','пункт выдачи','самовывоз','оплат','₽','ошиб','срок'])]
+                  radios=page.locator('input[type="radio"]').evaluate_all("(xs)=>xs.map(e=>({name:e.name,disabled:e.disabled,checked:e.checked})).slice(0,30)")
+                  print('STAGE26_CITY_TEST='+json.dumps({'mode':mode,'result':'checked','region':saint['text'],
+                    'city_field_nonempty':bool(page.locator('input[name="region[city]"]').input_value()),
+                    'shipping_button_clicked':clicked,'radio_count':len(radios),'radios':radios,
+                    'visible_shipping_text':relevant[:55],'browser_error_count':len(errors)},ensure_ascii=False))
+                except Exception as error:
+                  print('STAGE26_CITY_TEST='+json.dumps({'mode':mode,'result':'not_confirmed',
+                     'error_type':type(error).__name__,'reason':str(error)[:200]},ensure_ascii=False))
               ctx.close()
             browser.close()
           PY
