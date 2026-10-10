@@ -91,6 +91,19 @@ jobs:
                     'city_field_nonempty':bool(page.locator('input[name="region[city]"]').input_value()),
                     'shipping_button_clicked':clicked,'radio_count':len(radios),'radios':radios,
                     'visible_shipping_text':relevant[:55],'browser_error_count':len(errors)},ensure_ascii=False))
+                  shipping_choice=page.get_by_text('Доставка от 890 руб',exact=False)
+                  if shipping_choice.count():
+                    try:
+                      shipping_choice.first.click(timeout=6500)
+                      page.wait_for_timeout(2400)
+                      body2=page.locator('body').inner_text().splitlines()
+                      choices=[line.strip()[:110] for line in body2 if any(word in line.strip().lower() for word in ['оплата','онлайн','наличн','картой','сбп','рассроч','банков','счет','счёт','доставк','курьер'])]
+                      print('STAGE26_SHIPPING_PAYMENT_FLOW='+json.dumps({'mode':mode,'shipping_selected':True,'payment_shipping_labels':choices[:50],
+                        'javascript_errors':len(errors)},ensure_ascii=False))
+                    except Exception as delivery_error:
+                      print('STAGE26_SHIPPING_PAYMENT_FLOW='+json.dumps({'mode':mode,'shipping_selected':False,'reason':str(delivery_error)[:260]},ensure_ascii=False))
+                  else:
+                    print('STAGE26_SHIPPING_PAYMENT_FLOW='+json.dumps({'mode':mode,'shipping_selected':False,'reason':'delivery option not in UI'},ensure_ascii=False))
                 except Exception as error:
                   print('STAGE26_CITY_TEST='+json.dumps({'mode':mode,'result':'not_confirmed',
                      'error_type':type(error).__name__,'reason':str(error)[:200]},ensure_ascii=False))
