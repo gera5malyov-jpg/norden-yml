@@ -110,6 +110,17 @@ for rel,first,last in [
    if any(k in t.lower() for k in ('<img','<picture','itemprop','product.sku','product.features','features.','<article','data-src','manufacturer','brand','sku__','<h1','<meta','loading=','itemtype','product.summary','product.description')):
     matches.append({'n':i+1,'v':t[:420]})
   print('STOREFRONT_STAGE10_TEMPLATE='+json.dumps({'file':rel,'lines':matches[:90]},ensure_ascii=False))
+for base in ('wa-data/public/shop/themes/pureMegapolis42',):
+ folder=root/base
+ for file in folder.rglob('*.html'):
+  if file.stat().st_size>200000:continue
+  lines=file.read_text(encoding='utf-8',errors='replace').splitlines()
+  matches=[]
+  for i,t in enumerate(lines):
+   if any(k in t for k in ('product-sku__sku','product-sku__title','productImgHtml','ext_images[0]','product.photos__','product-gallery__thumb','$_brand','product.features.brand')):
+    matches.append({'n':i+1,'v':t[:480],
+      'prev':lines[i-1][:280] if i else ''})
+  if matches: print('STOREFRONT_STAGE10_SOURCE='+json.dumps({'file':str(file.relative_to(root)),'hits':matches[:20]},ensure_ascii=False))
 for base in ('wa-data/public/site/themes/pureMegapolis42','wa-data/public/shop/themes/pureMegapolis42'):
  d=root/base
  if not d.is_dir(): continue
