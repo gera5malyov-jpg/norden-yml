@@ -33,7 +33,7 @@ def public_location(url):
 
 
 def install_metrics(page):
-    page.add_init_script("""() => {
+    page.add_init_script("""(() => {
       window.__auditMetrics = {cls:0, lcp:0, lcpElement:null, errors:[], longTasks:[]};
       try {
         new PerformanceObserver(list => {
@@ -58,7 +58,7 @@ def install_metrics(page):
         }).observe({type:'longtask', buffered:true});
       } catch(e) {}
       window.addEventListener('error',e => window.__auditMetrics.errors.push('js'),true);
-    }""")
+    })()""")
 
 
 def audit_checkout(browser):
@@ -158,10 +158,6 @@ def audit_speed(browser):
         mobile=(mode=="mobile")
         for label,route in routes:
             ctx=browser.new_context(
-                viewport={"width":390 if mobile else 1365,"height":844 if mobile else 900},
-                device_scale_factor=2 if mobile else 1,is_mobile=mobile,has_touch=mobile,
-                locale="ru-RU",cache_enabled=False
-            ) if False else browser.new_context(
                 viewport={"width":390 if mobile else 1365,"height":844 if mobile else 900},
                 device_scale_factor=2 if mobile else 1,is_mobile=mobile,has_touch=mobile,
                 locale="ru-RU"
