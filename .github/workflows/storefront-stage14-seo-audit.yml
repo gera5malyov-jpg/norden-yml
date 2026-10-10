@@ -1,0 +1,24 @@
+name: Storefront Stage 14 - Read-only SEO 4xx audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage14-seo-audit.yml'
+permissions:
+  contents: read
+jobs:
+  seo-crawl-errors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate read-only SEO audit
+        run: python3 -m py_compile storefront/stage14_seo_4xx_audit.py
+      - name: Diagnose YandexBot 4xx and robots source without changes
+        run: python3 storefront/stage14_seo_4xx_audit.py
