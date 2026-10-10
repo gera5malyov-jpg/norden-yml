@@ -26,6 +26,11 @@ for basedir in (site,shop):
     hits.append({'line':num+1,'text':line[:1100]})
   print('STAGE30_SOURCE='+json.dumps({'file':str(file.relative_to(root)),'needles':matching,
           'size':len(raw),'matching_lines':hits[:14]},ensure_ascii=False))
+for file in [site/'index.html',site/'layouts/layout.categories.html',site/'layouts/layout.slider.html']:
+ if file.is_file():
+  for ix,line in enumerate(file.read_text(encoding='utf-8',errors='replace').splitlines()):
+   if (file.name=='index.html' and 55<=ix+1<=152) or (file.name!='index.html' and ix<112):
+    print('STAGE30_SNIPPET='+json.dumps({'file':str(file.relative_to(root)),'line':ix+1,'text':line[:350]},ensure_ascii=False))
 for path in [
  site/'css/fonts/montserrat.min.css',
  site/'img/slider/slider_01.png',
