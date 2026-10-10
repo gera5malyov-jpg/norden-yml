@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage12-metrica.yml'
+      - 'storefront/stage12_metrika_funnel.py'
 permissions:
   contents: read
 concurrency:
