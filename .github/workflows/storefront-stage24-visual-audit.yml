@@ -72,6 +72,49 @@ jobs:
             browser.close()
           print('STAGE24_BROWSER_RESULT='+json.dumps(results,ensure_ascii=False))
           PY
+      - name: Inspect actual checkout terms with a disposable anonymous cart
+        run: |
+          python - <<'PY'
+          import json
+          from playwright.sync_api import sync_playwright
+          site='https://profikompany.ru'
+          with sync_playwright() as p:
+            browser=p.chromium.launch(channel='chrome',headless=True,args=['--no-sandbox'])
+            context=browser.new_context(locale='ru-RU')
+            page=context.new_page()
+            response=page.goto(site+'/',wait_until='domcontentloaded',timeout=60000)
+            assert response and response.status==200
+            form=page.locator('form.add-to-cart').first
+            pid=form.locator('input[name="product_id"]').get_attribute('value')
+            assert pid and pid.isdigit()
+            print('STAGE24_TEST_CART_PRODUCT_ID='+pid)
+            form.locator('input[type="submit"]').click(timeout=20000)
+            page.wait_for_timeout(1200)
+            checkout=page.goto(site+'/order/',wait_until='domcontentloaded',timeout=60000)
+            assert checkout and checkout.status==200
+            before=page.locator('body').inner_text()
+            related=page.get_by_text('Условия предоставления услуг',exact=False)
+            links=page.locator('a').evaluate_all('(els)=>els.filter(e=>(e.textContent||"").toLowerCase().includes("услов")).map(e=>({text:e.textContent.trim().slice(0,120),href:e.getAttribute("href")}))')
+            clicked=False
+            if related.count():
+              try:
+                related.first.click(timeout=7000)
+                clicked=True
+              except Exception as exc:
+                print('STAGE24_TERMS_CLICK_NOTE='+str(exc)[:250])
+            text=page.locator('body').inner_text()
+            result={'http':checkout.status,'cart_product_id':pid,'terms_trigger_count':related.count(),
+                    'terms_trigger_clicked':clicked,'links':links[:8],
+                    'new_terms_text_in_dom':'Условия продажи товаров' in page.content(),
+                    'new_terms_text_visible':'Условия продажи товаров' in text,
+                    'old_demo_title_visible':'УСЛОВИЯ ИНТЕРНЕТ-МАГАЗИНА' in text,
+                    'checkout_body_excerpt':text[:500]}
+            print('STAGE24_CHECKOUT_RESULT='+json.dumps(result,ensure_ascii=False))
+            assert result['new_terms_text_in_dom'], 'Updated checkout terms not present in populated checkout DOM'
+            assert not result['old_demo_title_visible'], 'Outdated checkout terms shown'
+            context.close()
+            browser.close()
+          PY
       - name: Save visual verification screenshots
         if: always()
         uses: actions/upload-artifact@v4
