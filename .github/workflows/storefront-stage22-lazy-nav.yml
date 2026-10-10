@@ -1,0 +1,26 @@
+name: Storefront Stage 22 - Lazy navigation category icons
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage22-lazy-nav.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-site-theme-nav
+  cancel-in-progress: false
+jobs:
+  lazy-category-icons:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m py_compile storefront/stage22_lazy_nav_icons.py
+      - name: Backup menu templates and test lazy category images
+        run: python3 storefront/stage22_lazy_nav_icons.py
