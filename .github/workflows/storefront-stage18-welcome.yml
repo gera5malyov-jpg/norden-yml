@@ -1,10 +1,6 @@
 name: Storefront Stage 18 - Homepage about copy
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/storefront-stage18-welcome.yml'
 permissions:
   contents: read
 concurrency:
