@@ -31,9 +31,10 @@ if ready:
  checks=[]
  for path in ('/','/proizvoditeli/','/garantiya/','/vozmozhnosti/','/order/'):
   u='https://profikompany.ru'+path+'?footer_readonly_check='+str(int(time.time()))
-  p=subprocess.run(['curl','-k','-sSL','--max-time','30','-w','\\n%{http_code}',u],
-                   capture_output=True,text=True,timeout=36)
-  html,status=p.stdout.rsplit('\\n',1) if '\\n' in p.stdout else ('','')
+  p=subprocess.Popen(['curl','-k','-sSL','--max-time','30','-w','\\n%{http_code}',u],
+                     stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
+  output,error=p.communicate(timeout=36)
+  html,status=output.rsplit('\\n',1) if '\\n' in output else ('','')
   has_links=all(link in html for link in ready_links)
   good=p.returncode==0 and status=='200' and has_links
   checks.append({'path':path,'http':status,'footer_links':has_links,'ok':good})
