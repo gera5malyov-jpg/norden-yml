@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage17-audit.yml'
+      - 'storefront/stage17_home_checkout_audit.py'
 permissions:
   contents: read
 jobs:
