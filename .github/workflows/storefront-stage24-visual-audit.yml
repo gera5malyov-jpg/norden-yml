@@ -1,0 +1,81 @@
+name: Storefront Stage 24 - Desktop and mobile browser verification
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage24-visual-audit.yml'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser driver
+        run: python -m pip install playwright==1.55.0
+      - name: Check live footer and pages in desktop and mobile browser
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          base='https://profikompany.ru'
+          targets={'Производители':'/proizvoditeli/','Возможности':'/vozmozhnosti/','Гарантия':'/garantiya/',
+                   'О компании':'/o-kompanii/','Условия оплаты':'/oplata/',
+                   'Условия доставки':'/dostavka/','Политика обработки персональных данных':'/privacy-policy/'}
+          removed=['Статьи','Вопрос-ответ','Помощь','Магазины','Сотрудники','Вакансии','Новости']
+          Path('screenshots').mkdir(exist_ok=True)
+          results=[]
+          with sync_playwright() as p:
+            browser=p.chromium.launch(channel='chrome',headless=True,args=['--no-sandbox'])
+            for mode,width,height in [('desktop',1365,900),('mobile',390,844)]:
+              context=browser.new_context(viewport={'width':width,'height':height},device_scale_factor=2 if mode=='mobile' else 1,is_mobile=mode=='mobile',has_touch=mode=='mobile',locale='ru-RU')
+              page=context.new_page()
+              response=page.goto(base+'/',wait_until='domcontentloaded',timeout=65000)
+              page.locator('.footer').wait_for(timeout=30000)
+              assert response and response.status==200,(mode,'home',response.status if response else None)
+              links=page.locator('.footer a.footer__link').evaluate_all('(els) => els.map(e => ({text:e.textContent.trim(),href:e.getAttribute("href")}))')
+              titles=[x.strip() for x in page.locator('.footer__title').all_text_contents()]
+              for label,href in targets.items():
+                assert any(x['href']==href and label.lower() in x['text'].lower() for x in links),(mode,'link',label,href)
+              assert len(titles)==3 and all(x for x in titles),(mode,'footer-columns',titles)
+              assert not any(x['text'] in removed for x in links),(mode,'removed-menu',links)
+              footer=page.locator('.footer')
+              footer.scroll_into_view_if_needed()
+              page.screenshot(path='screenshots/'+mode+'-footer.png')
+              widths=footer.evaluate('(e)=>({viewport:window.innerWidth,client:e.clientWidth,scroll:e.scrollWidth})')
+              assert widths['scroll']<=widths['client']+3,(mode,'footer-horizontal-overflow',widths)
+              for label,route in list(targets.items())[:3]:
+                if label=='Производители':
+                  page.locator('.footer a.footer__link[href="/proizvoditeli/"]').click(timeout=20000)
+                  page.wait_for_load_state('domcontentloaded')
+                  assert '/proizvoditeli/' in page.url,(mode,'footer-click',page.url)
+                else:
+                  response=page.goto(base+route,wait_until='domcontentloaded',timeout=60000)
+                  assert response and response.status==200,(mode,label,'status')
+                assert page.title().strip(),(mode,label,'empty-title')
+                if label=='Производители':
+                  amount=page.locator('a[href^="/search/?query="]').count()
+                  assert amount>=100,(mode,'manufacturer-links',amount)
+                page.goto(base+'/',wait_until='domcontentloaded',timeout=60000)
+              response=page.goto(base+'/order/',wait_until='domcontentloaded',timeout=60000)
+              assert response and response.status==200,(mode,'order',response.status if response else None)
+              body=page.locator('body').inner_text().lower()
+              results.append({'mode':mode,'footer_columns':titles,'links':len(links),'footer_widths':widths,
+                              'manufacturer_links':amount,'order_http':response.status,
+                              'checkout_terms_visible_with_empty_cart':'условия предоставления услуг' in body})
+              context.close()
+            browser.close()
+          print('STAGE24_BROWSER_RESULT='+json.dumps(results,ensure_ascii=False))
+          PY
+      - name: Save visual verification screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: storefront-stage24-footer-desktop-mobile
+          path: screenshots/
+          if-no-files-found: ignore
