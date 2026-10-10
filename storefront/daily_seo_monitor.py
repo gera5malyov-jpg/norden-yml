@@ -17,7 +17,17 @@ TODAY = datetime.datetime.now(datetime.timezone.utc).date()
 
 
 def read_response(url, limit=5_000_000):
-    request = urllib.request.Request(url, headers=HEADERS)
+    parsed = urllib.parse.urlsplit(url)
+    # Sitemap XML may contain internationalized URLs; send RFC3986-compatible
+    # percent-encoded UTF-8 paths without changing source URLs.
+    encoded_url = urllib.parse.urlunsplit((
+        parsed.scheme,
+        parsed.netloc,
+        urllib.parse.quote(parsed.path, safe="/%:@-._~"),
+        urllib.parse.quote(parsed.query, safe="=&%:@-._~"),
+        parsed.fragment,
+    ))
+    request = urllib.request.Request(encoded_url, headers=HEADERS)
     try:
         with urllib.request.urlopen(request, timeout=22) as response:
             code = response.status
