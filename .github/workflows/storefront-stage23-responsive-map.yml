@@ -1,11 +1,6 @@
 name: Storefront Stage 23 - Responsive contact map
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/storefront-stage23-responsive-map.yml'
-      - 'storefront/stage23_responsive_map.py'
 permissions:
   contents: read
 concurrency:
