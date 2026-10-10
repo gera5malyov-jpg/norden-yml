@@ -59,7 +59,7 @@ $inject=<<<'TPL'
       {/if}
 
 TPL;
-if(substr_count($old,$anchor)!==1 || strpos($old,"{$_info_title = 'Производители")!==false)throw new Exception('SEO source changed');
+if(substr_count($old,$anchor)!==1 || strpos($old,"Производители мебели и предметов интерьера | Мегаполис")!==false)throw new Exception('SEO source changed');
 $new=str_replace($anchor,$inject.$anchor,$old);
 $cAnchor=<<<'TPL'
           {if $_seo_url == '/privacy-policy/'}
