@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage20-navigation-audit.yml'
+      - 'storefront/stage20_navigation_audit.py'
 permissions:
   contents: read
 jobs:
