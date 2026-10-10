@@ -1,0 +1,26 @@
+name: Storefront Stage 13 - Mobile purchase CTA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage13-mobile-buy.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-product-template
+  cancel-in-progress: false
+jobs:
+  mobile-cta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m py_compile storefront/stage13_mobile_buy.py
+      - name: Backup and test guarded mobile buying CTA
+        run: python3 storefront/stage13_mobile_buy.py
