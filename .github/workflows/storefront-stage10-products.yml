@@ -1,0 +1,27 @@
+name: Storefront Stage 10 - Product schema and thumbnails
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage10-products.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-product-template
+  cancel-in-progress: false
+jobs:
+  product-template:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate stage 10 script
+        run: python3 -m py_compile storefront/stage10_product_schema_images.py
+      - name: Back up product templates and verify live SEO and image enhancements
+        run: python3 storefront/stage10_product_schema_images.py
