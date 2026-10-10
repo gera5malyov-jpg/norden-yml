@@ -28,6 +28,11 @@ for base in paths:
     excerpts.append({'n':i+1,'text':line[:700],'nearby':[lines[j][:340] for j in range(max(0,i-2),min(len(lines),i+3))]})
   print('HOMECHECK_TEMPLATE='+json.dumps({'file':str(p.relative_to(root)),'keywords':hit,'excerpts':excerpts[:18]},ensure_ascii=False))
 # discover whether homepage text is stored in site_page or shop_page, without private fields
+for rel in ('wa-data/public/site/themes/pureMegapolis42/layouts/layout.welcome.html', 'wa-data/public/site/themes/pureMegapolis42/layouts/layout.footer.html'):
+ p=root/rel
+ if p.is_file():
+  lines=p.read_text(encoding='utf-8',errors='replace').splitlines()
+  print('HOMECHECK_CONTEXT='+json.dumps({'file':rel,'lines':[{'n':i+1,'v':lines[i][:510]} for i in range(min(len(lines),110))]},ensure_ascii=False))
 print('HOMECHECK_HOME_TEXT_FILES='+json.dumps({
 'configs_exist':[(str(p.relative_to(root)),p.is_file()) for p in [
 root/'wa-config/apps/site/routes.php',root/'wa-config/apps/site/checkout.php',
