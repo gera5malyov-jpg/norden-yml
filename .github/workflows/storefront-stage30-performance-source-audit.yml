@@ -1,0 +1,25 @@
+name: Storefront Stage 30 - Theme performance source audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage30-performance-source-audit.yml'
+      - 'storefront/stage30_theme_performance_sources.py'
+permissions:
+  contents: read
+jobs:
+  read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate inventory audit
+        run: python -m py_compile storefront/stage30_theme_performance_sources.py
+      - name: Read production theme and assets without modifying them
+        run: python storefront/stage30_theme_performance_sources.py
