@@ -99,7 +99,7 @@ jobs:
                       body2=page.locator('body').inner_text().splitlines()
                       choices=[line.strip()[:110] for line in body2 if any(word in line.strip().lower() for word in ['оплата','онлайн','наличн','картой','сбп','рассроч','банков','счет','счёт','доставк','курьер'])]
                       print('STAGE26_SHIPPING_PAYMENT_FLOW='+json.dumps({'mode':mode,'shipping_selected':True,'payment_shipping_labels':choices[:50],
-                        'javascript_errors':len(errors)},ensure_ascii=False))
+                        'browser_events_total':len(errors),'browser_event_types':list(dict.fromkeys(errors))},ensure_ascii=False))
                     except Exception as delivery_error:
                       print('STAGE26_SHIPPING_PAYMENT_FLOW='+json.dumps({'mode':mode,'shipping_selected':False,'reason':str(delivery_error)[:260]},ensure_ascii=False))
                   else:
