@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage15-robots-audit.yml'
+      - 'storefront/stage15_robots_readonly.py'
 permissions:
   contents: read
 jobs:
