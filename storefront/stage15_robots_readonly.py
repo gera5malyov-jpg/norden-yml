@@ -20,6 +20,8 @@ if base.exists():
    lines=p.read_text(encoding='utf-8',errors='replace').splitlines()
    found.append({'file':str(p.relative_to(root)),'lines':[{'n':i+1,'text':l[:350]} for i,l in enumerate(lines[:180])]})
 print('SEO_ROBOTS_PHP='+json.dumps(found[:8],ensure_ascii=False))
+q=root/'wa-data/public/site/data/profikompany.ru/robots.txt'
+print('SEO_ROBOTS_PRESENT='+json.dumps({'exists':q.is_file(),'lines':q.read_text().splitlines() if q.is_file() else []},ensure_ascii=False))
 PY
 p=$(mktemp /tmp/seo-robots-read-XXXXXX.php)
 trap 'rm -f "$p"' EXIT
