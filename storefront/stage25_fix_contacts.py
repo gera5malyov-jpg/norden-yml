@@ -29,7 +29,7 @@ for file in targets:
  if orig.count(old)!=1:raise RuntimeError('Unexpected callback source count in '+str(file))
  if '$_company__callback_link' not in orig or 'callback' not in orig:
   raise RuntimeError('Callback anchor unexpectedly missing: '+str(file))
- files[file]=(orig,orig.replace(old,old+'\\n'+addon,1))
+ files[file]=(orig,orig.replace(old,old+'\n'+addon,1))
 backups=root.parent/'storefront-backups'
 backups.mkdir(mode=0o700,parents=True,exist_ok=True)
 folder=backups/('stage25-callback-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+str(os.getpid()))
@@ -49,10 +49,10 @@ try:
  checks=[]
  for urlpath in ('/','/order/','/proizvoditeli/'):
   u='https://profikompany.ru'+urlpath+'?stage25_check='+str(int(time.time()))
-  p=subprocess.Popen(['curl','-k','-sS','-L','--max-time','30','-w','\\n%{http_code}',u],
+  p=subprocess.Popen(['curl','-k','-sS','-L','--max-time','30','-w','\n%{http_code}',u],
    stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
   output,error=p.communicate(timeout=38)
-  html,status=output.rsplit('\\n',1) if '\\n' in output else ('','')
+  html,status=output.rsplit('\n',1) if '\n' in output else ('','')
   ok=(p.returncode==0 and status=='200' and '/+7 (499) 677 63 32' not in html
     and html.count('>Заказать звонок</a>')>=3
     and 'tel:+7(499)6776332' in html and 'mailto:shop@office-mag.com' in html)
