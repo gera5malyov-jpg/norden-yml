@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Monitor a rotating sample of the public Webasyst Sitemap without changing site data."""
 import concurrent.futures
+from collections import Counter
 import datetime
 import json
 import os
@@ -78,8 +79,14 @@ def main():
                 xml = ET.fromstring(response["body"])
                 urls = [x.text for x in xml.findall("sm:url/sm:loc", NS) if x.text and site_url(x.text)]
                 doc["count"] = len(urls)
-                doc["duplicates_inside"] = len(urls) - len(set(urls))
+                counts = Counter(urls)
+                doc["duplicates_inside"] = len(urls) - len(counts)
+                doc["duplicate_examples"] = [
+                    {"url": url, "entries": qty}
+                    for url, qty in counts.items() if qty > 1
+                ][:15]
                 doc["duplicates_across"] = len(set(urls) & all_locs)
+                doc["cross_sitemap_duplicate_examples"] = list(set(urls) & all_locs)[:10]
                 all_locs.update(urls)
                 if urls:
                     # Vary positions daily so that different pages get sampled each day.
@@ -114,6 +121,8 @@ def main():
         "sitemaps": len(result["child_sitemaps"]),
         "total_sitemap_urls": sum(d.get("count", 0) for d in result["child_sitemaps"]),
         "internal_duplicate_entries": sum(d.get("duplicates_inside", 0) for d in result["child_sitemaps"]),
+        "cross_sitemap_duplicates": sum(d.get("duplicates_across", 0) for d in result["child_sitemaps"]),
+        "unique_urls_in_sitemaps": len(all_locs),
         "sample_checked": len(result["checks"]),
         "failures": len(result["failures"]),
     }, ensure_ascii=False))
