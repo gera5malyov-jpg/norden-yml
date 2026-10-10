@@ -1,0 +1,25 @@
+name: Storefront Stage 32 - Semantic category and SEO audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage32-semantics.yml'
+      - 'storefront/stage32_semantic_categories_audit.py'
+permissions:
+  contents: read
+jobs:
+  categories:
+    runs-on: ubuntu-latest
+    timeout-minutes: 11
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate read-only semantic audit
+        run: python -m py_compile storefront/stage32_semantic_categories_audit.py
+      - name: Inspect category labels and organic search metadata without writes
+        run: python storefront/stage32_semantic_categories_audit.py
