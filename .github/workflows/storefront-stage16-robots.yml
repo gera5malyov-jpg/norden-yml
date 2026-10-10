@@ -1,0 +1,27 @@
+name: Storefront Stage 16 - Repair domain robots.txt
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage16-robots.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-domain-robots
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate safe deployment
+        run: python3 -m py_compile storefront/stage16_fix_robots.py
+      - name: Repair only profikompany robots.txt with offsite backup and live validation
+        run: python3 storefront/stage16_fix_robots.py
