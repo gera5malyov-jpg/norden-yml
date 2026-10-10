@@ -1,0 +1,35 @@
+name: Daily SEO health check - profikompany.ru
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '15 6 * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/daily-storefront-seo.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-daily-seo
+  cancel-in-progress: false
+jobs:
+  seo-status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate SEO monitor
+        run: python3 -m py_compile storefront/daily_seo_monitor.py
+      - name: Check 12 sitemaps and rotating URL samples
+        run: python3 storefront/daily_seo_monitor.py
+      - name: Store detailed report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: storefront-seo-report
+          path: seo-reports/sitemap-daily.json
+          retention-days: 30
+          if-no-files-found: warn
