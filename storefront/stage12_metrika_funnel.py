@@ -6,6 +6,7 @@ category and stock records are untouched.
 """
 from __future__ import annotations
 import json, os, subprocess, tempfile, urllib.parse
+import base64
 from pathlib import Path
 from stage1_readonly_audit import VM_ID, VM_IP, request_json
 
