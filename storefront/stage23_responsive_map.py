@@ -17,7 +17,7 @@ file=root/'wa-data/public/site/themes/pureMegapolis42/layouts/layout.contact.htm
 orig=file.read_text(encoding='utf-8')
 if 'contact__map' not in orig or 'megapolis-responsive-contact-map' in orig:
  raise RuntimeError('Contact map source differs from audited theme')
-styling="""
+styling='''
 {* Prevent the Yandex map's fixed 500px iframe from widening the mobile homepage *}
 {if $wa->domainUrl() == 'https://profikompany.ru'}
 <style id="megapolis-responsive-contact-map">
@@ -26,7 +26,7 @@ styling="""
 }
 </style>
 {/if}
-"""
+'''
 edited=orig+'\n'+styling
 broot=root.parent/'storefront-backups';broot.mkdir(mode=0o700,parents=True,exist_ok=True)
 bdir=broot/('stage23-map-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+str(os.getpid()))
