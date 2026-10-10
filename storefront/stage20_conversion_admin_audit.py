@@ -46,7 +46,7 @@ $out['products']=array(
 $out['feature_candidates']=read_rows($m,"SELECT id,code,name,type,status FROM shop_feature WHERE code LIKE '%brand%' OR code LIKE '%manufactur%' OR code LIKE '%proizvod%' OR name LIKE '%Бренд%' OR name LIKE '%роизводител%' ORDER BY id LIMIT 20");
 $out['brand_like_tables']=array_values(array_filter($names,function($x){return preg_match('/brand|manufacturer/',$x);}));
 $out['checkout']=array(
-  'active_shipping_plugins'=>read_rows($m,"SELECT plugin,value FROM shop_plugin_settings WHERE name='enabled' LIMIT 40"),
+  'active_shipping_plugins'=>read_rows($m,"SELECT id,plugin,name,status FROM shop_plugin WHERE type='shipping' AND status=1 ORDER BY sort LIMIT 40"),
   'order_columns'=>$out['columns']['shop_order']
 );
 $out['manufacturer_counts']=read_rows($m,"SELECT f.feature_id, COUNT(DISTINCT f.product_id) AS total_products FROM shop_product_features f INNER JOIN shop_product p ON p.id=f.product_id WHERE f.feature_id IN (9,568,2329) AND p.status=1 GROUP BY f.feature_id");
