@@ -1,0 +1,29 @@
+name: Storefront Stage 19 - Replace outdated checkout terms
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage19-terms.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-checkout-terms
+  cancel-in-progress: false
+jobs:
+  legal-terms:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate replacement and deploy script
+        run: |
+          python3 -m py_compile storefront/stage19_checkout_terms.py
+          test -s storefront/terms_profikompany_2026-10-10.html
+      - name: Back up and safely replace checkout terms text
+        run: python3 storefront/stage19_checkout_terms.py
