@@ -1,0 +1,63 @@
+name: Storefront Stage 26 - Checkout shipping and payment browser diagnosis
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage26-checkout-diagnostics.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser library
+        run: python -m pip install playwright==1.55.0
+      - name: Inspect real anonymous cart, shipping and payment without ordering
+        run: |
+          python - <<'PY'
+          import json,re
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+            browser=p.chromium.launch(channel='chrome',headless=True,args=['--no-sandbox'])
+            for mode,width in [('desktop',1280),('mobile',390)]:
+              ctx=browser.new_context(viewport={'width':width,'height':850},locale='ru-RU',is_mobile=(mode=='mobile'),has_touch=(mode=='mobile'))
+              page=ctx.new_page()
+              errors=[]
+              page.on('pageerror',lambda e: errors.append(type(e).__name__))
+              page.on('requestfailed',lambda request: errors.append('request_failed'))
+              res=page.goto('https://profikompany.ru/',wait_until='domcontentloaded',timeout=60000)
+              assert res and res.status==200
+              card=page.locator('form.add-to-cart').first
+              assert card.count()==1
+              card.locator('input[type="submit"]').click(timeout=18000)
+              page.wait_for_timeout(1250)
+              order=page.goto('https://profikompany.ru/order/',wait_until='domcontentloaded',timeout=60000)
+              assert order and order.status==200
+              page.wait_for_timeout(2000)
+              lines=page.locator('body').inner_text().splitlines()
+              keys=['доставк','самовывоз','оплат','курьер','пункт выдачи','сдэк','транспортн','город','адрес','получен']
+              interesting=[l.strip()[:130] for l in lines if any(k in l.strip().lower() for k in keys)]
+              controls=page.locator('input,select,button').evaluate_all("""
+                (xs)=>xs.slice(0,160).map(e=>({tag:e.tagName.toLowerCase(),
+                  type:e.getAttribute('type')||'',name:e.getAttribute('name')||'',
+                  id:e.getAttribute('id')||'',
+                  placeholder:(e.getAttribute('placeholder')||'').slice(0,100),
+                  label:(e.tagName==='BUTTON'?(e.textContent||'').trim().slice(0,90):'')}))
+              """)
+              specials=[c for c in controls if any(k in str(c).lower() for k in ['shipping','delivery','payment','оплат','достав','город','city','location','region','country','checkout'])]
+              options=page.locator('input[type="radio"]').evaluate_all('(xs)=>xs.map(e=>({name:e.name,id:e.id,disabled:e.disabled,checked:e.checked})).slice(0,50)')
+              print('STAGE26_CHECKOUT='+json.dumps({
+                 'mode':mode,'http':order.status,
+                 'summary_line_count':len(lines),'shipping_payment_lines':interesting[:65],
+                 'checkout_controls':specials[:65],
+                 'radio_options':options,'browser_errors_count':len(errors),
+                 'browser_error_categories':list(dict.fromkeys(errors))[:8]
+              },ensure_ascii=False))
+              ctx.close()
+            browser.close()
+          PY
