@@ -1,10 +1,6 @@
 name: Storefront Stage 11 - Purchase information
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/storefront-stage11-purchase-help.yml'
 permissions:
   contents: read
 concurrency:
