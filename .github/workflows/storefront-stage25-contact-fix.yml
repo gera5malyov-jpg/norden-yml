@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage25-contact-fix.yml'
+      - 'storefront/stage25_fix_contacts.py'
 permissions:
   contents: read
 concurrency:
