@@ -1,0 +1,30 @@
+name: Storefront Stage 21 - Real footer pages
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage21-navigation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-navigation-pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate deployment script and page contents
+        run: |
+          python3 -m py_compile storefront/stage21_footer_pages.py
+          test -s storefront/pages/garantiya.html
+          test -s storefront/pages/vozmozhnosti.html
+      - name: Create verified pages and clean footer, back up original
+        run: python3 storefront/stage21_footer_pages.py
