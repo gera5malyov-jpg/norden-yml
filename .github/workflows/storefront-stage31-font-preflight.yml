@@ -1,0 +1,20 @@
+name: Storefront Stage 31 - Font optimization preflight
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage31-font-preflight.yml'
+permissions:
+  contents: read
+jobs:
+  static-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate optimization script without server access
+        run: python -m py_compile storefront/stage31_optimize_font.py
