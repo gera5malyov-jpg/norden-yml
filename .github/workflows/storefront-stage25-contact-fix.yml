@@ -1,0 +1,27 @@
+name: Storefront Stage 25 - Repair callback label
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage25-contact-fix.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-contact-label
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate deploy script
+        run: python -m py_compile storefront/stage25_fix_contacts.py
+      - name: Back up, correct callback display, smoke test and roll back on error
+        run: python storefront/stage25_fix_contacts.py
