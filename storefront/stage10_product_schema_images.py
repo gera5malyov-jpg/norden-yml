@@ -85,12 +85,21 @@ try:
     details={'path':path,'mode':mode,'http':status}
     if mode=='external':
       one=page.split('class="product-page"')[1].split('</article>')[0] if 'class="product-page"' in page else ''
-      details['primary_image_schema']='itemprop="image" src=' in one
+      has_external='js-extimg-main-img' in one
+      details['uses_external_gallery']=has_external
+      details['primary_image_schema']='itemprop="image"' in one
       details['sku_schema']='itemprop="sku"' in one
       details['product_url_schema']='itemprop="url"' in one
-      details['lazy_thumbnails']='loading="lazy" decoding="async"' in one
-      details['main_photo_not_lazy']='itemprop="image" src=' in one and 'itemprop="image" src=' in one.split('loading="lazy"')[0]
+      if has_external:
+        details['external_image_schema']='<img itemprop="image"' in one
+        details['lazy_thumbnails']=('loading="lazy" decoding="async"' in one) or 'product-gallery__thumb' not in one
+      else:
+        details['external_image_schema']='not_applicable'
+        details['lazy_thumbnails']=('loading="lazy"' in one) or 'product-photos__list' not in one
+      details['main_photo_not_lazy']=not has_external or ('itemprop="image" src=' in one and
+          one.index('itemprop="image" src=') < one.find('loading="lazy"') if 'loading="lazy"' in one else 'itemprop="image" src=' in one)
       ok=ok and all(details[k] for k in ['primary_image_schema','sku_schema','product_url_schema','lazy_thumbnails','main_photo_not_lazy'])
+      if has_external:ok=ok and details['external_image_schema'] is True
     if mode=='native':
       one=page.split('class="product-page"')[1].split('</article>')[0] if 'class="product-page"' in page else ''
       details['sku_schema']='itemprop="sku"' in one
