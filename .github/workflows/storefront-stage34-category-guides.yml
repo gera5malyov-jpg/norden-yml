@@ -1,0 +1,28 @@
+name: Storefront Stage 34 - Six useful category buyer guides
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage34-category-guides.yml'
+      - 'storefront/stage34_semantic_category_guides.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate scoped category copy
+        run: python -m py_compile storefront/stage34_semantic_category_guides.py
+      - name: Back up category theme and verify six buying guides
+        run: python storefront/stage34_semantic_category_guides.py
