@@ -163,6 +163,19 @@ if logdir.is_dir():
      hits.append(line[:350].strip())
    if hits:print('STOREFRONT_SEO_ERRORS='+json.dumps({'log_name':file.name,'matches':hits[-8:]},ensure_ascii=False))
   except Exception: pass
+import re
+for base in ('wa-data/public/site/themes/pureMegapolis42','wa-data/public/shop/themes/pureMegapolis42'):
+ rootdir=root/base
+ if not rootdir.is_dir():continue
+ for path in rootdir.rglob('*'):
+  if path.suffix.lower() not in ('.js','.html') or path.stat().st_size>100000:continue
+  lines=path.read_text(encoding='utf-8',errors='replace').splitlines()
+  matches=[]
+  for i,line in enumerate(lines):
+   if re.search(r'reachGoal|dataLayer\.push|ecommerce|checkout_open|checkout_start|add_to_cart|cartAdd|checkout.*submit|order.*success',line,re.I):
+    matches.append({'n':i+1,'v':line[:330]})
+  if matches:
+   print('STOREFRONT_METRIKA_AUDIT='+json.dumps({'file':str(path.relative_to(root)),'hits':matches[:22]},ensure_ascii=False))
 PY
 printf 'STOREFRONT_AGREEMENT_SOURCES='
 grep -RIl --include='*.php' -E 'wa_agreement_document|class waAgreementDocument' /home/web/vm-23f9aff9.na4u.ru/www/wa-system /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib 2>/dev/null | head -18 | tr '\n' ',' || true
