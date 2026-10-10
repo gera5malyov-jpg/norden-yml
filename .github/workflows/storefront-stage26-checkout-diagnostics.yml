@@ -34,8 +34,17 @@ jobs:
               assert res and res.status==200
               card=page.locator('form.add-to-cart').first
               assert card.count()==1
+              post_add=[]
+              page.on('response',lambda response: post_add.append({'status':response.status,'path':'/cart/add/'}) if '/cart/add/' in response.url else None)
               card.locator('input[type="submit"]').click(timeout=18000)
-              page.wait_for_timeout(1250)
+              page.wait_for_timeout(3500)
+              print('STAGE26_ADD_TO_CART='+json.dumps({
+                 'mode':mode,'after_click_url_path':page.url.split('profikompany.ru')[-1][:100],
+                 'cart_add_responses':post_add,
+                 'buy_button_values':page.locator('form.add-to-cart input[type="submit"]').evaluate_all("(xs)=>xs.slice(0,3).map(e=>e.value)"),
+                 'cart_overlay_visible':page.locator('.product-overlay__add:visible').count(),
+                 'after_click_has_added_label':'В корзине' in page.locator('body').inner_text()
+               },ensure_ascii=False))
               order=page.goto('https://profikompany.ru/order/',wait_until='domcontentloaded',timeout=60000)
               assert order and order.status==200
               page.wait_for_timeout(2000)
