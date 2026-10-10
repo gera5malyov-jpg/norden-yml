@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage23-responsive-map.yml'
+      - 'storefront/stage23_responsive_map.py'
 permissions:
   contents: read
 concurrency:
