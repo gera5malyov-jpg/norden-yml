@@ -1,0 +1,29 @@
+name: Storefront Stage 12 - Metrica funnel goals
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage12-metrica.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  funnel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate Python and browser JavaScript
+        run: |
+          python3 -m py_compile storefront/stage12_metrika_funnel.py
+          node --check storefront/assets/metrika_funnel_v1.js
+      - name: Deploy and verify funnel goals without touching commerce data
+        run: python3 storefront/stage12_metrika_funnel.py
