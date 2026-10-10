@@ -1,6 +1,10 @@
 name: Storefront Stage 21 - Footer navigation cleanup
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'storefront/stage21_footer_cleanup.py'
 permissions:
   contents: read
 concurrency:
