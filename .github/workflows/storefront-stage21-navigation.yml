@@ -1,10 +1,6 @@
 name: Storefront Stage 21 - Real footer pages
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/storefront-stage21-navigation.yml'
 permissions:
   contents: read
 concurrency:
