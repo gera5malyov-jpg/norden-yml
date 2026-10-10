@@ -45,7 +45,6 @@ if q.is_file():
  print('HOMECHECK_AGREEMENTS='+json.dumps(result[:28],ensure_ascii=False))
 PY
 """
-"""
 
 def run():
   key=os.environ.get('NETANGELS_API_KEY','').strip()
