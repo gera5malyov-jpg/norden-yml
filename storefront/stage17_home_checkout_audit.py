@@ -84,6 +84,15 @@ for directory in ('wa-apps/shop/lib','wa-apps/shop/templates','wa-data/public/si
   try:p.kill()
   except Exception:pass
   print('HOMECHECK_TERMS_FILE_MATCH='+json.dumps({'directory':directory,'error':type(e).__name__},ensure_ascii=False))
+for base in (root/'wa-data/public/site/themes/pureMegapolis42',root/'wa-data/public/shop/themes/pureMegapolis42'):
+ for p in base.rglob('*.html'):
+  if p.stat().st_size>200000:continue
+  rows=p.read_text(encoding='utf-8',errors='replace').splitlines()
+  out=[]
+  for i,line in enumerate(rows):
+   if 'categories-nav__image' in line or 'categories-nav__content' in line or 'cat_img' in line.lower():
+    out.append({'n':i+1,'line':line[:320],'next':[x[:300] for x in rows[i+1:i+3]]})
+  if out:print('HOMECHECK_MENU_IMAGE='+json.dumps({'file':str(p.relative_to(root)),'rows':out[:16]},ensure_ascii=False))
 PY
 """
 def run():
