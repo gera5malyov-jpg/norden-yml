@@ -1,11 +1,6 @@
 name: Storefront Stage 12 - Metrica funnel goals
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/storefront-stage12-metrica.yml'
-      - 'storefront/stage12_metrika_funnel.py'
 permissions:
   contents: read
 concurrency:
