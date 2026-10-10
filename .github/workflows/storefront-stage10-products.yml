@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage10-products.yml'
+      - 'storefront/stage10_product_schema_images.py'
 permissions:
   contents: read
 concurrency:
