@@ -45,6 +45,16 @@ try{
  $php=$root.'/wa-apps/shop/lib/models/shopPage.model.php';
  echo "STORE_NAV_PAGE_MODEL=".json_encode(array('exists'=>is_file($php),'path'=>$php,'content'=>is_file($php)?substr(file_get_contents($php),0,7000):''),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
 }catch(Throwable $e){}
+try{
+ $rows=$m->query("SELECT v.value, COUNT(DISTINCT p.id) AS product_count FROM shop_feature_values_varchar v JOIN shop_product_features pf ON pf.feature_value_id=v.id AND pf.feature_id=9 JOIN shop_product p ON p.id=pf.product_id AND p.status=1 WHERE v.feature_id=9 GROUP BY v.value ORDER BY product_count DESC LIMIT 90")->fetchAll();
+ echo "STORE_NAV_LIVE_MANUFACTURERS=".json_encode($rows,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\\n";
+ $count=$m->query("SELECT COUNT(*) AS qty FROM shop_feature_values_varchar WHERE feature_id=9")->fetchAll();
+ echo "STORE_NAV_MANUFACTURERS_TOTAL=".json_encode($count,JSON_UNESCAPED_UNICODE)."\\n";
+}catch(Throwable $e){echo "STORE_NAV_MANUFACTURERS_ERROR=".json_encode($e->getMessage(),JSON_UNESCAPED_UNICODE)."\\n";}
+try {
+ $existing=$m->query("SELECT id,parent_id,domain,route,url,full_url,name,title,create_datetime,update_datetime,create_contact_id,sort,status,thumbpage,CHAR_LENGTH(content) AS content_length FROM shop_page WHERE id IN (7,10,12,20) ORDER BY id")->fetchAll();
+ echo "STORE_NAV_PAGE_SHAPES=".json_encode($existing,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\\n";
+}catch(Throwable $e){echo "STORE_NAV_PAGE_SHAPES_ERROR=".json_encode($e->getMessage(),JSON_UNESCAPED_UNICODE)."\\n";}
 ?>
 PHP
 chmod 644 "$p"
