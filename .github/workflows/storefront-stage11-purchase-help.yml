@@ -1,0 +1,27 @@
+name: Storefront Stage 11 - Purchase information
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage11-purchase-help.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-product-template
+  cancel-in-progress: false
+jobs:
+  purchase-help:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile purchase-help deployment
+        run: python3 -m py_compile storefront/stage11_purchase_help.py
+      - name: Back up product template and verify category-scoped purchase guidance
+        run: python3 storefront/stage11_purchase_help.py
