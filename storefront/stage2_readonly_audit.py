@@ -176,6 +176,15 @@ for base in ('wa-data/public/site/themes/pureMegapolis42','wa-data/public/shop/t
     matches.append({'n':i+1,'v':line[:330]})
   if matches:
    print('STOREFRONT_METRIKA_AUDIT='+json.dumps({'file':str(path.relative_to(root)),'hits':matches[:22]},ensure_ascii=False))
+for rel,lo,hi in (
+ ('wa-data/public/site/themes/pureMegapolis42/js/theme.js',1120,1205),
+ ('wa-data/public/shop/themes/pureMegapolis42/order.html',1,115),
+ ('wa-data/public/shop/themes/pureMegapolis42/cart.html',185,228),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.cart.html',16,31)):
+ file=root/rel
+ if file.is_file():
+  lines=file.read_text(encoding='utf-8',errors='replace').splitlines()
+  print('STOREFRONT_FUNNEL_LINES='+json.dumps({'file':rel,'lines':[{'n':i+1,'v':lines[i][:450]} for i in range(lo-1,min(hi,len(lines)))]},ensure_ascii=False))
 PY
 printf 'STOREFRONT_AGREEMENT_SOURCES='
 grep -RIl --include='*.php' -E 'wa_agreement_document|class waAgreementDocument' /home/web/vm-23f9aff9.na4u.ru/www/wa-system /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/lib 2>/dev/null | head -18 | tr '\n' ',' || true
