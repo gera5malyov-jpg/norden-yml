@@ -1,10 +1,6 @@
 name: Storefront Stage 19 - Replace outdated checkout terms
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/storefront-stage19-terms.yml'
 permissions:
   contents: read
 concurrency:
