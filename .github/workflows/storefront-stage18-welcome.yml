@@ -1,0 +1,26 @@
+name: Storefront Stage 18 - Homepage about copy
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage18-welcome.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-welcome-page
+  cancel-in-progress: false
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m py_compile storefront/stage18_home_copy.py
+      - name: Back up and publish new company text with live smoke check
+        run: python3 storefront/stage18_home_copy.py
