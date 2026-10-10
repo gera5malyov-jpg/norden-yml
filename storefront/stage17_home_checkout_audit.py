@@ -48,9 +48,36 @@ if q.is_file():
      'neighbor_line_lengths':[len(t) for t in lines[i:i+5]],
      'agreement_text_snippets':[t.strip()[:210] for t in lines[i:i+5] if ('href=' in t or 'политик' in t.lower() or 'условия' in t.lower())]})
  print('HOMECHECK_AGREEMENTS='+json.dumps(result[:28],ensure_ascii=False))
+for rel in ('wa-config/apps/shop/checkout2.php','wa-config/apps/shop/checkout.php','wa-config/apps/shop/config.php'):
+ p=root/rel
+ if not p.is_file():continue
+ z=p.read_text(encoding='utf-8',errors='replace')
+ needles=['УСЛОВИЯ ИНТЕРНЕТ-МАГАЗИНА','http://***','условия предоставления услуг','terms_and_conditions','terms_of_service','service_agreement_text','order_terms','service_agreement_hint']
+ report=[]
+ for word in needles:
+  start=0; offsets=[]
+  while True:
+   j=z.find(word,start)
+   if j<0:break
+   offsets.append(j);start=j+len(word)
+   if len(offsets)>8:break
+  report.append({'match':word,'hits':len(offsets),'offsets':offsets[:3]})
+ print('HOMECHECK_TERMS_SOURCE='+json.dumps({'file':rel,'hits':report},ensure_ascii=False))
+# Common Shop Script core files may contain default terms; inspect filenames only.
+for directory in ('wa-apps/shop/lib','wa-apps/shop/templates','wa-data/public/site/themes/pureMegapolis42'):
+ base=root/directory
+ if not base.is_dir():continue
+ try:
+  import subprocess
+  p=subprocess.Popen(['grep','-RIl','--include=*.php','--include=*.html','-e','УСЛОВИЯ ИНТЕРНЕТ-МАГАЗИНА',str(base)],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+  out,_=p.communicate(timeout=10)
+  print('HOMECHECK_TERMS_FILE_MATCH='+json.dumps({'directory':directory,'paths':[x.replace(str(root)+'/','') for x in out.decode('utf-8','replace').splitlines()[:15]]},ensure_ascii=False))
+ except Exception as e:
+  try:p.kill()
+  except Exception:pass
+  print('HOMECHECK_TERMS_FILE_MATCH='+json.dumps({'directory':directory,'error':type(e).__name__},ensure_ascii=False))
 PY
 """
-
 def run():
   key=os.environ.get('NETANGELS_API_KEY','').strip()
   if not key:raise RuntimeError('Missing NETANGELS_API_KEY secret')
