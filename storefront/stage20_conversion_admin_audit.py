@@ -49,6 +49,11 @@ $out['checkout']=array(
   'active_shipping_plugins'=>read_rows($m,"SELECT plugin,value FROM shop_plugin_settings WHERE name='enabled' LIMIT 40"),
   'order_columns'=>$out['columns']['shop_order']
 );
+$out['manufacturer_counts']=read_rows($m,"SELECT f.feature_id, COUNT(DISTINCT f.product_id) AS total_products FROM shop_product_features f INNER JOIN shop_product p ON p.id=f.product_id WHERE f.feature_id IN (9,568,2329) AND p.status=1 GROUP BY f.feature_id");
+$out['manufacturer_values']=read_rows($m,"SELECT v.value,COUNT(DISTINCT f.product_id) AS active_products FROM shop_feature_values_varchar v INNER JOIN shop_product_features f ON f.feature_value_id=v.id AND f.feature_id=9 INNER JOIN shop_product p ON p.id=f.product_id AND p.status=1 WHERE v.feature_id=9 AND TRIM(v.value)!='' GROUP BY v.id,v.value ORDER BY active_products DESC LIMIT 110");
+$out['manufacturer_value_count']=read_val($m,"SELECT COUNT(*) FROM shop_feature_values_varchar WHERE feature_id=9");
+$out['information_pages']=read_rows($m,"SELECT id,name,title,url,full_url,domain,route,status,CHAR_LENGTH(content) AS content_size,LEFT(content,350) AS text_intro FROM shop_page WHERE domain='profikompany.ru' AND route='*' AND (url LIKE '%garant%' OR url LIKE '%vozmozh%' OR url LIKE '%o-kompan%' OR url LIKE '%proizvod%') LIMIT 25");
+$out['shop_settings_featured']=read_rows($m,"SELECT app_id,name,CHAR_LENGTH(value) AS value_size FROM wa_app_settings WHERE app_id='shop' AND (name LIKE '%checkout%' OR name LIKE '%search%' OR name LIKE '%rating%') LIMIT 45");
 $out['top_types']=read_rows($m,"SELECT type_id,COUNT(*) AS total FROM shop_product WHERE status=1 GROUP BY type_id ORDER BY total DESC LIMIT 12");
 $out['recent_orders_by_state']=read_rows($m,"SELECT state_id,COUNT(*) AS orders FROM shop_order WHERE create_datetime >= DATE_SUB(NOW(),INTERVAL 30 DAY) GROUP BY state_id ORDER BY orders DESC LIMIT 15");
 echo 'CONVERSION_ADMIN_AUDIT='.json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
