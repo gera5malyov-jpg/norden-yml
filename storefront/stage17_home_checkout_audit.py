@@ -63,6 +63,14 @@ for rel in ('wa-config/apps/shop/checkout2.php','wa-config/apps/shop/checkout.ph
    if len(offsets)>8:break
   report.append({'match':word,'hits':len(offsets),'offsets':offsets[:3]})
  print('HOMECHECK_TERMS_SOURCE='+json.dumps({'file':rel,'hits':report},ensure_ascii=False))
+ if 'УСЛОВИЯ ИНТЕРНЕТ-МАГАЗИНА' in z:
+  j=z.index('УСЛОВИЯ ИНТЕРНЕТ-МАГАЗИНА')
+  before=z[:j].splitlines()
+  print('HOMECHECK_TERMS_NEARBY='+json.dumps({'file':rel,
+     'line':len(before)+1,
+     'previous':[(i+1,ln[:310]) for i,ln in enumerate(before[-13:],start=len(before)-13)],
+     'context':z[j-520:j+830]},ensure_ascii=False))
+
 # Common Shop Script core files may contain default terms; inspect filenames only.
 for directory in ('wa-apps/shop/lib','wa-apps/shop/templates','wa-data/public/site/themes/pureMegapolis42'):
  base=root/directory
