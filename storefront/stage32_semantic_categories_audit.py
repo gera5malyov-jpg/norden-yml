@@ -59,7 +59,7 @@ def run():
             '-o','UserKnownHostsFile=/dev/null','-o','ConnectTimeout=15','root@'+VM_IP,'bash -s'],
             input=REMOTE,text=True,capture_output=True,timeout=160)
       for line in r.stdout.splitlines():
-        if line.startswith('CONVERSION_'):print(line,flush=True)
+        if line.startswith('SEMANTIC_CATALOG_AUDIT='):print(line,flush=True)
       if r.returncode:
         raise RuntimeError('Storefront UX fix failed '+r.stdout[-1200:]+' '+r.stderr[-500:])
     finally:
