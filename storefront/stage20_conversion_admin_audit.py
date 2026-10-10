@@ -73,6 +73,9 @@ $out['checkout_flow_schema']=read_rows($m,"SHOW COLUMNS FROM shop_checkout_flow"
 $out['plugin_settings_schema']=read_rows($m,"SHOW COLUMNS FROM shop_plugin_settings");
 $out['shop_plugin_schema']=read_rows($m,"SHOW COLUMNS FROM shop_plugin");
 $out['order_param_names']=read_rows($m,"SELECT name,COUNT(*) AS instances FROM shop_order_params WHERE name LIKE '%storefront%' OR name LIKE '%referer%' OR name LIKE '%shipping%' GROUP BY name ORDER BY instances DESC LIMIT 30");
+$out['storefront_order_sources_30d']=read_rows($m,"SELECT op.value AS storefront,COUNT(DISTINCT o.id) AS orders FROM shop_order_params op JOIN shop_order o ON o.id=op.order_id WHERE op.name='storefront' AND o.create_datetime>=DATE_SUB(NOW(),INTERVAL 30 DAY) GROUP BY op.value ORDER BY orders DESC LIMIT 22");
+$out['active_plugins']=read_rows($m,"SELECT type,plugin,name,status FROM shop_plugin WHERE status=1 ORDER BY type,name LIMIT 80");
+$out['recent_checkout_events']=read_rows($m,"SELECT code,step,COUNT(*) AS total FROM shop_checkout_flow WHERE date>=DATE_SUB(CURDATE(),INTERVAL 30 DAY) GROUP BY code,step ORDER BY total DESC LIMIT 22");
 $out['top_types']=read_rows($m,"SELECT type_id,COUNT(*) AS total FROM shop_product WHERE status=1 GROUP BY type_id ORDER BY total DESC LIMIT 12");
 $out['recent_orders_by_state']=read_rows($m,"SELECT state_id,COUNT(*) AS orders FROM shop_order WHERE create_datetime >= DATE_SUB(NOW(),INTERVAL 30 DAY) GROUP BY state_id ORDER BY orders DESC LIMIT 15");
 echo 'CONVERSION_ADMIN_AUDIT='.json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
