@@ -1,0 +1,31 @@
+name: Storefront Stage 29 - Mobile homepage LCP probe
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage29-lcp-probe.yml'
+      - 'storefront/stage29_home_lcp_probe.py'
+permissions:
+  contents: read
+jobs:
+  lcp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage29_home_lcp_probe.py
+      - run: python -m pip install playwright==1.55.0
+      - name: Identify LCP image and unresolved static assets on real homepage
+        run: python storefront/stage29_home_lcp_probe.py
+      - name: Preserve browser screenshots and structured findings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: storefront-stage29-home-visual-diagnostics
+          path: stage29-home-audit/
+          retention-days: 30
+          if-no-files-found: warn
