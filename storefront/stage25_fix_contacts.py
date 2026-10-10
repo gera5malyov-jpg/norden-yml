@@ -16,11 +16,11 @@ root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
 theme=root/'wa-data/public/site/themes/pureMegapolis42'
 targets=[theme/'layouts/layout.footer.html',theme/'components/component.phones.html']
 old='{$_company__callback_text = $theme_settings.company__callback_text}'
-addon="""
+addon='''
 {* megapolis-callback-label-2026: the callback is a form, not the Moscow phone number *}
 {if $wa->domainUrl() == 'https://profikompany.ru' && $_company__callback_text == '/+7 (499) 677 63 32'}
   {$_company__callback_text = 'Заказать звонок'}
-{/if}"""
+{/if}'''
 files={}
 for file in targets:
  orig=file.read_text(encoding='utf-8')
