@@ -15,6 +15,32 @@ from datetime import datetime,timezone
 root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
 file=root/'wa-data/public/site/themes/pureMegapolis42/layouts/layout.footer.html'
 orig=file.read_text(encoding='utf-8')
+# Stage 21 pages were already published by a separate workflow. Do not fail or
+# rewrite the footer when the desired state is present.
+ready_links=(
+ 'href="/o-kompanii/"','href="/oplata/"','href="/dostavka/"',
+ 'href="/privacy-policy/"','href="/proizvoditeli/"',
+ 'href="/garantiya/"','href="/vozmozhnosti/"'
+)
+obsolete=('News','Employees','Jobs','Our shops','Help','Articles','FAQ')
+ready=(all(orig.count(link)==1 for link in ready_links)
+ and 'href="#" class="footer__link"' not in orig
+ and not any('['+chr(96)+name+chr(96)+']' in orig for name in obsolete)
+ and orig.count('footer__title')==3)
+if ready:
+ checks=[]
+ for path in ('/','/proizvoditeli/','/garantiya/','/vozmozhnosti/','/order/'):
+  u='https://profikompany.ru'+path+'?footer_readonly_check='+str(int(time.time()))
+  p=subprocess.run(['curl','-k','-sSL','--max-time','30','-w','\\n%{http_code}',u],
+                   capture_output=True,text=True,timeout=36)
+  html,status=p.stdout.rsplit('\\n',1) if '\\n' in p.stdout else ('','')
+  has_links=all(link in html for link in ready_links)
+  good=p.returncode==0 and status=='200' and has_links
+  checks.append({'path':path,'http':status,'footer_links':has_links,'ok':good})
+ if not all(c['ok'] for c in checks):
+  raise RuntimeError('Live footer verification failed: '+json.dumps(checks,ensure_ascii=False))
+ print('STAGE21_ALREADY_CLEAN='+json.dumps({'status':'verified','writes':0,'checks':checks},ensure_ascii=False))
+ raise SystemExit(0)
 lines=orig.splitlines(True)
 remove_labels=('News','Employees','Jobs','Our shops','Help','Articles','FAQ')
 needed=('href="/o-kompanii/"','href="/oplata/"','href="/dostavka/"','href="/privacy-policy/"')
