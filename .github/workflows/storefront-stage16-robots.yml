@@ -1,10 +1,6 @@
 name: Storefront Stage 16 - Repair domain robots.txt
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/storefront-stage16-robots.yml'
 permissions:
   contents: read
 concurrency:
