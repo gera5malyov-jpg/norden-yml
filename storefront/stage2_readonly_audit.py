@@ -110,6 +110,15 @@ for rel,first,last in [
    if any(k in t.lower() for k in ('<img','<picture','itemprop','product.sku','product.features','features.','<article','data-src','manufacturer','brand','sku__','<h1','<meta','loading=','itemtype','product.summary','product.description')):
     matches.append({'n':i+1,'v':t[:420]})
   print('STOREFRONT_STAGE10_TEMPLATE='+json.dumps({'file':rel,'lines':matches[:90]},ensure_ascii=False))
+for rel,first,last in [
+ ('wa-data/public/shop/themes/pureMegapolis42/product.cart.html',115,165),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.html',37,122),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.gallery.html',25,150)]:
+ p=root/rel
+ if p.is_file():
+  ls=p.read_text(encoding='utf-8',errors='replace').splitlines()
+  print('STOREFRONT_STAGE10_CONTEXT='+json.dumps({'file':rel,
+    'rows':[{'line':i+1,'v':ls[i][:350]} for i in range(first-1,min(last,len(ls)))]},ensure_ascii=False))
 for base in ('wa-data/public/shop/themes/pureMegapolis42',):
  folder=root/base
  for file in folder.rglob('*.html'):
