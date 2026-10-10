@@ -1,0 +1,24 @@
+name: Storefront Stage 27 - Sitemap collision diagnosis
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage27-sitemap-collisions.yml'
+      - 'storefront/stage27_sitemap_duplicate_audit.py'
+permissions:
+  contents: read
+jobs:
+  read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage27_sitemap_duplicate_audit.py
+      - name: Compare repeated Sitemap URLs with Webasyst product slugs
+        run: python storefront/stage27_sitemap_duplicate_audit.py
