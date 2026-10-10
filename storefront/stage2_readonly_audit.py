@@ -96,6 +96,20 @@ for d in (root/'wa-data/public/site/themes/pureMegapolis42', root/'wa-data/publi
     hits=[{'n':i+1,'line':line[:420]} for i,line in enumerate(lines)
           if any(w.lower() in line.lower() for w in ('условия оплаты','условия доставки','политика обработки','footer__link'))]
     if hits:print('STOREFRONT_LEGAL_TEMPLATE='+json.dumps({'file':str(p.relative_to(root)),'lines':hits[:12]},ensure_ascii=False))
+for rel,first,last in [
+ ('wa-data/public/shop/themes/pureMegapolis42/product.html',1,50),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.info.html',1,235),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.gallery.html',1,175),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.overview.html',1,105)]:
+ file=root/rel
+ if file.is_file():
+  ls=file.read_text(encoding='utf-8',errors='replace').splitlines()
+  matches=[]
+  for i in range(first-1,min(last,len(ls))):
+   t=ls[i]
+   if any(k in t.lower() for k in ('<img','<picture','itemprop','product.sku','product.features','features.','<article','data-src','manufacturer','brand','sku__','<h1','<meta','loading=','itemtype','product.summary','product.description')):
+    matches.append({'n':i+1,'v':t[:420]})
+  print('STOREFRONT_STAGE10_TEMPLATE='+json.dumps({'file':rel,'lines':matches[:90]},ensure_ascii=False))
 for base in ('wa-data/public/site/themes/pureMegapolis42','wa-data/public/shop/themes/pureMegapolis42'):
  d=root/base
  if not d.is_dir(): continue
