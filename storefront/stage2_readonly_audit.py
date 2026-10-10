@@ -112,6 +112,8 @@ for rel,first,last in [
   print('STOREFRONT_STAGE10_TEMPLATE='+json.dumps({'file':rel,'lines':matches[:90]},ensure_ascii=False))
 for rel,first,last in [
  ('wa-data/public/shop/themes/pureMegapolis42/product.cart.html',115,165),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.cart.html',165,360),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.html',119,195),
  ('wa-data/public/shop/themes/pureMegapolis42/product.html',37,122),
  ('wa-data/public/shop/themes/pureMegapolis42/product.gallery.html',25,150)]:
  p=root/rel
