@@ -1,0 +1,26 @@
+name: Storefront Stage 21 - Footer navigation cleanup
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage21-footer.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-footer
+  cancel-in-progress: false
+jobs:
+  footer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m py_compile storefront/stage21_footer_cleanup.py
+      - name: Back up and update footer to verified pages
+        run: python3 storefront/stage21_footer_cleanup.py
