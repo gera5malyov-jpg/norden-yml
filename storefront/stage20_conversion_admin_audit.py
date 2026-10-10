@@ -54,6 +54,25 @@ $out['manufacturer_values']=read_rows($m,"SELECT v.value,COUNT(DISTINCT f.produc
 $out['manufacturer_value_count']=read_val($m,"SELECT COUNT(*) FROM shop_feature_values_varchar WHERE feature_id=9");
 $out['information_pages']=read_rows($m,"SELECT id,name,title,url,full_url,domain,route,status,CHAR_LENGTH(content) AS content_size,LEFT(content,350) AS text_intro FROM shop_page WHERE domain='profikompany.ru' AND route='*' AND (url LIKE '%garant%' OR url LIKE '%vozmozh%' OR url LIKE '%o-kompan%' OR url LIKE '%proizvod%') LIMIT 25");
 $out['shop_settings_featured']=read_rows($m,"SELECT app_id,name,CHAR_LENGTH(value) AS value_size FROM wa_app_settings WHERE app_id='shop' AND (name LIKE '%checkout%' OR name LIKE '%search%' OR name LIKE '%rating%') LIMIT 45");
+$out['eligible_instock_categorized']=read_rows($m,"SELECT COUNT(*) AS products,
+ SUM(CASE WHEN (description IS NULL OR TRIM(description)='') THEN 1 ELSE 0 END) AS no_full_description,
+ SUM(CASE WHEN (summary IS NULL OR TRIM(summary)='') THEN 1 ELSE 0 END) AS no_short_description,
+ SUM(CASE WHEN (image_id IS NULL OR image_id=0) THEN 1 ELSE 0 END) AS no_internal_main_image,
+ SUM(CASE WHEN (image_id IS NULL OR image_id=0) AND (summary LIKE '%http%' OR description LIKE '%http%') THEN 1 ELSE 0 END) AS no_internal_main_image_but_external_link_hint,
+ SUM(CASE WHEN price<=0 THEN 1 ELSE 0 END) AS zero_price,
+ SUM(CASE WHEN (meta_title IS NULL OR meta_title='') THEN 1 ELSE 0 END) AS no_manual_meta_title
+ FROM shop_product WHERE status=1 AND category_id>0 AND (count>0 OR count IS NULL)");
+$out['top_categories_quality']=read_rows($m,"SELECT c.id,c.name,COUNT(*) AS active_instock,
+ SUM(CASE WHEN (p.description IS NULL OR TRIM(p.description)='') THEN 1 ELSE 0 END) AS no_description,
+ SUM(CASE WHEN p.image_id=0 OR p.image_id IS NULL THEN 1 ELSE 0 END) AS no_internal_main_image,
+ SUM(CASE WHEN p.price<=0 THEN 1 ELSE 0 END) AS zero_price
+ FROM shop_product p JOIN shop_category c ON c.id=p.category_id
+ WHERE p.status=1 AND p.category_id>0 AND (p.count>0 OR p.count IS NULL)
+ GROUP BY c.id,c.name ORDER BY active_instock DESC LIMIT 18");
+$out['checkout_flow_schema']=read_rows($m,"SHOW COLUMNS FROM shop_checkout_flow");
+$out['plugin_settings_schema']=read_rows($m,"SHOW COLUMNS FROM shop_plugin_settings");
+$out['shop_plugin_schema']=read_rows($m,"SHOW COLUMNS FROM shop_plugin");
+$out['order_param_names']=read_rows($m,"SELECT name,COUNT(*) AS instances FROM shop_order_params WHERE name LIKE '%storefront%' OR name LIKE '%referer%' OR name LIKE '%shipping%' GROUP BY name ORDER BY instances DESC LIMIT 30");
 $out['top_types']=read_rows($m,"SELECT type_id,COUNT(*) AS total FROM shop_product WHERE status=1 GROUP BY type_id ORDER BY total DESC LIMIT 12");
 $out['recent_orders_by_state']=read_rows($m,"SELECT state_id,COUNT(*) AS orders FROM shop_order WHERE create_datetime >= DATE_SUB(NOW(),INTERVAL 30 DAY) GROUP BY state_id ORDER BY orders DESC LIMIT 15");
 echo 'CONVERSION_ADMIN_AUDIT='.json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
