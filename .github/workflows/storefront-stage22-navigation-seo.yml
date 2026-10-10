@@ -1,10 +1,6 @@
 name: Storefront Stage 22 - New pages SEO
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/storefront-stage22-navigation-seo.yml'
 permissions:
   contents: read
 concurrency:
