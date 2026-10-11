@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-10-10T10:43:48.677610+00:00",
+  "started_at": "2026-10-11T10:57:12.894706+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=334",
   "type_name": "kennermebel-334",
@@ -15,10 +15,10 @@
   "webasyst_duplicate_skus": 0,
   "processed": 87,
   "created": 0,
-  "updated_prices_stock": 1,
+  "updated_prices_stock": 2,
   "summaries_updated_from_kit": 0,
   "kit_variants_without_images": 0,
-  "unchanged": 86,
+  "unchanged": 85,
   "features_created": 0,
   "feature_values_written": 0,
   "file_urls_resolved": 1426,
@@ -34,19 +34,29 @@
   "sample_new": [],
   "sample_updates": [
     {
-      "sku": "334-325174",
+      "sku": "334-320850",
       "fields": [
         "stock"
       ],
-      "price": "42590.00",
-      "compare_price": "64500.00",
-      "stock": 5,
-      "images_in_summary": 28
+      "price": "17340.00",
+      "compare_price": "17340.00",
+      "stock": 40,
+      "images_in_summary": 16
+    },
+    {
+      "sku": "334-323469",
+      "fields": [
+        "stock"
+      ],
+      "price": "43680.00",
+      "compare_price": "43680.00",
+      "stock": 1,
+      "images_in_summary": 19
     }
   ],
   "complete": false,
   "webasyst_routing_feature_code": "kenner_f93046718124",
   "webasyst_334_products": 87,
-  "finished_at": "2026-10-10T11:31:37.293686+00:00",
+  "finished_at": "2026-10-11T11:59:15.996252+00:00",
   "status": "degraded"
 }
