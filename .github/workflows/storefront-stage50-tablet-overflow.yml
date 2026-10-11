@@ -1,0 +1,29 @@
+name: Storefront Stage 50 - Tablet horizontal overflow diagnosis
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage50-tablet-overflow.yml'
+      - 'storefront/stage50_tablet_overflow_probe.py'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install playwright==1.55.0
+      - run: python storefront/stage50_tablet_overflow_probe.py
+      - name: Save diagnostic screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: storefront-stage50-tablet-screenshots
+          path: storefront-stage50-tablet/
+          retention-days: 14
+          if-no-files-found: warn
