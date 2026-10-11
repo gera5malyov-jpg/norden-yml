@@ -1,0 +1,28 @@
+name: Storefront Stage 44 - Deduplicate product purchase information
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage44-deduplicate-purchase.yml'
+      - 'storefront/stage44_deduplicate_product_purchase.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-product-conversion
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify guarded script
+        run: python -m py_compile storefront/stage44_deduplicate_product_purchase.py
+      - name: Back up product template, remove repeats and verify pages
+        run: python storefront/stage44_deduplicate_product_purchase.py
