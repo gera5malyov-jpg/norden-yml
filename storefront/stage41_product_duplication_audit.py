@@ -37,14 +37,20 @@ def run():
   private=d+'/id'
   subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',private],check=True)
   pub=Path(private+'.pub').read_text().strip()
-  try:
-   resp=request_json('https://api-ms.netangels.ru/api/v1/cloud/vms/{}/ssh/create/'.format(VM_ID),'POST',json.dumps({'key':pub,'name':'stage41-audit-'+os.getenv('GITHUB_RUN_ID','audit')}).encode(),headers)
-  except Exception as e:
-   from urllib.error import HTTPError
-   if isinstance(e,HTTPError):
+  from urllib.error import HTTPError
+  import time
+  for attempt in range(1,11):
+   try:
+    resp=request_json('https://api-ms.netangels.ru/api/v1/cloud/vms/{}/ssh/create/'.format(VM_ID),'POST',json.dumps({'key':pub,'name':'stage41-audit-'+os.getenv('GITHUB_RUN_ID','audit')}).encode(),headers)
+    break
+   except HTTPError as e:
     details=e.read().decode('utf-8','replace')
-    print('STAGE41_SSH_API_ERROR='+json.dumps({'status':e.code,'detail':details[:500]}),flush=True)
-   raise
+    if e.code==400 and 'SSH' in details and attempt<10:
+     print('STAGE41_SERVER_BACKUP='+json.dumps({'attempt':attempt,'retry_seconds':25}),flush=True)
+     time.sleep(25)
+     continue
+    print('STAGE41_SSH_API_ERROR='+json.dumps({'status':e.code,'detail':details[:450]}),flush=True)
+    raise
   kid=resp.get('id')
   if not kid:raise RuntimeError('Temporary SSH key registration failed')
   try:
