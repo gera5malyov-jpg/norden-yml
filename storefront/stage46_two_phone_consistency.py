@@ -51,7 +51,11 @@ product_old='''<p class="megapolis-purchase-trust__contact">Поможем ут�
 product_new='''<p class="megapolis-purchase-trust__contact">Поможем уточнить детали: <a href="tel:+78122449264">+7 (812) 244-92-64</a> (СПб), <a href="tel:+74996776332">+7 (499) 677-63-32</a> (Москва)</p>'''
 updates=[(phonefile,phone_old,phone_new),(welcome,welcome_old,welcome_new),(product,product_old,product_new)]
 for file,needle,replacement in updates:
- if oldtext[file].count(needle)!=1 or 'megapolis-paired-phones-2026' in oldtext[file]:
+ count=oldtext[file].count(needle)
+ existing=('megapolis-paired-phones-2026' in oldtext[file])
+ print('STAGE46_PREFLIGHT='+json.dumps({'name':file.name,'match_count':count,'previous_patch':existing,
+  'sample':oldtext[file][max(0,oldtext[file].find('{if $_phones_type|strpos:')-10):oldtext[file].find('{if $_phones_type|strpos:')+105] if file==phonefile else ''},ensure_ascii=False))
+ if count!=1 or existing:
   raise RuntimeError('Preflight: unexpected content for '+str(file))
  if oldtext[file].count(replacement):
   raise RuntimeError('Preflight: patch already present '+str(file))
