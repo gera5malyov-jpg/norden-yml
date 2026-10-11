@@ -41,7 +41,7 @@ phone_new='''     {* megapolis-paired-phones-2026: preserve theme phone selector
        <a class="phones__link phones__link--phone" href="tel:{$_company__phone_main|replace:" ":""}">
          {$_company__phone_main}
        </a>
-       {if $wa->domainUrl() == 'https://profikompany.ru' && !empty($_company__phone_second) && $_phones_type|strpos:"phone" === false}
+       {if $wa->domainUrl() == 'https://profikompany.ru' && !empty($_company__phone_second) && $_phones_type|strpos:"callback" !== false}
          <a class="phones__link phones__link--phone" href="tel:{$_company__phone_second|replace:" ":""}">{$_company__phone_second}</a>
        {/if}
      {/if}'''
@@ -92,9 +92,9 @@ try:
   header=html.split('class="header-top',1)[-1].split('</header>',1)[0]
   header_both='tel:+7(812)2449264' in header and 'tel:+7(499)6776332' in header
   if kind=='home':
-   ok=p.returncode==0 and status=='200' and header_both and
+   ok=(p.returncode==0 and status=='200' and header_both and
      '<a href="tel:+74996776332">+7 (499) 677-63-32</a>' in html and
-     'mailto:shop@office-mag.com' in html
+     'mailto:shop@office-mag.com' in html)
   elif kind=='categorized':
    box=html.split('class="megapolis-purchase-trust"',1)[-1].split('</section>',1)[0]
    both=('tel:+78122449264' in box and 'tel:+74996776332' in box)
