@@ -1,0 +1,28 @@
+name: Storefront Stage 40 - Delivery consultation by callback
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage40-delivery-consultation.yml'
+      - 'storefront/stage40_shipping_consultation.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-product-conversion
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate deployment
+        run: python -m py_compile storefront/stage40_shipping_consultation.py
+      - name: Add delivery lead CTA safely and verify live pages
+        run: python storefront/stage40_shipping_consultation.py
