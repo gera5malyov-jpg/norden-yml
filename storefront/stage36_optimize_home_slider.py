@@ -65,7 +65,7 @@ try:
   if route=='/':
    ok=p.returncode==0 and status=='200' and has_source and page.count('srcset=')>=7
   else:ok=p.returncode==0 and status=='200'
-  checks.append({'route':route,'http':status,'webp_in_html':has_source,'ok':ok})
+  checks.append({'route':route,'http':status,'webp_in_html':has_source,'srcset_count':page.count('srcset='),'image_pos':page.find('slider_01.png'),'first_slider_markup':page[max(0,page.find('slider_01.png')-170):page.find('slider_01.png')+300] if route=='/' else '', 'ok':ok})
  if not all(c['ok'] for c in checks):
   raise RuntimeError('Public page smoke test failed: '+json.dumps(checks,ensure_ascii=False))
  for n in [1,4,7]:
