@@ -1,0 +1,64 @@
+name: Storefront Stage 40 - Mobile and desktop sales layout QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage40-responsive-conversion-qa.yml'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 11
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser automation
+        run: python -m pip install playwright==1.55.0
+      - name: Test responsive banners and product buyer trust after deployment
+        run: |
+          python - <<'PY'
+          import json
+          from playwright.sync_api import sync_playwright
+          root='https://profikompany.ru'
+          with sync_playwright() as p:
+            browser=p.chromium.launch(channel='chrome',headless=True,args=['--no-sandbox'])
+            for name,width in [('desktop',1365),('mobile',390)]:
+              mobile=name=='mobile'
+              ctx=browser.new_context(viewport={'width':width,'height':844},
+                device_scale_factor=1,is_mobile=mobile,has_touch=mobile,locale='ru-RU')
+              page=ctx.new_page()
+              errors=[]
+              page.on('pageerror',lambda e:errors.append(type(e).__name__))
+              home=page.goto(root+'/',wait_until='domcontentloaded',timeout=60000)
+              assert home and home.status==200
+              page.locator('.slider__image').first.wait_for(timeout=16000)
+              page.wait_for_timeout(1700)
+              slider=page.locator('.slider__image').first.evaluate("""e=>({
+                width:Math.round(e.getBoundingClientRect().width),
+                height:Math.round(e.getBoundingClientRect().height),
+                selected:e.currentSrc.split('?')[0].split('/').pop(),
+                nativeWidth:e.naturalWidth,
+                nativeHeight:e.naturalHeight
+              })""")
+              ratio=slider['height']/max(1,slider['width'])
+              assert 0.23 < ratio < 0.45,(name,'slider image distortion',slider)
+              assert slider['selected'].endswith('.webp'),(name,'WebP not chosen',slider)
+              url=root+'/stul-dlya-posetiteley-rs42-chernyy-karkas-tkan-chernaya/'
+              product=page.goto(url,wait_until='domcontentloaded',timeout=60000)
+              assert product and product.status==200
+              box=page.locator('.megapolis-purchase-trust')
+              assert box.count()==1 and box.first.is_visible(),(name,'trust box missing')
+              links=box.locator('a').evaluate_all('(els)=>els.map(e=>e.getAttribute("href"))')
+              assert all(x in links for x in ['/dostavka/','/oplata/','/garantiya/'])
+              assert page.locator('#s-product-form input[type="submit"]').count()>=1,(name,'buy missing')
+              document=page.evaluate("""()=>({vw:innerWidth,scrollWidth:document.documentElement.scrollWidth})""")
+              assert document['scrollWidth'] <= document['vw']+4,(name,'horizontal overflow',document)
+              assert len(errors)==0,(name,'JS page errors',errors)
+              print('STAGE40_UI='+json.dumps({'mode':name,'slider':slider,'product_trust_links':links,'widths':document,
+                'js_errors':errors,'ok':True},ensure_ascii=False),flush=True)
+              ctx.close()
+            browser.close()
+          PY
