@@ -1,0 +1,30 @@
+name: Storefront Stage 49 - Header mobile desktop acceptance
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage49-header-acceptance.yml'
+      - 'storefront/stage49_header_browser_verify.py'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install playwright==1.55.0
+      - name: Check mobile navigation, two phone links, layout spacing and product cart
+        run: python storefront/stage49_header_browser_verify.py
+      - name: Save browser screenshots and JSON report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: header-mobile-desktop-stage49
+          path: storefront-stage49-header/
+          retention-days: 14
+          if-no-files-found: warn
