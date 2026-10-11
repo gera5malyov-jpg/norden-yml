@@ -1,0 +1,28 @@
+name: Storefront Stage 47 - Mobile desktop phone visual QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage47-phone-visual.yml'
+      - 'storefront/stage47_phone_visual_audit.py'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install playwright==1.55.0
+      - run: python storefront/stage47_phone_visual_audit.py
+      - name: Screenshots and structured results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage47-phone-visual-audit
+          path: stage47-phone-reports/
+          retention-days: 14
