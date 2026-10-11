@@ -1,0 +1,23 @@
+name: Storefront Stage 41 - Product duplicate content audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage41-product-duplicates.yml'
+      - 'storefront/stage41_product_duplication_audit.py'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage41_product_duplication_audit.py
+      - run: python storefront/stage41_product_duplication_audit.py
