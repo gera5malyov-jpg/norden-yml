@@ -20,6 +20,16 @@ for folder in directories:
   for i in hits[:30]:
    result.append({'line':i+1,'context':[{'n':j+1,'text':lines[j][:420]} for j in range(max(0,i-2),min(len(lines),i+3))]})
   print('STAGE45_THEME='+json.dumps({'file':str(f.relative_to(root)),'hits':result},ensure_ascii=False))
+for rel,a,b in (
+ ('wa-data/public/site/themes/pureMegapolis42/components/component.phones.html',1,65),
+ ('wa-data/public/site/themes/pureMegapolis42/layouts/layout.welcome.html',1,30),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.html',144,180),
+ ('wa-data/public/site/themes/pureMegapolis42/header/header.top.html',75,123),
+):
+ p=root/rel
+ if p.is_file():
+  lines=p.read_text(encoding='utf-8',errors='replace').splitlines()
+  print('STAGE45_SNIPPET='+json.dumps({'file':rel,'lines':[{'n':i+1,'t':lines[i][:400]} for i in range(a-1,min(b,len(lines)))]},ensure_ascii=False))
 PY
 """
 def run():
