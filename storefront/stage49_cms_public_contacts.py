@@ -80,7 +80,7 @@ set -e
 if test -s "$jsonbackup"; then cp "$jsonbackup" "$backup/cms_pages.json"; chmod 600 "$backup/cms_pages.json"; fi
 printf 'STAGE49_BACKUP=%s\n' "$backup"
 exit "$status"
-''''''
+'''
 def run():
  key=os.environ.get('NETANGELS_API_KEY','').strip()
  if not key:raise RuntimeError('Missing NETANGELS_API_KEY')
