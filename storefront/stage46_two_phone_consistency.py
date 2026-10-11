@@ -45,6 +45,9 @@ phone_new='''     {* megapolis-paired-phones-2026: preserve theme phone selector
          <a class="phones__link phones__link--phone" href="tel:{$_company__phone_second|replace:" ":""}">{$_company__phone_second}</a>
        {/if}
      {/if}'''
+# Match the four-space indentation verified in the production Smarty component.
+phone_old='\n'.join(line[1:] if line.startswith(' ') else line for line in phone_old.split('\n'))
+phone_new='\n'.join(line[1:] if line.startswith(' ') else line for line in phone_new.split('\n'))
 welcome_old='''<p>Нужна помощь с выбором? Свяжитесь с нами по телефону <a href="tel:+78122449264">+7 (812) 244-92-64</a> или напишите на <a href="mailto:shop@office-mag.com">shop@office-mag.com</a>. Поможем уточнить характеристики и условия заказа.</p>'''
 welcome_new='''<p>Нужна помощь с выбором? Позвоните по телефонам <a href="tel:+78122449264">+7 (812) 244-92-64</a> (Санкт-Петербург) или <a href="tel:+74996776332">+7 (499) 677-63-32</a> (Москва), либо напишите на <a href="mailto:shop@office-mag.com">shop@office-mag.com</a>. Поможем уточнить характеристики и условия заказа.</p>'''
 product_old='''<p class="megapolis-purchase-trust__contact">Поможем уточнить детали: <a href="tel:+78122449264">+7 (812) 244-92-64</a></p>'''
