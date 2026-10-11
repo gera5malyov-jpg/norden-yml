@@ -23,6 +23,18 @@ for folder in (base,shop):
   if not matches:continue
   samples=[{'offset':m.start(),'near':' '.join(s[max(0,m.start()-170):m.end()+190].split())[:430]} for m in matches[:15]]
   print('STAGE52_MATCH='+json.dumps({'file':str(f.relative_to(root)),'count':len(matches),'samples':samples},ensure_ascii=False),flush=True)
+for rel in ['wa-data/public/site/themes/pureMegapolis42/index.html','wa-data/public/site/themes/pureMegapolis42/layouts/layout.footer.html','wa-data/public/site/themes/pureMegapolis42/components/component.phones.html']:
+ f=root/rel;s=f.read_text(encoding='utf-8')
+ lines=s.splitlines()
+ needle='callback'
+ hits=[i for i,line in enumerate(lines) if needle in line.lower()]
+ windows=[]
+ for i in hits:
+  a=max(0,i-4);b=min(len(lines),i+6)
+  if windows and a<=windows[-1][1]+2:windows[-1]=(windows[-1][0],max(windows[-1][1],b))
+  else:windows.append((a,b))
+ print('STAGE52_LINES='+json.dumps({'file':rel,'length':len(lines),'windows':[{'start':a+1,'lines':lines[a:b][:80]} for a,b in windows[:15]]},ensure_ascii=False),flush=True)
+
 PY
 
 """
