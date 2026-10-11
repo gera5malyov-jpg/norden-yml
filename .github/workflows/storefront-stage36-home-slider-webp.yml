@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage36-home-slider-webp.yml'
+      - 'storefront/stage36_optimize_home_slider.py'
 permissions:
   contents: read
 concurrency:
