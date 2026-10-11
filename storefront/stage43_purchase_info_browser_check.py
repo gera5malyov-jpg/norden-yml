@@ -43,6 +43,21 @@ with sync_playwright() as p:
       page.wait_for_timeout(400)
       result['modal_visible']=page.locator('#callback-modal').first.is_visible() if page.locator('#callback-modal').count() else False
       result['modal_hash']=page.evaluate('location.hash')[:35]
+      result['callback_probe']=page.evaluate("""() => ({
+        callbackCount:document.querySelectorAll('#callback-modal').length,
+        callbackSnippet:(document.querySelector('#callback-modal')?.outerHTML || '').slice(0,380),
+        visibleDialogs:[...document.querySelectorAll('.modal,[role="dialog"],.fancybox-container,.iziModal, .mfp-wrap')]
+         .filter(e=>e.getBoundingClientRect().width>0 && getComputedStyle(e).visibility!=='hidden')
+         .map(e=>({tag:e.tagName,cls:typeof e.className==='string'?e.className.slice(0,100):'',id:e.id,display:getComputedStyle(e).display})).slice(0,8),
+        classnames:[...document.querySelectorAll('a[href="#callback-modal"]')].slice(0,8).map(e=>e.className)
+      })""")
+      if not result['modal_visible'] and page.locator('.phones__link--callback').count():
+       page.locator('.phones__link--callback').first.click(timeout=9000)
+       page.wait_for_timeout(550)
+       result['header_callback_probe']=page.evaluate("""() => ({
+         callbackVisible:!!document.querySelector('#callback-modal') && document.querySelector('#callback-modal').getBoundingClientRect().width>0,
+         dialogs:[...document.querySelectorAll('.modal,[role="dialog"],.fancybox-container,.mfp-wrap')].filter(e=>e.getBoundingClientRect().width>0).map(e=>({cls:typeof e.className==='string'?e.className.slice(0,80):'',id:e.id})).slice(0,6)
+       })""")
      else:result['modal_visible']=False
     result['page_errors']=errors
     if kind=='categorized':
