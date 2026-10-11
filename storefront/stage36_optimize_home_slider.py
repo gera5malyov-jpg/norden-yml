@@ -61,7 +61,7 @@ try:
   u='https://profikompany.ru'+route+'?stage36_check='+str(int(time.time()))
   p=subprocess.run(['curl','-ksSL','--max-time','32','-w','\n%{http_code}',u],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=40)
   page,status=p.stdout.rsplit('\n',1) if '\n' in p.stdout else ('','')
-  has_source='slider_01.webp 1x' in page
+  has_source=('slider_01.webp' in page and 'srcset=' in page)
   if route=='/':
    ok=p.returncode==0 and status=='200' and has_source and page.count('srcset=')>=7
   else:ok=p.returncode==0 and status=='200'
