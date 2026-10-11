@@ -37,7 +37,14 @@ def run():
   private=d+'/id'
   subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',private],check=True)
   pub=Path(private+'.pub').read_text().strip()
-  resp=request_json('https://api-ms.netangels.ru/api/v1/cloud/vms/{}/ssh/create/'.format(VM_ID),'POST',json.dumps({'key':pub,'name':'stage41-audit-'+os.getenv('GITHUB_RUN_ID','audit')}).encode(),headers)
+  try:
+   resp=request_json('https://api-ms.netangels.ru/api/v1/cloud/vms/{}/ssh/create/'.format(VM_ID),'POST',json.dumps({'key':pub,'name':'stage41-audit-'+os.getenv('GITHUB_RUN_ID','audit')}).encode(),headers)
+  except Exception as e:
+   import urllib.error
+   if isinstance(e,urllib.error.HTTPError):
+    details=e.read().decode('utf-8','replace')
+    print('STAGE41_SSH_API_ERROR='+json.dumps({'status':e.code,'detail':details[:500]}),flush=True)
+   raise
   kid=resp.get('id')
   if not kid:raise RuntimeError('Temporary SSH key registration failed')
   try:
