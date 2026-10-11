@@ -1,6 +1,8 @@
 name: Storefront Stage 29 - Mobile homepage LCP probe
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "24 4 * * 1"
   push:
     branches: [main]
     paths:
