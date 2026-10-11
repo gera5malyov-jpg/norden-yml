@@ -34,6 +34,9 @@ for rel in ['wa-data/public/site/themes/pureMegapolis42/index.html','wa-data/pub
   if windows and a<=windows[-1][1]+2:windows[-1]=(windows[-1][0],max(windows[-1][1],b))
   else:windows.append((a,b))
  print('STAGE52_LINES='+json.dumps({'file':rel,'length':len(lines),'windows':[{'start':a+1,'lines':lines[a:b][:80]} for a,b in windows[:15]]},ensure_ascii=False),flush=True)
+ if rel.endswith('/index.html'):
+  print('STAGE52_MODAL_BLOCK='+json.dumps({'lines':[{'n':i+1,'text':line} for i,line in enumerate(lines) if 248<=i+1<=323]},ensure_ascii=False),flush=True)
+
 
 PY
 
