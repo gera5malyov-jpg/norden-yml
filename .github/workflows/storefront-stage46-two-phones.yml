@@ -1,0 +1,28 @@
+name: Storefront Stage 46 - Both phone numbers consistently visible
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage46-two-phones.yml'
+      - 'storefront/stage46_two_phone_consistency.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-product-and-header-contacts
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 11
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check patch syntax
+        run: python -m py_compile storefront/stage46_two_phone_consistency.py
+      - name: Back up templates, add both numbers and verify live storefront
+        run: python storefront/stage46_two_phone_consistency.py
