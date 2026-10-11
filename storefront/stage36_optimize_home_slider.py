@@ -40,7 +40,7 @@ try:
   target=img.with_suffix('.webp')
   st=img.stat()
   tmp=temp/target.name
-  cp=subprocess.run(['cwebp','-quiet','-q','84','-m','5','-mt',str(img),'-o',str(tmp)],capture_output=True,text=True,timeout=55)
+  cp=subprocess.run(['cwebp','-quiet','-q','84','-m','5','-mt',str(img),'-o',str(tmp)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=55)
   if cp.returncode!=0 or not tmp.exists() or tmp.read_bytes()[:4]!=b'RIFF' or tmp.read_bytes()[8:12]!=b'WEBP':
    raise RuntimeError('WebP encode failed: '+img.name+' '+cp.stderr[-160:])
   if tmp.stat().st_size>st.st_size*0.83:
@@ -59,7 +59,7 @@ try:
  checks=[]
  for route in ('/','/category/kompyuternye-kresla/','/order/'):
   u='https://profikompany.ru'+route+'?stage36_check='+str(int(time.time()))
-  p=subprocess.run(['curl','-ksSL','--max-time','32','-w','\n%{http_code}',u],capture_output=True,text=True,timeout=40)
+  p=subprocess.run(['curl','-ksSL','--max-time','32','-w','\n%{http_code}',u],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=40)
   page,status=p.stdout.rsplit('\n',1) if '\n' in p.stdout else ('','')
   has_source='slider_01.webp 1x' in page
   if route=='/':
@@ -70,7 +70,7 @@ try:
   raise RuntimeError('Public page smoke test failed: '+json.dumps(checks,ensure_ascii=False))
  for n in [1,4,7]:
   url='https://profikompany.ru/wa-data/public/site/themes/pureMegapolis42/img/slider/slider_%02d.webp'%n
-  p=subprocess.run(['curl','-ksSI','--max-time','24',url],capture_output=True,text=True,timeout=30)
+  p=subprocess.run(['curl','-ksSI','--max-time','24',url],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=30)
   if ' 200' not in p.stdout.splitlines()[0]:raise RuntimeError('WebP delivery failed: '+url)
  saved=sum(x['png_bytes']-x['webp_bytes'] for x in results)
  print('STAGE36_APPLY='+json.dumps({'ok':True,'backup':str(backup),'saved_bytes':saved,'slides':results,'checks':checks},ensure_ascii=False))
@@ -105,7 +105,7 @@ def run():
      input=REMOTE,text=True,capture_output=True,timeout=240)
    for line in p.stdout.splitlines():
     if line.startswith('STAGE36_'):print(line,flush=True)
-   if p.returncode:raise RuntimeError('SEO update failed '+p.stdout[-1300:]+' '+p.stderr[-400:])
+   if p.returncode:raise RuntimeError('Slider optimization failed '+p.stdout[-1300:]+' '+p.stderr[-400:])
   finally:
    try:
     request_json('https://api-ms.netangels.ru/api/v1/cloud/vms/{}/ssh/{}/'.format(VM_ID,kid),'DELETE',None,hdr)
