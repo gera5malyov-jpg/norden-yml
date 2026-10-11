@@ -83,5 +83,34 @@ with sync_playwright() as p:
     results.append(result)
     print('STAGE29_HOME='+json.dumps(result,ensure_ascii=False),flush=True)
     ctx.close()
+  # Post-optimization visual and conversion CTA check, anonymous and read-only.
+  for mode in ('desktop','mobile'):
+    mobile=(mode=='mobile')
+    ctx=browser.new_context(viewport={'width':390 if mobile else 1365,'height':844 if mobile else 900},
+      is_mobile=mobile,has_touch=mobile,locale='ru-RU')
+    page=ctx.new_page()
+    js_errors=[]
+    page.on('pageerror',lambda e:js_errors.append(type(e).__name__))
+    result={'mode':mode}
+    try:
+      res=page.goto('https://profikompany.ru/stul-dlya-posetiteley-rs42-chernyy-karkas-tkan-chernaya/',
+        wait_until='domcontentloaded',timeout=60000)
+      link=page.locator('.megapolis-purchase-consultation a')
+      result['product_http']=res.status if res else None
+      result['consultation_link_count']=link.count()
+      if link.count():
+        link.first.click(timeout=15000)
+        page.wait_for_timeout(950)
+        result['current_hash']='#callback-modal' in page.url
+        result['modal_visible']=page.locator('#callback-modal:visible').count()>0
+        result['popup_visible']=page.locator('.mfp-wrap:visible,.fancybox-container:visible,.modal:visible').count()>0
+        result['visible_form_count']=page.locator('form:visible').count()
+        page.screenshot(path=OUT+'/'+mode+'-product-callback.png',full_page=False)
+      result['page_error_types']=js_errors
+    except Exception as e:
+      result['error_type']=type(e).__name__
+      result['error_message']=str(e).splitlines()[0][:200]
+    print('STAGE29_CALLBACK='+json.dumps(result,ensure_ascii=False),flush=True)
+    ctx.close()
   browser.close()
 with open(OUT+'/results.json','w',encoding='utf-8') as f:json.dump(results,f,ensure_ascii=False,indent=2)
