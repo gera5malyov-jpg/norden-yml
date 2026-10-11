@@ -1,79 +1,66 @@
 #!/usr/bin/env python3
-"""Anonymous mobile/desktop product purchase information and callback UI check.
-
-Never submits a callback, cart, checkout or an order.
-"""
+"""Strict anonymous mobile/desktop verification of deduplicated purchase information."""
 import json,os
 from playwright.sync_api import sync_playwright
-origin='https://profikompany.ru'
-routes=[
+ORIGIN='https://profikompany.ru'
+cases=[
  ('categorized','/stul-dlya-posetiteley-rs42-chernyy-karkas-tkan-chernaya/'),
- ('uncategorized','/stul-sevyn-bukle-kofeynyy-2-sht/')
+ ('uncategorized','/stul-sevyn-bukle-kofeynyy-2-sht/'),
 ]
-strict=os.getenv('STRICT_CONVERSION_CHECK')=='1'
-tests=[]
-with sync_playwright() as p:
- browser=p.chromium.launch(channel='chrome',headless=True,args=['--no-sandbox'])
- for mode in ['mobile','desktop']:
-  for kind,route in routes:
-   mobile=mode=='mobile'
-   ctx=browser.new_context(viewport={'width':390 if mobile else 1365,'height':844 if mobile else 900},device_scale_factor=1,is_mobile=mobile,has_touch=mobile,locale='ru-RU')
+results=[]
+with sync_playwright() as pw:
+ browser=pw.chromium.launch(channel='chrome',headless=True,args=['--no-sandbox'])
+ for mode in ('mobile','desktop'):
+  mobile=(mode=='mobile')
+  for kind,path in cases:
+   ctx=browser.new_context(
+    viewport={'width':390 if mobile else 1365,'height':844 if mobile else 900},
+    device_scale_factor=1,is_mobile=mobile,has_touch=mobile,locale='ru-RU')
    page=ctx.new_page()
-   errors=[];page.on('pageerror',lambda x:errors.append(str(x)[:150]))
-   result={'mode':mode,'kind':kind,'url':route}
+   errors=[]
+   page.on('pageerror',lambda e:errors.append(str(e)[:140]))
+   result={'mode':mode,'kind':kind,'path':path}
    try:
-    resp=page.goto(origin+route,wait_until='domcontentloaded',timeout=60000)
-    page.wait_for_timeout(800)
+    resp=page.goto(ORIGIN+path,wait_until='domcontentloaded',timeout=60000)
+    page.wait_for_timeout(900)
     result['status']=resp.status if resp else None
-    selectors={
+    fields={
      'trust':'.product-page__cart > .megapolis-purchase-trust',
-     'duplicated_text':'.product-page__cart > .product-page__buy-help',
-     'duplicated_icons':'.product-page__cart > .features.features--inline.features--circle',
-     'consultation':'.megapolis-purchase-consultation a[href="#callback-modal"]',
+     'repeat_text':'.product-page__cart > .product-page__buy-help',
+     'repeat_icons':'.product-page__cart > .features.features--inline.features--circle',
+     'broken_consultation':'.megapolis-purchase-consultation',
      'buy_form':'form#s-product-form input[type="submit"]',
+     'price':'.product-price',
+     'product_description':'.product-tabs',
     }
-    result['elements']={k:page.locator(v).count() for k,v in selectors.items()}
-    result['visible']={k:page.locator(v).first.is_visible() if page.locator(v).count() else False for k,v in selectors.items()}
-    result['trust_links'] = page.locator('.megapolis-purchase-trust a').count()
-    result['horizontal_overflow'] = page.evaluate('document.documentElement.scrollWidth > window.innerWidth + 3')
-    if kind=='categorized':
-     link=page.locator(selectors['consultation'])
-     if link.count():
-      link.click(timeout=10000)
-      page.wait_for_timeout(400)
-      result['modal_visible']=page.locator('#callback-modal').first.is_visible() if page.locator('#callback-modal').count() else False
-      result['modal_hash']=page.evaluate('location.hash')[:35]
-      result['callback_probe']=page.evaluate("""() => ({
-        callbackCount:document.querySelectorAll('#callback-modal').length,
-        callbackSnippet:(document.querySelector('#callback-modal')?.outerHTML || '').slice(0,380),
-        visibleDialogs:[...document.querySelectorAll('.modal,[role="dialog"],.fancybox-container,.iziModal, .mfp-wrap')]
-         .filter(e=>e.getBoundingClientRect().width>0 && getComputedStyle(e).visibility!=='hidden')
-         .map(e=>({tag:e.tagName,cls:typeof e.className==='string'?e.className.slice(0,100):'',id:e.id,display:getComputedStyle(e).display})).slice(0,8),
-        classnames:[...document.querySelectorAll('a[href="#callback-modal"]')].slice(0,8).map(e=>e.className)
-      })""")
-      if not result['modal_visible'] and page.locator('.phones__link--callback').count():
-       page.locator('.phones__link--callback').first.click(timeout=9000)
-       page.wait_for_timeout(550)
-       result['header_callback_probe']=page.evaluate("""() => ({
-         callbackVisible:!!document.querySelector('#callback-modal') && document.querySelector('#callback-modal').getBoundingClientRect().width>0,
-         dialogs:[...document.querySelectorAll('.modal,[role="dialog"],.fancybox-container,.mfp-wrap')].filter(e=>e.getBoundingClientRect().width>0).map(e=>({cls:typeof e.className==='string'?e.className.slice(0,80):'',id:e.id})).slice(0,6)
-       })""")
-     else:result['modal_visible']=False
+    result['counts']={key:page.locator(css).count() for key,css in fields.items()}
+    result['no_horizontal_scroll']=page.evaluate(
+      'document.documentElement.scrollWidth <= window.innerWidth + 3')
+    result['trust_phone_link']=page.locator(
+      '.megapolis-purchase-trust a[href="tel:+78122449264"]').count()
+    result['trust_delivery_link']=page.locator(
+      '.megapolis-purchase-trust a[href="/dostavka/"]').count()
+    result['trust_payment_link']=page.locator(
+      '.megapolis-purchase-trust a[href="/oplata/"]').count()
     result['page_errors']=errors
+    counts=result['counts']
+    normal=result['status']==200 and counts['buy_form']>=1 and counts['price']>=1 and result['no_horizontal_scroll'] and not errors
     if kind=='categorized':
-     result['passed']=bool(
-       result['status']==200 and result['elements']['trust']==1 and result['elements']['duplicated_text']==0 and
-       (result['elements']['duplicated_icons']==0 or not result['visible']['duplicated_icons']) and
-       result['elements']['consultation']==1 and result['elements']['buy_form']>=1 and
-       not result['horizontal_overflow'] and not errors
-     )
-    else:result['passed']=bool(result['status']==200 and not errors)
-   except Exception as e:
-    result['error']=type(e).__name__+': '+str(e).split('\n')[0][:180]
+     result['passed']=bool(normal and counts['trust']==1 and
+       counts['repeat_text']==0 and counts['repeat_icons']==0 and
+       counts['broken_consultation']==0 and result['trust_phone_link']==1 and
+       result['trust_delivery_link']==1 and result['trust_payment_link']==1)
+    else:
+     result['passed']=bool(normal and counts['trust']==0 and counts['repeat_text']==0
+       and counts['repeat_icons']==1 and counts['broken_consultation']==0)
+   except Exception as exc:
+    result['error']=type(exc).__name__+': '+str(exc).splitlines()[0][:160]
     result['passed']=False
-   tests.append(result)
-   print('STAGE43_VISUAL='+json.dumps(result,ensure_ascii=False),flush=True)
+   print('STAGE43_FINAL='+json.dumps(result,ensure_ascii=False),flush=True)
+   results.append(result)
    ctx.close()
  browser.close()
-print('STAGE43_SUMMARY='+json.dumps({'total':len(tests),'passed':sum(x['passed'] for x in tests)},ensure_ascii=False))
-if strict and not all(x['passed'] for x in tests):raise SystemExit(2)
+summary={'total':len(results),'passed':sum(x['passed'] for x in results)}
+print('STAGE43_FINAL_SUMMARY='+json.dumps(summary,ensure_ascii=False),flush=True)
+if os.getenv('STRICT_CONVERSION_CHECK')=='1' and not all(x['passed'] for x in results):
+ raise SystemExit(2)
