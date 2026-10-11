@@ -27,12 +27,12 @@ items=[]
 for id in ids:
  directory=cat_root/str(id)
  candidates=sorted(directory.glob('thumbnail_*.png'))
- if len(candidates)!=1:raise RuntimeError('Expected exactly one category thumbnail png for '+str(id)+'; found '+str(len(candidates)))
- png=candidates[0]
- webp=png.with_suffix('.webp')
- if webp.exists():raise RuntimeError('Companion webp already exists for '+str(id))
- if not 5000<=png.stat().st_size<=3000000:raise RuntimeError('Suspicious thumbnail file size for '+str(id))
- items.append((id,png,webp))
+ if not (1<=len(candidates)<=8):raise RuntimeError('Unexpected thumbnail count for '+str(id)+'; found '+str(len(candidates)))
+ for png in candidates:
+  webp=png.with_suffix('.webp')
+  if webp.exists():raise RuntimeError('Companion webp already exists for '+str(id))
+  if not 5000<=png.stat().st_size<=3000000:raise RuntimeError('Suspicious thumbnail file size for '+str(id))
+  items.append((id,png,webp))
 check=' || '.join('$_category.id == '+str(id) for id in ids)
 replacement=('''{* megapolis-category-webp-v1: lighter existing category thumbnails, original PNGs retained *}
                   {if ('''+check+''') && strpos($_image, '.png') !== false}
