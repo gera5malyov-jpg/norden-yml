@@ -1,0 +1,24 @@
+name: Storefront Stage 35 - Conversion and media sources
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage35-conversion-audit.yml'
+      - 'storefront/stage35_conversion_sources.py'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage35_conversion_sources.py
+      - name: Read-only audit of sales templates and image conversion capabilities
+        run: python storefront/stage35_conversion_sources.py
