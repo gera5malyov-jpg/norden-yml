@@ -1,0 +1,26 @@
+name: Storefront Stage 48 - Buy redirect isolated preflight
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage48-buy-preflight.yml'
+      - 'storefront/stage48_buy_redirect_browser_qa.py'
+      - 'storefront/assets/megapolis-buy-to-cart-v1.js'
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage48_buy_redirect_browser_qa.py
+      - run: python -m pip install playwright==1.55.0
+      - name: Test new redirect logic locally in isolated browser, without site modifications
+        env:
+          INJECT_BUY_SCRIPT: '1'
+        run: python storefront/stage48_buy_redirect_browser_qa.py
