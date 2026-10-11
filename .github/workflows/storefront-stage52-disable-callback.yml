@@ -1,0 +1,45 @@
+name: Storefront Stage 52 - Remove callback form and triggers
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage52-disable-callback.yml'
+      - 'storefront/stage52_disable_callback.py'
+      - 'storefront/stage52_callback_browser_qa.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-stage52-callback
+  cancel-in-progress: false
+jobs:
+  deploy-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify Python scripts
+        run: python -m py_compile storefront/stage52_disable_callback.py storefront/stage52_callback_browser_qa.py
+      - name: Back up three production Smarty templates, remove callback and smoke-test
+        run: python storefront/stage52_disable_callback.py
+      - name: Install browser acceptance dependency
+        run: python -m pip install playwright==1.55.0
+      - name: Verify mobile and desktop pages, contacts, cart and callback removal
+        run: python storefront/stage52_callback_browser_qa.py
+      - name: Restore all three production templates if acceptance failed
+        if: failure()
+        run: |
+          if [ -f stage52-state.json ]; then python storefront/stage52_disable_callback.py --rollback; fi
+      - name: Save screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage52-callback-removal-evidence
+          path: storefront-stage52-callback/
+          retention-days: 14
+          if-no-files-found: warn
