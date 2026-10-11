@@ -65,7 +65,7 @@ try:
  for route in ('/','/order/','/garantiya/','/category/kompyuternye-kresla/','/stul-dlya-posetiteley-rs42-chernyy-karkas-tkan-chernaya/'):
   p=subprocess.run(['curl','-ksSL','--max-time','35','-w','\n%{http_code}',
    'https://profikompany.ru'+route+'?stage52_verify='+str(os.getpid())],
-   capture_output=True,text=True,timeout=42)
+   stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=42)
   html,status=p.stdout.rsplit('\n',1) if '\n' in p.stdout else ('','')
   visible_call='Заказать звонок' in html or 'phones__link--callback' in html or 'id="callback-modal"' in html
   spb='tel:+7(812)2449264' in html
