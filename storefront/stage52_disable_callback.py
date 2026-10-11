@@ -15,8 +15,8 @@ root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
 theme=root/'wa-data/public/site/themes/pureMegapolis42'
 targets=[
  (theme/'index.html',
- "{if $theme_settings.main__easyfeedback == 'default'}",
- "{if $theme_settings.main__easyfeedback == 'default' && $wa->domainUrl() != 'https://profikompany.ru'}"),
+ "{* CALLBACK MODAL *}\n{if $theme_settings.main__easyfeedback == 'default'}",
+ "{* CALLBACK MODAL *}\n{if $wa->domainUrl() != 'https://profikompany.ru'}\n{if $theme_settings.main__easyfeedback == 'default'}"),
  (theme/'layouts/layout.footer.html',
  "{if !empty($_company__callback_text) && !empty($theme_settings.footer__callback)}",
  "{if !empty($_company__callback_text) && !empty($theme_settings.footer__callback) && $wa->domainUrl() != 'https://profikompany.ru'}"),
@@ -36,6 +36,12 @@ for f,old,new in targets:
   raise RuntimeError('Two-phone block absent; refusing to patch')
  original[f]=s
  updated[f]=s.replace(old,new,1)
+ if f.name=='index.html':
+  ending_old='{/if}\n\n{* FLY CART *}'
+  ending_new='{/if}\n{/if}\n\n{* FLY CART *}'
+  if s.count(ending_old)!=1 or "{elseif $theme_settings.main__easyfeedback == 'dialog'}" not in s:
+   raise RuntimeError('Unexpected callback modal closing block')
+  updated[f]=updated[f].replace(ending_old,ending_new,1)
 print('STAGE52_PREFLIGHT='+json.dumps({'files':[str(f.relative_to(root)) for f in original]},ensure_ascii=False),flush=True)
 base=root.parent/'storefront-backups'
 base.mkdir(mode=0o700,parents=True,exist_ok=True)
@@ -90,7 +96,7 @@ root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
 theme=root/'wa-data/public/site/themes/pureMegapolis42'
 folder=pathlib.Path("""+json.dumps(backup_folder)+""")
 targets=[
- (theme/'index.html',folder/'00-index.html',"{if $theme_settings.main__easyfeedback == 'default' && $wa->domainUrl() != 'https://profikompany.ru'}"),
+ (theme/'index.html',folder/'00-index.html',"{if $wa->domainUrl() != 'https://profikompany.ru'}"),
  (theme/'layouts/layout.footer.html',folder/'01-layout.footer.html',"{if !empty($_company__callback_text) && !empty($theme_settings.footer__callback) && $wa->domainUrl() != 'https://profikompany.ru'}"),
  (theme/'components/component.phones.html',folder/'02-component.phones.html',"{if !empty($_company__callback_text) && $wa->domainUrl() != 'https://profikompany.ru'}")
 ]
