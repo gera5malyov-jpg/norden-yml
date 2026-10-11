@@ -1,0 +1,23 @@
+name: Storefront Stage 47 - Buy button session cart probe
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage47-buy-probe.yml'
+      - 'storefront/stage47_buy_cart_probe.py'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage47_buy_cart_probe.py
+      - run: python -m pip install playwright==1.55.0
+      - name: Test isolated cart add - never submit an order
+        run: python storefront/stage47_buy_cart_probe.py
