@@ -57,7 +57,8 @@ try{
   exec('curl -ksSL --max-time 35 -o '.escapeshellarg($target)." -w '%{http_code}' ".escapeshellarg($url),$log,$rc);
   $body=@file_get_contents($target);@unlink($target);
   $status=trim(implode('',$log));
-  $n=$body!==false?substr_count($body,'href="tel:+74996776332"'):0;
+  $stored=$model->getById($id);
+  $n=$stored?substr_count((string)$stored['content'],'href="tel:+74996776332"'):0;
   $ok=$rc===0 && $status==='200' && $n===$t['count'] &&
       $body!==false && strpos($body,'href="tel:+78122449264"')!==false &&
       strpos($body,'rel="canonical"')!==false;
