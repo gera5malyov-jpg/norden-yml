@@ -1,0 +1,44 @@
+name: Storefront Stage 48 - Buy button adds item and opens cart
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage48-buy-redirect-deploy.yml'
+      - 'storefront/stage48_deploy_buy_redirect.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-product-buy-redirect
+  cancel-in-progress: false
+jobs:
+  deploy-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate patch code and JavaScript
+        run: |
+          python -m py_compile storefront/stage48_deploy_buy_redirect.py storefront/stage48_buy_redirect_browser_qa.py
+          node --check storefront/assets/megapolis-buy-to-cart-v1.js
+      - name: Install isolated browser test runner
+        run: python -m pip install playwright==1.55.0
+      - name: Test proposed Buy redirect in browser before changing the storefront
+        env:
+          INJECT_BUY_SCRIPT: '1'
+        run: python storefront/stage48_buy_redirect_browser_qa.py
+      - name: Back up and deploy Buy to cart navigation
+        run: python storefront/stage48_deploy_buy_redirect.py
+      - name: Test actual storefront on mobile and desktop after deployment
+        env:
+          INJECT_BUY_SCRIPT: '0'
+        run: python storefront/stage48_buy_redirect_browser_qa.py
+      - name: Restore previous theme and remove new script if post-deploy verification fails
+        if: failure()
+        run: |
+          if [ -f stage48-state.json ]; then python storefront/stage48_deploy_buy_redirect.py --rollback; fi
