@@ -11,7 +11,7 @@ permissions:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 11
     env:
       NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
     steps:
