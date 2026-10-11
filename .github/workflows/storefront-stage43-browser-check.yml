@@ -19,4 +19,6 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install playwright==1.55.0
       - name: Check mobile and desktop purchase copy and callback without submitting
+        env:
+          STRICT_CONVERSION_CHECK: '1'
         run: python storefront/stage43_purchase_info_browser_check.py
