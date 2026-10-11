@@ -1,0 +1,28 @@
+name: Storefront Stage 37 - Product purchase trust and SEO
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage37-product-trust.yml'
+      - 'storefront/stage37_product_trust_seo.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-conversion-theme
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 11
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate deployment script
+        run: python -m py_compile storefront/stage37_product_trust_seo.py
+      - name: Add buyer reassurance and repair product metadata with verified rollback
+        run: python storefront/stage37_product_trust_seo.py
