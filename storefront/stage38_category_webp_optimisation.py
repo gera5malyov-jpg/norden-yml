@@ -44,26 +44,26 @@ updated=orig.replace(needle,replacement,1)
 folder=root.parent/'storefront-backups'/('stage38-category-webp-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+str(os.getpid()))
 folder.mkdir(mode=0o700,parents=True)
 backup=folder/'layout.categories.html'
-shutil.copy2(file,backup);os.chmod(backup,0o600)
+shutil.copy2(str(file),str(backup));os.chmod(str(backup),0o600)
 created=[];theme_written=False
 try:
  for cid,png,webp in items:
   tmp=webp.with_name('.stage38-'+webp.name)
-  proc=subprocess.run([cwebp,'-quiet','-q','75','-m','4',str(png),'-o',str(tmp)],capture_output=True,text=True,timeout=28)
+  proc=subprocess.run([cwebp,'-quiet','-q','75','-m','4',str(png),'-o',str(tmp)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=28)
   if proc.returncode or not tmp.is_file():raise RuntimeError('WebP conversion failed for category '+str(cid)+': '+proc.stderr[-160:])
   if tmp.stat().st_size>=png.stat().st_size:
    tmp.unlink();raise RuntimeError('WebP not smaller for category '+str(cid))
-  os.chmod(tmp,0o644)
-  st=png.stat();os.chown(tmp,st.st_uid,st.st_gid)
-  os.replace(tmp,webp);created.append(webp)
+  os.chmod(str(tmp),0o644)
+  st=png.stat();os.chown(str(tmp),st.st_uid,st.st_gid)
+  os.replace(str(tmp),str(webp));created.append(webp)
  stat=file.stat()
  with tempfile.NamedTemporaryFile('w',encoding='utf-8',dir=str(file.parent),prefix='.stage38-',delete=False) as f:
   f.write(updated);temp=f.name
- os.chmod(temp,stat.st_mode);os.chown(temp,stat.st_uid,stat.st_gid);os.replace(temp,file);theme_written=True
+ os.chmod(temp,stat.st_mode);os.chown(temp,stat.st_uid,stat.st_gid);os.replace(str(temp),str(file));theme_written=True
  checks=[]
  for route,has_webp in (('/',True),('/category/kompyuternye-kresla/',False),('/order/',False),('/stul-dlya-posetiteley-rs42-chernyy-karkas-tkan-chernaya/',False)):
   cmd=['curl','-ksSL','--max-time','37','-w','\n%{http_code}','https://profikompany.ru'+route+'?stage38_verify='+str(os.getpid())]
-  p=subprocess.run(cmd,capture_output=True,text=True,timeout=48)
+  p=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=48)
   h,status=p.stdout.rsplit('\n',1) if '\n' in p.stdout else ('','')
   targeted=bool(re.search(r'skcatimage/4907/thumbnail_[^"]+\.webp',h))
   ok=(p.returncode==0 and status=='200' and (not has_webp or targeted))
@@ -74,7 +74,7 @@ try:
  'old_bytes':sum(x['png'] for x in stats),'new_bytes':sum(x['webp'] for x in stats),
  'first_three':stats[:3],'checks':checks},ensure_ascii=False))
 except Exception as e:
- if theme_written:shutil.copy2(backup,file)
+ if theme_written:shutil.copy2(str(backup),str(file))
  for path in created:
   if path.is_file():path.unlink()
  print('STAGE38_ROLLBACK='+json.dumps({'reason':str(e),'template_restored':theme_written,'companions_deleted':len(created)},ensure_ascii=False))
