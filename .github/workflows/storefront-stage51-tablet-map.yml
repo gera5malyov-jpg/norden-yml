@@ -1,0 +1,27 @@
+name: Storefront Stage 51 - Fix tablet contact map overflow
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage51-tablet-map.yml'
+      - 'storefront/stage51_tablet_contact_map_width.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-theme-tablet
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage51_tablet_contact_map_width.py
+      - name: Back up contact map layout and stop tablet overflow
+        run: python storefront/stage51_tablet_contact_map_width.py
