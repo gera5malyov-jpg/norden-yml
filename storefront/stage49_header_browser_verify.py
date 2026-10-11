@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only Chrome visual and interaction audit after mobile header changes."""
+"""Read-only Chrome visual and interaction audit after mobile header and map fixes."""
 import json,os
 from playwright.sync_api import sync_playwright
 out='storefront-stage49-header'
