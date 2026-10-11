@@ -27,6 +27,21 @@ $targets=array(
 );
 $from='<a href="tel:+78122449264">+7 (812) 244-92-64</a>';
 $to='<a href="tel:+78122449264">+7 (812) 244-92-64</a> (Санкт-Петербург) или <a href="tel:+74996776332">+7 (499) 677-63-32</a> (Москва)';
+// Safe re-run: the two pages may already be updated by an earlier successful run.
+$all_present=true;
+foreach($targets as $id=>$t){
+ $entry=$model->getById($id);
+ if(!$entry || $entry['domain']!=='profikompany.ru' || $entry['url']!==$t['url'] ||
+    substr_count((string)$entry['content'],'tel:+74996776332')!==$t['count'] ||
+    substr_count((string)$entry['content'],'tel:+78122449264')!==$t['count']){
+   $all_present=false;
+   break;
+ }
+}
+if($all_present){
+ echo 'STAGE49_ALREADY_APPLIED='.json_encode(array('ok'=>true,'pages'=>array_keys($targets),'writes'=>0),JSON_UNESCAPED_UNICODE)."\n";
+ exit(0);
+}
 $old=array();$changes=array();
 foreach($targets as $id=>$target){
  $r=$model->getById($id);
