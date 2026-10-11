@@ -1,0 +1,27 @@
+name: Storefront Stage 45 - Remove nonworking callback link
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage45-remove-broken-callback.yml'
+      - 'storefront/stage45_remove_broken_consultation.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-product-conversion
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage45_remove_broken_consultation.py
+      - name: Remove broken callback link and verify remaining buying controls
+        run: python storefront/stage45_remove_broken_consultation.py
