@@ -1,0 +1,27 @@
+name: Storefront Stage 36 - Homepage banner image optimization
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage36-home-slider-webp.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-theme-performance
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate guarded image optimization
+        run: python -m py_compile storefront/stage36_optimize_home_slider.py
+      - name: Convert 7 banners to WebP, validate storefront, rollback on errors
+        run: python storefront/stage36_optimize_home_slider.py
