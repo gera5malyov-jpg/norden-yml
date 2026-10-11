@@ -1,0 +1,28 @@
+name: Storefront Stage 39 - Restore responsive slider height
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage39-mobile-slider-fix.yml'
+      - 'storefront/stage39_mobile_slider_layout.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-theme-performance
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate responsive slider correction
+        run: python -m py_compile storefront/stage39_mobile_slider_layout.py
+      - name: Restore automatic image aspect ratio, retain WebP files
+        run: python storefront/stage39_mobile_slider_layout.py
