@@ -40,8 +40,8 @@ def run():
   try:
    resp=request_json('https://api-ms.netangels.ru/api/v1/cloud/vms/{}/ssh/create/'.format(VM_ID),'POST',json.dumps({'key':pub,'name':'stage41-audit-'+os.getenv('GITHUB_RUN_ID','audit')}).encode(),headers)
   except Exception as e:
-   import urllib.error
-   if isinstance(e,urllib.error.HTTPError):
+   from urllib.error import HTTPError
+   if isinstance(e,HTTPError):
     details=e.read().decode('utf-8','replace')
     print('STAGE41_SSH_API_ERROR='+json.dumps({'status':e.code,'detail':details[:500]}),flush=True)
    raise
