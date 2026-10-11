@@ -21,7 +21,18 @@ with sync_playwright() as pw:
     events.append({'event':'request','path':urlparse(req.url).path,'method':req.method})
   def recv(resp):
    if '/cart/' in resp.url or '/order/' in resp.url:
-    events.append({'event':'response','path':urlparse(resp.url).path,'status':resp.status})
+    rowdata={'event':'response','path':urlparse(resp.url).path,'status':resp.status}
+    if '/cart/add/' in resp.url:
+     try:
+      obj=resp.json()
+      if isinstance(obj,dict):
+       rowdata['response_keys']=list(obj.keys())[:15]
+       rowdata['status_field']=obj.get('status')
+       rowdata['errors_present']=bool(obj.get('errors'))
+       rowdata['data_type']=type(obj.get('data')).__name__
+      else:rowdata['response_type']=type(obj).__name__
+     except Exception as e:rowdata['response_parse_error']=type(e).__name__
+    events.append(rowdata)
   page.on('request',sent);page.on('response',recv)
   row={'mode':kind}
   try:
