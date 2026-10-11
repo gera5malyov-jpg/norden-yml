@@ -1,0 +1,28 @@
+name: Storefront Stage 38 - Speed up homepage category thumbnails
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage38-category-webp.yml'
+      - 'storefront/stage38_category_webp_optimisation.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-homepage-category-images
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile guarded deployment script
+        run: python -m py_compile storefront/stage38_category_webp_optimisation.py
+      - name: Back up theme, create WebP thumbnails, verify checkout, roll back on failure
+        run: python storefront/stage38_category_webp_optimisation.py
