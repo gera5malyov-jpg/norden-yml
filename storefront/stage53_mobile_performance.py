@@ -93,4 +93,5 @@ def patch_index(source):
     css='<link href="{$wa_real_theme_url}css/user.css?v{$wa_theme_version}" rel="stylesheet" />'
     return once(source,css,css+'''\n    {if $wa->domainUrl() == 'https://profikompany.ru'}
       <link href="{$wa_real_theme_url}css/megapolis-mobile-home.css?v=20261012" rel="stylesheet" />
+      <script src="{$wa_real_theme_url}js/megapolis-mobile-home.js?v=20261012" defer></script>
     {/if}''')

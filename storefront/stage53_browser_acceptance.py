@@ -58,7 +58,11 @@ with sync_playwright() as pw:
             rows.append({'width':width,'home':data})
             if width in (390,1365):
                 if width==390:
-                    page.locator('#megapolis-home-search').fill('РС42');page.locator('.megapolis-mobile-search button').click()
+                    page.locator('#megapolis-home-search').fill('РС42')
+                    page.wait_for_timeout(120)
+                    geometry=page.evaluate("""()=>{const b=document.querySelector('.megapolis-mobile-search button'),r=b.getBoundingClientRect(),h=document.querySelector('header.header:not(.header--fixed)').getBoundingClientRect();return {button:{top:r.top,bottom:r.bottom},header:{top:h.top,bottom:h.bottom},scrollY,hit:document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.tagName}}""")
+                    print('STAGE53_SEARCH_GEOMETRY='+json.dumps(geometry),flush=True)
+                    page.locator('.megapolis-mobile-search button').click()
                     page.wait_for_url('**/search/**',timeout=25000)
                     assert 'РС42' in page.locator('body').inner_text(),'Model search failed'
                 if width==1365:

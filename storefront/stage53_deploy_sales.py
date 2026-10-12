@@ -128,7 +128,7 @@ def main():
         state.unlink();return
     modules={name:server_module((BASE/name).read_text()) for name in ('stage53_mobile_performance.py','stage54_product_filters.py')}
     assets={}
-    for target,filename in [('css/megapolis-mobile-home.css','megapolis-mobile-home.css'),('js/megapolis-funnel-v2.js','megapolis-funnel-v2.js'),('css/megapolis-product-filter-v1.css','megapolis-product-filter-v1.css'),('js/megapolis-product-filter-v1.js','megapolis-product-filter-v1.js')]:
+    for target,filename in [('css/megapolis-mobile-home.css','megapolis-mobile-home.css'),('js/megapolis-mobile-home.js','megapolis-mobile-home.js'),('js/megapolis-funnel-v2.js','megapolis-funnel-v2.js'),('css/megapolis-product-filter-v1.css','megapolis-product-filter-v1.css'),('js/megapolis-product-filter-v1.js','megapolis-product-filter-v1.js')]:
         apps=('site','shop') if 'product-filter' in filename else ('site',)
         for app in apps:assets['wa-data/public/'+app+'/themes/pureMegapolis42/'+target]=(BASE/'assets'/filename).read_text()
     payload=base64.b64encode(json.dumps({'modules':modules,'assets':assets,'audited':AUDITED}).encode()).decode()
