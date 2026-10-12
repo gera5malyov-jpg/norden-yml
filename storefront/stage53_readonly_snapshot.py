@@ -18,7 +18,7 @@ with zipfile.ZipFile(b,'w',zipfile.ZIP_DEFLATED) as z:
   for f in (theme/'js').glob('*.js'):
    if f.is_file() and f.stat().st_size<400000:
     z.writestr(str(f.relative_to(root)),f.read_bytes())
- for rel in ('wa-apps/shop/js/frontend/order/form.js','wa-apps/shop/lib/classes/shopSitemapConfig.class.php'):
+ for rel in ('wa-apps/shop/js/frontend/order/form.js','wa-apps/shop/lib/config/shopSitemapConfig.class.php'):
   f=root/rel
   if f.is_file():z.writestr(rel,f.read_bytes())
 print('STAGE53_SOURCES='+base64.b64encode(b.getvalue()).decode())
@@ -34,7 +34,8 @@ $out=[];
 $out['feature_definitions']=$m->query("SELECT id,code,name,type,default_unit FROM shop_feature")->fetchAll();
 $out['categories']=$m->query("SELECT c.id,c.name,c.full_url,c.meta_title,c.meta_description,c.description,COUNT(p.id) products FROM shop_category c JOIN shop_product p ON p.category_id=c.id AND p.status=1 AND p.price>0 AND (p.count>0 OR p.count IS NULL) WHERE c.status=1 GROUP BY c.id ORDER BY products DESC LIMIT 40")->fetchAll();
 $out['products']=[];
-$rows=$m->query("SELECT p.id,p.name,p.url,p.category_id,p.price,p.count,p.image_id,p.description,p.summary,c.full_url AS category_url FROM shop_product p JOIN shop_category c ON p.category_id=c.id WHERE p.status=1 AND c.status=1 AND p.price>0 AND (p.count>0 OR p.count IS NULL) AND p.category_id IN (2195,288,2215,2267,267,275,1003) ORDER BY (p.description IS NULL OR TRIM(p.description)='') DESC,p.total_sales DESC,p.id DESC LIMIT 160")->fetchAll();
+$rows=[];
+foreach([285,438,271,4201,279,2150,440,4204,1003] as $cid){$rows=array_merge($rows,$m->query("SELECT p.id,p.name,p.url,p.category_id,p.status,p.price,p.count,p.image_id,p.description,p.summary,c.full_url AS category_url FROM shop_product p JOIN shop_category c ON p.category_id=c.id WHERE p.status=1 AND c.status=1 AND p.price>0 AND (p.count>0 OR p.count IS NULL) AND p.category_id=".(int)$cid." ORDER BY (p.description IS NULL OR TRIM(p.description)='') DESC,p.total_sales DESC,p.id DESC LIMIT 35")->fetchAll());}
 foreach($rows as $r){$p=new shopProduct($r['id']);$r['features']=$p->features;$r['skus']=[];foreach($p->skus as $sku){$r['skus'][]=array_intersect_key($sku,array_flip(['id','sku','name','price','count','available']));}$out['products'][]=$r;}
 $out['pages']=$m->query("SELECT id,name,full_url,content FROM shop_page WHERE full_url IN ('dostavka/','oplata/') AND domain='profikompany.ru'")->fetchAll();
 $out['paid_categories_90d']=$m->query("SELECT p.category_id,c.name,COUNT(DISTINCT o.id) paid_orders,SUM(i.price*i.quantity) item_revenue FROM shop_order o JOIN shop_order_params op ON op.order_id=o.id AND op.name='storefront' AND op.value LIKE '%profikompany.ru%' JOIN shop_order_items i ON i.order_id=o.id JOIN shop_product p ON p.id=i.product_id JOIN shop_category c ON c.id=p.category_id WHERE o.paid_date>=DATE_SUB(CURDATE(),INTERVAL 90 DAY) AND o.state_id NOT IN ('deleted','refunded') GROUP BY p.category_id,c.name ORDER BY item_revenue DESC LIMIT 15")->fetchAll();
