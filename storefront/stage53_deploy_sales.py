@@ -26,7 +26,7 @@ REMOTE=r'''set -eu
 python3 - <<'PY'
 import base64,hashlib,json,os,pathlib,shutil,subprocess,tempfile
 from datetime import datetime,timezone
-payload=json.loads(base64.b64decode('PAYLOAD_B64'))
+payload=json.loads(base64.b64decode('PAYLOAD_B64').decode('utf-8'))
 root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
 site='wa-data/public/site/themes/pureMegapolis42/'
 shop='wa-data/public/shop/themes/pureMegapolis42/'
