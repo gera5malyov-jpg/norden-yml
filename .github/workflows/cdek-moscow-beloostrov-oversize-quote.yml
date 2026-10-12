@@ -1,0 +1,95 @@
+name: CDEK Moscow to Beloostrov oversize quote
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cdek-moscow-beloostrov-oversize-quote.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CDEK_CLIENT_ID: ${{ secrets.CDEK_CLIENT_ID }}
+      CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
+    steps:
+      - name: Calculate one package 198x33x20 cm Moscow to Beloostrov
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os,urllib.request,urllib.parse,urllib.error,datetime
+          base="https://api.cdek.ru/v2"
+          client=os.getenv("CDEK_CLIENT_ID")
+          secret=os.getenv("CDEK_CLIENT_SECRET")
+          if not client or not secret:
+              raise RuntimeError("CDEK credentials not configured")
+          def call(path,payload=None,token=None,form=False):
+              h={"Accept":"application/json","User-Agent":"megapolis-cdek-quote/1.0"}
+              if token: h["Authorization"]="Bearer "+token
+              raw=None
+              if payload is not None:
+                  if form:
+                      h["Content-Type"]="application/x-www-form-urlencoded"
+                      raw=urllib.parse.urlencode(payload).encode()
+                  else:
+                      h["Content-Type"]="application/json; charset=utf-8"
+                      raw=json.dumps(payload,ensure_ascii=False).encode()
+              req=urllib.request.Request(base+path,headers=h,data=raw)
+              try:
+                  with urllib.request.urlopen(req,timeout=55) as r:
+                      return r.status,json.loads(r.read().decode())
+              except urllib.error.HTTPError as e:
+                  raw=e.read().decode("utf-8","replace")
+                  try: return e.code,json.loads(raw)
+                  except: return e.code,{"error":raw[:600]}
+          status,auth=call("/oauth/token",{"grant_type":"client_credentials","client_id":client,"client_secret":secret},form=True)
+          if status!=200 or not auth.get("access_token"): raise RuntimeError("Auth failed: HTTP "+str(status))
+          token=auth["access_token"]
+          city_results={}
+          for name in ["Москва","Белоостров","Санкт-Петербург","Сестрорецк"]:
+              status,data=call("/location/cities?"+urllib.parse.urlencode({"city":name,"country_codes":"RU","size":100}),token=token)
+              if status==200 and isinstance(data,list):
+                  exact=[z for z in data if z.get("city","").casefold()==name.casefold()]
+                  city_results[name]=[{"city":z.get("city"),"region":z.get("region"),"code":z.get("code"),"sub_region":z.get("sub_region")} for z in exact[:10]]
+              else:city_results[name]={"http":status,"response":data}
+          if not city_results.get("Москва"):raise RuntimeError("Moscow not found")
+          from_code=next((x["code"] for x in city_results["Москва"] if x["region"]=="Москва"),city_results["Москва"][0]["code"])
+          to_targets=[]
+          if city_results.get("Белоостров") and isinstance(city_results["Белоостров"],list):
+              to_targets.append(("Белоостров",city_results["Белоостров"][0]["code"]))
+          if city_results.get("Санкт-Петербург") and isinstance(city_results["Санкт-Петербург"],list):
+              to_targets.append(("Санкт-Петербург (ориентир для Белоострова)",city_results["Санкт-Петербург"][0]["code"]))
+          if city_results.get("Сестрорецк") and isinstance(city_results["Сестрорецк"],list):
+              to_targets.append(("Сестрорецк (ориентир)",city_results["Сестрорецк"][0]["code"]))
+          out={"checked_at_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),
+               "city_lookup":city_results,
+               "shipment":{"from":"Москва","destination":"Белоостров, ул. Рейдовая, 15","length_cm":198,"width_cm":33,
+                           "height_cm":20,"actual_weight_net_kg":5,"calculated_volume_m3":.13068,"volumetric_weight_kg":26.136},
+               "quotes":[]}
+          for target,code in to_targets:
+              for kg in [5,6]:
+                  for incl_ltl in [False,True]:
+                      body={"type":1,"from_location":{"code":from_code},"to_location":{"code":code},
+                            "packages":[{"weight":kg*1000,"length":198,"width":33,"height":20}],"lang":"rus"}
+                      if incl_ltl: body["additional_order_types"]=[2]
+                      http,ans=call("/calculator/tarifflist",body,token=token)
+                      tariffs=ans.get("tariff_codes",[]) if isinstance(ans,dict) else []
+                      dd=sorted([{
+                           "code":t.get("tariff_code"),"name":t.get("tariff_name"),
+                           "price_rub":t.get("delivery_sum"),"days_min":t.get("period_min"),"days_max":t.get("period_max"),
+                           "delivery_mode":t.get("delivery_mode"),"description":t.get("tariff_description"),
+                           "services":t.get("services")
+                         } for t in tariffs if t.get("delivery_mode")==1 and t.get("delivery_sum") is not None],
+                         key=lambda x:float(x["price_rub"]))
+                      out["quotes"].append({"destination":target,"to_code":code,"gross_assumed_kg":kg,
+                          "ltl_requested":incl_ltl,"http":http,"door_to_door":dd[:18],
+                          "errors":ans.get("errors") if isinstance(ans,dict) else None,
+                          "raw_message":ans.get("message") if isinstance(ans,dict) else None})
+          print("CDEK_RESULT_START")
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          print("CDEK_RESULT_END")
+          PY
