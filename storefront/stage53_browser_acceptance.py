@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Anonymous acceptance: layouts, successful cart event and untouched checkout."""
-import json,sys
+import json,os,sys
 from pathlib import Path
 from urllib.parse import urlparse
 from playwright.sync_api import sync_playwright
@@ -17,7 +17,7 @@ with sync_playwright() as pw:
     page=ctx.new_page();page.route('**/mc.yandex.*/**',lambda route:route.abort())
     page.add_init_script("window.__sales53Lcp=[];new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__sales53Lcp.push(Math.round(e.startTime)))).observe({type:'largest-contentful-paint',buffered:true});")
     cdp=ctx.new_cdp_session(page);cdp.send('Network.enable');cdp.send('Network.emulateNetworkConditions',{'offline':False,'latency':120,'downloadThroughput':220000,'uploadThroughput':90000,'connectionType':'cellular4g'})
-    response=page.goto(ROOT+'/',wait_until='domcontentloaded',timeout=75000);page.wait_for_timeout(6000)
+    response=page.goto(ROOT+'/?sales53_perf='+os.getenv('GITHUB_RUN_ID','manual')+('-before' if BASELINE else '-after'),wait_until='domcontentloaded',timeout=75000);page.wait_for_timeout(6000)
     perf=page.evaluate("({lcpMs:Math.max(0,...window.__sales53Lcp),resources:performance.getEntriesByType('resource').filter(r=>r.name.includes('montserrat')||r.name.includes('/img/slider/')).map(r=>({path:new URL(r.name).pathname,bytes:r.transferSize,durationMs:Math.round(r.duration)}))})")
     if not BASELINE:
         before=json.loads((OUT/'baseline-performance.json').read_text())

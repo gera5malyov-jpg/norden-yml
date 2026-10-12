@@ -91,7 +91,9 @@ with tempfile.TemporaryDirectory(prefix='megapolis-sales-patch-') as td:
   for row in reversed(written):
    path=root/row['path']
    if path.exists() and hashlib.sha256(path.read_bytes()).hexdigest()!=row['new_sha']:raise RuntimeError('Concurrent edit blocks rollback: '+row['path'])
-   if row['backup']:shutil.copy2(str(folder/row['backup']),str(path))
+   if row['backup']:
+    shutil.copy2(str(folder/row['backup']),str(path))
+    if path.suffix=='.html':os.utime(str(path),None)
    elif path.exists():path.unlink()
   print('STAGE53_ROLLBACK='+json.dumps({'error':str(ex),'restored':len(written)}),flush=True)
   raise
@@ -103,7 +105,7 @@ def rollback_remote(folder):
         raise ValueError('Invalid backup folder')
     return '''set -eu
 python3 - <<'PY'
-import hashlib,json,pathlib,shutil
+import hashlib,json,os,pathlib,shutil
 root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
 folder=pathlib.Path('''+repr(folder)+''')
 rows=json.loads((folder/'manifest.json').read_text())
@@ -112,7 +114,9 @@ for row in rows:
  if not p.exists() or hashlib.sha256(p.read_bytes()).hexdigest()!=row['new_sha']:raise RuntimeError('Live file differs, abort rollback: '+row['path'])
 for row in reversed(rows):
  p=root/row['path']
- if row['backup']:shutil.copy2(str(folder/row['backup']),str(p))
+ if row['backup']:
+  shutil.copy2(str(folder/row['backup']),str(p))
+  if p.suffix=='.html':os.utime(str(p),None)
  else:p.unlink()
 print('STAGE53_ROLLBACK='+json.dumps({'restored':len(rows)}),flush=True)
 PY
@@ -120,6 +124,25 @@ PY
 
 def main():
     state=Path('stage53-sales-state.json')
+    if '--refresh-restored' in sys.argv:
+        from stage54_product_filters import AUDITED_SHA256
+        expected=dict(AUDITED)
+        for name,digest in AUDITED_SHA256.items():expected['wa-data/public/shop/themes/pureMegapolis42/'+name]=digest
+        remote='''set -eu
+python3 - <<'PY'
+import hashlib,json,os,pathlib
+root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
+expected=json.loads('''+repr(json.dumps(expected))+''')
+matches=all(hashlib.sha256((root/rel).read_text(encoding='utf-8').encode()).hexdigest()==digest for rel,digest in expected.items())
+if matches:
+ for rel in expected:os.utime(str(root/rel),None)
+print('STAGE53_REFRESH='+json.dumps({'restored_originals_match':matches,'templates_refreshed':len(expected) if matches else 0}),flush=True)
+PY
+'''
+        out=execute(remote)
+        for line in out.splitlines():
+            if line.startswith('STAGE53_'):print(line,flush=True)
+        return
     if '--rollback' in sys.argv:
         if not state.exists():return
         out=execute(rollback_remote(json.loads(state.read_text())['backup']))

@@ -37,6 +37,8 @@ jobs:
           node --test storefront/tests/test_funnel_v2.js storefront/tests/test_product_filters.js
           python -m py_compile storefront/stage53_deploy_sales.py storefront/stage53_browser_acceptance.py
       - run: python -m pip install playwright==1.55.0
+      - name: Refresh restored Smarty template timestamps before baseline
+        run: python storefront/stage53_deploy_sales.py --refresh-restored
       - name: Measure cold mobile baseline
         run: python storefront/stage53_browser_acceptance.py --baseline
       - name: Back up and publish guarded storefront improvements
