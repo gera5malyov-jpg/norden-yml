@@ -2,7 +2,7 @@
 """Anonymous acceptance: layouts, successful cart event and untouched checkout."""
 import json,os,sys
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse,urljoin,parse_qs
 from playwright.sync_api import sync_playwright
 OUT=Path('storefront-stage53-evidence');OUT.mkdir(exist_ok=True)
 BASELINE='--baseline' in sys.argv
@@ -62,8 +62,11 @@ with sync_playwright() as pw:
                     page.wait_for_timeout(120)
                     geometry=page.evaluate("""()=>{const b=document.querySelector('.megapolis-mobile-search button'),r=b.getBoundingClientRect(),h=document.querySelector('header.header:not(.header--fixed)').getBoundingClientRect();return {button:{top:r.top,bottom:r.bottom},header:{top:h.top,bottom:h.bottom},scrollY,hit:document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.tagName}}""")
                     print('STAGE53_SEARCH_GEOMETRY='+json.dumps(geometry),flush=True)
+                    action=page.locator('.megapolis-mobile-search').get_attribute('action')
+                    expected_path=urlparse(urljoin(ROOT,action)).path.rstrip('/')
                     page.locator('.megapolis-mobile-search button').click()
-                    page.wait_for_url('**/search/**',timeout=25000)
+                    page.wait_for_url(lambda u:urlparse(u).path.rstrip('/')==expected_path,timeout=25000)
+                    assert parse_qs(urlparse(page.url).query).get('query')==['РС42'],page.url
                     assert 'РС42' in page.locator('body').inner_text(),'Model search failed'
                 if width==1365:
                     page.goto(ROOT+'/category/kompyuternye-kresla/',wait_until='domcontentloaded',timeout=65000);page.wait_for_timeout(500)
