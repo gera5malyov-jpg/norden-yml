@@ -16,8 +16,11 @@ with zipfile.ZipFile(b,'w',zipfile.ZIP_DEFLATED) as z:
    if f.is_file() and f.stat().st_size<400000:
     z.writestr(str(f.relative_to(root)),f.read_bytes())
   for f in (theme/'js').glob('*.js'):
-   if f.is_file() and f.stat().st_size<400000 and any(x in f.name for x in ('product','categor','filter','cart','metrika','megapolis','slider')):
+   if f.is_file() and f.stat().st_size<400000:
     z.writestr(str(f.relative_to(root)),f.read_bytes())
+ for rel in ('wa-apps/shop/js/frontend/order/form.js','wa-apps/shop/lib/classes/shopSitemapConfig.class.php'):
+  f=root/rel
+  if f.is_file():z.writestr(rel,f.read_bytes())
 print('STAGE53_SOURCES='+base64.b64encode(b.getvalue()).decode())
 PY
 p=$(mktemp /tmp/storefront-stage53-XXXXXXXX.php)
@@ -28,6 +31,7 @@ $root='/home/web/vm-23f9aff9.na4u.ru/www';chdir($root);
 require_once $root.'/wa-config/SystemConfig.class.php';
 waSystem::getInstance(null,new SystemConfig());wa('shop');$m=new waModel();
 $out=[];
+$out['feature_definitions']=$m->query("SELECT id,code,name,type,default_unit FROM shop_feature")->fetchAll();
 $out['categories']=$m->query("SELECT c.id,c.name,c.full_url,c.meta_title,c.meta_description,c.description,COUNT(p.id) products FROM shop_category c JOIN shop_product p ON p.category_id=c.id AND p.status=1 AND p.price>0 AND (p.count>0 OR p.count IS NULL) WHERE c.status=1 GROUP BY c.id ORDER BY products DESC LIMIT 40")->fetchAll();
 $out['products']=[];
 $rows=$m->query("SELECT p.id,p.name,p.url,p.category_id,p.price,p.count,p.image_id,p.description,p.summary,c.full_url AS category_url FROM shop_product p JOIN shop_category c ON p.category_id=c.id WHERE p.status=1 AND c.status=1 AND p.price>0 AND (p.count>0 OR p.count IS NULL) AND p.category_id IN (2195,288,2215,2267,267,275,1003) ORDER BY (p.description IS NULL OR TRIM(p.description)='') DESC,p.total_sales DESC,p.id DESC LIMIT 160")->fetchAll();
