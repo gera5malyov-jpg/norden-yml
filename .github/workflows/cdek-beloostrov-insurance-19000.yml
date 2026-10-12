@@ -1,0 +1,64 @@
+name: CDEK Beloostrov insurance 19000 quote
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cdek-beloostrov-insurance-19000.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CDEK_CLIENT_ID: ${{ secrets.CDEK_CLIENT_ID }}
+      CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
+    steps:
+      - name: Calculate insured delivery
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os,json,urllib.request,urllib.parse,urllib.error
+          base="https://api.cdek.ru/v2"
+          cid=os.environ["CDEK_CLIENT_ID"]
+          sec=os.environ["CDEK_CLIENT_SECRET"]
+          def call(endpoint, body, token=None, form=False):
+              headers={"Accept":"application/json"}
+              if token: headers["Authorization"]="Bearer "+token
+              if form:
+                  data=urllib.parse.urlencode(body).encode()
+                  headers["Content-Type"]="application/x-www-form-urlencoded"
+              else:
+                  data=json.dumps(body).encode()
+                  headers["Content-Type"]="application/json"
+              req=urllib.request.Request(base+endpoint,method="POST",headers=headers,data=data)
+              try:
+                  with urllib.request.urlopen(req,timeout=60) as r:
+                      return r.status,json.loads(r.read().decode())
+              except urllib.error.HTTPError as e:
+                  return e.code,json.loads(e.read().decode())
+          _,tok=call("/oauth/token",{"grant_type":"client_credentials","client_id":cid,"client_secret":sec},form=True)
+          token=tok["access_token"]
+          out=[]
+          for typ in [1,2]:
+              for service in [False,True]:
+                  data={
+                      "type":typ,"tariff_code":139,
+                      "from_location":{"code":44},
+                      "to_location":{"code":2724},
+                      "packages":[{"weight":5000,"length":198,"width":33,"height":20}],
+                      "lang":"rus"
+                  }
+                  if service: data["services"]=[{"code":"INSURANCE","parameter":"19000"}]
+                  status,result=call("/calculator/tariff",data,token)
+                  out.append({"type":typ,"insurance_service_in_request":service,"status":status,
+                     "delivery_sum":result.get("delivery_sum"),"total_sum":result.get("total_sum"),
+                     "services":result.get("services"),"weight_calc":result.get("weight_calc"),
+                     "errors":result.get("errors"),"warnings":result.get("warnings"),"other":{k:v for k,v in result.items() if k in ("message","requests")}})
+          print("INSURANCE_CALC_START")
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          print("INSURANCE_CALC_END")
+          PY
