@@ -1,0 +1,54 @@
+name: Storefront Stage 53 - Mobile conversion, fonts and accurate funnel
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage53-sales.yml'
+      - 'storefront/stage53_deploy_sales.py'
+      - 'storefront/stage53_mobile_performance.py'
+      - 'storefront/stage53_browser_acceptance.py'
+      - 'storefront/stage54_product_filters.py'
+      - 'storefront/assets/megapolis-mobile-home.css'
+      - 'storefront/assets/megapolis-funnel-v2.js'
+      - 'storefront/assets/megapolis-product-filter-v1.*'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: storefront-sales-rollout
+  cancel-in-progress: false
+jobs:
+  deploy-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify pure transformations and funnel contracts
+        run: |
+          python -m unittest discover -s storefront/tests -p 'test_*.py'
+          node --test storefront/tests/test_funnel_v2.js storefront/tests/test_product_filters.js
+          python -m py_compile storefront/stage53_deploy_sales.py storefront/stage53_browser_acceptance.py
+      - run: python -m pip install playwright==1.55.0
+      - name: Measure cold mobile baseline
+        run: python storefront/stage53_browser_acceptance.py --baseline
+      - name: Back up and publish guarded storefront improvements
+        run: python storefront/stage53_deploy_sales.py
+      - name: Verify six widths, search, cart and analytics
+        run: python storefront/stage53_browser_acceptance.py
+      - name: Restore exact previous templates if acceptance fails
+        if: failure()
+        run: python storefront/stage53_deploy_sales.py --rollback
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: storefront-stage53-conversion-evidence
+          path: storefront-stage53-evidence/
+          retention-days: 14

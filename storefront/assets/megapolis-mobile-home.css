@@ -1,0 +1,23 @@
+.megapolis-mobile-home{display:none}
+.megapolis-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:767px){
+ .megapolis-mobile-home{display:block;padding-top:10px;padding-bottom:18px}
+ .megapolis-original-home-slider,.megapolis-original-home-categories{display:none}
+ .megapolis-mobile-search{display:flex;gap:8px;margin:0 0 12px}
+ .megapolis-mobile-search input{flex:1;min-width:0;width:100%;height:44px;padding:10px 12px;border:1px solid #aaa;border-radius:6px;font:inherit;font-size:16px;background:#fff;color:#252525}
+ .megapolis-mobile-search button{height:44px;padding:0 14px;border:0;border-radius:6px;background:#694932;color:#fff;font:inherit;font-weight:600}
+ .megapolis-mobile-hero{padding:16px;background:#f4f1ec;border:1px solid #e3d9cc;border-radius:9px;margin-bottom:16px;text-align:left;color:#252525}
+ .megapolis-mobile-hero__title{font-size:23px;font-weight:700;line-height:1.2;margin:0 0 7px}
+ .megapolis-mobile-hero p:not(.megapolis-mobile-hero__title){font-size:14px;line-height:1.4;margin:0 0 12px}
+ .megapolis-mobile-hero__button{display:inline-flex;min-height:42px;align-items:center;padding:10px 16px;border-radius:6px;background:#694932;color:#fff;text-decoration:none;font-size:14px;font-weight:600}
+ .megapolis-mobile-hero small{display:block;font-size:12px;line-height:1.4;margin-top:10px;color:#555}
+ .megapolis-mobile-categories h2{font-size:19px;font-weight:700;line-height:1.3;margin:0 0 10px}
+ .megapolis-mobile-categories__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .megapolis-mobile-categories__grid a{display:flex;align-items:center;min-height:52px;padding:10px 12px;border:1px solid #ddd5cc;border-radius:7px;background:#fff;color:#353535;font-size:13px;font-weight:600;line-height:1.35;text-decoration:none;overflow-wrap:anywhere}
+ .megapolis-mobile-categories__grid a:active{background:#f4f1ec}
+ .megapolis-all-categories{margin-top:12px;border:1px solid #ddd5cc;border-radius:7px;background:#fff}
+ .megapolis-all-categories summary{padding:12px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;color:#694932}
+ .megapolis-all-categories>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:0 12px 12px}
+ .megapolis-all-categories>div a{padding:8px 4px;color:#353535;font-size:13px;line-height:1.35}
+ .megapolis-mobile-home a:focus-visible,.megapolis-mobile-home button:focus-visible,.megapolis-mobile-home input:focus-visible,.megapolis-mobile-home summary:focus-visible{outline:2px solid #694932;outline-offset:3px}
+}
