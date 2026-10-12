@@ -1,5 +1,5 @@
 {
-  "status": "skipped",
+  "status": "ok",
   "dry_run": false,
   "source": "https://s3.q-parser.ru/automata/612af8f7ec414c/treez.ru.xml",
   "supplier": "treez",
@@ -13,21 +13,105 @@
     "СПБ привозной": 100
   },
   "missing_from_source_rule": "остаток 0",
-  "source_offers": 0,
-  "created": 0,
-  "updated_existing": 0,
-  "existing_media_repaired": 0,
-  "price_updates": 0,
-  "stock_updates": 0,
-  "zeroed_missing": 0,
-  "images_uploaded": 0,
-  "gallery_images_found": 0,
-  "image_errors": 0,
+  "source_offers": 1387,
+  "created": 2,
+  "updated_existing": 1385,
+  "existing_media_repaired": 2,
+  "price_updates": 1387,
+  "stock_updates": 2814,
+  "zeroed_missing": 20,
+  "images_uploaded": 16,
+  "gallery_images_found": 28,
+  "image_errors": 12,
   "videos_uploaded": 0,
-  "video_errors": 0,
+  "video_errors": 1,
   "duplicate_source_codes": [],
   "errors": [],
-  "warnings": [],
-  "days_since_last_success": 11.35,
-  "reason": "С последнего успешного обновления прошло менее 14 дней"
+  "warnings": [
+    {
+      "source_code": "41.1020-0041-GR-47",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.1020-0041-GR-1",
+      "message": "404 Client Error: Not Found for url: https://treez.ru/photos/resize/1000_1286/41.1020-0041-GR-1"
+    },
+    {
+      "source_code": "41.1020-0041-GR-47",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.1020-0041-GR-2.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.1020-0041-GR-55",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.1020-0041-GR-1",
+      "message": "404 Client Error: Not Found for url: https://treez.ru/photos/resize/1000_1286/41.1020-0041-GR-1"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-1.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-2.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-3.jpg",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-5.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-6.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-90.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-91.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-92.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-33",
+      "stage": "video",
+      "url": "https://treez.ru/upload/files/VIDEO/41.33-25-24-126-BL.mp4",
+      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+    }
+  ],
+  "days_since_last_success": 18.37,
+  "source_categories": 40,
+  "warehouses": {
+    "МСК": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
+    "СПБ привозной": "01a0a0e3-a119-72a1-b4cb-da76a3bfd74c"
+  },
+  "complete": true
 }
