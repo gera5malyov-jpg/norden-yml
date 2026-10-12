@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-10-11T12:31:13.079729+00:00",
+  "started_at": "2026-10-12T14:09:49.070037+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=336",
   "type_name": "deephouse-336",
@@ -8,8 +8,8 @@
   "webasyst_stock_id": "66",
   "kit_stock": "МСК",
   "kit_stock_id": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
-  "kit_variants_scanned": 1195,
-  "kit_webasyst_336_variants": 1158,
+  "kit_variants_scanned": 1198,
+  "kit_webasyst_336_variants": 1161,
   "kit_duplicate_skus": 0,
   "webasyst_products": 1904,
   "webasyst_duplicate_skus": 0,
@@ -194,6 +194,11 @@
     {
       "sku": "DEEP-56322",
       "variant_id": "01a0cdc2-c0b8-7837-8d67-44ae8d29a88f",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-56585",
+      "variant_id": "01a13053-8524-7afc-b070-32400d8346c6",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
@@ -1337,6 +1342,11 @@
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
+      "sku": "DEEP-60387",
+      "variant_id": "01a1304a-44a9-7b00-9f73-1f61497323d4",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
       "sku": "DEEP-60388",
       "variant_id": "01a0c983-c88f-72a6-9541-211b4eab97b4",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
@@ -2179,6 +2189,11 @@
     {
       "sku": "DEEP-63659",
       "variant_id": "01a0ce0a-e6d4-748b-bda4-74c2497b31bd",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-63660",
+      "variant_id": "01a1305b-6712-7d75-8022-b2b8ec9cd8c1",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
@@ -5878,6 +5893,6 @@
   "complete": false,
   "webasyst_routing_feature_code": "kenner_f93046718124",
   "webasyst_336_products": 1904,
-  "finished_at": "2026-10-11T12:47:39.396413+00:00",
+  "finished_at": "2026-10-12T14:24:28.324594+00:00",
   "status": "degraded"
 }
