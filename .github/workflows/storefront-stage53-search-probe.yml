@@ -1,0 +1,24 @@
+name: Storefront mobile search read-only hit testing
+on:
+  push:
+    branches: [main]
+    paths: ['storefront/stage53_search_probe.py','.github/workflows/storefront-stage53-search-probe.yml']
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install playwright==1.55.0
+      - run: python storefront/stage53_search_probe.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-search-hit-testing
+          path: stage53-search-probe/
+          retention-days: 7
