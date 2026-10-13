@@ -1,0 +1,74 @@
+name: Audit Red-Black zero prices and image links (read-only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/audit-redblack-zero-price-images-20261013.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Read-only inspect RED-Black1 prices and short descriptions
+        run: |
+          python - <<'PY'
+          import json, re
+          from collections import Counter
+          from webasyst.client import WebasystClient
+          w = WebasystClient(min_request_interval=0.35)
+          def rows(p, keys=()):
+              if isinstance(p,list): return [v for v in p if isinstance(v,dict)]
+              if isinstance(p,dict):
+                  for k in keys:
+                      q=p.get(k)
+                      if isinstance(q,list): return [v for v in q if isinstance(v,dict)]
+                      if isinstance(q,dict): return list(q.values())
+                  if p and all(isinstance(q,dict) for q in p.values()):return list(p.values())
+              return []
+          types=rows(w.call('shop.type.getList'))
+          types=[x for x in types if str(x.get('name') or x.get('title') or '').lower().strip()=='red-black1']
+          if len(types)!=1: raise SystemExit('Expected exactly one RED-Black1 type; got '+str(len(types)))
+          type_id=str(types[0]['id'])
+          result={'type_id':type_id,'red_skus':0,'zero_price':0,'wrong_yandex_images':0,'supplier_images':0,'zero_sample':[],'yandex_sample':[],'product_4806':[],'scanned_products':0}
+          for off in range(0,50000,500):
+              page=w.call('shop.product.search',params={'hash':'type/'+type_id,'offset':off,'limit':500,'fields':'id,name,type_id,summary,skus'})
+              items=rows(page,('products','items'))
+              if not items: break
+              result['scanned_products']+=len(items)
+              for p in items:
+                  skus=rows(p.get('skus') or [],('skus',))
+                  if not skus:
+                      info=w.call('shop.product.getInfo',params={'id':p['id']})
+                      skus=rows(info.get('skus') or [],('skus',))
+                      p['summary']=p.get('summary') or info.get('summary')
+                  red=[s for s in skus if str(s.get('sku') or '').upper().startswith('RED-')]
+                  for s in red:
+                      sku=str(s.get('sku') or '')
+                      result['red_skus']+=1
+                      try: val=float(str(s.get('price') or '0').replace(',','.'))
+                      except:val=0
+                      if val<=0:
+                          result['zero_price']+=1
+                          if len(result['zero_sample'])<25:result['zero_sample'].append({'sku':sku,'product_id':p.get('id'),'name':p.get('name')})
+                      if sku.upper()=='RED-00-00004806':
+                          result['product_4806'].append({'sku':sku,'product_id':p.get('id'),'price':s.get('price'),'purchase_price':s.get('purchase_price'),'summary':str(p.get('summary') or '')[:1800]})
+                  summary=str(p.get('summary') or '')
+                  if red and 'avatars.mds.yandex.net' in summary:
+                      result['wrong_yandex_images']+=1
+                      if len(result['yandex_sample'])<10:result['yandex_sample'].append({'sku':red[0].get('sku'),'product_id':p.get('id')})
+                  if red and 'opt.red-black.ru/custom/dimages' in summary:result['supplier_images']+=1
+              if len(items)<500:break
+          print('RED_BLACK_READ_ONLY_AUDIT='+json.dumps(result,ensure_ascii=False))
+          PY
