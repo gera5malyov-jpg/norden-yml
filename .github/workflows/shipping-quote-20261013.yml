@@ -14,6 +14,7 @@ jobs:
       CDEK_CLIENT_ID: ${{ secrets.CDEK_CLIENT_ID }}
       CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
       DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+      DALLI_TOKEN_SPB: ${{ secrets.DALLI_TOKEN }}
       DALLI_ACCOUNT: msk
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +25,7 @@ jobs:
       - name: Quote CDEK and Dalli, no order creation
         run: |
           python - <<'PY'
-          import json, sys, traceback
+          import json, sys, traceback, os
           from cdek.cdek_api import CdekClient
           from dalli.dalli_api import DalliClient
           boxes = [
@@ -56,4 +57,10 @@ jobs:
               c=DalliClient.from_env()
               return c.delivery_cost('Санкт-Петербург, Невский проспект, 1',dalli_boxes,order_price=0,insurance_price=170000,output_x2=True)
           output('DALLI_MSK_INSURED',dalli)
+          def dalli_spb_credential_for_msk():
+              tok=os.environ.get('DALLI_TOKEN_SPB','')
+              if not tok: raise ValueError('DALLI_TOKEN_SPB is missing')
+              c=DalliClient(tok,base_url='https://api.dalli-service.com/v1',account='msk')
+              return c.delivery_cost('Санкт-Петербург, Невский проспект, 1',dalli_boxes,order_price=0,insurance_price=170000,output_x2=True)
+          output('DALLI_MSK_ENDPOINT_SPB_CREDENTIAL_DIAGNOSTIC',dalli_spb_credential_for_msk)
           PY
