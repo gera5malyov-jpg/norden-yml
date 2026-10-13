@@ -1,0 +1,85 @@
+name: Inspect saved Red-Black Megasuppliers profile
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/redblack-plugin-profile-readonly-20261013.yml']
+permissions: {contents: read}
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read Red-Black configuration and stock/type IDs via temporary SSH
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os,subprocess,tempfile,urllib.parse,urllib.request
+          key=os.environ['NETANGELS_API_KEY'].strip()
+          def req(url,method='GET',body=None,headers=None):
+              x=urllib.request.Request(url,data=body,method=method,headers=headers or {})
+              with urllib.request.urlopen(x,timeout=30) as f:
+                  raw=f.read().decode('utf-8')
+                  return json.loads(raw) if raw else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':key}).encode(),{'Content-Type':'application/x-www-form-urlencoded'})['token']
+          headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/json'}
+          php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';
+          chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());
+          wa('shop');
+          $m=new waModel();
+          $suppliers=$m->query('SELECT id,name,code FROM shop_megasuppliers_supplier WHERE active=1')->fetchAll();
+          $matches=array();
+          foreach($suppliers as $s){
+              $idstr=preg_replace('/[^a-z0-9]/','',strtolower($s['name'].' '.$s['code']));
+              if(strpos($idstr,'redblack')!==false) $matches[]=$s;
+          }
+          if(count($matches)!==1) {fwrite(STDERR,'AMBIGUOUS_REDBLACK_SUPPLIER='.count($matches));exit(4);}
+          $supplier=$matches[0];
+          $type=$m->query('SELECT id,name FROM shop_type WHERE id=150')->fetch();
+          $stock=$m->query("SELECT id,name FROM shop_stock WHERE name='Red МСК'")->fetchAll();
+          $dir=wa()->getDataPath('plugins/megasuppliers/import-config',false,'shop',true);
+          $path=$dir.'/'.(int)$supplier['id'].'.json';
+          $cfg=file_exists($path)?json_decode(file_get_contents($path),true):null;
+          $safe=is_array($cfg)?array(
+              'enabled'=>!empty($cfg['enabled']),
+              'source_format'=>(string)ifset($cfg['source']['format']),
+              'source_url_present'=>!empty($cfg['source']['location']),
+              'supplier_sku_field'=>(string)ifset($cfg['identity']['supplier_sku_field']),
+              'sku_prefix'=>(string)ifset($cfg['identity']['sku_prefix']),
+              'purchase_price_field'=>(string)ifset($cfg['mapping']['purchase_price']),
+              'sale_price_field'=>(string)ifset($cfg['mapping']['price']),
+              'image_fields'=>ifset($cfg['mapping']['images'],array()),
+              'price_formulas'=>ifset($cfg['rules']['price_formulas'],array()),
+              'create_new'=>!empty($cfg['rules']['create_new']),
+              'only_create_in_stock'=>!empty($cfg['rules']['only_create_in_stock']),
+              'update_images'=>!empty($cfg['rules']['update_images']),
+              'update_stock'=>!empty($cfg['rules']['update_stock']),
+              'zero_if_missing'=>!empty($cfg['rules']['zero_if_missing']),
+              'zero_other_stocks'=>!empty($cfg['rules']['zero_other_stocks']),
+              'type_id'=>ifset($cfg['webasyst']['type_id']),
+              'stock_id'=>ifset($cfg['webasyst']['stock_id']),
+              'export_to_kit'=>!empty($cfg['rules']['export_to_kit'])
+          ):null;
+          echo json_encode(array('supplier'=>$supplier,'type'=>$type,'stocks'=>$stock,'config_exists'=>is_array($cfg),'config'=>$safe),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+          ?>'''
+          with tempfile.TemporaryDirectory() as td:
+              path=td+'/id'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',path],check=True)
+              pub=open(path+'.pub').read().strip()
+              kid=req('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/create/','POST',json.dumps({'key':pub,'name':'redblack-profile-inspect-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),headers)['id']
+              try:
+                  cmd="cat >/tmp/redblack_profile_probe.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/redblack_profile_probe.php\nsu -s /bin/bash web -c 'php /tmp/redblack_profile_probe.php'\nrc=$?\nrm -f /tmp/redblack_profile_probe.php\nexit $rc\n"
+                  p=subprocess.run(['ssh','-i',path,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@45.86.180.49','bash -s'],input=cmd,text=True,capture_output=True,timeout=120)
+                  print('PROFILE_INSPECT='+p.stdout.strip())
+                  if p.returncode:
+                      print('PROBE_ERR='+p.stderr[-700:])
+                      raise SystemExit(p.returncode)
+              finally:
+                  try:req('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/'+str(kid)+'/','DELETE',None,headers)
+                  except Exception: pass
+          PY
