@@ -389,6 +389,12 @@ def main():
             raise ValueError("Signed Megasuppliers bridge is required for apply")
 
         effective_rules = dict(config.get("rules") or {})
+        if _is_red_black(config):
+            # Red-Black source has a dedicated wholesale and RRP field.
+            # Never create a 0 RUB offer or use an RRP as the purchase cost.
+            effective_rules["require_purchase_price"] = True
+            effective_rules["require_positive_sale_price"] = True
+            effective_rules["update_images"] = True
         if _price_formulas_require_purchase_price(effective_rules.get("price_formulas") or {}):
             effective_rules["require_purchase_price"] = True
 
