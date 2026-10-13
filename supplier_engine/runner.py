@@ -395,6 +395,10 @@ def main():
             effective_rules["require_purchase_price"] = True
             effective_rules["require_positive_sale_price"] = True
             effective_rules["update_images"] = True
+            # Legacy Webasyst contains 2226 RED articles, but the current
+            # supplier feed contains fewer. Do not zero historical SKU stock
+            # until coverage and supplier links have been reconciled.
+            effective_rules["zero_if_missing"] = False
         if _price_formulas_require_purchase_price(effective_rules.get("price_formulas") or {}):
             effective_rules["require_purchase_price"] = True
 
