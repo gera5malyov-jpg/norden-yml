@@ -1,4 +1,5 @@
-import copy,importlib.util,json,sys,os,tempfile,io,re,shutil,subprocess
+import copy,importlib.util,json,sys,os,tempfile,io,re,shutil,subprocess,base64
+from types import SimpleNamespace
 from contextlib import redirect_stdout
 from unittest.mock import patch
 from pathlib import Path
@@ -95,3 +96,25 @@ echo 'Canonical record CAS regression passed';
   message=str(caught.exception)
   for value in ('Динамический title','Ожидаемый',url):self.assertIn(value,message)
   with self.assertRaises(AssertionError):m.assert_exact_metadata('Ожидаемый ','Ожидаемый','title',url)
+
+ def test_db_boundary_serializes_reversed_category_set_to_identical_php_field_plan(self):
+  m=load();namespace={};exec(m.REMOTE_COMMON,namespace);serialized=[]
+  php="<?php $input=json_decode(base64_decode('DB_INPUT_B64'),true);"
+  first={'php':php,'proposal':{'categories':[{'id':285,'set':{'meta_title':'Заголовок','meta_description':'Описание'}}]}}
+  second=copy.deepcopy(first);second['proposal']['categories'][0]['set']={'meta_description':'Описание','meta_title':'Заголовок'}
+  def php_boundary(command,**kwargs):
+   if command[:2]==['php','-l']:
+    script=Path(command[2]).read_text()
+    encoded=re.search(r"base64_decode\('([^']+)'\)",script).group(1)
+    serialized.append(base64.b64decode(encoded))
+    return SimpleNamespace(returncode=0,stdout='',stderr='')
+   result=base64.b64encode(b'{"records":[]}').decode()
+   return SimpleNamespace(returncode=0,stdout='DB_RESULT='+result+'\n',stderr='')
+  # The PHP binary is the external boundary; the real Python serializer and
+  # emitted temporary script run unchanged, including nested key ordering.
+  with patch.object(namespace['subprocess'],'run',php_boundary):
+   namespace['db_run']('prepare',first);namespace['db_run']('prepare',second)
+  self.assertEqual(len(serialized),2)
+  self.assertEqual(serialized[0],serialized[1])
+  plans=[list(json.loads(raw)['payload']['proposal']['categories'][0]['set']) for raw in serialized]
+  self.assertEqual(plans,[['meta_description','meta_title']]*2)

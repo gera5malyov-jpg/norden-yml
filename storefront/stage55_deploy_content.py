@@ -130,7 +130,7 @@ root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
 def digest(data):return hashlib.sha256(data).hexdigest()
 def db_run(mode,payload,records=None):
  data={'mode':mode,'payload':payload,'records':records or []}
- script=payload['php'].replace('DB_INPUT_B64',base64.b64encode(json.dumps(data,ensure_ascii=False).encode('utf-8')).decode('ascii'))
+ script=payload['php'].replace('DB_INPUT_B64',base64.b64encode(json.dumps(data,ensure_ascii=False,sort_keys=True).encode('utf-8')).decode('ascii'))
  with tempfile.NamedTemporaryFile('w',encoding='utf-8',prefix='stage55-db-',suffix='.php',delete=False) as f:f.write(script);name=f.name
  os.chmod(name,0o644)
  try:
