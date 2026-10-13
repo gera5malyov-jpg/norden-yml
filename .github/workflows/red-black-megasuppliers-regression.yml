@@ -28,7 +28,7 @@ jobs:
           php-version: '7.3'
           coverage: none
       - name: Install test dependencies
-        run: python -m pip install pytest requests openpyxl pdfplumber
+        run: python -m pip install pytest requests openpyxl pdfplumber reportlab
       - name: Import-engine unit and integration regression tests
         run: python -m pytest -q tests/test_supplier_engine.py
       - name: Megasuppliers PHP syntax check
