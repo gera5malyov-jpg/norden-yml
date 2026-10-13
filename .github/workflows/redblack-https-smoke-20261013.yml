@@ -1,0 +1,33 @@
+name: Red-Black HTTPS image smoke update
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/redblack-https-smoke-20261013.yml']
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Upgrade exact sample SKU to HTTPS images with backup
+        run: >-
+          python -m scripts.repair_redblack_zero_prices_images --apply
+          --sku RED-00-00004806
+          --backup redblack-https-smoke-backup.json
+          --report redblack-https-smoke-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: redblack-https-smoke-backup
+          path: |
+            redblack-https-smoke-backup.json
+            redblack-https-smoke-report.json
+          if-no-files-found: error
