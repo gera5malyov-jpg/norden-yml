@@ -1,0 +1,130 @@
+name: Apply verified Red-Black Megasuppliers primary profile
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/redblack-plugin-profile-apply-20261013.yml']
+permissions: {contents: read}
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Back up and fix Red-Black pricing, images and stock configuration
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os,subprocess,tempfile,urllib.parse,urllib.request
+          key=os.environ['NETANGELS_API_KEY'].strip()
+          def req(url,method='GET',body=None,headers=None):
+              x=urllib.request.Request(url,data=body,method=method,headers=headers or {})
+              with urllib.request.urlopen(x,timeout=30) as f:
+                  raw=f.read().decode('utf-8')
+                  return json.loads(raw) if raw else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':key}).encode(),{'Content-Type':'application/x-www-form-urlencoded'})['token']
+          headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/json'}
+          php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';
+          chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());
+          wa('shop');
+          $m=new waModel();
+          $suppliers=$m->query('SELECT id,name,code FROM shop_megasuppliers_supplier WHERE active=1')->fetchAll();
+          $matches=array();
+          foreach($suppliers as $s){
+              $idstr=preg_replace('/[^a-z0-9]/','',strtolower($s['name'].' '.$s['code']));
+              if(strpos($idstr,'redblack')!==false) $matches[]=$s;
+          }
+          if(count($matches)!==1) {fwrite(STDERR,'AMBIGUOUS_REDBLACK_SUPPLIER='.count($matches));exit(4);}
+          $supplier=$matches[0];
+          $type=$m->query('SELECT id,name FROM shop_type WHERE id=150')->fetch();
+          $stock=$m->query("SELECT id,name FROM shop_stock WHERE name='Red МСК'")->fetchAll();
+          $dir=wa()->getDataPath('plugins/megasuppliers/import-config',false,'shop',true);
+          $path=$dir.'/'.(int)$supplier['id'].'.json';
+          if((int)$supplier['id']!==10 || !$type || (int)$type['id']!==150 || (string)$type['name']!=='RED-Black1'
+              || count($stock)!==1 || (int)$stock[0]['id']!==12){
+              fwrite(STDERR,'RED_BLACK_IDENTITY_VALIDATION_FAILED');
+              exit(6);
+          }
+          if(!file_exists($path)){fwrite(STDERR,'CONFIG_NOT_FOUND');exit(7);}
+          $cfg=json_decode(file_get_contents($path),true);
+          if(!is_array($cfg)){fwrite(STDERR,'INVALID_CONFIG');exit(8);}
+          $origin=parse_url((string)ifset($cfg['source']['location']));
+          if(!is_array($origin) || (string)ifset($origin['host'])!=='opt.red-black.ru'
+             || (string)ifset($origin['path'])!=='/pricelist_api.xml'){
+              fwrite(STDERR,'UNEXPECTED_SOURCE_URL');
+              exit(9);
+          }
+          $backup=$path.'.bak-redblack-primary-'.date('Ymd-His');
+          if(!copy($path,$backup)){fwrite(STDERR,'BACKUP_FAILED');exit(10);}
+          $cfg['enabled']=true;
+          if(empty($cfg['identity'])||!is_array($cfg['identity']))$cfg['identity']=array();
+          if(empty($cfg['mapping'])||!is_array($cfg['mapping']))$cfg['mapping']=array();
+          if(empty($cfg['rules'])||!is_array($cfg['rules']))$cfg['rules']=array();
+          if(empty($cfg['webasyst'])||!is_array($cfg['webasyst']))$cfg['webasyst']=array();
+          $cfg['identity']['supplier_sku_field']='article';
+          $cfg['identity']['sku_prefix']='RED-00-';
+          $cfg['mapping']['name']='name';
+          $cfg['mapping']['description']='description';
+          $cfg['mapping']['purchase_price']='price';
+          $cfg['mapping']['price']='rrc_price';
+          $cfg['mapping']['compare_price']='';
+          $cfg['mapping']['stock']='stock';
+          $cfg['mapping']['category']='categoryId';
+          $cfg['mapping']['images']=array('pictures');
+          $cfg['rules']['price_formulas']=array();
+          $cfg['rules']['create_new']=true;
+          $cfg['rules']['only_create_in_stock']=true;
+          $cfg['rules']['update_prices']=true;
+          $cfg['rules']['update_stock']=true;
+          $cfg['rules']['update_images']=true;
+          $cfg['rules']['zero_if_missing']=false;
+          $cfg['rules']['zero_other_stocks']=false;
+          $cfg['rules']['require_purchase_price']=true;
+          $cfg['rules']['require_positive_sale_price']=true;
+          $cfg['webasyst']['sku_mode']='supplier';
+          $cfg['webasyst']['type_id']=150;
+          $cfg['webasyst']['stock_id']=12;
+          $json=json_encode($cfg,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+          if($json===false){fwrite(STDERR,'ENCODE_FAILED');exit(11);}
+          $tmp=$path.'.tmp-redblack-'.getmypid();
+          if(file_put_contents($tmp,$json)===false||!rename($tmp,$path)){
+              @unlink($tmp);fwrite(STDERR,'SAVE_FAILED');exit(12);
+          }
+          $check=json_decode(file_get_contents($path),true);
+          $safe=array(
+             'enabled'=>!empty($check['enabled']),
+             'supplier_field'=>$check['identity']['supplier_sku_field'],
+             'sku_prefix'=>$check['identity']['sku_prefix'],
+             'purchase'=>$check['mapping']['purchase_price'],
+             'retail'=>$check['mapping']['price'],
+             'images'=>$check['mapping']['images'],
+             'create_new'=>!empty($check['rules']['create_new']),
+             'only_create_in_stock'=>!empty($check['rules']['only_create_in_stock']),
+             'zero_other_stocks'=>!empty($check['rules']['zero_other_stocks']),
+             'zero_if_missing'=>!empty($check['rules']['zero_if_missing']),
+             'type_id'=>$check['webasyst']['type_id'],
+             'stock_id'=>$check['webasyst']['stock_id'],
+             'export_to_kit'=>!empty($check['rules']['export_to_kit'])
+          );
+          echo json_encode(array('status'=>'saved','supplier_id'=>$supplier['id'],'config'=>$safe,'backup'=>basename($backup)),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+          ?>'''
+          with tempfile.TemporaryDirectory() as td:
+              path=td+'/id'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',path],check=True)
+              pub=open(path+'.pub').read().strip()
+              kid=req('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/create/','POST',json.dumps({'key':pub,'name':'redblack-primary-profile-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),headers)['id']
+              try:
+                  cmd="cat >/tmp/redblack_profile_apply.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/redblack_profile_apply.php\nsu -s /bin/bash web -c 'php /tmp/redblack_profile_apply.php'\nrc=$?\nrm -f /tmp/redblack_profile_apply.php\nexit $rc\n"
+                  p=subprocess.run(['ssh','-i',path,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@45.86.180.49','bash -s'],input=cmd,text=True,capture_output=True,timeout=120)
+                  print('PROFILE_APPLY='+p.stdout.strip())
+                  if p.returncode:
+                      print('PROBE_ERR='+p.stderr[-700:])
+                      raise SystemExit(p.returncode)
+              finally:
+                  try:req('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/'+str(kid)+'/','DELETE',None,headers)
+                  except Exception: pass
+          PY
