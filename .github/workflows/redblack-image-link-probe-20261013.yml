@@ -1,0 +1,32 @@
+name: Check Red-Black remote image URL accessibility
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/redblack-image-link-probe-20261013.yml']
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Check HTTP and HTTPS originals
+        run: |
+          python - <<'PY'
+          import requests
+          urls = [
+              'http://opt.red-black.ru/custom/dimages/big/17/16611.jpg',
+              'https://opt.red-black.ru/custom/dimages/big/17/16611.jpg',
+              'http://opt.red-black.ru/custom/dimages/big/17/16612.jpg',
+          ]
+          for url in urls:
+              try:
+                  r=requests.get(url,headers={'User-Agent':'Mozilla/5.0'},timeout=(7,15),stream=True)
+                  print('IMAGE_LINK_RESULT',r.status_code,r.url,r.headers.get('Content-Type'),r.headers.get('Content-Length'),flush=True)
+              except Exception as exc:
+                  print('IMAGE_LINK_RESULT_ERROR',url,type(exc).__name__,str(exc)[:250],flush=True)
+          PY
