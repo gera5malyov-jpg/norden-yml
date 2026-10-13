@@ -1,0 +1,30 @@
+name: Red-Black alternative HTTPS image-host probe
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/redblack-https-hostname-probe-20261013.yml']
+permissions: {contents: read}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Identify valid HTTPS supplier image origin
+        run: |
+          python - <<'PY'
+          import requests, subprocess
+          path='/custom/dimages/big/17/16611.jpg'
+          for host in ['opt.red-black.ru','red-black.ru','www.red-black.ru','opt.redblack.ru','redblack.ru','www.redblack.ru']:
+              url='https://'+host+path
+              try:
+                  r=requests.get(url,timeout=(5,10),stream=True)
+                  print('PROBE',r.status_code,r.url,r.headers.get('content-type'),flush=True)
+              except Exception as exc:
+                  print('PROBE_ERROR',url,type(exc).__name__,str(exc)[:135],flush=True)
+          p=subprocess.run(['openssl','s_client','-connect','opt.red-black.ru:443','-servername','opt.red-black.ru'],input='',text=True,capture_output=True,timeout=18)
+          print('CERT_DETAILS',p.stderr[-700:],flush=True)
+          PY
