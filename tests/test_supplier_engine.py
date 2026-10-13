@@ -46,8 +46,8 @@ def test_each_external_image_has_its_own_shortcode():
     from supplier_engine.webasyst_sync import extimg_summary
     urls = ["http://opt.red-black.ru/a.jpg", "http://opt.red-black.ru/b.jpg"]
     assert extimg_summary(urls) == (
-        "[extimg]\\nhttp://opt.red-black.ru/a.jpg\\n[/extimg]\\n"
-        "[extimg]\\nhttp://opt.red-black.ru/b.jpg\\n[/extimg]"
+        "[extimg]\nhttp://opt.red-black.ru/a.jpg\n[/extimg]\n"
+        "[extimg]\nhttp://opt.red-black.ru/b.jpg\n[/extimg]"
     )
     assert extimg_summary(urls + [urls[0]]) == extimg_summary(urls)
 
