@@ -1,0 +1,37 @@
+name: Red-Black Megasuppliers regression
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supplier_engine/runner.py'
+      - 'supplier_engine/webasyst_sync.py'
+      - 'webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php'
+      - 'tests/test_supplier_engine.py'
+      - '.github/workflows/red-black-megasuppliers-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.3'
+          coverage: none
+      - name: Install test dependencies
+        run: python -m pip install pytest requests openpyxl pdfplumber
+      - name: Import-engine unit and integration regression tests
+        run: python -m pytest -q tests/test_supplier_engine.py
+      - name: Megasuppliers PHP syntax check
+        run: find webasyst/megasuppliers/lib -name '*.php' -type f -print0 | xargs -0 -n1 php -l
+      - name: Python syntax check
+        run: python -m py_compile supplier_engine/runner.py supplier_engine/webasyst_sync.py
