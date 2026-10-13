@@ -22,6 +22,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
 
         if (waRequest::method() === 'get') {
             $config = file_exists($path) ? json_decode(file_get_contents($path), true) : null;
+            $config = $this->applyRedBlackDefaults($config, $supplier);
             $this->response = array(
                 'status' => 'ok',
                 'supplier_id' => $supplier_id,
@@ -38,6 +39,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
         } else {
             $config = $this->fromForm($supplier);
         }
+        $config = $this->applyRedBlackDefaults($config, $supplier);
         if (!$this->validConfig($config)) {
             $this->errors[] = 'INVALID_CONFIG';
             return;
@@ -179,27 +181,37 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
             $config['rules']['auto_features'] = true;
         }
 
-        // Red-Black always uses supplier XML as the primary source.
-        // Its historical SKU is RED-00-00004806, not RED-00004806.
-        $red_black_identity = strtolower((string)$supplier['name'].' '.(string)$supplier['code']);
-        $red_black_identity = preg_replace('/[^a-z0-9]/', '', $red_black_identity);
-        if (strpos($red_black_identity, 'redblack') !== false && in_array($format, array('yml', 'xml'), true)) {
-            $config['identity']['supplier_sku_field'] = 'article';
-            $config['identity']['sku_prefix'] = 'RED-00-';
-            $config['mapping']['name'] = 'name';
-            $config['mapping']['description'] = 'description';
-            $config['mapping']['purchase_price'] = 'price';
-            $config['mapping']['price'] = 'rrc_price';
-            $config['mapping']['compare_price'] = '';
-            $config['mapping']['stock'] = 'stock';
-            $config['mapping']['category'] = 'categoryId';
-            $config['mapping']['images'] = array('pictures');
-            $config['rules']['price_formulas'] = array();
-            $config['rules']['require_purchase_price'] = true;
-            $config['rules']['require_positive_sale_price'] = true;
-            $config['rules']['update_images'] = true;
-        }
 
+        return $config;
+    }
+
+    private function applyRedBlackDefaults($config, $supplier)
+    {
+        if (!is_array($config)) {
+            return $config;
+        }
+        $format = strtolower((string)ifset($config['source']['format']));
+        // Red-Black always uses supplier XML as the primary source.
+            // Its historical SKU is RED-00-00004806, not RED-00004806.
+            $red_black_identity = strtolower((string)$supplier['name'].' '.(string)$supplier['code']);
+            $red_black_identity = preg_replace('/[^a-z0-9]/', '', $red_black_identity);
+            if (strpos($red_black_identity, 'redblack') !== false && in_array($format, array('yml', 'xml'), true)) {
+                $config['identity']['supplier_sku_field'] = 'article';
+                $config['identity']['sku_prefix'] = 'RED-00-';
+                $config['mapping']['name'] = 'name';
+                $config['mapping']['description'] = 'description';
+                $config['mapping']['purchase_price'] = 'price';
+                $config['mapping']['price'] = 'rrc_price';
+                $config['mapping']['compare_price'] = '';
+                $config['mapping']['stock'] = 'stock';
+                $config['mapping']['category'] = 'categoryId';
+                $config['mapping']['images'] = array('pictures');
+                $config['rules']['price_formulas'] = array();
+                $config['rules']['require_purchase_price'] = true;
+                $config['rules']['require_positive_sale_price'] = true;
+                $config['rules']['update_images'] = true;
+            }
+    
         return $config;
     }
 
