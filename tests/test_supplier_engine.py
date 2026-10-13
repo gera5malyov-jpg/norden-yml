@@ -13,6 +13,64 @@ from supplier_engine.validators import validate_run
 from supplier_engine.webasyst_sync import apply_plan, build_plan, index_by_sku, index_by_supplier_sku_name, validate_apply_plan, webasyst_sku_mode
 
 
+def test_red_black_legacy_sku_prices_and_supplier_images():
+    xml = b'''<yml_catalog><shop><offers>
+      <offer id="4806" code="00-00004806" article="00004806">
+        <name>Red Black stool</name><price>2280</price><rrc_price>2645</rrc_price>
+        <stock>2</stock><categoryId>00_0008605</categoryId>
+        <picture>http://opt.red-black.ru/custom/dimages/big/17/16611.jpg</picture>
+        <picture>http://opt.red-black.ru/custom/dimages/big/17/16612.jpg</picture>
+      </offer>
+    </offers></shop></yml_catalog>'''
+    cfg = {
+        "code": "Red-Black", "name": "Red-Black",
+        "identity": {"supplier_sku_field": "vendorCode", "sku_prefix": "RED-", "brand": ""},
+        # Simulate the old incomplete mapping and stale price formulas in the UI.
+        "mapping": {"name": "name", "purchase_price": "", "price": "",
+                    "images": ["picture"], "stock": "stock"},
+        "rules": {"price_formulas": {"price": "supplier_price * 1.25"}},
+    }
+    p = normalize(cfg, load_xml_yml(xml))[0]
+    assert p.supplier_sku == "00004806"
+    assert p.sku == "RED-00-00004806"
+    assert p.purchase_price == 2280
+    assert p.price == 2645
+    assert p.stock == 2
+    assert p.images == [
+        "http://opt.red-black.ru/custom/dimages/big/17/16611.jpg",
+        "http://opt.red-black.ru/custom/dimages/big/17/16612.jpg",
+    ]
+
+
+def test_each_external_image_has_its_own_shortcode():
+    from supplier_engine.webasyst_sync import extimg_summary
+    urls = ["http://opt.red-black.ru/a.jpg", "http://opt.red-black.ru/b.jpg"]
+    assert extimg_summary(urls) == (
+        "[extimg]\\nhttp://opt.red-black.ru/a.jpg\\n[/extimg]\\n"
+        "[extimg]\\nhttp://opt.red-black.ru/b.jpg\\n[/extimg]"
+    )
+    assert extimg_summary(urls + [urls[0]]) == extimg_summary(urls)
+
+
+def test_red_black_missing_sale_price_cannot_create_zero_price_product():
+    p = Product("00004806", "RED-00-00004806", "Stool", purchase_price=2280, price=0, stock=2)
+    plan = build_plan(
+        [p], existing={}, rules={"create_new": True, "require_positive_sale_price": True}
+    )
+    assert not plan["create"]
+    assert plan["skipped"][0]["reason"] == "missing_sale_price"
+
+
+def test_zero_purchase_and_sale_prices_not_written_to_webasyst():
+    from supplier_engine.webasyst_sync import _sku_write_data
+    payload = _sku_write_data(
+        {"price": 0, "purchase_price": 0, "stock": 2},
+        {"update_prices": True, "update_stock": False}, stock_id=1,
+    )
+    assert "price" not in payload
+    assert "purchase_price" not in payload
+
+
 def test_duplicate_blocks():
     p=[Product("1","X-1","A"),Product("2","X-1","B")]
     r=validate_run(p)
