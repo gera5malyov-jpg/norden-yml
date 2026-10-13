@@ -30,15 +30,27 @@ class DeliveryTests(unittest.TestCase):
         self.assertIn('$wa->shop->checkout()->form',new)
         self.assertIn("$wa->domainUrl() == 'https://profikompany.ru'",new)
         self.assertRaises(ValueError,self.p.patch_order,new)
-    def test_cms_removes_fixed_quote_and_qualifies_widget_preserving_provider_settings(self):
+    def test_cms_removes_blocking_calculator_preserving_all_surrounding_delivery_terms(self):
         old=source('delivery-page12.html')
         self.assertIsNotNone(self.p,'Delivery patch builder is missing'); new=self.p.patch_delivery_content(old)
         self.assertNotIn('от 600 ₽',new); self.assertIn('города отправки',new)
-        self.assertIn('Москва',new); self.assertIn('предварительного',new)
+        self.assertNotIn('transportnye-kompanii',new)
+        self.assertNotIn('calculatorBuilder',new)
+        self.assertNotIn('cityFrom',new)
         self.assertEqual(new.count('id="megapolis-delivery-calculator-note"'),1)
-        script=old[old.index('<script src='):old.index('</script>',old.index('<script>'))+9]
-        self.assertIn(script,new)
+        self.assertIn('Для расчёта нужны выбранные товары и адрес получения.',new)
+        self.assertIn('Менеджер уточнит город отправления и согласует стоимость доставки отдельно.',new)
+        for company in ('ПЭК','Деловые линии','СДЭК','DPD','Байкал Сервис'):
+            self.assertIn('<strong>'+company+'</strong>',new)
+        self.assertIn('после 100% предоплаты',new)
         self.assertIn('Все отправленные заказы застрахованы на сумму заказанного изделия.',new)
+        # Invert only the three authorized substitutions: all other bytes survive.
+        restored=new.replace(self.p.CMS_PRICE_NEW,self.p.CMS_PRICE_OLD)
+        restored=restored.replace(self.p.CMS_FACTORS_NEW,self.p.CMS_FACTORS_OLD)
+        block_start=old.index('<div id="transportnye-kompanii">')
+        block_end=old.index('</script>',old.index('<script>calculatorBuilder'))+len('</script>')
+        restored=restored.replace(self.p.CMS_WIDGET_NOTE,old[block_start:block_end])
+        self.assertEqual(restored,old)
         self.assertRaises(ValueError,self.p.patch_delivery_content,new)
     def test_changed_sources_fail_closed(self):
         self.assertIsNotNone(self.p,'Delivery patch builder is missing')

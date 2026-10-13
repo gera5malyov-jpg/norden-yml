@@ -24,8 +24,8 @@ CMS_PRICE_OLD = '<li>Стоимость доставки по Санкт-Пет�
 CMS_PRICE_NEW = '<li>Стоимость доставки рассчитывается <strong>индивидуально</strong>: товары отправляются из разных городов, поэтому расчёт зависит от <strong>города отправки, адреса получения, веса и объёма заказа</strong>.</li>'
 CMS_FACTORS_OLD = '<li>Итоговая стоимость зависит от <strong>габаритов, веса, района доставки</strong>, а также дополнительных услуг (подъём/сборка).</li>'
 CMS_FACTORS_NEW = '<li>Дополнительные услуги (подъём/сборка) также рассчитываются и согласуются отдельно.</li>'
-CMS_WIDGET_ANCHOR = '<div id="transportnye-kompanii"></div>'
-CMS_WIDGET_NOTE = '<p id="megapolis-delivery-calculator-note">Калькулятор даёт ориентир для предварительного расчёта. По умолчанию выбран город отправки Москва; фактический город отправки зависит от товара и может отличаться. Уточните его у менеджера и укажите в калькуляторе. Окончательная стоимость доставки согласуется отдельно.</p>\r\n\r\n'
+CMS_WIDGET_BLOCK = '<div id="transportnye-kompanii"></div>\r\n\r\n<script src="https://transportnye-kompanii.com/transport/generate-calculator/"></script>\r\n\r\n<script>calculatorBuilder({\r\n    companies: [\r\n        [\'baikalService\', \'Байкал Сервис\'],\r\n        [\'pec\', \'ПЭК\'],\r\n        [\'cdek\', \'СДЭК\'],\r\n        [\'dellin\', \'Деловые линии\'],\r\n        [\'dpd\', \'DPD\'],\r\n    ],\r\n    title: \'Калькулятор стоимости доставки\',\r\n    cityFrom: \'Москва\',\r\n    cargoPickup: true,\r\n    cargoDelivery: true,\r\n    insurance: true,\r\n    rigidPackaging: true,\r\n    colorScheme: \'#62488E\',\r\n    buttonTextColor: \'white\',\r\n});\r\n</script>'
+CMS_WIDGET_NOTE = '<p id="megapolis-delivery-calculator-note">Для расчёта нужны выбранные товары и адрес получения. Менеджер уточнит город отправления и согласует стоимость доставки отдельно.</p>'
 
 def _verify(source: str, name: str, expected_sha256: str | None) -> None:
     if hashlib.sha256(source.encode('utf-8')).hexdigest() != (expected_sha256 or AUDITED_SHA256[name]):
@@ -56,4 +56,4 @@ def patch_delivery_content(source: str, *, expected_sha256: str | None = None) -
         raise ValueError('Calculator notice already present')
     updated = _replace(source, CMS_PRICE_OLD, CMS_PRICE_NEW)
     updated = _replace(updated, CMS_FACTORS_OLD, CMS_FACTORS_NEW)
-    return _replace(updated, CMS_WIDGET_ANCHOR, CMS_WIDGET_NOTE + CMS_WIDGET_ANCHOR)
+    return _replace(updated, CMS_WIDGET_BLOCK, CMS_WIDGET_NOTE)

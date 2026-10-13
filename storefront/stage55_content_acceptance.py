@@ -42,8 +42,10 @@ def main():
    res=page.goto(ROOT+'/dostavka/',wait_until='domcontentloaded',timeout=65000)
    assert res.status==200
    assert page.locator('#megapolis-delivery-calculator-note').count()==1
+   assert page.locator('script[src*="transportnye-kompanii.com"]').count()==0,'Blocking external calculator remains'
+   assert 'Менеджер уточнит город отправления' in page.locator('#megapolis-delivery-calculator-note').inner_text()
    assert 'от 600' not in page.locator('body').inner_text()
-   page.screenshot(path=str(OUT/('delivery-'+str(width)+'.png')))
+   page.screenshot(path=str(OUT/('delivery-'+str(width)+'.png')),full_page=True)
    for product in proposal['products'][:6]:
     res=page.goto(ROOT+product['url'],wait_until='domcontentloaded',timeout=65000)
     assert res.status==200,'Product HTTP failure'
@@ -78,7 +80,7 @@ def main():
    labels=page.locator('#js-order-form').inner_text()
    assert 'Доставка от 890 руб' not in labels and 'Самовывоз от 450 руб' not in labels
    assert not errors,errors
-   page.screenshot(path=str(OUT/('nonempty-cart-'+str(width)+'.png')))
+   page.screenshot(path=str(OUT/('nonempty-cart-'+str(width)+'.png')),full_page=True)
    checks.append({'width':width,'categories_checked':len(proposal['categories']),'products_checked':min(6,len(proposal['products'])),'delivery_note':True,'nonempty_native_checkout':True,'order_submitted':False,'order_created_signal':False,'shipping_choices_rendered':bool(page.locator('#js-order-form .wa-type-wrapper').count())})
    ctx.close()
   browser.close()
