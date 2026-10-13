@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Refresh factual catalog eligibility on 2026-10-13 before the content rollout.
 """Read only public theme sources and categorized product facts; no customer data."""
 import base64, json
 from pathlib import Path
