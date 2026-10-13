@@ -20,7 +20,7 @@ jobs:
       - name: Python syntax check
         run: python -m py_compile scripts/repair_redblack_zero_prices_images.py
       - name: Dry-run prices and images migration
-        run: python scripts/repair_redblack_zero_prices_images.py --backup redblack-backup-preview.json --report redblack-repair-preview.json
+        run: python -m scripts.repair_redblack_zero_prices_images --backup redblack-backup-preview.json --report redblack-repair-preview.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
