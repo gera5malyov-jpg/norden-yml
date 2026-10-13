@@ -1,0 +1,268 @@
+{strip}
+
+{* GLOBALS *}
+{$_js = $wa->globals('jsMin')}
+{$wa->globals("hideSidebar", true)}
+{$wa->globals("isBackground", true)}
+
+{* SETTINGS *}
+{$_cart_phone = $theme_settings.cart__phone_enable}
+{$_cart_phone_title = $theme_settings.cart__phone_title}
+{$_cart_help = $theme_settings.cart__help_enable}
+{$_cart_help_title = $theme_settings.cart__help_title}
+{$_cart_help_desc = $theme_settings.cart__help_desc}
+
+{* WA SETTINGS *}
+{$_show_cart = true}
+{$_cart_count = $wa->shop->cart->count()}
+
+{* todo: get order details *}
+{$_order_id = $wa->get("order_id")}
+
+<style>
+  @media screen and (max-width: 1200px) {
+    .main .main__container {
+      max-width: 100%;
+    }
+  }
+</style>
+
+{* SUCCESS *}
+{if !empty($_order_id)}
+
+  <div class="order-success">
+
+    <div class="order-success__icon-box">
+      <svg class="order-success__icon svg-icon"><use xlink:href="#cart-empty"></use></svg>
+    </div>
+
+    <h2 class="order-success__title">{$config.confirmation.thankyou_header|default:"[`Заказ оформлен. Спасибо!`]"|escape}</h2>
+
+    {if !empty($config.confirmation.thankyou_content)}
+      <div class="order-success__description">{$config.confirmation.thankyou_content|replace:'$order_id':$_order_id|escape}</div>
+    {/if}
+
+    {if !empty($payment)}
+      <div class="order-success__plugins">{$payment}</div>
+    {/if}
+
+    {if !empty($payment_success)}
+      <div class="order-success__payment alert alert-info">[`Your payment has been successfully accepted. We will process your order and contact you shortly.`]</div>
+    {/if}
+
+    <div class="order-success__actions">
+      <a href="{$wa_app_url}" class="btn btn-default">[`Go to home page`]</a>
+    </div>
+
+    {if !empty($frontend_checkout)}
+      {* @event frontend_checkout.%plugin_id% *}
+      {foreach $frontend_checkout as $_}{$_}{/foreach}
+    {/if}
+
+  </div>
+
+{* EMPTY *}
+{elseif empty($_cart_count)}
+  <div class="order-empty">
+    <div class="order-empty__icon-box">
+      <svg class="order-empty__icon svg-icon"><use xlink:href="#cart-empty"></use></svg>
+    </div>
+    <div class="order-empty__description">{$config.cart.empty_text|default:"[`Your shopping cart is empty.`]"|escape}</div>
+    <a href="{$wa_app_url}" class="btn btn-default">[`Go to home page`]</a>
+  </div>
+{* ORDER *}
+{else}
+    <div class="order-page" id="js-order-page">
+
+        <h1 class="order-page__title title size-typo-xxxl">{$config.cart.block_name|default:"[`Корзина`]"|escape}</h1>
+
+        <div class="row">
+
+          {if !empty($_show_cart)}
+            <div class="col-lg-6 col-md-12">
+              <div class="order-page__section order-products" id="js-order-cart">
+                <div class="order-page__section-header">
+                  <div class="order-page__section-header-item">[`Товары`]</div>
+                  <div class="order-page__section-header-item">
+                    <button class="js-clear-cart">
+                      <svg class="svg-icon svg-icon--xxl"><use xlink:href="#icon-close"></use></svg>
+                      <span>[`Удалить все товары`]</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="order-page__body">
+                  {$wa->shop->checkout()->cart([
+                    "wrapper" => "#js-order-cart"
+                  ])}
+                </div>
+
+                {if !empty($theme_settings.cart__quickorder) && class_exists('shopClicklitePlugin')}
+                  <div class="order-page__quickorder">
+                    <div class="cart-quickorder">
+                      {shopClicklitePlugin::displayCartButton()}
+                    </div>
+                  </div>
+                {/if}
+
+                {if !empty($_cart_phone)}
+                  <div class="cart-phone">
+                    {if !empty($_cart_phone_title)}
+                      <div class="cart-phone__title">{$_cart_phone_title}</div>
+                    {/if}
+                    {if !empty($theme_settings.company__phone_main)}
+                      <a class="cart-phone__tel" href="tel:{$theme_settings.company__phone_main|replace:" ":""}">{$theme_settings.company__phone_main}</a>
+                    {/if}
+                    {if !empty($theme_settings.company__phone_second)}
+                      <a class="cart-phone__tel" href="tel:{$theme_settings.company__phone_second|replace:" ":""}">{$theme_settings.company__phone_second}</a>
+                    {/if}
+                  </div>
+                {/if}
+
+              </div>
+
+              {if method_exists($wa->shop->checkout(), 'crossSelling')}
+                {strip}
+                  {capture assign="_cross_selling_html"}
+                  {$wa->shop->checkout()->crossSelling([
+                    "DEBUG" => true,
+                    "wrapper" => "#js-cross-selling-section"
+                  ])}
+                  {/capture}
+                {/strip}
+
+                {if !empty($_cross_selling_html)}
+                  <div class="order-page__section order-page__section-cross-selling" id="js-cross-selling-section">
+                    <div class="order-page__section-header">
+                      <div class="order-page__section-header-item">{$config.recommendations.block_name|default:"[`Recommend`]"|escape}</div>
+                    </div>
+                    <div class="order-page__body">
+                      {$_cross_selling_html}
+                    </div>
+                  </div>
+                {/if}
+              {/if}
+
+              {if !empty($_cart_help)}
+                <div class="cart-help">
+                  {if !empty($_cart_help_title) || !empty($_cart_help_desc)}
+                    <div class="cart-help__header">
+                      {if !empty($_cart_help_title)}<div class="cart-help__title">{$_cart_help_title}</div>{/if}
+                      {if !empty($_cart_help_desc)}<div class="cart-help__desc">{$_cart_help_desc}</div>{/if}
+                    </div>
+                  {/if}
+                  <div class="cart-help__content">
+                    {if !empty($theme_settings.company__address)}
+                      <div class="cart-help__info">
+                        <span class="cart-help__info-text">[`Address`]:</span>
+                        <span class="cart-help__info-title">{$theme_settings.company__address}</span>
+                      </div>
+                    {/if}
+                    {if !empty($theme_settings.company__phone_main)}
+                      <div class="cart-help__info">
+                        <span class="cart-help__info-text">[`Phone`]:</span>
+                        <a class="cart-help__info-title" href="tel:{$theme_settings.company__phone_main|replace:" ":""}">{$theme_settings.company__phone_main}</a>
+                      </div>
+                    {/if}
+                    {if !empty($theme_settings.company__phone_second)}
+                      <div class="cart-help__info">
+                        <span class="cart-help__info-text">[`Phone`]:</span>
+                        <a class="cart-help__info-title" href="tel:{$theme_settings.company__phone_second|replace:" ":""}">{$theme_settings.company__phone_second}</a>
+                      </div>
+                    {/if}
+                    {if !empty($theme_settings.company__email)}
+                      <div class="cart-help__info">
+                        <span class="cart-help__info-text">[`Email`]:</span>
+                        <a href="mailto:{$theme_settings.company__email}" class="cart-help__info-title">{$theme_settings.company__email}</a>
+                      </div>
+                    {/if}
+                    <div class="cart-help__info">
+                      {if !method_exists($wa->shop, 'schedule')}
+                        <span class="cart-help__info-text">[`Workhours`]:</span>
+                      {/if}
+                      <span class="cart-help__info-title">
+                        {if method_exists($wa->shop, 'schedule')}
+                          {$_schedule = $wa->shop->schedule()}
+                          <button type="button" class="btn btn-link phones__workhours" data-container="body" data-toggle="popover" data-placement="bottom">
+                            <span class="phones__workhours-text">[`Business hours`]</span>
+                            <svg class="phones__workhours-text__link-arrow svg-icon svg-icon--m icon--chevrondown"><use xlink:href="#icon-chevrondown"></use></svg>
+                          </button>
+                          <div class="schedule-wrapper is-hidden">
+                            <div class="schedule">
+                              <ul class="schedule__list list-styled">
+                                {if isset($_schedule.current_week)}
+                                  {foreach $_schedule.current_week as $_day}
+                                    <li class="schedule__item">
+                                      <span class="schedule__day">{$_day.name|escape}:</span>
+                                      {if !empty($_day.work)}
+                                        <span class="schedule__time">
+                                          {$_day.start_work|escape} — {$_day.end_work|escape}
+                                        </span>
+                                      {else}
+                                        <span class="schedule__time">[`day off`]</span>
+                                      {/if}
+                                    </li>
+                                  {/foreach}
+                                {/if}
+                              </ul>
+                            </div>
+                          </div>
+                        {elseif $wh = $wa->shop->settings('workhours')}
+                          <span class="phones__workhours">{$wh.days_from_to}{if $wh.hours_from && $wh.hours_to} {$wh.hours_from}—{$wh.hours_to}{/if}</span>
+                        {/if}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              {/if}
+
+            </div>
+          {/if}
+
+          <div class="col-lg-6 col-md-12">
+            <section class="order-page__section" id="js-order-form">
+              <div class="order-page__section-header">
+                {$config.order.block_name|default:"[`Оформление заказа`]"|escape}
+              </div>
+              <div class="order-page__body">
+                {$wa->shop->checkout()->form([
+                  "wrapper" => "#js-order-form"
+                ])}
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <script>
+            ( function($) {
+
+                ( typeof window.ShopOrderPage === "function" ? init() : load().then(init) );
+
+                function load() {
+                    var deferred = $.Deferred();
+
+                    $.getScript("{$wa_theme_url}js/order.js?v={$wa->version()}", function() {
+                        deferred.resolve();
+                    });
+
+                    return deferred.promise();
+                }
+
+                function init() {
+                    new window.ShopOrderPage({
+                        $wrapper: $("#js-order-page"),
+                        urls: {
+                            "checkbox-icon": "{$wa_app_static_url}img/frontend/order/svg/sprite.svg#checkbox-yes"
+                        }
+                    });
+                }
+
+            })(jQuery);
+        </script>
+    </div>
+{/if}
+
+<!-- plugin hook: 'frontend_order' -->
+{* @event frontend_order.%plugin_id% *}
+{foreach $frontend_order as $_}{$_}{/foreach}
+
+{/strip}

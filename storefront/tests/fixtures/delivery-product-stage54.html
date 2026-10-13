@@ -1,0 +1,307 @@
+{strip}
+
+{* GLOBALS *}
+{$_js = $wa->globals('jsMin')}
+{$wa->globals("hideSidebar", true)}
+{if empty($theme_settings.slider__page_product)}{$wa->globals("hideSlider", true)}{/if}
+{$_is_dialog = $wa->get('cart')}
+
+{* === extimg: parse external image links from product.summary === *}
+{assign var="ext_images" value=[]}
+{assign var="__extimg_source" value=$product.summary|default:''}
+{assign var="__m" value=[]}
+{assign var="__extimg_block" value=''}
+{assign var="__has_extimg" value=false}
+
+{if $__extimg_source}
+    {if preg_match('/\[extimg\](.*?)\[\/extimg\]/is', $__extimg_source, $__m)}
+        {assign var="__extimg_block" value=$__m.1|default:''}
+        {assign var="__has_extimg" value=true}
+    {/if}
+
+    {if $__extimg_block}
+        {* normalize line breaks and split by \n (no \R for compatibility) *}
+        {assign var="__extimg_block" value=str_replace("\r\n", "\n", $__extimg_block)}
+        {assign var="__extimg_block" value=str_replace("\r", "\n", $__extimg_block)}
+        {assign var="__lines" value=explode("\n", $__extimg_block)}
+
+        {foreach $__lines as $__line}
+            {assign var="__url" value=trim($__line)}
+            {if $__url && preg_match('~^https?://~i', $__url)}
+                {append var="ext_images" value=$__url}
+            {/if}
+        {/foreach}
+    {/if}
+{/if}
+{* === /extimg === *}
+
+{* PRODUCT PAGE *}
+<article class="product-page" itemscope itemtype="http://schema.org/Product">
+{* Search snippet properties - visible product data only *}
+<link itemprop="url" href="{$wa->shop->productUrl($product)|escape}">
+{$_schema_sku = $product.skus[$product.sku_id]}
+{if !empty($_schema_sku.sku)}
+  <meta itemprop="sku" content="{$_schema_sku.sku|escape}">
+{/if}
+
+    {* если нет штатных изображений и нет внешних — тогда no-gutters *}
+    <div class="product-page__row row{if !$product.images && !$ext_images|@count} no-gutters{/if}">
+
+      {* IMAGE GALLERY *}
+      {if $product.images}
+        {include file="product.gallery.html" product=$product _is_page=true inline}
+
+      {elseif $ext_images|@count}
+        {* Внешняя галерея из summary + переключение по миниатюрам (без новой вкладки) *}
+        <div class="product-page__gallery col-lg-6 col-md-5">
+            <div class="product-gallery product-gallery--extimg" id="js-extimg-gallery">
+
+                {* MAIN IMAGE (без ссылки) *}
+                <div class="product-gallery__main">
+                    <img itemprop="image" src="{$ext_images[0]|escape}" class="js-extimg-main-img" alt="{$product.name|escape}">
+                </div>
+
+                {* THUMBS *}
+                {if $ext_images|@count > 1}
+                    <div class="product-gallery__thumbs">
+                        {foreach $ext_images as $img_url}
+                            {assign var="__is_active" value=$img_url@first}
+                            <a class="product-gallery__thumb js-extimg-thumb{if $__is_active} is-active{/if}"
+                               href="#"
+                               data-extimg="{$img_url|escape}">
+                                <img src="{$img_url|escape}" loading="lazy" decoding="async"
+                                     alt="{$product.name|escape}{if !$img_url@first} #{$img_url@iteration}{/if}">
+                            </a>
+                        {/foreach}
+                    </div>
+                {/if}
+
+            </div>
+        </div>
+
+        <script>
+        (function () {
+          var root = document.getElementById('js-extimg-gallery');
+          if (!root) return;
+
+          var mainImg = root.querySelector('.js-extimg-main-img');
+          if (!mainImg) return;
+
+          root.addEventListener('click', function (e) {
+            var a = e.target.closest('.js-extimg-thumb');
+            if (!a || !root.contains(a)) return;
+
+            e.preventDefault();
+
+            var url = a.getAttribute('data-extimg');
+            if (!url) return;
+
+            if (mainImg.getAttribute('src') !== url) {
+              mainImg.setAttribute('src', url);
+            }
+
+            var thumbs = root.querySelectorAll('.js-extimg-thumb');
+            for (var i = 0; i < thumbs.length; i++) {
+              thumbs[i].classList.remove('is-active');
+            }
+            a.classList.add('is-active');
+          });
+        })();
+        </script>
+      {/if}
+
+      {* PRODUCT CART *}
+      <div class="product-page__cart{if $product.images || $ext_images|@count} col-lg-6 col-md-7{else} col-12{/if}" id="s-cart-wrapper">
+
+          <h1 class="product-page__header" itemprop="name">{$product.name|escape}</h1>
+
+          {* summary: если в нём есть extimg-блок — НЕ выводим, чтобы не показывать ссылки/коды *}
+          {if $product.summary && !$__has_extimg}
+              <p class="product-page__summary">{$product.summary|truncate:512|strip_tags}</p>
+          {/if}
+
+          {* megapolis-product-filter-v1: buyer facts, original values and units only. *}
+          {if $wa->domainUrl() == 'https://profikompany.ru' && !empty($product.category_id)}
+            {$_megapolis_priority = ['color','material','material_karkasa','material_sidenya','material_stoleshnitsy','razmer','shirina','glubina','vysota','razreshennaya_nagruzka_do','podlokotniki','kolichestvo_yashchikov','kolichestvo_dverey','garantiya','garantiynyy_srok','vendor','strana','obivka','material_obivki','razmery_stula_vkhshkhg','razmery_kresla','gabaritnyy_razmer_dshv','regulirovka_vysoty','mekhanizm_kachaniya','krestovina','vysota_sidenya','kolichestvo_mest','kollektsiya','ms_s1_372e9683f239fd53','ms_s1_5af1dea9d5916a8e','ms_s1_f55983d699df1974','ms_s1_f2c22d29eeca8e55','ms_s1_18188210a236dc01','ms_s1_9eb235a32fb2e2e5','ms_s1_28a7cfd863de2a3f','ms_s1_1b66eb4ba2adc943','ms_s1_7129a076a1939833','ms_s1_85f95885541f3c22','ms_s1_d9b2d50e5906628a','ms_s1_a24cbdca8d3d95d2']}
+            {if $product.features && !empty($theme_settings.product__features) && count(array_intersect(array_keys($product.features), $_megapolis_priority))}
+              <div class="features-list megapolis-key-features">
+                {$_megapolis_shown = 0}
+                {foreach $_megapolis_priority as $f_code}
+                  {if isset($product.features[$f_code]) && $features[$f_code].type != 'divider' && $_megapolis_shown < 6}
+                    {$f_value = $product.features[$f_code]}
+                  <div class="features-list__item">
+                    <div class="features-list__name">{if $features[$f_code].name == 'Высотамм'}Высота, мм{elseif $features[$f_code].name == 'Длинамм'}Длина, мм{elseif $features[$f_code].name == 'Ширинамм'}Ширина, мм{elseif $features[$f_code].name == 'Цветкорпуса'}Цвет корпуса{elseif $features[$f_code].name == 'Цветфасадов'}Цвет фасадов{elseif $features[$f_code].name == 'Материалкаркаса'}Материал каркаса{elseif $features[$f_code].name == 'Материалстолешницы'}Материал столешницы{elseif $features[$f_code].name == 'Сиденьематериал'}Материал сиденья{else}{$features[$f_code].name|escape}{/if}</div>
+                    <div class="features-list__line"></div>
+                    <div class="features-list__value">
+                      {if is_array($f_value)}
+                          {if $features[$f_code].type == 'color'}
+                              {implode('<br /> ', $f_value)}
+                          {else}
+                              {implode(', ', $f_value)}
+                          {/if}
+                      {else}
+                          {$f_value}
+                      {/if}
+                    </div>
+                  </div>
+                    {$_megapolis_shown = $_megapolis_shown + 1}
+                  {/if}
+                {/foreach}
+                {if !empty($theme_settings.product__features_tab)}
+                  {if $theme_settings.product__info == "list"}<a href="#product-features" class="features-list__link smooth-scroll">Все характеристики</a>
+                  {else}<a href="#product-features" class="features-list__link" data-toggle="tab" role="tab">Все характеристики</a>{/if}
+                {else}<a href="#megapolis-full-features" class="features-list__link smooth-scroll">Все характеристики</a>{/if}
+              </div>
+            {/if}
+          {else}
+          {if $product.features && !empty($theme_settings.product__features)}
+            <div class="features-list">
+              {foreach $product.features as $f_code => $f_value}
+                {if $f_value@iteration < 10 && $features[$f_code].type != 'divider'}
+                  <div class="features-list__item">
+                    <div class="features-list__name">{$features[$f_code].name|escape}</div>
+                    <div class="features-list__line"></div>
+                    <div class="features-list__value">
+                      {if is_array($f_value)}
+                          {if $features[$f_code].type == 'color'}
+                              {implode('<br /> ', $f_value)}
+                          {else}
+                              {implode(', ', $f_value)}
+                          {/if}
+                      {else}
+                          {$f_value}
+                      {/if}
+                    </div>
+                  </div>
+                {/if}
+              {/foreach}
+              {if $theme_settings.product__info == "list"}<a href="#product-features" class="features-list__link smooth-scroll">[`All features`]</a>{/if}
+            </div>
+          {/if}
+          {/if}
+
+          {include file="product.cart.html" inline}
+          {* Scope buyer information to categorized products only, with truthful service terms. *}
+          {if $wa->domainUrl() == 'https://profikompany.ru' && !empty($product.category_id)}
+            <section class="megapolis-purchase-trust" aria-label="Информация перед покупкой">
+              <div class="megapolis-purchase-trust__title">Перед оформлением заказа</div>
+              <p>Доставляем мебель по Санкт-Петербургу и России. Стоимость и условия доставки уточняются при оформлении заказа.</p>
+              <nav class="megapolis-purchase-trust__links" aria-label="Условия заказа">
+                <a href="/dostavka/">Доставка</a>
+                <a href="/oplata/">Способы оплаты</a>
+                <a href="/garantiya/">Гарантия и возврат</a>
+              </nav>
+              <p class="megapolis-purchase-trust__contact">Поможем уточнить детали: <a href="tel:+78122449264">+7 (812) 244-92-64</a> (СПб), <a href="tel:+74996776332">+7 (499) 677-63-32</a> (Москва)</p>
+            </section>
+            {literal}
+              <style>
+                .megapolis-purchase-trust{padding:15px 17px;margin:12px 0 20px;background:#f7f7f6;border:1px solid #e5e3e0;border-radius:8px;color:#353535;font-size:14px;line-height:1.55}
+                .megapolis-purchase-trust__title{font-size:16px;line-height:1.35;font-weight:700;margin-bottom:5px}
+                .megapolis-purchase-trust p{margin:0 0 9px}
+                .megapolis-purchase-trust__links{display:flex;gap:7px 18px;flex-wrap:wrap;margin:5px 0 10px}
+                .megapolis-purchase-trust a{color:#694932;text-decoration:underline;text-underline-offset:2px}
+                .megapolis-purchase-trust a:focus-visible{outline:2px solid #694932;outline-offset:2px}
+                .megapolis-purchase-trust__contact{margin-bottom:0!important}
+              </style>
+            {/literal}
+          {/if}
+          {* Product-only mobile buying shortcut, no catalog changes *}
+          {if $wa->domainUrl() == 'https://profikompany.ru' && !empty($product.category_id)}
+            {* megapolis-buy-to-cart-success-v1: never navigate until server accepted item *}
+            <script src="{$wa_real_theme_url}js/megapolis-buy-to-cart-v1.js?v=20261011b" defer></script>
+            <div id="megapolis-mobile-buy" class="megapolis-mobile-buy" role="group" aria-label="Покупка товара">
+              <span class="megapolis-mobile-buy__price">{shop_currency_html($product.price)}</span>
+              <button type="button" class="megapolis-mobile-buy__button">Купить</button>
+            </div>
+            {literal}
+            <style>
+            @media (min-width:768px) {.megapolis-mobile-buy{display:none!important}}
+            @media (max-width:767px) {
+             .product-page{padding-bottom:72px}
+             .megapolis-mobile-buy{position:fixed;bottom:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;padding:10px 14px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -3px 18px rgba(0,0,0,.13);box-sizing:border-box}
+             .megapolis-mobile-buy.is-hidden{display:none}
+             .megapolis-mobile-buy__price{font-size:19px;font-weight:700}
+             .megapolis-mobile-buy__button{min-width:130px;background:#7b5e45;color:#fff;border:0;border-radius:5px;font-size:16px;font-weight:600;min-height:44px;cursor:pointer}
+             .megapolis-mobile-buy__button:disabled{opacity:.45;cursor:not-allowed}
+            }
+            </style>
+            <script>
+            (function(){
+             function init(){
+              var bar=document.getElementById('megapolis-mobile-buy');
+              var form=document.getElementById('s-product-form');
+              if(!bar||!form)return;
+              var button=bar.querySelector('button');
+              var label=bar.querySelector('.megapolis-mobile-buy__price');
+              var original=form.querySelector('.product-add input[type="submit"]');
+              var price=form.querySelector('.product-price');
+              if(!original){bar.classList.add('is-hidden');return}
+              function sync(){
+               button.disabled=original.disabled;
+               if(price)label.textContent=price.textContent.trim();
+              }
+              sync();
+              button.addEventListener('click',function(){sync();if(!button.disabled)original.click()});
+              if(window.MutationObserver){var mo=new MutationObserver(sync);mo.observe(form,{attributes:true,subtree:true,childList:true,characterData:true})}
+              if(window.IntersectionObserver){var io=new IntersectionObserver(function(entries){bar.classList.toggle('is-hidden',entries[0].isIntersecting)});io.observe(original)}
+             }
+             if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+            })();
+            </script>
+            {/literal}
+          {/if}
+
+          {* The existing purchase trust box already covers shipping, payments and warranty.
+             Suppress only this generic repeat for categorized products on profikompany.ru. *}
+          {if !empty($theme_settings.product__features_custom) && ($wa->domainUrl() != 'https://profikompany.ru' || empty($product.category_id))}
+            {$theme_settings.product__features_custom}
+          {/if}
+
+          {if !empty($frontend_product) && !$_is_dialog}
+              {* @event frontend_product.%plugin_id%.cart *}
+              {foreach $frontend_product as $_}{$_.cart}{/foreach}
+
+              {* @event frontend_product.%plugin_id%.block_aux *}
+              <div class="s-product-aux">
+                  {foreach $frontend_product as $_}{$_.block_aux}{/foreach}
+              </div>
+          {/if}
+      </div>
+
+    </div>
+
+    {* Keep every original feature reachable even when the theme full-feature tab is disabled. *}
+    {if $wa->domainUrl() == 'https://profikompany.ru' && !empty($product.category_id) && $product.features && empty($theme_settings.product__features_tab)}
+      <details id="megapolis-full-features" class="megapolis-full-features">
+        <summary>Все характеристики</summary>
+        <div class="features-list">
+          {foreach $product.features as $f_code => $f_value}
+            {if $features[$f_code].type == 'divider'}
+              <h3 class="features-list__divider">{$features[$f_code].name|escape}</h3>
+            {else}
+                  <div class="features-list__item">
+                    <div class="features-list__name">{$features[$f_code].name|escape}</div>
+                    <div class="features-list__line"></div>
+                    <div class="features-list__value">
+                      {if is_array($f_value)}
+                          {if $features[$f_code].type == 'color'}
+                              {implode('<br /> ', $f_value)}
+                          {else}
+                              {implode(', ', $f_value)}
+                          {/if}
+                      {else}
+                          {$f_value}
+                      {/if}
+                    </div>
+                  </div>
+            {/if}
+          {/foreach}
+        </div>
+      </details>
+    {/if}
+
+    {include file="product.info.html" inline}
+
+</article>
+
+{/strip}
