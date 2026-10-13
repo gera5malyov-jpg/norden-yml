@@ -6,6 +6,7 @@ on:
       - '.github/workflows/storefront-stage55-content.yml'
       - 'storefront/stage55_deploy_content.py'
       - 'storefront/stage55_content_acceptance.py'
+      - 'storefront/stage55_access_cleanup.py'
       - 'storefront/stage55_seo_content.py'
       - 'storefront/stage55-proposal.json'
       - 'storefront/stage56_delivery.py'
@@ -40,6 +41,8 @@ jobs:
           node --test storefront/tests/test_delivery.js
           python -m py_compile storefront/stage55_deploy_content.py storefront/stage55_content_acceptance.py
       - run: python -m pip install playwright==1.55.0
+      - name: Reconcile temporary access from the interrupted 502 request
+        run: python storefront/stage55_access_cleanup.py
       - name: Back up and apply content after exact phase 1 prerequisite guards
         run: python storefront/stage55_deploy_content.py
       - name: Verify SEO, delivery, paired phones and anonymous nonempty checkout
