@@ -1,0 +1,35 @@
+name: Storefront mobile checkout and delivery presentation polish
+on:
+  push:
+    branches: [main]
+    paths: ['storefront/stage57_checkout_polish.py','storefront/stage57_checkout_acceptance.py','.github/workflows/storefront-stage57-polish.yml']
+permissions:
+  contents: read
+concurrency:
+  group: storefront-sales-rollout
+  cancel-in-progress: false
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install playwright==1.55.0
+      - run: python storefront/stage57_checkout_polish.py
+      - run: python storefront/stage57_checkout_acceptance.py
+      - name: Restore exact previous display if verification fails
+        if: failure() || cancelled()
+        run: python storefront/stage57_checkout_polish.py --rollback
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: storefront-stage57-polish-evidence
+          path: |
+            storefront-stage57-evidence/
+            stage57-polish-state.json
+          retention-days: 14
