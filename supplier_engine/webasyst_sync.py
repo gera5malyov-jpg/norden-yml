@@ -392,7 +392,10 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
             rules.get("require_purchase_price", False)
             and (product.purchase_price is None or product.purchase_price <= 0)
         )
-        missing_sale_price = product.price is None or product.price <= 0
+        missing_sale_price = bool(
+            rules.get("require_positive_sale_price", False)
+            and (product.price is None or product.price <= 0)
+        )
 
         if not matches and product.supplier_sku:
             supplier_links = links_by_supplier.get(product.supplier_sku, [])
