@@ -123,12 +123,38 @@ def _price_formulas_require_purchase_price(formulas):
     )
 
 
+def _is_red_black(config):
+    # Use the supplier identity, never another product's brand or category.
+    identity = str(config.get("code") or "") + str(config.get("name") or "")
+    return "redblack" in "".join(char for char in identity.lower() if char.isalnum())
+
+
+def _red_black_sku(article):
+    # Historical Red-Black Webasyst/KIT SKU: RED-00-00004806.
+    digits = "".join(char for char in str(article or "") if char.isdigit())
+    if not digits or len(digits) > 8:
+        return ""
+    return "RED-00-" + digits.zfill(8)
+
+
 def normalize(c, rows):
-    m = c["mapping"]
+    red_black = _is_red_black(c)
+    m = dict(c["mapping"])
     ident = c["identity"]
     prefix = ident.get("sku_prefix", "")
     rules = c.get("rules", {}) or {}
     formulas = rules.get("price_formulas") or {}
+    if red_black:
+        # This YML contains both wholesale <price> and retail <rrc_price>.
+        # Ignore stale UI mappings/formulas that previously created 0 RUB prices.
+        m.update({
+            "name": "name", "description": "description",
+            "purchase_price": "price", "price": "rrc_price",
+            "stock": "stock", "category": "categoryId",
+            "images": ["pictures"],
+        })
+        formulas = {}
+
     if not isinstance(formulas, dict):
         formulas = {}
     require_purchase_price = bool(rules.get("require_purchase_price", False)) or _price_formulas_require_purchase_price(formulas)
@@ -141,8 +167,8 @@ def normalize(c, rows):
 
     out = []
     for row in rows:
-        ss = str(_get(row, ident.get("supplier_sku_field"), "")).strip()
-        sku = "%s%s" % (prefix, ss) if ss else ""
+        ss = str(_get(row, "article" if red_black else ident.get("supplier_sku_field"), "")).strip()
+        sku = _red_black_sku(ss) if red_black else ("%s%s" % (prefix, ss) if ss else "")
         imgs = []
         for field in m.get("images", []):
             value = _get(row, field, [])
@@ -174,6 +200,13 @@ def normalize(c, rows):
         )
         is_norden = c.get("source", {}).get("format", "").lower() == "norden"
         missing_purchase = product.purchase_price is None or product.purchase_price <= 0
+        if red_black and (missing_purchase or product.price is None or product.price <= 0):
+            # Do not overwrite existing prices or create 0-priced Red-Black
+            # products when the supplier feed is incomplete.
+            product.purchase_price = None if missing_purchase else product.purchase_price
+            product.price = None
+            out.append(product)
+            continue
         if require_purchase_price and missing_purchase:
             # Never substitute a retail/RRP field for a missing wholesale price.
             # Existing products may still receive non-price updates; new products
