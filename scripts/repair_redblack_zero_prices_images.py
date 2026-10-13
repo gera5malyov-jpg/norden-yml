@@ -112,7 +112,12 @@ def build_updates(wa):
         image_urls = source.images or []
         needs_image = (
             bool(image_urls)
-            and ("avatars.mds.yandex.net" in summary or ("\\n" in summary and "[extimg]" in summary))
+            and (
+                "avatars.mds.yandex.net" in summary
+                or ("\\n" in summary and "[extimg]" in summary)
+                or "http://opt.red-black.ru/custom/dimages/" in summary
+                or "https://opt.red-black.ru/custom/dimages/" in summary
+            )
             and extimg_summary(image_urls) != summary
         )
         if not (is_zero or needs_image):
