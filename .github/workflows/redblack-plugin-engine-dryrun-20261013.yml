@@ -1,0 +1,51 @@
+name: Red-Black Megasuppliers importer read-only end-to-end validation
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/redblack-plugin-engine-dryrun-20261013.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests openpyxl pdfplumber
+      - name: Verify main Megasuppliers Red-Black importer without catalog changes
+        run: |
+          python - <<'PY'
+          import json
+          cfg={
+            "code":"RED_BLACK","name":"Red-Black","enabled":True,
+            "source":{"kind":"url","format":"yml",
+              "location":"http://opt.red-black.ru/pricelist_api.xml?org=e15e8a25-8153-11e9-8be6-00155d396f01&showcategories=True&showpictures=True&showparams=True"},
+            "identity":{"supplier_sku_field":"article","sku_prefix":"RED-00-","brand":""},
+            "mapping":{"name":"name","description":"description","purchase_price":"price","price":"rrc_price","compare_price":"",
+              "stock":"stock","category":"categoryId","images":["pictures"],"characteristics":{}},
+            "rules":{"create_new":True,"only_create_in_stock":True,"update_prices":True,"update_stock":True,
+              "update_images":True,"update_description":True,"update_characteristics":False,
+              "auto_features":False,"zero_if_missing":False,"zero_other_stocks":False,"export_to_kit":False,
+              "price_formulas":{},"require_purchase_price":True,"require_positive_sale_price":True},
+            "webasyst":{"sku_mode":"supplier","type_id":150,"stock_id":12,"stock_ids":[],"feature_codes":{}},
+            "safety":{"dry_run_required":True,"min_source_count_ratio":0.60,"max_price_change_pct":100,"block_duplicate_sku":True}
+          }
+          open('/tmp/redblack-main-plugin-profile.json','w').write(json.dumps(cfg))
+          PY
+          python -m supplier_engine.runner /tmp/redblack-main-plugin-profile.json --mode dry-run --output redblack-plugin-dryrun-result.json
+          python - <<'PY'
+          import json
+          d=json.load(open('redblack-plugin-dryrun-result.json'))
+          print('RED_BLACK_PLUGIN_DRYRUN='+json.dumps(d,ensure_ascii=False)[:12000])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: redblack-plugin-import-engine-dry-run-report
+          path: redblack-plugin-dryrun-result.json
+          if-no-files-found: warn
