@@ -19,9 +19,19 @@ with zipfile.ZipFile(b,'w',zipfile.ZIP_DEFLATED) as z:
   for f in (theme/'js').glob('*.js'):
    if f.is_file() and f.stat().st_size<400000:
     z.writestr(str(f.relative_to(root)),f.read_bytes())
- for rel in ('wa-apps/shop/js/frontend/order/form.js','wa-apps/shop/lib/config/shopSitemapConfig.class.php'):
+ for rel in ('wa-apps/shop/js/frontend/order/form.js','wa-apps/shop/lib/config/shopSitemapConfig.class.php','wa-apps/shop/lib/actions/frontend/shopFrontendCategory.action.php','wa-apps/shop/lib/classes/shopViewHelper.class.php'):
   f=root/rel
   if f.is_file():z.writestr(rel,f.read_bytes())
+ plugins=root/'wa-apps/shop/plugins'
+ plugin_names=[]
+ for folder in plugins.iterdir():
+  if not folder.is_dir():continue
+  plugin_names.append(folder.name)
+  if 'seo' not in folder.name.lower() and 'meta' not in folder.name.lower():continue
+  for f in (folder/'lib').rglob('*.php'):
+   if f.is_file() and f.stat().st_size<350000 and 'config' not in f.parts and 'models' not in f.parts:
+    z.writestr(str(f.relative_to(root)),f.read_bytes())
+ z.writestr('shop-plugin-directory-names.json',__import__('json').dumps(plugin_names))
 print('STAGE53_SOURCES='+base64.b64encode(b.getvalue()).decode())
 PY
 p=$(mktemp /tmp/storefront-stage53-XXXXXXXX.php)
