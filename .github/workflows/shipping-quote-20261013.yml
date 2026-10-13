@@ -1,0 +1,59 @@
+name: Temporary shipping quote 2026-10-13
+on:
+  push:
+    branches: [shipping-quote-20261013]
+    paths: [.github/workflows/shipping-quote-20261013.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CDEK_CLIENT_ID: \${{ secrets.CDEK_CLIENT_ID }}
+      CDEK_CLIENT_SECRET: \${{ secrets.CDEK_CLIENT_SECRET }}
+      DALLI_TOKEN_MSK: \${{ secrets.DALLI_TOKEN_MSK }}
+      DALLI_ACCOUNT: msk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Quote CDEK and Dalli, no order creation
+        run: |
+          python - <<'PY'
+          import json, sys, traceback
+          from cdek.cdek_api import CdekClient
+          from dalli.dalli_api import DalliClient
+          boxes = [
+              {'weight':9000, 'length':78, 'width':36, 'height':36},
+              {'weight':10000, 'length':99, 'width':36, 'height':36},
+              {'weight':9500, 'length':78, 'width':44, 'height':44},
+              {'weight':11000, 'length':92, 'width':44, 'height':44},
+          ]
+          dalli_boxes = [
+              {'weight_kg':p['weight']/1000, 'length_cm':p['length'], 'width_cm':p['width'], 'height_cm':p['height']}
+              for p in boxes
+          ]
+          print('PARAMETERS Moscow to Saint Petersburg; 4 packages; 170000 rub declared value; delivery to reference address Nevsky 1',flush=True)
+          def output(name, func):
+              try:
+                  r=func()
+                  print('RESULT '+name+' '+json.dumps(r,ensure_ascii=False),flush=True)
+              except Exception as e:
+                  print('ERROR '+name+' '+type(e).__name__+' '+str(e)[:1300],flush=True)
+          def cdek(t,with_services):
+              c=CdekClient.from_env()
+              body={'type':t,'from_location':{'code':44},'to_location':{'code':137},'packages':boxes}
+              if with_services:
+                  body['services']=[{'code':'INSURANCE','parameter':'170000'}]
+              return c._request('POST','/calculator/tariffAndService' if with_services else '/calculator/tarifflist',json_body=body)
+          output('CDEK_TYPE2_INSURED',lambda:cdek(2,True))
+          output('CDEK_TYPE1_NO_EXTRA_INSURANCE',lambda:cdek(1,False))
+          def dalli():
+              c=DalliClient.from_env()
+              return c.delivery_cost('Санкт-Петербург, Невский проспект, 1',dalli_boxes,order_price=0,insurance_price=170000,output_x2=True)
+          output('DALLI_MSK_INSURED',dalli)
+          PY
