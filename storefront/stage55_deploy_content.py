@@ -112,7 +112,7 @@ try{
  }else{
   $result=prepare_records($m,$payload);
   if($mode==='apply'){
-   if($result['records']!==$input['records'])throw new Exception('Content changed after backup; no database writes');
+   if(canon($result['records'])!==canon($input['records']))throw new Exception('Content changed after backup; no database writes');
    foreach($result['records'] as $record)write_field($m,$record,'old','new');$m->query('COMMIT');
    $ids=array('products'=>array(),'categories'=>array());
    foreach($result['records'] as $record){if($record['table']==='shop_product')$ids['products'][]=$record['id'];if($record['table']==='shop_category')$ids['categories'][]=$record['id'];}

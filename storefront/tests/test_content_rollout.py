@@ -1,4 +1,4 @@
-import copy,importlib.util,json,sys,os,tempfile,io
+import copy,importlib.util,json,sys,os,tempfile,io,re,shutil,subprocess
 from contextlib import redirect_stdout
 from unittest.mock import patch
 from pathlib import Path
@@ -59,3 +59,30 @@ class ContentRollout(unittest.TestCase):
    second=acquire(Path(td),timeout=0);os.close(second)
   self.assertIn('_rollout_lock=acquire_rollout_lock(folder)',m.REMOTE_APPLY)
   self.assertIn('_rollout_lock=acquire_rollout_lock(folder)',m.rollback_remote('/home/web/vm-23f9aff9.na4u.ru/storefront-backups/stage55-content-20261012'))
+
+ def test_prepared_records_compare_canonical_keys_without_scalar_coercion(self):
+  m=load()
+  self.assertIn("if(canon($result['records'])!==canon($input['records']))",m.PHP)
+
+ @unittest.skipUnless(shutil.which('php'),'PHP absent locally; executable regression runs where PHP is installed')
+ def test_php_record_comparison_ignores_object_order_but_keeps_types_and_list_order(self):
+  m=load()
+  canon_source='function canon'+m.PHP.split('function canon',1)[1].split('function scalar_equal',1)[0]
+  comparison=re.search(r"if\((.*?)\)throw new Exception\('Content changed after backup; no database writes'\);",m.PHP).group(1)
+  # Values are ordinary JSON from a PHP result, reserialized through unordered
+  # Python 3.5 dictionaries. Only associative-key order changes in the first case.
+  script='<?php\n'+canon_source+"""
+$a=array('table'=>'shop_product','id'=>7,'field'=>'description','old'=>null,'new'=>'<p>Модель</p>');
+$b=array('new'=>'<p>Модель</p>','old'=>null,'field'=>'description','id'=>7,'table'=>'shop_product');
+$result=array('records'=>array($a));$input=array('records'=>array($b));
+function changed($result,$input){return COMPARISON;}
+if(changed($result,$input))exit(11);
+$input['records'][0]['old']='';if(!changed($result,$input))exit(12);
+$input['records'][0]=$b;$input['records'][0]['id']='7';if(!changed($result,$input))exit(13);
+$c=$a;$c['id']=8;$result['records']=array($a,$c);$input['records']=array($c,$b);
+if(!changed($result,$input))exit(14);
+echo 'Canonical record CAS regression passed';
+""".replace('COMPARISON',comparison)
+  proc=subprocess.run(['php'],input=script,text=True,capture_output=True,timeout=10)
+  self.assertEqual(proc.returncode,0,proc.stderr+proc.stdout)
+  self.assertIn('Canonical record CAS regression passed',proc.stdout)
