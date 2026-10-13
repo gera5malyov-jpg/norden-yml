@@ -1,0 +1,53 @@
+name: One-time deploy verified Red-Black Megasuppliers fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/redblack-megasuppliers-deploy-20261013.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    if: "github.event.head_commit.message == 'Deploy verified Red-Black Megasuppliers fix 2026-10-13'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      DRIVE_FILE_ID: '129zSQGB1FKGrn1AgkbJg-EGIvQYylfxQ'
+      EXPECTED_SHA256: '5538d704c8f40a5e3b3743a3af507f3b03e14356be789dcf2d8ef427245afa42'
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Check plugin PHP syntax before production update
+        run: find webasyst/megasuppliers/lib -name '*.php' -type f -print0 | xargs -0 -n1 php -l
+      - name: Install dependencies
+        run: python -m pip install google-api-python-client google-auth pytest requests openpyxl pdfplumber reportlab
+      - name: Run regression tests before production update
+        run: python -m pytest -q tests/test_supplier_engine.py
+      - name: Wait for hosting VM
+        run: python3 scripts/wait_netangels_ready.py
+      - name: Prepare deployer
+        run: python3 scripts/augment_deploy_megasuppliers.py
+      - name: Back up and deploy verified plugin package
+        run: python3 scripts/deploy_megasuppliers.py
+      - name: Save install report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/megasuppliers-install.txt || echo "INSTALL_STATUS=FAILED_NO_REPORT" > .deploy-probe/megasuppliers-install.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/megasuppliers-install.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save verified Red-Black plugin deployment report [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
