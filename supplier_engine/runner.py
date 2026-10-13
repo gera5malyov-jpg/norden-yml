@@ -176,6 +176,15 @@ def normalize(c, rows):
                 imgs.extend(str(x).strip() for x in value if x)
             elif value:
                 imgs.append(str(value).strip())
+        if red_black:
+            # The opt.red-black.ru TLS certificate does not match that hostname.
+            # Red-Black's public red-black.ru host serves the same image paths
+            # with a valid certificate and avoids browser mixed-content blocking.
+            imgs = [
+                url.replace("http://opt.red-black.ru/custom/dimages/", "https://red-black.ru/custom/dimages/")
+                   .replace("https://opt.red-black.ru/custom/dimages/", "https://red-black.ru/custom/dimages/")
+                for url in imgs
+            ]
         chars = {dst: _get(row, src) for dst, src in characteristic_map.items() if src}
         dynamic_characteristics = m.get("dynamic_characteristics")
         if dynamic_characteristics:
