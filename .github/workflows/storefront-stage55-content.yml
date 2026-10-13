@@ -1,0 +1,57 @@
+name: Storefront Stage 55 - factual descriptions, SEO and separate delivery
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage55-content.yml'
+      - 'storefront/stage55_deploy_content.py'
+      - 'storefront/stage55_content_acceptance.py'
+      - 'storefront/stage55_seo_content.py'
+      - 'storefront/stage55-proposal.json'
+      - 'storefront/stage56_delivery.py'
+      - 'storefront/assets/megapolis-delivery-v1.js'
+      - 'storefront/tests/test_content_rollout.py'
+      - 'storefront/tests/test_seo_content.py'
+      - 'storefront/tests/test_delivery.py'
+      - 'storefront/tests/test_delivery.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: storefront-sales-rollout
+  cancel-in-progress: false
+jobs:
+  content-and-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify pure transformations and factual content guards
+        run: |
+          python -m unittest discover -s storefront/tests -p 'test_*.py'
+          node --test storefront/tests/test_delivery.js
+          python -m py_compile storefront/stage55_deploy_content.py storefront/stage55_content_acceptance.py
+      - run: python -m pip install playwright==1.55.0
+      - name: Back up and apply content after exact phase 1 prerequisite guards
+        run: python storefront/stage55_deploy_content.py
+      - name: Verify SEO, delivery, paired phones and anonymous nonempty checkout
+        run: python storefront/stage55_content_acceptance.py
+      - name: Restore content and templates with CAS if acceptance fails
+        if: failure() || cancelled()
+        run: python storefront/stage55_deploy_content.py --rollback
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: storefront-stage55-content-evidence
+          path: |
+            storefront-stage55-evidence/
+            stage55-content-state.json
+          retention-days: 14
