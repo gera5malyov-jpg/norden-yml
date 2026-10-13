@@ -37,8 +37,8 @@ def test_red_black_legacy_sku_prices_and_supplier_images():
     assert p.price == 2645
     assert p.stock == 2
     assert p.images == [
-        "http://opt.red-black.ru/custom/dimages/big/17/16611.jpg",
-        "http://opt.red-black.ru/custom/dimages/big/17/16612.jpg",
+        "https://red-black.ru/custom/dimages/big/17/16611.jpg",
+        "https://red-black.ru/custom/dimages/big/17/16612.jpg",
     ]
 
 
