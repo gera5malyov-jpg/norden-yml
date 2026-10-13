@@ -86,3 +86,12 @@ echo 'Canonical record CAS regression passed';
   proc=subprocess.run(['php'],input=script,text=True,capture_output=True,timeout=10)
   self.assertEqual(proc.returncode,0,proc.stderr+proc.stdout)
   self.assertIn('Canonical record CAS regression passed',proc.stdout)
+
+ def test_acceptance_metadata_mismatch_reports_actual_expected_url_without_relaxing(self):
+  spec=importlib.util.spec_from_file_location('content_acceptance',BASE/'stage55_content_acceptance.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+  url='https://profikompany.ru/category/stul/stulya/'
+  m.assert_exact_metadata('Ожидаемый','Ожидаемый','title',url)
+  with self.assertRaises(AssertionError) as caught:m.assert_exact_metadata('Динамический title','Ожидаемый','title',url)
+  message=str(caught.exception)
+  for value in ('Динамический title','Ожидаемый',url):self.assertIn(value,message)
+  with self.assertRaises(AssertionError):m.assert_exact_metadata('Ожидаемый ','Ожидаемый','title',url)

@@ -1,0 +1,5 @@
+    {if !empty($_info_title)}
+      <title>{$_info_title|escape}</title>
+    {else}
+      <title>{$wa->title()|escape}</title>
+    {/if}

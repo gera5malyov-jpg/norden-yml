@@ -207,6 +207,66 @@ def build_sitemap_duplicate_patch(source):
     return result
 
 
+CATEGORY_HEAD_SHA256 = '8aac2e31d06d5afbe5688b1e67b4b0f5b5a7dec5f6b3fffac1cc3012ec3e7a28'
+CATEGORY_HEAD_ANCHOR = """    {if !empty($_info_title)}
+      <title>{$_info_title|escape}</title>
+    {else}
+      <title>{$wa->title()|escape}</title>
+    {/if}
+"""
+CATEGORY_HEAD_ROUTES = {
+    285:'stul/stulya',438:'stoly_1/stoly-zhurnalnye',271:'stoly_1/stoly',
+    4201:'kompyuternye-kresla/stulya-posetiteley',279:'shkafy/stellazhi',
+    2150:'shkafy/shkafy-raspashnye',
+}
+
+
+def patch_category_metadata_head(source, categories, expected_sha256=None):
+    """Use saved native metadata for six clean canonical category URLs only.
+
+    Production shopFrontendCategoryAction sets native response metadata before
+    frontend_category. SEO frontendHead then applyOuter replaces it with its
+    priority-2 forced templates. The verified shopViewHelper.category reads the
+    native category row and SEO has no view_category handler. Rendering these two
+    saved fields directly leaves plugin hooks, keywords, OG, H1 and body intact.
+    Every query variant keeps the original plugin-controlled head.
+    """
+    if fingerprint_text(source)!=(expected_sha256 or CATEGORY_HEAD_SHA256):
+        raise ValueError('Audited category head source changed')
+    marker='megapolis-native-category-meta-stage55'
+    if source.count(CATEGORY_HEAD_ANCHOR)!=1 or marker in source:
+        raise ValueError('Category title anchor changed or already patched')
+    if not 1<=len(categories)<=6:raise ValueError('Unexpected category metadata scope')
+    ids=set();branches=[]
+    for row in categories:
+        ident=row['id'];route=CATEGORY_HEAD_ROUTES.get(ident)
+        if ident in ids or not route or row['url']!='/category/'+route+'/':
+            raise ValueError('Unverified category ID/route')
+        ids.add(ident)
+        tag='if' if not branches else 'elseif'
+        branches.append("      {"+tag+" $_megapolis_meta_url == '/category/"+route+"/'}\n"+
+                        "        {$_megapolis_meta_category = $wa->shop->category("+str(ident)+")}\n"+
+                        "        {$_megapolis_meta_expected_url = '"+route+"'}")
+    block="""    {* megapolis-native-category-meta-stage55: saved metadata on clean canonical pages only *}
+    {if $wa->domainUrl() == 'https://profikompany.ru' && $wa->param('action') == 'category' && $wa->currentUrl(false) == $wa->currentUrl(false, true)}
+      {$_megapolis_meta_url = $wa->currentUrl(false, true)}
+      {$_megapolis_meta_category = []}
+      {$_megapolis_meta_expected_url = ''}
+"""+'\n'.join(branches)+"""
+      {/if}
+      {if !empty($_megapolis_meta_category) && $_megapolis_meta_category.status == 1 && $_megapolis_meta_category.full_url == $_megapolis_meta_expected_url}
+        {if !empty($_megapolis_meta_category.meta_title)}{$_info_title = $_megapolis_meta_category.meta_title}{/if}
+        {if !empty($_megapolis_meta_category.meta_description)}{$_info_description = $_megapolis_meta_category.meta_description}{/if}
+      {/if}
+    {/if}
+"""
+    return source.replace(CATEGORY_HEAD_ANCHOR,block+CATEGORY_HEAD_ANCHOR,1)
+
+
+def fingerprint_text(text):
+    return hashlib.sha256(text.encode('utf-8')).hexdigest()
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('snapshot',type=Path)

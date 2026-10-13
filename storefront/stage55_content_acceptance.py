@@ -2,12 +2,16 @@
 """Anonymous Chrome QA for phase 2; never submits a checkout or creates an order."""
 import json,os,re
 from pathlib import Path
-from playwright.sync_api import sync_playwright
 BASE=Path(__file__).parent
 ROOT='https://profikompany.ru'
 OUT=Path('storefront-stage55-evidence')
 
+def assert_exact_metadata(actual,expected,field,url):
+ if actual!=expected:
+  raise AssertionError('Category metadata mismatch: '+json.dumps({'field':field,'url':url,'expected':expected,'actual':actual},ensure_ascii=False))
+
 def main():
+ from playwright.sync_api import sync_playwright
  OUT.mkdir(exist_ok=True);proposal=json.loads((BASE/'stage55-proposal.json').read_text());checks=[]
  rollout=json.loads((OUT/'rollout.json').read_text())['database']
  proposal['products']=[p for p in proposal['products'] if p['id'] in rollout['applied_product_ids']]
@@ -26,9 +30,14 @@ def main():
     fields=category['set']
     actual_title=page.title()
     actual_description=page.locator('meta[name=description]').get_attribute('content')
-    print('STAGE55_CATEGORY_META='+json.dumps({'url':page.url,'actual_title':actual_title,'expected':fields,'actual_description':actual_description},ensure_ascii=False),flush=True)
-    if 'meta_title' in fields:assert actual_title==fields['meta_title'],('Category title mismatch',category['url'],actual_title,fields['meta_title'])
-    if 'meta_description' in fields:assert page.locator('meta[name=description]').get_attribute('content')==fields['meta_description'],'Category description mismatch'
+    observed={'url':page.url,'actual_title':actual_title,'expected':fields,'actual_description':actual_description}
+    response_head=res.text().split('</head>',1)[0]
+    raw_title=re.search(r'<title[^>]*>(.*?)</title>',response_head,re.S|re.I)
+    observed['response_title_html']=raw_title.group(1) if raw_title else None
+    (OUT/('category-meta-'+str(category['id'])+'-'+str(width)+'.json')).write_text(json.dumps(observed,ensure_ascii=False,indent=2))
+    print('STAGE55_CATEGORY_META='+json.dumps(observed,ensure_ascii=False),flush=True)
+    if 'meta_title' in fields:assert_exact_metadata(actual_title,fields['meta_title'],'title',page.url)
+    if 'meta_description' in fields:assert_exact_metadata(actual_description,fields['meta_description'],'description',page.url)
     assert page.locator('h1').count()==1,'Category heading count changed'
    res=page.goto(ROOT+'/dostavka/',wait_until='domcontentloaded',timeout=65000)
    assert res.status==200

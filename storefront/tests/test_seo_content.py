@@ -114,4 +114,35 @@ class Safety(unittest.TestCase):
         self.assertIn('features_sha256',result[0]['expected'])
         self.assertEqual(m.build_product_proposals(rows, [], category_rows=[category()],limit=500),result)
 
+
+
+class CategoryHead(unittest.TestCase):
+    FIXTURE_SHA256 = '41226e018f48368cc13b94b001a0b8e2536b6e5d6a6df884345d9486c056a24f'
+    def test_manual_db_metadata_only_for_six_clean_verified_routes(self):
+        import hashlib
+        m=module();source=(MODULE.parent/'tests/fixtures/stage55-category-head.html').read_text()
+        self.assertEqual(hashlib.sha256(source.encode()).hexdigest(),self.FIXTURE_SHA256)
+        row=category();proposal=m.build_category_proposals([row],[])
+        patched=m.patch_category_metadata_head(source,proposal,expected_sha256=self.FIXTURE_SHA256)
+        self.assertIn("$wa->domainUrl() == 'https://profikompany.ru'",patched)
+        self.assertIn("$wa->param('action') == 'category'",patched)
+        self.assertIn('$wa->currentUrl(false) == $wa->currentUrl(false, true)',patched)
+        self.assertIn("'/category/stul/stulya/'",patched)
+        self.assertIn('$wa->shop->category(285)',patched)
+        self.assertIn('$_megapolis_meta_category.meta_title',patched)
+        self.assertIn('$_megapolis_meta_category.meta_description',patched)
+        self.assertNotIn('meta_keywords',patched)
+        self.assertEqual(patched.count('<title>'),source.count('<title>'))
+        self.assertIn(source,patched)
+        with self.assertRaises(ValueError):m.patch_category_metadata_head(source,proposal)
+        with self.assertRaises(ValueError):m.patch_category_metadata_head(patched,proposal,expected_sha256=hashlib.sha256(patched.encode()).hexdigest())
+
+    def test_unverified_route_and_id_are_rejected(self):
+        import hashlib
+        m=module();source=(MODULE.parent/'tests/fixtures/stage55-category-head.html').read_text()
+        proposal=m.build_category_proposals([category()],[])
+        for bad in ({'id':440},{'url':'/category/unverified/'}):
+            rows=copy.deepcopy(proposal);rows[0].update(bad)
+            with self.assertRaises(ValueError):m.patch_category_metadata_head(source,rows,expected_sha256=self.FIXTURE_SHA256)
+
 if __name__=='__main__':unittest.main()

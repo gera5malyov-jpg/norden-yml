@@ -191,7 +191,7 @@ with tempfile.TemporaryDirectory(prefix='stage55-modules-') as td:
  import sys
  sys.path.insert(0,td)
  from stage56_delivery import patch_product,patch_order
- from stage55_seo_content import build_sitemap_duplicate_patch
+ from stage55_seo_content import build_sitemap_duplicate_patch,patch_category_metadata_head
  for rel,expected in payload['expected_files'].items():
   if digest((root/rel).read_bytes())!=expected:raise RuntimeError('Phase 1 prerequisite/source mismatch: '+rel)
  changes[shop+'product.html']=patch_product((root/(shop+'product.html')).read_text(encoding='utf-8')).encode('utf-8')
@@ -199,6 +199,7 @@ with tempfile.TemporaryDirectory(prefix='stage55-modules-') as td:
  core='wa-apps/shop/lib/config/shopSitemapConfig.class.php'
  changes[core]=build_sitemap_duplicate_patch((root/core).read_text(encoding='utf-8')).encode('utf-8')
  index=(root/(site+'index.html')).read_text(encoding='utf-8')
+ index=patch_category_metadata_head(index,payload['proposal']['categories'])
  anchor='<script src="{$wa_real_theme_url}js/megapolis-funnel-v2.js?v=20261012"></script>'
  if index.count(anchor)!=1 or 'megapolis-delivery-v1.js' in index:raise RuntimeError('Phase 1 index anchor mismatch')
  fresh_funnel=anchor.replace('v=20261012','v=20261013a')
