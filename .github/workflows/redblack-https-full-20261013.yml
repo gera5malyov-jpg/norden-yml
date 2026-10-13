@@ -1,0 +1,33 @@
+name: Red-Black one-time HTTPS source images migration
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/redblack-https-full-20261013.yml']
+permissions:
+  contents: read
+jobs:
+  https:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Update linked supplier photos to verified HTTPS host
+        run: >-
+          python -m scripts.repair_redblack_zero_prices_images --apply
+          --backup redblack-https-migration-backup.json
+          --report redblack-https-migration-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: redblack-https-migration-backup-and-report
+          path: |
+            redblack-https-migration-backup.json
+            redblack-https-migration-report.json
+          if-no-files-found: error
+          retention-days: 90
