@@ -24,7 +24,10 @@ def main():
     res=page.goto(ROOT+category['url'],wait_until='domcontentloaded',timeout=65000)
     assert res.status==200,'Category HTTP failure'
     fields=category['set']
-    if 'meta_title' in fields:assert page.title()==fields['meta_title'],'Category title mismatch'
+    actual_title=page.title()
+    actual_description=page.locator('meta[name=description]').get_attribute('content')
+    print('STAGE55_CATEGORY_META='+json.dumps({'url':page.url,'actual_title':actual_title,'expected':fields,'actual_description':actual_description},ensure_ascii=False),flush=True)
+    if 'meta_title' in fields:assert actual_title==fields['meta_title'],('Category title mismatch',category['url'],actual_title,fields['meta_title'])
     if 'meta_description' in fields:assert page.locator('meta[name=description]').get_attribute('content')==fields['meta_description'],'Category description mismatch'
     assert page.locator('h1').count()==1,'Category heading count changed'
    res=page.goto(ROOT+'/dostavka/',wait_until='domcontentloaded',timeout=65000)
