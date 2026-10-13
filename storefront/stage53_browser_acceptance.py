@@ -64,10 +64,14 @@ with sync_playwright() as pw:
                     print('STAGE53_SEARCH_GEOMETRY='+json.dumps(geometry),flush=True)
                     action=page.locator('.megapolis-mobile-search').get_attribute('action')
                     expected_path=urlparse(urljoin(ROOT,action)).path.rstrip('/')
-                    page.locator('.megapolis-mobile-search button').click()
-                    page.wait_for_url(lambda u:urlparse(u).path.rstrip('/')==expected_path,timeout=25000)
+                    with page.expect_navigation(wait_until='domcontentloaded',timeout=45000) as search_response:
+                        page.locator('.megapolis-mobile-search button').click()
+                    assert search_response.value.status==200,search_response.value.status
+                    assert urlparse(page.url).path.rstrip('/')==expected_path,page.url
                     assert parse_qs(urlparse(page.url).query).get('query')==['РС42'],page.url
-                    assert 'РС42' in page.locator('body').inner_text(),'Model search failed'
+                    result_titles=page.locator('.product-item__title').all_text_contents()
+                    assert any('РС42' in title for title in result_titles),result_titles[:5]
+                    rows[-1]['model_search_results']=sum('РС42' in title for title in result_titles)
                 if width==1365:
                     page.goto(ROOT+'/category/kompyuternye-kresla/',wait_until='domcontentloaded',timeout=65000);page.wait_for_timeout(500)
                     label=page.locator('label[for^="megapolis-country-group-"]').filter(has_text='Китай').first
@@ -87,7 +91,7 @@ with sync_playwright() as pw:
                 assert page.locator('#s-product-form').count()==1
                 page.screenshot(path=str(OUT/('product-'+str(width)+'.png')))
                 button=page.locator('.megapolis-mobile-buy__button') if mobile else page.locator('#s-product-form .product-add input[type=submit]')
-                button.first.click(timeout=15000);page.wait_for_url('**/order/**',timeout=30000);page.wait_for_timeout(650)
+                button.first.click(timeout=15000);page.wait_for_url('**/order/**',wait_until='domcontentloaded',timeout=45000);page.wait_for_timeout(650)
                 assert page.locator('#js-order-page').count()==1
                 assert 'РС42' in page.locator('body').inner_text()
                 goals=page.evaluate('window.__sales53Goals')
