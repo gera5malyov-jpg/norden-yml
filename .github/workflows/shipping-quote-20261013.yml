@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      CDEK_CLIENT_ID: \${{ secrets.CDEK_CLIENT_ID }}
-      CDEK_CLIENT_SECRET: \${{ secrets.CDEK_CLIENT_SECRET }}
-      DALLI_TOKEN_MSK: \${{ secrets.DALLI_TOKEN_MSK }}
+      CDEK_CLIENT_ID: ${{ secrets.CDEK_CLIENT_ID }}
+      CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
+      DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
       DALLI_ACCOUNT: msk
     steps:
       - uses: actions/checkout@v4
