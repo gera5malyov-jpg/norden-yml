@@ -51,8 +51,17 @@ def _slug(text):
 
 
 def extimg_summary(urls):
-    clean = [str(x).strip() for x in (urls or []) if str(x).strip()]
-    return "" if not clean else "[extimg]\n" + "\n".join(clean) + "\n[/extimg]"
+    # The shortcode expects ONE image URL per [extimg] pair.
+    # Never combine several URLs inside a single tag.
+    clean = []
+    seen = set()
+    for value in urls or []:
+        url = str(value or "").strip().replace("\\n", "").strip()
+        if not url.lower().startswith(("http://", "https://")) or url in seen:
+            continue
+        seen.add(url)
+        clean.append(url)
+    return "\n".join("[extimg]\n%s\n[/extimg]" % url for url in clean)
 
 
 def _same_number(left, right):
@@ -383,6 +392,7 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
             rules.get("require_purchase_price", False)
             and (product.purchase_price is None or product.purchase_price <= 0)
         )
+        missing_sale_price = product.price is None or product.price <= 0
 
         if not matches and product.supplier_sku:
             supplier_links = links_by_supplier.get(product.supplier_sku, [])
@@ -401,11 +411,11 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
                 if linked is None:
                     # Do not recreate a product when the selected pricing policy
                     # requires a purchase price that the supplier did not provide.
-                    if missing_required_purchase:
+                    if missing_required_purchase or missing_sale_price:
                         plan["skipped"].append({
                             "sku": product.sku,
                             "supplier_sku": product.supplier_sku,
-                            "reason": "missing_purchase_price",
+                            "reason": "missing_purchase_price" if missing_required_purchase else "missing_sale_price",
                         })
                         continue
                     # The old supplier link points to a SKU that no longer
@@ -447,11 +457,11 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
             })
             continue
 
-        if missing_required_purchase:
+        if missing_required_purchase or missing_sale_price:
             plan["skipped"].append({
                 "sku": product.sku,
                 "supplier_sku": product.supplier_sku,
-                "reason": "missing_purchase_price",
+                "reason": "missing_purchase_price" if missing_required_purchase else "missing_sale_price",
             })
             continue
         if not rules.get("create_new", False):
@@ -537,8 +547,13 @@ def _sku_write_data(desired, rules, stock_id, stock_ids=None):
     data = {}
     if rules.get("update_prices", True):
         for field in ("purchase_price", "price", "compare_price"):
-            if desired.get(field) is not None:
-                data[field] = _num_string(desired[field])
+            value = desired.get(field)
+            if value is None:
+                continue
+            # Never replace the main price or wholesale cost with zero.
+            if field in ("purchase_price", "price") and float(value) <= 0:
+                continue
+            data[field] = _num_string(value)
     if rules.get("update_stock", True) and desired.get("stock") is not None:
         target_id = str(int(stock_id))
         if rules.get("zero_other_stocks", False):
@@ -641,6 +656,10 @@ def apply_plan(wa: WebasystClient, plan, config):
     rules = dict(config.get("rules") or {})
     if str(config.get("code") or "").strip().upper() == "TETCHAIR":
         rules["update_description"] = True
+    red_black_identity = str(config.get("code") or "") + str(config.get("name") or "")
+    if "redblack" in "".join(char for char in red_black_identity.lower() if char.isalnum()):
+        # Red-Black YML is the primary image source, not legacy KIT/Yandex URLs.
+        rules["update_images"] = True
     web = config.get("webasyst") or {}
     stock_id = web.get("stock_id")
     stock_ids = web.get("stock_ids") or []
