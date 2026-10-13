@@ -64,9 +64,26 @@
       return path === requestPath({url: checkoutController.urls[key], type: 'POST'});
     });
   }
+  function visibleErrorMarker(marker) {
+    // Native checkout keeps unavailable-shipping messages in hidden sections.
+    // A CSS class alone is not evidence that the customer saw an error.
+    if (!marker.getClientRects().length) return false;
+    if (marker.matches('.wa-error-text') && !marker.textContent.trim()) return false;
+    for (var element = marker; element; element = element.parentElement) {
+      var style = w.getComputedStyle(element);
+      if (style.display === 'none' || style.visibility === 'hidden' ||
+          style.visibility === 'collapse' || parseFloat(style.opacity) === 0) return false;
+    }
+    return true;
+  }
   function scanValidationErrors() {
-    var page = checkoutPage();
-    var hasError = !!(page && page.querySelector('.wa-error, .wa-error-text'));
+    var page = checkoutPage(), hasError = false;
+    if (page) {
+      var markers = page.querySelectorAll('.wa-error, .wa-error-text');
+      for (var i = 0; i < markers.length; i++) {
+        if (visibleErrorMarker(markers[i])) { hasError = true; break; }
+      }
+    }
     if (hasError && !validationError) goal('checkout_validation_error');
     validationError = hasError;
   }
@@ -152,7 +169,8 @@
       scanValidationErrors();
       if (typeof w.MutationObserver === 'function') {
         new w.MutationObserver(scanValidationErrors).observe(page, {
-          childList: true, subtree: true, attributes: true, attributeFilter: ['class']
+          childList: true, subtree: true, characterData: true, attributes: true,
+          attributeFilter: ['class', 'style', 'hidden', 'aria-hidden']
         });
       }
     }

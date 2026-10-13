@@ -8,7 +8,20 @@ const asset = path.join(__dirname, '../assets/megapolis-funnel-v2.js');
 function browser(options = {}) {
   const events = {}, ajax = {}, timers = [], calls = [];
   let mutation;
-  const page = options.checkout ? {contains: el => el && el.inside !== false, querySelector: () => page.error ? {} : null} : null;
+  function marker({message=true, blank=false, hidden=false, hiddenParent=false, opacity='1'} = {}) {
+    const parent = hiddenParent ? {styleState:{display:'none',visibility:'visible',opacity:'1'},parentElement:null} : null;
+    return {parentElement:parent,styleState:{display:hidden?'none':'block',visibility:'visible',opacity},
+      getClientRects:function () {
+        for(let el=this;el;el=el.parentElement) if(el.styleState.display==='none') return [];
+        return [{}];
+      },
+      matches:selector => message && selector === '.wa-error-text',
+      textContent:blank ? '   ' : 'Native error private@example.com'};
+  }
+  const page = options.checkout ? {contains: el => el && el.inside !== false,
+    markers:options.hiddenShippingError ? [marker({hiddenParent:true})] : options.markers || [],
+    querySelector: () => page.error ? marker() : page.markers[0] || null,
+    querySelectorAll: () => page.error ? [marker()] : page.markers} : null;
   const document = {readyState: options.loading ? 'loading' : 'complete',
     getElementById: id => id === 'js-order-page' ? page : null,
     addEventListener: (type, fn) => (events[type] ||= []).push(fn)};
@@ -18,11 +31,12 @@ function browser(options = {}) {
     setTimeout: fn => {timers.push(fn); return timers.length;},
     sendYandex: (...args) => calls.push(['legacy', ...args]),
     ym: options.noYm ? null : (...args) => calls.push(args)};
+  window.getComputedStyle = element => element.styleState || {display:'block',visibility:'visible',opacity:'1'};
   window.MutationObserver = function(cb) {mutation = cb; this.observe = () => {};};
   const context = vm.createContext({window, document, URL, WeakSet, Date});
   function run() {if(fs.existsSync(asset)) vm.runInContext(fs.readFileSync(asset, 'utf8'), context);}
   run();
-  return {window, calls, run, document, page, jquery,
+  return {window, calls, run, document, page, jquery, marker,
     mutate: () => mutation && mutation(),
     emitFrom: (name, target, ...args) => (ajax[name] || []).forEach(fn => fn({target}, ...args)),
     emit: (name, ...args) => (ajax[name] || []).forEach(fn => fn({}, ...args)),
@@ -130,4 +144,30 @@ test('creation goal requires native confirmed order event and never reports paid
   b.emitFrom('wa_order_form_created', b.page, {order_id:5}); b.run();
   assert.deepEqual(b.goals(), ['checkout_started','order_created']);
   assert.ok(!JSON.stringify(b.calls).includes('order_id'));
+});
+
+test('hidden native shipping error is excluded until revealed and each new visible episode counts', () => {
+  const b = browser({checkout:true,hiddenShippingError:true});
+  const hidden = b.page.markers[0]; b.mutate();
+  assert.deepEqual(b.goals(), ['checkout_started']);
+  hidden.parentElement.styleState.display='block'; b.mutate(); b.mutate();
+  assert.deepEqual(b.goals(), ['checkout_started','checkout_validation_error']);
+  hidden.parentElement.styleState.display='none'; b.mutate();
+  hidden.parentElement.styleState.display='block'; b.mutate();
+  assert.deepEqual(b.goals(), ['checkout_started','checkout_validation_error','checkout_validation_error']);
+  assert.ok(!JSON.stringify(b.calls).includes('private'));
+});
+test('blank, invisible and transparent error messages do not count', () => {
+  const b=browser({checkout:true});
+  const invisible=b.marker(); invisible.styleState.visibility='hidden';
+  const transparentParent=b.marker(); transparentParent.parentElement={styleState:{display:'block',visibility:'visible',opacity:'0'},parentElement:null};
+  b.page.markers=[b.marker({blank:true}),b.marker({hidden:true}),invisible,b.marker({opacity:'0'}),transparentParent]; b.mutate();
+  assert.deepEqual(b.goals(),['checkout_started']);
+});
+test('visible errored input counts without inspecting its value or text', () => {
+  const b=browser({checkout:true});const field=b.marker({message:false});
+  Object.defineProperty(field,'value',{get:()=>{throw Error('must not inspect input');}});
+  Object.defineProperty(field,'textContent',{get:()=>{throw Error('must not inspect input');}});
+  b.page.markers=[b.marker({hiddenParent:true}),field];b.mutate();
+  assert.deepEqual(b.goals(),['checkout_started','checkout_validation_error']);
 });
