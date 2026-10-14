@@ -1,0 +1,21 @@
+name: Set Red-Black editable SKU code once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/set-redblack-code-field-once-20261014.yml']
+permissions: {contents: read}
+jobs:
+  profile_only:
+    if: github.event.head_commit.message == 'Set Red-Black editable SKU code once'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m py_compile scripts/set_redblack_code_mapping_once.py
+      - name: Save only Red-Black SKU source field to code with backup and roundtrip
+        run: python scripts/set_redblack_code_mapping_once.py
