@@ -110,7 +110,7 @@
                         <div class="value"><input type="text" name="location_secret" placeholder="MEGASUPPLIERS_SOURCE_..."><p class="hint">Нужен только для приватного URL. Для Norden оставьте пустым.</p></div>
                     </div>
 
-                    <div class="field"><div class="name">Поле артикула</div><div class="value"><input type="text" name="supplier_sku_field" placeholder="vendorCode" required></div></div>
+                    <div class="field"><div class="name">Поле артикула</div><div class="value"><input type="text" name="supplier_sku_field" placeholder="vendorCode" required><p class="hint">Например, article или code. Изменение этого поля влияет на сопоставление товаров: сначала сохраните профиль и выполните «Проверить прайс». Без проверки «Применить» не запускайте.</p></div></div>
                     <div class="field"><div class="name">Префикс артикула</div><div class="value"><input type="text" name="sku_prefix" placeholder="например Liga-"></div></div>
                     <div class="field"><div class="name">Поле названия</div><div class="value"><input type="text" name="name_field" placeholder="name" required></div></div>
                     <div class="field"><div class="name">Поле описания</div><div class="value"><input type="text" name="description_field" placeholder="description"><p class="hint">Для YML/XML по умолчанию используется description.</p></div></div>
@@ -460,9 +460,31 @@
         if(!id){setStatus('Выберите поставщика','error');return;}
         setStatus('Сохранение…','busy');
         try{
-            var r=await requestJson(configUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:paramsFromForm()});
+            var submitted=paramsFromForm();
+            var r=await requestJson(configUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:submitted});
             if(r&&r.status==='ok'){
-                setStatus('Профиль сохранён','ok');
+                // A successful POST is not sufficient: read the saved profile
+                // back from Webasyst and check that no field was silently
+                // reset to a supplier default.
+                var confirmation=await requestJson(configUrl+'&supplier_id='+encodeURIComponent(id),{credentials:'same-origin',cache:'no-store'});
+                var saved=confirmation.data?confirmation.data:confirmation;
+                if(!saved.config)throw new Error('PROFILE_READBACK_MISSING');
+                fill(saved.config,saved.stocks||[],saved.types||[]);
+                var readback=paramsFromForm();
+                var mismatches=[];
+                submitted.forEach(function(value,key){
+                    if(key==='_csrf')return;
+                    if(readback.get(key)!==value)mismatches.push(key);
+                });
+                readback.forEach(function(value,key){
+                    if(key==='_csrf')return;
+                    if(submitted.get(key)!==value&&mismatches.indexOf(key)===-1)mismatches.push(key);
+                });
+                if(mismatches.length){
+                    setStatus('Настройки сохранены не полностью. Поля: '+mismatches.join(', '),'error','Проверьте поля и не запускайте импорт.');
+                    return;
+                }
+                setStatus('Профиль сохранён и проверен','ok');
                 if(next)await next(id);
             }else setStatus('Ошибка сохранения','error');
         }catch(err){

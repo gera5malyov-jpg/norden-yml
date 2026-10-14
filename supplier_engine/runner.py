@@ -3,6 +3,7 @@ from collections import Counter
 import hashlib
 import hmac
 import json
+import re
 import os
 import urllib.request
 from pathlib import Path
@@ -132,11 +133,16 @@ def _is_red_black(config):
 
 
 def _red_black_sku(article):
-    # Historical Red-Black Webasyst/KIT SKU: RED-00-00004806.
-    digits = "".join(char for char in str(article or "") if char.isdigit())
-    if not digits or len(digits) > 8:
+    # Keep the historical SKU even when the chosen source field is "code".
+    # Red-Black <offer code="00-_0008542" article="0008542"> uses
+    # non-numeric separators before its article portion.
+    value = str(article or "").strip()
+    match = re.fullmatch(r"00[-_]+(\d{1,8})", value)
+    if match:
+        value = match.group(1)
+    if not re.fullmatch(r"\d{1,8}", value):
         return ""
-    return "RED-00-" + digits.zfill(8)
+    return "RED-00-" + value.zfill(8)
 
 
 def normalize(c, rows):
@@ -146,16 +152,8 @@ def normalize(c, rows):
     prefix = ident.get("sku_prefix", "")
     rules = c.get("rules", {}) or {}
     formulas = rules.get("price_formulas") or {}
-    if red_black:
-        # This YML contains both wholesale <price> and retail <rrc_price>.
-        # Ignore stale UI mappings/formulas that previously created 0 RUB prices.
-        m.update({
-            "name": "name", "description": "description",
-            "purchase_price": "price", "price": "rrc_price",
-            "stock": "stock", "category": "categoryId",
-            "images": ["pictures"],
-        })
-        formulas = {}
+    # Supplier-specific input defaults belong in the saved profile, not in
+    # normalize(): honor field mappings and pricing formulas edited in Webasyst.
 
     if not isinstance(formulas, dict):
         formulas = {}
@@ -176,8 +174,11 @@ def normalize(c, rows):
             str(int(entry["stock_id"])): _stock(_get(row, entry["source_field"], None))
             for entry in warehouses
         }
-        ss = str(_get(row, "article" if red_black else ident.get("supplier_sku_field"), "")).strip()
-        sku = _red_black_sku(ss) if red_black else ("%s%s" % (prefix, ss) if ss else "")
+        ss = str(_get(row, ident.get("supplier_sku_field"), "")).strip()
+        if red_black and prefix == "RED-00-":
+            sku = _red_black_sku(ss)
+        else:
+            sku = "%s%s" % (prefix, ss) if ss else ""
         imgs = []
         for field in m.get("images", []):
             value = _get(row, field, [])
@@ -286,6 +287,31 @@ def filter_incomplete_riva_rows(config, rows):
         "skipped_reasons": dict(skipped),
         "skipped_sample": samples,
         "zero_if_missing_blocked": bool(skipped),
+    }
+
+
+def filter_red_black_code_conflicts(config, rows):
+    """Skip source rows whose code and article identify different legacy SKUs.
+
+    Most Red-Black code values have a "00-_" wrapper around article. Some
+    offers disagree, so updating either historical SKU would be ambiguous.
+    The rest can still be checked without risking these four mismatches.
+    """
+    if not _is_red_black(config) or str((config.get("identity") or {}).get("supplier_sku_field")) != "code":
+        return rows, {}
+    clean, conflicts = [], []
+    for row in rows:
+        code = str(row.get("code") or "").strip()
+        article = str(row.get("article") or "").strip()
+        code_sku = _red_black_sku(code)
+        article_sku = _red_black_sku(article)
+        if code and article and code_sku and article_sku and code_sku != article_sku:
+            conflicts.append({"code": code, "article": article, "offer_id": str(row.get("id") or "")})
+        else:
+            clean.append(row)
+    return clean, {
+        "red_black_code_mismatches": len(conflicts),
+        "red_black_code_conflict_sample": conflicts[:10],
     }
 
 
@@ -420,9 +446,10 @@ def main():
             snapshot_path.write_bytes(source_data)
         rows = parse_source(config, source_data) if source_meta is None or not config.get("source", {}).get("format", "").lower() == "norden" else rows
 
-        valid_rows, riva_quality = filter_incomplete_riva_rows(config, rows)
-        if riva_quality:
-            source_meta = dict(source_meta or {}, **riva_quality)
+        code_rows, code_quality = filter_red_black_code_conflicts(config, rows)
+        valid_rows, riva_quality = filter_incomplete_riva_rows(config, code_rows)
+        if code_quality or riva_quality:
+            source_meta = dict(source_meta or {}, **code_quality, **riva_quality)
         products = normalize(config, valid_rows)
         if source_meta is not None and config.get("source", {}).get("format", "").lower() == "norden":
             source_meta["missing_purchase_price"] = sum(
@@ -507,6 +534,15 @@ def main():
         )
         if catalog_warning:
             report.warnings.append(catalog_warning)
+        if code_quality.get("red_black_code_mismatches"):
+            count = code_quality["red_black_code_mismatches"]
+            report.warnings.append(
+                "Red-Black: пропущено %d предложений, у которых code и article указывают "
+                "на разные старые артикулы. Перед обновлением таких товаров нужна ручная сверка."
+                % count
+            )
+            if count / float(max(1, len(rows))) > 0.02:
+                report.errors.append("Red-Black: слишком много противоречивых значений code/article.")
         if riva_quality.get("skipped_rows"):
             omitted = riva_quality["skipped_rows"]
             report.warnings.append(

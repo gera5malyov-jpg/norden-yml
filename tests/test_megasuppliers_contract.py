@@ -363,3 +363,20 @@ def test_production_physical_callback_saves_riva_approved_snapshot_request_id():
     assert "hash_equals((string)$last_dry['report']['source_sha256'], (string)$previous['report']['source_sha256'])" in controller
     assert "&& (string)ifset($previous['mode']) === 'dry-run'" in controller
     assert "&& (string)ifset($previous['finished_at']) === (string)ifset($last_dry['finished_at'])" in controller
+
+
+
+def test_editable_supplier_profile_is_not_overwritten_with_red_black_defaults():
+    config = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php").read_text(encoding="utf-8")
+    ui = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    runner = (ROOT / "supplier_engine/runner.py").read_text(encoding="utf-8")
+    assert "applyRedBlackDefaults" not in config
+    assert "preserveUneditedConfig" in config
+    assert "array_merge($existing[$section], $new_section)" in config
+    assert "$edited['safety'] = $existing['safety']" in config
+    assert "supplier_sku_field" in ui
+    assert "cache:'no-store'" in ui
+    assert "var readback=paramsFromForm();" in ui
+    assert "Настройки сохранены не полностью" in ui
+    assert '_get(row, ident.get("supplier_sku_field")' in runner
+    assert "m.update({" not in runner[runner.index("def normalize("):runner.index("def filter_incomplete_riva_rows(")]
