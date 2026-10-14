@@ -1,4 +1,5 @@
 name: Deploy Riva callback request ID fix once
+# One-time repair of production callback request_id persistence
 on:
   push:
     branches: [main]
