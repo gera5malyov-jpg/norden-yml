@@ -244,7 +244,8 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
         if (!is_array($warehouses) || count($warehouses) > 30) {
             return false;
         }
-        if (count($warehouses) && !empty($config['rules']['zero_other_stocks'])) {
+        if (count($warehouses) && (!empty($config['rules']['zero_other_stocks'])
+            || !empty($config['rules']['export_to_kit']))) {
             return false;
         }
         $allowed_ids = array_map('strval', $this->stockIds());

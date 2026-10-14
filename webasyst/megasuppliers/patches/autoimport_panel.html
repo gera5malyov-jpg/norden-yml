@@ -136,7 +136,7 @@
                         <p class="hint">Для каждого склада укажите точное название поля остатков из файла поставщика и склад Webasyst. Например, разные поля для СПБ и МСК. Несопоставленные склады не изменяются.</p>
                         <div class="s-ms-warehouse-list"></div>
                         <button type="button" class="button light-gray s-ms-add-warehouse">+ Добавить сопоставление склада</button>
-                        <p class="hint">Если сопоставления не заданы, плагин использует один склад Webasyst как раньше. Для нескольких складов запрещено обнуление остальных складов.</p>
+                        <p class="hint">Если сопоставления не заданы, плагин использует один склад Webasyst как раньше. Для нескольких складов запрещено обнуление остальных складов. Передача в KIT временно отключается: текущий модуль KIT не умеет распределять разные остатки СПБ и МСК и мог бы их ошибочно перезаписать.</p>
                     </div>
                 </div>
             </div>
@@ -298,6 +298,12 @@
         if(zero){
             if(hasMapped)zero.checked=false;
             zero.disabled=hasMapped;
+        }
+        var kit=field('export_to_kit');
+        if(kit){
+            if(hasMapped)kit.checked=false;
+            kit.disabled=hasMapped;
+            kit.title=hasMapped?'В многоскладском режиме автоматическая выгрузка в KIT отключена, чтобы не смешивать остатки регионов.':'';
         }
     }
     function renderWarehouseMappings(stocks,mappings){

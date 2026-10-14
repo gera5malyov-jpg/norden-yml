@@ -1,4 +1,5 @@
 import argparse
+from collections import Counter
 import hashlib
 import json
 import os
@@ -239,6 +240,54 @@ def normalize(c, rows):
     return out
 
 
+
+def filter_incomplete_riva_rows(config, rows):
+    """Quarantine ambiguous/incomplete Riva offers, never invent a SKU or stock.
+
+    A partially broken Riva feed must never trigger zero-if-missing for other
+    supplier-linked products. Other suppliers retain their strict validation.
+    """
+    code = str(config.get("code") or "").strip().upper()
+    if code != "RIVA":
+        return rows, {}
+    sku_field = str((config.get("identity") or {}).get("supplier_sku_field") or "").strip()
+    mappings = (config.get("rules") or {}).get("warehouses") or []
+    counts = Counter(str(row.get(sku_field) or "").strip() for row in rows)
+    clean, skipped, samples = [], Counter(), []
+    for row in rows:
+        sku = str(row.get(sku_field) or "").strip()
+        reason = ""
+        if not sku:
+            reason = "empty_supplier_sku"
+        elif counts[sku] > 1:
+            reason = "ambiguous_duplicate_sku"
+        else:
+            for mapping in mappings:
+                field = mapping.get("source_field", "")
+                value = _stock(row.get(field))
+                if value is None or value < 0:
+                    reason = "missing_or_invalid_mapped_stock"
+                    break
+        if reason:
+            skipped[reason] += 1
+            if len(samples) < 12:
+                samples.append({
+                    "supplier_sku": sku,
+                    "reason": reason,
+                    "offer_id": str(row.get("id") or ""),
+                })
+        else:
+            clean.append(row)
+    return clean, {
+        "origin": "Riva XML",
+        "original_rows": len(rows),
+        "skipped_rows": sum(skipped.values()),
+        "skipped_reasons": dict(skipped),
+        "skipped_sample": samples,
+        "zero_if_missing_blocked": bool(skipped),
+    }
+
+
 def _unique_image_aliases(products):
     by_url = {}
     ambiguous = set()
@@ -350,7 +399,10 @@ def main():
             if not approved or source_sha.lower() != approved:
                 raise ValueError("Источник изменился после dry-run; применение заблокировано.")
 
-        products = normalize(config, rows)
+        valid_rows, riva_quality = filter_incomplete_riva_rows(config, rows)
+        if riva_quality:
+            source_meta = dict(source_meta or {}, **riva_quality)
+        products = normalize(config, valid_rows)
         if source_meta is not None and config.get("source", {}).get("format", "").lower() == "norden":
             source_meta["missing_purchase_price"] = sum(
                 1 for product in products
@@ -418,6 +470,12 @@ def main():
             effective_rules["zero_if_missing"] = False
         if _price_formulas_require_purchase_price(effective_rules.get("price_formulas") or {}):
             effective_rules["require_purchase_price"] = True
+        if riva_quality.get("zero_if_missing_blocked"):
+            # Missing/ambiguous Riva offers must not be mistaken for disappeared
+            # products during apply; the user setting remains unchanged on disk.
+            effective_rules["zero_if_missing"] = False
+        effective_config = dict(config)
+        effective_config["rules"] = effective_rules
 
         report = validate_run(
             products,
@@ -428,6 +486,18 @@ def main():
         )
         if catalog_warning:
             report.warnings.append(catalog_warning)
+        if riva_quality.get("skipped_rows"):
+            omitted = riva_quality["skipped_rows"]
+            report.warnings.append(
+                "Riva: пропущено %d из %d предложений с пустым/повторным кодом либо неполными остатками. "
+                "Остальные товары будут обработаны, массовое обнуление отсутствующих SKU отключено для этой загрузки."
+                % (omitted, len(rows))
+            )
+            if len(rows) < 10 or omitted / float(len(rows)) > 0.05:
+                report.errors.append(
+                    "Riva: доля некорректных позиций слишком велика (%d из %d), проверьте настройки полей."
+                    % (omitted, len(rows))
+                )
         if source_meta and source_meta.get("fallback_used"):
             report.warnings.append("Norden API недоступен; использован резервный XML-источник.")
         if source_meta and source_meta.get("missing_purchase_price"):
@@ -451,7 +521,7 @@ def main():
         if source_meta is not None:
             source_meta["characteristics_detected"] = len(characteristic_names)
             source_meta["characteristics_sample"] = characteristic_names[:20]
-        for error in validate_apply_plan(plan, config):
+        for error in validate_apply_plan(plan, effective_config):
             if error not in report.errors:
                 report.errors.append(error)
         report.blocked = bool(report.errors)
@@ -461,7 +531,7 @@ def main():
         if args.mode == "apply" and not report.blocked:
             try:
                 features_resolved = 0
-                rules = config.get("rules") or {}
+                rules = effective_rules
                 if characteristic_names and rules.get("auto_features", False):
                     type_id = (config.get("webasyst") or {}).get("type_id")
                     if not type_id:
@@ -479,7 +549,7 @@ def main():
                     feature_codes.update(resolved)
                     web_cfg["feature_codes"] = feature_codes
                     features_resolved = len(resolved)
-                result = apply_plan(wa, plan, config)
+                result = apply_plan(wa, plan, effective_config)
                 synced = bridge.sync_links(
                     args.supplier_id,
                     args.request_id,
