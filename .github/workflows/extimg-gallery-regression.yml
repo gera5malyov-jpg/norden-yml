@@ -1,0 +1,31 @@
+name: External image gallery regression
+on:
+  pull_request:
+    paths:
+      - 'storefront/fix_extimg_multi_image_gallery.py'
+      - 'tests/test_extimg_gallery.py'
+      - '.github/workflows/extimg-gallery-regression.yml'
+permissions:
+  contents: read
+jobs:
+  lint-and-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip -q install pytest
+      - run: python -m py_compile storefront/fix_extimg_multi_image_gallery.py
+      - run: python -m pytest -q tests/test_extimg_gallery.py
+  live-readonly-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Inspect actual active theme without writing
+        run: python storefront/fix_extimg_multi_image_gallery.py audit
