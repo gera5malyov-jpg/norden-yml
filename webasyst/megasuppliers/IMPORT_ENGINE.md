@@ -87,3 +87,21 @@ update only addresses the configured warehouses.
   return supported YML/XML, CSV or XLSX must first be adapted.
 - The production plugin is never installed by a push. Run the manual deploy
   workflow **only after** PR validation and a dry-run against the actual supplier feed.
+
+
+## Riva source validation and KIT safety
+
+Riva supplier code `RIVA` uses a bounded quarantine for XML source rows with
+empty site code, duplicate site code, or missing/invalid mapped stock fields.
+It does not synthesize a code or a quantity, and it never changes another
+supplier. Quarantined rows are shown in the run's source statistics.
+Any quarantine disables `zero_if_missing` **for that one run only**; the
+saved supplier profile is not rewritten. If over 5% of Riva rows are
+quarantined (or the source has fewer than ten rows), validation blocks apply.
+
+KIT export with multiple Webasyst warehouses is forbidden until an explicit
+KIT stock mapping is implemented. The legacy KIT exporter sends a single
+warehouse's quantity to both Moscow and SPB KIT warehouses, which would be
+incorrect for Riva's regional quantities. The profile form disables the KIT
+checkbox while multiple warehouses are selected. Unmanaged Webasyst stocks
+remain untouched.
