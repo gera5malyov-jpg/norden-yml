@@ -2684,3 +2684,77 @@ def test_multi_warehouse_kit_export_cannot_cross_write_region_stock():
         "update": [{"desired": {"warehouse_stocks": {"11": 3, "12": 0}, "characteristics": {}}}],
     }
     assert any("KIT" in msg for msg in validate_apply_plan(plan, cfg))
+
+
+
+def test_riva_approved_source_snapshot_is_exact_and_tamper_protected(tmp_path, monkeypatch):
+    import hashlib
+    import sys
+    from supplier_engine import runner
+
+    xml = b'<yml_catalog><shop><offers><offer id="101"><vendorCode>CHAIR-101</vendorCode><name>Chair</name><price>1000</price><stock>1</stock></offer></offers></shop></yml_catalog>'
+    cfg = {
+        "code": "RIVA", "name": "Riva", "enabled": True,
+        "source": {"kind": "url", "format": "yml", "location": "https://riva.ru/api/"},
+        "identity": {"supplier_sku_field": "vendorCode", "sku_prefix": "", "brand": "Riva"},
+        "mapping": {"name": "name", "purchase_price": "price", "price": "price",
+                    "stock": "stock", "category": "", "images": []},
+        "rules": {"create_new": False, "update_stock": False, "zero_if_missing": False},
+        "safety": {"min_source_count_ratio": 0.6, "max_price_change_pct": 100},
+        "webasyst": {"type_id": 101, "stock_id": None},
+    }
+    config_path = tmp_path / "cfg.json"
+    config_path.write_text(json.dumps(cfg))
+    snapshot = tmp_path / "snapshot.bin"
+    report_path = tmp_path / "dry-report.json"
+    monkeypatch.delenv("WEBASYST_API_TOKEN", raising=False)
+    monkeypatch.setattr(runner, "fetch_source", lambda _: xml)
+    monkeypatch.setattr(sys, "argv", ["runner", str(config_path), "--mode", "dry-run",
+                                      "--source-snapshot-output", str(snapshot),
+                                      "--output", str(report_path)])
+    with pytest.raises(SystemExit) as exit_dry:
+        runner.main()
+    assert exit_dry.value.code == 0
+    assert snapshot.read_bytes() == xml
+    report = json.loads(report_path.read_text())
+    assert report["source_sha256"] == hashlib.sha256(xml).hexdigest()
+    assert report["status"] == "ok"
+
+    # Apply must not refetch. A changed blob is rejected before any catalog writes.
+    snapshot.write_bytes(xml.replace(b"1000", b"1001"))
+    apply_report_path = tmp_path / "apply-report.json"
+    monkeypatch.setattr(runner, "fetch_source", lambda _: pytest.fail("Riva apply refetched live XML"))
+    monkeypatch.setattr(sys, "argv", ["runner", str(config_path), "--mode", "apply",
+                                      "--source-snapshot-input", str(snapshot),
+                                      "--approved-source-sha256", report["source_sha256"],
+                                      "--output", str(apply_report_path)])
+    with pytest.raises(SystemExit) as exit_apply:
+        runner.main()
+    assert exit_apply.value.code == 2
+    apply_report = json.loads(apply_report_path.read_text())
+    assert apply_report["status"] == "failed"
+    assert any("Контрольная сумма" in e for e in apply_report["errors"])
+
+
+def test_riva_apply_without_snapshot_fails_closed_before_fetch(tmp_path, monkeypatch):
+    import sys
+    from supplier_engine import runner
+
+    cfg = {
+        "code": "RIVA", "name": "Riva",
+        "source": {"kind": "url", "format": "yml", "location": "https://riva.ru/api/"},
+        "identity": {"supplier_sku_field": "vendorCode"},
+        "mapping": {"name": "name"}, "rules": {}, "safety": {},
+        "webasyst": {"type_id": 101},
+    }
+    path = tmp_path / "cfg.json"
+    path.write_text(json.dumps(cfg))
+    report = tmp_path / "report.json"
+    monkeypatch.setattr(runner, "fetch_source", lambda _: pytest.fail("Unexpected live fetch"))
+    monkeypatch.setattr(sys, "argv", ["runner", str(path), "--mode", "apply",
+                                      "--approved-source-sha256", "a" * 64,
+                                      "--output", str(report)])
+    with pytest.raises(SystemExit) as err:
+        runner.main()
+    assert err.value.code == 2
+    assert "снимок" in " ".join(json.loads(report.read_text())["errors"])
