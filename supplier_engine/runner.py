@@ -165,8 +165,15 @@ def normalize(c, rows):
     if not description_field and str(c.get("code") or "").strip().upper() == "TETCHAIR":
         description_field = "description"
 
+    warehouses = rules.get("warehouses") or []
     out = []
     for row in rows:
+        # A configured warehouse has its own source field and Webasyst stock id.
+        # Never fall back to the total supplier stock for a missing city field.
+        warehouse_stocks = {
+            str(int(entry["stock_id"])): _stock(_get(row, entry["source_field"], None))
+            for entry in warehouses
+        }
         ss = str(_get(row, "article" if red_black else ident.get("supplier_sku_field"), "")).strip()
         sku = _red_black_sku(ss) if red_black else ("%s%s" % (prefix, ss) if ss else "")
         imgs = []
@@ -201,6 +208,7 @@ def normalize(c, rows):
             price=_num(_get(row, m.get("price"), None)),
             compare_price=_num(_get(row, m.get("compare_price"), None)),
             stock=_stock(_get(row, m.get("stock"), None)),
+            warehouse_stocks=warehouse_stocks,
             brand=ident.get("brand", ""),
             category=str(_get(row, m.get("category"), "")).strip(),
             images=imgs,
