@@ -1,0 +1,43 @@
+name: Read-only Webasyst log investigation 20261014
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/webasyst-last-logs-20261014.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  logs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - name: Inspect recent Webasyst PHP and web logs without changes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os,subprocess,tempfile,urllib.parse,urllib.request
+          from pathlib import Path
+          api=os.environ["NETANGELS_API_KEY"].strip()
+          def api_json(url,method="GET",data=None,headers=None):
+              req=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(req,timeout=24) as resp:
+                  return json.loads(resp.read().decode("utf-8"))
+          token=api_json("https://panel.netangels.ru/api/gateway/token/","POST",urllib.parse.urlencode({"api_key":api}).encode(),{"Content-Type":"application/x-www-form-urlencoded"})["token"]
+          h={"Authorization":"Bearer "+token,"Content-Type":"application/json","Accept":"application/json"}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+"/key"
+              subprocess.run(["ssh-keygen","-q","-t","ed25519","-N","","-f",key],check=True)
+              pub=Path(key+".pub").read_text().strip()
+              created=api_json("https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/create/","POST",json.dumps({"key":pub,"name":"webasyst-log-check-"+os.environ.get("GITHUB_RUN_ID","manual")}).encode(),h)
+              kid=created["id"]
+              try:
+                  script="set +e\nROOT=/home/web/vm-23f9aff9.na4u.ru/www\necho '=== DATE ==='; date -Is\necho '=== DISK ==='; df -h /; df -i /\necho '=== LOG SIZE ==='; du -sh \"$ROOT/wa-log\" /var/log/nginx /var/log/apache2 /var/log/mysql /var/log/mariadb /var/log/journal \"$ROOT/wa-cache\" 2>/dev/null\necho '=== LARGEST WA LOGS ==='; find \"$ROOT/wa-log\" -maxdepth 3 -type f -printf '%s %p\\n' 2>/dev/null | sort -nr | head -18\necho '=== RECENT WA LOGS ==='; find \"$ROOT/wa-log\" -maxdepth 3 -type f -mmin -360 -printf '%TY-%Tm-%Td %TH:%TM %s %p\\n' 2>/dev/null | sort -r | head -35\necho '=== RECENT SYSTEM ERROR LOGS ==='; find /var/log -maxdepth 3 -type f \\( -iname '*error*.log' -o -iname '*slow*.log' \\) -mmin -360 -printf '%TY-%Tm-%Td %TH:%TM %s %p\\n' 2>/dev/null | sort -r | head -25\necho '=== WEBASYST ERROR SUMMARY ==='; for f in \"$ROOT/wa-log\"/php.log \"$ROOT/wa-log\"/error.log \"$ROOT/wa-log\"/exception.log \"$ROOT/wa-log\"/db.log \"$ROOT/wa-log\"/mysql.log; do if test -f \"$f\"; then echo \"FILE=$f\"; tail -n 180 \"$f\" 2>/dev/null | grep -Eic 'fatal|error|exception|slow|timeout|deadlock|lock wait|out of memory|too many connections|disk full|no space|gone away' || true; tail -n 180 \"$f\" 2>/dev/null | grep -Ei 'fatal|error|exception|slow|timeout|deadlock|lock wait|out of memory|too many connections|disk full|no space|gone away' | tail -8 | cut -c 1-240 | sed -E 's/([?&][[:alnum:]_-]+)=([^& ]+)/\\1=[REDACTED]/g; s/[[:alnum:]._%+-]+@[[:alnum:].-]+/[EMAIL]/g' || true; fi; done\necho '=== SERVICE LOG ERROR SUMMARY ==='; for f in /var/log/nginx/error.log /var/log/apache2/error.log /var/log/mysql/error.log /var/log/mysql/mysql-slow.log; do if test -f \"$f\"; then echo \"FILE=$f\"; tail -n 120 \"$f\" | grep -Ei 'error|crit|emerg|timeout|upstream|slow|deadlock|disk|space|killed|failed' | tail -10 | cut -c 1-220 || true; fi; done\necho '=== DB PROCESS COUNTS ==='; timeout 8 mysql -N -B -e \"SELECT COMMAND, STATE, COUNT(*), MAX(TIME) FROM information_schema.PROCESSLIST GROUP BY COMMAND,STATE ORDER BY MAX(TIME) DESC LIMIT 18\" 2>/dev/null || true\necho '=== DB SLOW SETTINGS ==='; timeout 8 mysql -N -B -e \"SHOW GLOBAL VARIABLES WHERE Variable_name IN ('slow_query_log','long_query_time','slow_query_log_file','max_connections')\" 2>/dev/null || true\necho '=== ACTIVE LONG PHP ==='; ps -eo pid,etime,pcpu,pmem,comm --sort=-pcpu | grep -E '(^ *PID|php|mysql|apache|nginx)' | head -18\necho '=== FINISHED ==='"
+                  p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=10","root@45.86.180.49","bash","-s"],input=script,text=True,capture_output=True,timeout=90)
+                  print(p.stdout[-22000:])
+                  if p.returncode: raise RuntimeError("remote check exit="+str(p.returncode)+" "+p.stderr[-300:])
+              finally:
+                  try: api_json("https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/"+str(kid)+"/","DELETE",None,h)
+                  except Exception as exc: print("temporary_key_cleanup_error",str(type(exc).__name__))
+          PY
