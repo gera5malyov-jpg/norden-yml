@@ -1,4 +1,5 @@
 name: Deploy Riva multi-image gallery once
+# Retry after correcting Python subprocess compatibility; previous attempt rolled back
 on:
   push:
     branches: [main]
