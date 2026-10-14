@@ -1,6 +1,7 @@
 import argparse
 from collections import Counter
 import hashlib
+import html
 import hmac
 import json
 import re
@@ -145,6 +146,63 @@ def _red_black_sku(article):
     return "RED-00-" + value.zfill(8)
 
 
+_RIVA_EXCLUDED_PARAM_PARTS = (
+    "на складе", "склад ", "склад(", "складах", "наличие",
+    "в наличии", "цена", "прайс", "мрц", "ррц", "скидк",
+    "похожие товары", "фильтр", "код для сайта", "код цвета",
+    "для продажи", "новинки", "description_html", "description",
+    "предложения", "внутренний", "веб", "маркет",
+)
+_RIVA_EXCLUDED_PARAM_NAMES = {"артикул", "код", "тип по умолчанию"}
+_RIVA_DESCRIPTION_PRIORITIES = (
+    "Материал сиденья", "Материал спинки", "Цвет изделия",
+    "Цвет сиденья", "Цвет спинки", "Основание кресла",
+    "Механизм", "Размер", "Ширина сиденья см.",
+    "Глубина сиденья см.", "Высота спинки см.",
+    "Высота от пола до сиденья см.", "Ролики мм.",
+    "Допустимая нагрузка кг.",
+)
+
+
+def riva_param_characteristics(row):
+    """Only genuine, customer-facing <param> fields; exclude prices and stock."""
+    raw = row.get("_supplier_params") or {}
+    if not isinstance(raw, dict):
+        return {}
+    result = {}
+    for original_name, original_value in raw.items():
+        name = " ".join(str(original_name or "").split())
+        value = " ".join(str(original_value or "").split())
+        low = name.casefold()
+        if (
+            not name or not value or len(name) > 90 or len(value) > 220
+            or low in _RIVA_EXCLUDED_PARAM_NAMES
+            or any(part in low for part in _RIVA_EXCLUDED_PARAM_PARTS)
+            or value in {"[]", "{}", "-", "—", "нет данных"}
+            or value.startswith(("{", "[", "<", "http://", "https://"))
+        ):
+            continue
+        result[name] = value
+    return result
+
+
+def riva_generated_description(name, characteristics):
+    """Minimal factual text, no fabricated claims or copied internal XML fields."""
+    if not characteristics:
+        return ""
+    priority = {key.casefold(): pos for pos, key in enumerate(_RIVA_DESCRIPTION_PRIORITIES)}
+    items = sorted(
+        characteristics.items(),
+        key=lambda p: (priority.get(p[0].casefold(), 1000), p[0].casefold()),
+    )[:14]
+    heading = html.escape(str(name or "Товар"))
+    lines = "".join(
+        "<li><strong>%s:</strong> %s</li>" % (html.escape(key), html.escape(str(value)))
+        for key, value in items
+    )
+    return "<p>%s. Основные параметры по данным поставщика:</p><ul>%s</ul>" % (heading, lines)
+
+
 def normalize(c, rows):
     red_black = _is_red_black(c)
     m = dict(c["mapping"])
@@ -196,6 +254,10 @@ def normalize(c, rows):
                 for url in imgs
             ]
         chars = {dst: _get(row, src) for dst, src in characteristic_map.items() if src}
+        riva_chars = riva_param_characteristics(row) if str(c.get("code") or "").strip().upper() == "RIVA" else {}
+        # Explicitly configured feature mappings take precedence over Riva's
+        # safe fallback for XML param fields.
+        chars = {**riva_chars, **chars}
         dynamic_characteristics = m.get("dynamic_characteristics")
         if dynamic_characteristics:
             raw_chars = _get(row, dynamic_characteristics, {})
@@ -203,6 +265,8 @@ def normalize(c, rows):
                 for key, value in raw_chars.items():
                     if key and value not in (None, ""):
                         chars[str(key)] = value
+        supplied_description = str(_get(row, description_field, "")).strip() if description_field else ""
+        generated = bool(riva_chars) and not supplied_description and str(c.get("code") or "").strip().upper() == "RIVA"
         product = Product(
             supplier_sku=ss,
             sku=sku,
@@ -216,7 +280,8 @@ def normalize(c, rows):
             category=str(_get(row, m.get("category"), "")).strip(),
             images=imgs,
             characteristics=chars,
-            description=str(_get(row, description_field, "")).strip() if description_field else "",
+            description=riva_generated_description(str(_get(row, m.get("name"), "")).strip(), riva_chars) if generated else supplied_description,
+            description_generated=generated,
         )
         is_norden = c.get("source", {}).get("format", "").lower() == "norden"
         missing_purchase = product.purchase_price is None or product.purchase_price <= 0

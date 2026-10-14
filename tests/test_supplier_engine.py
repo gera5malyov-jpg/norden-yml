@@ -2831,3 +2831,93 @@ def test_red_black_code_article_conflicts_are_quarantined():
     assert detail["red_black_code_conflict_sample"][0]["offer_id"] == "b"
     cfg["identity"]["supplier_sku_field"] = "article"
     assert filter_red_black_code_conflicts(cfg, rows) == (rows, {})
+
+
+
+def test_riva_xml_params_generate_sanitized_description_and_product_features():
+    xml = """<yml_catalog><shop><offers><offer id="1332321">
+      <name>Кресло Икспресс CX1361М Черный Пластик/Черный</name><price>9295</price>
+      <param name="Код для сайта">УЧ-00001998</param>
+      <param name="Материал сиденья">ткань</param>
+      <param name="Цвет сиденья">Черный</param>
+      <param name="Основание кресла">пятилучье, d680, черное пластиковое</param>
+      <param name="Размер">64*64*104-112</param>
+      <param name="Допустимая нагрузка кг.">120</param>
+      <param name="Похожие товары по фильтру">[1,2,3]</param>
+      <param name="Количество на складе «Склад СПБ»">1</param>
+      <param name="В наличии">Y</param>
+      <param name="Цена скидочная">8900</param>
+      <param name="Вставка">&lt;script&gt;alert(1)&lt;/script&gt;</param>
+    </offer></offers></shop></yml_catalog>""".encode("utf-8")
+    from supplier_engine.runner import riva_param_characteristics
+    cfg = {
+        "code": "RIVA", "name": "Riva",
+        "identity": {"supplier_sku_field": "Код для сайта", "sku_prefix": "", "brand": "Riva"},
+        "mapping": {"name": "name", "description": "description",
+                    "purchase_price": "price", "stock": "stock", "images": []},
+        "rules": {"price_formulas": {}},
+    }
+    rows = load_xml_yml(xml)
+    assert rows[0]["_supplier_params"]["Материал сиденья"] == "ткань"
+    features = riva_param_characteristics(rows[0])
+    assert features["Материал сиденья"] == "ткань"
+    assert features["Размер"] == "64*64*104-112"
+    assert "Количество на складе «Склад СПБ»" not in features
+    assert "Похожие товары по фильтру" not in features
+    assert "Цена скидочная" not in features
+    assert "В наличии" not in features
+    assert "Вставка" not in features
+    p = normalize(cfg, rows)[0]
+    assert p.description_generated is True
+    assert p.characteristics == features
+    assert p.supplier_sku == "УЧ-00001998"
+    assert "120" in p.description and "ткань" in p.description
+    assert "<script>" not in p.description
+
+
+def test_riva_explicit_supplier_description_not_replaced():
+    xml = '''<yml_catalog><shop><offers><offer id="1">
+      <name>Chair</name><description>Supplier description</description>
+      <param name="Код для сайта">RIVA-1</param><param name="Материал">ткань</param>
+    </offer></offers></shop></yml_catalog>'''.encode('utf-8')
+    cfg = {"code": "RIVA", "name": "Riva",
+        "identity": {"supplier_sku_field": "Код для сайта", "sku_prefix": "", "brand": ""},
+        "mapping": {"name": "name", "description": "description", "images": []},
+        "rules": {"price_formulas": {}}}
+    p = normalize(cfg, load_xml_yml(xml))[0]
+    assert p.description == "Supplier description"
+    assert p.description_generated is False
+    assert p.characteristics["Материал"] == "ткань"
+
+
+def test_riva_manual_description_survives_generated_fallback():
+    from supplier_engine.webasyst_sync import apply_plan
+    class Wa:
+        def __init__(self):
+            self.calls = []
+        def call(self, name, **kw):
+            self.calls.append((name, kw))
+            return {}
+    wa = Wa()
+    plan = {
+        "create": [], "repair_sku": [], "zero": [], "skipped": [], "blocked": [],
+        "update": [{
+            "product_id": "1489551", "sku_id": "31668689", "supplier_sku": "УЧ-00001998",
+            "sku": "УЧ-00001998", "desired": {
+                "name": "Chair", "sku": "УЧ-00001998", "description": "<p>Auto</p>",
+                "description_generated": True, "characteristics": {},
+            },
+            "current_product": {
+                "id": "1489551", "status": 1, "description": "Сохранённое авторское описание",
+            },
+            "current_sku": {"sku": "УЧ-00001998", "name": "УЧ-00001998"},
+        }],
+    }
+    cfg = {
+        "code": "RIVA",
+        "rules": {"update_stock": False, "update_prices": False,
+                  "update_description": True, "update_characteristics": False},
+        "webasyst": {"type_id": 136, "stock_id": 1, "stock_ids": [1]},
+    }
+    apply_plan(wa, plan, cfg)
+    assert not any(name == "shop.product.update" for name, kw in wa.calls)

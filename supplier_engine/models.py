@@ -16,6 +16,7 @@ class Product:
     images: list[str] = field(default_factory=list)
     characteristics: dict[str, Any] = field(default_factory=dict)
     description: str = ""
+    description_generated: bool = False
 
 @dataclass
 class ValidationReport:

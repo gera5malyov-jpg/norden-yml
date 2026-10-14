@@ -220,7 +220,7 @@ def test_signed_bridge_can_create_supplier_characteristics():
     assert "shopFeatureModel" in bridge
     assert "shopTypeFeaturesModel" in bridge
     assert "TYPE_VARCHAR" in bridge
-    assert "'status' => 'private'" in bridge
+    assert "'status' => $is_riva ? 'public' : 'private'" in bridge
     assert 'name="auto_features"' in panel
     assert "'auto_features' =>" in controller
 
@@ -380,3 +380,11 @@ def test_editable_supplier_profile_is_not_overwritten_with_red_black_defaults():
     assert "Настройки сохранены не полностью" in ui
     assert '_get(row, ident.get("supplier_sku_field")' in runner
     assert "m.update({" not in runner[runner.index("def normalize("):runner.index("def filter_incomplete_riva_rows(")]
+
+
+
+def test_riva_generated_specs_are_public_only_for_riva():
+    bridge = (ROOT / "webasyst/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendBridge.controller.php").read_text(encoding="utf-8")
+    assert "strtoupper(trim((string)ifset($feature_supplier['code']))) === 'RIVA'" in bridge
+    assert "'status' => $is_riva ? 'public' : 'private'" in bridge
+    assert "'available_for_sku' => 0" in bridge

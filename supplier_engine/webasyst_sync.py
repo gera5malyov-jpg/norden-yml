@@ -947,6 +947,10 @@ def apply_plan(wa: WebasystClient, plan, config):
                     raise
 
             product_data = _product_write_data(desired, rules, web, creating=False)
+            # Supplier-param fallback text must not overwrite a manual
+            # description. Explicit supplier descriptions retain old behavior.
+            if desired.get("description_generated") and str(current_product.get("description") or "").strip():
+                product_data.pop("description", None)
             if (
                 str(current_product.get("status") or "0") == "0"
                 and str(current_sku.get("sku") or "").strip() == str(row.get("supplier_sku") or "").strip()
