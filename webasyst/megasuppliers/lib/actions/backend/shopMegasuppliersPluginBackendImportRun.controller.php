@@ -104,6 +104,21 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
             $approved_source_sha = trim((string)$last_dry['report']['source_sha256']);
             if ($is_riva_snapshot) {
                 $approved_snapshot_request_id = trim((string)ifset($last_dry['request_id'], ''));
+                // The older physical /megasuppliers-callback/ handler did not
+                // persist last_dry_run.request_id. Restore it only when the
+                // current status is EXACTLY this completed, successful dry-run
+                // with the same config and source hashes. Never guess another run.
+                if ($approved_snapshot_request_id === ''
+                    && (string)ifset($previous['status']) === 'completed'
+                    && (string)ifset($previous['mode']) === 'dry-run'
+                    && (string)ifset($previous['config_sha256']) === (string)$last_dry['config_sha256']
+                    && !empty($previous['report']['source_sha256'])
+                    && hash_equals((string)$last_dry['report']['source_sha256'], (string)$previous['report']['source_sha256'])
+                    && (string)ifset($previous['report']['status']) === 'ok'
+                    && empty($previous['report']['blocked'])
+                    && (string)ifset($previous['finished_at']) === (string)ifset($last_dry['finished_at'])) {
+                    $approved_snapshot_request_id = trim((string)ifset($previous['request_id'], ''));
+                }
                 if (!preg_match('/^[0-9]{14}-[0-9a-f]{16}$/', $approved_snapshot_request_id)) {
                     $this->errors[] = 'FRESH_DRY_RUN_REQUIRED';
                     return;
