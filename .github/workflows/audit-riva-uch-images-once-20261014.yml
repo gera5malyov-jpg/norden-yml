@@ -1,0 +1,55 @@
+name: Audit Riva UCH images once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/audit-riva-uch-images-once-20261014.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    if: github.event.head_commit.message == 'Audit Riva UCH images once'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read product and image counts without writes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os,subprocess,tempfile,urllib.parse,urllib.request
+          def api(url,method='GET',data=None,h=None):
+            req=urllib.request.Request(url,data=data,headers=h or {},method=method)
+            with urllib.request.urlopen(req,timeout=35) as r:
+              b=r.read();return json.loads(b) if b else {}
+          token=api('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':os.environ['NETANGELS_API_KEY']}).encode(),{'Content-Type':'application/x-www-form-urlencoded'})['token']
+          h={'Authorization':'Bearer '+token,'Content-Type':'application/json'}
+          php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';
+          chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());
+          wa('shop');
+          $m=new waModel();
+          $rows=$m->query("SELECT p.id,p.name,p.url,p.summary,p.image_id,p.status,sk.sku,sk.name AS sku_name FROM shop_product p JOIN shop_product_skus sk ON sk.product_id=p.id WHERE sk.sku='УЧ-0000199' OR sk.name='УЧ-0000199' OR sk.sku='uch-0000199' LIMIT 20")->fetchAll();
+          $result=array();
+          foreach ($rows as $r) {
+            $urls=array();preg_match_all('~https?://[^\s\[\]<>]+~u',(string)$r['summary'],$mm);
+            $imageCount=(int)$m->query("SELECT COUNT(*) FROM shop_product_images WHERE product_id=".(int)$r['id'])->fetchField();
+            $result[]=array('product_id'=>$r['id'],'name'=>$r['name'],'url'=>$r['url'],'status'=>$r['status'],'sku'=>$r['sku'],'sku_name'=>$r['sku_name'],'image_id'=>$r['image_id'],'image_count'=>$imageCount,'summary_size'=>strlen($r['summary']),'extimg_blocks'=>substr_count($r['summary'],'[extimg]'),'external_urls'=>count($mm[0]),'first_url'=>isset($mm[0][0])?$mm[0][0]:null);
+          }
+          echo json_encode($result,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+          ?>''';
+          with tempfile.TemporaryDirectory() as td:
+            k=td+'/id';subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',k],check=True)
+            new=api('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/create/','POST',json.dumps({'key':open(k+'.pub').read().strip(),'name':'riva-image-audit-'+os.environ['GITHUB_RUN_ID']}).encode(),h)['id']
+            try:
+              cmd="cat >/tmp/riva_image_audit.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/riva_image_audit.php\nsu -s /bin/bash web -c 'php /tmp/riva_image_audit.php'\ncode=$?; rm -f /tmp/riva_image_audit.php; exit $code"
+              p=subprocess.run(['ssh','-i',k,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@45.86.180.49','bash -s'],input=cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=120)
+              print('PRODUCT_IMAGE_AUDIT='+p.stdout[:4500])
+              if p.returncode:raise RuntimeError('remote read '+str(p.returncode)+' '+p.stderr[-200:])
+            finally:
+              try:api('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/'+str(new)+'/','DELETE',b'',h)
+              except Exception:print('WARNING: temporary key cleanup failed')
+          PY
