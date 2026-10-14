@@ -289,6 +289,31 @@ def filter_incomplete_riva_rows(config, rows):
     }
 
 
+def filter_red_black_code_conflicts(config, rows):
+    """Skip source rows whose code and article identify different legacy SKUs.
+
+    Most Red-Black code values have a "00-_" wrapper around article. Some
+    offers disagree, so updating either historical SKU would be ambiguous.
+    The rest can still be checked without risking these four mismatches.
+    """
+    if not _is_red_black(config) or str((config.get("identity") or {}).get("supplier_sku_field")) != "code":
+        return rows, {}
+    clean, conflicts = [], []
+    for row in rows:
+        code = str(row.get("code") or "").strip()
+        article = str(row.get("article") or "").strip()
+        code_sku = _red_black_sku(code)
+        article_sku = _red_black_sku(article)
+        if code and article and code_sku and article_sku and code_sku != article_sku:
+            conflicts.append({"code": code, "article": article, "offer_id": str(row.get("id") or "")})
+        else:
+            clean.append(row)
+    return clean, {
+        "red_black_code_mismatches": len(conflicts),
+        "red_black_code_conflict_sample": conflicts[:10],
+    }
+
+
 def _unique_image_aliases(products):
     by_url = {}
     ambiguous = set()
@@ -420,9 +445,10 @@ def main():
             snapshot_path.write_bytes(source_data)
         rows = parse_source(config, source_data) if source_meta is None or not config.get("source", {}).get("format", "").lower() == "norden" else rows
 
-        valid_rows, riva_quality = filter_incomplete_riva_rows(config, rows)
-        if riva_quality:
-            source_meta = dict(source_meta or {}, **riva_quality)
+        code_rows, code_quality = filter_red_black_code_conflicts(config, rows)
+        valid_rows, riva_quality = filter_incomplete_riva_rows(config, code_rows)
+        if code_quality or riva_quality:
+            source_meta = dict(source_meta or {}, **code_quality, **riva_quality)
         products = normalize(config, valid_rows)
         if source_meta is not None and config.get("source", {}).get("format", "").lower() == "norden":
             source_meta["missing_purchase_price"] = sum(
@@ -507,6 +533,15 @@ def main():
         )
         if catalog_warning:
             report.warnings.append(catalog_warning)
+        if code_quality.get("red_black_code_mismatches"):
+            count = code_quality["red_black_code_mismatches"]
+            report.warnings.append(
+                "Red-Black: пропущено %d предложений, у которых code и article указывают "
+                "на разные старые артикулы. Перед обновлением таких товаров нужна ручная сверка."
+                % count
+            )
+            if count / float(max(1, len(rows))) > 0.02:
+                report.errors.append("Red-Black: слишком много противоречивых значений code/article.")
         if riva_quality.get("skipped_rows"):
             omitted = riva_quality["skipped_rows"]
             report.warnings.append(
