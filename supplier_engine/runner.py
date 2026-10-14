@@ -136,10 +136,10 @@ def _red_black_sku(article):
     # Red-Black <offer code="00-_0008542" article="0008542"> uses
     # non-numeric separators before its article portion.
     value = str(article or "").strip()
-    match = re.fullmatch(r"00[-_]+(\\d{1,8})", value)
+    match = re.fullmatch(r"00[-_]+(\d{1,8})", value)
     if match:
         value = match.group(1)
-    if not re.fullmatch(r"\\d{1,8}", value):
+    if not re.fullmatch(r"\d{1,8}", value):
         return ""
     return "RED-00-" + value.zfill(8)
 
