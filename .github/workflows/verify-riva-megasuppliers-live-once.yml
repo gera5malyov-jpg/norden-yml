@@ -1,0 +1,27 @@
+name: Verify Riva live supplier profile once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/verify-riva-megasuppliers-live-once.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: github.event.head_commit.message == 'Run safe Riva live profile verification once'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+      WEBASYST_BASE_URL: 'https://profikompany.ru'
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install dependencies
+        run: pip -q install requests openpyxl pdfplumber
+      - name: Verify script syntax
+        run: python -m py_compile scripts/verify_riva_megasuppliers_profile_once.py
+      - name: Correct Riva profile and perform read-only dry run
+        run: python scripts/verify_riva_megasuppliers_profile_once.py
