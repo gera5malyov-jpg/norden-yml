@@ -318,3 +318,13 @@ def test_multi_warehouse_profile_editor_and_server_validation():
     assert "postedWarehouseMappings" in controller
     assert "zero_other_stocks" in controller
     assert "in_array($id, $allowed_ids, true)" in controller
+
+
+
+def test_multi_warehouse_kit_checkbox_has_safety_guard():
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    controller = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php").read_text(encoding="utf-8")
+    assert "kit.disabled=hasMapped" in panel
+    assert "kit.checked=false" in panel
+    assert "'export_to_kit'" in controller
+    assert "'zero_other_stocks'" in controller
