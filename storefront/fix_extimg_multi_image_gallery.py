@@ -25,12 +25,12 @@ NEW_PARSER = r'''{* === extimg: parse ALL [extimg] blocks, one URL per block or 
 {assign var="__has_extimg" value=false}
 
 {if $__extimg_source}
-    {if preg_match_all('/\\[extimg\\](.*?)\\[\\/extimg\\]/is', $__extimg_source, $__extimg_matches)}
+    {if preg_match_all('/\[extimg\](.*?)\[\/extimg\]/is', $__extimg_source, $__extimg_matches)}
         {assign var="__has_extimg" value=true}
         {foreach $__extimg_matches.1 as $__extimg_block}
-            {assign var="__extimg_block" value=str_replace("\\r\\n", "\\n", $__extimg_block)}
-            {assign var="__extimg_block" value=str_replace("\\r", "\\n", $__extimg_block)}
-            {assign var="__lines" value=explode("\\n", $__extimg_block)}
+            {assign var="__extimg_block" value=str_replace("\r\n", "\n", $__extimg_block)}
+            {assign var="__extimg_block" value=str_replace("\r", "\n", $__extimg_block)}
+            {assign var="__lines" value=explode("\n", $__extimg_block)}
             {foreach $__lines as $__line}
                 {assign var="__url" value=trim($__line)}
                 {if $__url && preg_match('~^https?://~i', $__url) && !in_array($__url, $ext_images)}
