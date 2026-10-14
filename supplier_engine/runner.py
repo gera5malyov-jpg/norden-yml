@@ -3,6 +3,7 @@ from collections import Counter
 import hashlib
 import hmac
 import json
+import re
 import os
 import urllib.request
 from pathlib import Path
