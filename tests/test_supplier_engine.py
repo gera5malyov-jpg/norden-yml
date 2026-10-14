@@ -24,11 +24,10 @@ def test_red_black_legacy_sku_prices_and_supplier_images():
     </offers></shop></yml_catalog>'''
     cfg = {
         "code": "Red-Black", "name": "Red-Black",
-        "identity": {"supplier_sku_field": "vendorCode", "sku_prefix": "RED-", "brand": ""},
-        # Simulate the old incomplete mapping and stale price formulas in the UI.
-        "mapping": {"name": "name", "purchase_price": "", "price": "",
-                    "images": ["picture"], "stock": "stock"},
-        "rules": {"price_formulas": {"price": "supplier_price * 1.25"}},
+        "identity": {"supplier_sku_field": "article", "sku_prefix": "RED-00-", "brand": ""},
+        "mapping": {"name": "name", "purchase_price": "price", "price": "rrc_price",
+                    "images": ["pictures"], "stock": "stock"},
+        "rules": {"price_formulas": {}},
     }
     p = normalize(cfg, load_xml_yml(xml))[0]
     assert p.supplier_sku == "00004806"
@@ -2758,3 +2757,57 @@ def test_riva_apply_without_snapshot_fails_closed_before_fetch(tmp_path, monkeyp
         runner.main()
     assert err.value.code == 2
     assert "снимок" in " ".join(json.loads(report.read_text())["errors"])
+
+
+
+def test_red_black_profile_can_select_code_field_without_changing_legacy_sku():
+    xml = b'''<yml_catalog><shop><offers>
+      <offer id="8542" code="00-_0008542" article="0008542">
+        <name>Red Black stool</name><price>2000</price><rrc_price>2600</rrc_price>
+        <stock>4</stock><picture>https://red-black.ru/custom/dimages/a.jpg</picture>
+      </offer>
+    </offers></shop></yml_catalog>'''
+    base = {
+        "code": "RED_BLACK", "name": "Red-Black",
+        "identity": {"supplier_sku_field": "code", "sku_prefix": "RED-00-", "brand": "Профи"},
+        "mapping": {"name": "name", "description": "description", "purchase_price": "price",
+                    "price": "rrc_price", "stock": "stock", "images": ["pictures"]},
+        "rules": {"price_formulas": {}},
+    }
+    p = normalize(base, load_xml_yml(xml))[0]
+    assert p.supplier_sku == "00-_0008542"
+    assert p.sku == "RED-00-00008542"
+    assert p.purchase_price == 2000
+    assert p.price == 2600
+    assert len(p.images) == 1
+    base["identity"]["supplier_sku_field"] = "article"
+    old = normalize(base, load_xml_yml(xml))[0]
+    assert old.sku == p.sku
+    assert old.supplier_sku == "0008542"
+
+
+def test_red_black_user_edited_price_and_image_field_mapping_is_respected():
+    xml = b'''<yml_catalog><shop><offers>
+      <offer id="8542" code="00-_0008542" article="0008542">
+        <name>Chair</name><price>2000</price><rrc_price>2600</rrc_price>
+        <stock>2</stock><picture>https://red-black.ru/a.jpg</picture>
+      </offer>
+    </offers></shop></yml_catalog>'''
+    cfg = {
+        "code": "RED_BLACK", "name": "Red-Black",
+        "identity": {"supplier_sku_field": "article", "sku_prefix": "RED-00-", "brand": ""},
+        "mapping": {"name": "name", "purchase_price": "price", "price": "price",
+                    "stock": "stock", "images": []},
+        "rules": {"price_formulas": {}},
+    }
+    product = normalize(cfg, load_xml_yml(xml))[0]
+    assert product.price == 2000  # UI selected price, not forced rrc_price.
+    assert product.images == []  # UI cleared images mapping.
+
+
+def test_red_black_invalid_code_must_never_derive_a_wrong_legacy_sku():
+    from supplier_engine.runner import _red_black_sku
+    assert _red_black_sku("00-_0008542") == "RED-00-00008542"
+    assert _red_black_sku("00-00004806") == "RED-00-00004806"
+    assert _red_black_sku("00004806") == "RED-00-00004806"
+    assert _red_black_sku("00-other-12345") == ""
