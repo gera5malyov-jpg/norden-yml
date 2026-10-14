@@ -23,6 +23,7 @@ def test_webasyst_dispatch_inputs_are_declared_by_workflow():
         "source_secret",
         "previous_count",
         "approved_source_sha256",
+        "approved_snapshot_request_id",
     }
     for key in dispatched:
         assert "'%s' =>" % key in controller
@@ -328,3 +329,23 @@ def test_multi_warehouse_kit_checkbox_has_safety_guard():
     assert "kit.checked=false" in panel
     assert "'export_to_kit'" in controller
     assert "'zero_other_stocks'" in controller
+
+
+
+def test_riva_apply_uses_immutable_source_artifact_and_preserves_hash_guard():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    run_controller = RUN_CONTROLLER.read_text(encoding="utf-8")
+    callback = (ROOT / "webasyst/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendImportCallback.controller.php").read_text(encoding="utf-8")
+    runner = (ROOT / "supplier_engine/runner.py").read_text(encoding="utf-8")
+    assert "supplier-source-" in workflow
+    assert "retention-days: 3" in workflow
+    assert "gh run download" in workflow
+    assert "actions: read" in workflow
+    assert "--source-snapshot-output" in workflow
+    assert "--source-snapshot-input" in workflow
+    assert "'request_id' => (string)ifset($pending['request_id'])" in callback
+    assert "'approved_snapshot_request_id' => $approved_snapshot_request_id" in run_controller
+    assert "FRESH_DRY_RUN_REQUIRED" in run_controller
+    assert "hmac.compare_digest" in runner
+    assert "if is_riva and args.mode == \"dry-run\"" in runner
+    assert 'raise ValueError("Для Riva требуется новая проверка' in runner
