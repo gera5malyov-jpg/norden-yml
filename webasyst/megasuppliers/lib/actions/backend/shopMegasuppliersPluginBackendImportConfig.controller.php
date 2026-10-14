@@ -22,7 +22,6 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
 
         if (waRequest::method() === 'get') {
             $config = file_exists($path) ? json_decode(file_get_contents($path), true) : null;
-            $config = $this->applyRedBlackDefaults($config, $supplier);
             $this->response = array(
                 'status' => 'ok',
                 'supplier_id' => $supplier_id,
@@ -38,8 +37,12 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
             $config = json_decode($raw, true);
         } else {
             $config = $this->fromForm($supplier);
+            // The form does not expose advanced characteristic codes and
+            // safety limits. Preserve these from the previous saved profile,
+            // but never override an editable field with supplier defaults.
+            $existing = file_exists($path) ? json_decode(file_get_contents($path), true) : null;
+            $config = $this->preserveUneditedConfig($existing, $config);
         }
-        $config = $this->applyRedBlackDefaults($config, $supplier);
         if (!$this->validConfig($config)) {
             $this->errors[] = 'INVALID_CONFIG';
             return;
@@ -194,34 +197,37 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
         return is_array($mappings) ? $mappings : null;
     }
 
-    private function applyRedBlackDefaults($config, $supplier)
+    private function preserveUneditedConfig($existing, $edited)
     {
-        if (!is_array($config)) {
-            return $config;
+        if (!is_array($existing)) {
+            return $edited;
         }
-        $format = strtolower((string)ifset($config['source']['format']));
-        // Red-Black always uses supplier XML as the primary source.
-            // Its historical SKU is RED-00-00004806, not RED-00004806.
-            $red_black_identity = strtolower((string)$supplier['name'].' '.(string)$supplier['code']);
-            $red_black_identity = preg_replace('/[^a-z0-9]/', '', $red_black_identity);
-            if (strpos($red_black_identity, 'redblack') !== false && in_array($format, array('yml', 'xml'), true)) {
-                $config['identity']['supplier_sku_field'] = 'article';
-                $config['identity']['sku_prefix'] = 'RED-00-';
-                $config['mapping']['name'] = 'name';
-                $config['mapping']['description'] = 'description';
-                $config['mapping']['purchase_price'] = 'price';
-                $config['mapping']['price'] = 'rrc_price';
-                $config['mapping']['compare_price'] = '';
-                $config['mapping']['stock'] = 'stock';
-                $config['mapping']['category'] = 'categoryId';
-                $config['mapping']['images'] = array('pictures');
-                $config['rules']['price_formulas'] = array();
-                $config['rules']['require_purchase_price'] = true;
-                $config['rules']['require_positive_sale_price'] = true;
-                $config['rules']['update_images'] = true;
+        // Preserve keys that have no input controls, such as existing feature
+        // mappings, rule guards and future plugin extensions.
+        foreach (array('source', 'identity', 'mapping', 'rules', 'webasyst', 'safety') as $section) {
+            if (!isset($existing[$section]) || !is_array($existing[$section])) {
+                continue;
             }
-    
-        return $config;
+            $new_section = isset($edited[$section]) && is_array($edited[$section])
+                ? $edited[$section] : array();
+            $edited[$section] = array_merge($existing[$section], $new_section);
+        }
+        foreach (array('characteristics', 'dynamic_characteristics') as $key) {
+            if (isset($existing['mapping'][$key])) {
+                $edited['mapping'][$key] = $existing['mapping'][$key];
+            }
+        }
+        if (isset($existing['webasyst']['feature_codes'])) {
+            $edited['webasyst']['feature_codes'] = $existing['webasyst']['feature_codes'];
+        }
+        // Preserve the complete existing safety section because the basic
+        // form does not offer a safety editor.
+        if (isset($existing['safety']) && is_array($existing['safety'])) {
+            $edited['safety'] = $existing['safety'];
+        }
+        // Preserve other top-level extension fields, without changing what
+        // was explicitly edited in this request.
+        return array_merge($existing, $edited);
     }
 
     private function validConfig($config)
