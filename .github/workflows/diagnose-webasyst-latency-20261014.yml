@@ -1,0 +1,67 @@
+name: Diagnose Webasyst site latency (read-only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-webasyst-latency-20261014.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - name: Inspect production VM and Webasyst processes (read only)
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, tempfile, urllib.parse, urllib.request
+          from pathlib import Path
+          API_KEY=os.environ['NETANGELS_API_KEY'].strip()
+          VM_ID=44780
+          VM_IP='45.86.180.49'
+          def req(url,method='GET',data=None,headers=None):
+              r=urllib.request.Request(url,method=method,data=data,headers=headers or {})
+              with urllib.request.urlopen(r,timeout=25) as response:
+                  data=response.read().decode('utf-8')
+                  return json.loads(data) if data else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':API_KEY}).encode(),{'Content-Type':'application/x-www-form-urlencoded'})['token']
+          headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/json'}
+          with tempfile.TemporaryDirectory() as d:
+              key=d+'/id_ed25519'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=Path(key+'.pub').read_text().strip()
+              created=req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/create/','POST',json.dumps({'key':pub,'name':'webasyst-latency-diagnostic-'+os.environ.get('GITHUB_RUN_ID','')}).encode(),headers)
+              kid=created['id']
+              try:
+                  script=r'''set +e
+                  ROOT=/home/web/vm-23f9aff9.na4u.ru/www
+                  echo ===TIME===; date -Is
+                  echo ===UPTIME_LOAD===; uptime
+                  echo ===RAM===; free -m
+                  echo ===DISK===; df -h / /home
+                  echo ===VMSTAT===; vmstat 1 2 | tail -3
+                  echo ===SERVICES===; for x in mariadb mysql nginx apache2 php8.0-fpm php8.1-fpm php8.2-fpm php8.3-fpm php8.4-fpm; do printf "%s:" "$x"; systemctl is-active "$x" 2>/dev/null || true; done
+                  echo ===CPU_TOP===; ps -eo pid,etime,pcpu,pmem,comm --sort=-pcpu | head -22
+                  echo ===MEM_TOP===; ps -eo pid,etime,pcpu,pmem,comm --sort=-pmem | head -18
+                  echo ===MYSQL_AGGREGATES===; timeout 6 mysql -N -B -e "SELECT COMMAND, COUNT(*), MAX(TIME) FROM information_schema.PROCESSLIST GROUP BY COMMAND" 2>/dev/null | head -15 || true
+                  echo ===PROCESS_COUNTS===; ps -eo comm= | sort | uniq -c | sort -rn | head -20
+                  echo ===RECENT_WA_LOG_FILES===; find "$ROOT/wa-log" -maxdepth 2 -type f -mmin -30 -printf '%TY-%Tm-%TdT%TH:%TM %s %p\n' 2>/dev/null | head -25
+                  echo ===HTTP_SITE===; curl -k -L -sS -o /dev/null --max-time 15 --resolve profikompany.ru:443:127.0.0.1 -w 'http=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n' https://profikompany.ru/
+                  echo ===HTTP_ADMIN===; curl -k -L -sS -o /dev/null --max-time 12 --resolve profikompany.ru:443:127.0.0.1 -w 'http=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n' https://profikompany.ru/webasyst/
+                  echo ===COMPLETE===
+                  '''
+                  result=subprocess.run(['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','-o','ConnectTimeout=12',f'root@{VM_IP}','bash','-s'],input=script,text=True,capture_output=True,timeout=95)
+                  print(result.stdout[-18000:])
+                  if result.stderr:
+                      print('SSH_DIAGNOSTIC=',result.stderr[-1200:])
+                  if result.returncode: raise RuntimeError('ssh exit status '+str(result.returncode))
+              finally:
+                  try:
+                      req(f'https://api-ms.netangels.ru/api/v1/cloud/vms/{VM_ID}/ssh/{kid}/','DELETE',None,headers)
+                  except Exception as ex:
+                      print('ssh_key_cleanup_warning',type(ex).__name__)
+          PY
