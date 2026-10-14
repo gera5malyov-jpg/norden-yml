@@ -1,6 +1,7 @@
 import argparse
 from collections import Counter
 import hashlib
+import hmac
 import json
 import os
 import urllib.request
@@ -382,22 +383,42 @@ def main():
     ap.add_argument("--request-id", default="")
     ap.add_argument("--previous-count", type=int)
     ap.add_argument("--approved-source-sha256", default="")
+    ap.add_argument("--source-snapshot-input", default="", help="Exact immutable bytes approved in dry-run")
+    ap.add_argument("--source-snapshot-output", default="", help="Persist verified feed bytes for future apply")
     ap.add_argument("--output", default="supplier-run.json")
     args = ap.parse_args()
 
     try:
         config = load_config(args.config)
         source_meta = None
-        if config.get("source", {}).get("format", "").lower() == "norden":
+        is_riva = str(config.get("code") or "").strip().upper() == "RIVA"
+        if args.source_snapshot_input:
+            if args.mode != "apply" or not is_riva:
+                raise ValueError("Source snapshot input allowed only for Riva apply.")
+            snapshot = Path(args.source_snapshot_input)
+            if not snapshot.is_file() or snapshot.stat().st_size > 100 * 1024 * 1024:
+                raise ValueError("Approved Riva source snapshot is missing or too large.")
+            source_data = snapshot.read_bytes()
+            source_meta = {"approved_snapshot_used": True}
+        elif is_riva and args.mode == "apply":
+            # Never fall back to a new live request: it may silently switch the
+            # checked prices/stocks or reproduce Riva's changing-feed problem.
+            raise ValueError("Для Riva требуется новая проверка прайса и сохранённый проверенный снимок XML.")
+        elif config.get("source", {}).get("format", "").lower() == "norden":
             rows, source_data, source_meta = load_norden_source()
         else:
             source_data = fetch_source(config)
-            rows = parse_source(config, source_data)
         source_sha = hashlib.sha256(source_data).hexdigest()
         if args.mode == "apply":
             approved = args.approved_source_sha256.strip().lower()
-            if not approved or source_sha.lower() != approved:
-                raise ValueError("Источник изменился после dry-run; применение заблокировано.")
+            if not approved or not hmac.compare_digest(source_sha.lower(), approved):
+                raise ValueError("Контрольная сумма проверенного прайса не совпадает; применение заблокировано.")
+        if is_riva and args.mode == "dry-run" and args.source_snapshot_output:
+            snapshot_path = Path(args.source_snapshot_output)
+            if snapshot_path.exists():
+                raise ValueError("Refusing to overwrite an existing source snapshot.")
+            snapshot_path.write_bytes(source_data)
+        rows = parse_source(config, source_data) if source_meta is None or not config.get("source", {}).get("format", "").lower() == "norden" else rows
 
         valid_rows, riva_quality = filter_incomplete_riva_rows(config, rows)
         if riva_quality:

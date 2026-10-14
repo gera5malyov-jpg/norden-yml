@@ -56,9 +56,14 @@ on:
         description: Source hash approved by the preceding dry-run
         required: false
         default: ''
+      approved_snapshot_request_id:
+        description: Riva immutable source artifact request id from preceding dry-run
+        required: false
+        default: ''
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   tests:
@@ -181,6 +186,7 @@ jobs:
           BRIDGE_URL: ${{ inputs.bridge_url }}
           WEBASYST_URL: ${{ inputs.webasyst_base_url }}
           APPROVED_SOURCE_SHA256: ${{ inputs.approved_source_sha256 }}
+          APPROVED_SNAPSHOT_REQUEST_ID: ${{ inputs.approved_snapshot_request_id }}
         run: |
           python - <<'PY'
           import os, re
@@ -215,7 +221,31 @@ jobs:
           approved=os.environ.get('APPROVED_SOURCE_SHA256','').strip()
           if mode=='apply' and not re.fullmatch(r'[0-9a-fA-F]{64}', approved):
               raise SystemExit('approved_source_sha256 is required for apply')
+          snapshot=os.environ.get('APPROVED_SNAPSHOT_REQUEST_ID','').strip()
+          if snapshot and (mode!='apply' or not re.fullmatch(r'[0-9]{14}-[a-f0-9]{16}', snapshot)):
+              raise SystemExit('Invalid approved snapshot request id')
           PY
+      - name: Retrieve immutable Riva source from successful dry-run
+        if: inputs.mode == 'apply' && inputs.approved_snapshot_request_id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APPROVED_SNAPSHOT_REQUEST_ID: ${{ inputs.approved_snapshot_request_id }}
+          SUPPLIER_ID: ${{ inputs.supplier_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$APPROVED_SNAPSHOT_REQUEST_ID" =~ ^[0-9]{14}-[a-f0-9]{16}$ ]] || exit 3
+          [[ "$SUPPLIER_ID" =~ ^[0-9]+$ ]] || exit 3
+          artifact="supplier-source-${SUPPLIER_ID}-${APPROVED_SNAPSHOT_REQUEST_ID}"
+          run_id="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts?name=${artifact}&per_page=100" --jq ".artifacts | map(select(.name == \"${artifact}\" and (.expired | not))) | sort_by(.created_at) | last | .workflow_run.id")"
+          if [[ -z "$run_id" || "$run_id" == "null" ]]; then
+            echo "Approved Riva snapshot not found; run a fresh dry-run." >&2
+            exit 3
+          fi
+          mkdir -p /tmp/approved-source
+          gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name "$artifact" --dir /tmp/approved-source
+          test -s /tmp/approved-source/supplier-source.bin
+          echo "approved_snapshot_downloaded=yes"
       - name: Run supplier engine
         id: engine
         shell: bash
@@ -225,6 +255,7 @@ jobs:
           REQUEST_ID: ${{ inputs.request_id }}
           PREVIOUS_COUNT: ${{ inputs.previous_count }}
           APPROVED_SOURCE_SHA256: ${{ inputs.approved_source_sha256 }}
+          APPROVED_SNAPSHOT_REQUEST_ID: ${{ inputs.approved_snapshot_request_id }}
         run: |
           set +e
           args=( "${{ steps.cfg.outputs.path }}" --mode "$RUN_MODE" --output supplier-run.json )
@@ -232,6 +263,8 @@ jobs:
           if [ -n "$REQUEST_ID" ]; then args+=( --request-id "$REQUEST_ID" ); fi
           if [ -n "$PREVIOUS_COUNT" ]; then args+=( --previous-count "$PREVIOUS_COUNT" ); fi
           if [ -n "$APPROVED_SOURCE_SHA256" ]; then args+=( --approved-source-sha256 "$APPROVED_SOURCE_SHA256" ); fi
+          if [ "$RUN_MODE" = "dry-run" ]; then args+=( --source-snapshot-output supplier-source.bin ); fi
+          if [ -n "$APPROVED_SNAPSHOT_REQUEST_ID" ]; then args+=( --source-snapshot-input /tmp/approved-source/supplier-source.bin ); fi
           python -m supplier_engine.runner "${args[@]}"
           code=$?
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
@@ -242,8 +275,17 @@ jobs:
           name: supplier-${{ inputs.mode }}-${{ inputs.request_id || github.run_id }}
           path: supplier-run.json
           if-no-files-found: error
+      - name: Save immutable Riva XML from successful dry-run
+        id: snapshot-upload
+        if: inputs.mode == 'dry-run' && steps.engine.outputs.exit_code == '0' && hashFiles('supplier-source.bin') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: supplier-source-${{ inputs.supplier_id }}-${{ inputs.request_id }}
+          path: supplier-source.bin
+          if-no-files-found: error
+          retention-days: 3
       - name: Send signed result to Webasyst
-        if: always() && inputs.callback_url != '' && hashFiles('supplier-run.json') != ''
+        if: always() && steps.snapshot-upload.outcome != 'failure' && inputs.callback_url != '' && hashFiles('supplier-run.json') != ''
         env:
           CALLBACK_URL: ${{ inputs.callback_url }}
           CALLBACK_SECRET: ${{ secrets.MEGASUPPLIERS_CALLBACK_SECRET }}

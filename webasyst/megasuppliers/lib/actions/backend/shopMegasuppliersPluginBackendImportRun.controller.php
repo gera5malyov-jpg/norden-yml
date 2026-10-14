@@ -76,6 +76,8 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
         }
 
         $approved_source_sha = '';
+        $approved_snapshot_request_id = '';
+        $is_riva_snapshot = strtoupper(trim((string)ifset($config['code'], ''))) === 'RIVA';
         if ($mode === 'apply') {
             if (empty($config['enabled'])) {
                 $this->errors[] = 'PROFILE_DISABLED';
@@ -100,6 +102,13 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
                 return;
             }
             $approved_source_sha = trim((string)$last_dry['report']['source_sha256']);
+            if ($is_riva_snapshot) {
+                $approved_snapshot_request_id = trim((string)ifset($last_dry['request_id'], ''));
+                if (!preg_match('/^[0-9]{14}-[0-9a-f]{16}$/', $approved_snapshot_request_id)) {
+                    $this->errors[] = 'FRESH_DRY_RUN_REQUIRED';
+                    return;
+                }
+            }
         }
 
         try {
@@ -155,6 +164,7 @@ class shopMegasuppliersPluginBackendImportRunController extends waJsonController
             'source_secret' => $source_secret,
             'previous_count' => $previous_count,
             'approved_source_sha256' => $approved_source_sha,
+            'approved_snapshot_request_id' => $approved_snapshot_request_id,
         )));
         $ch = curl_init($url);
         curl_setopt_array($ch, array(
