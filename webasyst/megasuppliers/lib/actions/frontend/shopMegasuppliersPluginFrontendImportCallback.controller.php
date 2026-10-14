@@ -76,6 +76,7 @@ class shopMegasuppliersPluginFrontendImportCallbackController extends waJsonCont
 
         if ((string)ifset($pending['mode']) === 'dry-run' && $pending['status'] === 'completed') {
             $pending['last_dry_run'] = array(
+                'request_id' => (string)ifset($pending['request_id']),
                 'config_sha256' => (string)ifset($pending['config_sha256']),
                 'finished_at' => $pending['finished_at'],
                 'report' => $report,
