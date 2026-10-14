@@ -470,7 +470,7 @@ def build_plan(products: Iterable[Product], existing, links=None, rules=None):
         if not rules.get("create_new", False):
             plan["skipped"].append({"sku": product.sku, "reason": "create_disabled"})
             continue
-        if rules.get("only_create_in_stock", False) and (product.stock is None or product.stock <= 0):
+        if rules.get("only_create_in_stock", False) and not (any((v or 0) > 0 for v in product.warehouse_stocks.values()) if product.warehouse_stocks else (product.stock is not None and product.stock > 0)):
             plan["skipped"].append({"sku": product.sku, "reason": "not_in_stock"})
             continue
         plan["create"].append({"sku": product.sku, "supplier_sku": product.supplier_sku, "desired": desired})
@@ -527,13 +527,27 @@ def validate_apply_plan(plan, config):
             errors.append("Привязки поставщика почти не совпадают с текущим прайсом; массовое обнуление остатков заблокировано.")
     if (plan["create"] or plan.get("repair_sku")) and not web.get("type_id"):
         errors.append("Для создания новых товаров не задан webasyst.type_id.")
+    warehouses = rules.get("warehouses") or []
     needs_stock = rules.get("update_stock", True) and (
-        any(row["desired"].get("stock") is not None for row in plan["create"] + plan.get("repair_sku", []) + plan["update"]) or bool(plan["zero"])
+        any(row["desired"].get("warehouse_stocks") or row["desired"].get("stock") is not None
+            for row in plan["create"] + plan.get("repair_sku", []) + plan["update"]) or bool(plan["zero"])
     )
-    if needs_stock and not web.get("stock_id"):
+    if needs_stock and not warehouses and not web.get("stock_id"):
         errors.append("Для изменения остатков не задан webasyst.stock_id.")
     if needs_stock and rules.get("zero_other_stocks", False) and not (web.get("stock_ids") or []):
         errors.append("Для обнуления остальных складов не передан список webasyst.stock_ids.")
+    if warehouses and rules.get("zero_other_stocks", False):
+        errors.append("При сопоставлении нескольких складов обнуление остальных складов запрещено.")
+    stock_ids = {str(x) for x in (web.get("stock_ids") or [])}
+    selected = set()
+    for entry in warehouses:
+        if not isinstance(entry, dict) or not str(entry.get("stock_id") or "").isdigit() or not str(entry.get("source_field") or "").strip():
+            errors.append("Неверное сопоставление склада: нужен склад Webasyst и поле остатков поставщика.")
+            continue
+        sid = str(int(entry["stock_id"]))
+        if sid in selected or sid not in stock_ids:
+            errors.append("Склад Webasyst повторяется либо отсутствует в списке: " + sid)
+        selected.add(sid)
     if rules.get("update_characteristics", False) and not rules.get("auto_features", False):
         missing = set()
         mapping = web.get("feature_codes") or {}
@@ -557,7 +571,15 @@ def _sku_write_data(desired, rules, stock_id, stock_ids=None):
             if field in ("purchase_price", "price") and float(value) <= 0:
                 continue
             data[field] = _num_string(value)
-    if rules.get("update_stock", True) and desired.get("stock") is not None:
+    warehouse_stocks = desired.get("warehouse_stocks") or {}
+    if rules.get("update_stock", True) and warehouse_stocks:
+        # Only explicitly mapped warehouses are written, never other Webasyst stock ids.
+        data["stock"] = {str(sid): _num_string(count) for sid, count in warehouse_stocks.items() if count is not None}
+        # An existing SKU may have available stock at an unmanaged warehouse.
+        # Never mark it unavailable based only on the managed locations.
+        if any(count is not None and count > 0 for count in warehouse_stocks.values()):
+            data["available"] = 1
+    elif rules.get("update_stock", True) and desired.get("stock") is not None:
         target_id = str(int(stock_id))
         if rules.get("zero_other_stocks", False):
             ids = [int(x) for x in (stock_ids or []) if str(x).isdigit() and int(x) > 0]
@@ -666,6 +688,7 @@ def apply_plan(wa: WebasystClient, plan, config):
     web = config.get("webasyst") or {}
     stock_id = web.get("stock_id")
     stock_ids = web.get("stock_ids") or []
+    managed_warehouse_ids = [str(int(entry["stock_id"])) for entry in (rules.get("warehouses") or [])]
     result = {
         "created": 0,
         "updated": 0,
@@ -698,7 +721,7 @@ def apply_plan(wa: WebasystClient, plan, config):
             temporary_sku = str(row.get("sku") or supplier_code).strip()
             sku_data = _sku_write_data(desired, rules, stock_id, stock_ids)
             sku_data.update({
-                "available": 1 if (desired.get("stock") or 0) > 0 else 0,
+                "available": 1 if (any((v or 0) > 0 for v in (desired.get("warehouse_stocks") or {}).values()) if desired.get("warehouse_stocks") else (desired.get("stock") or 0) > 0) else 0,
                 "status": 1,
                 "sku": temporary_sku,
                 "name": supplier_code,
@@ -832,7 +855,7 @@ def apply_plan(wa: WebasystClient, plan, config):
                 temporary_sku = str(row.get("sku") or supplier_code).strip()
                 sku_data = _sku_write_data(desired, rules, stock_id, stock_ids)
                 sku_data.update({
-                    "available": 1 if (desired.get("stock") or 0) > 0 else 0,
+                    "available": 1 if (any((v or 0) > 0 for v in (desired.get("warehouse_stocks") or {}).values()) if desired.get("warehouse_stocks") else (desired.get("stock") or 0) > 0) else 0,
                     "status": 1,
                     "sku": temporary_sku,
                     "name": supplier_code,
@@ -1003,11 +1026,14 @@ def apply_plan(wa: WebasystClient, plan, config):
                         params={"id": str(row["sku_id"])},
                         data={
                             "stock": (
-                                {str(int(x)): "0" for x in stock_ids if str(x).isdigit() and int(x) > 0}
-                                if rules.get("zero_other_stocks", False)
-                                else {str(int(stock_id)): "0"}
+                                {sid: "0" for sid in managed_warehouse_ids}
+                                if managed_warehouse_ids else (
+                                    {str(int(x)): "0" for x in stock_ids if str(x).isdigit() and int(x) > 0}
+                                    if rules.get("zero_other_stocks", False)
+                                    else {str(int(stock_id)): "0"}
+                                )
                             ),
-                            "available": 0,
+                            **({} if managed_warehouse_ids else {"available": 0}),
                         },
                     )
                 except Exception as exc:
