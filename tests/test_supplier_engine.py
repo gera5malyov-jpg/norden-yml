@@ -2876,10 +2876,10 @@ def test_riva_xml_params_generate_sanitized_description_and_product_features():
 
 
 def test_riva_explicit_supplier_description_not_replaced():
-    xml = b'''<yml_catalog><shop><offers><offer id="1">
+    xml = '''<yml_catalog><shop><offers><offer id="1">
       <name>Chair</name><description>Supplier description</description>
       <param name="Код для сайта">RIVA-1</param><param name="Материал">ткань</param>
-    </offer></offers></shop></yml_catalog>'''
+    </offer></offers></shop></yml_catalog>'''.encode('utf-8')
     cfg = {"code": "RIVA", "name": "Riva",
         "identity": {"supplier_sku_field": "Код для сайта", "sku_prefix": "", "brand": ""},
         "mapping": {"name": "name", "description": "description", "images": []},
