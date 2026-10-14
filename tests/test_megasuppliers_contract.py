@@ -220,7 +220,7 @@ def test_signed_bridge_can_create_supplier_characteristics():
     assert "shopFeatureModel" in bridge
     assert "shopTypeFeaturesModel" in bridge
     assert "TYPE_VARCHAR" in bridge
-    assert "'status' => 'private'" in bridge
+    assert "'status' => $is_riva ? 'public' : 'private'" in bridge
     assert 'name="auto_features"' in panel
     assert "'auto_features' =>" in controller
 
