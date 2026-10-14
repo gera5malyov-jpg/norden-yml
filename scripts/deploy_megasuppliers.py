@@ -701,6 +701,8 @@ $pending['finished_at'] = date('c');
 $pending['report'] = $report;
 if ((string)(isset($pending['mode']) ? $pending['mode'] : '') === 'dry-run' && $pending['status'] === 'completed') {
     $pending['last_dry_run'] = array(
+        // Required to retrieve the exact approved Riva XML artifact in Apply.
+        'request_id' => isset($pending['request_id']) ? (string)$pending['request_id'] : '',
         'config_sha256' => isset($pending['config_sha256']) ? (string)$pending['config_sha256'] : '',
         'finished_at' => $pending['finished_at'],
         'report' => $report,
