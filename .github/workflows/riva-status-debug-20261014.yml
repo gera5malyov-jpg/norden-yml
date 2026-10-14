@@ -47,7 +47,21 @@ jobs:
           }
           $dry=isset($s['last_dry_run'])?$s['last_dry_run']:array();
           $hash=hash('sha256',json_encode(sortedTree($c),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+          $liveCallback=file_get_contents($root.'/megasuppliers-callback/index.php');
+          $liveRunController=file_get_contents($root.'/wa-apps/shop/plugins/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportRun.controller.php');
+          $last=isset($s['last_dry_run'])?$s['last_dry_run']:array();
+          $verifiedRecent=(isset($s['status'])&&$s['status']==='completed'
+              && isset($s['mode'])&&$s['mode']==='dry-run'
+              && isset($last['config_sha256'])&&hash_equals($hash,(string)$last['config_sha256'])
+              && !empty($s['request_id'])
+              && isset($s['report']['source_sha256'])&&isset($last['report']['source_sha256'])
+              && hash_equals((string)$last['report']['source_sha256'],(string)$s['report']['source_sha256'])
+              && isset($last['finished_at'])&&isset($s['finished_at'])
+              && $last['finished_at']===$s['finished_at']);
           $out=array(
+             'live_callback_persists_request_id'=>strpos($liveCallback,"'request_id' => isset(\$pending['request_id'])")!==false,
+             'live_apply_has_legacy_recovery'=>strpos($liveRunController,'The older physical /megasuppliers-callback/ handler did not')!==false,
+             'current_completed_snapshot_recovery_valid'=>$verifiedRecent,
              'riva_code'=>isset($c['code'])?$c['code']:null,
              'saved_status'=>isset($s['status'])?$s['status']:null,
              'saved_mode'=>isset($s['mode'])?$s['mode']:null,
