@@ -1,4 +1,5 @@
 name: Repair single Riva UCH product description and specs once
+# Retry after correcting by-reference feature save; no target product writes so far
 # Retry with PHP diagnostics for guarded characteristic creation; product still has no features
 on:
   push:
