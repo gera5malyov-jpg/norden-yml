@@ -155,6 +155,8 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
 
         $feature_model = new shopFeatureModel();
         $type_features_model = new shopTypeFeaturesModel();
+        $feature_supplier = (new shopMegasuppliersSupplierModel())->getById($supplier_id);
+        $is_riva = $feature_supplier && strtoupper(trim((string)ifset($feature_supplier['code']))) === 'RIVA';
         $mapping = array();
         $created = 0;
         $linked = 0;
@@ -180,7 +182,9 @@ class shopMegasuppliersPluginFrontendBridgeController extends waJsonController
                     'type' => shopFeatureModel::TYPE_VARCHAR,
                     'selectable' => 0,
                     'multiple' => 0,
-                    'status' => 'private',
+                    // Riva's customer-facing product specs must be visible
+                    // in the storefront as well as the product editor.
+                    'status' => $is_riva ? 'public' : 'private',
                     'available_for_sku' => 0,
                 );
                 $feature_id = $feature_model->save($data);
