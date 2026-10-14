@@ -349,3 +349,17 @@ def test_riva_apply_uses_immutable_source_artifact_and_preserves_hash_guard():
     assert "hmac.compare_digest" in runner
     assert "if is_riva and args.mode == \"dry-run\"" in runner
     assert 'raise ValueError("Для Riva требуется новая проверка' in runner
+
+
+
+def test_production_physical_callback_saves_riva_approved_snapshot_request_id():
+    # The website uses a physical /megasuppliers-callback/ endpoint rather than
+    # Shop-Script's plugin route. Both implementations must persist the ID.
+    deploy = DEPLOY_SCRIPT.read_text(encoding="utf-8")
+    callback = (ROOT / "webasyst/megasuppliers/lib/actions/frontend/shopMegasuppliersPluginFrontendImportCallback.controller.php").read_text(encoding="utf-8")
+    controller = RUN_CONTROLLER.read_text(encoding="utf-8")
+    assert "'request_id' => isset($pending['request_id']) ? (string)$pending['request_id'] : ''" in deploy
+    assert "'request_id' => (string)ifset($pending['request_id'])" in callback
+    assert "hash_equals((string)$last_dry['report']['source_sha256'], (string)$previous['report']['source_sha256'])" in controller
+    assert "&& (string)ifset($previous['mode']) === 'dry-run'" in controller
+    assert "&& (string)ifset($previous['finished_at']) === (string)ifset($last_dry['finished_at'])" in controller
