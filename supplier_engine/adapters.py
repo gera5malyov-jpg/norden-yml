@@ -70,7 +70,11 @@ def load_xml_yml(data: bytes):
             if child.tag == "param":
                 key = child.attrib.get("name", "").strip()
                 if key:
-                    row[key] = (child.text or "").strip()
+                    value = (child.text or "").strip()
+                    row[key] = value
+                    # Preserve precise XML <param> provenance. The existing
+                    # flattened mappings remain backward-compatible.
+                    row.setdefault("_supplier_params", {})[key] = value
             elif child.tag == "picture":
                 row.setdefault("pictures", []).append((child.text or "").strip())
             else:
