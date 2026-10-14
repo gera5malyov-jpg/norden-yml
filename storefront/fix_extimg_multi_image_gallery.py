@@ -116,8 +116,8 @@ else:
             results=[]
             for target in (route,'/stul-dlya-posetiteley-rs42-chernyy-karkas-tkan-chernaya/'):
                 u='https://profikompany.ru'+target+'?extimg_test='+str(os.getpid())+'_'+str(attempt)
-                p=subprocess.run(['curl','-sSL','--max-time','40','-w','\\n%{http_code}',u],capture_output=True,text=True,timeout=47)
-                html,status=p.stdout.rsplit('\\n',1) if '\\n' in p.stdout else ('','')
+                p=subprocess.run(['curl','-sSL','--max-time','40','-w','\n%{http_code}',u],capture_output=True,text=True,timeout=47)
+                html,status=p.stdout.rsplit('\n',1) if '\n' in p.stdout else ('','')
                 count=html.count('data-extimg="')
                 ok=p.returncode==0 and status=='200'
                 if target==route:
