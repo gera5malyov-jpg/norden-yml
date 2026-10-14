@@ -90,10 +90,11 @@ foreach($names as $raw) {
   $code='ms_s16_'.substr(hash('sha256',$key),0,16);
   $f=$featureModel->getByField('code',$code);
   if(!$f) {
-    $fid=$featureModel->save(array(
+    $data=array(
       'code'=>$code,'name'=>$name,'type'=>shopFeatureModel::TYPE_VARCHAR,
       'selectable'=>0,'multiple'=>0,'status'=>'public','available_for_sku'=>0
-    ));
+    );
+    $fid=$featureModel->save($data);
     if(!$fid){fwrite(STDERR,"Could not create characteristic\n");exit(10);}
   } else {
     $fid=(int)$f['id'];
