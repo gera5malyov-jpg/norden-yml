@@ -63,3 +63,27 @@ GitHub repository secrets:
 `scripts/build_megasuppliers_package.py` builds the installable ZIP from the checksum-pinned 1.0.1 base package plus the reviewed 1.1.0 overlay. CI builds it and lints every PHP file using PHP 7.3, matching the production PHP generation previously verified on the server.
 
 Building and testing the ZIP does not install it and does not change production.
+
+
+## Mapping multiple warehouse stocks
+
+The supplier profile editor supports an optional **Сопоставление нескольких складов** section.
+Each row binds a source field (for example, a YML `param name="Riva СПБ"`) to
+one actual Webasyst stock id. One supplier/SKU remains one product; the inventory
+update only addresses the configured warehouses.
+
+- If `rules.warehouses` is empty, the existing `webasyst.stock_id` and
+  `mapping.stock` behavior is unchanged.
+- If mappings are present, `rules.warehouses` is a list of objects such as
+  `{"source_field":"Riva СПБ","stock_id":11}`. Each target stock id must exist and be unique.
+- Values must be numeric or recognized availability booleans. Blank, missing, or
+  negative mapped quantities **block the dry-run**, rather than silently writing zero.
+- `rules.zero_other_stocks` is forbidden for mapped profiles; all unmanaged warehouses are preserved.
+- `zero_if_missing` zeros only mapped warehouses for a supplier SKU absent
+  from the feed, and does not disable availability at an unmanaged warehouse.
+- `only_create_in_stock` checks the mapped warehouse quantities, not a supplier total.
+- The source may contain other fields with city labels, but the exact keys must
+  be inspected before enabling Apply. A supplier API endpoint that does not
+  return supported YML/XML, CSV or XLSX must first be adapted.
+- The production plugin is never installed by a push. Run the manual deploy
+  workflow **only after** PR validation and a dry-run against the actual supplier feed.
