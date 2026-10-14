@@ -16,7 +16,7 @@ def test_extimg_gallery_parses_every_block_and_legacy_multiline():
     assert "preg_match_all(" in updated
     assert "{foreach $__extimg_matches.1 as $__extimg_block}" in updated
     assert updated.count("loading=\"lazy\"") == 1
-    assert "$__has_extimg" in updated
+    assert 'var="__has_extimg"' in updated
     assert 'str_replace("\\r\\n", "\\n"' in updated
     assert "in_array($__url, $ext_images)" in updated
     assert updated != old
@@ -24,12 +24,12 @@ def test_extimg_gallery_parses_every_block_and_legacy_multiline():
 
 def test_shortcode_extraction_handles_11_individual_blocks_and_old_multiline():
     urls = ["https://riva.ru/upload/image-%d.jpg" % i for i in range(11)]
-    text = "".join("[extimg]\\n" + url + "\\n[/extimg]\\n" for url in urls)
-    groups = re.findall(r"\\[extimg\\](.*?)\\[/extimg\\]", text, flags=re.I | re.S)
+    text = "".join("[extimg]\n" + url + "\n[/extimg]\n" for url in urls)
+    groups = re.findall(r"\[extimg\](.*?)\[/extimg\]", text, flags=re.I | re.S)
     extracted = [v.strip() for g in groups for v in g.splitlines() if v.strip()]
     assert extracted == urls
-    old_format = "[extimg]\\n" + "\\n".join(urls) + "\\n[/extimg]"
-    old_groups = re.findall(r"\\[extimg\\](.*?)\\[/extimg\\]", old_format, flags=re.I | re.S)
+    old_format = "[extimg]\n" + "\n".join(urls) + "\n[/extimg]"
+    old_groups = re.findall(r"\[extimg\](.*?)\[/extimg\]", old_format, flags=re.I | re.S)
     assert [v.strip() for g in old_groups for v in g.splitlines() if v.strip()] == urls
 
 
