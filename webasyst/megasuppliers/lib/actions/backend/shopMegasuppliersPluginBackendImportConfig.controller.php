@@ -44,6 +44,8 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
             $this->errors[] = 'INVALID_CONFIG';
             return;
         }
+        // Warehouse ids come from Webasyst, not from arbitrary client JSON.
+        $config['webasyst']['stock_ids'] = $this->stockIds();
         $config['code'] = (string)$supplier['code'];
         $config['name'] = (string)$supplier['name'];
         $json = json_encode($config, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
@@ -140,7 +142,7 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
                     'price' => (string)waRequest::post('price_formula', '', waRequest::TYPE_STRING_TRIM),
                     'compare_price' => (string)waRequest::post('compare_price_formula', '', waRequest::TYPE_STRING_TRIM),
                 ), 'strlen'),
-                'warehouses' => array(),
+                'warehouses' => $this->postedWarehouseMappings(),
             ),
             'webasyst' => array(
                 'sku_mode' => $sku_mode,
@@ -183,6 +185,13 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
 
 
         return $config;
+    }
+
+    private function postedWarehouseMappings()
+    {
+        $raw = waRequest::post('warehouse_mappings', '[]', waRequest::TYPE_STRING_TRIM);
+        $mappings = json_decode($raw, true);
+        return is_array($mappings) ? $mappings : null;
     }
 
     private function applyRedBlackDefaults($config, $supplier)
@@ -230,6 +239,27 @@ class shopMegasuppliersPluginBackendImportConfigController extends waJsonControl
         $sku_mode = strtolower((string)ifset($config['webasyst']['sku_mode']));
         if ($sku_mode !== '' && !in_array($sku_mode, array('numeric', 'supplier'), true)) {
             return false;
+        }
+        $warehouses = ifset($config['rules']['warehouses'], array());
+        if (!is_array($warehouses) || count($warehouses) > 30) {
+            return false;
+        }
+        if (count($warehouses) && !empty($config['rules']['zero_other_stocks'])) {
+            return false;
+        }
+        $allowed_ids = array_map('strval', $this->stockIds());
+        $used_ids = array();
+        foreach ($warehouses as $warehouse) {
+            if (!is_array($warehouse) || !isset($warehouse['stock_id']) || !isset($warehouse['source_field'])) {
+                return false;
+            }
+            $id = (string)(int)$warehouse['stock_id'];
+            $field = trim((string)$warehouse['source_field']);
+            if (!in_array($id, $allowed_ids, true) || in_array($id, $used_ids, true)
+                || $field === '' || mb_strlen($field) > 180) {
+                return false;
+            }
+            $used_ids[] = $id;
         }
         $source_secret = trim((string)ifset($config['source']['location_secret']));
         if ($format !== 'norden' && trim((string)ifset($config['source']['location'])) === '' && $source_secret === '') {
