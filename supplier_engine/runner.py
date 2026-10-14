@@ -132,11 +132,16 @@ def _is_red_black(config):
 
 
 def _red_black_sku(article):
-    # Historical Red-Black Webasyst/KIT SKU: RED-00-00004806.
-    digits = "".join(char for char in str(article or "") if char.isdigit())
-    if not digits or len(digits) > 8:
+    # Keep the historical SKU even when the chosen source field is "code".
+    # Red-Black <offer code="00-_0008542" article="0008542"> uses
+    # non-numeric separators before its article portion.
+    value = str(article or "").strip()
+    match = re.fullmatch(r"00[-_]+(\\d{1,8})", value)
+    if match:
+        value = match.group(1)
+    if not re.fullmatch(r"\\d{1,8}", value):
         return ""
-    return "RED-00-" + digits.zfill(8)
+    return "RED-00-" + value.zfill(8)
 
 
 def normalize(c, rows):
@@ -146,16 +151,8 @@ def normalize(c, rows):
     prefix = ident.get("sku_prefix", "")
     rules = c.get("rules", {}) or {}
     formulas = rules.get("price_formulas") or {}
-    if red_black:
-        # This YML contains both wholesale <price> and retail <rrc_price>.
-        # Ignore stale UI mappings/formulas that previously created 0 RUB prices.
-        m.update({
-            "name": "name", "description": "description",
-            "purchase_price": "price", "price": "rrc_price",
-            "stock": "stock", "category": "categoryId",
-            "images": ["pictures"],
-        })
-        formulas = {}
+    # Supplier-specific input defaults belong in the saved profile, not in
+    # normalize(): honor field mappings and pricing formulas edited in Webasyst.
 
     if not isinstance(formulas, dict):
         formulas = {}
@@ -176,8 +173,11 @@ def normalize(c, rows):
             str(int(entry["stock_id"])): _stock(_get(row, entry["source_field"], None))
             for entry in warehouses
         }
-        ss = str(_get(row, "article" if red_black else ident.get("supplier_sku_field"), "")).strip()
-        sku = _red_black_sku(ss) if red_black else ("%s%s" % (prefix, ss) if ss else "")
+        ss = str(_get(row, ident.get("supplier_sku_field"), "")).strip()
+        if red_black and prefix == "RED-00-":
+            sku = _red_black_sku(ss)
+        else:
+            sku = "%s%s" % (prefix, ss) if ss else ""
         imgs = []
         for field in m.get("images", []):
             value = _get(row, field, [])
