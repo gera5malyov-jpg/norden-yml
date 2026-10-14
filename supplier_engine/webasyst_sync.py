@@ -538,6 +538,10 @@ def validate_apply_plan(plan, config):
         errors.append("Для обнуления остальных складов не передан список webasyst.stock_ids.")
     if warehouses and rules.get("zero_other_stocks", False):
         errors.append("При сопоставлении нескольких складов обнуление остальных складов запрещено.")
+    if warehouses and rules.get("export_to_kit", False):
+        errors.append("Выгрузка в KIT отключена для многоскладского профиля: KIT не должен получать один общий остаток вместо региональных.")
+    elif rules.get("export_to_kit", False) and not web.get("stock_id"):
+        errors.append("Для выгрузки в KIT нужно выбрать склад Webasyst.")
     stock_ids = {str(x) for x in (web.get("stock_ids") or [])}
     selected = set()
     for entry in warehouses:
