@@ -1,0 +1,86 @@
+name: Inspect Riva saved dry-run state once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/inspect-riva-last-dry-run-once.yml']
+permissions: {contents: read}
+jobs:
+  inspect:
+    if: github.event.head_commit.message == 'Inspect Riva last dry-run state once'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read-only Riva config and status inspection
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os,subprocess,tempfile,urllib.parse,urllib.request
+          def req(url,method="GET",body=None,headers=None):
+              r=urllib.request.Request(url,data=body,method=method,headers=headers or {})
+              with urllib.request.urlopen(r,timeout=35) as f:
+                  x=f.read().decode("utf-8")
+                  return json.loads(x) if x else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':os.environ['NETANGELS_API_KEY']}).encode(),{'Content-Type':'application/x-www-form-urlencoded'})['token']
+          headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/json'}
+          php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';
+          chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());
+          wa('shop');
+          $supplierId=16;
+          $cfgPath=wa()->getDataPath('plugins/megasuppliers/import-config',false,'shop',true).'/'.$supplierId.'.json';
+          $statusPath=wa()->getDataPath('plugins/megasuppliers/import-status',false,'shop',true).'/'.$supplierId.'.json';
+          $c=is_file($cfgPath)?json_decode(file_get_contents($cfgPath),true):null;
+          $s=is_file($statusPath)?json_decode(file_get_contents($statusPath),true):null;
+          if(!is_array($c)||!is_array($s)){echo json_encode(array('error'=>'missing_config_or_status'));exit(2);}
+          function sr($v){
+            if(!is_array($v))return $v;
+            $keys=array_keys($v);$assoc=$keys!==array_keys($keys);
+            if($assoc)ksort($v);
+            foreach($v as $k=>$w)$v[$k]=sr($w);
+            return $v;
+          }
+          $currentHash=hash('sha256',json_encode(sr($c),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+          $last=isset($s['last_dry_run']) && is_array($s['last_dry_run'])?$s['last_dry_run']:array();
+          $rep=is_array(ifset($last['report'],array()))?$last['report']:array();
+          $out=array(
+            'supplier_id'=>$supplierId,
+            'profile_code'=>ifset($c['code']),
+            'profile_enabled'=>!empty($c['enabled']),
+            'config_current_sha'=>$currentHash,
+            'config_last_dry_sha'=>ifset($last['config_sha256']),
+            'config_match'=>isset($last['config_sha256'])&&hash_equals($currentHash,(string)$last['config_sha256']),
+            'last_dry_request_id'=>ifset($last['request_id'],null),
+            'last_dry_finished_at'=>ifset($last['finished_at'],null),
+            'last_dry_status'=>ifset($rep['status'],null),
+            'last_dry_blocked'=>ifset($rep['blocked'],null),
+            'last_dry_source_sha_present'=>!empty($rep['source_sha256']),
+            'last_dry_products'=>ifset($rep['products'],null),
+            'last_dry_errors'=>array_slice((array)ifset($rep['errors'],array()),0,3),
+            'last_dry_warning_count'=>count((array)ifset($rep['warnings'],array())),
+            'current_status'=>ifset($s['status'],null),
+            'current_mode'=>ifset($s['mode'],null),
+            'current_request_id'=>ifset($s['request_id'],null),
+            'current_report_status'=>ifset($s['report']['status'],null),
+            'config_modified'=>date('c',filemtime($cfgPath)),
+            'status_modified'=>date('c',filemtime($statusPath))
+          );
+          echo json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+          ?>'''
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/ssh'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              kid=req('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/create/','POST',json.dumps({'key':open(key+'.pub').read().strip(),'name':'riva-status-inspect-'+os.environ['GITHUB_RUN_ID']}).encode(),headers)['id']
+              try:
+                  cmd="cat >/tmp/chatgpt_read_riva_status.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/chatgpt_read_riva_status.php\nsu -s /bin/bash web -c 'php /tmp/chatgpt_read_riva_status.php'\nresult=$?; rm -f /tmp/chatgpt_read_riva_status.php; exit $result\n"
+                  p=subprocess.run(['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@45.86.180.49','bash -s'],input=cmd,capture_output=True,text=True,timeout=100)
+                  print('RIVA_STATE='+p.stdout[:6000])
+                  if p.returncode: raise SystemExit('STATUS_INSPECTION_FAILED '+str(p.returncode)+' '+p.stderr[-400:])
+              finally:
+                  try: req('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/'+str(kid)+'/','DELETE',None,headers)
+                  except Exception: print('SSH_KEY_CLEANUP_FAILED')
+          PY
