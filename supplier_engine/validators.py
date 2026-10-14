@@ -15,6 +15,11 @@ def validate_run(products, previous_count=None, max_price_change_pct=100.0, min_
         if p.sku in seen: r.errors.append(f"Дубль артикула: {p.sku}")
         seen.add(p.sku)
         if p.stock is not None and p.stock < 0: r.errors.append(f"Отрицательный остаток: {p.sku}")
+        for warehouse_id, quantity in p.warehouse_stocks.items():
+            if quantity is None and len(r.errors) < 30:
+                r.errors.append(f"Нет остатка для склада {warehouse_id}: {p.sku}. Проверьте имя поля источника.")
+            elif quantity is not None and quantity < 0 and len(r.errors) < 30:
+                r.errors.append(f"Отрицательный остаток склада {warehouse_id}: {p.sku}")
         for label,value in (("закупка",p.purchase_price),("цена",p.price),("цена до скидки",p.compare_price)):
             if value is not None and value < 0: r.errors.append(f"Отрицательная {label}: {p.sku}")
         old=previous_by_sku.get(p.sku,{})
