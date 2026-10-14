@@ -10,6 +10,7 @@ class Product:
     price: float | None = None
     compare_price: float | None = None
     stock: float | None = None
+    warehouse_stocks: dict[str, float | None] = field(default_factory=dict)
     brand: str = ""
     category: str = ""
     images: list[str] = field(default_factory=list)

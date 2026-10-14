@@ -305,3 +305,16 @@ def test_supplier_profile_exposes_full_description_mapping_and_rule():
     assert "$config['mapping']['description'] = 'description';" in controller
     assert 'description_field = m.get("description")' in runner
     assert 'data["description"]' in sync
+
+
+
+def test_multi_warehouse_profile_editor_and_server_validation():
+    panel = (ROOT / "webasyst/megasuppliers/patches/autoimport_panel.html").read_text(encoding="utf-8")
+    controller = (ROOT / "webasyst/megasuppliers/lib/actions/backend/shopMegasuppliersPluginBackendImportConfig.controller.php").read_text(encoding="utf-8")
+    assert "s-ms-add-warehouse" in panel
+    assert "readWarehouseMappings" in panel
+    assert "warehouse_mappings" in panel
+    assert "warehouse_mappings" in controller
+    assert "postedWarehouseMappings" in controller
+    assert "zero_other_stocks" in controller
+    assert "in_array($id, $allowed_ids, true)" in controller

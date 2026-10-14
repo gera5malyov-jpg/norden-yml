@@ -28,6 +28,9 @@
 #s-megasuppliers-autoimport .s-ms-supplier-list td{padding:7px 6px;border-bottom:1px solid #eee;vertical-align:middle}
 #s-megasuppliers-autoimport .s-ms-supplier-list td:last-child{text-align:right}
 #s-megasuppliers-autoimport .s-ms-muted{color:#777;font-size:12px}
+#s-megasuppliers-autoimport .s-ms-warehouse-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;margin:8px 0}
+#s-megasuppliers-autoimport .s-ms-warehouse-row input,#s-megasuppliers-autoimport .s-ms-warehouse-row select{min-width:0;width:100%;box-sizing:border-box}
+@media(max-width:700px){#s-megasuppliers-autoimport .s-ms-warehouse-row{grid-template-columns:1fr}}
 #s-megasuppliers-autoimport .s-ms-danger-note{display:block;margin-top:7px;color:#8a6d3b}
 @media(max-width:700px){
   #s-megasuppliers-autoimport{padding:4px 0 18px}
@@ -126,8 +129,15 @@
 
                     <div class="field"><div class="name">Тип товара Webasyst</div><div class="value"><select name="type_id"><option value="">— выберите тип товара —</option></select><p class="hint">Отображается название типа. Внутренний ID сохраняется автоматически.</p></div></div>
                     <div class="field"><div class="name">Артикул Webasyst</div><div class="value"><select name="sku_mode"><option value="numeric">Автоматический цифровой</option><option value="supplier">Артикул поставщика</option></select><p class="hint">«Наименование артикула» всегда хранит код поставщика. Режим можно задать отдельно для каждого поставщика.</p></div></div>
-                    <div class="field"><div class="name">Склад Webasyst</div><div class="value"><select name="stock_id"><option value="">— выберите склад —</option></select><p class="hint">Отображается название склада. Внутренний ID сохраняется автоматически.</p></div></div>
+                    <div class="field"><div class="name">Склад Webasyst (для обычного режима)</div><div class="value"><select name="stock_id"><option value="">— выберите склад —</option></select><p class="hint">Для источника с одним остатком. Если заданы сопоставления ниже, остатки идут только на сопоставленные склады.</p></div></div>
                     <div class="field"><div class="name">Категория Webasyst</div><div class="value"><input type="number" min="0" name="category_id" placeholder="ID категории"></div></div>
+                    <div class="field full">
+                        <div class="name">Сопоставление нескольких складов</div>
+                        <p class="hint">Для каждого склада укажите точное название поля остатков из файла поставщика и склад Webasyst. Например, разные поля для СПБ и МСК. Несопоставленные склады не изменяются.</p>
+                        <div class="s-ms-warehouse-list"></div>
+                        <button type="button" class="button light-gray s-ms-add-warehouse">+ Добавить сопоставление склада</button>
+                        <p class="hint">Если сопоставления не заданы, плагин использует один склад Webasyst как раньше. Для нескольких складов запрещено обнуление остальных складов.</p>
+                    </div>
                 </div>
             </div>
         </details>
@@ -184,6 +194,7 @@
     var configUrl='{$backend_url}?plugin=megasuppliers&action=importConfig',runUrl='{$backend_url}?plugin=megasuppliers&action=importRun',statusUrl='{$backend_url}?plugin=megasuppliers&action=importStatus';
 {literal}
     var pollTimer=null;
+    var warehouseStockOptions=[];
 
     function tidyLegacyUi(){
         var root=document.getElementById('s-megasuppliers');
@@ -247,6 +258,69 @@
         }
         el.value=(selected===null||typeof selected==='undefined')?'':String(selected);
     }
+    function addWarehouseRow(entry){
+        var list=box.querySelector('.s-ms-warehouse-list');
+        if(!list)return;
+        var row=document.createElement('div');
+        row.className='s-ms-warehouse-row';
+        var source=document.createElement('input');
+        source.type='text';
+        source.className='s-ms-warehouse-source';
+        source.placeholder='Поле остатка (например stock_spb)';
+        source.value=entry&&entry.source_field||'';
+        var select=document.createElement('select');
+        select.className='s-ms-warehouse-target';
+        var empty=document.createElement('option');
+        empty.value='';
+        empty.textContent='— выберите склад Webasyst —';
+        select.appendChild(empty);
+        warehouseStockOptions.forEach(function(stock){
+            var option=document.createElement('option');
+            option.value=String(stock.id);
+            option.textContent=stock.name||('Склад '+stock.id);
+            select.appendChild(option);
+        });
+        select.value=entry&&entry.stock_id?String(entry.stock_id):'';
+        var remove=document.createElement('button');
+        remove.type='button';
+        remove.className='button light-gray';
+        remove.textContent='Удалить';
+        remove.addEventListener('click',function(){row.remove();syncWarehouseSafety();});
+        row.appendChild(source);
+        row.appendChild(select);
+        row.appendChild(remove);
+        list.appendChild(row);
+        syncWarehouseSafety();
+    }
+    function syncWarehouseSafety(){
+        var hasMapped=!!box.querySelector('.s-ms-warehouse-row');
+        var zero=field('zero_other_stocks');
+        if(zero){
+            if(hasMapped)zero.checked=false;
+            zero.disabled=hasMapped;
+        }
+    }
+    function renderWarehouseMappings(stocks,mappings){
+        warehouseStockOptions=stocks||[];
+        var list=box.querySelector('.s-ms-warehouse-list');
+        if(list)list.innerHTML='';
+        (mappings||[]).forEach(addWarehouseRow);
+        syncWarehouseSafety();
+    }
+    function readWarehouseMappings(){
+        var mappings=[],used={};
+        Array.prototype.forEach.call(box.querySelectorAll('.s-ms-warehouse-row'),function(row){
+            var source=row.querySelector('.s-ms-warehouse-source').value.trim();
+            var stock=row.querySelector('.s-ms-warehouse-target').value;
+            if(!source||!stock)throw new Error('Заполните поле остатков и склад в каждом сопоставлении');
+            if(used[stock])throw new Error('Один склад Webasyst нельзя сопоставить дважды');
+            used[stock]=true;
+            mappings.push({source_field:source,stock_id:Number(stock)});
+        });
+        return mappings;
+    }
+    var addWarehouseButton=box.querySelector('.s-ms-add-warehouse');
+    if(addWarehouseButton)addWarehouseButton.addEventListener('click',function(){addWarehouseRow({});});
     function fill(c,stocks,types){
         if(!c)return;
         setField('format',c.source&&c.source.format);
@@ -280,9 +354,14 @@
         if(skuMode!=='numeric'&&skuMode!=='supplier'){skuMode=(c.source&&c.source.format==='norden')?'numeric':'supplier';}
         setField('sku_mode',skuMode);
         setStockOptions(stocks,c.webasyst&&c.webasyst.stock_id);
+        renderWarehouseMappings(stocks,c.rules&&c.rules.warehouses);
         setField('category_id',c.webasyst&&c.webasyst.category_id);
     }
-    function paramsFromForm(){return new URLSearchParams(new FormData(form));}
+    function paramsFromForm(){
+        var params=new URLSearchParams(new FormData(form));
+        params.set('warehouse_mappings',JSON.stringify(readWarehouseMappings()));
+        return params;
+    }
     async function requestJson(url,options){
         var res=await fetch(url,options||{credentials:'same-origin'});
         var text=await res.text(),data=null;
@@ -380,7 +459,10 @@
                 setStatus('Профиль сохранён','ok');
                 if(next)await next(id);
             }else setStatus('Ошибка сохранения','error');
-        }catch(err){setStatus('Ошибка сохранения','error');}
+        }catch(err){
+            var errors=err.data&&err.data.errors||[];
+            setStatus('Ошибка сохранения: '+(errors.length?errors.join('; '):err.message),'error');
+        }
     }
     async function run(id,mode){
         setRunBusy(true);
