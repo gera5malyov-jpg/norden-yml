@@ -685,10 +685,6 @@ def apply_plan(wa: WebasystClient, plan, config):
     rules = dict(config.get("rules") or {})
     if str(config.get("code") or "").strip().upper() == "TETCHAIR":
         rules["update_description"] = True
-    red_black_identity = str(config.get("code") or "") + str(config.get("name") or "")
-    if "redblack" in "".join(char for char in red_black_identity.lower() if char.isalnum()):
-        # Red-Black YML is the primary image source, not legacy KIT/Yandex URLs.
-        rules["update_images"] = True
     web = config.get("webasyst") or {}
     stock_id = web.get("stock_id")
     stock_ids = web.get("stock_ids") or []
