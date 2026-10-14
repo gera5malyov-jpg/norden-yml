@@ -2673,3 +2673,14 @@ def test_riva_filter_does_not_change_other_suppliers_or_complete_feed():
     cfg["code"] = "TETCHAIR"
     cleaned, meta = filter_incomplete_riva_rows(cfg, rows + [{"vendorCode": ""}])
     assert len(cleaned) == 2 and meta == {}
+
+
+
+def test_multi_warehouse_kit_export_cannot_cross_write_region_stock():
+    cfg = _multi_warehouse_config()
+    cfg["rules"]["export_to_kit"] = True
+    plan = {
+        "create": [], "repair_sku": [], "zero": [], "skipped": [], "blocked": [],
+        "update": [{"desired": {"warehouse_stocks": {"11": 3, "12": 0}, "characteristics": {}}}],
+    }
+    assert any("KIT" in msg for msg in validate_apply_plan(plan, cfg))
