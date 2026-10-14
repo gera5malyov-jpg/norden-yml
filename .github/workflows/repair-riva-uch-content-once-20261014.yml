@@ -1,4 +1,5 @@
 name: Repair single Riva UCH product description and specs once
+# Retry after fixing standalone module import path; no catalog modifications were made
 on:
   push:
     branches: [main]
