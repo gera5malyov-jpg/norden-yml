@@ -1,0 +1,74 @@
+name: Audit Riva last dry-run snapshot
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/riva-status-debug-20261014.yml']
+permissions: {contents: read}
+jobs:
+  inspect:
+    if: github.event.head_commit.message == 'Audit Riva last dry-run snapshot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect Webasyst Riva profile and last validated state read-only
+        run: |
+          python3 - <<'PY'
+          import json,os,subprocess,tempfile,urllib.parse,urllib.request
+          def req(url,method='GET',data=None,headers=None):
+              with urllib.request.urlopen(urllib.request.Request(url,method=method,data=data,headers=headers or {}),timeout=35) as f:
+                  b=f.read();return json.loads(b) if b else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':os.environ['NETANGELS_API_KEY']}).encode(),{'Content-Type':'application/x-www-form-urlencoded'})['token']
+          hdr={'Authorization':'Bearer '+token,'Content-Type':'application/json'}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              kid=req('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/create/','POST',json.dumps({'key':open(key+'.pub').read().strip(),'name':'riva-audit-'+os.environ['GITHUB_RUN_ID']}).encode(),hdr)['id']
+              try:
+                  php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';
+          chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());
+          wa('shop');
+          $id=16;
+          $configPath=wa()->getDataPath('plugins/megasuppliers/import-config',false,'shop',true).'/'.$id.'.json';
+          $statusPath=wa()->getDataPath('plugins/megasuppliers/import-status',false,'shop',true).'/'.$id.'.json';
+          $c=json_decode(file_get_contents($configPath),true);
+          $s=json_decode(file_get_contents($statusPath),true);
+          function sortedTree($x){
+            if(!is_array($x))return $x;
+            $ks=array_keys($x);
+            if($ks!==array_keys($ks))ksort($x);
+            foreach($x as $k=>$v)$x[$k]=sortedTree($v);
+            return $x;
+          }
+          $dry=isset($s['last_dry_run'])?$s['last_dry_run']:array();
+          $hash=hash('sha256',json_encode(sortedTree($c),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+          $out=array(
+             'riva_code'=>isset($c['code'])?$c['code']:null,
+             'saved_status'=>isset($s['status'])?$s['status']:null,
+             'saved_mode'=>isset($s['mode'])?$s['mode']:null,
+             'saved_current_request_id'=>isset($s['request_id'])?$s['request_id']:null,
+             'last_dry_present'=>!empty($dry),
+             'last_dry_request_id'=>isset($dry['request_id'])?$dry['request_id']:null,
+             'last_dry_status'=>isset($dry['report']['status'])?$dry['report']['status']:null,
+             'last_dry_config_matches'=>isset($dry['config_sha256'])&&hash_equals($hash,(string)$dry['config_sha256']),
+             'last_dry_source_sha_present'=>!empty($dry['report']['source_sha256']),
+             'last_dry_finished_at'=>isset($dry['finished_at'])?$dry['finished_at']:null,
+             'config_mtime'=>date('c',filemtime($configPath)),
+             'status_mtime'=>date('c',filemtime($statusPath)),
+             'last_report_status'=>isset($s['report']['status'])?$s['report']['status']:null,
+             'last_report_errors'=>array_slice((array)(isset($s['report']['errors'])?$s['report']['errors']:array()),0,3)
+          );
+          echo json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+          ?>'''
+                  cmd="cat >/tmp/riva_readonly_profile_audit.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/riva_readonly_profile_audit.php\nsu -s /bin/bash web -c 'php /tmp/riva_readonly_profile_audit.php'\ncode=$?; rm -f /tmp/riva_readonly_profile_audit.php; exit $code"
+                  p=subprocess.run(['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@45.86.180.49','bash -s'],input=cmd,capture_output=True,text=True,timeout=120)
+                  print('RIVA_AUDIT='+p.stdout.strip())
+                  if p.returncode:raise RuntimeError('Remote audit failed: '+str(p.returncode)+' '+p.stderr[-250:])
+              finally:
+                  req('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/'+str(kid)+'/','DELETE',b'',hdr)
+          PY
