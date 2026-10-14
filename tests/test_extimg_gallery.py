@@ -41,3 +41,11 @@ def test_gallery_refuses_malformed_or_repeat_source():
         pass
     else:
         raise AssertionError("Repeated gallery patch should be rejected")
+
+
+def test_gallery_remote_works_on_older_production_python():
+    from storefront.fix_extimg_multi_image_gallery import REMOTE
+    assert "capture_output=True" not in REMOTE
+    assert "text=True" not in REMOTE
+    assert "universal_newlines=True" in REMOTE
+    assert "stderr=subprocess.PIPE" in REMOTE
