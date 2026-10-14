@@ -1,0 +1,58 @@
+name: Diagnose Red-Black duplicate matches once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/diagnose-redblack-duplicate-matches-once.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    if: github.event.head_commit.message == 'Diagnose Red-Black Webasyst duplicate matches once'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WEBASYST_BASE_URL: https://profikompany.ru
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip -q install requests openpyxl pdfplumber
+      - name: Read Red-Black matched Webasyst SKUs (no writes)
+        run: |
+          python - <<'PY'
+          import json
+          from supplier_engine.runner import fetch_source,parse_source,normalize,_unique_image_aliases
+          from supplier_engine.webasyst_sync import index_by_supplier_sku_name, build_plan
+          from webasyst.client import WebasystClient
+          config={
+            "code":"RED_BLACK","name":"Red-Black",
+            "source":{"kind":"url","format":"yml","location":"http://opt.red-black.ru/pricelist_api.xml?org=e15e8a25-8153-11e9-8be6-00155d396f01&showcategories=True&showpictures=True&showparams=True"},
+            "identity":{"supplier_sku_field":"article","sku_prefix":"RED-00-","brand":""},
+            "mapping":{"name":"name","description":"description","purchase_price":"price","price":"rrc_price","compare_price":"",
+              "stock":"stock","category":"categoryId","images":["pictures"],"characteristics":{}},
+            "rules":{"create_new":True,"only_create_in_stock":True,"update_prices":True,"update_stock":True,
+              "zero_if_missing":False,"price_formulas":{}},
+            "webasyst":{"sku_mode":"supplier","type_id":150,"stock_id":12}
+          }
+          rows=parse_source(config,fetch_source(config))
+          products=normalize(config,rows)
+          codes=[p.supplier_sku for p in products]
+          print('SOURCE_ROWS='+str(len(rows)),flush=True)
+          wa=WebasystClient()
+          match=index_by_supplier_sku_name(wa,150,codes,{p.sku:p.supplier_sku for p in products},_unique_image_aliases(products))
+          duplicates=[]
+          for code,arr in match.items():
+            uniq={}
+            for product,sku in arr:
+              key=(str(product.get("id")),str(sku.get("id")))
+              uniq[key]={"product_id":key[0],"sku_id":key[1],"webasyst_sku":sku.get("sku"),"sku_name":sku.get("name"),"product_name":product.get("name")}
+            if len(uniq)>1:
+              duplicates.append({"supplier_sku":code,"matches":list(uniq.values())})
+          print('DUPLICATE_SUPPLIER_CODES='+str(len(duplicates)),flush=True)
+          for item in duplicates[:70]:
+            print('DUPLICATE='+json.dumps(item,ensure_ascii=False),flush=True)
+          plan=build_plan(products, {p.sku:match[p.supplier_sku] for p in products if p.supplier_sku in match},rules=config["rules"])
+          print('PLAN_BLOCKED='+str(len(plan["blocked"])),flush=True)
+          print('PLAN_BLOCKED_REASONS='+json.dumps([p.get("reason") for p in plan["blocked"]][:60],ensure_ascii=False),flush=True)
+          PY
