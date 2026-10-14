@@ -31,9 +31,11 @@ def run_php(code, parameter=None):
         + "chdir('/home/web/vm-23f9aff9.na4u.ru/www');\n"
         + "require_once '/home/web/vm-23f9aff9.na4u.ru/www/wa-config/SystemConfig.class.php';\n"
         + "waSystem::getInstance(null,new SystemConfig());wa('shop');\n"
+        + "error_reporting(E_ALL); ini_set('display_errors','1');\n"
+        + "register_shutdown_function(function(){ $e=error_get_last(); if($e && in_array($e['type'],array(E_ERROR,E_PARSE,E_CORE_ERROR,E_COMPILE_ERROR),true)){fwrite(STDERR,'RIVA_PHP_FATAL='.substr($e['message'],0,350).'\\n');}});\n"
         + code + "\n?>\nPHP\n"
         "chown web:web /tmp/riva_uch1998_once.php\n"
-        "su -s /bin/bash web -c 'php -d display_errors=0 /tmp/riva_uch1998_once.php'\n"
+        "su -s /bin/bash web -c 'php -d display_errors=1 /tmp/riva_uch1998_once.php'\n"
         "rc=$?; rm -f /tmp/riva_uch1998_once.php; exit $rc\n"
     )
     out = execute(remote)
