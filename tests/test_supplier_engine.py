@@ -2547,3 +2547,93 @@ def test_repair_sku_never_reuses_product_from_another_type():
         if call["method"] == "shop.product.skus.add"
         and str(call["params"].get("product_id")) == "11"
     ]
+
+
+
+def _multi_warehouse_config():
+    return {
+        "code": "RIVA",
+        "name": "Riva",
+        "source": {"format": "yml"},
+        "identity": {"supplier_sku_field": "vendorCode", "sku_prefix": "", "brand": "Riva"},
+        "mapping": {"name": "name", "purchase_price": "price", "stock": "count", "images": []},
+        "rules": {
+            "update_stock": True,
+            "zero_other_stocks": False,
+            "warehouses": [
+                {"source_field": "Riva СПБ", "stock_id": 11},
+                {"source_field": "Riva МСК", "stock_id": 12},
+            ],
+        },
+        "webasyst": {"stock_ids": [11, 12, 13], "type_id": 100},
+    }
+
+
+def test_multi_warehouse_normalize_and_update_only_mapped_stocks():
+    from supplier_engine.webasyst_sync import _sku_write_data
+    cfg = _multi_warehouse_config()
+    product = normalize(cfg, [{
+        "vendorCode": "CHAIR-1", "name": "Chair", "price": "900",
+        "count": "47", "Riva СПБ": "22", "Riva МСК": "25",
+    }])[0]
+    assert product.stock == 47
+    assert product.warehouse_stocks == {"11": 22, "12": 25}
+    desired = vars(product)
+    payload = _sku_write_data(desired, cfg["rules"], stock_id=13, stock_ids=[11, 12, 13])
+    assert payload["stock"] == {"11": "22", "12": "25"}
+    assert "13" not in payload["stock"]
+
+
+def test_multi_warehouse_missing_or_negative_source_stock_blocks():
+    cfg = _multi_warehouse_config()
+    missing = normalize(cfg, [{
+        "vendorCode": "CHAIR-1", "name": "Chair",
+        "Riva СПБ": "22",  # No Riva МСК field: never guess from total stock.
+    }])[0]
+    assert missing.warehouse_stocks == {"11": 22, "12": None}
+    assert validate_run([missing]).blocked
+    negative = normalize(cfg, [{
+        "vendorCode": "CHAIR-2", "name": "Chair",
+        "Riva СПБ": "-1", "Riva МСК": "25",
+    }])[0]
+    assert validate_run([negative]).blocked
+
+
+def test_multi_warehouse_new_product_uses_any_positive_mapped_stock():
+    cfg = _multi_warehouse_config()
+    cfg["rules"]["only_create_in_stock"] = True
+    cfg["rules"]["create_new"] = True
+    product = normalize(cfg, [{
+        "vendorCode": "CHAIR-1", "name": "Chair",
+        "Riva СПБ": "0", "Riva МСК": "3",
+    }])[0]
+    assert len(build_plan([product], {}, rules=cfg["rules"])["create"]) == 1
+    product.warehouse_stocks = {"11": 0, "12": 0}
+    assert len(build_plan([product], {}, rules=cfg["rules"])["create"]) == 0
+
+
+def test_multi_warehouse_plan_validation_requires_known_unique_stocks_and_blocks_global_zero():
+    cfg = _multi_warehouse_config()
+    plan = {
+        "create": [],
+        "update": [{"desired": {"stock": None, "warehouse_stocks": {"11": 2, "12": 0}, "characteristics": {}}}],
+        "repair_sku": [], "zero": [], "blocked": [], "skipped": [],
+    }
+    assert validate_apply_plan(plan, cfg) == []
+    cfg["rules"]["zero_other_stocks"] = True
+    assert any("запрещено" in x for x in validate_apply_plan(plan, cfg))
+    cfg["rules"]["zero_other_stocks"] = False
+    cfg["rules"]["warehouses"].append({"source_field": "duplicate", "stock_id": 12})
+    assert any("повторяется" in x for x in validate_apply_plan(plan, cfg))
+
+
+def test_multi_warehouse_zero_missing_touches_only_managed_stocks():
+    cfg = _multi_warehouse_config()
+    cfg["rules"]["zero_if_missing"] = True
+    wa = _FakeWebasyst()
+    plan = {"create": [], "repair_sku": [], "update": [], "skipped": [], "blocked": [],
+            "zero": [{"sku_id": 21, "product_id": 11, "supplier_sku": "LOST"}]}
+    apply_plan(wa, plan, cfg)
+    sku_call = next(x for x in wa.calls if x["method"] == "shop.product.skus.update")
+    assert sku_call["data"]["stock"] == {"11": "0", "12": "0"}
+    assert "available" not in sku_call["data"]
