@@ -1,0 +1,76 @@
+name: Audit Riva descriptions and features once
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/riva-description-audit-once-20261014.yml']
+permissions: {contents: read}
+jobs:
+  inspect:
+    if: github.event.head_commit.message == 'Audit Riva description and characteristics once'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Read-only profile and product verification
+        run: |
+          python3 - <<'PY'
+          import json,os,subprocess,tempfile,urllib.parse,urllib.request
+          def api(url,method='GET',body=None,headers=None):
+              req=urllib.request.Request(url,method=method,data=body,headers=headers or {})
+              with urllib.request.urlopen(req,timeout=40) as r:
+                  a=r.read();return json.loads(a) if a else {}
+          token=api('https://panel.netangels.ru/api/gateway/token/','POST',urllib.parse.urlencode({'api_key':os.environ['NETANGELS_API_KEY']}).encode(),{'Content-Type':'application/x-www-form-urlencoded'})['token']
+          h={'Authorization':'Bearer '+token,'Content-Type':'application/json'}
+          php=r'''<?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';
+          chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());
+          wa('shop');
+          $m=new waModel();
+          $supplier=$m->query("SELECT id,code,name FROM shop_megasuppliers_supplier WHERE UPPER(code)='RIVA' LIMIT 1")->fetch();
+          if(!$supplier){echo json_encode(array('error'=>'supplier_not_found'));exit(2);}
+          $sid=(int)$supplier['id'];
+          $configfile=wa()->getDataPath('plugins/megasuppliers/import-config',false,'shop',true).'/'.$sid.'.json';
+          $c=json_decode(file_get_contents($configfile),true);
+          $p=$m->query("SELECT id,name,type_id,description,summary,image_id FROM shop_product WHERE id=1489551")->fetch();
+          $skus=$m->query('SELECT id,sku,name FROM shop_product_skus WHERE product_id=1489551')->fetchAll();
+          $featureRows=$m->query('SELECT f.code,f.name,pf.feature_id FROM shop_product_features pf JOIN shop_feature f ON f.id=pf.feature_id WHERE pf.product_id=1489551 LIMIT 100')->fetchAll();
+          $out=array('supplier'=>array('id'=>$sid,'code'=>$supplier['code']),
+             'profile'=>array('type_id'=>ifset($c['webasyst']['type_id']),
+               'description_field'=>ifset($c['mapping']['description']),
+               'dynamic_characteristics'=>ifset($c['mapping']['dynamic_characteristics']),
+               'characteristic_mapping_count'=>count((array)ifset($c['mapping']['characteristics'],array())),
+               'update_description'=>!empty($c['rules']['update_description']),
+               'update_characteristics'=>!empty($c['rules']['update_characteristics']),
+               'auto_features'=>!empty($c['rules']['auto_features']),
+               'images_field'=>ifset($c['mapping']['images'],array()),
+               'feature_code_count'=>count((array)ifset($c['webasyst']['feature_codes'],array()))
+             ),
+             'product'=>array('found'=>!!$p,'id'=>(int)ifset($p['id']),
+               'type_id'=>ifset($p['type_id']),
+               'name'=>ifset($p['name']),
+               'description_length'=>strlen((string)ifset($p['description'])),
+               'description_preview'=>mb_substr(strip_tags((string)ifset($p['description'])),0,250),
+               'summary_length'=>strlen((string)ifset($p['summary'])),
+               'image_id'=>ifset($p['image_id']),
+               'sku_rows'=>$skus,'feature_count'=>count($featureRows),
+               'feature_names'=>array_slice(array_column($featureRows,'name'),0,15))
+          );
+          echo json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+          ?>''';
+          with tempfile.TemporaryDirectory() as td:
+              key=td+'/id';subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              k=api('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/create/','POST',json.dumps({'key':open(key+'.pub').read().strip(),'name':'riva-desc-read-'+os.environ['GITHUB_RUN_ID']}).encode(),h)['id']
+              try:
+                  cmd="cat >/tmp/riva_desc_read.php <<'PHP'\n"+php+"\nPHP\nchown web:web /tmp/riva_desc_read.php\nsu -s /bin/bash web -c 'php -d display_errors=0 /tmp/riva_desc_read.php'\nx=$?; rm -f /tmp/riva_desc_read.php; exit $x"
+                  p=subprocess.run(['ssh','-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no','-o','UserKnownHostsFile=/dev/null','root@45.86.180.49','bash -s'],input=cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=115)
+                  print('RIVA_DESCRIPTION_AUDIT='+p.stdout.strip()[:6500],flush=True)
+                  if p.returncode:raise RuntimeError('remote audit failed exit '+str(p.returncode)+' stderr='+p.stderr[-350:])
+              finally:
+                  api('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/'+str(k)+'/','DELETE',None,h)
+          PY
