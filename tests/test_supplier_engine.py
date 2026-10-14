@@ -2811,3 +2811,23 @@ def test_red_black_invalid_code_must_never_derive_a_wrong_legacy_sku():
     assert _red_black_sku("00-00004806") == "RED-00-00004806"
     assert _red_black_sku("00004806") == "RED-00-00004806"
     assert _red_black_sku("00-other-12345") == ""
+
+
+
+def test_red_black_code_article_conflicts_are_quarantined():
+    from supplier_engine.runner import filter_red_black_code_conflicts
+    cfg = {
+        "code": "RED_BLACK", "name": "Red-Black",
+        "identity": {"supplier_sku_field": "code"},
+    }
+    rows = [
+        {"id": "a", "code": "00-_0008542", "article": "0008542"},
+        {"id": "b", "code": "00-00001669", "article": "4684"},
+        {"id": "c", "code": "00-00008160", "article": "00003483"},
+    ]
+    clean, detail = filter_red_black_code_conflicts(cfg, rows)
+    assert clean == rows[:1]
+    assert detail["red_black_code_mismatches"] == 2
+    assert detail["red_black_code_conflict_sample"][0]["offer_id"] == "b"
+    cfg["identity"]["supplier_sku_field"] = "article"
+    assert filter_red_black_code_conflicts(cfg, rows) == (rows, {})
