@@ -73,7 +73,10 @@ class shopUnivimportPluginDeephouseSync
             || !empty($config['http_login']) || !empty($config['http_auth'])) {
             throw new RuntimeException('Unsafe Deephouse profile configuration');
         }
-        $url = (string)$config['url'];
+        $url = isset($config['url']) ? trim((string)$config['url']) : '';
+        // Recover the user's previously configured Deephouse URL only when it is blank.
+        // This is a feed for the standalone photo addon; never modify YML PRO settings.
+        if ($url === '') $url = 'https://deephouse.pro/upload/cutcat.xml';
         $p = parse_url($url);
         if (!$p || !isset($p['host']) || strtolower($p['host']) !== 'deephouse.pro'
             || !isset($p['scheme']) || !in_array(strtolower($p['scheme']), array('http','https'), true)) {
