@@ -1,0 +1,29 @@
+name: Deephouse full photo dry-run
+on:
+  push:
+    branches: [feature/universal-yml-import-20261015]
+    paths: [.github/workflows/deephouse-full-photo-preview.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: webasyst-yml-photo-companion
+  cancel-in-progress: false
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Confirm PHP compatibility and standalone plugin package
+        run: |
+          python -m py_compile scripts/run_deephouse_full_sync.py
+          php -l webasyst/univimport/lib/classes/shopUnivimportPluginDeephouseSync.class.php
+      - name: Deploy isolated external-image companion without running imports
+        run: python -u scripts/install_univimport.py
+      - name: Preview every Deephouse product without writing
+        run: python -u scripts/run_deephouse_full_sync.py
