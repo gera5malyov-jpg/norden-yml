@@ -1,0 +1,24 @@
+name: Apply verified universal image profiles
+on:
+  push:
+    branches: [feature/universal-yml-import-20261015]
+    paths: [.github/workflows/apply-universal-verified-profiles.yml]
+permissions:
+  contents: read
+concurrency:
+  group: webasyst-yml-photo-companion
+  cancel-in-progress: false
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      UNIVERSAL_PROFILE_IDS: '254,16,231'
+      UNIVERSAL_APPLY: '1'
+      UNIVERSAL_STRICT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -u scripts/run_universal_ymlpro_photos.py
