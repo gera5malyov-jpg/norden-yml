@@ -12,6 +12,15 @@ test -f wa-apps/shop/plugins/univimport/lib/config/plugin.php
 test -f wa-apps/shop/plugins/univimport/templates/actions/backend/Backend.html
 test -f wa-config/apps/shop/plugins.php
 echo 'UNIVIMPORT_FILES=present'
+echo 'UNIVIMPORT_WASYSTEM_PLUGIN_SOURCE_BEGIN'
+sed -n '1370,1408p' wa-system/waSystem.class.php | sed -E 's/^[[:space:]]+/ /'
+echo 'UNIVIMPORT_WASYSTEM_PLUGIN_SOURCE_END'
+echo 'UNIVIMPORT_AUTOLOAD_FILES'
+find wa-cache -maxdepth 5 -iname '*plugin*' -type f 2>/dev/null | grep -E '/shop/|autoload' | head -15 || true
+echo 'UNIVIMPORT_PLUGIN_FILES'
+find wa-apps/shop/plugins/univimport/lib -maxdepth 2 -type f -printf '%P\\n' | head -15
+echo 'UNIVIMPORT_OTHER_PLUGIN_EXAMPLES'
+for id in ozonstocksync megasuppliers; do ls -l "wa-apps/shop/plugins/$id/lib/shop"*.plugin.php 2>/dev/null || true; done
 cat >/tmp/verify-univimport-run.php <<'VERIFY_PHP'
 <?php
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
