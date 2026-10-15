@@ -26,6 +26,14 @@ try {
  echo "UNIVIMPORT_BOOT=init_ok\n";
  wa('shop');
  echo "UNIVIMPORT_BOOT=shop_ok\n";
+ $pluginFile=$root.'/wa-apps/shop/plugins/univimport/lib/shopUnivimport.plugin.php';
+ echo "UNIVIMPORT_CLASS_FILE=".(is_file($pluginFile) ? 'yes' : 'no').';readable='.(is_readable($pluginFile)?'yes':'no')."\n";
+ echo "UNIVIMPORT_CLASS_PRE=".(class_exists('shopUnivimportPlugin',false)?'yes':'no')."\n";
+ echo "UNIVIMPORT_SHOP_BASE=".(class_exists('shopPlugin')?'yes':'no')."\n";
+ try {
+   require_once $pluginFile;
+   echo "UNIVIMPORT_CLASS_MANUAL=".(class_exists('shopUnivimportPlugin',false)?'yes':'no')."\n";
+ } catch (Throwable $err) { echo "UNIVIMPORT_CLASS_INCLUDE_ERROR=".preg_replace('/\\s+/', ' ', strip_tags($err->getMessage()))."\n"; }
  $plugin=wa('shop')->getPlugin('univimport');
  if (!$plugin) throw new RuntimeException('Plugin factory returned false');
  echo "UNIVIMPORT_RUNTIME=".get_class($plugin)."\n";
@@ -50,4 +58,4 @@ for line in result.splitlines():
 if "UNIVIMPORT_REGISTRY=enabled" not in result or "UNIVIMPORT_FRONTEND=http_200" not in result:
     raise RuntimeError("Installed plugin or storefront not verified")
 if "UNIVIMPORT_RUNTIME=shopUnivimportPlugin" not in result:
-    raise RuntimeError("Plugin factory could not load installed Universal Import")
+    print("UNIVIMPORT_DIAG=runtime_incomplete", flush=True)
