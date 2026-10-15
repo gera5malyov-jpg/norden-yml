@@ -1,0 +1,41 @@
+name: Package Universal Import
+
+on:
+  push:
+    branches:
+      - feature/universal-yml-import-20261015
+    paths:
+      - 'webasyst/univimport/**'
+      - '.github/workflows/package-univimport.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.3'
+          extensions: xmlreader, simplexml, curl, mbstring
+          coverage: none
+      - name: Validate PHP and XML parser
+        run: |
+          set -euo pipefail
+          find webasyst/univimport -name '*.php' -type f -print0 | xargs -0 -n1 php -l
+          php webasyst/univimport/tests/test_import.php
+      - name: Create standalone installable ZIP
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cd webasyst
+          zip -q -r ../dist/univimport.zip univimport -x 'univimport/tests/*' 'univimport/README.md'
+          unzip -l ../dist/univimport.zip | grep 'univimport/lib/config/plugin.php'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: univimport-plugin-0.1.0
+          path: dist/univimport.zip
+          if-no-files-found: error
