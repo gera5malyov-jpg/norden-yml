@@ -27,7 +27,7 @@ foreach(array(1199339,1199328,1458758,1458759,1458760,1225888) as $pid){
  $actual=$html?substr_count($html,'data-extimg='):0;
  $out=array('id'=>$pid,'http'=>(int)$code,'summary_photos'=>$count,
    'gallery_thumbnails'=>$actual,'route'=>$p['url'],'effective_route'=>parse_url($end,PHP_URL_PATH),'product_page'=>strpos((string)$html,'class="product-page"')!==false,'external_gallery'=>strpos((string)$html,'product-gallery--extimg')!==false,'native_gallery'=>strpos((string)$html,'product-gallery--extimg')===false && strpos((string)$html,'product-gallery')!==false,'main_image'=>strpos((string)$html,'js-extimg-main-img')!==false,
-   'native_image_unchanged'=>(int)$p['image_id']>0,'published'=>(int)$p['status']===1);
+   'native_image_unchanged'=>(int)$p['image_id']>0,'published'=>(int)$p['status']===1,'html_title'=>preg_match('~<title[^>]*>(.*?)</title>~is',(string)$html,$tm)?mb_substr(trim(strip_tags($tm[1])),0,115):'missing', 'actual_heading'=>preg_match('~<h1[^>]*>(.*?)</h1>~is',(string)$html,$hm)?mb_substr(trim(strip_tags($hm[1])),0,90):'missing', 'product_name_in_html'=>strpos((string)$html,(string)$p['name'])!==false);
  echo 'YMLPHOTO_LIVE='.json_encode($out,JSON_UNESCAPED_UNICODE)."\n";
 }
 PHP
