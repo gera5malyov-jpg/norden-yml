@@ -2,7 +2,7 @@ name: Test universal YML photo shard discovery
 on:
   push:
     branches: [feature/universal-yml-import-20261015]
-    paths: [.github/workflows/test-universal-photo-shard.yml]
+    paths: [.github/workflows/test-universal-photo-shard.yml, scripts/run_universal_ymlpro_photos.py]
 permissions:
   contents: read
 jobs:
