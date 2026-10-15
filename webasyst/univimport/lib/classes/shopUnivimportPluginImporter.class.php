@@ -310,10 +310,8 @@ class shopUnivimportPluginImporter
                 throw new RuntimeException('Shop-Script не создал артикул для товара '.$productId);
             }
             $skuId = (int)$sku['id'];
-            $model->insert('shop_univimport_map', array(
-                'profile'=>$profile['id'], 'offer_id'=>$row['id'],
-                'product_id'=>$productId, 'sku_id'=>$skuId, 'updated_at'=>date('Y-m-d H:i:s')
-            ));
+            $model->exec("INSERT INTO shop_univimport_map (profile, offer_id, product_id, sku_id, updated_at) VALUES ('".
+                $profileId."', '".$id."', ".(int)$productId.", ".(int)$skuId.", NOW())");
             self::applyStock($profile, $row, $productId, $skuId, $skus);
             return 'created';
         }
