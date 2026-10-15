@@ -1,0 +1,25 @@
+name: Deploy and preview YML PRO photo companion
+on:
+  push:
+    branches: [feature/universal-yml-import-20261015]
+    paths: ['.github/workflows/deploy-ymlpro-photo-pilot.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: webasyst-yml-photo-companion
+  cancel-in-progress: false
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install updated independent addon only
+        run: python -u scripts/install_univimport.py
+      - name: Verify EverProf five-product preview without changes
+        run: python -u scripts/run_ymlpro_photo_preview.py
