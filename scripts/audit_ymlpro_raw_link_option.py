@@ -21,7 +21,7 @@ for term in keywords:
    around=s[max(0,m.start()-250):m.end()+250]
    tokens=re.findall(r'(?:->|::)([A-Za-z_][A-Za-z0-9_]*)\s*\(|\b(?:function|if|foreach|while|return|switch|case|isset|empty)\b',around)
    near=sorted(set(x for x in re.findall(r'(?:summary|picture|images|image_save|image_upload|download|queueImages|insertImage|description|raw_image_links|setImage|product_id|profile_id|link_separator|file_get_contents|shopProductImagesModel)',around,re.I)),key=str.lower)
-   strgs=re.findall(r'''_w?p?\(\s*['"]([^'"]{8,85})['"]\s*\)''',around)
+   strgs=[]
    hits.append({'file':str(f.relative_to(base)),'line':s.count('\n',0,m.start())+1,'methods':list(dict.fromkeys(x for x in re.findall(r'\bfunction\s+([A-Za-z_][A-Za-z0-9_]*)',s[max(0,m.start()-1800):m.start()])))[-2:],'related':near[:17],'translations':strgs[:2]})
  print('YMLKEY_'+term.upper()+'='+json.dumps(hits[:25],ensure_ascii=False))
 PY'''
