@@ -2,7 +2,7 @@ name: Prefer external images on product listings
 on:
   push:
     branches: [feature/universal-yml-import-20261015]
-    paths: [.github/workflows/deploy-external-product-tiles.yml]
+    paths: [.github/workflows/deploy-external-product-tiles.yml, storefront/enable_external_product_tile_images.py]
 permissions:
   contents: read
 concurrency:
