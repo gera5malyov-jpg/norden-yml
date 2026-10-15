@@ -56,7 +56,7 @@ for name in ('lib/classes/import/shopYmlImages.class.php','templates/actions/pro
   d.append({'line':s.count('\\n',0,m.start())+1,
             'before_tokens':[x for x in words if re.search(r'\\b'+re.escape(x)+r'\\b',before,re.I)],
             'after_tokens':[x for x in words if re.search(r'\\b'+re.escape(x)+r'\\b',after,re.I)],
-            'after_calls':list(dict.fromkeys(re.findall(r'(?:->|::)([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(',after)))[:12],
+            'after_calls':list(dict.fromkeys([]))[:12],
             'has_extimg':'[extimg]' in (before+after)})
  print('YML_OPTION_BEHAVIOR_'+name.rsplit('/',1)[-1]+'='+json.dumps(d,ensure_ascii=False))
 
