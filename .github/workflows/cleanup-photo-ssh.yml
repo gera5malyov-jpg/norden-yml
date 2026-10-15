@@ -2,7 +2,7 @@ name: Clean up abandoned NetAngels photo deploy SSH key
 on:
   push:
     branches: [feature/universal-yml-import-20261015]
-    paths: [.github/workflows/cleanup-photo-ssh.yml]
+    paths: [.github/workflows/cleanup-photo-ssh.yml, scripts/cleanup_netangels_photo_ssh.py]
 permissions:
   contents: read
 jobs:
