@@ -1,0 +1,23 @@
+name: Apply EverProf five-item external gallery pilot
+on:
+  push:
+    branches: [feature/universal-yml-import-20261015]
+    paths: ['.github/workflows/apply-everprof-photo-pilot.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: webasyst-yml-photo-companion
+  cancel-in-progress: false
+jobs:
+  apply-limited:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Update exactly five preverified EverProf product summaries
+        run: python -u scripts/apply_ymlpro_photo_pilot.py
