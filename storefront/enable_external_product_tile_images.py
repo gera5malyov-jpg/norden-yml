@@ -30,7 +30,8 @@ block=r'''
 {if $_extimg_list_source && preg_match('/\\[extimg\\](.*?)\\[\\/extimg\\]/is', $_extimg_list_source, $_extimg_list_match)}
   {$_extimg_list_block = str_replace("\r\n", "\n", $_extimg_list_match[1])}
   {$_extimg_list_block = str_replace("\r", "\n", $_extimg_list_block)}
-  {foreach explode("\n", $_extimg_list_block) as $_candidate}
+  {$_extimg_list_lines = explode("\n", $_extimg_list_block)}
+  {foreach $_extimg_list_lines as $_candidate}
     {if preg_match('~^https?://~i', trim($_candidate))}
       {$_product_image_src = trim($_candidate)}
       {break}
