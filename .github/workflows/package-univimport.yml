@@ -27,6 +27,7 @@ jobs:
           set -euo pipefail
           find webasyst/univimport -name '*.php' -type f -print0 | xargs -0 -n1 php -l
           php webasyst/univimport/tests/test_import.php
+          php webasyst/univimport/tests/test_gallery.php
       - name: Create standalone installable ZIP
         run: |
           set -euo pipefail
@@ -36,6 +37,6 @@ jobs:
           unzip -l ../dist/univimport.zip | grep 'univimport/lib/config/plugin.php'
       - uses: actions/upload-artifact@v4
         with:
-          name: univimport-plugin-0.1.0
+          name: univimport-plugin-0.2.0
           path: dist/univimport.zip
           if-no-files-found: error
