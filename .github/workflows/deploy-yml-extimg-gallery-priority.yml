@@ -4,6 +4,7 @@ on:
     branches: [feature/universal-yml-import-20261015]
     paths:
       - .github/workflows/deploy-yml-extimg-gallery-priority.yml
+      - storefront/yml_extimg_priority_fix.py
   workflow_dispatch:
 permissions:
   contents: read
