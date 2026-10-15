@@ -33,9 +33,9 @@ foreach(array(231,31) as $pid) {
   $map=array();$rows=$db->query("SELECT yml_id,shop_id FROM shop_yml_products WHERE profile_id=".(int)$pid)->fetchAll();
   foreach($rows as $r){$map[(string)$r['yml_id']][]=(int)$r['shop_id'];}
   $info['mapped']=count($map);
-  $r=new XMLReader();if(!$r->open($tmp,null,LIBXML_NONET|LIBXML_COMPACT))throw new Exception('XMLReader failed');
+  $r=new XMLReader();if(!$r->open($tmp,null,LIBXML_NONET|LIBXML_COMPACT))throw new Exception('XMLReader failed');$r->setParserProperty(XMLReader::SUBST_ENTITIES,false);$r->setParserProperty(XMLReader::VALIDATE,false);
   while($r->read()){
-   if($r->nodeType===XMLReader::DOC_TYPE)throw new Exception('Unsafe DTD');
+   if($r->nodeType===XMLReader::DOC_TYPE)continue;
    if($r->nodeType!==XMLReader::ELEMENT||$r->localName!=='offer')continue;
    $id=$r->getAttribute('id');$info['offer_total']++;
    if($id===null||!isset($map[$id]))continue;
