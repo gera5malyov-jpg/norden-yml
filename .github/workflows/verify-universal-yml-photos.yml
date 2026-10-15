@@ -1,0 +1,32 @@
+name: Verify universal YML PRO photos
+on:
+  push:
+    branches: [feature/universal-yml-import-20261015]
+    paths:
+      - .github/workflows/verify-universal-yml-photos.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: webasyst-yml-photo-companion
+  cancel-in-progress: false
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      UNIVERSAL_PROFILE_IDS: '20,16'
+      UNIVERSAL_APPLY: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Lint generic photo companion on PHP
+        run: |
+          php -l webasyst/univimport/lib/classes/shopUnivimportPluginUniversalPhotoSync.class.php
+          python -m py_compile scripts/run_universal_ymlpro_photos.py
+      - name: Install addon while verifying YML PRO files unchanged
+        run: python -u scripts/install_univimport.py
+      - name: Run Deephouse and Stoolgroup general importer preview
+        run: python -u scripts/run_universal_ymlpro_photos.py
