@@ -5,6 +5,7 @@ on:
       - feature/universal-yml-import-20261015
     paths:
       - '.github/workflows/audit-installed-yml.yml'
+      - 'scripts/ymlpro_structure_audit.py'
   workflow_dispatch:
 permissions:
   contents: read
