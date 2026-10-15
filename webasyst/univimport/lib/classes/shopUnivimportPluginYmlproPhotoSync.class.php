@@ -116,4 +116,33 @@ class shopUnivimportPluginYmlproPhotoSync
         return $selected;
     }
 
+    public static function apply($items, $backupFile)
+    {
+        if (!$items || count($items) > 10) {
+            throw new RuntimeException('Pilot limited to ten products');
+        }
+        $records = array();
+        foreach ($items as $item) {
+            $records[] = array('id'=>$item['product_id'], 'summary'=>$item['summary']);
+        }
+        if (!file_put_contents($backupFile, json_encode($records), LOCK_EX)) {
+            throw new RuntimeException('Backup failed');
+        }
+        @chmod($backupFile, 0600);
+        $model = new shopProductModel();
+        $results = array();
+        foreach ($items as $item) {
+            $current = $model->getById($item['product_id']);
+            if (!$current || (string)$current['summary'] !== $item['summary']) {
+                $results[] = array('id'=>$item['product_id'], 'status'=>'conflict');
+                continue;
+            }
+            $model->updateById($item['product_id'], array(
+                'summary'=>self::gallery($item['summary'], $item['photos']),
+            ));
+            $results[] = array('id'=>$item['product_id'], 'status'=>'updated');
+        }
+        return $results;
+    }
+
 }
