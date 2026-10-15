@@ -26,8 +26,10 @@ require_once $root.'/wa-apps/shop/plugins/univimport/lib/classes/shopUnivimportP
 $args=isset($argv)?$argv:array();
 $apply=in_array('--apply',$args,true);
 $shard=(int)gmdate('G')%6;
+$onlyProfile=0;
 foreach ($args as $arg) {
     if (preg_match('/^--shard=([0-5])$/',$arg,$parts))$shard=(int)$parts[1];
+    if (preg_match('/^--profile=([1-9][0-9]{0,5})$/',$arg,$parts))$onlyProfile=(int)$parts[1];
 }
 $lockDir=wa()->getDataPath('plugins/univimport/locks',false,'shop',true);
 if(!is_dir($lockDir))waFiles::create($lockDir);
@@ -42,7 +44,7 @@ try {
     $profiles=shopUnivimportPluginUniversalPhotoSync::profiles();
     foreach ($profiles as $entry) {
         $id=(int)$entry['id'];
-        if ($id%6!==$shard || (int)$entry['linked']<1)continue;
+        if (($onlyProfile && $id!==$onlyProfile) || (!$onlyProfile && $id%6!==$shard) || (int)$entry['linked']<1)continue;
         if (microtime(true)-$start>2700){
             echo 'PHOTO_CRON='.json_encode(array('status'=>'time_limit_reached','shard'=>$shard)).PHP_EOL;
             break;
