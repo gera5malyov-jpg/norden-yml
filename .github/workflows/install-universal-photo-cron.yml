@@ -1,0 +1,29 @@
+name: Install universal supplier photo scheduler
+on:
+  push:
+    branches: [feature/universal-yml-import-20261015]
+    paths: [.github/workflows/install-universal-photo-cron.yml]
+permissions:
+  contents: read
+concurrency:
+  group: webasyst-yml-photo-companion
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Validate PHP syntax and runner
+        run: |
+          php -l webasyst/univimport/lib/classes/shopUnivimportPluginUniversalPhotoSync.class.php
+          php -l webasyst/univimport/lib/cli/universal-photo-cron.php
+          python -m py_compile scripts/install_universal_photo_cron.py
+      - name: Install independently maintained photo module
+        run: python -u scripts/install_univimport.py
+      - name: Install one server cron and run a no-write acceptance test
+        run: python -u scripts/install_universal_photo_cron.py
