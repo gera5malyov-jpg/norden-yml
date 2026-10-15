@@ -1,0 +1,34 @@
+name: Test standalone Universal Import
+
+on:
+  push:
+    branches:
+      - feature/universal-yml-import-20261015
+    paths:
+      - 'webasyst/univimport/**'
+      - '.github/workflows/test-univimport.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  php-compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.3', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: xmlreader, simplexml, curl, mbstring
+          coverage: none
+      - name: Syntax check every plugin PHP file
+        run: |
+          set -euo pipefail
+          find webasyst/univimport -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Check YML parsing and URL validation
+        run: php webasyst/univimport/tests/test_import.php
