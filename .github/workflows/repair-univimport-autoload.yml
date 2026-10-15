@@ -1,0 +1,30 @@
+name: Repair Universal Import autoload
+
+on:
+  push:
+    branches:
+      - feature/universal-yml-import-20261015
+    paths:
+      - '.github/workflows/repair-univimport-autoload.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: webasyst-univimport-autoload
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Clear only Shop-Script class cache and verify
+        run: python -u scripts/repair_univimport_cache.py
