@@ -17,13 +17,11 @@ from datetime import datetime,timezone
 root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
 f=root/'wa-data/public/shop/themes/pureMegapolis42/product.html'
 s=f.read_text(encoding='utf-8')
-old='{* IMAGE GALLERY *}\n{if $product.images}\n'
-new='{* IMAGE GALLERY *}\n{if $product.images && ($ext_images|@count == 0)}\n'
-if s.count(old)!=1 or new in s:
- raise RuntimeError('Gallery priority source changed; refusing write')
-if 'js-extimg-main-img' not in s or 'product-gallery--extimg' not in s:
- raise RuntimeError('Expected external gallery not present')
-updated=s.replace(old,new,1)
+pattern=r'(\\{\\* IMAGE GALLERY \\*\\}\\s*)\\{if \\$product\\.images\\}'
+replacement=r'\\1{if $product.images && ($ext_images|@count == 0)}'
+updated,n=re.subn(pattern,replacement,s,count=2)
+if n!=1 or 'js-extimg-main-img' not in s or 'product-gallery--extimg' not in s:
+ raise RuntimeError('Gallery priority source unexpected; refusing write')
 before=hashlib.sha256(s.encode()).hexdigest()
 directory=root.parent/'storefront-backups'/('yml-extimg-priority-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ'))
 directory.mkdir(parents=True,mode=0o700)
