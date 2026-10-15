@@ -68,4 +68,52 @@ class shopUnivimportPluginYmlproPhotoSync
         return $urls;
     }
 
+    public static function collect($profileId, $limit)
+    {
+        $profileId = (int)$profileId;
+        $limit = min(max(1, (int)$limit), 50);
+        list($file, $cfg) = self::downloadFeed($profileId);
+        $max = isset($cfg['max_img']) ? (int)$cfg['max_img'] : 10;
+        $max = $max > 0 ? min($max, 30) : 30;
+        $db = new waModel();
+        $map = array();
+        $sql = 'SELECT yp.yml_id, yp.shop_id, p.summary, p.image_id '.
+            'FROM shop_yml_products yp JOIN shop_product p ON p.id=yp.shop_id '.
+            'WHERE yp.profile_id='.$profileId;
+        foreach ($db->query($sql)->fetchAll() as $v) {
+            $key = (string)$v['yml_id'];
+            if (!isset($map[$key])) $map[$key] = array();
+            $map[$key][] = $v;
+        }
+        $reader = new XMLReader();
+        $selected = array();
+        try {
+            if (!$reader->open($file, null, LIBXML_NONET | LIBXML_COMPACT)) {
+                throw new RuntimeException('Invalid YML');
+            }
+            $reader->setParserProperty(XMLReader::SUBST_ENTITIES, false);
+            $reader->setParserProperty(XMLReader::VALIDATE, false);
+            while ($reader->read()) {
+                if ($reader->nodeType !== XMLReader::ELEMENT || $reader->localName !== 'offer') continue;
+                $offerId = (string)$reader->getAttribute('id');
+                if (!isset($map[$offerId]) || count($map[$offerId]) !== 1) continue;
+                $v = $map[$offerId][0];
+                $productId = (int)$v['shop_id'];
+                if (stripos((string)$v['summary'], '[extimg]') !== false) continue;
+                $other = (int)$db->query('SELECT COUNT(*) FROM shop_yml_products WHERE shop_id='.
+                    $productId.' AND profile_id<>'.$profileId)->fetchField();
+                if ($other) continue;
+                $urls = self::pictures($reader->readOuterXML(), $max);
+                if (!$urls) continue;
+                $selected[] = array('product_id'=>$productId, 'photos'=>$urls,
+                    'summary'=>(string)$v['summary'], 'native_image'=>(int)$v['image_id']);
+                if (count($selected) >= $limit) break;
+            }
+        } finally {
+            $reader->close();
+            @unlink($file);
+        }
+        return $selected;
+    }
+
 }
