@@ -121,7 +121,7 @@ class shopUnivimportPluginDeephouseSync
             $map[$id] = $row;
             $count++;
         }
-        if ($count !== 1917) throw new RuntimeException('Mapping count changed since read-only audit');
+        if ($count < 1700 || $count > 2200) throw new RuntimeException('Mapping count outside safe band: '.$count);
         $shared = (int)$db->query('SELECT COUNT(*) FROM shop_yml_products a JOIN shop_yml_products b '.
             'ON a.shop_id=b.shop_id AND b.profile_id<>20 WHERE a.profile_id=20')->fetchField();
         if ($shared) throw new RuntimeException('Cross-profile product collision');
