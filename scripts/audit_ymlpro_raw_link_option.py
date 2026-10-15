@@ -68,6 +68,7 @@ for n,line in enumerate(t.splitlines()):
  if clean and ('изображ' in clean.lower() or 'скач' in clean.lower() or 'ссыл' in clean.lower() or 'фото' in clean.lower() or ('value=' in line and 'images' in t[max(0,n-12):n+120])):
   out.append({'line':n+1,'label':clean[:140]})
 print('YML_IMAGE_MODE_LABELS='+json.dumps(out[:55],ensure_ascii=False))
+print('YML_IMAGE_MODE_SELECTOR='+json.dumps([{'line':n+1,'raw':t.splitlines()[n].strip()[:200]} for n in range(5,min(35,len(t.splitlines())))],ensure_ascii=False))
 
 PY'''
 r=execute(REMOTE)
