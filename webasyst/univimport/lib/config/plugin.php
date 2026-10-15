@@ -1,8 +1,8 @@
 <?php
 return array(
     'name' => 'Импорт универсальный',
-    'description' => 'Независимый импорт YML в Shop-Script с хранением изображений внешними ссылками [extimg].',
-    'version' => '0.1.0',
+    'description' => 'Независимый YML-импорт с внешними изображениями в основной галерее витрины без скачивания на сервер.',
+    'version' => '0.2.0',
     'vendor' => 'megapolis',
     'img' => 'img/icon.svg',
     'handlers' => array(
