@@ -2,7 +2,7 @@ name: Deephouse full photo dry-run
 on:
   push:
     branches: [feature/universal-yml-import-20261015]
-    paths: [.github/workflows/deephouse-full-photo-preview.yml]
+    paths: [.github/workflows/deephouse-full-photo-preview.yml, scripts/run_deephouse_full_sync.py, webasyst/univimport/lib/classes/shopUnivimportPluginDeephouseSync.class.php]
   workflow_dispatch:
 permissions:
   contents: read
