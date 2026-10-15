@@ -1,0 +1,23 @@
+name: Audit YML PRO image integration
+on:
+  push:
+    branches:
+      - feature/universal-yml-import-20261015
+    paths:
+      - '.github/workflows/audit-ymlpro-image-integration.yml'
+      - 'scripts/audit_ymlpro_image_pipeline.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Inspect YML PRO image pipeline without modifying files
+        run: python -u scripts/audit_ymlpro_image_pipeline.py
