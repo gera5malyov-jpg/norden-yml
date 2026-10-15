@@ -33,7 +33,7 @@
     </div>
     <h3 style="margin-top:22px">Правила импорта</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      {foreach ['create'=>'Создавать новые товары скрытыми','update'=>'Обновлять свои существующие товары','update_name'=>'Обновлять название','update_description'=>'Обновлять полное описание','update_images'=>'Обновлять ссылки [extimg] в кратком описании','update_prices'=>'Обновлять цены продажи','update_stocks'=>'Обновлять остаток выбранного склада','allow_write'=>'РАЗРЕШИТЬ ЗАПИСЬ В КАТАЛОГ (после проверки)'] as $key=>$label}
+      {foreach $flags as $key=>$label}
       <label style="cursor:pointer"><input type="hidden" name="profile[{$key|escape}]" value="0"><input type="checkbox" name="profile[{$key|escape}]" value="1" {if $profile[$key]}checked{/if}> {$label|escape}</label>
       {/foreach}
     </div>
