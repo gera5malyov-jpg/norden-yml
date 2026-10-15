@@ -31,4 +31,6 @@ jobs:
           set -euo pipefail
           find webasyst/univimport -type f -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Check YML parsing and URL validation
-        run: php webasyst/univimport/tests/test_import.php
+        run: |
+          php webasyst/univimport/tests/test_import.php
+          php webasyst/univimport/tests/test_gallery.php
