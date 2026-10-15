@@ -69,7 +69,7 @@ for pathname in logs:
  flags={
   'deephouse_mentions':len(re.findall('deephouse',raw,re.I)),
   'tcat_mentions':len(re.findall('tcat[.]xml',raw,re.I)),
-  'http_source_found':bool(re.search('https?://[^\\\\s<>\\\\"\\\\']*deephouse[.]pro/[^\\\\s<>\\\\"\\\\']*tcat[.]xml',raw,re.I)),
+  'http_source_found':bool('deephouse.pro/' in raw.lower() and 'tcat.xml' in raw.lower()),
  }
  matches.append({'filename':os.path.basename(pathname),'signals':flags})
 print('DEEPHOUSE_SOURCE_LOG_EVIDENCE='+json.dumps(matches,ensure_ascii=False))
