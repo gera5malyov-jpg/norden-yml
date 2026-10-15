@@ -25,9 +25,9 @@ config=base/'lib/config/plugin.php'
 entry=base/'lib/shopYml.plugin.php'
 details={}
 s=content(config)
-details['event_keys'] = list(dict.fromkeys(re.findall(r'''['"]([a-z_]+(?:\.[a-z_]+)?)['"]\s*=>''', s)))[:65]
+details['event_keys'] = list(dict.fromkeys(re.findall(r"""['"]([a-z_]+(?:\.[a-z_]+)?)['"]\s*=>""", s)))[:65]
 details['plugin_class_methods'] = re.findall(r'function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(',content(entry))[:60]
-details['plugin_declared_hooks'] = re.findall(r'''['"]([a-z_]+(?:\.[a-z_]+)?)['"]\s*=>\s*['"]([a-zA-Z0-9_]+)['"]''',s)[-60:]
+details['plugin_declared_hooks'] = re.findall(r"""['"]([a-z_]+(?:\.[a-z_]+)?)['"]\s*=>\s*['"]([a-zA-Z0-9_]+)['"]""",s)[-60:]
 def candidate(f):
  p=short(f).lower()
  return any(x in p for x in ('image','picture','photo','media','download','import/handler','import/processor','import/pipeline','import/batch'))
