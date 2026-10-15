@@ -17,6 +17,16 @@ class shopUnivimportPluginBackendAction extends waViewAction
             'categories' => (new shopCategoryModel())->getAll(),
             'stocks' => (new shopStockModel())->getAll(),
             'base_url' => wa('shop')->getAppUrl(null, true).'?plugin=univimport',
+            'flags' => array(
+                'create' => 'Создавать новые товары скрытыми',
+                'update' => 'Обновлять свои существующие товары',
+                'update_name' => 'Обновлять название',
+                'update_description' => 'Обновлять полное описание',
+                'update_images' => 'Обновлять ссылки [extimg] в кратком описании',
+                'update_prices' => 'Обновлять цены продажи',
+                'update_stocks' => 'Обновлять остаток выбранного склада',
+                'allow_write' => 'РАЗРЕШИТЬ ЗАПИСЬ В КАТАЛОГ (после проверки)',
+            ),
         ));
     }
 }
