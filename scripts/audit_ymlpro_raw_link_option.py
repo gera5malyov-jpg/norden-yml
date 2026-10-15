@@ -63,5 +63,5 @@ for name in ('lib/classes/import/shopYmlImages.class.php','templates/actions/pro
 PY'''
 r=execute(REMOTE)
 for l in r.splitlines():
- if l.startswith('YMLKEY_'):print(l,flush=True)
+ if l.startswith('YMLKEY_') or l.startswith('YML_OPTION_'):print(l,flush=True)
 if 'YMLKEY_RAW_IMAGE_LINKS=' not in r:raise RuntimeError('No image option info')
