@@ -2,7 +2,7 @@ name: Audit NetAngels temporary SSH slots
 on:
   push:
     branches: [feature/universal-yml-import-20261015]
-    paths: [.github/workflows/audit-netangels-ssh-slots.yml]
+    paths: [.github/workflows/audit-netangels-ssh-slots.yml, scripts/audit_netangels_ephemeral_keys.py]
 permissions:
   contents: read
 jobs:
