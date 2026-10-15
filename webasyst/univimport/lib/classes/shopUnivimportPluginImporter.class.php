@@ -104,7 +104,7 @@ class shopUnivimportPluginImporter
         if ($code === '') {
             $code = $id;
         }
-        if ($id === '' || $name === '' || strlen($id) > 180) {
+        if ($id === '' || $name === '' || strlen($id) > 100) {
             throw new RuntimeException('У offer отсутствует обязательный id/name или id слишком длинный.');
         }
         $price = trim((string)$v->price);
@@ -235,7 +235,7 @@ class shopUnivimportPluginImporter
     {
         (new waModel())->exec(
             "CREATE TABLE IF NOT EXISTS shop_univimport_map (".
-            "profile VARCHAR(40) NOT NULL, offer_id VARCHAR(180) NOT NULL,".
+            "profile VARCHAR(40) NOT NULL, offer_id VARCHAR(100) NOT NULL,".
             "product_id INT UNSIGNED NOT NULL, sku_id INT UNSIGNED NOT NULL,".
             "updated_at DATETIME NOT NULL,".
             "PRIMARY KEY (profile, offer_id), KEY product_id (product_id)".
