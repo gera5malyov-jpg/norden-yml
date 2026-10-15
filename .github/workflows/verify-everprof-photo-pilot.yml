@@ -2,7 +2,7 @@ name: Verify live EverProf external galleries
 on:
   push:
     branches: [feature/universal-yml-import-20261015]
-    paths: ['.github/workflows/verify-everprof-photo-pilot.yml']
+    paths: ['.github/workflows/verify-everprof-photo-pilot.yml', 'scripts/verify_everprof_photo_pilot.py']
   workflow_dispatch:
 permissions:
   contents: read
