@@ -64,7 +64,7 @@ try:
  tests=[]
  for path in ['/','/category/kompyuternye-kresla/','/stol-detskiy-reguliruemyy-everprof-kids-table-2-belyy/']:
   c=subprocess.run(['curl','-ksSL','--max-time','35','-w','\n%{http_code}',
-   'https://profikompany.ru'+path+'?external_photo_tiles_check=1'],text=True,capture_output=True,timeout=43)
+   'https://profikompany.ru'+path+'?external_photo_tiles_check=1'],universal_newlines=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=43)
   html,code=c.stdout.rsplit('\n',1) if '\n' in c.stdout else ('','')
   ok=c.returncode==0 and code=='200' and len(html)>10000 and 'SmartyCompilerException' not in html
   if 'stol-detskiy' in path:ok=ok and 'js-extimg-main-img' in html
