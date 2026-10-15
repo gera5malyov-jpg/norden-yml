@@ -16,7 +16,7 @@ if (PHP_SAPI !== 'cli') {
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE & ~E_WARNING);
 ini_set('display_errors','0');
 set_time_limit(0);
-$root=dirname(__FILE__,6);
+$root=dirname(__FILE__,7);
 chdir($root);
 require_once $root.'/wa-config/SystemConfig.class.php';
 waSystem::getInstance(null,new SystemConfig());
