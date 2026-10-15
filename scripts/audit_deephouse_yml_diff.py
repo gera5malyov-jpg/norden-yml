@@ -35,7 +35,7 @@ $stats=array('mapped'=>count($map),'duplicated_mapping'=>$duplicate,'bytes'=>$le
  'offers_match'=>0,'with_pictures'=>0,'mapped_without_pictures'=>0,'missing_mapping'=>0,
  'existing_extimg'=>0,'new_extimg'=>0,'no_change'=>0,'needs_change'=>0,
  'source_pictures'=>0,'existing_pictures'=>0,'photo_counts_diff'=>0,'missing_in_feed'=>0);
-$seen=array();$sample=array();$hosts=array();
+$seen=array();$sample=array();$hosts=array();$probes=array();$schemes=array();
 $reader=new XMLReader();
 if(!$reader->open($tmp,null,LIBXML_NONET|LIBXML_COMPACT))throw new RuntimeException('Invalid YML');
 $reader->setParserProperty(XMLReader::SUBST_ENTITIES,false);
@@ -58,6 +58,8 @@ while($reader->read()){
   if($pu && isset($pu['scheme']) && in_array(strtolower($pu['scheme']),array('https','http'),true) && isset($pu['host']) && !in_array($u,$urls,true))$urls[]=$u;
  }
  if(!$urls){$stats['mapped_without_pictures']++;continue;}
+ foreach($urls as $u){$sch=parse_url($u,PHP_URL_SCHEME);$schemes[$sch]=isset($schemes[$sch])?$schemes[$sch]+1:1;}
+ if(count($probes)<8 && in_array($stats['offers_match'],array(1,2,3,4,10,100,500,1000),true)){$probes[]=$urls[0];}
  $stats['with_pictures']++;$stats['source_pictures']+=count($urls);
  $summary=(string)$map[$id]['summary'];$old=array();
  preg_match_all('~\\[extimg\\](.*?)\\[/extimg\\]~is',$summary,$matches);
@@ -77,7 +79,20 @@ while($reader->read()){
 $reader->close();unlink($tmp);
 $stats['missing_in_feed']=count($map)-count($seen);
 arsort($hosts);
-echo 'DEEPHOUSE_FEED_AUDIT='.json_encode(array('stats'=>$stats,'image_hosts'=>array_slice($hosts,0,10,true),'examples'=>$sample),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+$checks=array();
+foreach($probes as $i=>$url){
+ $parts=parse_url($url);if(!$parts||strtolower($parts['host'])!=='deephouse.pro')continue;
+ foreach(array('http','https') as $scheme){
+  $candidate=preg_replace('~^https?://~i',$scheme.'://',$url);
+  $ch=curl_init($candidate);
+  curl_setopt_array($ch,array(CURLOPT_NOBODY=>true,CURLOPT_RETURNTRANSFER=>true,CURLOPT_FOLLOWLOCATION=>false,CURLOPT_CONNECTTIMEOUT=>5,CURLOPT_TIMEOUT=>9,CURLOPT_SSL_VERIFYPEER=>true));
+  curl_exec($ch);$checks[]=array('sample'=>$i,'scheme'=>$scheme,'status'=>(int)curl_getinfo($ch,CURLINFO_HTTP_CODE),'error'=>(int)curl_errno($ch),'content_type'=>curl_getinfo($ch,CURLINFO_CONTENT_TYPE));curl_close($ch);
+ }
+}
+$httpsSource=preg_replace('~^http://~','https://',$src);
+$ch=curl_init($httpsSource);curl_setopt_array($ch,array(CURLOPT_NOBODY=>true,CURLOPT_RETURNTRANSFER=>true,CURLOPT_FOLLOWLOCATION=>false,CURLOPT_CONNECTTIMEOUT=>8,CURLOPT_TIMEOUT=>15,CURLOPT_SSL_VERIFYPEER=>true));curl_exec($ch);
+$httpsFeed=array('http'=>(int)curl_getinfo($ch,CURLINFO_HTTP_CODE),'error'=>(int)curl_errno($ch));curl_close($ch);
+echo 'DEEPHOUSE_FEED_AUDIT='.json_encode(array('stats'=>$stats,'image_hosts'=>array_slice($hosts,0,10,true),'image_schemes'=>$schemes,'photo_checks'=>$checks,'https_feed'=>$httpsFeed,'examples'=>$sample),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
 PHP
 chmod 644 "$F"
 su -s /bin/bash web -c "php -d display_errors=0 '$F'"
