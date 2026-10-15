@@ -1,0 +1,117 @@
+<div class="content univimport" style="max-width:1050px;margin:24px auto;padding:0 16px">
+  <h1>Импорт универсальный <span style="color:#888;font-size:14px">v0.1.0</span></h1>
+  <p>Независимый YML-импорт. Фотографии записываются в «Краткое описание» ссылками в формате <code>[extimg]</code>, а не в медиабиблиотеку.</p>
+  <div style="background:#fff5df;border-left:4px solid #e6a237;padding:12px;margin-bottom:15px">
+    Перед первым импортом создайте резервную копию каталога. Новые товары создаются скрытыми. Обновляются только товары, привязанные к этому профилю. Запись по умолчанию выключена.
+  </div>
+  <h3>Профили импорта</h3>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin:12px 0 20px">
+    <a href="{$base_url|escape}" class="button">+ Новый профиль</a>
+    {foreach $profiles as $item}
+      <a href="{$base_url|escape}&amp;id={$item.id|escape:'url'}" class="button {if $profile.id == $item.id}green{/if}">{$item.name|escape}</a>
+    {/foreach}
+  </div>
+  <form id="univ-form" style="background:#fff;padding:20px;border:1px solid #ddd;border-radius:7px">
+    <input type="hidden" name="original_id" value="{if isset($profiles[$profile.id])}{$profile.id|escape}{/if}">
+    <div style="display:grid;grid-template-columns: minmax(220px,1fr) minmax(220px,2fr);gap:12px;align-items:center">
+      <label>ID профиля (латиница)</label><input name="profile[id]" value="{$profile.id|escape}" required {if isset($profiles[$profile.id])}readonly{/if} placeholder="supplier_yml">
+      <label>Название поставщика / профиля</label><input name="profile[name]" value="{$profile.name|escape}" required placeholder="Мой поставщик">
+      <label>Прямая HTTPS-ссылка на YML</label><input name="profile[url]" type="url" value="{$profile.url|escape}" required placeholder="https://example.org/catalog.yml">
+      <label>Префикс артикула (необязательно)</label><input name="profile[sku_prefix]" value="{$profile.sku_prefix|escape}" placeholder="sup-">
+      <label>Тип товара Webasyst (обязательно)</label>
+      <select name="profile[type_id]" required><option value="0">Выберите тип товара</option>
+        {foreach $types as $type}<option value="{$type.id|escape}" {if $type.id == $profile.type_id}selected{/if}>{$type.name|escape}</option>{/foreach}
+      </select>
+      <label>Категория для новых товаров</label>
+      <select name="profile[category_id]"><option value="0">Без назначения</option>
+        {foreach $categories as $category}<option value="{$category.id|escape}" {if $category.id == $profile.category_id}selected{/if}>{$category.name|escape}</option>{/foreach}
+      </select>
+      <label>Склад для остатков</label>
+      <select name="profile[stock_id]"><option value="0">Не выбран</option>
+        {foreach $stocks as $stock}<option value="{$stock.id|escape}" {if $stock.id == $profile.stock_id}selected{/if}>{$stock.name|escape}</option>{/foreach}
+      </select>
+    </div>
+    <h3 style="margin-top:22px">Правила импорта</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      {foreach ['create'=>'Создавать новые товары скрытыми','update'=>'Обновлять свои существующие товары','update_name'=>'Обновлять название','update_description'=>'Обновлять полное описание','update_images'=>'Обновлять ссылки [extimg] в кратком описании','update_prices'=>'Обновлять цены продажи','update_stocks'=>'Обновлять остаток выбранного склада','allow_write'=>'РАЗРЕШИТЬ ЗАПИСЬ В КАТАЛОГ (после проверки)'] as $key=>$label}
+      <label style="cursor:pointer"><input type="hidden" name="profile[{$key|escape}]" value="0"><input type="checkbox" name="profile[{$key|escape}]" value="1" {if $profile[$key]}checked{/if}> {$label|escape}</label>
+      {/foreach}
+    </div>
+    <div style="margin-top:22px"><button class="button green" type="submit">Сохранить настройки</button><span id="univ-save-status" style="margin-left:10px"></span></div>
+  </form>
+  <div style="border:1px solid #ddd;background:#fff;padding:20px;margin-top:16px;border-radius:7px">
+    <h3>Проверка и загрузка</h3>
+    <p>1. Сохраните профиль. 2. Запустите проверку (без изменений в каталоге). 3. Если всё верно, разрешите запись, сохраните настройки и повторите проверку. 4. Запустите импорт.</p>
+    <button type="button" class="button blue" id="univ-preview">Проверить YML (dry-run)</button>
+    <button type="button" class="button" id="univ-apply">Импортировать проверенный файл</button>
+    <div id="univ-run-status" style="white-space:pre-wrap;margin-top:12px;max-height:380px;overflow:auto"></div>
+    {if !empty($report)}
+      <p style="color:#777">Последняя проверка: {if isset($report.count)}товаров {$report.count|escape}, изображений {$report.images|escape}, SHA-256 {$report.sha256|escape}{/if}</p>
+    {/if}
+  </div>
+</div>
+<script>
+(function() {
+  var form = document.getElementById('univ-form');
+  var saveStatus = document.getElementById('univ-save-status');
+  var runStatus = document.getElementById('univ-run-status');
+  var running = false;
+  var endpoint = '{$base_url|escape:'javascript'}';
+  function send(action, body) {
+    return fetch(endpoint + '&action=' + action + '&module=backend', {
+      method: 'POST', credentials: 'same-origin', body: body
+    }).then(function(r) { if (!r.ok) { throw new Error('HTTP ' + r.status); } return r.json(); })
+      .then(function(j) {
+        if (j.status !== 'ok') { throw new Error(Array.isArray(j.errors) ? JSON.stringify(j.errors) : (j.errors || 'Ошибка сервера')); }
+        return j.data;
+      });
+  }
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveStatus.textContent = 'Сохраняем...';
+    send('save', new FormData(form)).then(function(data) {
+      saveStatus.textContent = 'Сохранено. Профиль: ' + data.id;
+      if (!new URLSearchParams(location.search).get('id')) {
+        location.href = endpoint + '&id=' + encodeURIComponent(data.id);
+      }
+    }).catch(function(err) { saveStatus.textContent = 'Ошибка: ' + err.message; });
+  });
+  function profileId() { return form.querySelector('[name="profile[id]"]').value.trim(); }
+  function post(mode, offset) {
+    var b = new FormData(); b.append('id', profileId()); b.append('mode', mode);
+    b.append('offset', offset || 0);
+    return send('run', b);
+  }
+  document.getElementById('univ-preview').addEventListener('click', function() {
+    if (running) return;
+    running = true; runStatus.textContent = 'Загрузка и проверка файла...';
+    post('preview', 0).then(function(d) {
+      runStatus.textContent = 'Проверка пройдена. Товаров: ' + d.count + ', внешних фото: ' + d.images
+        + ', размер: ' + d.bytes + ' байт.\nПримеры:\n' + d.samples.map(function(x) { return x.id + ' - ' + x.name + ' (' + x.images + ' фото)'; }).join('\n');
+    }).catch(function(e) { runStatus.textContent = 'Ошибка проверки: ' + e.message; })
+      .finally(function(){running = false;});
+  });
+  document.getElementById('univ-apply').addEventListener('click', function() {
+    if (running) return;
+    if (!confirm('Применить изменения к каталогу? Требуется предварительная проверка и включённая запись. Новые товары будут скрытыми.')) return;
+    running = true;
+    var offset = 0, created = 0, updated = 0, skipped = 0;
+    function next() {
+      post('apply', offset).then(function(d) {
+        if (d.next_offset <= offset && !d.done) throw new Error('Импорт не продвинулся.');
+        offset = d.next_offset;
+        created += d.created; updated += d.updated; skipped += d.skipped;
+        runStatus.textContent = 'Обработано: ' + offset + '/' + d.total + '\nСоздано: ' + created + '\nОбновлено: ' + updated + '\nПропущено: ' + skipped;
+        if (d.done) {
+          runStatus.textContent += '\nИмпорт завершён.';
+          running = false;
+        } else { next(); }
+      }).catch(function(e) {
+        runStatus.textContent += '\nОШИБКА на позиции ' + offset + ': ' + e.message + '\nПовторный запуск безопасен для уже привязанных товаров, но проверьте журнал.';
+        running = false;
+      });
+    }
+    next();
+  });
+})();
+</script>
