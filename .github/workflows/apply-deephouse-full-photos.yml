@@ -1,0 +1,24 @@
+name: Apply Deephouse full external galleries
+on:
+  push:
+    branches: [feature/universal-yml-import-20261015]
+    paths: [.github/workflows/apply-deephouse-full-photos.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: webasyst-yml-photo-companion
+  cancel-in-progress: false
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      DEEPHOUSE_FULL_APPLY: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Update mapped Deephouse summaries only, after full private backup
+        run: python -u scripts/run_deephouse_full_sync.py
