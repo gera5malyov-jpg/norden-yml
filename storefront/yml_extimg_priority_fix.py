@@ -12,7 +12,7 @@ from stage52_disable_callback import execute
 
 REMOTE=r"""set -euo pipefail
 python3 - <<'PY'
-import hashlib,os,pathlib,shutil,subprocess,tempfile,urllib.parse,json
+import hashlib,os,pathlib,shutil,subprocess,tempfile,urllib.parse,json,re
 from datetime import datetime,timezone
 root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
 f=root/'wa-data/public/shop/themes/pureMegapolis42/product.html'
