@@ -243,19 +243,43 @@ class shopUnivimportPluginImporter
         );
     }
 
+    /**
+     * Store URLs exactly in the format consumed by pureMegapolis42's
+     * product.gallery--extimg renderer. The theme creates the full main
+     * gallery and thumbnails directly from summary without local uploads.
+     *
+     * Replace *all* old extimg blocks (including the historical format with
+     * many URLs inside one block), leaving normal human-written summary intact.
+     */
     private static function summaryImages($summary, $images)
     {
         if (!$images) {
-            return $summary;
+            return (string)$summary;
         }
-        // Replace only [extimg] blocks, preserving all manually written text.
-        $summary = preg_replace('~\s*\[extimg\]\s*https?://[^\[\r\n]+\s*\[/extimg\]\s*~iu', "\n", (string)$summary);
-        $summary = trim($summary);
-        $blocks = array();
+
+        $summary = preg_replace(
+            '~\\s*\\[extimg\\].*?\\[/extimg\\]\\s*~isu',
+            "\n",
+            (string)$summary
+        );
+        if ($summary === null) {
+            throw new RuntimeException('Не удалось обновить блоки изображений.');
+        }
+
+        $urls = array();
         foreach ($images as $url) {
+            $url = trim((string)$url);
+            if ($url !== '' && !in_array($url, $urls, true)) {
+                $urls[] = $url;
+            }
+        }
+
+        $blocks = array();
+        foreach ($urls as $url) {
             $blocks[] = "[extimg]\n".$url."\n[/extimg]";
         }
-        return trim($summary."\n".implode("\n", $blocks));
+        // Exactly one URL per block. Preserve original supplier ordering.
+        return trim(trim($summary)."\n".implode("\n", $blocks));
     }
 
     private static function applyRow($profile, $row, $model)
