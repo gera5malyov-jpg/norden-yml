@@ -54,6 +54,26 @@ for parent in parents:
  files.sort(key=lambda v:v['modified_utc'],reverse=True)
  out.append({'parent':parent.replace(root,'ROOT'),'exists':True,'files':files[:24]})
 print('DEEPHOUSE_CACHE_INVENTORY='+json.dumps(out,ensure_ascii=False))
+import re
+matches=[]
+logs=[
+ root+'/wa-log/shop/plugins/yml.log',
+ root+'/wa-log/shop/plugins/yml/import.log',
+ root+'/wa-log/shop/plugins/yml/diagnostics.log',
+ root+'/wa-log/shop/plugins/yml/report.log',
+]
+for pathname in logs:
+ if not os.path.isfile(pathname):continue
+ try:raw=open(pathname,'rb').read(4000000).decode('utf-8','replace')
+ except Exception:continue
+ flags={
+  'deephouse_mentions':len(re.findall('deephouse',raw,re.I)),
+  'tcat_mentions':len(re.findall('tcat[.]xml',raw,re.I)),
+  'http_source_found':bool(re.search('https?://[^\\\\s<>\\\\"\\\\']*deephouse[.]pro/[^\\\\s<>\\\\"\\\\']*tcat[.]xml',raw,re.I)),
+ }
+ matches.append({'filename':os.path.basename(pathname),'signals':flags})
+print('DEEPHOUSE_SOURCE_LOG_EVIDENCE='+json.dumps(matches,ensure_ascii=False))
+
 PY
 """
 out=execute(REMOTE)
