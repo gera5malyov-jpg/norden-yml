@@ -41,6 +41,11 @@ $info=array('name'=>$p['name'],'profile_id'=>20,'source_scheme'=>isset($parts['s
  'source_host'=>isset($parts['host'])?$parts['host']:null, 'path_suffix'=>substr(isset($parts['path'])?$parts['path']:'',-8),
  'source_type'=>isset($c['source_type'])?$c['source_type']:null,'images_mode'=>isset($c['images'])?$c['images']:null,
  'max_img'=>isset($c['max_img'])?$c['max_img']:null,'has_auth'=>!empty($c['http_login'])||!empty($c['http_auth']),
+ 'url_bytes'=>strlen($u),'server_file_set'=>!empty($c['server_file']),
+ 'server_file_basename'=>!empty($c['server_file'])?basename((string)$c['server_file']):null,
+ 'local_file_set'=>!empty($c['local_file']),
+ 'local_file_basename'=>!empty($c['local_file'])?basename((string)$c['local_file']):null,
+ 'config_hash'=>substr(hash('sha256',(string)$p['config']),0,16),
  'stats'=>$agg,'shared_products'=>(int)$shared,'examples'=>$sample);
 echo 'DEEPHOUSE_PROFILE='.json_encode($info,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
 if($u){
