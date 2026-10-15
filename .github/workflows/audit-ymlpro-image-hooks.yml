@@ -1,0 +1,22 @@
+name: Inspect YML PRO image hooks and profile mapping
+on:
+  push:
+    branches:
+      - feature/universal-yml-import-20261015
+    paths:
+      - 'scripts/audit_ymlpro_image_hooks.py'
+      - '.github/workflows/audit-ymlpro-image-hooks.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -u scripts/audit_ymlpro_image_hooks.py
