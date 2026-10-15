@@ -3,7 +3,7 @@
 
 Permanent SSH keys are never modified.
 """
-import os,json,urllib.parse
+import os,json,urllib.parse,urllib.error
 import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"storefront"))
@@ -23,7 +23,12 @@ target=[x for x in rows if isinstance(x,dict) and x.get("id")==37470 and
 if len(target)!=1:
     print("SSH_CLEANUP=target_absent_or_changed")
     exit(0)
-request_json(url+"37470/","DELETE",None,headers)
+try:
+    request_json(url+"37470/","DELETE",None,headers)
+except urllib.error.HTTPError as err:
+    message=err.read(1200).decode("utf-8","replace")
+    print("SSH_DELETE_DIAGNOSTIC="+json.dumps({"http":err.code,"message":message[:480]},ensure_ascii=False))
+    raise
 print("SSH_CLEANUP=retired_abandoned_temp_key")
 fresh=request_json(url,"GET",None,headers)
 exists=any(isinstance(x,dict) and x.get("id")==37470 for x in fresh.get("entities",[]))
