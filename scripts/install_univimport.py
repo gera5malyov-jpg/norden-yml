@@ -88,6 +88,8 @@ if (file_put_contents($tmp, "<?php\nreturn ".var_export($plugins, true).";\n") =
 }
 if (!rename($tmp, $conf)) { throw new RuntimeException('Cannot replace registry'); }
 REGISTER_PHP
+chmod 755 "$STAGE"
+chmod 644 "$STAGE/register.php"
 chown web:web "$STAGE/register.php"
 su -s /bin/bash web -c "php -d display_errors=1 '$STAGE/register.php'"
 php -r '
