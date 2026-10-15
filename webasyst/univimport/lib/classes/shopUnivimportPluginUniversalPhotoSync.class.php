@@ -206,4 +206,89 @@ class shopUnivimportPluginUniversalPhotoSync
           'sample'=>$sample,'changes'=>$changes);
     }
 
+    private static function testPhotos($changes)
+    {
+        if(!$changes)return true;
+        // Validate one remote image as a guard against feed URLs pointing to error pages.
+        $max=min(3,count($changes));
+        for($i=0;$i<$max;$i++){
+            preg_match('~\\[extimg\\]\\s*(https://[^\\s<]+)~',$changes[$i]['new'],$match);
+            if(!isset($match[1]))return false;
+            $ch=curl_init($match[1]);
+            curl_setopt_array($ch,array(CURLOPT_NOBODY=>true,CURLOPT_RETURNTRANSFER=>true,
+              CURLOPT_FOLLOWLOCATION=>false,CURLOPT_TIMEOUT=>12,CURLOPT_CONNECTTIMEOUT=>7,
+              CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2));
+            curl_exec($ch);
+            $status=(int)curl_getinfo($ch,CURLINFO_HTTP_CODE);
+            $type=(string)curl_getinfo($ch,CURLINFO_CONTENT_TYPE);
+            curl_close($ch);
+            if ($status!==200 && $status!==206) return false;
+            if ($type!=='' && stripos($type,'image/')!==0) return false;
+        }
+        return true;
+    }
+
+    public static function run($profileId,$apply=false)
+    {
+        $profileId=(int)$profileId;
+        if($profileId<1)throw new RuntimeException('Invalid profile ID');
+        $lockdir=wa()->getDataPath(self::LOCK_DIR,false,'shop',true);
+        if(!is_dir($lockdir))waFiles::create($lockdir);
+        $handle=fopen($lockdir.'/profile-'.$profileId.'.lock','c');
+        if(!$handle)throw new RuntimeException('Cannot open profile sync lock');
+        if(!flock($handle,LOCK_EX|LOCK_NB)){
+            fclose($handle);
+            return array('profile_id'=>$profileId,'status'=>'already_running');
+        }
+        try {
+            $db=new waModel();
+            $profile=self::profile($db,$profileId);
+            if(isset($profile['skip']))return array('profile_id'=>$profileId,'status'=>'skipped',
+                'reason'=>$profile['skip']);
+            $plan=self::plan($profileId,$profile,$db);
+            $result=array();
+            foreach($plan as $key=>$value){
+                if($key!=='changes')$result[$key]=$value;
+            }
+            $result['status']=$apply?'apply':'preview';
+            $result['updated']=0;
+            $result['concurrent_skipped']=0;
+            if(!$apply || !$plan['changed'])return $result;
+            if(!self::testPhotos($plan['changes'])){
+                $result['status']='blocked';
+                $result['reason']='photo_reachability_check_failed';
+                return $result;
+            }
+            $backup=self::snapshot($profileId,$plan['changes']);
+            $model=new shopProductModel();
+            foreach($plan['changes'] as $item){
+                $record=$model->getById($item['id']);
+                if(!$record || (string)$record['summary']!==$item['old']){
+                    $result['concurrent_skipped']++;
+                    continue;
+                }
+                $model->updateById($item['id'],array('summary'=>$item['new']));
+                $result['updated']++;
+            }
+            $result['backup_created']=is_file($backup);
+            // Keep source configuration and native pictures intact.
+            return $result;
+        } finally {
+            flock($handle,LOCK_UN);
+            fclose($handle);
+        }
+    }
+
+    public static function profiles()
+    {
+        $model=new waModel();
+        $rows=$model->query('SELECT p.id,p.name,COUNT(m.shop_id) AS linked FROM shop_yml_profiles p '.
+            'LEFT JOIN shop_yml_products m ON m.profile_id=p.id GROUP BY p.id,p.name ORDER BY p.id')->fetchAll();
+        $result=array();
+        foreach($rows as $row){
+            $result[]=array('id'=>(int)$row['id'],'linked'=>(int)$row['linked']);
+        }
+        return $result;
+    }
+
 }
