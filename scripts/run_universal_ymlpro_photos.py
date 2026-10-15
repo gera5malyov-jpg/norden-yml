@@ -80,6 +80,10 @@ su -s /bin/bash web -c "php -d display_errors=0 '$F'"
         success+=1
     except Exception as exc:
         failed+=1
+        message=str(exc)
+        if "UNIVERSAL_PROFILE_ERROR=" in message:
+            part=message.split("UNIVERSAL_PROFILE_ERROR=",1)[1].splitlines()[0][:300]
+            print("UNIVERSAL_PROFILE_ERROR="+part,flush=True)
         print("UNIVERSAL_RUN_FAILED=profile_id:{};category:{}".format(pid,type(exc).__name__),flush=True)
 print("UNIVERSAL_SUMMARY=success:{};failed:{};apply:{}".format(success,failed,int(apply)),flush=True)
 if strict and failed:raise RuntimeError("One or more profiles did not pass preflight")
