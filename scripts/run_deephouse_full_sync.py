@@ -28,7 +28,7 @@ foreach(array_slice($plan['changes'],0,8) as $item){
 echo 'DEEPHOUSE_SYNC_PREFLIGHT='.json_encode(array(
  'mapped'=>$plan['mapped'],'offers'=>$plan['feed_offers'],
  'updated_needed'=>count($plan['changes']),'already_current'=>$plan['unchanged'],
- 'not_in_feed'=>$plan['not_in_feed'],'supplier_image_links'=>$plan['photos'],
+ 'not_in_feed'=>$plan['not_in_feed'],'unmapped_source_offers'=>$plan['unmapped_offers_skipped'],'supplier_image_links'=>$plan['photos'],
  'examples'=>$sample),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
 if ('APPLY_FLAG'==='1') {
  $result=shopUnivimportPluginDeephouseSync::apply($plan);
