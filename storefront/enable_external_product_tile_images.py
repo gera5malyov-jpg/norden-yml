@@ -13,10 +13,10 @@ theme=root/'wa-data/public/shop/themes/pureMegapolis42'
 paths=[theme/'products.html',theme/'list-thumbs.html']
 old={p:p.read_text(encoding='utf-8') for p in paths}
 a=old[paths[0]]
-needle='{if !$_product_image_src}\n{$_extimg_summary'
-new='{if !empty($product.summary)}\n{$_extimg_summary'
+needle='{if !$_product_image_src}'
+new='{if !empty($product.summary)}'
 guard='{if empty($product.image_id) && $_has_extimg}'
-if a.count(needle)!=1 or a.count(guard)!=1:
+if a.count(needle)!=2 or a.count(guard)!=1 or a.find(needle)>a.find('{$_extimg_summary'):
  raise RuntimeError('products.html extimg branch changed; no edits')
 a=a.replace(needle,new,1).replace(guard,'{if $_has_extimg}',1)
 b=old[paths[1]]
