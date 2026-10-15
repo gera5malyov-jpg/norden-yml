@@ -29,7 +29,7 @@ $ids=array();
 foreach(shopUnivimportPluginUniversalPhotoSync::profiles() as $p){
  if($p['linked']>0 && $p['id']%SHARD_COUNT===SHARD_NUMBER)$ids[]=$p['id'];
 }
-echo 'UNIVERSAL_DISCOVERED='.implode(',',$ids)."\\n";
+echo 'UNIVERSAL_DISCOVERED='.implode(',',$ids).PHP_EOL;
 PHP
 chmod 644 "$F"
 su -s /bin/bash web -c "php -d display_errors=0 '$F'"
