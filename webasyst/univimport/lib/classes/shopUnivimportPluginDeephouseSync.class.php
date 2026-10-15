@@ -77,7 +77,7 @@ class shopUnivimportPluginDeephouseSync
         $p = parse_url($url);
         if (!$p || !isset($p['host']) || strtolower($p['host']) !== 'deephouse.pro'
             || !isset($p['scheme']) || !in_array(strtolower($p['scheme']), array('http','https'), true)) {
-            throw new RuntimeException('Unrecognized Deephouse source URL');
+            throw new RuntimeException('Unrecognized Deephouse URL scheme='.(isset($p['scheme'])?$p['scheme']:'none').' host='.(isset($p['host'])?$p['host']:'none').' len='.strlen($url));
         }
         // Valid TLS is available for this same supplier path; do not use plaintext HTTP.
         $url = preg_replace('~^http://~i', 'https://', $url);
