@@ -1,0 +1,88 @@
+name: KIT migration completion API route audit (read-only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kit-migration-route-audit-20261015.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      KIT_OLD: ${{ secrets.YANDEX_KIT_TOKEN }}
+      KIT_NEW: ${{ secrets.KIT_New }}
+    steps:
+      - name: Check storefront and other routes without writes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, urllib.request, urllib.error, json, hashlib
+          tokens={'OLD':os.getenv('KIT_OLD','').strip(),'NEW':os.getenv('KIT_NEW','').strip()}
+          if not tokens['OLD'] or not tokens['NEW'] or tokens['OLD']==tokens['NEW']:
+            raise SystemExit('Two distinct KIT tokens required; no requests made.')
+          api='https://api.kit.yandex.net/api/experimental/v1'
+          paths=[
+            '/constructor/content',
+            '/menu',
+            '/delivery/warehouses/search',
+            '/modal_windows?page=1&per_page=25&sort_by=created_at&sort_order=desc',
+            '/settings/describe/',
+            '/blog/entries/count',
+            '/section-templates'
+          ]
+          store_results={}
+          for label,token in tokens.items():
+            print('STORE',label,flush=True)
+            store_results[label]={}
+            for path in paths:
+              req=urllib.request.Request(api+path,headers={
+                'Authorization':'Bearer '+token,
+                'Accept':'application/json',
+                'User-Agent':'megapolis-kit-completion-audit/1.0',
+              })
+              try:
+                with urllib.request.urlopen(req,timeout=18) as resp:
+                  code=resp.status
+                  data=json.loads(resp.read().decode('utf-8'))
+                out={'http':code}
+                if path=='/constructor/content':
+                  if isinstance(data,dict):
+                    ps=data.get('pages',[]) or []
+                    gs=data.get('global_settings',{}) or {}
+                    out.update({
+                      'pages':len(ps),
+                      'page_titles_count':len({(p.get('alias'),p.get('title')) for p in ps}),
+                      'pages_with_meta':sum(bool(p.get('meta')) for p in ps),
+                      'pages_with_layout':sum(bool(p.get('layout')) for p in ps),
+                      'global_settings_groups':len(gs),
+                      'has_appearance':bool(gs.get('appearance')),
+                      'appearance_hash':hashlib.sha256(json.dumps(gs.get('appearance',{}),sort_keys=True,ensure_ascii=False).encode()).hexdigest()[:16],
+                    })
+                  else:out['kind']=type(data).__name__
+                elif isinstance(data,dict):
+                  out['keys']=list(data.keys())[:8]
+                  for key in ('items','warehouses','modal_windows','section_templates','pages'):
+                    if isinstance(data.get(key),list):out['count']=len(data[key]);break
+                elif isinstance(data,list):out['count']=len(data)
+                else:out['kind']=type(data).__name__
+              except urllib.error.HTTPError as e:
+                out={'http':e.code}
+              except Exception as e:
+                out={'error_type':type(e).__name__}
+              print(path,json.dumps(out,ensure_ascii=False),flush=True)
+              store_results[label][path]=out
+          a=store_results['OLD'].get('/constructor/content',{})
+          b=store_results['NEW'].get('/constructor/content',{})
+          print('STOREFRONT_COMPARE',json.dumps({
+            'both_ok':a.get('http')==200 and b.get('http')==200,
+            'pages_equal':a.get('pages')==b.get('pages') if a.get('http')==b.get('http')==200 else None,
+            'appearance_equal':a.get('appearance_hash')==b.get('appearance_hash') if a.get('http')==b.get('http')==200 else None,
+            'meta_page_count_equal':a.get('pages_with_meta')==b.get('pages_with_meta') if a.get('http')==b.get('http')==200 else None,
+          },ensure_ascii=False),flush=True)
+          PY
