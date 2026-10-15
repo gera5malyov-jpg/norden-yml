@@ -19,7 +19,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 require_once 'wa-config/SystemConfig.class.php';
 waSystem::getInstance(null,new SystemConfig());wa('shop');
 require_once 'wa-apps/shop/plugins/univimport/lib/classes/shopUnivimportPluginDeephouseSync.class.php';
-$plan=shopUnivimportPluginDeephouseSync::prepare();
+try { $plan=shopUnivimportPluginDeephouseSync::prepare(); } catch (Throwable $e) { echo 'DEEPHOUSE_SYNC_ERROR='.get_class($e).' '.substr($e->getMessage(),0,200)."\n"; exit(4); }
 $sample=array();
 foreach(array_slice($plan['changes'],0,8) as $item){
  $sample[]=array('id'=>$item['id'],'photos'=>$item['photos'],
@@ -39,7 +39,7 @@ if ('APPLY_FLAG'==='1') {
 }
 PHP
 chmod 644 "$F"
-su -s /bin/bash web -c "php -d display_errors=0 '$F'"
+su -s /bin/bash web -c "php -d display_errors=1 '$F'"
 """
 out=execute(REMOTE.replace("APPLY_FLAG","1" if APPLY else "0"))
 for line in out.splitlines():
