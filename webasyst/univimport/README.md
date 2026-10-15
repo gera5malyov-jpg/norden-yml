@@ -3,7 +3,7 @@
 Independent, clean-room YML importer with external image links. Plugin ID: `univimport`.
 Does not copy, modify, depend on, or read the separately licensed `yml` (YML PRO) plugin.
 
-## Current 0.1.0 scope
+## Current 0.2.0 scope
 
 - Separate supplier profiles, HTTPS YML URL, type/category/stock and SKU prefix.
 - Stream parse `<offer>` from Yandex.Market YML, including sale price, basic quantity,
@@ -15,6 +15,8 @@ Does not copy, modify, depend on, or read the separately licensed `yml` (YML PRO
   mapped by this profile in `shop_univimport_map`, with matching product type and SKU ownership.
 - External images are kept in the product `summary` (Краткое описание) as
   `[extimg]\nhttps://...\n[/extimg]` and NEVER downloaded to Webasyst image storage.
+- Re-import replaces all obsolete [extimg] blocks (even legacy multi-URL blocks), preserves non-image summary text, de-duplicates URLs and preserves supplier photo order. Tested with 11 photos.
+- Verified on 2026-10-15: the active `pureMegapolis42` theme on profikompany.ru already renders `[extimg]` URLs as full-size main product image plus a thumbnail gallery (Riva CX1361M: 11 thumbnails). No theme modification or duplicate gallery is necessary.
 - Entirely separate profiles, storage and DB map from YML PRO.
 
 ## Important limitations (not full feature parity with commercial YML PRO)
@@ -25,7 +27,7 @@ Does not copy, modify, depend on, or read the separately licensed `yml` (YML PRO
   SKU variants and automatic category creation are not yet implemented.
 - Does not automatically adopt existing unmapped products to prevent cross-supplier updates.
 - `[extimg]` is data in `summary`, NOT native Shop-Script media records.
-  A compatible storefront/KIT renderer must display these URLs as images.
+  The site's active `pureMegapolis42` theme currently reads them. Other themes need an external-image renderer; the Shop-Script native gallery data itself is not populated. Category listing thumbnails may also need separate renderer support.
 - YML `<quantity>`, `<stock>` or `<count>` supported. No declared quantity means
   the stock is left unchanged, except `available="false"` means 0.
 - No automatic zeroing of disappeared SKUs; no destructive changes/deletion.
@@ -41,6 +43,6 @@ Never overwrite or alter `wa-apps/shop/plugins/yml`.
 
 ## Verification
 
-`php -l` all PHP files and `php tests/test_import.php`.
+`php -l` all PHP files, `php tests/test_import.php`, and `php tests/test_gallery.php`.
 Run a dry-run with a representative real YML before enabling `allow_write`.
 Check SKU uniqueness, stock mapping, external image renderer on the actual storefront.
