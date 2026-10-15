@@ -13,14 +13,12 @@ test -f wa-apps/shop/plugins/univimport/templates/actions/backend/Backend.html
 test -f wa-config/apps/shop/plugins.php
 echo 'UNIVIMPORT_FILES=present'
 echo 'UNIVIMPORT_WASYSTEM_PLUGIN_SOURCE_BEGIN'
-sed -n '1370,1408p' wa-system/waSystem.class.php | sed -E 's/^[[:space:]]+/ /'
+sed -n '1370,1408p' wa-system/waSystem.class.php | while IFS= read -r line; do echo "UNIVIMPORT_SOURCE: $line"; done
 echo 'UNIVIMPORT_WASYSTEM_PLUGIN_SOURCE_END'
-echo 'UNIVIMPORT_AUTOLOAD_FILES'
-find wa-cache -maxdepth 5 -iname '*plugin*' -type f 2>/dev/null | grep -E '/shop/|autoload' | head -15 || true
-echo 'UNIVIMPORT_PLUGIN_FILES'
-find wa-apps/shop/plugins/univimport/lib -maxdepth 2 -type f -printf '%P\\n' | head -15
-echo 'UNIVIMPORT_OTHER_PLUGIN_EXAMPLES'
-for id in ozonstocksync megasuppliers; do ls -l "wa-apps/shop/plugins/$id/lib/shop"*.plugin.php 2>/dev/null || true; done
+find wa-apps/shop/plugins/univimport/lib -maxdepth 3 -type f -printf 'UNIVIMPORT_INSTALLED_FILE=%P\\n' | head -20
+for id in ozonstocksync megasuppliers; do
+  find "wa-apps/shop/plugins/$id/lib" -maxdepth 1 -name 'shop*.plugin.php' -printf 'UNIVIMPORT_REFERENCE_FILE=%P\\n' 2>/dev/null | head -3 || true
+done
 cat >/tmp/verify-univimport-run.php <<'VERIFY_PHP'
 <?php
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
