@@ -20,13 +20,19 @@ foreach(array(1199339,1199328,1458758,1458759,1458760,1225888) as $pid){
  $summary=(string)$p['summary'];
  preg_match_all('~\\[extimg\\](.*?)\\[/extimg\\]~is',$summary,$ms);
  $count=count($ms[1]);$first=$count?trim($ms[1][0]):'';
+ $imageStatus=null;
+ if($first && $pid!==1225888){
+   $c=curl_init($first);
+   curl_setopt_array($c,array(CURLOPT_NOBODY=>true,CURLOPT_RETURNTRANSFER=>true,CURLOPT_FOLLOWLOCATION=>true,CURLOPT_MAXREDIRS=>3,CURLOPT_TIMEOUT=>15,CURLOPT_SSL_VERIFYPEER=>true));
+   curl_exec($c);$imageStatus=(int)curl_getinfo($c,CURLINFO_HTTP_CODE);curl_close($c);
+ }
  $url='https://profikompany.ru/'.trim($p['url'],'/').'/';
  $ch=curl_init($url);
  curl_setopt_array($ch,array(CURLOPT_RETURNTRANSFER=>true,CURLOPT_FOLLOWLOCATION=>true,CURLOPT_MAXREDIRS=>5,CURLOPT_TIMEOUT=>30,CURLOPT_SSL_VERIFYPEER=>false));
  $html=curl_exec($ch);$code=curl_getinfo($ch,CURLINFO_HTTP_CODE);$end=curl_getinfo($ch,CURLINFO_EFFECTIVE_URL);curl_close($ch);
  $actual=$html?substr_count($html,'data-extimg='):0;
  $out=array('id'=>$pid,'http'=>(int)$code,'summary_photos'=>$count,
-   'gallery_thumbnails'=>$actual,'route'=>$p['url'],'effective_route'=>parse_url($end,PHP_URL_PATH),'product_page'=>strpos((string)$html,'class="product-page"')!==false,'external_gallery'=>strpos((string)$html,'product-gallery--extimg')!==false,'native_gallery'=>strpos((string)$html,'product-gallery--extimg')===false && strpos((string)$html,'product-gallery')!==false,'main_image'=>strpos((string)$html,'js-extimg-main-img')!==false,
+   'gallery_thumbnails'=>$actual,'route'=>$p['url'],'effective_route'=>parse_url($end,PHP_URL_PATH),'product_page'=>strpos((string)$html,'class="product-page"')!==false,'external_gallery'=>strpos((string)$html,'product-gallery--extimg')!==false,'native_gallery'=>strpos((string)$html,'product-gallery--extimg')===false && strpos((string)$html,'product-gallery')!==false,'main_image'=>strpos((string)$html,'js-extimg-main-img')!==false,'first_photo_http'=>$imageStatus,
    'native_image_unchanged'=>(int)$p['image_id']>0,'published'=>(int)$p['status']===1,'html_title'=>preg_match('~<title[^>]*>(.*?)</title>~is',(string)$html,$tm)?mb_substr(trim(strip_tags($tm[1])),0,115):'missing', 'actual_heading'=>preg_match('~<h1[^>]*>(.*?)</h1>~is',(string)$html,$hm)?mb_substr(trim(strip_tags($hm[1])),0,90):'missing', 'product_name_in_html'=>strpos((string)$html,(string)$p['name'])!==false);
  echo 'YMLPHOTO_LIVE='.json_encode($out,JSON_UNESCAPED_UNICODE)."\n";
 }
