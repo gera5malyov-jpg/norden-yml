@@ -53,11 +53,11 @@ for name in ('lib/classes/import/shopYmlImages.class.php','templates/actions/pro
   before=s[max(0,m.start()-230):m.start()]
   after=s[m.end():m.end()+500]
   words=['download','remote','url','picture','file','summary','description','image','setImage','insertImage','is_file','unlink','copy','rename','save','if','return','options','checkbox','checkbox']
-  d.append({'line':s.count('\\n',0,m.start())+1,
-            'before_tokens':[x for x in words if re.search(r'\\b'+re.escape(x)+r'\\b',before,re.I)],
-            'after_tokens':[x for x in words if re.search(r'\\b'+re.escape(x)+r'\\b',after,re.I)],
+  d.append({'line':s[:m.start()].count(chr(10))+1,
+            'before_tokens':[x for x in words if x.lower() in before.lower()],
+            'after_tokens':[x for x in words if x.lower() in after.lower()],
             'after_calls':list(dict.fromkeys([]))[:12],
-            'has_extimg':'[extimg]' in (before+after)})
+            'has_extimg':'[extimg]' in (before+after), 'ui_label':re.sub(r'<[^>]+>',' ',s[max(0,m.start()-170):m.end()+120]).replace(chr(10),' ')[:220] if name.endswith('.html') else ''})
  print('YML_OPTION_BEHAVIOR_'+name.rsplit('/',1)[-1]+'='+json.dumps(d,ensure_ascii=False))
 
 PY'''
