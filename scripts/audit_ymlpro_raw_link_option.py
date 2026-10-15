@@ -60,8 +60,17 @@ for name in ('lib/classes/import/shopYmlImages.class.php','templates/actions/pro
             'has_extimg':'[extimg]' in (before+after), 'ui_label':re.sub(r'<[^>]+>',' ',s[max(0,m.start()-170):m.end()+120]).replace(chr(10),' ')[:220] if name.endswith('.html') else ''})
  print('YML_OPTION_BEHAVIOR_'+name.rsplit('/',1)[-1]+'='+json.dumps(d,ensure_ascii=False))
 
+t=(base/'templates/actions/profile/tabs/product-tabs/images.html').read_text(encoding='utf-8',errors='replace')
+out=[]
+for n,line in enumerate(t.splitlines()):
+ if n>185:break
+ clean=re.sub(r'<[^>]+>',' ',line).strip()
+ if clean and ('изображ' in clean.lower() or 'скач' in clean.lower() or 'ссыл' in clean.lower() or 'фото' in clean.lower() or ('value=' in line and 'images' in t[max(0,n-12):n+120])):
+  out.append({'line':n+1,'label':clean[:140]})
+print('YML_IMAGE_MODE_LABELS='+json.dumps(out[:55],ensure_ascii=False))
+
 PY'''
 r=execute(REMOTE)
 for l in r.splitlines():
- if l.startswith('YMLKEY_') or l.startswith('YML_OPTION_'):print(l,flush=True)
+ if l.startswith('YMLKEY_') or l.startswith('YML_OPTION_') or l.startswith('YML_IMAGE_MODE_'):print(l,flush=True)
 if 'YMLKEY_RAW_IMAGE_LINKS=' not in r:raise RuntimeError('No image option info')
