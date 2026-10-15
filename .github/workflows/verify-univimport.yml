@@ -5,6 +5,7 @@ on:
       - feature/universal-yml-import-20261015
     paths:
       - '.github/workflows/verify-univimport.yml'
+      - 'scripts/verify_univimport.py'
   workflow_dispatch:
 
 permissions:
