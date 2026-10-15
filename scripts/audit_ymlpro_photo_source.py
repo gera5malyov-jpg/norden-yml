@@ -50,7 +50,7 @@ foreach(array(231,31) as $pid) {
    if(count($info['matches'])>=9)break;
   }
   $r->close();
- }catch(Throwable $e){$info['error'=>0];$info['error']=substr($e->getMessage(),0,160);}
+ }catch(Throwable $e){$info['error']=substr($e->getMessage(),0,160);}
  finally{if(file_exists($tmp))unlink($tmp);}
  echo 'PILOT_FEED='.json_encode($info,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
 }
