@@ -1,0 +1,82 @@
+name: Aletan - weekly YML Pro feed (no KIT)
+
+on:
+  schedule:
+    # Every 7 days: Friday at 03:17 UTC (06:17 Moscow)
+    - cron: '17 3 * * 5'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aletan-yml-weekly.yml'
+      - 'aletan-yml/build_feed.py'
+      - 'aletan-yml/tests/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aletan-standalone-yml
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install minimal public CSV dependency
+        run: python -m pip install 'requests>=2.32,<3'
+      - name: Run feed tests
+        run: python -m unittest discover -s aletan-yml/tests -v
+      - name: Generate feed from supplier CSV
+        env:
+          ALETAN_MIN_ROWS: '750'
+        run: python aletan-yml/build_feed.py
+      - name: Verify XML before publishing
+        run: |
+          python - <<'PY'
+          from collections import Counter
+          import xml.etree.ElementTree as ET
+          root=ET.parse('aletan-yml/aletan.yml').getroot()
+          offers=root.findall('./shop/offers/offer')
+          assert len(offers)>=750, f'Only {len(offers)} rows'
+          codes=[o.get('id') for o in offers]
+          assert len(set(codes))==len(codes), 'Duplicate offer IDs'
+          for o in offers:
+              assert o.findtext('price'), f"No price: {o.get('id')}"
+              assert o.findtext('vendorCode'), f"No SKU: {o.get('id')}"
+              assert o.findtext('picture'), f"No photos: {o.get('id')}"
+              assert o.findtext('url','').startswith('https://aletan.ru/'), f"Non-Aletan URL: {o.get('id')}"
+          print('Validated',len(offers),'Aletan products; all unique, all with price and photo')
+          PY
+      - name: Commit refreshed feed (retry on concurrent main changes)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp aletan-yml/aletan.yml /tmp/aletan-generated.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/aletan-generated.yml aletan-yml/aletan.yml
+            git add aletan-yml/aletan.yml
+            if git diff --cached --quiet; then
+              echo 'Feed is already current'
+              exit 0
+            fi
+            git commit -m 'Refresh Aletan weekly YML Pro feed'
+            if git push origin HEAD:main; then
+              echo 'YML published successfully'
+              exit 0
+            fi
+            echo "Concurrent update detected; retry $attempt"
+          done
+          echo 'Could not publish after three attempts'
+          exit 1
