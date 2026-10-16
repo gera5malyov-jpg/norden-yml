@@ -39,7 +39,7 @@ foreach($tables as $row) {
  if(stripos($tbl,'yml')===false || !preg_match('/(stock|batch|session|run)/i',$tbl))continue;
  $cols=$db->query('SHOW COLUMNS FROM `'.$tbl.'`')->fetchAll();
  $size=$db->query("SELECT TABLE_ROWS,DATA_LENGTH,INDEX_LENGTH FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='".$db->escape($tbl)."'")->fetch();
- $inds=$db->query('SHOW INDEX FROM \`'.$tbl.'\`')->fetchAll();
+ $inds=$db->query('SHOW INDEX FROM `'.$tbl.'`')->fetchAll();
  $idx=array();
  foreach($inds as $x) {
   $name=$x['Key_name'];if(!isset($idx[$name]))$idx[$name]=array('unique'=>(int)$x['Non_unique']===0,'fields'=>array());
