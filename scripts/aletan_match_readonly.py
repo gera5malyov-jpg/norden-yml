@@ -103,6 +103,20 @@ def main():
             wrong_meta.append({"product_id":p.get("id"),"name":p.get("name"),
                                "sku":[x.get("sku") for x in variants(p) if isinstance(x,dict)][:2],
                                "yml_profile_id":p.get("yml_profile_id")})
+    focus_codes={"B1001","B102","B1002","B307"}
+    focus=[]
+    for p in products:
+        vskus=variants(p)
+        name=norm(p.get("name"))
+        linked=source_names.get(name,set())
+        if linked.intersection(focus_codes) or str(p.get("id")) in ("1474987","1443656","1476508"):
+            focus.append({
+                "id":p.get("id"),"name":p.get("name"),"sku":[x.get("sku") for x in vskus if isinstance(x,dict)],
+                "sourceCodes":list(linked)[:5],"yml_id":p.get("yml_id"),
+                "yml_profile_id":p.get("yml_profile_id"),"yml_updated":p.get("yml_updated"),
+                "type_id":p.get("type_id"),"edit_datetime":p.get("edit_datetime"),
+                "status":p.get("status"),"id_1c":p.get("id_1c")})
+    print("B1001_FOCUS",focus[:18])
     print("YML_META_COUNTS",dict(meta),"PROFILE_GROUPS",dict(group))
     print("YML_META_SAMPLES",samples_meta)
     print("YML_MISSING_SAMPLES",wrong_meta)
