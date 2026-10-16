@@ -49,11 +49,36 @@ foreach(array('B1001','B102','B307') as $code) {
   $p=$m->query("SELECT id, name, type_id, yml_id, yml_profile_id, edit_datetime FROM shop_product WHERE yml_id=s:code",array('code'=>$code))->fetchAll();
   echo "PRODUCT ".json_encode($p,JSON_UNESCAPED_UNICODE).PHP_EOL;
 }
-$possible=array('shop_yml_offer_index','shop_yml_offer','shop_yml_profile','shop_yml_profile_settings');
+$possible=array('shop_yml_offer_index','shop_yml_products','shop_yml_profiles','shop_yml_finder_cache');
 foreach($possible as $t) {
   try { $res=$m->query("SHOW COLUMNS FROM `".$t."`")->fetchAll();
     if($res) echo "COLUMNS ".$t." ".json_encode(array_column($res,'Field'),JSON_UNESCAPED_UNICODE).PHP_EOL;
   } catch(Throwable $e){}
+}
+$profileIds=$m->query("SELECT id FROM shop_yml_profiles ORDER BY id DESC LIMIT 15")->fetchAll();
+echo "PROFILE_IDS ".json_encode($profileIds).PHP_EOL;
+$cols=$m->query("SHOW COLUMNS FROM shop_yml_profiles")->fetchAll();
+$names=array_column($cols,'Field');
+$allowed=array_intersect($names,array('id','name','title','source_url','url','link','file_url','file','created_at','updated_at'));
+if($allowed) {
+  $safe=implode(',',array_map(function($n){return "`".$n."`";},$allowed));
+  $rows=$m->query("SELECT $safe FROM shop_yml_profiles ORDER BY id DESC LIMIT 12")->fetchAll();
+  echo "PROFILES ".json_encode($rows,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES).PHP_EOL;
+}
+$rows=$m->query("SELECT profile_id,COUNT(*) n,SUM(linked_shop_id IS NOT NULL) linked FROM shop_yml_offer_index GROUP BY profile_id ORDER BY profile_id DESC LIMIT 15")->fetchAll();
+echo "OFFER_INDEX_COUNTS ".json_encode($rows).PHP_EOL;
+$rows=$m->query("SELECT profile_id,yml_id,linked_shop_id,sku_code,name FROM shop_yml_offer_index WHERE yml_id IN ('B1001','B102','B307') ORDER BY profile_id,yml_id")->fetchAll();
+echo "OFFER_INDEX_EXAMPLES ".json_encode($rows,JSON_UNESCAPED_UNICODE).PHP_EOL;
+$rows=$m->query("SELECT profile_id,COUNT(*) n FROM shop_yml_products GROUP BY profile_id ORDER BY profile_id DESC LIMIT 15")->fetchAll();
+echo "MAPPING_COUNTS ".json_encode($rows).PHP_EOL;
+$sample=$m->query("SHOW COLUMNS FROM shop_yml_products")->fetchAll();
+$mappingCols=array_column($sample,'Field');
+$select=array_intersect($mappingCols,array('id','shop_id','profile_id','yml_id','yml_hash_id','origin','mode'));
+if($select) {
+  $safe=implode(',',array_map(function($n){return "`".$n."`";},$select));
+  $pids=array(1474987,1443656,1474973,1476508);
+  $sql="SELECT $safe FROM shop_yml_products WHERE shop_id IN (".implode(',',$pids).") LIMIT 25";
+  echo "MAPPING_EXAMPLES ".json_encode($m->query($sql)->fetchAll(),JSON_UNESCAPED_UNICODE).PHP_EOL;
 }
 ?>
 PHP
