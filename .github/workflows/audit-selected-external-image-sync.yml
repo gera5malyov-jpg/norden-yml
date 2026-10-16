@@ -1,0 +1,37 @@
+name: Plan latest external photo updates for selected suppliers
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/audit-selected-external-image-sync.yml'
+      - 'scripts/refresh_selected_product_external_images.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: selected-external-photo-readonly-audit
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Plan photo replacement (no writes to Webasyst)
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python -u scripts/refresh_selected_product_external_images.py
+      - name: Preserve preview and rollback planning data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supplier-extimg-audit-${{ github.run_id }}
+          path: |
+            reports/external_image_refresh_20261016.json
+            reports/external_image_refresh_20261016_backup.json.gz
+          if-no-files-found: warn
+          retention-days: 14
