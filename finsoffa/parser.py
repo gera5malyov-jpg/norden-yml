@@ -196,14 +196,14 @@ def presence(soup: BeautifulSoup, structured: dict) -> tuple[str,str]:
     if isinstance(offer, list):
         offer=offer[0] if offer else {}
     schema = clean(offer.get("availability","")).rsplit("/",1)[-1].casefold() if isinstance(offer,dict) else ""
+    if re.search(r"нет\s+в\s+налич|отсутств|распродан|снят\s+с\s+производ",status):
+        return "false", "Нет в наличии"
     if re.search(r"в\s+налич|на\s+склад", status):
         if schema and schema not in ("instock","limitedavailability"):
             raise RuntimeError(f"Contradictory stock: {status} versus {schema}")
         return "true", "В наличии"
     if re.search(r"под\s+заказ|предзаказ|изготовлени",status):
         return "false", "Под заказ"
-    if re.search(r"нет\s+в\s+налич|отсутств|распродан|снят\s+с\s+производ",status):
-        return "false", "Нет в наличии"
     if schema in ("backorder","preorder","outofstock","soldout","discontinued"):
         return "false", "Под заказ" if schema in ("backorder","preorder") else "Нет в наличии"
     if schema=="instock":
