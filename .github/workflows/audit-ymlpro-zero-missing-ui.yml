@@ -2,7 +2,7 @@ name: Audit YML PRO missing product settings
 on:
   push:
     branches: [feature/universal-yml-import-20261015]
-    paths: ['.github/workflows/audit-ymlpro-zero-missing-ui.yml']
+    paths: ['.github/workflows/audit-ymlpro-zero-missing-ui.yml', 'scripts/audit_ymlpro_zero_missing_ui.py']
   workflow_dispatch:
 permissions:
   contents: read
