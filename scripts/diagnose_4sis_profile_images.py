@@ -51,6 +51,30 @@ $pics=$db->query("SELECT p.summary FROM shop_yml_products m JOIN shop_product p 
 foreach($pics as $p){if(preg_match('~\\[extimg\\]\\s*(https?://[^\\s]+)~',(string)$p['summary'],$m)){ $h=parse_url($m[1],PHP_URL_HOST); if($h)$hoststat[$h]=isset($hoststat[$h])?$hoststat[$h]+1:1; }}
 arsort($hoststat);
 $out['existing_photo_hosts']=array_slice($hoststat,0,5,true);
+$candidate=isset($c['bind_to_profile'])?$c['bind_to_profile']:'';
+if(is_string($candidate) && is_file($candidate)){
+ $out['bound_source_file']=array('size_bytes'=>filesize($candidate),'age_hours'=>round((time()-filemtime($candidate))/3600,1),
+   'head_type'=>'unknown','root_element'=>'','offer_count_sample'=>0,'picture_count_sample'=>0,'image_hosts_sample'=>array());
+ $b=fopen($candidate,'rb');$h=fread($b,512);fclose($b);
+ $out['bound_source_file']['head_type']=(strpos(ltrim($h),'<?xml')===0 || strpos(ltrim($h),'<yml_catalog')===0)?'xml':'other';
+ if($out['bound_source_file']['head_type']==='xml'){
+  $reader=new XMLReader();
+  if($reader->open($candidate,null,LIBXML_NONET|LIBXML_COMPACT)){
+   $reader->setParserProperty(XMLReader::SUBST_ENTITIES,false);
+   while($reader->read()){
+    if($reader->nodeType!==XMLReader::ELEMENT)continue;
+    if($out['bound_source_file']['root_element']==='')$out['bound_source_file']['root_element']=$reader->localName;
+    if($reader->localName!=='offer')continue;
+    $out['bound_source_file']['offer_count_sample']++;
+    $xml=$reader->readOuterXML();
+    preg_match_all('~<picture>([^<]+)</picture>~',$xml,$mm);
+    $out['bound_source_file']['picture_count_sample']+=count($mm[1]);
+    foreach($mm[1] as $url){$host=parse_url(html_entity_decode($url),PHP_URL_HOST);if($host)$out['bound_source_file']['image_hosts_sample'][$host]=1;}
+    if($out['bound_source_file']['offer_count_sample']>=5)break;
+   }$reader->close();
+  }
+ }
+}
 $fields=array_keys($c);$out['image_keys']=array_values(array_filter($fields,function($k){return preg_match('/image|photo|picture|source|file|url/i',$k);}));
 echo 'FOURSIS_SOURCE='.json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES).PHP_EOL;
 PHP
