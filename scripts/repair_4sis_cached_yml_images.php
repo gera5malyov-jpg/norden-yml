@@ -20,7 +20,7 @@ if(!is_string($filepath)||!is_file($filepath)||filesize($filepath)<1000000) {
     throw new RuntimeException('4sis cached YML source unavailable');
 }
 $products=$model->query(
-  "SELECT id,name,type_id,yml_id,yml_profile_id,summary,sku_id,price,compare_price,purchase_price,count FROM shop_product WHERE type_id=11 AND yml_profile_id=19 AND (summary='' OR summary IS NULL)"
+  "SELECT id,name,type_id,yml_id,yml_profile_id,summary,sku_id,price,compare_price,count FROM shop_product WHERE type_id=11 AND yml_profile_id=19 AND (summary='' OR summary IS NULL)"
 )->fetchAll();
 if(count($products)<50 || count($products)>85)throw new RuntimeException('Unexpected 4sis blank product count '.count($products));
 $byCode=array();$bad=array();
@@ -84,7 +84,7 @@ $changed=0;$failed=array();
 foreach($rows as $row) {
   $id=$row['id'];
   $before=$model->query(
-    "SELECT id,yml_id,type_id,yml_profile_id,summary,sku_id,price,compare_price,purchase_price,count FROM shop_product WHERE id=i:id",
+    "SELECT id,yml_id,type_id,yml_profile_id,summary,sku_id,price,compare_price,count FROM shop_product WHERE id=i:id",
     array('id'=>$id))->fetch();
   if(!$before || (int)$before['type_id']!==11 || (int)$before['yml_profile_id']!==19
      || (string)$before['yml_id']!==$row['code']
@@ -92,21 +92,19 @@ foreach($rows as $row) {
      || (int)$before['sku_id']!==$row['sku_id']
      || (string)$before['price']!==$row['price']
      || (string)$before['compare_price']!==$row['compare_price']
-     || (string)$before['purchase_price']!==$row['purchase_price']
      || (string)$before['count']!==$row['stock']) {
       $failed[]=array('id'=>$id,'reason'=>'concurrent_change');continue;
   }
   try {
     $modelProduct->updateById($id,array('summary'=>$row['new_summary']));
     $after=$model->query(
-      "SELECT summary,type_id,yml_id,sku_id,price,compare_price,purchase_price,count FROM shop_product WHERE id=i:id",
+      "SELECT summary,type_id,yml_id,sku_id,price,compare_price,count FROM shop_product WHERE id=i:id",
       array('id'=>$id))->fetch();
     if(!$after || (string)$after['summary']!==$row['new_summary']
       || (int)$after['type_id']!==11 || (string)$after['yml_id']!==$row['code']
       || (int)$after['sku_id']!==$row['sku_id']
       || (string)$after['price']!==$row['price']
       || (string)$after['compare_price']!==$row['compare_price']
-      || (string)$after['purchase_price']!==$row['purchase_price']
       || (string)$after['count']!==$row['stock']) {
         $failed[]=array('id'=>$id,'reason'=>'verification_mismatch');continue;
     }
