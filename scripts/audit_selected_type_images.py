@@ -19,7 +19,7 @@ def skus(o):
     x=o.get("skus")
     if isinstance(x,dict):x=list(x.values())
     return [str(r.get("sku","")) for r in x if isinstance(r,dict)] if isinstance(x,list) else []
-def extimg_count(s):return len(re.findall(r"\\[extimg\\]",str(s or ""),re.I))
+def extimg_count(s):return str(s or "").lower().count("[extimg]")
 def audit(wa,t):
     out=[];offset=0;limit=1000
     while True:
