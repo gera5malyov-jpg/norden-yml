@@ -150,13 +150,13 @@ try {
     $codes=array();
     foreach($missing as $r){$codes[(string)$r['yml_id']]=(int)$r['id'];}
     $reader=new XMLReader();
-    $matches=0;$withPhotos=0;$seen=0;$noPhotos=0;
+    $matches=0;$withPhotos=0;$seen=0;$noPhotos=0;$seenCodes=array();
     if($reader->open($local,null,LIBXML_NONET)) {
       while($reader->read()){
         if($reader->nodeType!==XMLReader::ELEMENT || $reader->localName!=='offer')continue;
         $id=(string)$reader->getAttribute('id');
         if(!isset($codes[$id]))continue;
-        $matches++;
+        $matches++;$seenCodes[$id]=true;
         $doc=$reader->readOuterXML();
         $photos=substr_count($doc,'<picture');
         if($photos>0)$withPhotos++;else $noPhotos++;
@@ -167,6 +167,8 @@ try {
     echo "FOURSIS_SOURCE_MISSING_MATCHES ".json_encode(array(
         'blank_products'=>count($missing),'id_matches'=>$matches,
         'matched_with_pictures'=>$withPhotos,'matched_without_pictures'=>$noPhotos)).PHP_EOL;
+    $unmatched=array_diff_key($codes,$seenCodes);
+    echo "FOURSIS_ONE_UNMATCHED ".json_encode($unmatched,JSON_UNESCAPED_UNICODE).PHP_EOL;
  }
 } catch(Throwable $e) {echo "FOURSIS_SOURCE_ERROR ".get_class($e).":".substr($e->getMessage(),0,130).PHP_EOL;}
 ?>
