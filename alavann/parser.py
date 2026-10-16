@@ -6,7 +6,7 @@ from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urljoin, urlparse, urldefrag
+from urllib.parse import urljoin, urlparse, urldefrag, parse_qs
 import requests
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
@@ -67,6 +67,77 @@ def sitemap_urls():
     if len(urls) < 200:
         raise RuntimeError(f"Unsafe sitemap: only {len(urls)} URL candidates")
     return sorted(urls)
+
+# The vendor's sitemap is stale: it omits current products visible in category
+# listings (e.g. ALV1242001 and ALV1235000). Always traverse live pagination.
+CATALOG_ROOTS = (
+    "/mebel/", "/screens/", "/rakoviny/", "/unitazy-kompakt/",
+    "/smesiteli-dlya-rakoviny/", "/zerkala/", "/polotentsesushiteli/",
+    "/steklyannye-shtorki-dlya-vannoj/",
+)
+
+def listing_page_count(soup, section_url):
+    """Find the last numbered page, including the site's last-page shortcut."""
+    end = urlparse(section_url).path.rstrip("/") + "/"
+    pages = [1]
+    for a in soup.select("a[href]"):
+        p = urlparse(urljoin(section_url,a.get("href","")))
+        if p.netloc not in ("alavann-shop.ru","www.alavann-shop.ru"):
+            continue
+        if p.path.rstrip("/") + "/" != end:
+            continue
+        raw = parse_qs(p.query).get("page",[])
+        if raw and raw[0].isdigit():
+            pages.append(int(raw[0]))
+    count = max(pages)
+    if count > 250:
+        raise RuntimeError(f"Suspiciously large page count: {section_url} {count}")
+    return count
+
+def listing_product_links(soup):
+    return {u for a in soup.select("a.product__name[href]")
+            if (u := canonical(a.get("href")))}
+
+def catalog_urls():
+    """Enumerate all live products, not just old sitemap entries.
+
+    Root category pages contain the full product inventory, including fresh
+    product cards absent from sitemap.xml. Use every pagination page.
+    Fail the run (retain old YML) if any page cannot be loaded.
+    """
+    all_pages = []
+    all_urls = set()
+    for section in CATALOG_ROOTS:
+        root = BASE + section
+        soup = BeautifulSoup(get(root).content,"lxml")
+        count = listing_page_count(soup,root)
+        first = listing_product_links(soup)
+        if count > 1 and not first:
+            raise RuntimeError(f"Empty first catalog page: {root}")
+        all_urls.update(first)
+        all_pages.extend(f"{root}?page={n}" for n in range(2,count+1))
+        print(f"Listing {section}: {count} pages, page 1: {len(first)} products",flush=True)
+    errors = []
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        futures = {pool.submit(get,url):url for url in all_pages}
+        for i,future in enumerate(as_completed(futures),1):
+            url = futures[future]
+            try:
+                soup = BeautifulSoup(future.result().content,"lxml")
+                links = listing_product_links(soup)
+                if not links:
+                    errors.append(f"Empty catalog page {url}")
+                all_urls.update(links)
+            except Exception as exc:
+                errors.append(f"{url}: {exc}")
+            if i%30==0:
+                print(f"Catalog pages {i}/{len(all_pages)}, live URLs={len(all_urls)}",flush=True)
+    if errors:
+        raise RuntimeError(f"Incomplete catalog listings: {errors[:8]}")
+    if len(all_urls)<200:
+        raise RuntimeError(f"Unsafe live catalog: only {len(all_urls)} URLs")
+    print(f"Live catalog: {len(all_urls)} products from {len(all_pages)+len(CATALOG_ROOTS)} pages",flush=True)
+    return all_urls
 
 def objects(soup):
     def walk(o):
@@ -206,8 +277,11 @@ def feed(products):
     return b'<?xml version="1.0" encoding="UTF-8"?>\n'+ET.tostring(root,encoding="utf-8")+b"\n"
 
 def main():
-    urls=sitemap_urls()
-    print(f"Sitemap candidates: {len(urls)}",flush=True)
+    mapped=set(sitemap_urls())
+    current=catalog_urls()
+    urls=sorted(mapped | current)
+    print(f"Sitemap candidates: {len(mapped)}; live catalog: {len(current)}; "
+          f"newly discovered: {len(current-mapped)}; combined: {len(urls)}",flush=True)
     products={}
     errors=[]
     duplicates=0
@@ -240,6 +314,12 @@ def main():
         except (ET.ParseError,OSError): old=0
         if old and len(products) < old*0.8:
             raise RuntimeError(f"Unsafe catalog shrink {old} -> {len(products)}")
+        # Large replacement is blocked even if a similar number of different
+        # SKUs would mask accidental catalog loss.
+        previous={el.get("id") for el in ET.parse(OUT).getroot().findall("./shop/offers/offer")}
+        missing=previous-products.keys()
+        if previous and len(missing)>len(previous)*0.2:
+            raise RuntimeError(f"Unsafe SKU churn: {len(missing)}/{len(previous)} disappeared")
     result=feed(list(products.values()))
     ET.fromstring(result)
     OUT.parent.mkdir(parents=True,exist_ok=True)
