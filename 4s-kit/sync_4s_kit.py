@@ -213,8 +213,11 @@ def parse_feed():
                 })
             e.clear()
         if stack: stack.pop()
-    if len(offers)<2500:
-        raise RuntimeError(f'4 Сезона feed looks incomplete: {len(offers)} offers')
+    # The supplier sitemap may temporarily omit products. Below this floor,
+    # fail before touching KIT; for 1800..2499, the main loop enters safe
+    # partial-feed mode after comparing with the live KIT catalog.
+    if len(offers)<1800:
+        raise RuntimeError(f'4 Сезона feed looks severely incomplete: {len(offers)} offers')
     return categories,offers
 
 def warehouse_map(rows):
@@ -555,6 +558,18 @@ def main():
         add_index(by_article,s(v.get('sku')),v)
         add_index(by_name,s(v.get('name')),v)
 
+    # Never treat sitemap omissions as deleted KIT products. Continue updating
+    # matched prices/stocks but skip creation and missing-item stock zeroing.
+    partial_feed=len(offers)<max(2500, int(len(managed)*0.90))
+    if partial_feed:
+        existing_only=True
+        print(
+            f'PARTIAL FEED PROTECTION: {len(offers)} offers vs '
+            f'{len(managed)} managed KIT variants; only existing cards '
+            'updated, absent stock zeroing disabled.',
+            flush=True,
+        )
+
     # Detect pre-existing exact duplicates before any write. Same non-empty supplier
     # code + same normalized name must resolve to a single canonical card.
     duplicate_variant_ids=set()
@@ -604,6 +619,9 @@ def main():
         'started_at':datetime.now(timezone.utc).isoformat(),
         'existing_only':existing_only,
         'force_media_refresh':force_media_refresh,
+        'partial_feed_protection':partial_feed,
+        'feed_to_kit_ratio':round(len(offers)/max(1,len(managed)),4),
+        'missing_stock_zeroing_disabled':partial_feed,
         'feed_offers_raw':len(raw_offers),'feed_unique_source_codes':len(offers),
         'feed_duplicate_article_name_identities':len(feed_duplicates),
         'feed_price_conflicts':len(feed_price_conflicts),
@@ -951,6 +969,8 @@ def main():
         if vid in seen_ids:
             continue
         absent_ids.append(vid)
+        if partial_feed:
+            continue
         for title in WAREHOUSE_TITLES:
             wid=wh[title]
             if current_stock(v,wid)!=0:
@@ -958,7 +978,8 @@ def main():
     if zero:
         kit.bulk_stocks(list(zero.values()))
 
-    report['absent_to_zero']=len(absent_ids)
+    report['absent_deferred_due_to_partial_feed']=len(absent_ids) if partial_feed else 0
+    report['absent_to_zero']=0 if partial_feed else len(absent_ids)
     report['absent_stock_updates']=len(zero)
     report['duplicate_variants_quarantined']=len(duplicate_variant_ids)
     report['finished_at']=datetime.now(timezone.utc).isoformat()
