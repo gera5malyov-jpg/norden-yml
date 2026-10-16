@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """DECcon public product pages -> content-only YML for Webasyst YML Pro.
 
-No price, stock, quantity, availability or source-store branding is published.
+No price, numeric stock quantity, or source-store branding is published.
+Availability is based on visible stock/production status, never schema InStock alone.
 Images are ORIGINAL public /upload/iblock or /upload/uf files, not compressed
 thumbnails. Existing baked-in watermarks are not edited or removed.
 """
@@ -190,6 +191,36 @@ def make_description(name: str, properties: dict[str,str]) -> str:
         blocks.append(f"{k}: {v}.")
     return clean(" ".join(blocks))
 
+def availability(soup: BeautifulSoup) -> tuple[bool,str]:
+    """Derive real ready-stock status, avoiding site's misleading schema InStock.
+
+    Its schema often says InStock for items with 15-20 days manufacture lead
+    times. A made-to-order item is NOT physically in stock.
+    """
+    stock_el=soup.select_one(".new_product_price .new_product_stock") or soup.select_one(".new_product_stock")
+    status=clean(stock_el.get_text(" ",strip=True)).lower() if stock_el else ""
+    buttons=[clean(x.get_text(" ",strip=True)).lower()
+             for x in soup.select(".new_product_buttons a")]
+    schema_el=soup.select_one(".new_product_price meta[itemprop='availability']")
+    schema=clean(schema_el.get("content","")).lower() if schema_el else ""
+    if re.search(r"снят[аоы]?\s+с\s+производств|не\s+производит", status):
+        return False, "Снято с производства"
+    if re.search(r"нет\s+в\s+налич|отсутствует|распродан", status):
+        return False, "Нет в наличии"
+    if re.search(r"срок\s+изготов|изготовлени|под\s+заказ|на\s+заказ", status):
+        return False, "Под заказ"
+    if any("под заказ" in b for b in buttons):
+        return False, "Под заказ"
+    if re.search(r"есть\s+в\s+налич|в\s+налич|на\s+складе|готов[аоы]?\s+к\s+отгрузке", status):
+        return True, "В наличии"
+    if schema.rsplit("/",1)[-1] in ("outofstock","discontinued","soldout"):
+        return False, "Нет в наличии"
+    # Ellipsis instead of stock data is common on obsolete listings.
+    if status in ("...", "…", "нет данных", "уточняйте") and buttons:
+        return False, "Под заказ"
+    # Do not guess stock from a buy button or schema.org InStock.
+    raise RuntimeError(f"Unrecognized DECcon stock status {status!r} and schema {schema!r}")
+
 def parse(url: str) -> dict:
     html=fetch(url)
     soup=BeautifulSoup(html,"html.parser")
@@ -209,13 +240,15 @@ def parse(url: str) -> dict:
         raise RuntimeError(f"Missing product ID in URL: {url}")
     source_id=id_match.group(1)
     props=specs(soup)
+    ready, status=availability(soup)
     photos=images(soup)
     if not name or not photos:
         raise RuntimeError(f"Missing name/images: {url}")
     return {
         "id": "deccon-"+source_id, "name": name, "sku": sku,
         "category": category(url), "photos": photos, "props": props,
-        "description": make_description(name,props)
+        "description": make_description(name,props),
+        "available": ready, "availability_label": status
     }
 
 def serialize(products: list[dict]) -> bytes:
@@ -231,7 +264,7 @@ def serialize(products: list[dict]) -> bytes:
         ET.SubElement(categories,"category",id=mapping[slug]).text=title
     offers=ET.SubElement(shop,"offers")
     for p in sorted(products,key=lambda x:int(x["id"].split("-")[-1])):
-        offer=ET.SubElement(offers,"offer",id=p["id"])
+        offer=ET.SubElement(offers,"offer",id=p["id"],available=str(p["available"]).lower())
         ET.SubElement(offer,"name").text=p["name"]
         ET.SubElement(offer,"categoryId").text=mapping[p["category"][0]]
         if p["sku"]:
@@ -242,7 +275,9 @@ def serialize(products: list[dict]) -> bytes:
         ET.SubElement(offer,"description").text=p["description"]
         for key,val in sorted(p["props"].items()):
             ET.SubElement(offer,"param",name=key).text=val
-        # No original product URL, source company, retailer prices, stock or vendor.
+        ET.SubElement(offer,"param",name="Наличие").text=p["availability_label"]
+        # Availability is binary only. No original product URL, source company,
+        # retailer prices, fabricated numeric stock quantity or vendor.
     ET.indent(root,space="  ")
     return ET.tostring(root,encoding="utf-8",xml_declaration=True)
 
@@ -271,7 +306,12 @@ def validate(data: bytes, previous: Path | None = None) -> tuple[int,int,int]:
         if not imgs:
             raise RuntimeError(f"No photos: {ident}")
         photos+=len(imgs)
-        for x in ("price","available","quantity","vendor","url"):
+        if o.get("available") not in ("true","false"):
+            raise RuntimeError(f"Missing or invalid available flag: {ident}")
+        availability_tags=[p for p in o.findall("param") if p.get("name")=="Наличие"]
+        if len(availability_tags)!=1 or not clean(availability_tags[0].text):
+            raise RuntimeError(f"Missing availability description: {ident}")
+        for x in ("price","quantity","vendor","url"):
             if o.find(x) is not None:
                 raise RuntimeError(f"Forbidden supplier/commerce field {x}: {ident}")
         for x in ("name","description"):
@@ -307,7 +347,8 @@ def main() -> None:
         f.write(data)
         tmp=Path(f.name)
     os.replace(tmp,OUT)
-    print(f"DECCON_SUCCESS offers={count} pictures={photos} vendor_codes={skus}",flush=True)
+    available=sum(bool(x["available"]) for x in products)
+    print(f"DECCON_SUCCESS offers={count} pictures={photos} vendor_codes={skus} available={available} not_ready={count-available}",flush=True)
 
 if __name__=="__main__":
     main()
