@@ -313,11 +313,12 @@ def main():
             try:
                 html=future.result()
                 refs=variant_links(html,base)
+                m=re.search(r'data-fl-item-id="(\d+)"',html)
+                selected=m.group(1) if m else None
                 for oid,details in refs.items():
-                    url=offer_url(base,oid)
                     if oid in offers and offers[oid][0]!=base:
                         raise RuntimeError("Offer ID collision for "+oid)
-                    offers[oid]=(base,details,html if clean(BeautifulSoup(html,"html.parser").select_one("[data-fl-item-id]").get("data-fl-item-id"))==oid else None)
+                    offers[oid]=(base,details,html if selected==oid else None)
             except Exception as exc:
                 failures.append(base+" "+str(exc))
             if i%25==0:print("METTA_MODELS %d/%d offers=%d failures=%d" % (i,len(models),len(offers),len(failures)),flush=True)
