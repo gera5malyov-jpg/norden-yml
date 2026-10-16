@@ -1,69 +1,17 @@
-name: Алетан — Webasyst без цены один раз
+# Disabled on 2026-10-16 at the user's request.
+# Aletan must no longer be written to KIT or Webasyst by these legacy pipelines.
+# A separate read-only supplier feed is maintained for YML Pro.
+name: DISABLED - aletan-webasyst-no-price-live-once.yml
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/aletan-webasyst-no-price-live-once.yml'
+  workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: aletan-webasyst-no-price-live-once
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  sync:
+  disabled:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    timeout-minutes: 240
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Установить зависимости
-        run: pip install requests openpyxl
-
-      - name: Проверить синтаксис
-        run: python -m py_compile webasyst/sync_aletan_to_webasyst.py aletan-kit/sync_aletan_catalog_full.py aletan-kit/sync_aletan_kit.py webasyst/client.py
-
-      - name: Контрольный dry-run
-        env:
-          WEBASYST_BASE_URL: https://profikompany.ru
-          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-          ALETAN_WEBASYST_WRITE_DELAY: '0.65'
-        run: python webasyst/sync_aletan_to_webasyst.py --dry-run
-
-      - name: Применить в Webasyst
-        env:
-          WEBASYST_BASE_URL: https://profikompany.ru
-          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-          ALETAN_WEBASYST_WRITE_DELAY: '0.65'
-        run: python webasyst/sync_aletan_to_webasyst.py
-
-      - name: Сохранить итоговый отчёт
-        if: always()
-        shell: bash
-        run: |
-          git config user.name github-actions
-          git config user.email actions@github.com
-          cp webasyst/last_aletan_webasyst_sync.json /tmp/aletan-wa.json 2>/dev/null || true
-          git fetch origin main
-          git reset --hard origin/main
-          if [ -f /tmp/aletan-wa.json ]; then
-            cp /tmp/aletan-wa.json webasyst/last_aletan_webasyst_sync.json
-          fi
-          git add webasyst/last_aletan_webasyst_sync.json 2>/dev/null || true
-          git diff --cached --quiet && exit 0
-          git commit -m 'Обновить отчёт Алетан Webasyst без закупочной цены'
-          git push origin HEAD:main || true
-
-# rerun 2026-09-22 no-price live
+      - run: echo 'Legacy Aletan KIT/Webasyst sync is disabled. Use Aletan YML Pro feed.'
