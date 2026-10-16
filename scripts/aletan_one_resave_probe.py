@@ -29,7 +29,7 @@ print("BEFORE",{k:v for k,v in before.items() if k!="sku"},"SKU_CODES",
       [x.get("sku") for x in before["sku"] if isinstance(x,dict)])
 if before["yml_id"] not in (None,"") or str(before["yml_profile_id"])!="373":
     raise RuntimeError("This test product was linked already; do not overwrite")
-if not before["name"] or before["images"]<1:
+if not before["name"]:
     raise RuntimeError("Product incomplete, skip no-op save")
 result=CLIENT.call("shop.product.update",http_method="POST",
                    params={"id":PRODUCT_ID},
