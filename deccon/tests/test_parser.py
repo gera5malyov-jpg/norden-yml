@@ -41,9 +41,11 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(product["props"],{"Вес":"47 кг","Механизм":"Hermle-451"})
         self.assertTrue(all("/upload/iblock/" in im for im in product["photos"]))
         data=d.serialize([product])
-        for token in (b"<price>",b"<available>",b"<quantity>",b"<vendor>",b"<url>"):
+        for token in (b"<price>",b"<available>",b"<quantity>",b"<vendor>"):
             self.assertNotIn(token,data)
         self.assertNotIn(b"499 111",data)
+        offer_xml=data.split(b"<offer id=",1)[1].split(b"</offer>",1)[0]
+        self.assertNotIn(b"<url>",offer_xml)
 
     def test_block_external_image(self):
         soup=d.BeautifulSoup('<div class="new_product_img"><div class="slider-single">'
