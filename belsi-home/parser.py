@@ -159,17 +159,86 @@ def option_map(soup):
                 mapping[(prop,str(item.get("data-onevalue")))]=value
     return mapping
 
+def js_block(raw, marker, opener="{", closer="}"):
+    """Extract one balanced JS object/array, respecting quotes, escaped quotes,
+    inline HTML and literal newlines in Bitrix's not-quite-valid JS strings."""
+    start=raw.find(marker)
+    if start<0:
+        return None
+    start=raw.find(opener,start+len(marker))
+    if start<0:
+        return None
+    depth=0
+    quoted=None
+    escaped=False
+    for i in range(start,len(raw)):
+        c=raw[i]
+        if quoted:
+            if escaped:
+                escaped=False
+            elif c=="\\":
+                escaped=True
+            elif c==quoted:
+                quoted=None
+            continue
+        if c in ("'",'"'):
+            quoted=c
+        elif c==opener:
+            depth+=1
+        elif c==closer:
+            depth-=1
+            if depth==0:
+                return raw[start:i+1]
+    raise RuntimeError("Unbalanced website script around "+marker)
+
+def js_string(raw,key,default=""):
+    pattern=r"'"+re.escape(key)+r"':'((?:\\.|[^'\\])*)'"
+    m=re.search(pattern,raw,re.S)
+    if not m:
+        return default
+    return m.group(1).replace("\\/","/").replace("\\'","'").replace("\\\\","\\")
+
+def partial_offer(raw):
+    """Parse only fields needed by YML without JSON-decoding embedded HTML."""
+    obj={}
+    obj["ID"]=js_string(raw,"ID")
+    obj["NAME"]=js_string(raw,"NAME")
+    obj["CAN_BUY"]=bool(re.search(r"'CAN_BUY':true",raw))
+    tree=js_block(raw,"'TREE':")
+    obj["TREE"]={("PROP_"+x):y for x,y in re.findall(r"'PROP_(\d+)':'([^']+)'",tree or "")}
+    value=js_block(raw,"'PRICE':")
+    price = (js_string(value or "","DISCOUNT_VALUE") or js_string(value or "","VALUE"))
+    obj["PRICE"]={"DISCOUNT_VALUE":price} if price else {}
+    props=re.search(r"'DISPLAY_PROPERTIES':'((?:\\.|[^'\\])*)'",raw,re.S)
+    obj["DISPLAY_PROPERTIES"]=props.group(1) if props else ""
+    slider=js_block(raw,"'SLIDER':","[","]")
+    obj["SLIDER"]=[{"SRC":m} for m in re.findall(r"'SRC':'((?:\\.|[^'\\])*)'",slider or "",re.S)]
+    # For standalone products, PICT contains primary image, but not other images.
+    pict=js_block(raw,"'PICT':")
+    obj["PICT"]={"SRC":js_string(pict or "","SRC")}
+    return obj
+
 def extract_offer_script(html):
-    # Read the actual Bitrix JSON-style JS object, not currently selected
-    # HTML content: JS OFFERS exposes all colors with separate media and prices.
     key="new JCCatalogElement("
     start=html.find(key)
     if start<0:
         return None
-    result=chompjs.parse_js_object(html[start+len(key):])
-    if not isinstance(result,dict) or not result.get("PRODUCT"):
-        raise RuntimeError("Cannot parse Bitrix offers object")
-    return result
+    raw=html[start+len(key):]
+    product_type=js_string(raw[:600],"PRODUCT_TYPE")
+    block=js_block(raw,"'PRODUCT':")
+    if not block:
+        raise RuntimeError("Missing PRODUCT in Bitrix script")
+    product=partial_offer(block)
+    # Simpler standalone products use PRODUCT_TYPE=1 and no OFFERS.
+    # Multicolor products use product_type=3 with all actual variant SKUs.
+    offers_block=js_block(raw,"'OFFERS':","[","]")
+    offers=[]
+    if offers_block:
+        positions=[x.start() for x in re.finditer(r"\{'ID':'\d+','NAME':",offers_block)]
+        for idx,pos in enumerate(positions):
+            piece=offers_block[pos:(positions[idx+1] if idx+1<len(positions) else len(offers_block))]
+            offers.append(partial_offer(piece))
+    return {"PRODUCT":product,"PRODUCT_TYPE":product_type,"OFFERS":offers}
 
 def category_from_soup(soup,url):
     breadcrumbs=[clean(x.get_text(" ",strip=True)) for x in soup.select(".breadcrumb__title")]
