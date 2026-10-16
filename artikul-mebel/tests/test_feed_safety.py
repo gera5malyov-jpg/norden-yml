@@ -62,3 +62,15 @@ def test_yml_also_cleans_description_fields():
     assert "Звоните" not in (offer.findtext("description") or "")
     assert "Каркас из стали" in (offer.findtext("description") or "")
     assert not any(x.get("name")=="Телефон" for x in offer.findall("param"))
+
+
+def test_reported_watermark_resize_cache_is_replaced_with_source():
+    resized = ("https://artikul-mebel.ru/upload/resize_cache/iblock/ca6/"
+               "800_800_1e1296507e9734c99fdc196eb7750a71d/"
+               "xebv0soqeqdt05e3rwovlw9ab9vpqn4l.jpg")
+    source = ("https://artikul-mebel.ru/upload/iblock/ca6/"
+              "xebv0soqeqdt05e3rwovlw9ab9vpqn4l.jpg")
+    soup=BeautifulSoup(
+        '<div class="wrapper-big-picture"><img data-big-src="'+resized+'"></div>',
+        "html.parser")
+    assert parser.extract_pictures(soup,soup)==[source]
