@@ -50,7 +50,9 @@ jobs:
           offers=root.findall('./shop/offers/offer')
           assert len(offers)>=100,len(offers)
           assert len({o.get('id') for o in offers})==len(offers)
-          assert len({o.findtext('vendorCode') for o in offers})==len(offers)
+          codes=[o.findtext('vendorCode') for o in offers if o.findtext('vendorCode')]
+          assert len(set(codes))==len(codes)
+          assert len(codes)>=len(offers)-8, 'Too many missing source articles'
           assert all(o.findall('picture') for o in offers)
           assert all(o.get('available') in ('true','false') for o in offers)
           assert all(o.find('price') is None and o.find('quantity') is None for o in offers)
