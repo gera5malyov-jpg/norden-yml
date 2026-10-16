@@ -9,8 +9,9 @@ Attributes: factual technical details, including mechanisms, case material, weig
 Photos: all genuine original gallery images under /upload/iblock/ or /upload/uf/ (not resized/cache/webp previews). They remain remote image URLs.
 Photo watermark note: if the origin JPEG already contains a baked-in watermark, this parser does NOT erase pixels. Separate clean authorized source images are required for that.
 Supplier: site company/address/phones/dealer information, source product URL, ad copy are removed. Genuine product model and brand in name remain.
-Safety: no import of price, quantity, available or stock; never pretend displayed retail prices are procurement prices. This is a CONTENT-ONLY intermediate YML.
-The source site's schema InStock may be inconsistent with "Под заказ", so stock is deliberately excluded. Do not update stocks in Webasyst with this feed.
+Availability: each offer has available="true" only for explicit website label "Есть в наличии"; available="false" for "Под заказ", lead-time manufacture, "Нет в наличии" and discontinued. Each offer also has param name="Наличие" with a Russian status. We DO NOT take schema.org InStock as truth because items made to order are frequently marked InStock there.
+Safety: no import of price or numeric quantity. Do not mistake site's retail prices for purchase prices or an available flag for confirmed warehouse stock units. This is a CONTENT+AVAILABILITY intermediate YML.
+Webasyst: map the offer available attribute to availability as appropriate in YML Pro, but leave purchasing/pricing and numeric stock quantity mappings switched OFF; no 1-item inventory is fabricated. If website text becomes unrecognizable, old YML stays and the workflow fails.
 Mass loss or failures block publication; old YML is retained on failures. No older KIT/Webasyst integrations are modified.
 
 After the first successful workflow completes, the permanent content URL is:
