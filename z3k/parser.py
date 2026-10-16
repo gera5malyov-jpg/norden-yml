@@ -85,6 +85,10 @@ def normalize(url):
         return None
     if not parsed.path.startswith("/shop/") or not parsed.path.endswith("/"):
         return None
+    # Service URLs also occur inside the sitemap and must never be scraped as products.
+    if parsed.path.split("/")[2] in {"cart","search","compare_items","yandex_market",
+                                     "yandex_realty","favorites","checkout","orders"}:
+        return None
     # Strip page tracking, fragments, and language/query duplication.
     return BASE+parsed.path
 
@@ -176,7 +180,9 @@ def parse_product(html,url):
     if not price:available=False
     photos=images(soup)
     if not photos:
-        raise RuntimeError("Product "+native_id+" has no photos")
+        # Some genuine HostCMS cards have no supplier image. Keep their
+        # price, availability, article and specs without inventing artwork.
+        print("Z3K_NO_PHOTO product="+native_id+" url="+url,flush=True)
     # The sitemap is hierarchical; last parent section identifies the category.
     category=urlsplit(url).path.rstrip("/").split("/")[-2].replace("-"," ").capitalize()
     return {
@@ -225,7 +231,7 @@ def verify(data):
     if len(offers)<MIN_OFFERS or len(set(ids))!=len(ids):
         raise RuntimeError("Missing products or duplicated HostCMS IDs")
     for o in offers:
-        if not o.findtext("name") or not o.findtext("vendorCode") or not o.findall("picture"):
+        if not o.findtext("name") or not o.findtext("vendorCode"):
             raise RuntimeError("Incomplete product "+str(o.get("id")))
         if CENSOR.search(o.findtext("description") or ""):
             raise RuntimeError("Supplier advertisement leaked")
