@@ -142,9 +142,16 @@ def variant_links(html,base):
     if not element:
         raise RuntimeError("No selected SKU on "+base)
     selected=clean(element.get("data-fl-item-id"))
-    if not selected.isdigit():
-        raise RuntimeError("Invalid selected SKU "+base)
-    found.setdefault(selected,{"color":"","sku":"","image":"","back":""})
+    if selected.isdigit():
+        found.setdefault(selected,{"color":"","sku":"","image":"","back":""})
+    if not found:
+        # A standalone accessory may have no ?offer= selector at all.
+        # Use the immutable numeric Bitrix product ID at the URL tail.
+        match=re.search(r"_(\\d+)$",urlsplit(base).path.rstrip("/").split("/")[-1])
+        if not match:
+            raise RuntimeError("Neither offers nor numeric product ID: "+base)
+        selected=match.group(1)
+        found[selected]={"color":"","sku":"","image":"","back":"","standalone":True}
     if len(found)>120:
         raise RuntimeError("Unexpected number of variants "+base)
     return found
@@ -213,8 +220,11 @@ def parse_offer(html,base,requested_id,known):
     if track is None:
         raise RuntimeError("Offer tracking data missing")
     actual=clean(track.get("data-fl-item-id"))
-    if actual!=requested_id:
+    if not actual and not known.get(requested_id,{}).get("standalone"):
+        raise RuntimeError("Selected offer ID absent: "+requested_id)
+    if actual and actual!=requested_id:
         raise RuntimeError("Wrong variant: requested %s got %s" % (requested_id,actual))
+    actual=requested_id
     price_text=clean(track.get("data-price"))
     try:price=float(price_text.replace(" ","").replace(",","."))
     except ValueError:raise RuntimeError("Missing price for SKU "+actual)
@@ -245,7 +255,7 @@ def parse_offer(html,base,requested_id,known):
         raise RuntimeError("Variant has no photo "+actual)
     group_id="metta-group-"+base.rstrip("/").split("/")[-1]
     category=base.rstrip("/").split("/")[-2].replace("_"," ").capitalize()
-    return {"id":"metta-"+actual,"group":group_id,"url":offer_url(base,actual),
+    return {"id":"metta-"+actual,"group":group_id,"url":base if selected.get("standalone") else offer_url(base,actual),
             "name":name,"sku":code or "METTA-"+actual,"price":price,
             "available":available and price>0,"category":category,
             "params":p,"photos":paths,"description":describe(name,p)}
@@ -291,7 +301,8 @@ def validate(payload):
             raise RuntimeError("Incomplete SKU "+str(x.get("id")))
         if CONTACT.search(x.findtext("description") or ""):
             raise RuntimeError("Supplier advertising in description "+str(x.get("id")))
-        if "?offer=" not in (x.findtext("url") or ""):
+        url=x.findtext("url") or ""
+        if "?offer=" not in url and product_base(url)!=url:
             raise RuntimeError("Unstable offer link "+str(x.get("id")))
     if OUTPUT.exists():
         old=ET.parse(OUTPUT).getroot().findall("./shop/offers/offer")
@@ -318,7 +329,7 @@ def main():
                 for oid,details in refs.items():
                     if oid in offers and offers[oid][0]!=base:
                         raise RuntimeError("Offer ID collision for "+oid)
-                    offers[oid]=(base,details,html if selected==oid else None)
+                    offers[oid]=(base,details,html if selected==oid or details.get("standalone") else None)
             except Exception as exc:
                 failures.append(base+" "+str(exc))
             if i%25==0:print("METTA_MODELS %d/%d offers=%d failures=%d" % (i,len(models),len(offers),len(failures)),flush=True)
