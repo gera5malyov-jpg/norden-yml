@@ -5,6 +5,10 @@ on:
     # Weekly full 4 Seasons refresh: Sunday 00:17 UTC (03:17 Moscow).
     - cron: '17 0 * * 0'
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'parse_4s.py'
 
 permissions:
   contents: write
@@ -50,7 +54,7 @@ jobs:
               ['git','show','HEAD:4s-mebel.yml'],capture_output=True,check=True,
           ).stdout
           old_count=len(ET.fromstring(previous).findall('.//offers/offer'))
-          min_count=max(1800,int(old_count*0.80))
+          min_count=max(1800,int(old_count*0.90))
           if len(offers)<min_count:
               raise SystemExit(f'Feed unexpectedly shrank: {old_count} -> {len(offers)} (min {min_count})')
           ids=[x.get('id') for x in offers]
