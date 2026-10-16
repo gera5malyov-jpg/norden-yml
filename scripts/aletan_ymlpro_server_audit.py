@@ -89,6 +89,20 @@ $bad=$m->query("SELECT COUNT(*) FROM shop_yml_products y LEFT JOIN shop_product 
 echo "ALETAN_LINK_INCONSISTENT_PRODUCTS ".(int)$bad.PHP_EOL;
 $countOffers=(int)$m->query("SELECT COUNT(*) FROM shop_yml_offer_index WHERE profile_id=373")->fetchField();
 echo "ALETAN_INDEX_ENTRIES ".$countOffers.PHP_EOL;
+$countAll=(int)$m->query("SELECT COUNT(*) FROM shop_product WHERE type_id=202")->fetchField();
+$owned=(int)$m->query("SELECT COUNT(*) FROM shop_product WHERE type_id=202 AND yml_profile_id=373")->fetchField();
+$empty=(int)$m->query("SELECT COUNT(*) FROM shop_product WHERE type_id=202 AND yml_profile_id=373 AND (yml_id IS NULL OR yml_id='')")->fetchField();
+$dup=(int)$m->query("SELECT COUNT(*) FROM (SELECT yml_id FROM shop_product WHERE type_id=202 AND yml_profile_id=373 AND yml_id IS NOT NULL AND yml_id<>'' GROUP BY yml_id HAVING COUNT(*)>1) d")->fetchField();
+$unbound=(int)$m->query("SELECT COUNT(*) FROM shop_product p LEFT JOIN shop_yml_products m ON m.profile_id=373 AND m.shop_id=p.id WHERE p.type_id=202 AND p.yml_profile_id=373 AND m.shop_id IS NULL")->fetchField();
+$matched=(int)$m->query("SELECT COUNT(*) FROM shop_product p JOIN shop_yml_products m ON m.profile_id=373 AND m.shop_id=p.id WHERE p.type_id=202 AND p.yml_profile_id=373")->fetchField();
+$createdRecently=(int)$m->query("SELECT COUNT(*) FROM shop_product WHERE type_id=202 AND create_datetime>='2026-10-16 20:00:00'")->fetchField();
+$zeroPrices=(int)$m->query("SELECT COUNT(*) FROM shop_product WHERE type_id=202 AND price=0")->fetchField();
+echo "ALETAN_CURRENT_STATUS ".json_encode(array(
+    'type202_products'=>$countAll,'profile373_products'=>$owned,'empty_yml_ids'=>$empty,
+    'duplicate_yml_id_groups'=>$dup,'linked_product_count'=>$matched,
+    'unlinked_product_count'=>$unbound,'created_after_20'=>$createdRecently,
+    'zero_prices'=>$zeroPrices
+),JSON_UNESCAPED_UNICODE).PHP_EOL;
 $latest=$m->query("SELECT id,name,sku_id,edit_datetime,yml_id FROM shop_product WHERE type_id=202 ORDER BY id DESC LIMIT 4")->fetchAll();
 echo "ALETAN_RECENT_PRODUCTS ".json_encode($latest,JSON_UNESCAPED_UNICODE).PHP_EOL;
 $profile=$m->query("SELECT id,name,config FROM shop_yml_profiles WHERE id=373")->fetch();
