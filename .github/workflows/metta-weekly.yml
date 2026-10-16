@@ -1,0 +1,75 @@
+name: METTA - weekly YML Pro all colors
+on:
+  schedule:
+    - cron: '27 6 * * 0' # Sunday 09:27 Moscow
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'metta/parser.py'
+      - 'metta/tests/**'
+      - 'metta/requirements.txt'
+      - '.github/workflows/metta-weekly.yml'
+permissions:
+  contents: write
+concurrency:
+  group: metta-all-variants-weekly
+  cancel-in-progress: true
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    defaults:
+      run:
+        working-directory: metta
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: metta/requirements.txt
+      - name: Install parser dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Test stable variant identification and cleaning
+        run: python -m pytest -q
+      - name: Generate METTA variant-specific YML
+        env:
+          WORKERS: '8'
+          MIN_OFFERS: '120'
+          OUTPUT: catalog.yml
+        run: python -u parser.py
+      - name: Validate complete YML file
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import parser
+          offers,photos=parser.validate(Path('catalog.yml').read_bytes())
+          print('METTA_VALIDATED offers=%d photos=%d' % (offers,photos))
+          PY
+      - name: Publish stable YML
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp catalog.yml /tmp/metta-ready.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/metta-ready.yml catalog.yml
+            git add catalog.yml
+            if git diff --cached --quiet; then
+              echo 'METTA_UNCHANGED'
+              exit 0
+            fi
+            git commit -m 'Refresh METTA weekly all-variants YML'
+            if git push origin HEAD:main; then
+              echo 'METTA_PUBLISHED'
+              exit 0
+            fi
+            echo "Retry concurrent push $attempt"
+          done
+          exit 1
