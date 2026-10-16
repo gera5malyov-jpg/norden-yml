@@ -189,6 +189,8 @@ def load_one(url: str) -> list[dict]:
         raise RuntimeError(f'Incomplete variants for {url}: {len(products)}/{len(refs)}')
     return products
 
+_core.sanitize_description = sanitize_description
+_core.clean_params = clean_params
 _core.parse_product = parse_product
 _core.extract_pictures = extract_pictures
 _core.compose_description = compose_description
