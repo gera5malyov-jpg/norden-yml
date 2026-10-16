@@ -1,0 +1,41 @@
+name: Repair external image links of selected supplier types
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refresh-selected-product-images.yml'
+      - 'scripts/refresh_selected_product_external_images.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: external-product-image-summary-repair
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 175
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install API dependency
+        run: pip install requests
+      - name: Compile guarded updater
+        run: python -m py_compile scripts/refresh_selected_product_external_images.py
+      - name: Plan image repairs without writing
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python -u scripts/refresh_selected_product_external_images.py
+      - name: Save recoverable backup and audit before any possible writes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supplier-image-summary-backup-${{ github.run_id }}
+          path: |
+            reports/external_image_refresh_20261016_backup.json.gz
+            reports/external_image_refresh_20261016.json
+          retention-days: 30
+          if-no-files-found: error
