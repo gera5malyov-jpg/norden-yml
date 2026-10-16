@@ -71,7 +71,7 @@ def get(url):
             res.raise_for_status()
             if len(res.content)<(150 if urlsplit(url).path.endswith(".xml") else 4000):
                 raise RuntimeError("Truncated supplier response")
-            res.encoding=res.apparent_encoding or "utf-8"
+            res.encoding="utf-8"
             return res.text
         except Exception as exc:
             last=exc
