@@ -19,7 +19,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: artikul-mebel-yml-update
+  group: artikul-mebel-yml-safe-v2
   cancel-in-progress: true
 
 jobs:
