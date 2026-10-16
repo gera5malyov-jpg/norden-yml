@@ -80,6 +80,20 @@ if($select) {
   $sql="SELECT $safe FROM shop_yml_products WHERE shop_id IN (".implode(',',$pids).") LIMIT 25";
   echo "MAPPING_EXAMPLES ".json_encode($m->query($sql)->fetchAll(),JSON_UNESCAPED_UNICODE).PHP_EOL;
 }
+echo "ALETAN_ALL_LINKS ".json_encode($m->query("SELECT profile_id,yml_id,shop_id,origin FROM shop_yml_products WHERE profile_id=373 ORDER BY yml_id LIMIT 30")->fetchAll(),JSON_UNESCAPED_UNICODE).PHP_EOL;
+$profile=$m->query("SELECT id,name,config FROM shop_yml_profiles WHERE id=373")->fetch();
+if($profile) {
+  $conf=json_decode($profile['config'] ?? '',true);
+  if(is_array($conf)) {
+    $filtered=array();
+    foreach($conf as $k=>$v) {
+      if(preg_match('/^(match_|ymlid_|sku|offer_|product_|find_|scope_)/',$k)) {
+        $filtered[$k]=is_scalar($v)?$v:(is_array($v)?'[array]':'[complex]');
+      }
+    }
+    echo "PROFILE_MATCH_CONFIG ".json_encode($filtered,JSON_UNESCAPED_UNICODE).PHP_EOL;
+  }
+}
 ?>
 PHP
 chown web:web /tmp/aletan_ymlpro_readonly.php
