@@ -57,7 +57,7 @@ while($reader->read()) {
     $rows[]=array('id'=>(int)$p['id'],'code'=>$code,'old_summary'=>(string)$p['summary'],
       'new_summary'=>implode("\n",$lines),'photo_count'=>count($urls),
       'price'=>(string)$p['price'],'compare_price'=>(string)$p['compare_price'],
-      'purchase_price'=>(string)$p['purchase_price'],'stock'=>(string)$p['count'],
+      'stock'=>(string)$p['count'],
       'sku_id'=>(int)$p['sku_id']);
 }
 $reader->close();
