@@ -49,7 +49,7 @@ for rel in files:
   if not re.search(r'count|stocks|stock_id|stockCount|inventory|available|quantity',txt,re.I):continue
   if len(result)>=38:break
   method=re.search(r'(?:->|::)([A-Za-z_][A-Za-z0-9_]*)\s*\(',txt)
-  keys=re.findall(r"""['"]([A-Za-z_][A-Za-z0-9_]{1,45})['"]""",txt)
+  keys=[]
   vars=re.findall(r'\$([a-zA-Z_][a-zA-Z0-9_]*)',txt)
   result.append({'line':line,'keys':keys[:6],'vars':list(dict.fromkeys(vars))[:9],'called':method.group(1) if method else None})
  print('YML289_STOCK_FLOW='+json.dumps({'file':rel,'references':result},ensure_ascii=False))
