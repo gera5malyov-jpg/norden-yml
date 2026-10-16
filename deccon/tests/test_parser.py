@@ -48,7 +48,7 @@ class ParserTests(unittest.TestCase):
         for token in (b"<price>",b"<available>",b"<quantity>",b"<vendor>"):
             self.assertNotIn(token,data)
         self.assertNotIn(b"499 111",data)
-        self.assertIn(b\'available="true"\',data)
+        self.assertIn(b'available="true"',data)
         self.assertIn("Наличие".encode(),data)
         offer_xml=data.split(b"<offer id=",1)[1].split(b"</offer>",1)[0]
         self.assertNotIn(b"<url>",offer_xml)
