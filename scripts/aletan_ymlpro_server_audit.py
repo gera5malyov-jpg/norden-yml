@@ -105,6 +105,22 @@ echo "ALETAN_CURRENT_STATUS ".json_encode(array(
 ),JSON_UNESCAPED_UNICODE).PHP_EOL;
 $latest=$m->query("SELECT id,name,sku_id,edit_datetime,yml_id FROM shop_product WHERE type_id=202 ORDER BY id DESC LIMIT 4")->fetchAll();
 echo "ALETAN_RECENT_PRODUCTS ".json_encode($latest,JSON_UNESCAPED_UNICODE).PHP_EOL;
+foreach($m->query("SELECT id,name,config FROM shop_yml_profiles")->fetchAll() as $pr) {
+  $cfg=json_decode($pr['config'] ?? '',true);
+  if(!is_array($cfg)) continue;
+  $tid=(int)($cfg['product_type'] ?? 0);
+  if(!in_array($tid,array(11,79,63,59,202),true)) continue;
+  $meta=array('id'=>$pr['id'],'name'=>$pr['name'],'type_id'=>$tid);
+  foreach ($cfg as $k=>$v) {
+    if(!preg_match('/source|file|url|image|picture|photo|identif/i',(string)$k))continue;
+    if(is_string($v) && preg_match('~^https?://~',$v)) {
+      $meta[$k.'_host']=parse_url($v,PHP_URL_HOST);
+    } else if(is_scalar($v)) {
+      $meta[$k.'_kind']=gettype($v);
+    }
+  }
+  echo "SUPPLIER_PROFILE_META ".json_encode($meta,JSON_UNESCAPED_UNICODE).PHP_EOL;
+}
 $profile=$m->query("SELECT id,name,config FROM shop_yml_profiles WHERE id=373")->fetch();
 if($profile) {
   $conf=json_decode($profile['config'] ?? '',true);
