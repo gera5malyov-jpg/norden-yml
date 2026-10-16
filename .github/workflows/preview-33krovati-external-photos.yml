@@ -1,0 +1,30 @@
+name: Preview 33krovati external photos
+on:
+  push:
+    branches: [feature/universal-yml-import-20261015]
+    paths: [.github/workflows/preview-33krovati-external-photos.yml]
+permissions:
+  contents: read
+concurrency:
+  group: webasyst-yml-photo-companion
+  cancel-in-progress: false
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      UNIVERSAL_PROFILE_IDS: '289'
+      UNIVERSAL_APPLY: '0'
+      UNIVERSAL_STRICT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate external photo companion PHP syntax
+        run: php -l webasyst/univimport/lib/classes/shopUnivimportPluginUniversalPhotoSync.class.php
+      - name: Install independent image companion
+        run: python -u scripts/install_univimport.py
+      - name: Check all 4 Seasons matches without writing product data
+        run: python -u scripts/run_universal_ymlpro_photos.py
