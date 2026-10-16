@@ -44,9 +44,25 @@ jobs:
           vendors={str(x.findtext('vendor') or '').strip() for x in offers}
           if vendors != {'4 Сезона'}:
               raise SystemExit(f'Unexpected vendors: {vendors}')
-          print(f'YML valid: {len(offers)} brand 4 Сезона offers')
+          # Reject drastic accidental catalog truncation.
+          import subprocess
+          previous=subprocess.run(
+              ['git','show','HEAD:4s-mebel.yml'],capture_output=True,check=True,
+          ).stdout
+          old_count=len(ET.fromstring(previous).findall('.//offers/offer'))
+          min_count=max(1800,int(old_count*0.80))
+          if len(offers)<min_count:
+              raise SystemExit(f'Feed unexpectedly shrank: {old_count} -> {len(offers)} (min {min_count})')
+          ids=[x.get('id') for x in offers]
+          if len(ids)!=len(set(ids)):
+              raise SystemExit('Duplicate offer IDs in refreshed feed')
+          if any(not x.findtext('price') for x in offers):
+              raise SystemExit('An offer is missing price')
+          print(f'YML valid: {len(offers)} brand 4 Сезона offers; previous {old_count}')
           PY
 
+      # Publish the feed only. A separate workflow_run job updates KIT after
+      # this workflow completes successfully. No direct Webasyst writes here.
       - name: Commit YML
         run: |
           git config user.name "github-actions[bot]"
@@ -59,25 +75,3 @@ jobs:
           else
             echo "No feed changes"
           fi
-
-      - name: Sync prices and stocks to Yandex KIT
-        env:
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-        run: python 4s-kit/sync_4s_kit.py
-
-      - name: Sync marked 4S products to Webasyst type 333
-        env:
-          WEBASYST_BASE_URL: https://profikompany.ru
-          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-          DRY_RUN: '0'
-          FOURS_WEBASYST_WRITE_DELAY: '0.80'
-        run: python webasyst/sync_4s_kit_to_webasyst.py
-
-      - name: Print Webasyst sync report
-        if: always()
-        run: cat webasyst/last_4s_kit_sync_report.json || true
-
-      - name: Print KIT sync report
-        if: always()
-        run: cat 4s-kit/last_sync_report.json || true
