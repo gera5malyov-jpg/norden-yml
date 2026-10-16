@@ -2,9 +2,9 @@
   "status": "ok",
   "feed_url_requested": "http://deephouse.pro/upload/cutcat.xml",
   "feed_url_effective": "http://deephouse.pro/upload/cutcat.xml",
-  "source_products": 1049,
+  "source_products": 1022,
   "source_categories": 7,
-  "stock_exact_products": 1049,
+  "stock_exact_products": 1022,
   "stock_boolean_products": 0,
   "stock_missing_products": 0,
   "price_missing_products": 0,
@@ -85,7 +85,7 @@
       "sku": "DEEP-64204+60217",
       "name": "Стул Мартин светло-бежевая ткань ножки черные",
       "price": "21990",
-      "stock": 30,
+      "stock": 21,
       "stock_source": "stock",
       "stock_is_exact": true,
       "category_id": "28",
@@ -145,14 +145,14 @@
       "pictures_count": 11
     }
   ],
-  "processed": 1049,
-  "created": 1,
-  "updated_existing": 1048,
+  "processed": 1022,
+  "created": 0,
+  "updated_existing": 1022,
   "duplicate_variants_archived": 0,
-  "images_uploaded": 1,
-  "image_errors": 93,
-  "price_updates": 1048,
-  "stock_updates": 2096,
+  "images_uploaded": 0,
+  "image_errors": 92,
+  "price_updates": 1022,
+  "stock_updates": 2044,
   "errors": [],
   "warnings": [
     "DEEP-64111+64110: image failed https://deephouse.pro/upload/iblock/e10/oyykb9u7osg9lk7z91llw1pgwp5u1huc/stulvermontvrashchayushchiysyasvetlokorichnevayaekokozhanozhkichernye.jpeg: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
@@ -246,8 +246,7 @@
     "DEEP-64194: image failed https://deephouse.pro/upload/iblock/b64/f0ipk5enopxo3llci1okqs0zm09kirh0/IMG_4208.jpg: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
     "DEEP-66921: image failed https://deephouse.pro/upload/iblock/59a/3w1nuefmbo9hs1peyug33w1uaxlw7ri4.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
     "DEEP-66921: image failed https://deephouse.pro/upload/iblock/1ff/c5drg0bsjvydaw1knigf2cmvsjtpzy16.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
-    "DEEP-66921: image failed https://deephouse.pro/upload/iblock/bba/hk31ilqi8h8fgj9v750zd0yoh33rsz47.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
-    "DEEP-66634+63629: image failed https://deephouse.pro/upload/iblock/651/1me4nkw08ln50h9cxw5l0jns7y9l3pfk.jpg: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    "DEEP-66921: image failed https://deephouse.pro/upload/iblock/bba/hk31ilqi8h8fgj9v750zd0yoh33rsz47.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
   ],
   "complete": true
 }
