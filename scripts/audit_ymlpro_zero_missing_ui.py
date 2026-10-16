@@ -39,7 +39,7 @@ for f in (root/'lib').rglob('*.php'):
  if len(docs)>90:break
  if re.search('missing|stock|product|import|settings|filter|option',name,re.I):
   funs=re.findall(r'\bfunction\s+([A-Za-z_]\w*)\s*\(',s)
-  keys=re.findall(r"""['"]([a-z][a-z0-9_]{3,65})['"]""",s)
+  keys=re.findall("['\\\"]([a-z][a-z0-9_]{3,65})['\\\"]",s)
   chosen=sorted(set(k for k in keys if pat.search(k)))
   docs.append({'file':name,'methods':[x for x in funs if pat.search(x)][:30],'keys':chosen[:35]})
 print('YMLOPT_CLASSES='+json.dumps(docs[:80],ensure_ascii=False))
