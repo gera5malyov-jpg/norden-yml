@@ -1,0 +1,81 @@
+name: Finsoffa - weekly content and availability YML Pro
+
+on:
+  schedule:
+    - cron: '30 4 * * 0' # Weekly Sunday UTC
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'finsoffa/parser.py'
+      - 'finsoffa/requirements.txt'
+      - 'finsoffa/tests/**'
+      - '.github/workflows/finsoffa-yml-weekly.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: finsoffa-weekly-yml
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: finsoffa/requirements.txt
+      - name: Install scraper dependencies
+        run: pip install -r finsoffa/requirements.txt
+      - name: Validate model-specific variants, stock mapping and sanitization
+        run: python -m unittest discover -s finsoffa/tests -v
+      - name: Scrape sitemap and every catalog page
+        env:
+          FINSOFFA_OUTPUT: finsoffa/catalog-content.yml
+          FINSOFFA_MIN_OFFERS: '100'
+          FINSOFFA_WORKERS: '4'
+        run: python -u finsoffa/parser.py
+      - name: Validate entire generated feed
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root=ET.parse('finsoffa/catalog-content.yml')
+          offers=root.findall('./shop/offers/offer')
+          assert len(offers)>=100,len(offers)
+          assert len({o.get('id') for o in offers})==len(offers)
+          assert len({o.findtext('vendorCode') for o in offers})==len(offers)
+          assert all(o.findall('picture') for o in offers)
+          assert all(o.get('available') in ('true','false') for o in offers)
+          assert all(o.find('price') is None and o.find('quantity') is None for o in offers)
+          print('FINSOFFA_VALIDATED offers',len(offers),'photos',sum(len(o.findall('picture')) for o in offers))
+          PY
+      - name: Publish only a fully validated YML
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp finsoffa/catalog-content.yml /tmp/finsoffa-checked.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/finsoffa-checked.yml finsoffa/catalog-content.yml
+            git add finsoffa/catalog-content.yml
+            if git diff --cached --quiet; then
+              echo 'FINSOFFA_UNCHANGED'
+              exit 0
+            fi
+            git commit -m 'Refresh Finsoffa full YML Pro content and availability'
+            if git push origin HEAD:main; then
+              echo 'FINSOFFA_PUBLISHED'
+              exit 0
+            fi
+          done
+          exit 1
