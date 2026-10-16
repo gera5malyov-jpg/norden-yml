@@ -1,90 +1,17 @@
-name: Алетан → KIT — цены раз в 2 недели
+# Disabled on 2026-10-16 at the user's request.
+# Aletan must no longer be written to KIT or Webasyst by these legacy pipelines.
+# A separate read-only supplier feed is maintained for YML Pro.
+name: DISABLED - aletan-kit-sync.yml
 
 on:
-  schedule:
-    # GitHub cron не умеет "каждые 14 дней".
-    # Проверяем каждый вторник; live-запуск проходит только если
-    # с последнего успешного обновления прошло >= 14 дней.
-    - cron: '35 12 * * 2'
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: 'Только проверка, без изменения цен'
-        required: true
-        default: true
-        type: boolean
-      force:
-        description: 'Игнорировать 14-дневный интервал'
-        required: true
-        default: false
-        type: boolean
-  push:
-    branches: [main]
-    paths:
-      - 'aletan-kit/sync_aletan_catalog_full.py'
-      - 'aletan-kit/sync_aletan_kit.py'
-      - '.github/workflows/aletan-kit-sync.yml'
 
 permissions:
-  contents: write
-
-concurrency:
-  group: aletan-kit-sync-v3
-  cancel-in-progress: true
+  contents: read
 
 jobs:
-  sync:
+  disabled:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    timeout-minutes: 300
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Установить зависимости
-        run: |
-          python -m pip install --disable-pip-version-check requests openpyxl playwright
-          python -m playwright install --with-deps chromium
-
-      - name: Сверить Алетан и обновить цены
-        env:
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          args=()
-
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            # Изменения кода всегда проверяем без записи в KIT.
-            args+=(--dry-run --force)
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            if [[ "${{ inputs.dry_run }}" == "true" ]]; then args+=(--dry-run); fi
-            if [[ "${{ inputs.force }}" == "true" ]]; then args+=(--force); fi
-          fi
-
-          python aletan-kit/sync_aletan_catalog_full.py "${args[@]}"
-
-      - name: Сохранить русскоязычный отчёт и дату последнего успеха
-        if: always()
-        shell: bash
-        run: |
-          git config user.name github-actions
-          git config user.email actions@github.com
-
-          cp aletan-kit/last_catalog_sync_report.json /tmp/aletan-catalog-report.json 2>/dev/null || true
-          cp aletan-kit/state.json /tmp/aletan-state.json 2>/dev/null || true
-
-          git fetch origin main
-          git reset --hard origin/main
-
-          cp /tmp/aletan-catalog-report.json aletan-kit/last_catalog_sync_report.json 2>/dev/null || true
-          cp /tmp/aletan-state.json aletan-kit/state.json 2>/dev/null || true
-
-          git add aletan-kit/last_catalog_sync_report.json aletan-kit/state.json 2>/dev/null || true
-          git diff --cached --quiet && exit 0
-          git commit -m 'Обновить отчёт каталога Алетан KIT'
-          git push origin HEAD:main || true
+      - run: echo 'Legacy Aletan KIT/Webasyst sync is disabled. Use Aletan YML Pro feed.'
