@@ -41,6 +41,13 @@ def audit(wa,t):
         photos["image_id"]+=int(bool(p.get("image_id")))
         photos["summary_http"]+=int("http" in s)
         photos["links_total"]+=b
+        closed=re.findall(r"\\[extimg\\](.*?)\\[/extimg\\]",s,re.I|re.S)
+        one_url_blocks=all(len(re.findall(r"https?://[^\\s<>\\[\\]]+",block))==1 for block in closed)
+        only_gallery=not re.sub(r"\\[extimg\\].*?\\[/extimg\\]","",s,flags=re.I|re.S).strip()
+        valid=bool(b) and len(closed)==b and one_url_blocks and only_gallery
+        photos["valid_gallery"]+=int(valid)
+        photos["invalid_gallery"]+=int(bool(b) and not valid)
+        photos["no_gallery"]+=int(not b)
         records.append({"id":p.get("id"),"sku":skus(p)[:2],"name":str(p.get("name",""))[:100],
              "extimg":b,"summary":s[:300],"image_id":p.get("image_id"),"yml_id":p.get("yml_id")})
     print("TYPE_REPORT",json.dumps({"name":t["name"],"id":t["id"],"count":len(out),
