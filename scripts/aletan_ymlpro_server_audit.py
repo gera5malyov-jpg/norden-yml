@@ -81,6 +81,16 @@ if($select) {
   echo "MAPPING_EXAMPLES ".json_encode($m->query($sql)->fetchAll(),JSON_UNESCAPED_UNICODE).PHP_EOL;
 }
 echo "ALETAN_ALL_LINKS ".json_encode($m->query("SELECT profile_id,yml_id,shop_id,origin FROM shop_yml_products WHERE profile_id=373 ORDER BY yml_id LIMIT 30")->fetchAll(),JSON_UNESCAPED_UNICODE).PHP_EOL;
+$stats=$m->query("SELECT COUNT(*) total, COUNT(DISTINCT shop_id) distinct_products,COUNT(DISTINCT yml_hash_id) distinct_offer_hashes,MIN(updated) min_updated,MAX(updated) max_updated FROM shop_yml_products WHERE profile_id=373")->fetch();
+echo "ALETAN_LINK_STATS ".json_encode($stats).PHP_EOL;
+$origins=$m->query("SELECT origin, COUNT(*) count FROM shop_yml_products WHERE profile_id=373 GROUP BY origin")->fetchAll();
+echo "ALETAN_LINK_ORIGINS ".json_encode($origins).PHP_EOL;
+$bad=$m->query("SELECT COUNT(*) FROM shop_yml_products y LEFT JOIN shop_product p ON p.id=y.shop_id WHERE y.profile_id=373 AND (p.id IS NULL OR p.type_id!=202 OR p.yml_profile_id!=373 OR p.yml_id!=y.yml_id)")->fetchField();
+echo "ALETAN_LINK_INCONSISTENT_PRODUCTS ".(int)$bad.PHP_EOL;
+$countOffers=(int)$m->query("SELECT COUNT(*) FROM shop_yml_offer_index WHERE profile_id=373")->fetchField();
+echo "ALETAN_INDEX_ENTRIES ".$countOffers.PHP_EOL;
+$latest=$m->query("SELECT id,name,sku_id,edit_datetime,yml_id FROM shop_product WHERE type_id=202 ORDER BY id DESC LIMIT 4")->fetchAll();
+echo "ALETAN_RECENT_PRODUCTS ".json_encode($latest,JSON_UNESCAPED_UNICODE).PHP_EOL;
 $profile=$m->query("SELECT id,name,config FROM shop_yml_profiles WHERE id=373")->fetch();
 if($profile) {
   $conf=json_decode($profile['config'] ?? '',true);
