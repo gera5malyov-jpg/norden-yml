@@ -570,10 +570,11 @@ def extract_product_id(payload):
 
 
 def extimg_summary(urls):
-    urls = [s(x) for x in urls if s(x)]
-    if not urls:
-        return ""
-    return "[extimg]\n" + "\n".join(urls)
+    """Persist each source photo as a standalone external-gallery shortcode."""
+    unique = list(dict.fromkeys(
+        s(x).replace("\\n", "") for x in urls if s(x).startswith(("http://", "https://"))
+    ))
+    return "\n".join("[extimg]\n" + url + "\n[/extimg]" for url in unique)
 
 
 def product_url(name, sku):
