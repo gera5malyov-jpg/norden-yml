@@ -1,0 +1,82 @@
+name: Avalon podstolya - weekly clean YML Pro
+
+on:
+  schedule:
+    # Monday at 08:17 Moscow
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'avalon-podstolya/parser.py'
+      - 'avalon-podstolya/tests/**'
+      - 'avalon-podstolya/requirements.txt'
+      - '.github/workflows/avalon-podstolya-weekly.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: avalon-podstolya-feed
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    defaults:
+      run:
+        working-directory: avalon-podstolya
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: avalon-podstolya/requirements.txt
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      - name: Test category and sanitization
+        run: python -m pytest -q
+      - name: Scrape only subframe category and all its pages
+        env:
+          MIN_PRODUCTS: '200'
+          WORKERS: '5'
+          OUTPUT: catalog.yml
+        run: python -u parser.py
+      - name: Validate final YML before publishing
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,'.')
+          import parser
+          from pathlib import Path
+          report=parser.validate(Path('catalog.yml').read_bytes())
+          print('Verified offers={offers} photos={pictures}'.format(**report))
+          PY
+      - name: Publish permanent YML safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp catalog.yml /tmp/avalon-generated.yml
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/avalon-generated.yml avalon-podstolya/catalog.yml
+            git add avalon-podstolya/catalog.yml
+            if git diff --cached --quiet; then
+              echo "Catalog unchanged"
+              exit 0
+            fi
+            git commit -m "Refresh weekly Avalon subframes YML"
+            if git push origin HEAD:main; then
+              echo "Published Avalon YML Pro feed"
+              exit 0
+            fi
+            echo "Concurrent push; retry $attempt"
+          done
+          exit 1
