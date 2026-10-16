@@ -86,11 +86,24 @@ jobs:
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add alavann/alavann.yml
-          if git diff --cached --quiet; then
-            echo 'No feed changes'
-            exit 0
-          fi
-          git commit -m 'Refresh Alavann YML feed'
-          git pull --rebase origin main
-          git push origin HEAD:main
+          # Preserve the validated result while moving to the freshest main.
+          # Concurrent runs may update the feed, so do not rebase an XML commit.
+          cp alavann/alavann.yml /tmp/alavann-generated.yml
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/alavann-generated.yml alavann/alavann.yml
+            git add alavann/alavann.yml
+            if git diff --cached --quiet; then
+              echo 'No feed changes'
+              exit 0
+            fi
+            git commit -m 'Refresh Alavann YML feed'
+            if git push origin HEAD:main; then
+              echo 'Feed successfully published'
+              exit 0
+            fi
+            echo "Push conflict, retry $attempt/3"
+          done
+          echo 'Could not push feed after 3 attempts'
+          exit 1
