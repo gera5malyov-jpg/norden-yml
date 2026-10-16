@@ -294,6 +294,35 @@ def parse_page(html,url):
     offers=script.get("OFFERS") or []
     if not isinstance(offers,list):
         raise RuntimeError("Unrecognized Bitrix offers list "+url)
+    if not offers:
+        # A standalone Bitrix product is itself the sellable SKU, not a category.
+        pid=clean(parent.get("ID"))
+        if not pid.isdecimal() or not parent.get("NAME"):
+            raise RuntimeError("Standalone product has no stable ID/name: "+url)
+        value=(parent.get("PRICE") or {}).get("DISCOUNT_VALUE") or (parent.get("PRICE") or {}).get("VALUE") or "0"
+        price=float(clean(value).replace(" ","").replace(",",".")) if clean(value) else 0.0
+        photos=pictures_from_offer({"SLIDER":parent.get("SLIDER") or [],"DETAIL_PICTURE":parent.get("PICT") or {}})
+        if not photos:
+            og=soup.select_one('meta[property="og:image"]')
+            photo=full_image(og.get("content")) if og else None
+            if photo: photos=[photo]
+        if not photos:
+            raise RuntimeError("Standalone product lacks photos: "+url)
+        code=None
+        for row in soup.select(".tabs__content tr, table tr"):
+            cells=row.find_all(["td","th"],recursive=False)
+            if len(cells)>=2 and clean(cells[0].get_text()).lower().startswith("артикул"):
+                code=clean(cells[1].get_text(" ",strip=True))
+                break
+        if not code:
+            code="BELSI-"+pid
+        return [{
+            "id":"belsi-"+pid,"group":"belsi-group-"+pid,
+            "url":url,"name":clean(parent["NAME"]),"sku":code,
+            "price":price,"available":bool(parent.get("CAN_BUY",False)) and price>0,
+            "pictures":photos,"description":description,
+            "params":spec,"category":category,
+        }],[]
     items=[]
     for offer in offers:
         if not isinstance(offer,dict):
@@ -371,7 +400,7 @@ def validate(xml):
     if len(offers)<MIN_OFFERS or len(set(ids))!=len(ids):
         raise RuntimeError("Too few offers or duplicate variant IDs")
     for o in offers:
-        if not (o.findtext("name") and o.findtext("vendorCode") and o.findall("picture") and "?model=" in (o.findtext("url") or "")):
+        if not (o.findtext("name") and o.findtext("vendorCode") and o.findall("picture")):
             raise RuntimeError("Incomplete variant "+str(o.get("id")))
         if CONTACTS.search(o.findtext("description") or ""):
             raise RuntimeError("Supplier contact in description")
