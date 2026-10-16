@@ -1,8 +1,18 @@
-name: Update Artikul-Mebel YML
+name: Artikul-Mebel - weekly YML Pro (all variants)
 
 on:
   schedule:
-    - cron: '0 0 1 * *'
+    # Every Sunday at 04:41 UTC (07:41 Moscow)
+    - cron: '41 4 * * 0'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'artikul-mebel/parser.py'
+      - 'artikul-mebel/parser_core.py'
+      - 'artikul-mebel/tests/**'
+      - 'artikul-mebel/requirements.txt'
+      - '.github/workflows/artikul-mebel.yml'
 
 permissions:
   contents: write
@@ -14,14 +24,16 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 120
     defaults:
       run:
         working-directory: artikul-mebel
 
     steps:
-      - name: Checkout
+      - name: Checkout current catalog and source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -31,43 +43,65 @@ jobs:
           cache-dependency-path: artikul-mebel/requirements.txt
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: python -m pip install -r requirements.txt
 
-      - name: Run tests
+      - name: Run offline regression tests
         run: python -m pytest -q
 
-      - name: Generate catalog
+      - name: Generate complete sanitized YML
         env:
           MIN_PRODUCTS: '100'
           WORKERS: '4'
           OUTPUT: 'catalog.yml'
-        run: python parser.py
+          ARTIKUL_VALIDATE_EXISTING: '1'
+        run: python -u parser.py
 
       - name: Validate generated YML
         run: |
           python - <<'PY'
-          import os
+          import os, re
           import xml.etree.ElementTree as ET
-
-          path = 'catalog.yml'
-          root = ET.parse(path).getroot()
-          offers = root.findall('./shop/offers/offer')
-          if len(offers) < 100:
-              raise SystemExit(f'Unsafe feed: only {len(offers)} offers')
-          if os.path.getsize(path) < 10000:
-              raise SystemExit('Unsafe feed: file too small')
-          print(f'Validated offers: {len(offers)}')
+          path='catalog.yml'
+          root=ET.parse(path).getroot()
+          offers=root.findall('./shop/offers/offer')
+          if len(offers)<100 or os.path.getsize(path)<10000:
+              raise SystemExit('Incomplete feed: too few offers or bytes')
+          ids=[o.get('id') for o in offers]
+          if len(ids)!=len(set(ids)):
+              raise SystemExit('Duplicate offer IDs')
+          for o in offers:
+              p=float(o.findtext('price') or '0')
+              if p<0 or o.findtext('currencyId')!='RUR':
+                  raise SystemExit('Bad price or currency in '+str(o.get('id')))
+              if not o.findtext('name') or not o.findtext('url'):
+                  raise SystemExit('Empty product fields in '+str(o.get('id')))
+              desc=o.findtext('description') or ''
+              if re.search(r'(?:\+7[\s()\-]*\d{3}|\b8[\s()\-]*800[\s()\-]*\d{3}|\b[\w.%+-]+@[\w.-]+\.[a-z]{2,}|(?:https?://|www\.)\S+|artikul-mebel\.ru)',desc,re.I):
+                  raise SystemExit('Supplier contacts in description for '+str(o.get('id')))
+          print(f'Validated {len(offers)} offers, all IDs unique, descriptions sanitized')
           PY
 
-      - name: Commit updated catalog
+      - name: Publish validated YML, retry on concurrent main pushes
+        shell: bash
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add catalog.yml
-          if git diff --cached --quiet; then
-            echo "Catalog has not changed"
-            exit 0
-          fi
-          git commit -m "Update Artikul-Mebel catalog"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          set -euo pipefail
+          cp catalog.yml /tmp/artikul-mebel-generated.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/artikul-mebel-generated.yml catalog.yml
+            git add catalog.yml
+            if git diff --cached --quiet; then
+              echo 'Catalog unchanged'
+              exit 0
+            fi
+            git commit -m 'Refresh Artikul-Mebel weekly all-variants YML'
+            if git push origin HEAD:main; then
+              echo 'Published catalog to stable YML Pro URL'
+              exit 0
+            fi
+            echo "Concurrent update; retry $attempt"
+          done
+          exit 1
