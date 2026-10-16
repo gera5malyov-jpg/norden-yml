@@ -226,7 +226,7 @@ def parse(url: str) -> dict:
         if sku and h_sku and sku!=h_sku:
             raise RuntimeError(f"Contradictory article {url}: {sku} vs {h_sku}")
         sku=sku or h_sku
-    if not name or not sku or len(sku)>100 or UNWANTED.search(name+" "+sku):
+    if not name or len(sku)>100 or UNWANTED.search(name+" "+sku):
         raise RuntimeError(f"Invalid product name/article: {url}")
     photos=get_images(data,soup)
     if not photos:
@@ -236,7 +236,13 @@ def parse(url: str) -> dict:
     # Factual description only, no supplier advertising or contacts.
     cleanname=re.sub(r"(?i)\s+арт\.\s*"+re.escape(sku)+r"\s*$","",name).strip()
     description=clean(f"{cleanname}. " + " ".join(f"{k}: {v}." for k,v in props.items()))
-    uid="finsoffa-"+sku  # Model/color-specific original vendor article is stable.
+    # Four side/coffee tables lack a source article. Use the actual site product
+    # numeric ID as stable external ID instead of inventing an article/SKU.
+    site_id_el=soup.select_one(".fs-pd__cart[data-id]") or soup.select_one(".fs-pd__fav[data-id]")
+    site_id=clean(site_id_el.get("data-id", "")) if site_id_el else ""
+    if not sku and not site_id.isdigit():
+        raise RuntimeError(f"Missing original SKU and stable website product ID: {url}")
+    uid="finsoffa-"+sku if sku else "finsoffa-site-"+site_id
     return {
         "id": uid, "sku":sku, "name":cleanname, "photos":photos,
         "params":props, "category":categories(soup),
@@ -272,8 +278,9 @@ def to_xml(items: list[dict]) -> bytes:
         o=ET.SubElement(offers,"offer",id=item["id"],available=item["available"])
         ET.SubElement(o,"name").text=item["name"]
         ET.SubElement(o,"categoryId").text=mapping[tuple(item["category"])]
-        ET.SubElement(o,"vendorCode").text=item["sku"]
-        ET.SubElement(o,"model").text=item["sku"]
+        if item["sku"]:
+            ET.SubElement(o,"vendorCode").text=item["sku"]
+            ET.SubElement(o,"model").text=item["sku"]
         for pic in item["photos"]:
             ET.SubElement(o,"picture").text=pic
         ET.SubElement(o,"description").text=item["description"]
@@ -289,7 +296,7 @@ def verify(content: bytes, old: Path | None=None) -> tuple[int,int,int,int]:
     if len(offers)<MIN_OFFERS:
         raise RuntimeError(f"Too few products: {len(offers)}")
     ids=[p.get("id") for p in offers]
-    codes=[p.findtext("vendorCode") for p in offers]
+    codes=[p.findtext("vendorCode") for p in offers if p.findtext("vendorCode")]
     if len(ids)!=len(set(ids)) or len(codes)!=len(set(codes)):
         raise RuntimeError("Duplicate IDs/vendor articles")
     if any(not p.findall("picture") for p in offers):
@@ -334,7 +341,8 @@ def main() -> None:
         f.write(xml)
         temporary=Path(f.name)
     temporary.replace(OUTPUT)
-    print(f"FINSOFFA_SUCCESS offers={count} pictures={pictures} available={yes} unavailable={no}",flush=True)
+    missing_codes=sum(not item["sku"] for item in result)
+    print(f"FINSOFFA_SUCCESS offers={count} pictures={pictures} available={yes} unavailable={no} no_source_article={missing_codes}",flush=True)
 
 if __name__=="__main__":
     main()
