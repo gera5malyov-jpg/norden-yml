@@ -38,7 +38,7 @@ SKIP_SPEC = re.compile(
 )
 STOCK_OFF = re.compile(r"(?i)под заказ|нет в наличии|отсутств|снят[аоы]?\s+с\s+производ|распродан")
 STOCK_POS = re.compile(r"(?i)в наличии|на складе|срок доставки\s*\d")
-PHOTO = re.compile(r"^/media/(?:images|cache/product_popup|cache/product_thumb)/product/.+\.(?:jpe?g|png|webp)$", re.I)
+PHOTO = re.compile(r"^/media/(?:images/product|cache/(?:product_popup|product_thumb)/images/product)/.+\.(?:jpe?g|png|webp)$", re.I)
 _SKIPS = ("privacy", "oferta", "about", "news", "service", "help", "blog", "video", "otzyvy", "login", "register")
 
 def clean(v: object) -> str:
