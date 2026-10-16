@@ -1,0 +1,25 @@
+name: Audit selected Webasyst product-type external images
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/audit-selected-type-images.yml'
+      - 'scripts/audit_selected_type_images.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Read type counts, image URLs, and identifiers
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python -u scripts/audit_selected_type_images.py
