@@ -61,13 +61,17 @@ def session():
         _LOCAL.s=s
     return _LOCAL.s
 
-def get(url):
+def get(url, allow_missing=False):
     if urlsplit(url).hostname not in {"metta.ru","www.metta.ru"}:
         raise RuntimeError("Unapproved URL "+url)
     last=None
     for trial in range(3):
         try:
             res=session().get(url,timeout=TIMEOUT)
+            if allow_missing and res.status_code in (404,410):
+                return None
+            if allow_missing and res.status_code==500 and trial==2:
+                return None
             res.raise_for_status()
             if len(res.content)<(150 if urlsplit(url).path.endswith(".xml") else 4000):
                 raise RuntimeError("Truncated supplier response")
@@ -316,13 +320,17 @@ def main():
     models=discover_models()
     offers={}
     failures=[]
+    vanished=[]
     # Fetch each model once, enumerate ALL possible variants, including colors.
     with cf.ThreadPoolExecutor(max_workers=WORKERS) as executor:
-        jobs={executor.submit(get,base):base for base in models}
+        jobs={executor.submit(get,base,True):base for base in models}
         for i,future in enumerate(cf.as_completed(jobs),1):
             base=jobs[future]
             try:
                 html=future.result()
+                if html is None:
+                    vanished.append(base)
+                    continue
                 refs=variant_links(html,base)
                 m=re.search(r'data-fl-item-id="(\d+)"',html)
                 selected=m.group(1) if m else None
@@ -333,6 +341,11 @@ def main():
             except Exception as exc:
                 failures.append(base+" "+str(exc))
             if i%25==0:print("METTA_MODELS %d/%d offers=%d failures=%d" % (i,len(models),len(offers),len(failures)),flush=True)
+    print("METTA_STALE_MODELS skipped=%d/%d" % (len(vanished),len(models)),flush=True)
+    for u in vanished[:20]:
+        print("METTA_OBSOLETE "+u,flush=True)
+    if len(vanished)>max(12,int(len(models)*.15)):
+        failures.append("Too many retired/broken model pages")
     if failures:
         for err in failures[:15]:print("METTA_FAIL "+err,flush=True)
         raise RuntimeError("Model enumeration failed: "+str(len(failures)))
