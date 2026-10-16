@@ -1,0 +1,29 @@
+name: Repair 33krovati missing Webasyst SKU codes
+on:
+  push:
+    branches: [feature/universal-yml-import-20261015]
+    paths: ['.github/workflows/repair-sku289-codes.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: webasyst-yml-sku-codes
+  cancel-in-progress: false
+jobs:
+  safe-repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Check dedicated SKU repair PHP syntax
+        run: |
+          php -l webasyst/univimport/lib/cli/autofill-sku-codes-289.php
+          python -m py_compile scripts/install_sku289_autofill.py
+      - name: Install independent addon without changing YML PRO
+        run: python -u scripts/install_univimport.py
+      - name: Safely backfill and schedule 33krovati SKU codes
+        run: python -u scripts/install_sku289_autofill.py
