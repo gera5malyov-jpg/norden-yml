@@ -75,6 +75,12 @@ if(is_string($candidate) && is_file($candidate)){
   }
  }
 }
+$out['yml_tables']=array();
+foreach($db->query("SHOW TABLES LIKE 'shop_yml_%'")->fetchAll() as $r){
+ $name=current($r);if(is_string($name))$out['yml_tables'][]=$name;
+}
+$out['import_sessions_columns']=array_map(function($r){return $r['Field'];},$db->query("SHOW COLUMNS FROM shop_yml_import_sessions")->fetchAll());
+$out['yml_profiles_columns']=array_map(function($r){return $r['Field'];},$db->query("SHOW COLUMNS FROM shop_yml_profiles")->fetchAll());
 $fields=array_keys($c);$out['image_keys']=array_values(array_filter($fields,function($k){return preg_match('/image|photo|picture|source|file|url/i',$k);}));
 echo 'FOURSIS_SOURCE='.json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES).PHP_EOL;
 PHP
