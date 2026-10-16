@@ -1,0 +1,20 @@
+name: Audit Aletan YML Pro server internals (read only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aletan-ymlpro-server-audit.yml'
+      - 'scripts/aletan_ymlpro_server_audit.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect installed YML Pro code and metadata without changes
+        run: python3 scripts/aletan_ymlpro_server_audit.py
