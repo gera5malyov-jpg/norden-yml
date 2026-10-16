@@ -289,27 +289,59 @@ def make(items):
 
 def main():
     urls=discover()
-    if len(urls)<MIN: raise RuntimeError(f'only {len(urls)} product URLs discovered; minimum {MIN}')
-    items=[]; fails=[]; skipped_brand=0; done=0
-    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        futures={pool.submit(parse,u):u for u in urls}
-        for future in as_completed(futures):
-            u=futures[future]; done+=1
-            try:
-                it=future.result()
-                if not it['name'] or not it['price']: raise ValueError('missing name or price')
-                # This feed represents the supplier 4 Сезона as a whole.
-                # Do not drop products because the product page has no explicit
-                # brand or contains another manufacturer name. In Yandex KIT
-                # the managed supplier scope is Brand = "4 Сезона".
-                it['brand']='4 Сезона'
-                items.append(it)
-            except Exception as e:
-                fails.append((u,str(e))); print('FAILED',u,e)
-            if done%25==0 or done==len(urls): print(f'parsed {done}/{len(urls)} brand_4seasons={len(items)} skipped_other_brand={skipped_brand} failed={len(fails)}')
+    if len(urls)<MIN:
+        raise RuntimeError(f'only {len(urls)} product URLs discovered; minimum {MIN}')
+
+    items=[]
+    pending=urls
+    permanent_404=[]
+    # A supplier page can temporarily fail, especially when thousands of
+    # product cards are requested. Never silently publish a truncated feed.
+    for attempt in range(1,4):
+        if not pending:
+            break
+        print(f'parse pass {attempt}/3: {len(pending)} product URLs',flush=True)
+        failed=[]
+        workers=WORKERS if attempt==1 else min(WORKERS,4)
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures={pool.submit(parse,u):u for u in pending}
+            for done,future in enumerate(as_completed(futures),1):
+                u=futures[future]
+                try:
+                    it=future.result()
+                    if not it['name'] or not it['price']:
+                        raise ValueError('missing name or price')
+                    it['brand']='4 Сезона'
+                    items.append(it)
+                except Exception as e:
+                    status=getattr(getattr(e,'response',None),'status_code',None)
+                    if status==404:
+                        permanent_404.append((u,str(e)))
+                    else:
+                        failed.append((u,str(e)))
+                if done%100==0 or done==len(futures):
+                    print(f'pass {attempt} processed {done}/{len(futures)}; '
+                          f'ok_total={len(items)} failed_retryable={len(failed)} '
+                          f'not_found={len(permanent_404)}',flush=True)
+        if failed:
+            for u,error in failed[:10]:
+                print('RETRYABLE',u,error,flush=True)
+        pending=[u for u,_ in failed]
+
+    if pending:
+        # Preserve the last good YML rather than publishing partial results.
+        for u,error in failed[:25]:
+            print('UNRESOLVED',u,error,flush=True)
+        raise RuntimeError(
+            f'{len(pending)} product pages still failed after 3 attempts; '
+            'refusing to replace the current feed'
+        )
+
     items.sort(key=lambda x:x['url'])
-    make(items); print(f'generated {OUT}: {len(items)} offers, skipped_other_brand={skipped_brand}, {OUT.stat().st_size} bytes')
-    if fails:
-        print('non-fatal failures',len(fails))
-        for u,e in fails[:20]: print('-',u,e)
+    make(items)
+    print(f'generated {OUT}: {len(items)} offers, '
+          f'404_product_pages={len(permanent_404)}, '
+          f'{OUT.stat().st_size} bytes',flush=True)
+    for u,error in permanent_404[:10]:
+        print('SITEMAP_404',u,error,flush=True)
 if __name__=='__main__': main()
