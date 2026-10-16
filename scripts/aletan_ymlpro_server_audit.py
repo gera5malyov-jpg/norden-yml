@@ -38,6 +38,8 @@ for spec in  'import/pins/shopYmlOfferIndexService.class.php:1:170'  'import/pin
 done
 echo '=====PROFILE SOURCE IMPLEMENTATION====='
 find "$ROOT/wa-apps/shop/plugins/yml/lib" -type f \( -iname '*Profile*.php' -o -iname '*File*.php' \) | sed "s|$ROOT/||" | head -45
+echo '=====PROFILE PUBLIC METHODS====='
+grep -nE '(function __construct|function getFile\(|function getFilePath|function getConfig\(|function getId\()' "$ROOT/wa-apps/shop/plugins/yml/lib/classes/profile/shopYmlProfile.class.php" | head -30 || true
 echo '=====PHP DATABASE INSPECTION====='
 cat > /tmp/aletan_ymlpro_readonly.php <<'PHP'
 <?php
