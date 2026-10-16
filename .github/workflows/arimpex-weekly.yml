@@ -1,0 +1,81 @@
+name: Arimpex - weekly YML Pro with all variants
+
+on:
+  schedule:
+    # Sundays 04:24 UTC (07:24 Moscow).
+    - cron: '24 4 * * 0'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/arimpex-weekly.yml'
+      - 'arimpex/parser.py'
+      - 'arimpex/tests/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: arimpex-weekly-feed
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install requests
+        run: python -m pip install 'requests>=2.32,<3'
+      - name: Run tests
+        run: python -m unittest discover -s arimpex/tests -v
+      - name: Read all models and all variants from Arimpex
+        env:
+          ARIMPEX_MIN_MODELS: '120'
+          ARIMPEX_WORKERS: '5'
+        run: python arimpex/parser.py
+      - name: Validate complete YML
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root=ET.parse('arimpex/arimpex.yml').getroot()
+          offers=root.findall('./shop/offers/offer')
+          assert len(offers)>=120, f'Only {len(offers)} items'
+          ids=[x.get('id') for x in offers]
+          assert len(set(ids))==len(ids), 'Duplicate SKU identifiers'
+          for o in offers:
+              assert o.findtext('price'), f'No price: {o.get("id")}'
+              assert o.findtext('vendorCode'), f'No code: {o.get("id")}'
+              assert o.findtext('url','').startswith('https://arimpex.ru/product/'), f'Invalid URL: {o.get("id")}'
+          print('Validated %d distinct Arimpex variants' % len(offers))
+          PY
+      - name: Publish permanent YML after validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp arimpex/arimpex.yml /tmp/arimpex-generated.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/arimpex-generated.yml arimpex/arimpex.yml
+            git add arimpex/arimpex.yml
+            if git diff --cached --quiet; then
+              echo 'Feed unchanged'
+              exit 0
+            fi
+            git commit -m 'Refresh Arimpex weekly all-variants YML'
+            if git push origin HEAD:main; then
+              echo 'Published YML to main'
+              exit 0
+            fi
+            echo "Concurrent change; retry $attempt"
+          done
+          echo 'Failed to publish after 4 attempts'
+          exit 1
