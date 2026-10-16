@@ -159,7 +159,13 @@ def build(rows):
     categories = ET.SubElement(shop, "categories")
     ET.SubElement(categories, "category", {"id": "1"}).text = "Алетан"
     cat_names = sorted({clean(row.get("category")) or "Без категории" for row in rows})
-    cat_to_id = {cat: str(i) for i, cat in enumerate(cat_names, start=100)}
+    # Stable IDs even when the supplier adds a new category in the CSV.
+    cat_to_id = {
+        cat: str(int(hashlib.sha256(cat.encode("utf-8")).hexdigest()[:12], 16) % 1_999_000_000 + 1000)
+        for cat in cat_names
+    }
+    if len(set(cat_to_id.values())) != len(cat_names):
+        raise RuntimeError("Hashed category ID collision; refusing to publish feed")
     for name, cat_id in cat_to_id.items():
         ET.SubElement(categories, "category", {"id": cat_id, "parentId": "1"}).text = xml_safe(name)
     offers = ET.SubElement(shop, "offers")
