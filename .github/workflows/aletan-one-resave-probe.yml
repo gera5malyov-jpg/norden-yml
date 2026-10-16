@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aletan-one-resave-probe.yml'
+      - 'scripts/aletan_one_resave_probe.py'
   workflow_dispatch:
 permissions:
   contents: read
