@@ -192,6 +192,7 @@ def desired_prices(variant):
 
 
 def main():
+    raise RuntimeError('DISABLED: Legacy Aletan direct Webasyst sync; use the YML Pro import')
     p = argparse.ArgumentParser()
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args()
