@@ -81,6 +81,24 @@ def main():
         oid=o["offer_id"]
         original=o["model"]
         key=o["normalized_name"]
+        # Strongest evidence: existing YML ID already equals the offer ID.
+        # An earlier importer may have created a second same-name product,
+        # which must never outrank the legacy AF-* item carrying this ID.
+        existing_exact=[p for p in by_yml.get(oid,[])
+                        if norm(p.get("name"))==key and len(sku_values(p))==1]
+        if len(existing_exact)==1:
+            p=existing_exact[0]
+            candidates.append({
+                "profile_id":PROFILE,"product_id":int(p["id"]),
+                "offer_id":oid,"name":trim(p.get("name")),
+                "current_yml_id":trim(p.get("yml_id")),
+                "current_sku":sku_values(p)[0],
+                "original_vendor_code":original
+            })
+            continue
+        if len(existing_exact)>1:
+            exclusions["duplicate_exact_external_id"]+=1
+            continue
         # Exact name is required even when a legacy external ID matches.
         by_external=by_yml.get(oid,[])
         if not by_external and oid!=original:
