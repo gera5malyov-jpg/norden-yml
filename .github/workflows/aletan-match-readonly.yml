@@ -5,6 +5,8 @@ on:
     paths:
       - 'scripts/aletan_match_readonly.py'
       - 'scripts/aletan_ymlpro_link_plan.py'
+      - 'scripts/aletan_ymlpro_apply.py'
+      - 'scripts/aletan_ymlpro_apply.php'
       - '.github/workflows/aletan-match-readonly.yml'
   workflow_dispatch:
 permissions:
@@ -26,3 +28,8 @@ jobs:
         run: |
           python scripts/aletan_match_readonly.py
           python scripts/aletan_ymlpro_link_plan.py
+      - name: Single-product guarded binding recovery (B102)
+        env:
+          ALETAN_REPAIR_MODE: one
+          NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+        run: python scripts/aletan_ymlpro_apply.py
