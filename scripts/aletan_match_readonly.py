@@ -49,6 +49,17 @@ def main():
         products.extend(batch)
         if len(batch)<1000:break
     print("WA_TYPE_ALETAN_COUNT",len(products),"SOURCE",len(supplier),"SOURCE_UNIQUE_ARTICLES",len(source_codes))
+    product_names=collections.Counter(norm(p.get("name")) for p in products)
+    supplier_names=collections.Counter(norm(p.get("name")) for p in supplier)
+    double_wa={name:n for name,n in product_names.items() if n>1}
+    double_source={name:n for name,n in supplier_names.items() if n>1}
+    eligible=sum(bool(product_names.get(name)==1 and supplier_names.get(name)==1) for name in supplier_names)
+    print("NAME_MATCH_UNIQUENESS",{"wa_unique":len(product_names),"wa_ambiguous":len(double_wa),
+        "source_unique":len(supplier_names),"source_ambiguous":len(double_source),
+        "source_products_unique_on_both":eligible})
+    print("NAME_DUPLICATE_SOURCE_EXAMPLES",
+        [{"name":r.get("name"),"vendorCode":r.get("vendorCode")}
+         for r in supplier if supplier_names[norm(r.get("name"))]>1][:12])
     counter=collections.Counter()
     samples=[]
     for p in products:
