@@ -66,8 +66,8 @@ jobs:
           for attempt in 1 2 3 4; do
             git fetch origin main
             git reset --hard origin/main
-            cp /tmp/avalon-generated.yml avalon-podstolya/catalog.yml
-            git add avalon-podstolya/catalog.yml
+            cp /tmp/avalon-generated.yml catalog.yml
+            git add catalog.yml
             if git diff --cached --quiet; then
               echo "Catalog unchanged"
               exit 0
