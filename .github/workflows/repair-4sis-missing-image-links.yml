@@ -1,0 +1,24 @@
+name: Recover 4sis missing image URLs from cached YML
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-4sis-missing-image-links.yml'
+      - 'scripts/repair_4sis_cached_yml_images.php'
+      - 'scripts/repair_4sis_cached_yml_images.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: 4sis-cached-yml-photo-repair
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit 4sis exact cached YML matches
+        run: python3 scripts/repair_4sis_cached_yml_images.py audit
