@@ -52,7 +52,13 @@ jobs:
           assert len(offers)>=150
           assert len({o.get('id') for o in offers})==len(offers)
           assert all(o.findall('picture') for o in offers)
-          assert all(o.find('price') is None and o.find('available') is None and o.find('quantity') is None for o in offers)
+          assert all(o.find('price') is None and o.find('quantity') is None for o in offers)
+          assert all(o.get('available') in ('true','false') for o in offers)
+          assert all(len([p for p in o.findall('param') if p.get('name')=='Наличие'])==1 for o in offers)
+          in_stock=sum(o.get('available')=='true' for o in offers)
+          preorder=len(offers)-in_stock
+          assert in_stock>0 and preorder>0, 'Suspicious stock classification, retain old feed'
+          print('DECCON_AVAILABILITY in_stock',in_stock,'not_ready',preorder)
           print('DECCON_VALIDATED',len(offers),'pictures',sum(len(o.findall('picture')) for o in offers))
           PY
       - name: Publish validated YML with conflict-safe retry
