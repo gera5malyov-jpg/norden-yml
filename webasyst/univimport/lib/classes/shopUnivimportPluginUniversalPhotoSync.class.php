@@ -69,6 +69,13 @@ class shopUnivimportPluginUniversalPhotoSync
         if ($url==='' && (int)$id===20 && trim((string)$row['name'])==='deephouse') {
             $url='https://deephouse.pro/upload/cutcat.xml';
         }
+        // 33кровати and 4 Сезона are the same supplier. The already verified
+        // published YML has matching offer IDs for all 2053 current offers.
+        // Use only when the original profile URL is empty. Do not change YML PRO.
+        if ($url==='' && (int)$id===289 && trim((string)$row['name'])==='33кровати'
+            && isset($c['images']) && (int)$c['images']===4) {
+            $url='https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/main/4s-mebel.yml';
+        }
         $parts=$url?parse_url($url):array();
         if (!$parts || !is_array($parts) || empty($parts['host']) || empty($parts['scheme'])
             || !in_array(strtolower($parts['scheme']),array('http','https'),true)
