@@ -73,7 +73,7 @@ def fetch(url):
             if response.status_code==404:
                 return None
             response.raise_for_status()
-            if len(response.content)<1200:
+            if len(response.content)<(100 if urlparse(url).path.endswith(".xml") else 1200):
                 raise RuntimeError("Truncated page")
             response.encoding=response.apparent_encoding or "utf-8"
             return response.text
