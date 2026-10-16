@@ -1,0 +1,19 @@
+name: Audit 33krovati codes and images
+on:
+  push:
+    branches: [feature/universal-yml-import-20261015]
+    paths: [.github/workflows/audit-33krovati-codes-images.yml]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -u scripts/audit_33krovati_codes_and_photos.py
