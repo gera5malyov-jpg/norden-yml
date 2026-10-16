@@ -69,6 +69,32 @@ def main():
                 "sku_matches":list(matches_by_sku)[:2],
                 "other_meta_keys":[k for k in p if "external" in k.lower() or "yml" in k.lower()],
                 "modified":p.get("edit_datetime")})
+    meta=collections.Counter()
+    group=collections.Counter()
+    samples_meta=[]
+    wrong_meta=[]
+    for p in products:
+        ext=str(p.get("yml_id") or "").strip()
+        profile=str(p.get("yml_profile_id") or "").strip()
+        group[profile or "<empty>"]+=1
+        if ext:meta["yml_id_set"]+=1
+        if profile:meta["profile_set"]+=1
+        if ext and ext in source_codes:meta["yml_id_matches_raw_vendorCode"]+=1
+        if ext and ext not in source_codes:meta["yml_id_not_raw_code"]+=1
+        if not ext:meta["yml_id_empty"]+=1
+        if profile and ext and len(samples_meta)<15:
+            samples_meta.append({"product_id":p.get("id"),"yml_id":ext,
+                                 "yml_profile_id":profile,
+                                 "sku":[x.get("sku") for x in variants(p) if isinstance(x,dict)][:2],
+                                 "modified":p.get("edit_datetime"),
+                                 "updated":p.get("yml_updated")})
+        if not ext and len(wrong_meta)<5:
+            wrong_meta.append({"product_id":p.get("id"),"name":p.get("name"),
+                               "sku":[x.get("sku") for x in variants(p) if isinstance(x,dict)][:2],
+                               "yml_profile_id":p.get("yml_profile_id")})
+    print("YML_META_COUNTS",dict(meta),"PROFILE_GROUPS",dict(group))
+    print("YML_META_SAMPLES",samples_meta)
+    print("YML_MISSING_SAMPLES",wrong_meta)
     print("COUNTS",dict(counter))
     print("SAMPLE",samples)
     if products:
