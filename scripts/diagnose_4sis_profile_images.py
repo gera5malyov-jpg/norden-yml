@@ -32,6 +32,25 @@ $out=array('id'=>19,'profile'=>'4sis',
 'image_mode'=>isset($c['images'])?$c['images']:null,
 'url_has_query'=>!empty($parts['query']),
 'url_has_fragment'=>!empty($parts['fragment']));
+foreach(array('local_file','server_file','bind_to_profile','raw_image_links','image_hooks') as $k){
+ $v=array_key_exists($k,$c)?$c[$k]:null;
+ $info=array('type'=>gettype($v),'set'=>($v!==null&&$v!==false&&$v!==''&&$v!==array()));
+ if(is_string($v)&&$v!==''){
+  $info['extension']=strtolower(pathinfo(parse_url($v,PHP_URL_PATH)?:$v,PATHINFO_EXTENSION));
+  $info['is_http']=strpos($v,'http://')===0||strpos($v,'https://')===0;
+  $info['is_regular_file']=is_file($v);
+  $info['basename_is_hidden']=substr(basename($v),0,1)==='.';
+ }
+ if(is_bool($v)||is_int($v))$info['value']=$v;
+ $out['source_setting_'.$k]=$info;
+}
+$sessions=$db->query("SELECT id, status, start_datetime, end_datetime FROM shop_yml_import_sessions WHERE profile_id=19 ORDER BY id DESC LIMIT 3")->fetchAll();
+$out['recent_imports']=$sessions;
+$hoststat=array();
+$pics=$db->query("SELECT p.summary FROM shop_yml_products m JOIN shop_product p ON p.id=m.shop_id WHERE m.profile_id=19")->fetchAll();
+foreach($pics as $p){if(preg_match('~\\[extimg\\]\\s*(https?://[^\\s]+)~',(string)$p['summary'],$m)){ $h=parse_url($m[1],PHP_URL_HOST); if($h)$hoststat[$h]=isset($hoststat[$h])?$hoststat[$h]+1:1; }}
+arsort($hoststat);
+$out['existing_photo_hosts']=array_slice($hoststat,0,5,true);
 $fields=array_keys($c);$out['image_keys']=array_values(array_filter($fields,function($k){return preg_match('/image|photo|picture|source|file|url/i',$k);}));
 echo 'FOURSIS_SOURCE='.json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES).PHP_EOL;
 PHP
