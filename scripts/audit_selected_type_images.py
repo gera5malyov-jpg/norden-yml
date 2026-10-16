@@ -41,9 +41,9 @@ def audit(wa,t):
         photos["image_id"]+=int(bool(p.get("image_id")))
         photos["summary_http"]+=int("http" in s)
         photos["links_total"]+=b
-        closed=re.findall(r"\\[extimg\\](.*?)\\[/extimg\\]",s,re.I|re.S)
-        one_url_blocks=all(len(re.findall(r"https?://[^\\s<>\\[\\]]+",block))==1 for block in closed)
-        only_gallery=not re.sub(r"\\[extimg\\].*?\\[/extimg\\]","",s,flags=re.I|re.S).strip()
+        closed=re.findall(r"\[extimg\](.*?)\[/extimg\]",s,re.I|re.S)
+        one_url_blocks=all(len(re.findall(r"https?://[^\s<>\[\]]+",block))==1 for block in closed)
+        only_gallery=not re.sub(r"\[extimg\].*?\[/extimg\]","",s,flags=re.I|re.S).strip()
         valid=bool(b) and len(closed)==b and one_url_blocks and only_gallery
         photos["valid_gallery"]+=int(valid)
         photos["invalid_gallery"]+=int(bool(b) and not valid)
