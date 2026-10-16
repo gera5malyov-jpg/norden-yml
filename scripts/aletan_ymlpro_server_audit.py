@@ -138,6 +138,37 @@ if($profile) {
     echo "PROFILE_MATCH_CONFIG ".json_encode($filtered,JSON_UNESCAPED_UNICODE).PHP_EOL;
   }
 }
+try {
+ $pr=new shopYmlProfile(19);
+ $src=$pr->getFile(false,false);
+ $local=$src->getFile();
+ echo "FOURSIS_SOURCE_INFO ".json_encode(array('profile_id'=>$pr->getId(),
+    'exists'=>is_string($local)&&is_file($local),
+    'bytes'=>is_string($local)&&is_file($local)?filesize($local):0)).PHP_EOL;
+ if(is_string($local)&&is_file($local) && filesize($local)>10000 && filesize($local)<100000000) {
+    $missing=$m->query("SELECT id,yml_id FROM shop_product WHERE type_id=11 AND (summary='' OR summary IS NULL)")->fetchAll();
+    $codes=array();
+    foreach($missing as $r){$codes[(string)$r['yml_id']]=(int)$r['id'];}
+    $reader=new XMLReader();
+    $matches=0;$withPhotos=0;$seen=0;$noPhotos=0;
+    if($reader->open($local,null,LIBXML_NONET)) {
+      while($reader->read()){
+        if($reader->nodeType!==XMLReader::ELEMENT || $reader->localName!=='offer')continue;
+        $id=(string)$reader->getAttribute('id');
+        if(!isset($codes[$id]))continue;
+        $matches++;
+        $doc=$reader->readOuterXML();
+        $photos=substr_count($doc,'<picture');
+        if($photos>0)$withPhotos++;else $noPhotos++;
+        $seen++;
+      }
+      $reader->close();
+    }
+    echo "FOURSIS_SOURCE_MISSING_MATCHES ".json_encode(array(
+        'blank_products'=>count($missing),'id_matches'=>$matches,
+        'matched_with_pictures'=>$withPhotos,'matched_without_pictures'=>$noPhotos)).PHP_EOL;
+ }
+} catch(Throwable $e) {echo "FOURSIS_SOURCE_ERROR ".get_class($e).":".substr($e->getMessage(),0,130).PHP_EOL;}
 ?>
 PHP
 chown web:web /tmp/aletan_ymlpro_readonly.php
