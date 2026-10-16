@@ -36,6 +36,8 @@ for spec in  'import/pins/shopYmlOfferIndexService.class.php:1:170'  'import/pin
         sed -n "${lo},${hi}p" "$BASE/$file" | head -185
     fi
 done
+echo '=====PROFILE SOURCE IMPLEMENTATION====='
+find "$ROOT/wa-apps/shop/plugins/yml/lib" -type f \( -iname '*Profile*.php' -o -iname '*File*.php' \) | sed "s|$ROOT/||" | head -45
 echo '=====PHP DATABASE INSPECTION====='
 cat > /tmp/aletan_ymlpro_readonly.php <<'PHP'
 <?php
