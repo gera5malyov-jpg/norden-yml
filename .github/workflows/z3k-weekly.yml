@@ -1,0 +1,75 @@
+name: Z3K full tools catalog - weekly YML Pro
+on:
+  schedule:
+    - cron: '17 7 * * 0' # Sunday 10:17 Moscow
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'z3k/parser.py'
+      - 'z3k/tests/**'
+      - 'z3k/requirements.txt'
+      - '.github/workflows/z3k-weekly.yml'
+permissions:
+  contents: write
+concurrency:
+  group: z3k-weekly-tools-full
+  cancel-in-progress: true
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    defaults:
+      run:
+        working-directory: z3k
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: z3k/requirements.txt
+      - name: Install parser
+        run: pip install -r requirements.txt
+      - name: Test stock, SKU, photo and supplier cleanup
+        run: python -m pytest -q
+      - name: Generate complete tools catalog YML
+        env:
+          MIN_OFFERS: '1000'
+          WORKERS: '14'
+          OUTPUT: catalog.yml
+        run: python -u parser.py
+      - name: Validate complete feed
+        run: |
+          python - <<'PY'
+          import parser
+          from pathlib import Path
+          count,images=parser.verify(Path('catalog.yml').read_bytes())
+          print(f'Z3K_VALIDATED offers={count} images={images}')
+          PY
+      - name: Publish permanent YML link
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp catalog.yml /tmp/z3k-new-catalog.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/z3k-new-catalog.yml catalog.yml
+            git add catalog.yml
+            if git diff --cached --quiet; then
+              echo "Z3K_UNCHANGED"
+              exit 0
+            fi
+            git commit -m 'Refresh weekly Z3K catalogue YML'
+            if git push origin HEAD:main; then
+              echo 'Z3K_PUBLISHED'
+              exit 0
+            fi
+            echo "Retry publish $attempt"
+          done
+          exit 1
