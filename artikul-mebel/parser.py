@@ -189,6 +189,34 @@ def load_one(url: str) -> list[dict]:
         raise RuntimeError(f'Incomplete variants for {url}: {len(products)}/{len(refs)}')
     return products
 
+
+# Curl handles the supplier's TLS endpoint more reliably than Python urllib3
+# on some hosts. Never fetch non-supplier URLs.
+import subprocess
+from shutil import which as executable
+_ORIGINAL_FETCH = _core.fetch
+
+def fetch(url: str, *, binary: bool=False):
+    if not _core.is_same_site(url):
+        raise RuntimeError("Refused external supplier fetch: "+url)
+    if executable("curl"):
+        cmd=[
+            "curl", "-4", "-fLsS", "--compressed", "--retry", "2",
+            "--retry-all-errors", "--retry-delay", "1",
+            "--connect-timeout", "12", "--max-time", "55",
+            "-A", "Mozilla/5.0 (compatible; ArtikulYMLPro/2.0)",
+            "-H", "Accept-Language: ru-RU,ru;q=0.9",
+            "--", url
+        ]
+        p=subprocess.run(cmd, capture_output=True, timeout=65)
+        if p.returncode==0 and len(p.stdout)>80:
+            return p.stdout if binary else p.stdout.decode("utf-8", "replace")
+        error=p.stderr.decode("utf-8","replace").strip()[-450:]
+        raise RuntimeError("Supplier curl fetch failed for %s: %s" % (url,error))
+    return _ORIGINAL_FETCH(url,binary=binary)
+
+_core.fetch = fetch
+
 _core.sanitize_description = sanitize_description
 _core.clean_params = clean_params
 _core.parse_product = parse_product
