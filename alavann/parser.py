@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent public Alavann sitemap -> YML Pro product catalog."""
+"""Alavann YML Pro feed restricted to six bathroom furniture categories."""
 from __future__ import annotations
 import hashlib, json, os, re, sys, threading, xml.etree.ElementTree as ET
 from collections import deque
@@ -15,7 +15,7 @@ from urllib3.util.retry import Retry
 BASE = "https://alavann-shop.ru"
 OUT = Path(os.getenv("ALAVANN_OUTPUT", "alavann/alavann.yml"))
 WORKERS = min(12, max(1, int(os.getenv("ALAVANN_WORKERS", "6"))))
-MINIMUM = int(os.getenv("ALAVANN_MIN_OFFERS", "200"))
+MINIMUM = int(os.getenv("ALAVANN_MIN_OFFERS", "140"))
 _tls = threading.local()
 
 def session():
@@ -46,12 +46,29 @@ def canonical(url):
         path += "/"
     return BASE + path
 
+# ONLY these six category directories are approved for the YML feed.
+# Prefix matching includes products under each directory, never sibling categories.
+CATALOG_ROOTS = (
+    "/mebel/cupboards/",
+    "/mebel/komody/",
+    "/mebel/zerkala-v-vannuyu/",
+    "/mebel/stand/",
+    "/mebel/set/",
+    "/mebel/mirror-cupboard/",
+)
+
+def in_scope(url):
+    normalized = canonical(url)
+    if not normalized:
+        return False
+    path = urlparse(normalized).path
+    return any(path.startswith(section) and path != section and
+               "/filter/" not in path and not path.endswith(".xml")
+               for section in CATALOG_ROOTS)
+
 def sitemap_urls():
     queue = deque([BASE + "/sitemap.xml"])
     seen, urls = set(), set()
-    prefixes = ("/mebel/","/screens/","/rakoviny/","/unitazy-kompakt/",
-                "/smesiteli-dlya-rakoviny/","/zerkala/","/polotentsesushiteli/",
-                "/steklyannye-shtorki-dlya-vannoj/")
     while queue and len(seen) < 40:
         url = queue.popleft()
         if url in seen: continue
@@ -63,19 +80,13 @@ def sitemap_urls():
             queue.extend(u for u in locs if u.startswith(BASE + "/") and u not in seen)
         elif root.tag.endswith("urlset"):
             urls.update(u for original in locs if (u := canonical(original))
-                        and urlparse(u).path.startswith(prefixes))
-    if len(urls) < 200:
-        raise RuntimeError(f"Unsafe sitemap: only {len(urls)} URL candidates")
+                        and in_scope(u))
+    if len(urls) < 100:
+        raise RuntimeError(f"Unsafe scoped sitemap: only {len(urls)} URL candidates")
     return sorted(urls)
 
-# The vendor's sitemap is stale: it omits current products visible in category
-# listings (e.g. ALV1242001 and ALV1235000). Always traverse live pagination.
-CATALOG_ROOTS = (
-    "/mebel/", "/screens/", "/rakoviny/", "/unitazy-kompakt/",
-    "/smesiteli-dlya-rakoviny/", "/zerkala/", "/polotentsesushiteli/",
-    "/steklyannye-shtorki-dlya-vannoj/",
-)
-
+# The vendor's sitemap is stale. Traverse all pages of each allowed category
+# in addition to category-scoped sitemap links.
 def listing_page_count(soup, section_url):
     """Find the last numbered page, including the site's last-page shortcut."""
     end = urlparse(section_url).path.rstrip("/") + "/"
@@ -96,7 +107,7 @@ def listing_page_count(soup, section_url):
 
 def listing_product_links(soup):
     return {u for a in soup.select("a.product__name[href]")
-            if (u := canonical(a.get("href")))}
+            if (u := canonical(a.get("href"))) and in_scope(u)}
 
 def catalog_urls():
     """Enumerate all live products, not just old sitemap entries.
@@ -112,8 +123,8 @@ def catalog_urls():
         soup = BeautifulSoup(get(root).content,"lxml")
         count = listing_page_count(soup,root)
         first = listing_product_links(soup)
-        if count > 1 and not first:
-            raise RuntimeError(f"Empty first catalog page: {root}")
+        if not first:
+            raise RuntimeError(f"Empty scoped catalog page: {root}")
         all_urls.update(first)
         all_pages.extend(f"{root}?page={n}" for n in range(2,count+1))
         print(f"Listing {section}: {count} pages, page 1: {len(first)} products",flush=True)
@@ -134,8 +145,8 @@ def catalog_urls():
                 print(f"Catalog pages {i}/{len(all_pages)}, live URLs={len(all_urls)}",flush=True)
     if errors:
         raise RuntimeError(f"Incomplete catalog listings: {errors[:8]}")
-    if len(all_urls)<200:
-        raise RuntimeError(f"Unsafe live catalog: only {len(all_urls)} URLs")
+    if len(all_urls)<140:
+        raise RuntimeError(f"Unsafe scoped live catalog: only {len(all_urls)} URLs")
     print(f"Live catalog: {len(all_urls)} products from {len(all_pages)+len(CATALOG_ROOTS)} pages",flush=True)
     return all_urls
 
@@ -279,7 +290,7 @@ def feed(products):
 def main():
     mapped=set(sitemap_urls())
     current=catalog_urls()
-    urls=sorted(mapped | current)
+    urls=sorted(url for url in mapped | current if in_scope(url))
     print(f"Sitemap candidates: {len(mapped)}; live catalog: {len(current)}; "
           f"newly discovered: {len(current-mapped)}; combined: {len(urls)}",flush=True)
     products={}
@@ -310,16 +321,25 @@ def main():
     if len(products)<MINIMUM or len(errors)>max(35,len(urls)*0.1):
         raise RuntimeError("Incomplete crawl; preserving existing catalog")
     if OUT.exists():
-        try: old=len(ET.parse(OUT).getroot().findall("./shop/offers/offer"))
-        except (ET.ParseError,OSError): old=0
-        if old and len(products) < old*0.8:
-            raise RuntimeError(f"Unsafe catalog shrink {old} -> {len(products)}")
-        # Large replacement is blocked even if a similar number of different
-        # SKUs would mask accidental catalog loss.
-        previous={el.get("id") for el in ET.parse(OUT).getroot().findall("./shop/offers/offer")}
+        # An intentional narrowing of the feed removes unrelated categories.
+        # Compare safety thresholds against old in-scope SKUs only, never the
+        # previous entire-site catalog.
+        try:
+            old_offers=ET.parse(OUT).getroot().findall("./shop/offers/offer")
+        except (ET.ParseError,OSError):
+            old_offers=[]
+        previous={el.get("id") for el in old_offers
+                  if in_scope(el.findtext("url") or "")}
+        if previous and len(products)<len(previous)*0.8:
+            raise RuntimeError(
+                f"Unsafe scoped catalog shrink {len(previous)} -> {len(products)}")
         missing=previous-products.keys()
         if previous and len(missing)>len(previous)*0.2:
-            raise RuntimeError(f"Unsafe SKU churn: {len(missing)}/{len(previous)} disappeared")
+            raise RuntimeError(
+                f"Unsafe scoped SKU churn: {len(missing)}/{len(previous)} disappeared")
+    excluded=[p["url"] for p in products.values() if not in_scope(p["url"])]
+    if excluded:
+        raise RuntimeError(f"Out-of-scope products rejected: {excluded[:10]}")
     result=feed(list(products.values()))
     ET.fromstring(result)
     OUT.parent.mkdir(parents=True,exist_ok=True)
