@@ -1,0 +1,81 @@
+name: College Chair - weekly content-only YML Pro
+on:
+  schedule:
+    - cron: '43 3 * * 6' # Weekly Saturday
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'college-chair/parser.py'
+      - 'college-chair/tests/**'
+      - 'college-chair/requirements.txt'
+      - '.github/workflows/college-chair-weekly.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: college-chair-public-content-weekly
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: college-chair/requirements.txt
+      - name: Install dependencies
+        run: pip install -r college-chair/requirements.txt
+      - name: Test content and supplier-stripping rules
+        run: python -m unittest discover -s college-chair/tests -v
+      - name: Scrape all public categories into content-only YML
+        env:
+          COLLEGE_OUTPUT: college-chair/catalog-content.yml
+          COLLEGE_MIN_OFFERS: '120'
+          COLLEGE_WORKERS: '4'
+        run: python -u college-chair/parser.py
+      - name: Check generated feed has NO price or stock data
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root=ET.parse('college-chair/catalog-content.yml').getroot()
+          offers=root.findall('./shop/offers/offer')
+          assert len(offers)>=120
+          assert len({o.findtext('vendorCode') for o in offers})==len(offers)
+          assert len({o.get('id') for o in offers})==len(offers)
+          assert set(o.findtext('categoryId') for o in offers)=={'7','8','16','17','18'}
+          assert all(o.findall('picture') for o in offers)
+          assert all(o.find('price') is None and o.find('available') is None for o in offers)
+          print(f'Validated {len(offers)} content-only products. No price/stock.')
+          PY
+      - name: Commit content-only feed without changing any other supplier
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp college-chair/catalog-content.yml /tmp/college-content.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/college-content.yml college-chair/catalog-content.yml
+            git add college-chair/catalog-content.yml
+            if git diff --cached --quiet; then
+              echo 'COLLEGE_FEED_UNCHANGED'
+              exit 0
+            fi
+            git commit -m 'Refresh College Chair content-only YML'
+            if git push origin HEAD:main; then
+              echo 'COLLEGE_FEED_PUBLISHED'
+              exit 0
+            fi
+            echo "Push conflict, retry $attempt"
+          done
+          exit 1
