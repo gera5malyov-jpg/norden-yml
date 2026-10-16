@@ -148,7 +148,7 @@ def build_yml(products):
     payload = _ORIGINAL_BUILD(products)
     output = os.getenv('OUTPUT', 'catalog.yml')
     # Existing feed remains unchanged if the source becomes incomplete.
-    if os.path.isfile(output) and os.getenv('ARTIKUL_ALLOW_CATALOG_SHRINK') != '1':
+    if os.getenv('ARTIKUL_VALIDATE_EXISTING') == '1' and os.path.isfile(output) and os.getenv('ARTIKUL_ALLOW_CATALOG_SHRINK') != '1':
         previous = ET.parse(output)
         previous_ids = {x.get('id') for x in previous.findall('./shop/offers/offer')}
         new_ids = {x.get('id') for x in ET.fromstring(payload).findall('./shop/offers/offer')}
