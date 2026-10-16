@@ -1,0 +1,70 @@
+name: Artikul - clean existing YML photos and supplier contacts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'artikul-mebel/fix_existing_feed.py'
+      - '.github/workflows/artikul-clean-existing.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: artikul-clean-existing-photos
+  cancel-in-progress: true
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            artikul-mebel
+            .github
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install parser dependencies
+        run: python -m pip install 'requests>=2.32,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Run local feed correction without supplier networking
+        working-directory: artikul-mebel
+        run: python -u fix_existing_feed.py
+      - name: Verify corrected original image URLs
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root=ET.parse('artikul-mebel/catalog.yml').getroot()
+          rows=root.findall('./shop/offers/offer')
+          assert len(rows)>=100
+          imgs=[x.text or '' for o in rows for x in o.findall('picture')]
+          assert imgs
+          problem=[x for x in imgs if '/upload/resize_cache/iblock/' in x or '/upload/resize_cache/uf/' in x]
+          assert not problem, f'Still {len(problem)} Bitrix watermark resize URLs'
+          print('Verified',len(rows),'offers,',len(imgs),'pictures without Bitrix resize-cache URLs')
+          PY
+      - name: Publish corrected catalog
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp artikul-mebel/catalog.yml /tmp/artikul-sanitized.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/artikul-sanitized.yml artikul-mebel/catalog.yml
+            git add artikul-mebel/catalog.yml
+            if git diff --cached --quiet; then
+              echo 'YML unchanged'
+              exit 0
+            fi
+            git commit -m 'Replace Artikul watermarked resize URLs with clean source photos'
+            if git push origin HEAD:main; then exit 0; fi
+            echo "Concurrent change; retry $attempt"
+          done
+          exit 1
