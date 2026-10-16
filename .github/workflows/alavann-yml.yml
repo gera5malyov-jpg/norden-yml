@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: alavann-yml-generator
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   generate:
@@ -57,7 +57,7 @@ jobs:
       - name: Scrape public catalog
         if: steps.cadence.outputs.run == 'true'
         env:
-          ALAVANN_MIN_OFFERS: '200'
+          ALAVANN_MIN_OFFERS: '140'
           ALAVANN_WORKERS: '6'
         run: python alavann/parser.py
       - name: Validate and commit persistent YML
@@ -67,10 +67,22 @@ jobs:
           import xml.etree.ElementTree as ET
           root=ET.parse('alavann/alavann.yml').getroot()
           offers=root.findall('./shop/offers/offer')
-          assert len(offers)>=200, f'Too few offers: {len(offers)}'
+          assert len(offers)>=140, f'Too few scoped offers: {len(offers)}'
           assert len({o.get('id') for o in offers})==len(offers)
           assert all(o.findtext('price') and o.findtext('vendorCode') for o in offers)
-          print(f'Validated {len(offers)} offers')
+          allowed={
+              '/mebel/cupboards/', '/mebel/komody/', '/mebel/zerkala-v-vannuyu/',
+              '/mebel/stand/', '/mebel/set/', '/mebel/mirror-cupboard/'}
+          from urllib.parse import urlparse
+          actual=set()
+          for o in offers:
+              path=urlparse(o.findtext('url') or '').path
+              category=next((c for c in allowed if path.startswith(c) and path!=c),None)
+              if not category:
+                  raise SystemExit(f'Unexpected category for {o.get("id")}: {path}')
+              actual.add(category)
+          assert actual == allowed, f'Missing expected categories: {allowed - actual}'
+          print(f'Validated {len(offers)} offers from exactly {len(actual)} approved categories')
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
