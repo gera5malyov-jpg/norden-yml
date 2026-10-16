@@ -249,23 +249,30 @@ def create_xml(items: list[dict]) -> bytes:
     ET.SubElement(shop,"company").text="Мегаполис"
     ET.SubElement(shop,"url").text="https://profikompany.ru/"
     cats=ET.SubElement(shop,"categories")
-    code={}
+    # Stable category IDs are essential: traversal and parallel completion order
+    # changes across weekly runs. Never use incrementing discovery-order IDs.
+    paths=set()
     for item in items:
         chain=[]
-        parent=None
         for name in item["categories"]:
-            name=clean(name)
-            chain.append(name)
-            path=tuple(chain)
-            if path not in code:
-                ident=str(len(code)+1)
-                tag=ET.SubElement(cats,"category",id=ident)
-                if parent:
-                    tag.set("parentId",parent)
-                tag.text=name
-                code[path]=ident
-            parent=code[path]
-        item["_category"]=parent or ""
+            chain.append(clean(name))
+            paths.add(tuple(chain))
+    code={}
+    used_ids={}
+    for path in sorted(paths):
+        token="/".join(path).encode("utf-8")
+        ident=str(1000000000 + int(hashlib.sha256(token).hexdigest()[:15],16) % 8000000000)
+        if ident in used_ids and used_ids[ident]!=path:
+            raise RuntimeError(f"Category-ID hash collision: {path} and {used_ids[ident]}")
+        used_ids[ident]=path
+        code[path]=ident
+        attrs={"id":ident}
+        if len(path)>1:
+            attrs["parentId"]=code[path[:-1]]
+        ET.SubElement(cats,"category",attrs).text=path[-1]
+    for item in items:
+        key=tuple(clean(x) for x in item["categories"])
+        item["_category"]=code.get(key,"")
     offers=ET.SubElement(shop,"offers")
     for p in sorted(items,key=lambda a:a["id"]):
         attrs={"id":p["id"]}
