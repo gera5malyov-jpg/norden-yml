@@ -17,3 +17,5 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: python -u scripts/diagnose_ymlpro_289_batch_stock.py
+
+# Investigation rerun after MySQL read-only introspection fix
