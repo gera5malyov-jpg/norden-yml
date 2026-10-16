@@ -1,0 +1,19 @@
+name: Diagnose 33krovati YML product codes
+on:
+  push:
+    branches: [feature/universal-yml-import-20261015]
+    paths: ['.github/workflows/diagnose-yml289-sku.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -u scripts/diagnose_ymlpro_289_sku_codes.py
