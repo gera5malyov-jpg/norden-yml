@@ -2,7 +2,7 @@ name: Diagnose YML PRO 33 beds stock failure
 on:
   push:
     branches: [feature/universal-yml-import-20261015]
-    paths: ['.github/workflows/diagnose-yml289-stock.yml']
+    paths: ['.github/workflows/diagnose-yml289-stock.yml', 'scripts/diagnose_ymlpro_289_batch_stock.py']
   workflow_dispatch:
 permissions:
   contents: read
