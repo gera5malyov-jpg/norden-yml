@@ -28,19 +28,39 @@ def main():
         try:
             script=r"""set -eu
 ROOT=/home/web/vm-23f9aff9.na4u.ru/www
-echo '=====PLUGINS====='
-ls "$ROOT/wa-apps/shop/plugins" | grep -Ei 'yml|xml' || true
-echo '=====YML PLUGIN PHP PATHS====='
-find "$ROOT/wa-apps/shop/plugins/" -maxdepth 3 -iname '*yml*' | head -45
-echo '=====MATCHING CODE HINTS====='
-for p in "$ROOT/wa-apps/shop/plugins/yml" "$ROOT/wa-apps/shop/plugins/ymlpro"; do
-  test -d "$p" || continue
-  grep -R -n -E 'yml_profile_id|yml_id|external_id|product_save|productSave' "$p/lib" --include='*.php' 2>/dev/null | head -65 | cut -c1-270 || true
+BASE="$ROOT/wa-apps/shop/plugins/yml/lib/classes"
+for spec in  'import/pins/shopYmlOfferIndexService.class.php:1:170'  'import/pins/shopYmlOfferMatcher.class.php:1:185'  'import/finders/cache/shopYmlFinderCache.class.php:105:195'  'binding/shopYmlBinding.class.php:1:135'  'import/finders/scope/shopYmlProductScopeProvider.class.php:1:125'; do
+    file=${spec%%:*}; part=${spec#*:}; lo=${part%%:*}; hi=${part##*:}
+    if test -f "$BASE/$file"; then
+        echo "=====FILE:$file:$lo-$hi====="
+        sed -n "${lo},${hi}p" "$BASE/$file" | head -185
+    fi
 done
-echo '=====DATABASE READ ONLY====='
-mysql --batch --skip-column-names -e "SELECT DATABASE();" 2>&1 | head -2
-mysql --batch --skip-column-names -e "SHOW TABLES LIKE '%yml%';" 2>&1 | head -40
-echo '=====COMPLETED====='
+echo '=====PHP DATABASE INSPECTION====='
+cat > /tmp/aletan_ymlpro_readonly.php <<'PHP'
+<?php
+$root='/home/web/vm-23f9aff9.na4u.ru/www';
+chdir($root); require_once $root.'/wa-config/SystemConfig.class.php';
+waSystem::getInstance(null,new SystemConfig()); wa('shop');
+$m=new waModel();
+$tables=$m->query("SHOW TABLES LIKE '%yml%'")->fetchAll();
+echo "YML_TABLES ".json_encode($tables,JSON_UNESCAPED_UNICODE).PHP_EOL;
+foreach(array('B1001','B102','B307') as $code) {
+  $p=$m->query("SELECT id, name, type_id, yml_id, yml_profile_id, edit_datetime FROM shop_product WHERE yml_id=s:code",array('code'=>$code))->fetchAll();
+  echo "PRODUCT ".json_encode($p,JSON_UNESCAPED_UNICODE).PHP_EOL;
+}
+$possible=array('shop_yml_offer_index','shop_yml_offer','shop_yml_profile','shop_yml_profile_settings');
+foreach($possible as $t) {
+  try { $res=$m->query("SHOW COLUMNS FROM `".$t."`")->fetchAll();
+    if($res) echo "COLUMNS ".$t." ".json_encode(array_column($res,'Field'),JSON_UNESCAPED_UNICODE).PHP_EOL;
+  } catch(Throwable $e){}
+}
+?>
+PHP
+chown web:web /tmp/aletan_ymlpro_readonly.php
+su -s /bin/bash web -c 'php /tmp/aletan_ymlpro_readonly.php'
+rm -f /tmp/aletan_ymlpro_readonly.php
+echo '=====AUDIT_COMPLETE====='
 """
             proc=subprocess.run(["ssh","-i",str(identity),"-o","BatchMode=yes",
                                   "-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null",
