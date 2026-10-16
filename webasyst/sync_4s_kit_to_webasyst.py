@@ -716,4 +716,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Decommissioned 2026-10-16: YML Pro is the sole Webasyst source
+    # for 4 Seasons. Fail closed even if another legacy workflow calls us.
+    raise SystemExit("Disabled: use the weekly 4s-mebel.yml feed with YML Pro")
