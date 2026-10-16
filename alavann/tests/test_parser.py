@@ -24,4 +24,28 @@ class ParserTests(unittest.TestCase):
     def test_reject_external_urls(self):
         self.assertEqual(parser.canonical("https://example.com/file.jpg"),"")
 
+    def test_exact_six_category_scope(self):
+        self.assertEqual(len(parser.CATALOG_ROOTS),6)
+        self.assertEqual(set(parser.CATALOG_ROOTS),{
+            "/mebel/cupboards/", "/mebel/komody/",
+            "/mebel/zerkala-v-vannuyu/", "/mebel/stand/",
+            "/mebel/set/", "/mebel/mirror-cupboard/"})
+        for section in parser.CATALOG_ROOTS:
+            self.assertTrue(parser.in_scope(parser.BASE+section+"example-product/"))
+            self.assertFalse(parser.in_scope(parser.BASE+section))
+        for path in ("/screens/ekran-pod-vannu/",
+                     "/mebel/shelves/a/", "/mebel/fixtures/a/",
+                     "/mebel/stand-other/a/", "/mebel/",
+                     "/mebel/stand/filter/color-red/apply/"):
+            self.assertFalse(parser.in_scope(parser.BASE+path), path)
+
+    def test_listing_does_not_pull_sibling_categories(self):
+        soup=BeautifulSoup("""<a class="product__name" href="/mebel/stand/allowed/">Allowed</a>
+            <a class="product__name" href="/mebel/zerkala-v-vannuyu/also-allowed/">Allowed 2</a>
+            <a class="product__name" href="/screens/excluded/">Excluded</a>
+            <a class="product__name" href="/mebel/shelves/excluded/">Excluded</a>""","lxml")
+        self.assertEqual(parser.listing_product_links(soup),{
+            parser.BASE+"/mebel/stand/allowed/",
+            parser.BASE+"/mebel/zerkala-v-vannuyu/also-allowed/"})
+
 if __name__=="__main__": unittest.main()
