@@ -208,6 +208,7 @@ def prepare_media(kit, item, report):
 
 
 def run(dry_run=False, force=False):
+    raise RuntimeError('DISABLED: Aletan KIT updates are permanently disabled; use the independent YML Pro feed')
     report = {
         "status": "running",
         "dry_run": bool(dry_run),
