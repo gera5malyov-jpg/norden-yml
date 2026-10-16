@@ -81,6 +81,15 @@ foreach($db->query("SHOW TABLES LIKE 'shop_yml_%'")->fetchAll() as $r){
 }
 $out['import_sessions_columns']=array_map(function($r){return $r['Field'];},$db->query("SHOW COLUMNS FROM shop_yml_import_sessions")->fetchAll());
 $out['yml_profiles_columns']=array_map(function($r){return $r['Field'];},$db->query("SHOW COLUMNS FROM shop_yml_profiles")->fetchAll());
+foreach(array('shop_yml_offer_index','shop_yml_finder_cache','shop_yml_import_stats','shop_yml_products') as $table){
+ $cols=array_map(function($r){return $r['Field'];},$db->query("SHOW COLUMNS FROM ".$table)->fetchAll());
+ $info=array('columns'=>$cols);
+ if(in_array('profile_id',$cols,true)){
+  $r=$db->query("SELECT COUNT(*) n FROM ".$table." WHERE profile_id=19")->fetch();
+  $info['profile_19_rows']=(int)$r['n'];
+ }
+ $out['table_'.$table]=$info;
+}
 $fields=array_keys($c);$out['image_keys']=array_values(array_filter($fields,function($k){return preg_match('/image|photo|picture|source|file|url/i',$k);}));
 echo 'FOURSIS_SOURCE='.json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES).PHP_EOL;
 PHP
