@@ -147,7 +147,7 @@ def variant_links(html,base):
     if not found:
         # A standalone accessory may have no ?offer= selector at all.
         # Use the immutable numeric Bitrix product ID at the URL tail.
-        match=re.search(r"_(\\d+)$",urlsplit(base).path.rstrip("/").split("/")[-1])
+        match=re.search(r"_(\d+)$",urlsplit(base).path.rstrip("/").split("/")[-1])
         if not match:
             raise RuntimeError("Neither offers nor numeric product ID: "+base)
         selected=match.group(1)
