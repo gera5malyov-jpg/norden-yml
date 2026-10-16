@@ -2,7 +2,7 @@ name: Diagnose 4sis external image source
 on:
   push:
     branches: [feature/universal-yml-import-20261015]
-    paths: [.github/workflows/diagnose-4sis-image-source.yml]
+    paths: [.github/workflows/diagnose-4sis-image-source.yml, scripts/diagnose_4sis_profile_images.py]
 permissions:
   contents: read
 jobs:
