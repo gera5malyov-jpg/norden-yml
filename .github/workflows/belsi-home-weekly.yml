@@ -1,0 +1,77 @@
+name: BELSI HOME - weekly colors and models YML Pro
+on:
+  schedule:
+    - cron: '47 5 * * 0' # Sunday 08:47 Moscow
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'belsi-home/parser.py'
+      - 'belsi-home/tests/**'
+      - 'belsi-home/requirements.txt'
+      - '.github/workflows/belsi-home-weekly.yml'
+permissions:
+  contents: write
+concurrency:
+  group: belsi-home-weekly-all-colors
+  cancel-in-progress: true
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    defaults:
+      run:
+        working-directory: belsi-home
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: belsi-home/requirements.txt
+      - name: Install libraries
+        run: pip install -r requirements.txt
+      - name: Test individual colors and fullsize original images
+        run: python -m pytest -q
+      - name: Generate complete independent color SKU feed
+        env:
+          WORKERS: '4'
+          MIN_OFFERS: '100'
+          OUTPUT: catalog.yml
+        run: python -u parser.py
+      - name: Validate all variants
+        run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,'.')
+          from parser import validate
+          offers,imgs=validate(Path('catalog.yml').read_bytes())
+          print('BELSI_VALIDATED independent_variants=',offers,'pictures=',imgs)
+          PY
+      - name: Publish exact approved YML
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp catalog.yml /tmp/belsi-home-new.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/belsi-home-new.yml catalog.yml
+            git add catalog.yml
+            if git diff --cached --quiet; then
+              echo 'BELSI_UNCHANGED'
+              exit 0
+            fi
+            git commit -m 'Refresh BELSI HOME all colors YML Pro feed'
+            if git push origin HEAD:main; then
+              echo 'BELSI_PUBLISHED'
+              exit 0
+            fi
+            echo "Retry concurrent push $attempt"
+          done
+          exit 1
