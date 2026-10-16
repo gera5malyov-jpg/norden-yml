@@ -1,10 +1,8 @@
 name: Repair external image links of selected supplier types
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/refresh-selected-product-images.yml'
-      - 'scripts/refresh_selected_product_external_images.py'
+  # Weekly after Aletan's Friday feed and Afina's daily supplier update.
+  schedule:
+    - cron: '50 9 * * 5'
   workflow_dispatch:
 permissions:
   contents: read
