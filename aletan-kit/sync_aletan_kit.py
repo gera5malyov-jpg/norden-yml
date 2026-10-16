@@ -801,6 +801,7 @@ def current_prices(variant):
     return money(p.get("price")), money(p.get("manual_discount_price"))
 
 def run(args):
+    raise RuntimeError('DISABLED: Aletan KIT price/stock updates are disabled; use the YML Pro feed')
     report = {
         "status": "running",
         "dry_run": bool(args.dry_run),
