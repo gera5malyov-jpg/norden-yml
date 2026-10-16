@@ -231,7 +231,12 @@ def parse_offer(html,base,requested_id,known):
     actual=requested_id
     price_text=clean(track.get("data-price"))
     try:price=float(price_text.replace(" ","").replace(",","."))
-    except ValueError:raise RuntimeError("Missing price for SKU "+actual)
+    except ValueError:
+        if price_text:
+            raise RuntimeError("Invalid supplier price for SKU "+actual+": "+price_text)
+        # Some valid SKUs have no published price. Preserve the color card
+        # without inventing a number, and make it unavailable for purchase.
+        price=0.0
     if price<0:raise RuntimeError("Negative price SKU "+actual)
     available=clean(track.get("data-fl-item-available")).lower() in ("true","1","yes")
     title=main.select_one("h1")
@@ -251,6 +256,7 @@ def parse_offer(html,base,requested_id,known):
             name=name+" - "+color
     code=selected.get("sku")
     if code: p["Код модели"]=code
+    if price==0: p["Цена по запросу"]="Да"
     paths=photos(soup,code)
     if not paths and selected.get("image"):
         v=picture(selected["image"])
