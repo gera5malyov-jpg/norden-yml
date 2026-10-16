@@ -33,11 +33,11 @@ if($profile) {
   'url_hostname'=>!empty($c['url'])?parse_url($c['url'],PHP_URL_HOST):null,
   'source_type'=>isset($c['source_type'])?$c['source_type']:null),JSON_UNESCAPED_UNICODE).PHP_EOL;
 }
-$tables=$db->query("SHOW TABLES")->fetchAll(null,false);
+$tables=$db->query("SHOW TABLES")->fetchAll();
 foreach($tables as $row) {
  $tbl=is_array($row)?reset($row):$row;
  if(stripos($tbl,'yml')===false || !preg_match('/(stock|batch|session|run)/i',$tbl))continue;
- $cols=$db->query('SHOW COLUMNS FROM \`'.$tbl.'\`')->fetchAll();
+ $cols=$db->query('SHOW COLUMNS FROM `'.$tbl.'`')->fetchAll();
  $size=$db->query("SELECT TABLE_ROWS,DATA_LENGTH,INDEX_LENGTH FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='".$db->escape($tbl)."'")->fetch();
  $inds=$db->query('SHOW INDEX FROM \`'.$tbl.'\`')->fetchAll();
  $idx=array();
@@ -51,7 +51,7 @@ foreach($tables as $row) {
 }
 PHP
 chmod 644 "$F"
-su -s /bin/bash web -c "php -d display_errors=0 '$F'"
+su -s /bin/bash web -c "php -d display_errors=1 '$F'" || echo YML289_PHP_AUDIT_FAILED=yes
 python3 - <<'PY'
 import os,re,json,pathlib,datetime
 root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
