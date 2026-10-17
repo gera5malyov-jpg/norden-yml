@@ -95,9 +95,11 @@ def test_dimensions_reserved_at_end_even_with_many_gallery_photos():
     soup=BeautifulSoup(PRODUCT,"html.parser")
     main=soup.select_one(".magnific-gallery")
     for n in range(40):
+        div=soup.new_tag("div")
+        div["class"]="magnific-gallery__item"
         a=soup.new_tag("a",href="/upload/iblock/abc/photo-%02d.jpg" % n)
-        a["class"]="magnific-gallery__item"
-        main.append(a)
+        div.append(a)
+        main.append(div)
     specs=soup.select_one(".sku__chars")
     div=soup.new_tag("div")
     div["class"]="magnific-gallery__item1"
