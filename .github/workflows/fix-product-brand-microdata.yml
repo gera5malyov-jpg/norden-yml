@@ -1,0 +1,23 @@
+name: Fix Product brand microdata for Yandex
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'storefront/fix_product_brand_microdata.py'
+      - '.github/workflows/fix-product-brand-microdata.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: prod-brand-microdata-yandex
+  cancel-in-progress: false
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply guarded brand schema patch with backup and live smoke
+        env:
+          NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+        run: python storefront/fix_product_brand_microdata.py
