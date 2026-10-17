@@ -70,3 +70,42 @@ def test_yml_offer_and_sanitized_description():
     assert x.findtext("picture").endswith("/full-1.jpg")
     assert "Авалон" not in (x.findtext("description") or "")
     assert root.findtext("./shop/company")=="ООО Мегаполис"
+
+
+def test_specification_diagram_is_last_and_not_duplicated():
+    # Avalon stores the dimensions drawing OUTSIDE the ordinary gallery.
+    diagram="/upload/iblock/537/5373dfeb23e2819adb7c57eb95007a34.jpg"
+    html=PRODUCT.replace("</body>", """
+    <div class="sku__chars">
+      <div class="magnific-gallery"><div class="magnific-gallery__item1">
+        <a href="%s"><img class="magnific-gallery__img_c" src="%s"></a>
+      </div></div>
+    </div></body>""" % (diagram,diagram))
+    parsed=parser.parse_product(html,"https://www.avalonmebel.ru/catalog/podstole-dlya-stola/-1282em")
+    expected="https://www.avalonmebel.ru"+diagram
+    assert parsed["pictures"]==[
+        "https://www.avalonmebel.ru/upload/iblock/c7c/full-1.jpg",
+        expected
+    ]
+    offer=ET.fromstring(parser.build_yml([parsed])).find("./shop/offers/offer")
+    assert [x.text for x in offer.findall("picture")][-1]==expected
+
+
+def test_dimensions_reserved_at_end_even_with_many_gallery_photos():
+    soup=BeautifulSoup(PRODUCT,"html.parser")
+    main=soup.select_one(".magnific-gallery")
+    for n in range(40):
+        a=soup.new_tag("a",href="/upload/iblock/abc/photo-%02d.jpg" % n)
+        a["class"]="magnific-gallery__item"
+        main.append(a)
+    specs=soup.select_one(".sku__chars")
+    div=soup.new_tag("div")
+    div["class"]="magnific-gallery__item1"
+    diagram=soup.new_tag("a",href="/upload/iblock/xyz/dimensions.jpg")
+    div.append(diagram)
+    specs.append(div)
+    images=parser.pictures(soup)
+    assert len(images)==35
+    assert images[0].endswith("/full-1.jpg")
+    assert images[-1].endswith("/dimensions.jpg")
+    assert images.count(images[-1])==1
