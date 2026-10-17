@@ -108,10 +108,10 @@ try:
     results=[]
     for attempt in range(8):
         image=test_mime()
-        html=cmd(['curl','-k','-LsS','--max-time','25','-w','\\n%{http_code}',
+        html=cmd(['curl','-k','-LsS','--max-time','25','-w','\n%{http_code}',
              PUBLIC_PAGE+'?extimg_proxy_fix='+str(os.getpid())+'_'+str(attempt)],timeout=35)
         raw=html.stdout
-        body,http_status=raw.rsplit('\\n',1) if '\\n' in raw else (raw,'unknown')
+        body,http_status=raw.rsplit('\n',1) if '\n' in raw else (raw,'unknown')
         expected='src="https://profikompany.ru/4sis-images/'+SAMPLE+'"'
         has_img=expected in body
         old_img='src="'+PREFIX+SAMPLE+'"'
