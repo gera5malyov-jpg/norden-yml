@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Read-only image-source audit for seven selected Webasyst product types."""
-import collections,json,re,sys,os
+"""Read-only image-source audit for eight selected Webasyst product types."""
+import collections,json,re,sys,os,gzip,datetime
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"webasyst"))
 from client import WebasystClient
 
 WANTED=["1-Обычный товар","33 Кровати-333","4sis.ru","afinalux","ALAVANN","aletan-provence","aletan-мрамор","aletan.ru"]
+BACKUP_ROWS=[]
+TYPE_REPORTS=[]
 def listify(o,keys=()):
     if isinstance(o,list):return [v for v in o if isinstance(v,dict)]
     if isinstance(o,dict):
@@ -33,6 +35,8 @@ def audit(wa,t):
     photos=collections.Counter();records=[]
     for p in out:
         s=str(p.get("summary") or "")
+        BACKUP_ROWS.append({"type_name":t["name"],"type_id":int(t["id"]),
+                            "product_id":int(p["id"]),"summary":s})
         b=extimg_count(s)
         photos["with_extimg"]+=int(b>0)
         photos["multi_extimg"]+=int(b>1)
@@ -50,6 +54,14 @@ def audit(wa,t):
         photos["no_gallery"]+=int(not b)
         records.append({"id":p.get("id"),"sku":skus(p)[:2],"name":str(p.get("name",""))[:100],
              "extimg":b,"summary":s[:300],"image_id":p.get("image_id"),"yml_id":p.get("yml_id")})
+    if len(out)!=len({str(p.get("id")) for p in out}):
+        raise RuntimeError("Duplicate product ID in audit for "+t["name"])
+    if any(str(p.get("type_id"))!=str(t["id"]) for p in out):
+        raise RuntimeError("Unexpected type ID in audit for "+t["name"])
+    TYPE_REPORTS.append({"name":t["name"],"type_id":int(t["id"]),
+                         "count":len(out),"counts":dict(photos),
+                         "missing_image_product_ids":[int(p["id"]) for p in out
+                              if not extimg_count(p.get("summary"))]})
     print("TYPE_REPORT",json.dumps({"name":t["name"],"id":t["id"],"count":len(out),
          "counts":dict(photos),"first":records[:5],
          "without_extimg":next((x for x in records if x["extimg"]==0),None),
@@ -66,5 +78,33 @@ def main():
         if len(ts)!=1:
             print("TYPE_NOT_UNIQUE",n,[{"id":x["id"],"name":x["name"]} for x in ts]);continue
         found.append(ts[0])
+    if len(found)!=len(WANTED):
+        raise RuntimeError("One or more named product types are missing or ambiguous")
     for t in found:audit(wa,t)
+    if len(BACKUP_ROWS)!=len({row["product_id"] for row in BACKUP_ROWS}):
+        raise RuntimeError("Duplicate product ID in complete backup")
+    folder=Path("reports")
+    folder.mkdir(parents=True,exist_ok=True)
+    backup=folder/"selected_type_images_inventory.json.gz"
+    report=folder/"selected_type_images_audit.json"
+    audit_data={
+        "audited_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "mode":"read_only",
+        "full_summary_backup":str(backup),
+        "total_products":len(BACKUP_ROWS),
+        "total_valid_gallery":sum(t["counts"].get("valid_gallery",0) for t in TYPE_REPORTS),
+        "total_no_gallery":sum(t["counts"].get("no_gallery",0) for t in TYPE_REPORTS),
+        "types":TYPE_REPORTS,
+    }
+    with gzip.open(backup,"wt",encoding="utf-8",compresslevel=6) as f:
+        json.dump({"audited_utc":audit_data["audited_utc"],
+                   "fields":["type_name","type_id","product_id","summary"],
+                   "products":BACKUP_ROWS},f,ensure_ascii=False)
+    report.write_text(json.dumps(audit_data,ensure_ascii=False,indent=2),encoding="utf-8")
+    print("COMPLETE_SUMMARY_BACKUP",json.dumps({"path":str(backup),
+        "items":len(BACKUP_ROWS),"bytes":backup.stat().st_size}),flush=True)
+    print("FINAL_SELECTED_AUDIT",json.dumps({"report":str(report),
+        "total_products":audit_data["total_products"],
+        "total_valid_gallery":audit_data["total_valid_gallery"],
+        "total_no_gallery":audit_data["total_no_gallery"]}),flush=True)
 if __name__=="__main__":main()
