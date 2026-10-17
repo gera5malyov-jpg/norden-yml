@@ -1,0 +1,61 @@
+name: Fix Mebelcity Montre VIP external image galleries
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/normalize_mebelcity_montrevip_extimg.py'
+      - '.github/workflows/normalize-mebelcity-montrevip-extimg.yml'
+permissions:
+  contents: read
+concurrency:
+  group: bulk-screenshot-type-extimg-20261017
+  cancel-in-progress: false
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Prepare Mebelcity and Montre VIP safe image plan
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python -u scripts/normalize_mebelcity_montrevip_extimg.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mebelcity-montrevip-backup-${{ github.run_id }}
+          path: |
+            reports/mebelcity_montrevip_photo_links_20261017_backup.json.gz
+            reports/mebelcity_montrevip_photo_links_20261017_plan.json.gz
+            reports/mebelcity_montrevip_photo_links_20261017.json
+          if-no-files-found: error
+          retention-days: 60
+  apply:
+    runs-on: ubuntu-latest
+    needs: plan
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - uses: actions/download-artifact@v4
+        with:
+          name: mebelcity-montrevip-backup-${{ github.run_id }}
+          path: reports/
+      - name: Update only short descriptions for safely matched cards
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python -u scripts/normalize_mebelcity_montrevip_extimg.py --apply
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mebelcity-montrevip-apply-${{ github.run_id }}
+          path: reports/mebelcity_montrevip_photo_links_20261017.json
+          if-no-files-found: warn
+          retention-days: 60
