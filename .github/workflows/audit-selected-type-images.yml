@@ -24,3 +24,13 @@ jobs:
           WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
           WEBASYST_BASE_URL: https://profikompany.ru
         run: python -u scripts/audit_selected_type_images.py
+      - name: Archive complete read-only summary backup and audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selected-webasyst-type-images-${{ github.run_id }}
+          path: |
+            reports/selected_type_images_inventory.json.gz
+            reports/selected_type_images_audit.json
+          if-no-files-found: warn
+          retention-days: 30
