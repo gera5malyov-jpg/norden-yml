@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/repair-avalon-0108d-one.yml'
+      - 'storefront/repair_avalon_0108d_one.py'
 permissions:
   contents: read
 concurrency:
