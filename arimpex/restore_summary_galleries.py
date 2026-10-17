@@ -176,7 +176,7 @@ def plan(wa):
     metadata["plan_bytes"] = PLAN.stat().st_size
     REPORT.write_text(json.dumps({"mode":"plan","metadata":metadata,"updated":0,"verified":0},ensure_ascii=False,indent=2),encoding="utf-8")
     print("ARIMPEX_BACKUP_READY",json.dumps({"original_summaries":len(backup),
-       "path":str(BACKUP),"bytes":BACKUP.stat().st_size}),ensure_ascii=False,flush=True)
+       "path":str(BACKUP),"bytes":BACKUP.stat().st_size},ensure_ascii=False),flush=True)
     print("ARIMPEX_PLAN",json.dumps(metadata,ensure_ascii=False),flush=True)
     if errors:
         raise RuntimeError("Unsafe Arimpex mapping: investigate plan report before applying")
