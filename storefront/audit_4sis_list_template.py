@@ -25,6 +25,12 @@ for base in (THEME,SITE):
   if matches:
    out.append({'path':str(path.relative_to(ROOT)),
                'matches':matches[:26],'size':len(body)})
+selected = {}
+for name in ('products.html','list-thumbs.html'):
+    target=THEME/name
+    lines=target.read_text(encoding='utf-8').splitlines()
+    selected[name]=[{'line':i+1,'text':lines[i]} for i in range(55,min(116,len(lines)))]
+print('FOURSIS_LIST_EXCERPTS='+json.dumps(selected,ensure_ascii=False),flush=True)
 print('FOURSIS_LIST_AUDIT='+json.dumps(out,ensure_ascii=False),flush=True)
 PY
 """
@@ -32,6 +38,6 @@ def main():
     output=execute(REMOTE)
     if 'FOURSIS_LIST_AUDIT=' not in output:
         raise RuntimeError('No template findings')
-    print(output.split('FOURSIS_LIST_AUDIT=',1)[1].split('\n',1)[0],flush=True)
+    print(output,flush=True)
 if __name__ == '__main__':
     main()
