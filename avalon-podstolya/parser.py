@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Avalon: only /catalog/podstole-dlya-stola/, all 29 Bitrix pages, YML Pro."""
+"""Avalon: tables and subframes, separate categories in one weekly YML Pro feed."""
 import concurrent.futures
 from datetime import datetime
 import hashlib
@@ -17,9 +17,18 @@ from bs4 import BeautifulSoup
 BASE = "https://www.avalonmebel.ru"
 CATEGORY = BASE + "/catalog/podstole-dlya-stola/"
 PREFIX = "/catalog/podstole-dlya-stola/"
+TABLE_CATEGORY = BASE + "/catalog/stoly-dlya-kafe/"
+TABLE_PREFIX = "/catalog/stoly-dlya-kafe/"
 OUTPUT = Path(os.getenv("OUTPUT", "catalog.yml"))
 WORKERS = max(1, min(10, int(os.getenv("WORKERS", "5"))))
 MIN_PRODUCTS = int(os.getenv("MIN_PRODUCTS", "200"))
+TABLE_MIN_PRODUCTS = int(os.getenv("TABLE_MIN_PRODUCTS", "100"))
+CATEGORIES = (
+    {"url": CATEGORY, "prefix": PREFIX, "id": "1",
+     "name": "Подстолья для столов", "min_products": MIN_PRODUCTS},
+    {"url": TABLE_CATEGORY, "prefix": TABLE_PREFIX, "id": "2",
+     "name": "Столы для кафе", "min_products": TABLE_MIN_PRODUCTS},
+)
 TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "40"))
 _TLS = threading.local()
 CONTACT = re.compile(
@@ -80,53 +89,83 @@ def fetch(url):
     raise RuntimeError("Fetch failed: %s: %s" % (url, last))
 
 
-def product_url(href):
+def product_category(href):
+    """Return the explicitly allowed Avalon category for a product URL."""
     parsed = urlparse(urljoin(BASE, href))
     if parsed.hostname not in {"www.avalonmebel.ru", "avalonmebel.ru"}:
         return None
-    if not parsed.path.startswith(PREFIX):
-        return None
-    suffix = parsed.path[len(PREFIX):].strip("/")
-    if not re.fullmatch("[A-Za-z0-9_-]{2,125}", suffix):
-        return None
-    return CATEGORY + suffix
+    for category in CATEGORIES:
+        if parsed.path.startswith(category["prefix"]):
+            suffix = parsed.path[len(category["prefix"]):].strip("/")
+            if re.fullmatch("[A-Za-z0-9_-]{2,125}", suffix):
+                return category
+    return None
 
 
-def listing(html):
+def product_url(href):
+    category = product_category(href)
+    if not category:
+        return None
+    suffix = urlparse(urljoin(BASE, href)).path[len(category["prefix"]):].strip("/")
+    return category["url"] + suffix
+
+
+def listing(html, category=None):
+    category = category or CATEGORIES[0]
     soup = BeautifulSoup(html, "html.parser")
     grid = soup.select_one("#js-catalog-wrapper-id")
     if not grid:
-        raise RuntimeError("Missing catalog grid")
+        raise RuntimeError("Missing catalog grid in " + category["url"])
     total = int(grid.get("data-total") or 0)
     pages = int(grid.get("data-pages") or 0)
     urls = []
     for a in grid.select("a.product[href]"):
         url = product_url(a.get("href"))
-        if url and url not in urls:
+        if url and product_category(url)["id"] == category["id"] and url not in urls:
             urls.append(url)
-    if total < MIN_PRODUCTS or pages < 1 or pages > 80 or not urls:
-        raise RuntimeError("Invalid grid: total=%s pages=%s urls=%s" % (total,pages,len(urls)))
-    return urls,total,pages
+    if total < category["min_products"] or pages < 1 or pages > 80 or not urls:
+        raise RuntimeError("Invalid grid for %s: total=%s pages=%s urls=%s" %
+                           (category["url"], total, pages, len(urls)))
+    return urls, total, pages
 
 
-def discover():
-    urls, expected, pages = listing(fetch(CATEGORY))
-    print("AVALON_DISCOVER expected=%d pages=%d" % (expected,pages),flush=True)
+def discover_category(category):
+    urls, expected, pages = listing(fetch(category["url"]), category)
+    print("AVALON_DISCOVER category=%s expected=%d pages=%d" %
+          (category["id"], expected, pages), flush=True)
+
     def read_page(n):
-        links, total, pc = listing(fetch(CATEGORY+"?PAGEN_1="+str(n)))
+        links, total, pc = listing(
+            fetch(category["url"] + "?PAGEN_1=" + str(n)), category)
         if total != expected or pc != pages:
-            raise RuntimeError("Changing catalog totals on page "+str(n))
-        return n,links
-    with concurrent.futures.ThreadPoolExecutor(max_workers=min(WORKERS,6)) as pool:
-        results = list(pool.map(read_page,range(2,pages+1)))
-    for n,links in sorted(results):
+            raise RuntimeError("Changing category totals: %s page %d" %
+                               (category["url"], n))
+        return n, links
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(WORKERS, 6)) as pool:
+        results = list(pool.map(read_page, range(2, pages + 1)))
+    for n, links in sorted(results):
         for link in links:
             if link not in urls:
                 urls.append(link)
-        print("Listing %d/%d: %d unique" % (n,pages,len(urls)),flush=True)
-    if len(urls)!=expected:
-        raise RuntimeError("Catalog incomplete: %d unique URLs, site reports %d" % (len(urls),expected))
-    return urls,expected
+        print("AVALON_LIST category=%s page=%d/%d unique=%d" %
+              (category["id"], n, pages, len(urls)), flush=True)
+    if len(urls) != expected:
+        raise RuntimeError("Catalog incomplete %s: %d URLs vs %d expected" %
+                           (category["url"], len(urls), expected))
+    return urls, expected
+
+
+def discover():
+    urls = []
+    expected_total = 0
+    for category in CATEGORIES:
+        links, expected = discover_category(category)
+        urls.extend(links)
+        expected_total += expected
+    if len(set(urls)) != expected_total:
+        raise RuntimeError("Duplicate product URLs between categories")
+    return urls, expected_total
 
 
 def source_image(raw):
@@ -214,19 +253,21 @@ def parse_product(html,url):
 def offer_id(p):
     suffix=urlparse(p["url"]).path.rstrip("/").split("/")[-1]
     slug=re.sub("[^0-9A-Za-z_-]","",suffix)[:110]
-    return "avalon-"+(slug or hashlib.sha256(p["url"].encode()).hexdigest()[:20])
+    prefix = "avalon-table-" if product_category(p["url"])["id"] == "2" else "avalon-"
+    return prefix + (slug or hashlib.sha256(p["url"].encode()).hexdigest()[:20])
 
 
 def build_yml(products):
     root=ET.Element("yml_catalog",{"date":datetime.now().strftime("%Y-%m-%d %H:%M")})
     shop=ET.SubElement(root,"shop")
-    ET.SubElement(shop,"name").text="Мегаполис - подстолья"
+    ET.SubElement(shop,"name").text="Мегаполис - мебель для кафе"
     ET.SubElement(shop,"company").text="ООО Мегаполис"
     ET.SubElement(shop,"url").text="https://profikompany.ru/"
     currencies=ET.SubElement(shop,"currencies")
     ET.SubElement(currencies,"currency",{"id":"RUR","rate":"1"})
     categories=ET.SubElement(shop,"categories")
-    ET.SubElement(categories,"category",{"id":"1"}).text="Подстолья для столов"
+    for category in CATEGORIES:
+        ET.SubElement(categories,"category",{"id":category["id"]}).text=category["name"]
     offers=ET.SubElement(shop,"offers")
     for p in sorted(products,key=lambda row:row["url"]):
         price=p["price"]
@@ -236,7 +277,7 @@ def build_yml(products):
         ET.SubElement(offer,"url").text=p["url"]
         ET.SubElement(offer,"price").text=("%g" % price) if price is not None else "0"
         ET.SubElement(offer,"currencyId").text="RUR"
-        ET.SubElement(offer,"categoryId").text="1"
+        ET.SubElement(offer,"categoryId").text=product_category(p["url"])["id"]
         for pic in p["pictures"]:
             ET.SubElement(offer,"picture").text=pic
         ET.SubElement(offer,"name").text=p["name"]
@@ -257,20 +298,33 @@ def validate(blob,old_path=None):
     ids=[o.get("id") for o in offers]
     if len(offers)<MIN_PRODUCTS or len(set(ids))!=len(ids):
         raise RuntimeError("YML invalid IDs or too few offers")
+    counts = {category["id"]: 0 for category in CATEGORIES}
+    defined = {cat.get("id") for cat in root.findall("./shop/categories/category")}
+    for category in CATEGORIES:
+        if category["id"] not in defined:
+            raise RuntimeError("Missing YML category " + category["id"])
     for o in offers:
-        if not product_url(o.findtext("url") or ""):
-            raise RuntimeError("Noncategory offer "+str(o.get("id")))
+        category = product_category(o.findtext("url") or "")
+        if not category:
+            raise RuntimeError("Noncategory offer " + str(o.get("id")))
+        if o.findtext("categoryId") != category["id"]:
+            raise RuntimeError("Invalid categoryId for " + str(o.get("id")))
+        counts[category["id"]] += 1
         if not o.findtext("name") or not o.findtext("vendorCode") or not o.findall("picture"):
-            raise RuntimeError("Incomplete product "+str(o.get("id")))
+            raise RuntimeError("Incomplete product " + str(o.get("id")))
         if CONTACT.search(o.findtext("description") or ""):
             raise RuntimeError("Supplier ad in YML")
+    for category in CATEGORIES:
+        if counts[category["id"]] < category["min_products"]:
+            raise RuntimeError("Missing category products: %s has %d" %
+                               (category["name"], counts[category["id"]]))
     if old_path and old_path.exists():
         old=ET.parse(old_path).getroot().findall("./shop/offers/offer")
         previous={x.get("id") for x in old}
         missing=previous-set(ids)
         if previous and (len(ids)<len(previous)*.90 or len(missing)>max(20,len(previous)*.15)):
             raise RuntimeError("Unsafe catalog shrink: %d SKUs missing" % len(missing))
-    return {"offers":len(offers),"pictures":sum(len(o.findall("picture")) for o in offers)}
+    return {"offers":len(offers),"pictures":sum(len(o.findall("picture")) for o in offers), "categories": counts}
 
 
 def main():

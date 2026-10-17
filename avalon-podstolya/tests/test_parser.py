@@ -55,7 +55,9 @@ def test_original_images_replace_resize_overlay():
 
 
 def test_no_other_category_or_generic_images():
-    assert parser.product_url("https://www.avalonmebel.ru/catalog/stoly-dlya-kafe/stol1") is None
+    assert parser.product_url("https://www.avalonmebel.ru/catalog/stoly-dlya-kafe/stol1") == (
+        "https://www.avalonmebel.ru/catalog/stoly-dlya-kafe/stol1")
+    assert parser.product_url("https://www.avalonmebel.ru/catalog/chairs/stol1") is None
     assert parser.source_image("https://www.avalonmebel.ru/local/templates/main/logo.png") is None
     assert parser.source_image("https://unrelated.example/upload/iblock/a/file.jpg") is None
 
@@ -111,3 +113,39 @@ def test_dimensions_reserved_at_end_even_with_many_gallery_photos():
     assert images[0].endswith("/full-1.jpg")
     assert images[-1].endswith("/dimensions.jpg")
     assert images.count(images[-1])==1
+
+
+TABLE_CATALOG = """<html><div id="js-catalog-wrapper-id"
+ data-page="1" data-pages="15" data-total="179" data-count="12">
+ <a class="product" href="/catalog/stoly-dlya-kafe/-2109em">table one</a>
+ <a class="product" href="/catalog/podstole-dlya-stola/-2109em">not a table</a>
+ <a class="product" href="/catalog/stoly-dlya-kafe/0501d">table two</a>
+ </div></html>"""
+
+
+def test_tables_category_discovery_filters_subframes():
+    urls,total,pages=parser.listing(TABLE_CATALOG,parser.CATEGORIES[1])
+    assert (total,pages)==(179,15)
+    assert urls==[
+        "https://www.avalonmebel.ru/catalog/stoly-dlya-kafe/-2109em",
+        "https://www.avalonmebel.ru/catalog/stoly-dlya-kafe/0501d",
+    ]
+
+
+def test_tables_products_keep_separate_category_and_stable_offer_ids():
+    # Keep the existing subframes offer IDs unchanged; tables have their own namespace.
+    table_url="https://www.avalonmebel.ru/catalog/stoly-dlya-kafe/-2109em"
+    original_url="https://www.avalonmebel.ru/catalog/podstole-dlya-stola/-2109em"
+    table_html=PRODUCT.replace("Подстолье 1282EM","Стол 2109EM").replace("1282EM","2109EM")
+    table=parser.parse_product(table_html,table_url)
+    subframe=parser.parse_product(table_html,original_url)
+    assert parser.offer_id(table)=="avalon-table--2109em"
+    assert parser.offer_id(subframe)=="avalon--2109em"
+    catalog=ET.fromstring(parser.build_yml([subframe,table]))
+    categories={x.get("id"):x.text for x in catalog.findall("./shop/categories/category")}
+    assert categories=={"1":"Подстолья для столов", "2":"Столы для кафе"}
+    offers={x.get("id"):x for x in catalog.findall("./shop/offers/offer")}
+    assert offers["avalon-table--2109em"].findtext("categoryId")=="2"
+    assert offers["avalon--2109em"].findtext("categoryId")=="1"
+    assert offers["avalon-table--2109em"].findtext("vendorCode")=="2109EM"
+    assert offers["avalon-table--2109em"].findtext("picture").endswith("/full-1.jpg")

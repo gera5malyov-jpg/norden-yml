@@ -1,4 +1,4 @@
-name: Avalon podstolya - weekly clean YML Pro
+name: Avalon subframes and cafe tables - weekly YML Pro
 
 on:
   schedule:
@@ -40,9 +40,10 @@ jobs:
         run: pip install -r requirements.txt
       - name: Test category and sanitization
         run: python -m pytest -q
-      - name: Scrape only subframe category and all its pages
+      - name: Scrape both Avalon categories and all their pages
         env:
           MIN_PRODUCTS: '200'
+          TABLE_MIN_PRODUCTS: '100'
           WORKERS: '5'
           OUTPUT: catalog.yml
         run: python -u parser.py
@@ -72,7 +73,7 @@ jobs:
               echo "Catalog unchanged"
               exit 0
             fi
-            git commit -m "Refresh weekly Avalon subframes YML"
+            git commit -m "Refresh weekly Avalon tables and subframes YML"
             if git push origin HEAD:main; then
               echo "Published Avalon YML Pro feed"
               exit 0
