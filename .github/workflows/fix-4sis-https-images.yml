@@ -1,0 +1,22 @@
+name: Fix 4sis mixed-content product photo gallery
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-4sis-https-images.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: storefront-4sis-https-photo-proxy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Backup and safely deploy 4sis HTTPS image proxy
+        env:
+          NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+        run: python storefront/repair_4sis_https_mixed_content.py
