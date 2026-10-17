@@ -1,0 +1,63 @@
+name: Restore external photo galleries for screenshot product types
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/bulk_screenshot_type_extimg_20261017.py'
+      - '.github/workflows/bulk-screenshot-type-extimg-20261017.yml'
+permissions:
+  contents: read
+concurrency:
+  group: bulk-screenshot-type-extimg-20261017
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Plan safe summary updates from exact supplier matches
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python -u scripts/bulk_screenshot_type_extimg_20261017.py
+      - name: Preserve full before-state and plan before any writes
+        uses: actions/upload-artifact@v4
+        with:
+          name: bulk-extimg-safe-backup-${{ github.run_id }}
+          path: |
+            reports/bulk_screenshot_type_extimg_20261017_backup.json.gz
+            reports/bulk_screenshot_type_extimg_20261017_plan.json.gz
+            reports/bulk_screenshot_type_extimg_20261017_report.json
+          if-no-files-found: error
+          retention-days: 60
+  apply:
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - uses: actions/download-artifact@v4
+        with:
+          name: bulk-extimg-safe-backup-${{ github.run_id }}
+          path: reports/
+      - name: Update ONLY short descriptions; verify current product identities
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python -u scripts/bulk_screenshot_type_extimg_20261017.py --apply-plan
+      - name: Preserve final report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bulk-extimg-apply-report-${{ github.run_id }}
+          path: reports/bulk_screenshot_type_extimg_20261017_report.json
+          if-no-files-found: warn
+          retention-days: 60
