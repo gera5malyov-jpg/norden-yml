@@ -1,9 +1,11 @@
-name: Arimpex - weekly YML Pro with all variants
+name: Arimpex - every 6 days YML Pro with all variants
 
 on:
   schedule:
-    # Sundays 04:24 UTC (07:24 Moscow).
-    - cron: '24 4 * * 0'
+    # GitHub checks daily at 04:24 UTC (07:24 Moscow).
+    # The job gate executes the parser only every 6 days, anchored 2026-10-18.
+    # Using */6 in day-of-month would wrongly reset the interval each month.
+    - cron: '24 4 * * *'
   workflow_dispatch:
   push:
     branches: [main]
@@ -24,22 +26,45 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
+      - name: Check exact six-day schedule
+        id: cadence
+        shell: bash
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" != "schedule" ]]; then
+            echo 'due=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          from datetime import date, datetime, timezone
+          first_run = date(2026, 10, 18)
+          today = datetime.now(timezone.utc).date()
+          due = today >= first_run and (today - first_run).days % 6 == 0
+          print(f"due={'true' if due else 'false'}")
+          PY
       - uses: actions/checkout@v4
+        if: steps.cadence.outputs.due == 'true'
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v5
+        if: steps.cadence.outputs.due == 'true'
         with:
           python-version: '3.12'
       - name: Install requests
+        if: steps.cadence.outputs.due == 'true'
         run: python -m pip install 'requests>=2.32,<3'
       - name: Run tests
+        if: steps.cadence.outputs.due == 'true'
         run: python -m unittest discover -s arimpex/tests -v
       - name: Read all models and all variants from Arimpex
+        if: steps.cadence.outputs.due == 'true'
         env:
           ARIMPEX_MIN_MODELS: '120'
           ARIMPEX_WORKERS: '5'
         run: python arimpex/parser.py
       - name: Validate complete YML
+        if: steps.cadence.outputs.due == 'true'
         run: |
           python - <<'PY'
           import xml.etree.ElementTree as ET
@@ -55,6 +80,7 @@ jobs:
           print('Validated %d distinct Arimpex variants' % len(offers))
           PY
       - name: Publish permanent YML after validation
+        if: steps.cadence.outputs.due == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -70,7 +96,7 @@ jobs:
               echo 'Feed unchanged'
               exit 0
             fi
-            git commit -m 'Refresh Arimpex weekly all-variants YML'
+            git commit -m 'Refresh Arimpex six-day all-variants YML'
             if git push origin HEAD:main; then
               echo 'Published YML to main'
               exit 0
