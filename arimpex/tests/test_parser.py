@@ -1,6 +1,8 @@
 """Offline checks for stable identification, source parsing, and stock semantics."""
 import sys
 import unittest
+from unittest.mock import patch
+import json
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import parser
@@ -23,3 +25,43 @@ class TestArimpex(unittest.TestCase):
            "aHR0cHM6Ly9hcmlt/cGV4LnJ1L3VwbG9h/ZC9pYmxvY2svNzdl/"
            "LzJrcjFoaDVhdmYw/YWRzdjljZWRsN3B3/NXA3dnRldmpxLmpw/Zw.jpg")
         self.assertEqual(parser.picture(u),"https://arimpex.ru/upload/iblock/77e/2kr1hh5avf0adsv9cedl7pw5p7vtevjq.jpg")
+
+    def test_name_contains_configuration(self):
+        p = {"name":"TUKA CB1994 Стул", "configuration":[
+            {"name":"Сиденье","items":[{"name":"экокожа Ekos","value":"белый"}]},
+            {"name":"Каркас","items":[{"name":"бук","value":"выбеленный бук"}]}]}
+        name=parser.variant_name(p)
+        self.assertIn("экокожа Ekos белый",name)
+        self.assertIn("бук выбеленный бук",name)
+
+    def test_complete_supplier_offers_are_not_just_preview(self):
+        base={"id":76160,"pid":64386,"eid":"model-uid#variant-uid",
+              "article":"CB1994","link":"/product/CB1994/",
+              "offers":{"preview":{"id":76160,"pid":64386}}}
+        full=[]
+        for i in range(57):
+            full.append({"id":76160+i,"pid":64386,
+                         "configuration":[{"name":"Сиденье","items":[
+                             {"id":100+i,"name":"ткань","value":str(i)}]}]})
+        st={"detail":{"product":base,
+             "options":[{"name":"configurator","enabled":True}]}}
+        with patch.object(parser,"state",return_value=st), patch.object(
+                parser,"request",return_value=json.dumps({"offers":full})) as req:
+            result=parser.load_model("https://arimpex.ru/product/CB1994/")
+        self.assertEqual(len(result["offers"]),57)
+        self.assertEqual(len({o["id"] for o in result["offers"]}),57)
+        self.assertIn("/api/product/model-uid/offers/",req.call_args.args[0])
+
+    def test_separate_product_cards_without_grouping(self):
+        base={"id":1,"pid":42,"name":"Стул","article":"CB1994",
+              "link":"/product/CB1994/","prices":[{"type":"current","value":42000}],
+              "availability":{"state":"on-order"},
+              "configuration":[{"name":"Каркас","items":[{"name":"бук","value":"орех"}]}]}
+        parent={"url":"https://arimpex.ru/product/CB1994/",
+                "base":base,"category":("Стулья",)}
+        content,ids=parser.xml_feed([(base,parent,base)])
+        import xml.etree.ElementTree as ET
+        item=ET.fromstring(content).find("./shop/offers/offer")
+        self.assertNotIn("group_id",item.attrib)
+        self.assertIn("бук орех",item.findtext("name"))
+        self.assertEqual(item.findtext("vendorCode"),"ARIMPEX-1")
