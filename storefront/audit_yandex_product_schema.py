@@ -18,6 +18,11 @@ for filename in ('product.html','product.info.html'):
  out[filename]={'positions':[i+1 for i in positions[:15]],
                 'excerpt':[{'line':i+1,'text':lines[i][:600]} for i in range(min(80,len(lines)))] if filename=='product.html' else [
                   {'line':max(1,i-2),'around':[x[:650] for x in lines[max(0,i-3):min(len(lines),i+4)]]} for i in positions[:6]]}
+for filename in ('product.html','product.info.html','product.features.html'):
+ p=base/filename
+ if p.is_file():
+  lines=p.read_text(encoding='utf-8').splitlines()
+  out.setdefault(filename,{})['feature_references']=[{'line':i+1,'text':s[:550]} for i,s in enumerate(lines) if 'features' in s or 'bryend' in s or 'vendor' in s][:35]
 print('YANDEX_THEME_AUDIT='+json.dumps(out,ensure_ascii=False),flush=True)
 PY
 dbfile=$(mktemp /tmp/yandex-schema-brand-XXXXXX.php)
