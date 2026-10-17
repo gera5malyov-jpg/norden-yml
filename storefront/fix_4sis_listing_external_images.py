@@ -27,7 +27,7 @@ existing={};new_text={}
 for file in FILES:
     if not file.is_file():raise RuntimeError('Missing theme file '+str(file))
     data=file.read_text(encoding='utf-8')
-    anchor='<div class="product-item'
+    anchor='<div class="product-item{if !$_is_slider}'
     if data.count(anchor)!=1 or data.count('data-src="{$_product_image_src}"')!=1:
         raise RuntimeError('Template structure changed: '+file.name)
     if PATCH in data:raise RuntimeError('Template already has the exact gallery URL rewrite: '+file.name)
