@@ -1,0 +1,27 @@
+name: Guarded Avalon catalog photo repair
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-avalon-catalog-photos.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-avalon-gallery-bulk-repair
+  cancel-in-progress: false
+jobs:
+  validate-and-repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile guarded script
+        run: python -m py_compile storefront/repair_avalon_catalog_photos.py
+      - name: Run 3 prechecks and update in protected batches with 10 page tests each
+        run: python storefront/repair_avalon_catalog_photos.py
