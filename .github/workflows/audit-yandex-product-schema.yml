@@ -1,0 +1,20 @@
+name: Audit Yandex product schema and brand coverage
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'storefront/audit_yandex_product_schema.py'
+      - '.github/workflows/audit-yandex-product-schema.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect live Product schema and real brand feature mapping
+        env:
+          NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+        run: python storefront/audit_yandex_product_schema.py
