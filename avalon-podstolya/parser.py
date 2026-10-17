@@ -151,6 +151,20 @@ def pictures(soup):
             image=source_image(node.get("href") or node.get("src") or "")
             if image and image not in found:
                 found.append(image)
+
+    # Dimension drawings are a separate gallery below the specifications,
+    # not part of .magnific-gallery__item. Keep them LAST in the YML even
+    # when there are more than 35 ordinary gallery photos.
+    dimensions=[]
+    for node in soup.select(".sku__chars .magnific-gallery__item1 a[href], "
+                            ".sku__chars .magnific-gallery__item1 img[src]"):
+        image=source_image(node.get("href") or node.get("src") or "")
+        if image and image not in dimensions:
+            dimensions.append(image)
+    if dimensions:
+        dimensions=dimensions[-35:]
+        found=[image for image in found if image not in dimensions]
+        return found[:35-len(dimensions)] + dimensions
     return found[:35]
 
 
