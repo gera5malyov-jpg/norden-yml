@@ -1,0 +1,20 @@
+name: Audit Arimpex Webasyst images read-only
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'arimpex/audit_site_images.py'
+      - '.github/workflows/audit-arimpex-shop-images.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect imported Arimpex products and image summaries
+        env:
+          NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+        run: python arimpex/audit_site_images.py
