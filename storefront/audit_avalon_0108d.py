@@ -40,5 +40,7 @@ su -s /bin/bash web -c "php '$f'"
 """
 if __name__ == '__main__':
     result = execute(REMOTE)
-    if 'AVALON_0108D_AUDIT=' not in result:
+    rows = [line for line in result.splitlines() if line.startswith('AVALON_0108D_AUDIT=')]
+    if len(rows) != 1:
         raise RuntimeError('Audit marker missing')
+    print(rows[0], flush=True)
