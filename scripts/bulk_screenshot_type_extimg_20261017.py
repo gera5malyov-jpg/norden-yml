@@ -105,7 +105,10 @@ def prepare():
     matched=[]
     for name in NAMES:
         matches=[t for t in types if str(t.get("name") or "").casefold()==name.casefold()]
-        if len(matches)!=1:raise RuntimeError("Webasyst type missing or ambiguous: "+name)
+        if not matches:
+            print("TYPE_UNAVAILABLE",json.dumps({"name":name,"reason":"no matching Webasyst type"},ensure_ascii=False),flush=True)
+            continue
+        if len(matches)!=1:raise RuntimeError("Ambiguous Webasyst type: "+name)
         matched.append((name,int(matches[0]["id"])))
     source_files={filename:load_feed(filename) for filename in set(FEEDS.values())}
     changes=[];backup=[];type_report={}
