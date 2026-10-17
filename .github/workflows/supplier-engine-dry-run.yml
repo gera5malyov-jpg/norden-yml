@@ -133,7 +133,9 @@ jobs:
           if-no-files-found: error
 
   supplier-run:
-    if: github.event_name == 'workflow_dispatch'
+    # Legacy Suppliers plugin write-back is disabled. Keep only read-only dry-run.
+    # All apply dispatches are skipped and cannot modify Webasyst or KIT.
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'dry-run'
     concurrency:
       group: supplier-webasyst-${{ inputs.supplier_id || 'unknown' }}
       cancel-in-progress: false
