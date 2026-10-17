@@ -49,8 +49,8 @@ folder.mkdir(mode=0o700)
 backups={}
 for file in FILES:
     backup=folder/(file.name+'.bak')
-    shutil.copy2(file,backup)
-    os.chmod(backup,0o600)
+    shutil.copy2(str(file),str(backup))
+    os.chmod(str(backup),0o600)
     backups[file]=backup
 
 def command(args,timeout=45):
@@ -68,7 +68,7 @@ def atomic(file,data):
         if os.path.exists(tmp):os.unlink(tmp)
 def check_page(url):
     r=command(['curl','-ksSL','--max-time','30','-w','\n%{http_code}',
-      url+'?extimg_list_fix='+str(os.getpid())+'_'+str(time.time_ns())],timeout=39)
+      url+'?extimg_list_fix='+str(os.getpid())+'_'+str(int(time.time()*1000))],timeout=39)
     body,status=r.stdout.rsplit('\n',1) if '\n' in r.stdout else ('','?')
     return {'http':status,'returncode':r.returncode,
         'rewritten':body.count('data-src="'+NEW),
@@ -110,7 +110,7 @@ try:
        'backup_dir':str(folder),'smoke':final,
        'proxy':proxy.stdout,'checks':len(results)},ensure_ascii=False),flush=True)
 except Exception as exc:
-    for file in reversed(written):shutil.copy2(backups[file],file)
+    for file in reversed(written):shutil.copy2(str(backups[file]),str(file))
     print('FOURSIS_LIST_GALLERY_FIX='+json.dumps({
       'result':'rolled_back','backup_dir':str(folder),
       'restored':[str(x.relative_to(ROOT)) for x in written],
