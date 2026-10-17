@@ -1,5 +1,5 @@
-# Active guarded 6-hour Webasyst -> KIT synchronization
-name: Norden Webasyst to KIT every 6 hours
+# Norden: KIT export from Webasyst only. Legacy supplier -> Webasyst reconciliation is disabled.
+name: Norden KIT export only every 6 hours
 
 on:
   schedule:
@@ -37,7 +37,9 @@ jobs:
       - name: Compile scheduled sync
         run: python -m py_compile supplier_engine/live_norden_scheduled_reconcile.py supplier_engine/live_kit_scheduled_sync.py supplier_engine/kit_sync.py scripts/dump_megasuppliers_links.py
 
-      - name: Read current Norden supplier links
+      # Disabled: no longer read old Suppliers plugin mapping for Webasyst import.
+      - name: Read current Norden supplier links (disabled)
+        if: ${{ false }}
         env:
           NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
         run: |
@@ -45,7 +47,9 @@ jobs:
             --supplier-id 1 \
             --output norden-links.json
 
-      - name: Reconcile Norden source with Webasyst
+      # Disabled: Webasyst supplier imports are handled by YML Pro instead.
+      - name: Reconcile Norden source with Webasyst (disabled)
+        if: ${{ false }}
         id: webasyst_reconcile
         env:
           NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
