@@ -161,6 +161,27 @@ def pictures(p):
             result.append(value)
     return result
 
+def configuration_swatches(p):
+    """Return only image samples selected for this concrete supplier variant.
+
+    Swatches belong to configuration.items, not to the model-wide offers
+    listing: never reuse another variant's material or frame sample.
+    """
+    result = []
+    for group in p.get("configuration") or []:
+        if not isinstance(group, dict):
+            continue
+        for item in group.get("items") or []:
+            if not isinstance(item, dict):
+                continue
+            image = item.get("image") or {}
+            if not isinstance(image, dict):
+                continue
+            url = picture(image.get("src"))
+            if url and url not in result:
+                result.append(url)
+    return result
+
 def availability(p):
     a = p.get("availability") or {}
     status = str(a.get("state") or "unknown")
@@ -222,8 +243,13 @@ def xml_feed(rows):
         for k,v in data.items(): ET.SubElement(elt,k).text=safe(v)
         old=current_price(p,"old")
         if old and Decimal(old)>Decimal(data["price"]): ET.SubElement(elt,"oldprice").text=old
+        # Main product photos remain first. Append the exact fabric/finish
+        # swatches for THIS supplier SKU, as extra YML picture links.
         photos=pictures(p)
         if not photos: photos=pictures(parent["base"])
+        for swatch in configuration_swatches(p):
+            if swatch not in photos:
+                photos.append(swatch)
         for v in photos: ET.SubElement(elt,"picture").text=v
         desc=clean(p.get("description"))
         if desc: ET.SubElement(elt,"description").text=safe(desc)
