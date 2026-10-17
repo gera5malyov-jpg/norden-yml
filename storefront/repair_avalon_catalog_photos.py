@@ -111,7 +111,8 @@ try:
  sample=eligible[:3]+eligible[len(eligible)//2:len(eligible)//2+3]+eligible[-4:]
  for row in sample:
   html,status=fetch(SITE+'/'+urllib.parse.quote(row['url'],safe='-._~/')+'/')
-  if status!='200' or row['pictures'][0] in html and row['before']==row['after']:raise RuntimeError('PREFLIGHT 3 public site mismatch')
+  expected_old=URL_RE.findall(row['before'])[0]
+  if status!='200' or ('src="'+expected_old+'"') not in html:raise RuntimeError('PREFLIGHT 3 public site mismatch')
  print('AVALON_BULK_PREFLIGHT='+json.dumps({'check':3,'result':'passed','public_sample':len(sample)}),flush=True)
  eligible.sort(key=lambda r:r['id'])
  # Two separate transactions: a limited 20-product pilot, then remaining products.
