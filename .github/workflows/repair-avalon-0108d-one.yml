@@ -1,0 +1,27 @@
+name: One-product Avalon 0108D external photo repair
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-avalon-0108d-one.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-avalon-0108d-one
+  cancel-in-progress: false
+jobs:
+  repair-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile isolated one-product repair
+        run: python -m py_compile storefront/repair_avalon_0108d_one.py
+      - name: Verify 3 preconditions, replace one URL, and repeat 10 checks
+        run: python storefront/repair_avalon_0108d_one.py
