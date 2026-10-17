@@ -134,6 +134,7 @@ def main() -> int:
         "failures_by_reason": {},
         "limit_hit": None,
         "complete_for_this_run": False,
+        "outcome": "running",
     }
 
     try:
@@ -191,12 +192,15 @@ def main() -> int:
                         print(f"Skipped autoarchived product: {reason}", flush=True)
                         if reason in {"restore_limit_exceeded", "total_limit_exceeded"}:
                             report["limit_hit"] = reason
+                            report["outcome"] = "quota_blocked" if reason == "restore_limit_exceeded" else "catalog_limit_blocked"
                             report["finished_at_utc"] = utc_now()
                             write_report(report)
-                            return 0 if reason == "restore_limit_exceeded" else 2
+                            print(f"Restore blocked by Ozon: {reason}; restored={report['restored_count']}; retry after quota reset.", file=sys.stderr, flush=True)
+                            return 2
 
                     if report["restored_count"] >= MAX_RESTORE:
                         report["limit_hit"] = "local_daily_safety_cap"
+                        report["outcome"] = "run_cap_reached"
                         report["finished_at_utc"] = utc_now()
                         write_report(report)
                         return 0
@@ -209,11 +213,24 @@ def main() -> int:
             seen_tokens.add(next_last_id)
             last_id = next_last_id
 
+        if report["failed_count"] or report["missing_info_skipped"]:
+            report["outcome"] = "incomplete_with_errors"
+        elif not report["complete_for_this_run"]:
+            report["outcome"] = "scan_incomplete"
+        elif report["autoarchive_candidates_seen"] == 0:
+            report["outcome"] = "no_autoarchived_products"
+        else:
+            report["outcome"] = "restore_completed"
+
         report["finished_at_utc"] = utc_now()
         write_report(report)
+        if report["outcome"] in {"incomplete_with_errors", "scan_incomplete"}:
+            print(f"Restore incomplete: {report['outcome']}; see report.", file=sys.stderr)
+            return 2
         return 0
 
     except Exception as exc:
+        report["outcome"] = "fatal_error"
         report["fatal_error"] = {"type": type(exc).__name__, "message": str(exc)[:1000]}
         report["finished_at_utc"] = utc_now()
         write_report(report)
