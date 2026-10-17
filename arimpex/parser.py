@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import xml.etree.ElementTree as ET
 import requests
 from requests.adapters import HTTPAdapter
@@ -24,7 +24,7 @@ def clean(x):
 def safe(x):
     return "".join(c for c in str(x or "") if c in "\n\r\t" or 32 <= ord(c) <= 55295 or 57344 <= ord(c) <= 65533 or 65536 <= ord(c) <= 1114111)
 
-def request(url):
+def request(url, min_size=300):
     u = urlsplit(url)
     if u.scheme != "https" or u.hostname not in ("arimpex.ru", "www.arimpex.ru"):
         raise ValueError("Refused unrelated URL: " + url)
@@ -38,7 +38,7 @@ def request(url):
         LOCAL.session = s
     r = s.get(url, timeout=(15, 45))
     r.raise_for_status()
-    if urlsplit(r.url).hostname not in ("arimpex.ru", "www.arimpex.ru") or len(r.content) < 300:
+    if urlsplit(r.url).hostname not in ("arimpex.ru", "www.arimpex.ru") or len(r.content) < min_size:
         raise ValueError("Unexpected page: " + url)
     return r.text
 
@@ -71,11 +71,38 @@ def load_model(url):
     st = state(url); p = st["detail"]["product"]
     if not clean(p.get("article")) or not p.get("pid"):
         raise ValueError("No article or product id on " + url)
+    # The initial HTML includes only a small preview of offers. The configurator
+    # fetches the actual complete list from /api/product/<model-eid>/offers/.
+    # Never create an artificial Cartesian product of colors: only real supplier SKUs.
+    options = st.get("detail", {}).get("options") or []
+    configurable = any(x.get("name") == "configurator" and x.get("enabled") for x in options)
     offers = list((p.get("offers") or {}).values())
+    eid = str(p.get("eid") or "").split("#")[0]
+    if eid:
+        api_url = SITE + "/api/product/" + quote(eid, safe="") + "/offers/"
+        payload = json.loads(request(api_url, min_size=2))
+        if not isinstance(payload, dict) or not isinstance(payload.get("offers"), (dict, list)):
+            raise ValueError("Invalid full offers API response: " + url)
+        full = payload["offers"]
+        complete = list(full.values()) if isinstance(full, dict) else full
+        if complete:
+            offers = complete
+        elif configurable:
+            raise ValueError("Configurator returned no SKUs: " + url)
+    elif configurable:
+        raise ValueError("Configurator missing model EID: " + url)
     if id_of(p) not in [id_of(x) for x in offers]:
+        if configurable:
+            raise ValueError("Main SKU missing from complete configurator: " + url)
         offers.append({"id": p["id"], "pid": p["pid"], "link": p.get("link")})
     if not offers or len(set(id_of(x) for x in offers)) != len(offers):
-        raise ValueError("Invalid SKU list: " + url)
+        raise ValueError("Invalid or duplicated SKU list: " + url)
+    for offer in offers:
+        if str(offer.get("pid")) != str(p["pid"]):
+            raise ValueError("Cross-model SKU in full configurator: " + url)
+        if configurable and not offer.get("configuration"):
+            raise ValueError("SKU without configuration: " + url)
+    LOG.info("Model %s: %d actual supplier SKUs", p["article"], len(offers))
     return {"url":url, "base":p, "category":category(st), "offers":offers}
 
 def get_variant(task):
@@ -146,6 +173,19 @@ def availability(p):
 def category_id(parts):
     return str(1000 + int(hashlib.sha256("/".join(parts).encode()).hexdigest()[:12],16) % 1999000000)
 
+def variant_name(p):
+    """Independent product title describing the supplier's actual configuration."""
+    title = clean(p.get("name"))
+    parts = []
+    for group in p.get("configuration") or []:
+        label = clean(group.get("name"))
+        values = [clean(" ".join(str(z or "") for z in (item.get("name"), item.get("value"))))
+                  for item in group.get("items") or []]
+        value = ", ".join(x for x in values if x)
+        if label and value:
+            parts.append(label + ": " + value)
+    return title + (" (" + "; ".join(parts) + ")" if parts else "")
+
 def xml_feed(rows):
     root = ET.Element("yml_catalog", date=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))
     shop = ET.SubElement(root, "shop")
@@ -168,10 +208,10 @@ def xml_feed(rows):
         seen.add(sku)
         status,count=availability(p)
         elt=ET.SubElement(offers,"offer",{"id":"arimpex-"+str(sku),
-            "group_id":"arimpex-"+str(p["pid"]), "available":"true" if status in ("buy","on-order") else "false"})
+            "available":"true" if status in ("buy","on-order") else "false"})
         link=urljoin(SITE,p.get("link") or off.get("link") or parent["url"])
         if not link.startswith(SITE+"/product/"): raise ValueError("Invalid variant URL "+link)
-        data={"categoryId":cat_ids[parent["category"]],"name":clean(p["name"]),
+        data={"categoryId":cat_ids[parent["category"]],"name":variant_name(p),
               "url":link,"price":current_price(p),"currencyId":"RUB",
               "vendorCode":"ARIMPEX-"+str(sku), "model":clean(p["article"]), "count":str(count)}
         brand=clean((p.get("brand") or {}).get("name"))
