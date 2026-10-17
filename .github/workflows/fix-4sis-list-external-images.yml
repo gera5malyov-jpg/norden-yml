@@ -1,0 +1,23 @@
+name: Fix external 4sis photographs in product listings
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'storefront/fix_4sis_listing_external_images.py'
+      - '.github/workflows/fix-4sis-list-external-images.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: one-off-4sis-listing-gallery-fix
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch two theme templates with backup and rollback smoke
+        env:
+          NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+        run: python storefront/fix_4sis_listing_external_images.py
