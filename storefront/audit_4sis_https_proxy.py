@@ -16,7 +16,7 @@ if template.exists():
  matches=[i for i,l in enumerate(lines) if 'extimg' in l.lower() or 'img_url' in l or 'js-extimg-main' in l]
  out['gallery_lines']=[{'n':i+1,'line':lines[i][:310]} for i in matches[:85]]
  out['external_img_block_count']=s.count('extimg: parse ALL')
-out['nginx_present']=bool(subprocess.run(['bash','-lc','command -v nginx'],capture_output=True).stdout)
+out['nginx_present']=bool(subprocess.run(['bash','-lc','command -v nginx'],stdout=subprocess.PIPE,stderr=subprocess.PIPE).stdout)
 candidates=[]
 for dirname in ['/etc/nginx/sites-enabled','/etc/nginx/conf.d','/etc/nginx/vhosts','/etc/nginx/sites-available']:
  p=pathlib.Path(dirname)
