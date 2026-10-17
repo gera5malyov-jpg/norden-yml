@@ -1,0 +1,26 @@
+name: Monitor 4sis external photo gallery on storefront
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'storefront/smoke_4sis_live_gallery.py'
+      - '.github/workflows/smoke-4sis-live-gallery.yml'
+  schedule:
+    - cron: '23 6,18 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: public-4sis-gallery-healthcheck
+  cancel-in-progress: false
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate actual public product image and three thumbnails
+        run: python -u storefront/smoke_4sis_live_gallery.py
