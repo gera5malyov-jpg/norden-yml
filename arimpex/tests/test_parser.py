@@ -65,3 +65,48 @@ class TestArimpex(unittest.TestCase):
         self.assertNotIn("group_id",item.attrib)
         self.assertIn("бук орех",item.findtext("name"))
         self.assertEqual(item.findtext("vendorCode"),"ARIMPEX-1")
+
+    def test_configuration_swatches_only_selected_sku(self):
+        white="https://arimpex.ru/upload/white.jpg"
+        black="https://arimpex.ru/upload/black.jpg"
+        walnut="https://arimpex.ru/upload/walnut.jpg"
+        white_sku={"configuration":[
+            {"name":"Сиденье","items":[{"name":"экокожа Ekos","value":"белый",
+                 "image":{"src":white}}]},
+            {"name":"Каркас","items":[{"name":"бук","value":"орех",
+                 "image":{"src":walnut}}]}]}
+        black_sku={"configuration":[
+            {"name":"Сиденье","items":[{"name":"экокожа Ekos","value":"черный",
+                 "image":{"src":black}}]},
+            {"name":"Каркас","items":[{"name":"бук","value":"орех",
+                 "image":{"src":walnut}}]}]}
+        self.assertEqual(parser.configuration_swatches(white_sku),[white,walnut])
+        self.assertEqual(parser.configuration_swatches(black_sku),[black,walnut])
+        self.assertNotIn(black,parser.configuration_swatches(white_sku))
+
+    def test_independent_offer_picture_gallery_and_color_square(self):
+        base={"pid":42,"name":"Стул","article":"CB1994",
+              "link":"/product/CB1994/",
+              "prices":[{"type":"current","value":42000}],
+              "availability":{"state":"on-order"},
+              "images":[{"src":"https://arimpex.ru/upload/chair.jpg"}]}
+        parent={"url":"https://arimpex.ru/product/CB1994/",
+                "base":base,"category":("Стулья",)}
+        rows=[]
+        for sku, sample, color in (
+                (101,"https://arimpex.ru/upload/white.jpg","белый"),
+                (102,"https://arimpex.ru/upload/black.jpg","черный")):
+            item=dict(base,id=sku,configuration=[{"name":"Сиденье",
+                "items":[{"name":"экокожа","value":color,
+                          "image":{"src":sample}}]}])
+            rows.append((item,parent,item))
+        xml,ids=parser.xml_feed(rows)
+        import xml.etree.ElementTree as ET
+        result={x.get("id"): x for x in ET.fromstring(xml).findall("./shop/offers/offer")}
+        white=[x.text for x in result["arimpex-101"].findall("picture")]
+        black=[x.text for x in result["arimpex-102"].findall("picture")]
+        self.assertEqual(white,["https://arimpex.ru/upload/chair.jpg",
+                                "https://arimpex.ru/upload/white.jpg"])
+        self.assertEqual(black,["https://arimpex.ru/upload/chair.jpg",
+                                "https://arimpex.ru/upload/black.jpg"])
+        self.assertEqual(len(ids),2)
