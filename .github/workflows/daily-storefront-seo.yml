@@ -24,7 +24,9 @@ jobs:
           python-version: '3.12'
       - name: Validate SEO monitor
         run: python3 -m py_compile storefront/daily_seo_monitor.py
-      - name: Check 12 sitemaps and rotating URL samples
+      - name: Run URL normalization regression tests
+        run: python3 -m unittest discover -s storefront/tests -p 'test_seo_monitor_url_encoding.py' -v
+      - name: Check all sitemaps and rotating URL samples
         run: python3 storefront/daily_seo_monitor.py
       - name: Store detailed report
         if: always()

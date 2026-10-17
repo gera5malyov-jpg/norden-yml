@@ -17,17 +17,24 @@ NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 TODAY = datetime.datetime.now(datetime.timezone.utc).date()
 
 
-def read_response(url, limit=5_000_000):
+def encode_request_url(url):
+    """Preserve literal '+' in URL paths (brand slugs); quote Unicode safely."""
     parsed = urllib.parse.urlsplit(url)
-    # Sitemap XML may contain internationalized URLs; send RFC3986-compatible
-    # percent-encoded UTF-8 paths without changing source URLs.
-    encoded_url = urllib.parse.urlunsplit((
+    # Webasyst brand slugs may contain literal '+'. Re-encoding it to '%2B'
+    # produces a different route and false 404s in the Sitemap monitor.
+    return urllib.parse.urlunsplit((
         parsed.scheme,
         parsed.netloc,
-        urllib.parse.quote(parsed.path, safe="/%:@-._~"),
+        urllib.parse.quote(parsed.path, safe="/%:@-._~+"),
         urllib.parse.quote(parsed.query, safe="=&%:@-._~"),
         parsed.fragment,
     ))
+
+
+def read_response(url, limit=5_000_000):
+    # Sitemap XML may contain internationalized URLs; send RFC3986-compatible
+    # percent-encoded UTF-8 paths without changing source URLs.
+    encoded_url = encode_request_url(url)
     request = urllib.request.Request(encoded_url, headers=HEADERS)
     try:
         with urllib.request.urlopen(request, timeout=22) as response:
