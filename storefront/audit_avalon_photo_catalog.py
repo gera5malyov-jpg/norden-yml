@@ -15,11 +15,11 @@ $rows=$m->query("SELECT id,name,url,summary FROM shop_product WHERE status=1 AND
 $items=array();
 foreach($rows as $row){
  $links=array();
- preg_match_all('~https?://[^\\s<\\]\\[\\"\\']+~i',(string)$row['summary'],$found);
+ preg_match_all('#https?://[A-Za-z0-9/:._?&=%+-]+#i',(string)$row['summary'],$found);
  foreach($found[0] as $value){$links[]=html_entity_decode($value,ENT_QUOTES,'UTF-8');}
  $items[]=array('id'=>$row['id'],'name'=>$row['name'],'url'=>$row['url'],'links'=>$links);
 }
-echo 'AVALON_CATALOG_B64='.base64_encode(json_encode($items,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES))."\\n";
+echo 'AVALON_CATALOG_B64='.base64_encode(json_encode($items,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)).PHP_EOL;
 PHP
 chmod 644 "$f"
 su -s /bin/bash web -c "php '$f'"
