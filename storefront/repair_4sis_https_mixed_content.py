@@ -43,17 +43,13 @@ location ^~ /4sis-images/ {
 }
 # END 4sis HTTPS legacy image proxy (ChatGPT-managed)
 '''
-old_fragment='''                {if $__url && preg_match('~^https?://~i', $__url) && !in_array($__url, $ext_images)}
+old_fragment='''                {assign var="__url" value=trim($__line)}
+                {if $__url && preg_match('~^https?://~i', $__url) && !in_array($__url, $ext_images)}
                     {append var="ext_images" value=$__url}
                 {/if}'''
-new_fragment=r'''                {if $__url && preg_match('~^https?://~i', $__url)}
-                    {* Browsers refuse HTTP images in HTTPS pages. Only fixed 4sis source is rewritten. *}
-                    {if preg_match('~^http://5\.35\.127\.160/images/~i', $__url)}
-                        {assign var="__url" value=preg_replace('~^http://5\.35\.127\.160/images/~i', '/4sis-images/', $__url)}
-                    {/if}
-                    {if !in_array($__url, $ext_images)}
-                        {append var="ext_images" value=$__url}
-                    {/if}
+new_fragment='''                {assign var="__url" value=str_replace('http://5.35.127.160/images/', 'https://profikompany.ru/4sis-images/', trim($__line))}
+                {if $__url && preg_match('~^https?://~i', $__url) && !in_array($__url, $ext_images)}
+                    {append var="ext_images" value=$__url}
                 {/if}'''
 if not THEME.is_file() or not CUSTOM.is_file():
     raise RuntimeError('Missing expected theme or custom nginx include: '+str(THEME)+' '+str(CUSTOM))
@@ -112,17 +108,19 @@ try:
     results=[]
     for attempt in range(8):
         image=test_mime()
-        html=cmd(['curl','-k','-LsS','--max-time','25',
-             '--resolve','profikompany.ru:443:127.0.0.1',
+        html=cmd(['curl','-k','-LsS','--max-time','25','-w','\\n%{http_code}',
              PUBLIC_PAGE+'?extimg_proxy_fix='+str(os.getpid())+'_'+str(attempt)],timeout=35)
-        body=html.stdout
-        expected='src="/4sis-images/'+SAMPLE+'"'
+        raw=html.stdout
+        body,http_status=raw.rsplit('\\n',1) if '\\n' in raw else (raw,'unknown')
+        expected='src="https://profikompany.ru/4sis-images/'+SAMPLE+'"'
         has_img=expected in body
         old_img='src="'+PREFIX+SAMPLE+'"'
         old_found=old_img in body
-        result={'try':attempt,'proxy':image,'html_http_ok':html.returncode==0,
+        result={'try':attempt,'proxy':image,'html_http_ok':html.returncode==0 and http_status=='200',
+                'html_status':http_status,'html_bytes':len(body),'html_start':body[:140],
                 'patched_main':has_img,'old_http_main':old_found,
-                'thumb_count':body.count('data-extimg="/4sis-images/')}
+                'rewrite_url_instances':body.count('/4sis-images/'),
+                'thumb_count':body.count('data-extimg="https://profikompany.ru/4sis-images/')}
         results.append(result)
         if image['code']==0 and image['http'].startswith('200|image/jpeg|') and has_img and not old_found:break
         time.sleep(2)
