@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """arimpex.ru -> YML Pro. Only public pages; no KIT/Webasyst API."""
 import ast, base64, hashlib, html, json, logging, os, re, sys, threading
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
@@ -202,6 +203,7 @@ def xml_feed(rows):
         ET.SubElement(cats,"category",{"id":cat_ids[p], "parentId":cat_ids[p[:-1]] if len(p)>1 else "1"}).text=safe(p[-1])
     offers=ET.SubElement(shop,"offers")
     seen=set()
+    title_counts = Counter(variant_name(p).casefold() for p,_,_ in rows)
     for p,parent,off in sorted(rows,key=lambda x:id_of(x[0])):
         sku=id_of(p)
         if sku in seen: raise ValueError("Duplicate SKU "+str(sku))
@@ -211,7 +213,8 @@ def xml_feed(rows):
             "available":"true" if status in ("buy","on-order") else "false"})
         link=urljoin(SITE,p.get("link") or off.get("link") or parent["url"])
         if not link.startswith(SITE+"/product/"): raise ValueError("Invalid variant URL "+link)
-        data={"categoryId":cat_ids[parent["category"]],"name":variant_name(p),
+        data={"categoryId":cat_ids[parent["category"]],
+              "name":variant_name(p) + (" [ARIMPEX-" + str(sku) + "]" if title_counts[variant_name(p).casefold()] > 1 else ""),
               "url":link,"price":current_price(p),"currencyId":"RUB",
               "vendorCode":"ARIMPEX-"+str(sku), "model":clean(p["article"]), "count":str(count)}
         brand=clean((p.get("brand") or {}).get("name"))
