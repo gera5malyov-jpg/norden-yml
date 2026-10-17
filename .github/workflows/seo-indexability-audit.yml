@@ -26,37 +26,38 @@ jobs:
           hdr={"Authorization":"Bearer "+t["token"],"Content-Type":"application/json","Accept":"application/json"}
           remote=r'''set -uo pipefail
           ROOT=/home/web/vm-23f9aff9.na4u.ru/www
-          echo '=== THEME DIRECTORIES ==='
-          for d in "$ROOT/wa-data/public/shop/themes" "$ROOT/wa-apps/shop/themes" "$ROOT/wa-data/public/site/themes"; do
-          if [ -d "$d" ]; then echo "$d"; ls -1 "$d" | head -30; fi
+          echo "=== SEO PLUGIN FILE RULES ==="
+          for d in "$ROOT/wa-apps/shop/plugins/seo" "$ROOT/wa-data/public/shop/themes/pureMegapolis42" "$ROOT/wa-data/public/site/themes/pureMegapolis42"; do
+          if [ -d "$d" ]; then echo "DIR $d"; find "$d" -type f \( -name '*.php' -o -name '*.html' -o -name '*.xml' \) -print0 | xargs -0 -r grep -inEi 'noindex|nofollow|robots|indexing' | head -90 | cut -c1-250 || true; fi
           done
-          echo '=== NOINDEX TEMPLATE MATCHES ==='
-          for d in "$ROOT/wa-data/public/shop/themes" "$ROOT/wa-apps/shop/themes" "$ROOT/wa-data/public/site/themes"; do
-          if [ -d "$d" ]; then find "$d" -type f \( -name '*.html' -o -name '*.php' -o -name '*.xml' \) -print0 | xargs -0 -r grep -inE 'noindex|nofollow|robots' | head -75 | cut -c1-250 || true; fi
-          done
-          echo '=== PLUGIN NAMES ==='
-          php -r '$p=include $argv[1]; if (is_array($p)) { foreach($p as $k=>$v) if($v) echo "$k\n"; }' "$ROOT/wa-config/apps/shop/plugins.php" 2>/dev/null | head -70
-          echo '=== CATEGORY FLAGS ==='
-          cat >/tmp/chatgpt_seo_readonly.php <<'PHP'
+          echo "=== SELECTED TEMPLATE CONTEXT ==="
+          f="$ROOT/wa-data/public/site/themes/pureMegapolis42/index.html"
+          [ ! -f "$f" ] || sed -n '115,145p' "$f" | cut -c1-200
+          echo "=== SEO TABLES AND CONFIG COLUMNS ==="
+          cat >/tmp/chatgpt_seo_audit2.php <<'PHP'
           <?php
           $root='/home/web/vm-23f9aff9.na4u.ru/www';
           chdir($root);
           require_once $root.'/wa-config/SystemConfig.class.php';
           waSystem::getInstance(null,new SystemConfig()); wa('shop');
           $m=new waModel();
-          try {
-           $cat=$m->query("SELECT id,name,url,status FROM shop_category WHERE name LIKE '%Кресла руководителя%' OR name='Столы' LIMIT 12")->fetchAll();
-           foreach($cat as $r) {
-            echo "CATEGORY ".json_encode($r,JSON_UNESCAPED_UNICODE)."\n";
-            try {
-             $p=$m->query("SELECT name,value FROM shop_category_params WHERE category_id=".(int)$r['id']." LIMIT 80")->fetchAll();
-             foreach($p as $v) { $n=strtolower($v['name']); if(preg_match('/robot|index|seo|canonical|follow|filter/',$n)) echo " PARAM ".$v['name']."=".substr($v['value'],0,100)."\n"; }
-            } catch(Throwable $e) { echo "CATEGORY_PARAMS_ERROR ".get_class($e)."\n"; }
+          foreach($m->query("SHOW TABLES")->fetchAll() as $t) {
+           $name=array_values($t)[0];
+           if(stripos($name,'seo')===false) continue;
+           echo "SEO_TABLE $name\n";
+           if(!preg_match('/(setting|param|category)/i',$name)) continue;
+           $cols=$m->query("SHOW COLUMNS FROM ".$name)->fetchAll();
+           $names=array_column($cols,'Field');
+           echo " COLUMNS ".implode(',',$names)."\n";
+           if(in_array('name',$names) && in_array('value',$names)) {
+            foreach($m->query("SELECT name,value FROM ".$name." WHERE name REGEXP 'robot|index|follow|category' LIMIT 15")->fetchAll() as $r) {
+             echo " FLAG ".$r['name']."=".substr($r['value'],0,100)."\n";
+            }
            }
-          } catch(Throwable $e) { echo "CATEGORY_QUERY_ERROR ".get_class($e)."\n"; }
+          }
           PHP
-          su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/chatgpt_seo_readonly.php' 2>&1 | head -65
-          rm -f /tmp/chatgpt_seo_readonly.php
+          su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/chatgpt_seo_audit2.php' 2>&1 | head -110
+          rm -f /tmp/chatgpt_seo_audit2.php
           '''
           with tempfile.TemporaryDirectory() as d:
               priv=d+"/id_ed25519"
