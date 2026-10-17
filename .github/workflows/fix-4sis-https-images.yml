@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/fix-4sis-https-images.yml'
+      - 'storefront/repair_4sis_https_mixed_content.py'
   workflow_dispatch:
 permissions:
   contents: read
