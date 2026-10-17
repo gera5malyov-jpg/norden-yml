@@ -1,0 +1,20 @@
+name: Audit external image links in Webasyst catalog templates
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'storefront/audit_4sis_list_template.py'
+      - '.github/workflows/audit-4sis-list-template.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read catalog image templates
+        env:
+          NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+        run: python storefront/audit_4sis_list_template.py
