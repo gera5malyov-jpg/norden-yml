@@ -1,0 +1,20 @@
+name: Audit Webasyst catalog capacity
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'storefront/audit_catalog_capacity.py'
+      - '.github/workflows/audit-catalog-capacity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check resources and Webasyst DB read-only
+        env:
+          NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+        run: python storefront/audit_catalog_capacity.py
