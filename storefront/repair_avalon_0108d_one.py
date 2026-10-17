@@ -60,7 +60,7 @@ try {
 }
 '''
 def run(cmd,timeout=25):
- p=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=timeout)
+ p=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=timeout)
  return p
 with tempfile.NamedTemporaryFile('w',encoding='utf-8',prefix='avalon0108d-',suffix='.php',dir='/tmp',delete=False) as tmp:
  tmp.write(PHP);php_file=tmp.name
@@ -90,7 +90,7 @@ try:
   raise RuntimeError('PREFLIGHT 1 database source diverged')
  print('AVALON_PREFLIGHT='+json.dumps({'check':1,'result':'passed','product_id':PRODUCT_ID,'summary_sha':EXPECTED}),flush=True)
  # Preflight 2: latest published Avalon YML contains this product and exactly the new picture.
- feed=subprocess.run(['curl','-fsSL','--max-time','30','https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/main/avalon-podstolya/catalog.yml'],capture_output=True,timeout=35)
+ feed=subprocess.run(['curl','-fsSL','--max-time','30','https://raw.githubusercontent.com/gera5malyov-jpg/norden-yml/main/avalon-podstolya/catalog.yml'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=35)
  if feed.returncode:raise RuntimeError('PREFLIGHT 2 cannot read current feed')
  offers=ET.fromstring(feed.stdout).findall('.//offer')
  target=[o for o in offers if o.get('id')=='avalon-table--0108d']
