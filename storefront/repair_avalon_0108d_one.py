@@ -108,9 +108,9 @@ try:
  # Private backup of exactly one original field.
  folder=ROOT.parent/'storefront-backups'/('avalon0108d-extimg-'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+str(os.getpid()))
  folder.mkdir(parents=True,mode=0o700)
- oldfile=folder/'product-summary.before';oldfile.write_bytes(orig);os.chmod(oldfile,0o600)
+ oldfile=folder/'product-summary.before';oldfile.write_bytes(orig);os.chmod(str(oldfile),0o600)
  (folder/'audit.json').write_text(json.dumps({'id':PRODUCT_ID,'old_sha':EXPECTED,'new_sha':hashlib.sha256(orig.replace(OLD.encode(),NEW.encode())).hexdigest()}))
- os.chmod(folder/'audit.json',0o600)
+ os.chmod(str(folder/'audit.json'),0o600)
  result=php('apply');applied=True
  new_sha=hashlib.sha256(orig.replace(OLD.encode(),NEW.encode())).hexdigest()
  if result['summary_sha']!=new_sha:raise RuntimeError('Database update mismatch')
