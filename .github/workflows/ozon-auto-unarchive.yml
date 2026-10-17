@@ -48,7 +48,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify script and read-only Ozon API on code changes
+      - name: Verify script and read-only Ozon API before code-change restoration
         if: github.event_name == 'push'
         shell: bash
         run: |
@@ -64,8 +64,7 @@ jobs:
           print(f"Ozon read-only probe OK: archived_in_first_page={len(items)}, total={total}, info_records={len(info)}")
           PY
 
-      - name: Check whether today's 100 were already restored
-        if: github.event_name != 'push'
+      - name: Check Ozon quota window (resets at 03:00 MSK)
         id: quota
         shell: bash
         run: |
@@ -75,30 +74,36 @@ jobs:
           from datetime import datetime, timezone, timedelta
           from pathlib import Path
 
-          skip = False
+          msk = timezone(timedelta(hours=3))
+          now_msk = datetime.now(msk)
+          skip = now_msk.hour < 3
+          reason = "Before the 03:00 MSK Ozon quota reset"
           path = Path(os.environ["OZON_REPORT_PATH"])
-          if path.exists():
+          if not skip and path.exists():
               try:
                   report = json.loads(path.read_text(encoding="utf-8"))
                   started = report.get("started_at_utc")
                   restored = int(report.get("restored_count", 0) or 0)
-                  limit_hit = str(report.get("limit_hit") or "")
                   if started:
                       run_dt = datetime.fromisoformat(started.replace("Z", "+00:00"))
-                      msk = timezone(timedelta(hours=3))
-                      same_day = run_dt.astimezone(msk).date() == datetime.now(msk).date()
-                      if same_day and (restored >= 100 or limit_hit == "restore_limit_exceeded"):
+                      # Ozon quota days start at 03:00 MSK, not at midnight.
+                      quota_day = lambda dt: (dt.astimezone(msk) - timedelta(hours=3)).date()
+                      same_window = quota_day(run_dt) == quota_day(now_msk)
+                      # A rate-limit error is NOT evidence 100 were restored
+                      # in this run. Retry after the reset and during fallbacks.
+                      if same_window and restored >= 100:
                           skip = True
-              except Exception:
-                  pass
+                          reason = "100 products restored in current Ozon quota window"
+              except (ValueError, TypeError, KeyError, OSError) as exc:
+                  print(f"Unable to read previous quota report; continue: {exc}")
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
               fh.write(f"skip={'true' if skip else 'false'}\n")
-          print("Daily quota already completed; skip fallback run." if skip else "Daily quota not completed; run restore.")
+          print(f"Skip restoration: {reason}" if skip else "Attempt restoration: quota not confirmed fulfilled.")
           PY
 
       - name: Restore only automatically archived products
-        if: github.event_name != 'push' && steps.quota.outputs.skip != 'true'
+        if: steps.quota.outputs.skip != 'true'
         id: restore
         shell: bash
         run: |
@@ -109,7 +114,7 @@ jobs:
           exit 0
 
       - name: Save redacted report
-        if: github.event_name != 'push' && steps.quota.outputs.skip != 'true'
+        if: steps.quota.outputs.skip != 'true'
         shell: bash
         run: |
           test -f results/ozon-auto-unarchive-latest.json
@@ -125,7 +130,7 @@ jobs:
           fi
 
       - name: Attach latest restore report
-        if: always() && github.event_name != 'push' && steps.quota.outputs.skip != 'true'
+        if: always() && steps.quota.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ozon-autoarchive-report-${{ github.run_id }}
@@ -134,6 +139,6 @@ jobs:
           retention-days: 14
 
       - name: Fail if restore job failed
-        if: github.event_name != 'push' && steps.quota.outputs.skip != 'true' && steps.restore.outputs.exit_code != '0'
+        if: steps.quota.outputs.skip != 'true' && steps.restore.outputs.exit_code != '0'
         shell: bash
         run: exit "${{ steps.restore.outputs.exit_code }}"
