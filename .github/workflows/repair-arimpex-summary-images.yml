@@ -1,0 +1,56 @@
+name: Repair all Arimpex external photos in Webasyst summary
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'arimpex/restore_summary_galleries.py'
+      - '.github/workflows/repair-arimpex-summary-images.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: arimpex-external-gallery-restore
+  cancel-in-progress: false
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 160
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install 'requests>=2.31,<3'
+      - name: Compile restore script
+        run: python -m py_compile arimpex/restore_summary_galleries.py
+      - name: Create full summary backup and exact-title plan without writing
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python -u arimpex/restore_summary_galleries.py
+      - name: Preserve complete rollback backup BEFORE any Webasyst update
+        uses: actions/upload-artifact@v4
+        with:
+          name: arimpex-summary-before-${{ github.run_id }}
+          path: |
+            reports/arimpex_extimg_before_20261017.json.gz
+            reports/arimpex_extimg_plan_20261017.json.gz
+            reports/arimpex_extimg_report_20261017.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Apply external photo links to summary only
+        env:
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          WEBASYST_BASE_URL: https://profikompany.ru
+        run: python -u arimpex/restore_summary_galleries.py --apply
+      - name: Save final verification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arimpex-summary-final-${{ github.run_id }}
+          path: |
+            reports/arimpex_extimg_before_20261017.json.gz
+            reports/arimpex_extimg_plan_20261017.json.gz
+            reports/arimpex_extimg_report_20261017.json
+          if-no-files-found: warn
+          retention-days: 30
