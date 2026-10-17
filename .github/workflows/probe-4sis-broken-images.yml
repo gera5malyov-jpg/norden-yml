@@ -1,0 +1,25 @@
+name: Diagnose broken 4sis external images (read only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-4sis-broken-images.yml'
+      - 'scripts/probe_4sis_live_image_endpoints.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Probe upstream image URLs and storefront
+        env:
+          WEBASYST_BASE_URL: https://profikompany.ru
+          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+          PYTHONWARNINGS: ignore
+        run: python -u scripts/probe_4sis_live_image_endpoints.py
