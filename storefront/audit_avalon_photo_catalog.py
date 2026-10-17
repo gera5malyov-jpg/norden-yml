@@ -43,13 +43,18 @@ def main():
             lookup[name].append({"offer_id":item.get("id"),"images":[x.text for x in item.findall("picture") if x.text]})
     report={"site":"profikompany.ru","live_avalon_linked_products":len(rows),"feed_offers":len(feed.findall(".//offer")),
             "exact_unique_name_matches":0,"different_main_image":0,"matching_main_image":0,
-            "ambiguous_or_missing":0,"examples":[]}
+            "ambiguous_or_missing":0,"single_link_products":0,"multi_link_products":0,
+            "same_gallery_count":0,"different_gallery_count":0,"examples":[]}
     for row in rows:
         candidates=lookup.get(normalized(row["name"]),[])
         if len(candidates)!=1 or not row["links"] or not candidates[0]["images"]:
             report["ambiguous_or_missing"]+=1
             continue
         report["exact_unique_name_matches"]+=1
+        if len(row["links"])==1:report["single_link_products"]+=1
+        else:report["multi_link_products"]+=1
+        if len(row["links"])==len(candidates[0]["images"]):report["same_gallery_count"]+=1
+        else:report["different_gallery_count"]+=1
         old=row["links"][0];new=candidates[0]["images"][0]
         if old==new:
             report["matching_main_image"]+=1
