@@ -162,41 +162,57 @@ def apply():
     originals={x["id"]:x for x in archive["original"]}
     if len(originals)!=len(archive["original"]):raise RuntimeError("Duplicate backup IDs")
     wa=WebasystClient(min_request_interval=0.11)
-    # Full optimistic preflight: reject changed summary or type before first mutation.
-    for i,c in enumerate(changes,1):
+    # The search endpoint was used to capture the original summary: use that same
+    # endpoint for preflight and verification, since getInfo may have a different
+    # response shape. Products changed since backup are skipped, never overwritten.
+    involved_typeids=sorted({x["type_id"] for x in changes})
+    current={}
+    for tid in involved_typeids:
+        batch=products_for_type(wa,tid)
+        for p in batch:current[int(p["id"])]=p
+        print("PREFLIGHT_TYPE",tid,len(batch),flush=True)
+    skipped=[];eligible=[]
+    for c in changes:
         before=originals.get(c["id"])
         if not before or any(before[k]!=c[k] for k in ("name","type_id")) or before["summary"]!=c["before"]:
             raise RuntimeError("Invalid backup relationship "+str(c["id"]))
-        p=wa.call("shop.product.getInfo",params={"id":str(c["id"])})
-        if not isinstance(p,dict) or str(p.get("summary") or "")!=c["before"] or str(p.get("name") or "")!=c["name"] or int(p.get("type_id") or 0)!=c["type_id"]:
-            raise RuntimeError("Concurrent card edit: "+str(c["id"]))
-        if i%250==0:print("PREFLIGHT_PROGRESS",i,len(changes),flush=True)
-    print("PREFLIGHT_PASSED",len(changes),flush=True)
-    failed=[];written=0;verified=0
-    for i,c in enumerate(changes,1):
+        p=current.get(c["id"])
+        if not p or str(p.get("summary") or "")!=c["before"] or str(p.get("name") or "")!=c["name"] or int(p.get("type_id") or 0)!=c["type_id"]:
+            skipped.append({"id":c["id"],"reason":"changed_after_backup"})
+        else:
+            eligible.append(c)
+    print("PREFLIGHT_PASSED",json.dumps({"eligible":len(eligible),"skipped_concurrent":len(skipped)}),flush=True)
+    failed=[];written=0
+    for i,c in enumerate(eligible,1):
         try:
             wa.call("shop.product.update",http_method="POST",params={"id":str(c["id"])},
                 data={"summary":c["after"]})
             written+=1
-            if i<=5 or i%100==0:
-                check=wa.call("shop.product.getInfo",params={"id":str(c["id"])})
-                if str(check.get("summary") or "")!=c["after"]:
-                    raise RuntimeError("Post-update summary mismatch")
-                verified+=1
         except Exception as e:
             failed.append({"id":c["id"],"reason":type(e).__name__,"message":str(e)[:180]})
             if len(failed)>=5:break
-        if i%100==0 or i==len(changes):
-            result=dict(meta,mode="applying",written=written,verified=verified,failed=failed,
-                       processed=i,expected=len(changes))
+        if i%100==0 or i==len(eligible):
+            result=dict(meta,mode="applying",written=written,verified=0,failed=failed,
+                       skipped_concurrent=skipped[:30],processed=i,expected=len(eligible))
             REPORT.write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
-            print("APPLY_PROGRESS",json.dumps({"processed":i,"total":len(changes),
-                "written":written,"verified_samples":verified,"failures":len(failed)}),flush=True)
-    result=dict(meta,mode="done" if not failed and written==len(changes) else "partial",
-                written=written,verified=verified,failed=failed,expected=len(changes))
+            print("APPLY_PROGRESS",json.dumps({"processed":i,"total":len(eligible),
+                "written":written,"failures":len(failed)}),flush=True)
+    verified=0;mismatch=[]
+    if written:
+        actual={}
+        for tid in involved_typeids:
+            for p in products_for_type(wa,tid):actual[int(p["id"])]=str(p.get("summary") or "")
+        for c in eligible:
+            if actual.get(c["id"])==c["after"]:verified+=1
+            else:mismatch.append(c["id"])
+    result=dict(meta,mode="done" if not failed and verified==written else "partial",
+                written=written,verified=verified,failed=failed,expected=len(eligible),
+                skipped_concurrent=skipped[:100],mismatch_ids=mismatch[:100])
     REPORT.write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
     print("BULK_EXTIMG_FINAL",json.dumps({"mode":result["mode"],"planned":len(changes),
-        "written":written,"verified_samples":verified,"failed":failed[:5]},ensure_ascii=False),flush=True)
+        "eligible":len(eligible),"written":written,"verified":verified,
+        "skipped_concurrent":len(skipped),"failed":failed[:5],
+        "mismatch_count":len(mismatch)},ensure_ascii=False),flush=True)
     if result["mode"]!="done":raise RuntimeError("Some image-only updates failed")
 
 if __name__=="__main__":
