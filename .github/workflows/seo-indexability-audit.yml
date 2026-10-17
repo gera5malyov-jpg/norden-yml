@@ -26,38 +26,23 @@ jobs:
           hdr={"Authorization":"Bearer "+t["token"],"Content-Type":"application/json","Accept":"application/json"}
           remote=r'''set -uo pipefail
           ROOT=/home/web/vm-23f9aff9.na4u.ru/www
-          echo "=== SEO PLUGIN FILE RULES ==="
-          for d in "$ROOT/wa-apps/shop/plugins/seo" "$ROOT/wa-data/public/shop/themes/pureMegapolis42" "$ROOT/wa-data/public/site/themes/pureMegapolis42"; do
-          if [ -d "$d" ]; then echo "DIR $d"; find "$d" -type f \( -name '*.php' -o -name '*.html' -o -name '*.xml' \) -print0 | xargs -0 -r grep -inEi 'noindex|nofollow|robots|indexing' | head -90 | cut -c1-250 || true; fi
-          done
-          echo "=== SELECTED TEMPLATE CONTEXT ==="
-          f="$ROOT/wa-data/public/site/themes/pureMegapolis42/index.html"
-          [ ! -f "$f" ] || sed -n '115,145p' "$f" | cut -c1-200
-          echo "=== SEO TABLES AND CONFIG COLUMNS ==="
-          cat >/tmp/chatgpt_seo_audit2.php <<'PHP'
+          echo "=== SEO PLUGIN FILE SHAPE ==="
+          find "$ROOT/wa-apps/shop/plugins/seo" -maxdepth 4 -type f | head -35 | cut -c1-190
+          echo "=== SEO DB OVERRIDES ==="
+          cat >/tmp/chatgpt_seo_audit3.php <<'PHP'
           <?php
-          $root='/home/web/vm-23f9aff9.na4u.ru/www';
-          chdir($root);
-          require_once $root.'/wa-config/SystemConfig.class.php';
-          waSystem::getInstance(null,new SystemConfig()); wa('shop');
-          $m=new waModel();
-          foreach($m->query("SHOW TABLES")->fetchAll() as $t) {
-           $name=array_values($t)[0];
-           if(stripos($name,'seo')===false) continue;
-           echo "SEO_TABLE $name\n";
-           if(!preg_match('/(setting|param|category)/i',$name)) continue;
-           $cols=$m->query("SHOW COLUMNS FROM ".$name)->fetchAll();
-           $names=array_column($cols,'Field');
-           echo " COLUMNS ".implode(',',$names)."\n";
-           if(in_array('name',$names) && in_array('value',$names)) {
-            foreach($m->query("SELECT name,value FROM ".$name." WHERE name REGEXP 'robot|index|follow|category' LIMIT 15")->fetchAll() as $r) {
-             echo " FLAG ".$r['name']."=".substr($r['value'],0,100)."\n";
-            }
-           }
-          }
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';chdir($root);require_once $root.'/wa-config/SystemConfig.class.php';waSystem::getInstance(null,new SystemConfig());wa('shop');$m=new waModel();
+          $queries=[
+          "SELECT group_storefront_id,category_id,name,value FROM shop_seo_category_settings WHERE category_id IN (4204,1002) LIMIT 100",
+          "SELECT group_id,name,value FROM shop_seo_group_category_settings WHERE name REGEXP 'index|robot|follow|enabled' LIMIT 70",
+          "SELECT group_id,name,value FROM shop_seo_storefront_settings WHERE name REGEXP 'index|robot|follow|enabled|category_ignore' LIMIT 100",
+          "SELECT name,value FROM shop_seo_plugin_settings WHERE name REGEXP 'index|robot|follow|enabled|category_ignore' LIMIT 90",
+          "SELECT category_id,name,value FROM shop_seo_category_settings WHERE name REGEXP 'index|robot|follow' LIMIT 50"
+          ];
+          foreach($queries as $i=>$sql) {echo "QUERY $i\n";try {foreach($m->query($sql)->fetchAll() as $r){foreach($r as $k=>$v){$v=str_replace(["\n","\r"]," ",(string)$v);$r[$k]=mb_substr($v,0,120);}echo json_encode($r,JSON_UNESCAPED_UNICODE|JSON_INVALID_UTF8_SUBSTITUTE)."\n";}}catch(Throwable $e){echo "ERROR ".get_class($e)." ".$e->getMessage()."\n";}}
           PHP
-          su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/chatgpt_seo_audit2.php' 2>&1 | head -110
-          rm -f /tmp/chatgpt_seo_audit2.php
+          su -s /bin/bash web -c 'php -d display_errors=0 -d log_errors=0 /tmp/chatgpt_seo_audit3.php' 2>&1 | head -190
+          rm -f /tmp/chatgpt_seo_audit3.php
           '''
           with tempfile.TemporaryDirectory() as d:
               priv=d+"/id_ed25519"
