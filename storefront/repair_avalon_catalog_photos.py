@@ -61,7 +61,7 @@ def backend(mode,records=None):
  marker='AVALON_DB=' if mode=='inspect' else 'AVALON_DB_BATCH='
  values=[line.split('=',1)[1] for line in p.stdout.splitlines() if line.startswith(marker)]
  if len(values)!=1:raise RuntimeError('PHP response missing '+mode)
- return json.loads(base64.b64decode(values[0])) if mode=='inspect' else json.loads(values[0])
+ return json.loads(base64.b64decode(values[0]).decode('utf-8')) if mode=='inspect' else json.loads(values[0])
 def namekey(name):return ' '.join((name or '').casefold().split())
 def fetch(url,timeout=24):
  p=run(['curl','-ksSL','--max-time',str(timeout),'-w','\n__CODE__%{http_code}',url],timeout=timeout+5)
