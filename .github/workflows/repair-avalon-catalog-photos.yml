@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/repair-avalon-catalog-photos.yml'
+      - 'storefront/repair_avalon_catalog_photos.py'
 permissions:
   contents: read
 concurrency:
