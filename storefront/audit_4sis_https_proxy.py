@@ -36,4 +36,5 @@ PY
 def main():
  result=execute(REMOTE)
  if 'EXTIMG_AUDIT=' not in result:raise RuntimeError('Missing server audit result')
+ print(result.split('EXTIMG_AUDIT=',1)[1].split('\n',1)[0],flush=True)
 if __name__=='__main__':main()
