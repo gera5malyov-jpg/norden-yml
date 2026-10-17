@@ -41,6 +41,8 @@ def safe(name, fn):
 
 # ---------- e-bulky ----------
 def quote_ebulky():
+    if req.get("city_only"):
+        return {"status": "НЕ_ПРИМЕНИМО", "reason": "Не указан адрес получателя"}
     key = os.environ.get("E_BULKY","").strip()
     if not key:
         raise RuntimeError("E_BULKY secret missing")
@@ -113,16 +115,24 @@ def quote_cdek():
         return int(x["code"])
     from_code=city_code(req["from_city"])
     to_code=city_code(req["to_city"])
+    boxes = req.get("packages") or [{
+        "weight_kg": req["weight_kg"],
+        "length_cm": req["length_cm"],
+        "width_cm": req["width_cm"],
+        "height_cm": req["height_cm"]
+    } for _ in range(int(req.get("places", 1)))]
+    packages = [{
+        "number": str(i + 1),
+        "weight": int(round(float(b["weight_kg"]) * 1000)),
+        "length": int(b["length_cm"]),
+        "width": int(b["width_cm"]),
+        "height": int(b["height_cm"])
+    } for i, b in enumerate(boxes)]
     body={
         "type":1,
         "from_location":{"code":from_code},
         "to_location":{"code":to_code},
-        "packages":[{
-            "weight":int(round(float(req["weight_kg"])*1000)),
-            "length":int(req["length_cm"]),
-            "width":int(req["width_cm"]),
-            "height":int(req["height_cm"])
-        }]
+        "packages":packages
     }
     _, ans=http_json(
         "https://api.cdek.ru/v2/calculator/tarifflist",
@@ -246,6 +256,8 @@ def quote_dalli():
 
 # ---------- PEK private API ----------
 def quote_pek():
+    if req.get("city_only"):
+        return {"status": "ТРЕБУЕТСЯ_АДРЕС", "reason": "Для точного тарифа ПЭК по частному API нужны адреса отправителя и получателя"}
     login=os.environ.get("PEK_LOGIN","").strip()
     key=os.environ.get("PEK_API_KEY","").strip()
     if not login or not key:
