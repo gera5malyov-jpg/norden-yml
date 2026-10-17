@@ -1,4 +1,5 @@
 name: Audit selected Webasyst product-type external images
+# Manual verification 2026-10-17: 4sis HTTPS mixed-content repair
 on:
   push:
     branches: [main]
