@@ -28,7 +28,7 @@ for dirname in ['/etc/nginx/sites-enabled','/etc/nginx/conf.d','/etc/nginx/vhost
   if ('profikompany.ru' in s or '/home/web/vm-23f9aff9' in s) and len(s)<100000:
    candidates.append({'path':str(path),'server_name_lines':[l.strip()[:210] for l in s.splitlines() if ('server_name' in l or 'root ' in l or 'include ' in l or 'listen ' in l or 'server {' in l or 'proxy_pass' in l)][:42],'has_proxy4sis':'4sis-images' in s})
 out['server_configs']=candidates
-p=subprocess.run(['nginx','-t'],capture_output=True,text=True)
+p=subprocess.run(['nginx','-t'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
 out['nginx_test']={'returncode':p.returncode,'stderr':p.stderr[-480:]}
 print('EXTIMG_AUDIT='+json.dumps(out,ensure_ascii=False),flush=True)
 PY
