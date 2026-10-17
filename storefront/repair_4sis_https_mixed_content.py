@@ -27,7 +27,7 @@ nginx_block=r'''
 # BEGIN 4sis HTTPS legacy image proxy (ChatGPT-managed)
 # Fixed supplier image origin; no arbitrary URL / SSRF proxying.
 location ^~ /4sis-images/ {
-    if ($uri !~* "^/4sis-images/[a-z0-9_/-]+\\.(jpe?g|png|webp)$") {
+    if ($uri !~* "^/4sis-images/[a-z0-9_/-]+\.(jpe?g|png|webp)$") {
         return 404;
     }
     proxy_pass http://5.35.127.160/images/;
@@ -48,8 +48,8 @@ old_fragment='''                {if $__url && preg_match('~^https?://~i', $__url
                 {/if}'''
 new_fragment=r'''                {if $__url && preg_match('~^https?://~i', $__url)}
                     {* Browsers refuse HTTP images in HTTPS pages. Only fixed 4sis source is rewritten. *}
-                    {if preg_match('~^http://5\\.35\\.127\\.160/images/~i', $__url)}
-                        {assign var="__url" value=preg_replace('~^http://5\\.35\\.127\\.160/images/~i', '/4sis-images/', $__url)}
+                    {if preg_match('~^http://5\.35\.127\.160/images/~i', $__url)}
+                        {assign var="__url" value=preg_replace('~^http://5\.35\.127\.160/images/~i', '/4sis-images/', $__url)}
                     {/if}
                     {if !in_array($__url, $ext_images)}
                         {append var="ext_images" value=$__url}
