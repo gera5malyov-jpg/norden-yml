@@ -1,0 +1,20 @@
+name: Audit 4sis HTTPS image proxy setup (read only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/audit-4sis-https-proxy.yml'
+      - 'storefront/audit_4sis_https_proxy.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect server nginx and gallery without modification
+        env:
+          NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+        run: python storefront/audit_4sis_https_proxy.py
