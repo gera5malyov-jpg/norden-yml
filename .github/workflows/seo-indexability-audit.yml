@@ -67,7 +67,7 @@ jobs:
               kid=obj["id"]
               try:
                 for attempt in range(14):
-                  p=subprocess.run(["ssh","-i",priv,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=8","root@45.86.180.49","bash -s"],input=remote,text=True,capture_output=True,timeout=55)
+                  p=subprocess.run(["ssh","-i",priv,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=8","root@45.86.180.49","bash -s"],input=remote,text=True,errors="replace",capture_output=True,timeout=55)
                   if p.returncode==0:
                     print(p.stdout[-18000:]); print("AUDIT_FINISHED=yes"); break
                   if attempt==13: print("SSH_ERROR",p.stderr[-1200:]); raise RuntimeError("Unable to connect")
