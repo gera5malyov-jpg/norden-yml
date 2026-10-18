@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage60-gallery-cls.yml'
+      - 'storefront/apply_mobile_gallery_cls_20261019.py'
 permissions:
   contents: read
 concurrency:
