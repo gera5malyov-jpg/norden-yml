@@ -46,6 +46,24 @@ if action.is_file():
  lines=action.read_text(encoding='utf-8').splitlines()
  payload['category_action_snippets']=[{'line':i+1,'text':'\\n'.join(lines[max(0,i-3):i+4])[:900]} for i,line in enumerate(lines) if any(term in line for term in ('frontend_category','setCanonical','canonical'))][:14]
 print('CANONICAL_PLUGIN_CONTEXT='+json.dumps(payload,ensure_ascii=False),flush=True)
+# Read only current plugin registry structure, not settings or credentials.
+import re
+registry=[]
+if cfg.is_file():
+ for i,line in enumerate(cfg.read_text(encoding='utf-8').splitlines()):
+  if '=>' in line or 'return' in line or 'array(' in line or line.strip() in ('<?php',');'):
+   safe=re.sub(r'(token|password|secret|api_key)[^=]*=>.*', '[REDACTED]',line,flags=re.I)
+   registry.append(str(i+1)+': '+safe[:160])
+samples=[]
+plugins=root/'wa-apps/shop/plugins'
+for name in ('megasuppliers','ozonstocksync','seo'):
+ d=plugins/name
+ for rel in ('lib/config/plugin.php','lib/shop'+name.capitalize()+'Plugin.class.php'):
+  p=d/rel
+  if p.is_file():
+   chunk=p.read_text(encoding='utf-8')[:850]
+   samples.append({'plugin':name,'file':rel,'example':chunk if rel.endswith('plugin.php') and not re.search('token|password|api_key|secret',chunk,re.I) else '[OMITTED]'})
+print('CANONICAL_PLUGIN_REGISTRY='+json.dumps({'lines':registry[:65],'samples':samples},ensure_ascii=False),flush=True)
 PY
 '''
 if __name__ == '__main__':
@@ -55,5 +73,5 @@ if __name__ == '__main__':
         raise RuntimeError('Missing audit output')
     print(rows[0],flush=True)
     for line in result.splitlines():
-        if line.startswith(('CANONICAL_LOG_AUDIT=','CANONICAL_PLUGIN_CONTEXT=')):
+        if line.startswith(('CANONICAL_LOG_AUDIT=','CANONICAL_PLUGIN_CONTEXT=','CANONICAL_PLUGIN_REGISTRY=')):
             print(line,flush=True)
