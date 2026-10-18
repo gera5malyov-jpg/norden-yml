@@ -51,6 +51,11 @@ seen=set()
 for sec,hashcode,query in sorted(queries,reverse=True):
  if hashcode in seen:continue
  seen.add(hashcode)
+ # Query skeleton contains no original literals; inspect join predicates and sort clauses only.
+ skeleton=re.sub(r"'(?:''|[^'])*'","?",query)
+ skeleton=re.sub(r'\b\d+\b','?',skeleton)
+ skeleton=' '.join(skeleton.split())
+ emit('QUERY_SHAPE',{'rank':len(seen),'template':skeleton[:900]})
  result=sqlrun(prefix+'EXPLAIN '+query,22)
  if result is None:
   emit('EXPLAIN',{'rank':len(seen),'pattern':hashcode,'slow_seconds':round(sec,3),'available':False})
