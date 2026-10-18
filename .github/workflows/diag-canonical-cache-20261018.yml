@@ -1,0 +1,22 @@
+name: Read-only canonical cache investigation
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diag-canonical-cache-20261018.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  investigate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read active template and Smarty cache (no writes)
+        run: python storefront/diag_canonical_cache_20261018.py
