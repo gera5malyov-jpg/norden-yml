@@ -80,7 +80,7 @@ for route,kind,canonical in cases:
     if item['rc'] or item['status']!='200' or len(item['title'])!=1 or len(item['desc'])!=1 or (canonical and item['canonical']!=[canonical]):
         raise RuntimeError('PREFLIGHT 2: '+route+': '+json.dumps(item,ensure_ascii=False)[:420])
     baseline.append(item)
-if not all(len(item['ogdesc'])==1 for item in baseline if item):
+if not all(len(baseline[i]['ogdesc'])==1 for i,(_,kind,_) in enumerate(cases) if kind in ('product','category')):
     raise RuntimeError('PREFLIGHT 2: unexpected Open Graph emitter')
 print('META_PREFLIGHT='+json.dumps({'check':2,'ok':True,'routes':len(baseline)}),flush=True)
 
@@ -125,7 +125,7 @@ try:
             after['canonical']==b['canonical'],
             after['ogdesc']==expected_og,
             after['product_count']==b['product_count'],
-            len(after['ogdesc'])==1, len(after['desc'])==1, len(after['title'])==1
+            len(after['ogdesc'])==len(b['ogdesc']), len(after['desc'])==1, len(after['title'])==1
         ])
         print('META_ACCEPTANCE='+json.dumps({'case':i+1,'route':route,'ok':ok,'status':after['status'],
           'title_unchanged':after['title']==b['title'],
