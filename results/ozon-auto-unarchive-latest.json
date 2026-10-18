@@ -1,17 +1,21 @@
 {
-  "started_at_utc": "2026-10-17T06:40:32.525718+00:00",
+  "started_at_utc": "2026-10-18T04:29:54.747976+00:00",
   "mode": "is_autoarchived_true_only",
   "max_restore_per_run": 100,
-  "archived_total_reported": 5679,
-  "archived_items_inspected": 4617,
-  "autoarchive_candidates_seen": 100,
-  "manual_or_other_archive_skipped": 4517,
+  "archived_total_reported": 5579,
+  "archived_items_inspected": 1000,
+  "autoarchive_candidates_seen": 0,
+  "manual_or_other_archive_skipped": 1000,
   "missing_info_skipped": 0,
-  "restored_count": 100,
+  "restored_count": 0,
   "failed_count": 0,
   "failures_by_reason": {},
-  "limit_hit": "local_daily_safety_cap",
+  "limit_hit": null,
   "complete_for_this_run": false,
-  "outcome": "run_cap_reached",
-  "finished_at_utc": "2026-10-17T06:42:10.658047+00:00"
+  "outcome": "fatal_error",
+  "fatal_error": {
+    "type": "TimeoutError",
+    "message": "The read operation timed out"
+  },
+  "finished_at_utc": "2026-10-18T04:31:12.340456+00:00"
 }
