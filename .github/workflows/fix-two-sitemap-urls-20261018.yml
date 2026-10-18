@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/fix-two-sitemap-urls-20261018.yml'
+      - 'storefront/fix_two_sitemap_urls_20261018.py'
   workflow_dispatch:
 permissions:
   contents: read
