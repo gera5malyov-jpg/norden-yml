@@ -15,6 +15,22 @@ out={'template_sha':hashlib.sha256(index.read_bytes()).hexdigest(),
      'cache_paths':[],'compiled_sample':[],'count_matches':0}
 cache=root/'wa-cache'
 if cache.is_dir():
+ # Inspect Webasyst's hashed cache roots without full expensive traversal.
+ levels=[cache]
+ for depth in range(4):
+  next_levels=[]
+  for parent in levels[:50]:
+   try:
+    children=list(parent.iterdir())[:90]
+   except Exception:
+    continue
+   subs=[c for c in children if c.is_dir()]
+   files=[c for c in children if c.is_file()]
+   path_label=str(parent.relative_to(root))
+   if len(out.setdefault('cache_tree',[]))<125:
+    out['cache_tree'].append({'path':path_label,'dirs':[c.name for c in subs[:25]],'file_samples':[c.name for c in files[:6]]})
+   next_levels.extend(subs)
+  levels=next_levels[:80]
  out['cache_paths']=[str(p.relative_to(root)) for p in list(cache.iterdir())[:24]]
  searchdirs=[cache/'apps'/'site',cache/'apps'/'shop',cache/'templates',cache/'compiled']
  for d in searchdirs:
