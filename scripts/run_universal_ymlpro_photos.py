@@ -39,7 +39,7 @@ su -s /bin/bash web -c "php -d display_errors=0 '$F'"
                 if line.startswith("UNIVERSAL_DISCOVERED=")]
     if not selected:
         raise RuntimeError("No profile discovery result")
-    os.environ["UNIVERSAL_PROFILE_IDS"] = selected[-1]
+    os.environ["UNIVERSAL_PROFILE_IDS"] = selected[-1].replace(r"\n", "").strip()
 raw=os.getenv("UNIVERSAL_PROFILE_IDS","20,16")
 profile_ids=[int(x.strip()) for x in raw.split(",") if x.strip()]
 if (not profile_ids and os.getenv("UNIVERSAL_SHARD") is None) or len(profile_ids)>12 or any(x<1 or x>1000000 for x in profile_ids):
