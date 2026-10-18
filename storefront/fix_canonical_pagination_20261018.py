@@ -15,7 +15,12 @@ old_block="""    {* CANONICAL *}
       <link rel="canonical" href="{$canonical|escape}" />
     {/if}"""
 new_block="""    {* CANONICAL *}
-    {if !empty($canonical)}
+    {* Canonical for clean numbered category pages; keep plugin canonical everywhere else. *}
+    {$_megapolis_page_num = $smarty.get.page|default:0|intval}
+    {$_megapolis_clean_page = $wa->domainUrl() == 'https://profikompany.ru' && $wa->param('action') == 'category' && $_megapolis_page_num > 1 && count($smarty.get) == 1}
+    {if $_megapolis_clean_page}
+      <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}?page={$_megapolis_page_num}" />
+    {elseif !empty($canonical)}
       <link rel="canonical" href="{$canonical|escape}" />
     {/if}"""
 def sha(b):return hashlib.sha256(b).hexdigest()
@@ -37,18 +42,18 @@ if sha(old)!=expected_sha or source.count(old_block)!=1 or 'Only clean numbered 
 category_old="""          {if $wa->param('action') == 'category'}
             <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
           {/if}"""
-category_new="""          {if $wa->param('action') == 'category'}
-            {if $wa->domainUrl() == 'https://profikompany.ru' && $wa->get('page', 0) > 1 && preg_match('~[?]page=[0-9]+$~', $wa->currentUrl(false))}
-              <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}?page={$wa->get('page', 0)|intval}" />
-            {else}
-              <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
-            {/if}
-          {/if}"""
+category_new=category_old
 if source.count(category_old)!=1:
  raise RuntimeError('PREFLIGHT 1: category canonical fallback must occur exactly once')
-new_source=source.replace(category_old,category_new,1)
+new_source=source.replace(old_block,new_block,1)
+# Existing fallback only runs when Shop-Script has not provided $canonical.
+# Avoid a second canonical when clean pagination triggered in the primary block.
+fallback_old="{if empty($canonical)}"
+fallback_new="{if empty($canonical) && !$_megapolis_clean_page}"
+if new_source.count(fallback_old)!=1:raise RuntimeError('Fallback canonical guard diverged')
+new_source=new_source.replace(fallback_old,fallback_new,1)
 new=new_source.encode('utf-8')
-if new.count(b'<link rel="canonical"')!=old.count(b'<link rel="canonical"')+1 or new_source.count(old_block)!=1:
+if new.count(b'<link rel="canonical"')!=old.count(b'<link rel="canonical"')+1 or new_source.count(new_block)!=1:
  raise RuntimeError('PREFLIGHT 1: category-only canonical delta mismatch')
 print('CANONICAL_PREFLIGHT='+json.dumps({'number':1,'ok':True,'source_sha':sha(old)}),flush=True)
 # Preflight 2 - distinct products and existing base canonicals.
