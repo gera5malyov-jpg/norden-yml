@@ -34,7 +34,7 @@ jobs:
           found=[]
           for parent in [root/'wa-apps/shop/lib',root/'wa-apps/site/lib',root/'wa-plugins']:
            if not parent.is_dir(): continue
-           for d,dirs,names in os.walk(parent):
+           for d,dirs,names in os.walk(str(parent)):
             dirs[:]=[n for n in dirs if n not in ('vendor','node_modules','.git','cache','temp')]
             for name in names:
              if 'sitemap' in name.lower() and name.endswith('.php'):
