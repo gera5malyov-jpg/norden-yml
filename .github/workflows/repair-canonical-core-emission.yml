@@ -1,0 +1,27 @@
+name: One canonical for clean category pagination
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-canonical-core-emission.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  guarded-repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate script
+        run: python -m py_compile storefront/fix_canonical_emit_once_20261018.py
+      - name: Three prechecks, guarded replacement, ten acceptance checks
+        run: python storefront/fix_canonical_emit_once_20261018.py
