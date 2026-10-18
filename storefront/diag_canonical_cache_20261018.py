@@ -96,7 +96,7 @@ for prefix in ('d0907d','d0907e'):
     k=body.find('CANONICAL')
     if k<0:k=body.find('canonical')
     snippet=body[max(0,k-800):min(len(body),k+1350)] if k>=0 else ''
-    out['compiled_index_files'].append({'path':str(file1.relative_to(root)),'mtime':round(file1.stat().st_mtime),'mtime_diff_to_source':round(file1.stat().st_mtime-index.stat().st_mtime),'contains_site_template_path':'wa-data/public/site/themes/pureMegapolis42/index.html' in body,'has_pagination_cond':'get(\\'page\\'' in body or 'Only clean numbered category pages' in body,'snippet':snippet[:1700]})
+    out['compiled_index_files'].append({'path':str(file1.relative_to(root)),'mtime':round(file1.stat().st_mtime),'mtime_diff_to_source':round(file1.stat().st_mtime-index.stat().st_mtime),'contains_site_template_path':'wa-data/public/site/themes/pureMegapolis42/index.html' in body ,'snippet':snippet[:1700]})
   except Exception as e:out.setdefault('compiled_lookup_errors',[]).append(str(e)[:120])
 print('CANONICAL_CACHE_AUDIT='+json.dumps(out,ensure_ascii=False),flush=True)
 PY
