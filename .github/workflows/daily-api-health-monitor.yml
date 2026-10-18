@@ -1,0 +1,59 @@
+name: Daily API health monitor (core integrations)
+on:
+  schedule:
+    - cron: '46 5 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/daily-api-health-monitor.yml'
+      - 'scripts/daily_api_health_check.py'
+permissions:
+  contents: read
+concurrency:
+  group: daily-api-health-monitor
+  cancel-in-progress: false
+jobs:
+  check-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
+      YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
+      NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
+      SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
+      KOMUS_API: ${{ secrets.KOMUS_API }}
+      KOMUS_API_KEY: ${{ secrets.KOMUS_API_KEY }}
+      KOMUS_TOKEN: ${{ secrets.KOMUS_TOKEN }}
+      KOMUS_API_TOKEN: ${{ secrets.KOMUS_API_TOKEN }}
+      CDEK_CLIENT_ID: ${{ secrets.CDEK_CLIENT_ID }}
+      CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
+      PEK_LOGIN: ${{ secrets.PEK_LOGIN }}
+      PEK_API_KEY: ${{ secrets.PEK_API_KEY }}
+      DALLI_TOKEN: ${{ secrets.DALLI_TOKEN }}
+      DALLI_TOKEN_MSK: ${{ secrets.DALLI_TOKEN_MSK }}
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HTTP library
+        run: python -m pip install 'requests>=2.31,<3'
+      - name: Compile health check and Dalli API client
+        run: python -m py_compile scripts/daily_api_health_check.py dalli/dalli_api.py
+      - name: Run read-only checks and send alerts only for failures
+        run: python scripts/daily_api_health_check.py
+      - name: Preserve sanitized status report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-api-health-${{ github.run_id }}
+          path: reports/daily-api-health.json
+          if-no-files-found: warn
+          retention-days: 30
