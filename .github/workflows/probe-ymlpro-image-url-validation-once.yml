@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/probe-ymlpro-image-url-validation-once.yml'
+      - 'scripts/probe_ymlpro_image_url_validation.py'
   workflow_dispatch:
 permissions:
   contents: read
