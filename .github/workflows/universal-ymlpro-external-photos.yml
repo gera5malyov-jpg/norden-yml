@@ -1,8 +1,8 @@
-name: Universal YML Pro external photo weekly refresh
+name: Universal YML Pro external photo daily refresh
 on:
-  # Every seven days, after the weekend supplier feed generation.
+  # Daily refresh; only changed external image links are written.
   schedule:
-    - cron: '15 4 * * 1'
+    - cron: '15 4 * * *'
   workflow_dispatch:
 permissions:
   contents: read
@@ -76,7 +76,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ymlpro-weekly-email-report-${{ github.run_id }}
+          name: ymlpro-daily-email-report-${{ github.run_id }}
           path: reports/ymlpro-photo-email-report.txt
           if-no-files-found: warn
           retention-days: 30
