@@ -15,12 +15,7 @@ old_block="""    {* CANONICAL *}
       <link rel="canonical" href="{$canonical|escape}" />
     {/if}"""
 new_block="""    {* CANONICAL *}
-    {* Only clean numbered category pages have their own canonical. *}
-    {$_seo_clean_page_canonical = false}
-    {if $wa->domainUrl() == 'https://profikompany.ru' && $wa->param('action') == 'category' && $wa->get('page', 0) > 1 && preg_match('~[?]page=[0-9]+$~', $wa->currentUrl(false))}
-      {$_seo_clean_page_canonical = true}
-      <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}?page={$wa->get('page', 0)|intval}" />
-    {elseif !empty($canonical)}
+    {if !empty($canonical)}
       <link rel="canonical" href="{$canonical|escape}" />
     {/if}"""
 def sha(b):return hashlib.sha256(b).hexdigest()
@@ -37,14 +32,24 @@ def get(route):
 old=file.read_bytes();source=old.decode('utf-8')
 if sha(old)!=expected_sha or source.count(old_block)!=1 or 'Only clean numbered category pages' in source or '$_seo_pagination_number' in source:
  raise RuntimeError('PREFLIGHT 1: live template hash/anchor differ or already patched')
-new_source=source.replace(old_block,new_block,1)
-fallback_old="      {if empty($canonical)}\n        {if $wa->currentUrl(false) == $_seo_url}"
-fallback_new="      {if empty($canonical) && !$_seo_clean_page_canonical}\n        {if $wa->currentUrl(false) == $_seo_url}"
-if new_source.count(fallback_old)!=1:
- raise RuntimeError('PREFLIGHT 1: expected sole native SEO fallback missing')
-new=new_source.replace(fallback_old,fallback_new,1).encode('utf-8')
-if new.count(b'<link rel="canonical"')!=old.count(b'<link rel="canonical"')+1:
- raise RuntimeError('PREFLIGHT 1: unexpected canonical template delta')
+# Preserve the original primary canonical and change only the fallback category rule.
+# The live paginated category has empty $canonical; a second link must never be added.
+category_old="""          {if $wa->param('action') == 'category'}
+            <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
+          {/if}"""
+category_new="""          {if $wa->param('action') == 'category'}
+            {if $wa->domainUrl() == 'https://profikompany.ru' && $wa->get('page', 0) > 1 && preg_match('~[?]page=[0-9]+$~', $wa->currentUrl(false))}
+              <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}?page={$wa->get('page', 0)|intval}" />
+            {else}
+              <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}" />
+            {/if}
+          {/if}"""
+if source.count(category_old)!=1:
+ raise RuntimeError('PREFLIGHT 1: category canonical fallback must occur exactly once')
+new_source=source.replace(category_old,category_new,1)
+new=new_source.encode('utf-8')
+if new.count(b'<link rel="canonical"')!=old.count(b'<link rel="canonical"')+1 or new_source.count(old_block)!=1:
+ raise RuntimeError('PREFLIGHT 1: category-only canonical delta mismatch')
 print('CANONICAL_PREFLIGHT='+json.dumps({'number':1,'ok':True,'source_sha':sha(old)}),flush=True)
 # Preflight 2 - distinct products and existing base canonicals.
 p1=get('/category/kompyuternye-kresla/')
