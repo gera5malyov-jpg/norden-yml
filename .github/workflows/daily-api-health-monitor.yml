@@ -23,6 +23,8 @@ jobs:
       WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
       YANDEX_MARKET_API_KEY: ${{ secrets.YANDEX_MARKET_API_KEY }}
       BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
+      E_BULKY: ${{ secrets.E_BULKY }}
+      MOYSKLAD_TOKEN: ${{ secrets.MOYSKLAD_TOKEN }}
       WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
       YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
       NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
