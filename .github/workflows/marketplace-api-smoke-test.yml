@@ -116,7 +116,7 @@ jobs:
           }
 
           failed = [name for name, status in statuses.items() if status != "OK"]
-          subject = "[API маркетплейсов] Требуется внимание: " + ", ".join(failed)
+          subject = "ВАЖНО !!! ВНИМАНИЕ !! Не работает API: " + ", ".join(failed)
 
           body = [
               "Автоматическая проверка API в GitHub обнаружила проблему.",
