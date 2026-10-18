@@ -1,0 +1,27 @@
+name: Fix 2 confirmed sitemap collisions with rollback
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-two-sitemap-urls-20261018.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: storefront-sitemap-repair
+  cancel-in-progress: false
+jobs:
+  guarded-sitemap-repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate repair script
+        run: python -m py_compile storefront/fix_two_sitemap_urls_20261018.py
+      - name: Verify 2 duplicates, back up generator, fix and compare all 13 XML sitemaps
+        run: python storefront/fix_two_sitemap_urls_20261018.py
