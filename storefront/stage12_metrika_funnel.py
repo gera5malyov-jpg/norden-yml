@@ -19,10 +19,10 @@ theme=root/'wa-data/public/site/themes/pureMegapolis42'
 layout=theme/'index.html'
 asset=theme/'js/metrika_funnel_v1.js'
 old=layout.read_text(encoding='utf-8')
-anchor='<script src="{$wa_real_theme_url}js/user.js?v{$wa_theme_version}"></script>'
+anchor='</head>'
 js=base64.b64decode('FUNNEL_B64').decode('utf-8')
 if old.count(anchor)!=1 or 'metrika_funnel_v1.js' in old:
- raise RuntimeError('Storefront template changed since audit, abort')
+ raise RuntimeError('Storefront head or existing funnel include changed; abort')
 if asset.exists() and asset.read_text(encoding='utf-8')!=js:
  raise RuntimeError('Existing funnel JS differs from audited version, abort')
 backups=root.parent/'storefront-backups'
@@ -35,7 +35,7 @@ written=False;created=False
 try:
  st=layout.stat()
  with tempfile.NamedTemporaryFile('w',dir=str(theme),encoding='utf-8',delete=False) as fp:
-  fp.write(old.replace(anchor,anchor+'\n    <script src="{$wa_real_theme_url}js/metrika_funnel_v1.js?v=20261010a" defer></script>',1));tpl=fp.name
+  fp.write(old.replace(anchor,'    <script src="{$wa_real_theme_url}js/metrika_funnel_v1.js?v=20261010a" defer></script>\n'+anchor,1));tpl=fp.name
  os.chown(tpl,st.st_uid,st.st_gid);os.chmod(tpl,st.st_mode)
  if not asset.exists():
   with tempfile.NamedTemporaryFile('w',dir=str(asset.parent),encoding='utf-8',delete=False) as fp:
