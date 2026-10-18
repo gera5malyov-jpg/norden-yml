@@ -1,0 +1,27 @@
+name: Fix OG description punctuation - scoped SEO
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/seo-og-description-punctuation-20261018.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  guarded-og:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate script
+        run: python -m py_compile storefront/fix_og_description_punctuation_20261018.py
+      - name: Three prechecks, backup, scoped OG fix and ten acceptance tests
+        run: python storefront/fix_og_description_punctuation_20261018.py
