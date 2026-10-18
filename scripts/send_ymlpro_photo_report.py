@@ -48,7 +48,7 @@ changes = sum(int(row.get("changed") or 0) for row in result)
 unchanged = sum(int(row.get("unchanged") or 0) for row in result)
 skipped = [r for r in result if r.get("status") in ("skipped", "blocked", "already_running")]
 broken = [r for r in result if r.get("status") == "blocked"]
-failed_count = len(failures) + len(missing) + len(broken)
+failed_count = len(failures) + len(missing) + len(skipped)
 status = "УСПЕШНО" if failed_count == 0 and len(files) == expected else "ЧАСТИЧНО / ОШИБКИ"
 if not result and not failures:
     status = "НЕ ВЫПОЛНЕНО"
