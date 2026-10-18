@@ -23,6 +23,11 @@ class APIProblem(Exception):
     pass
 
 
+class APIInconclusive(Exception):
+    """HTTP rate limit: the service cannot be declared down."""
+    pass
+
+
 def require(*names):
     absent = [n for n in names if not os.getenv(n, "").strip()]
     if absent:
@@ -57,7 +62,7 @@ def data(method, url, **kwargs):
         raise APIProblem("API не вернул ответ")
     if not 200 <= response.status_code < 300:
         if response.status_code == 429:
-            raise APIProblem("HTTP 429: лимит запросов API (после повторных попыток)")
+            raise APIInconclusive("HTTP 429: временный лимит запросов, состояние API не подтверждено")
         raise APIProblem("HTTP " + str(response.status_code))
     try:
         payload = response.json()
@@ -73,6 +78,8 @@ def verify(name, required, callback):
         require(*required)
         callback()
         RESULTS.append({"service": name, "status": "OK", "reason": ""})
+    except APIInconclusive as exc:
+        RESULTS.append({"service": name, "status": "UNKNOWN", "reason": str(exc)[:160]})
     except APIProblem as exc:
         reason = str(exc)[:160]
         status = "NO_KEY" if reason.startswith(("Не настроены секреты GitHub:", "Не настроен ключ")) else "FAIL"
@@ -243,49 +250,36 @@ def netangels():
         raise APIProblem("NetAngels: неверный формат ответа")
 
 
-def send_report():
-    """Exactly one full status email daily; urgent subject when anything failed."""
+def send_failure_alert(failures):
+    """Send an email ONLY when one or more API checks genuinely failed."""
+    if not failures:
+        print("No API outages; no email sent.", flush=True)
+        return True
+
     user = os.getenv("GMAIL_SMTP_USER", "").strip()
     password = os.getenv("GMAIL_APP_PASSWORD", "")
     if not user or not password:
-        print("::error::Cannot send status report: Gmail SMTP secrets not configured", flush=True)
+        print("::error::Cannot send outage alert: Gmail SMTP credentials unavailable", flush=True)
         return False
 
-    failures = [r for r in RESULTS if r["status"] != "OK"]
     report_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    real_failures = [r for r in RESULTS if r["status"] == "FAIL"]
-    unconfigured = [r for r in RESULTS if r["status"] == "NO_KEY"]
-    if real_failures:
-        subject = ("ВАЖНО !!! ВНИМАНИЕ !! Не работает API: " +
-                   ", ".join(r["service"] for r in real_failures))
-    elif unconfigured:
-        subject = ("ВНИМАНИЕ: нет ключей для проверки API: " +
-                   ", ".join(r["service"] for r in unconfigured))
-    else:
-        subject = "Ежедневный отчет API: все сервисы работают"
-
+    subject = ("ВАЖНО !!! ВНИМАНИЕ !! Не работает API: " +
+               ", ".join(row["service"] for row in failures))
     lines = [
-        "Полный ежедневный контроль API — " + report_time,
-        "",
-        "Интеграций в списке: " + str(len(RESULTS)) +
-        ". Работает: " + str(len(RESULTS) - len(failures)) +
-        ". Сбои: " + str(len(real_failures)) +
-        ". Не удалось проверить из-за отсутствия ключа: " + str(len(unconfigured)) + ".",
+        "Обнаружена проблема с доступностью API / авторизацией.",
+        "Дата проверки: " + report_time,
         "",
     ]
-    for row in RESULTS:
-        status = {"OK": "РАБОТАЕТ", "FAIL": "ОШИБКА", "NO_KEY": "НЕТ КЛЮЧА ДЛЯ ПРОВЕРКИ"}[row["status"]]
-        lines.append(row["service"] + " - " + status +
-                     (": " + row["reason"] if row["reason"] else ""))
+    for row in failures:
+        lines.append(row["service"] + ": " + row["reason"])
     lines.extend([
         "",
-        "Это чтение/проверка авторизации без изменения товаров, заказов и платежей.",
-        "Журнал проверки: " + RUN_URL,
+        "Проверки только читают данные, ничего не изменяют.",
+        "GitHub Actions: " + RUN_URL,
         "",
-        "Другие интеграции из отдельных репозиториев не входят в эту проверку.",
-        "Реестр текущих подключений и расписаний: https://github.com/gera5malyov-jpg/megapolis-smm/blob/main/reports/github-actions-inventory-2026-10-18.md",
+        "Другие проверенные API работают; уведомления о них не отправляются.",
+        "Отсутствующие секреты или лимит запросов (429) не считаются доказанным отказом API.",
     ])
-
     msg = EmailMessage()
     msg["From"] = user
     msg["To"] = DESTINATION
@@ -296,10 +290,10 @@ def send_report():
             smtp.starttls()
             smtp.login(user, password)
             smtp.send_message(msg)
-        print("Full status email sent. Services:", len(RESULTS), "failures:", len(failures), flush=True)
+        print("Outage alert email sent for", len(failures), "API(s).", flush=True)
         return True
     except (OSError, smtplib.SMTPException) as exc:
-        print("::error::Report delivery failed: " + type(exc).__name__, flush=True)
+        print("::error::Outage alert delivery failed: " + type(exc).__name__, flush=True)
         return False
 
 
@@ -330,8 +324,12 @@ def main():
         # Never print secret values or response bodies.
         print(row["service"], row["status"], row["reason"], flush=True)
 
-    failures = [row for row in RESULTS if row["status"] != "OK"]
-    email_ok = send_report()
+    failures = [row for row in RESULTS if row["status"] == "FAIL"]
+    email_ok = send_failure_alert(failures)
+    unchecked = [row for row in RESULTS if row["status"] in ("NO_KEY", "UNKNOWN")]
+    if unchecked:
+        print("::warning::Not confirmed (no key or API rate limit):",
+              ", ".join(row["service"] for row in unchecked), flush=True)
     if failures:
         print("::error::Failed API checks: " + str(len(failures)), flush=True)
     return 1 if failures or not email_ok else 0
