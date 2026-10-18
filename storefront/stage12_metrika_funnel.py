@@ -12,54 +12,50 @@ from stage1_readonly_audit import VM_ID, VM_IP, request_json
 
 REMOTE=r"""set -eu
 python3 - <<'PY'
-import os,json,pathlib,base64,shutil,tempfile,subprocess,time
+import os,json,pathlib,shutil,tempfile,subprocess
 from datetime import datetime,timezone
 root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
 theme=root/'wa-data/public/site/themes/pureMegapolis42'
 layout=theme/'index.html'
-asset=theme/'js/metrika_funnel_v1.js'
 old=layout.read_text(encoding='utf-8')
-anchor='<script src="{$wa_real_theme_url}js/megapolis-delivery-v1.js?v=20261013a" defer></script>{else}<script src="{$wa_real_theme_url}js/metrika_funnel_v1.js?v=20261010a" defer></script>{/if}'
-replacement='<script src="{$wa_real_theme_url}js/megapolis-delivery-v1.js?v=20261013a" defer></script>{/if}\n    <script src="{$wa_real_theme_url}js/metrika_funnel_v1.js?v=20261010a" defer></script>'
-js=base64.b64decode('FUNNEL_B64').decode('utf-8')
-print('FUNNEL_PROBE='+json.dumps({'head_close':old.count('</head>'),'funnel_refs':old.count('metrika_funnel_v1.js'),'user_js_refs':old.count('user.js'),'matching_lines':[{'line':i+1,'content':line.strip()[:260]} for i,line in enumerate(old.splitlines()) if 'metrika_funnel_v1.js' in line or '</head>' in line or 'user.js' in line][:12]},ensure_ascii=False),flush=True)
-if old.count(anchor)!=1 or old.count('metrika_funnel_v1.js')!=1:
- raise RuntimeError('Expected single conditional Metrica include not found; abort')
-if asset.exists() and asset.read_text(encoding='utf-8')!=js:
- raise RuntimeError('Existing funnel JS differs from audited version, abort')
+v1='<script src="{$wa_real_theme_url}js/metrika_funnel_v1.js?v=20261010a" defer></script>'
+v2='megapolis-funnel-v2.js'
+if old.count(v1)==0 and old.count(v2)==1:
+ print('FUNNEL_RESULT='+json.dumps({'status':'already_correct','v1':0,'v2':1}))
+ raise SystemExit(0)
+if old.count(v1)!=1 or old.count(v2)!=1:
+ raise RuntimeError('Unexpected funnel script references, no changes: '+json.dumps({'v1':old.count(v1),'v2':old.count(v2)}))
 backups=root.parent/'storefront-backups'
 backups.mkdir(mode=0o700,parents=True,exist_ok=True)
-backup=backups/('stage12-funnel-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+str(os.getpid()))
+backup=backups/('dedupe-funnel-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+str(os.getpid()))
 backup.mkdir(mode=0o700)
 shutil.copy2(str(layout),str(backup/'index.html'))
 os.chmod(str(backup/'index.html'),0o600)
-written=False;created=False
+written=False
 try:
  st=layout.stat()
+ new=old.replace(v1,'',1)
  with tempfile.NamedTemporaryFile('w',dir=str(theme),encoding='utf-8',delete=False) as fp:
-  fp.write(old.replace(anchor,replacement,1));tpl=fp.name
- os.chown(tpl,st.st_uid,st.st_gid);os.chmod(tpl,st.st_mode)
- if not asset.exists():
-  with tempfile.NamedTemporaryFile('w',dir=str(asset.parent),encoding='utf-8',delete=False) as fp:
-   fp.write(js);tmpjs=fp.name
-  os.chown(tmpjs,st.st_uid,st.st_gid);os.chmod(tmpjs,0o644)
-  os.replace(tmpjs,str(asset));created=True
- os.replace(tpl,str(layout));written=True
+  fp.write(new)
+  tpl=fp.name
+ os.chown(tpl,st.st_uid,st.st_gid)
+ os.chmod(tpl,st.st_mode)
+ os.replace(tpl,str(layout))
+ written=True
  checks=[]
- for path in ('/','/stul-dlya-posetiteley-rs42-chernyy-karkas-tkan-chernaya/','/order/'):
-  p=subprocess.Popen(['curl','-k','-sS','-L','--max-time','32','-w','\n%{http_code}','https://profikompany.ru'+path+'?stage12audit=1'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
+ for path in ('/','/stul-signal-misaki-t-253-bezhevyy-kashemir/','/order/'):
+  p=subprocess.Popen(['curl','-k','-sS','-L','--max-time','32','-w','\\n%{http_code}','https://profikompany.ru'+path+'?dedupe_metrica_20261018=1'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
   data,_=p.communicate(timeout=38)
-  h,status=data.rsplit('\n',1) if '\n' in data else ('','')
-  head=h.split('</head>')[0]
-  ok=(p.returncode==0 and status=='200' and head.count('metrika_funnel_v1.js?v=20261010a')==1)
-  if path=='/order/':ok=ok and 'noindex,follow' in head
-  checks.append({'page':path,'status':status,'ok':ok})
- if not all(x['ok'] for x in checks):raise RuntimeError('Live page checks failed: '+json.dumps(checks))
- print('FUNNEL_APPLY='+json.dumps({'ok':True,'backup':str(backup),'checks':checks},ensure_ascii=False))
-except Exception as ex:
+  html,status=data.rsplit('\\n',1) if '\\n' in data else ('','')
+  head=html.split('</head>')[0]
+  passed=(p.returncode==0 and status=='200' and head.count('metrika_funnel_v1.js')==0 and head.count(v2)==1 and head.count('ym(21811312, "init"')==1)
+  checks.append({'path':path,'status':status,'v1':head.count('metrika_funnel_v1.js'),'v2':head.count(v2),'ok':passed})
+ if not all(x['ok'] for x in checks):
+  raise RuntimeError('Live Metrica regression checks failed: '+json.dumps(checks))
+ print('FUNNEL_RESULT='+json.dumps({'status':'corrected','backup':str(backup),'checks':checks}))
+except Exception as e:
  if written:shutil.copy2(str(backup/'index.html'),str(layout))
- if created and asset.exists():asset.unlink()
- print('FUNNEL_ROLLBACK='+json.dumps({'reason':str(ex),'restored':written},ensure_ascii=False))
+ print('FUNNEL_ROLLBACK='+json.dumps({'error':str(e),'restored':written}))
  raise
 PY
 """
