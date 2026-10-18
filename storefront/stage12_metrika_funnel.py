@@ -21,8 +21,10 @@ asset=theme/'js/metrika_funnel_v1.js'
 old=layout.read_text(encoding='utf-8')
 anchor='<script src="{$wa_real_theme_url}js/user.js?v{$wa_theme_version}"></script>'
 js=base64.b64decode('FUNNEL_B64').decode('utf-8')
-if old.count(anchor)!=1 or asset.exists() or 'metrika_funnel_v1.js' in old:
- raise RuntimeError('Storefront changed since audit, abort')
+if old.count(anchor)!=1 or 'metrika_funnel_v1.js' in old:
+ raise RuntimeError('Storefront template changed since audit, abort')
+if asset.exists() and asset.read_text(encoding='utf-8')!=js:
+ raise RuntimeError('Existing funnel JS differs from audited version, abort')
 backups=root.parent/'storefront-backups'
 backups.mkdir(mode=0o700,parents=True,exist_ok=True)
 backup=backups/('stage12-funnel-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+str(os.getpid()))
@@ -34,11 +36,12 @@ try:
  st=layout.stat()
  with tempfile.NamedTemporaryFile('w',dir=str(theme),encoding='utf-8',delete=False) as fp:
   fp.write(old.replace(anchor,anchor+'\n    <script src="{$wa_real_theme_url}js/metrika_funnel_v1.js?v=20261010a" defer></script>',1));tpl=fp.name
- with tempfile.NamedTemporaryFile('w',dir=str(asset.parent),encoding='utf-8',delete=False) as fp:
-  fp.write(js);tmpjs=fp.name
  os.chown(tpl,st.st_uid,st.st_gid);os.chmod(tpl,st.st_mode)
- os.chown(tmpjs,st.st_uid,st.st_gid);os.chmod(tmpjs,0o644)
- os.replace(tmpjs,str(asset));created=True
+ if not asset.exists():
+  with tempfile.NamedTemporaryFile('w',dir=str(asset.parent),encoding='utf-8',delete=False) as fp:
+   fp.write(js);tmpjs=fp.name
+  os.chown(tmpjs,st.st_uid,st.st_gid);os.chmod(tmpjs,0o644)
+  os.replace(tmpjs,str(asset));created=True
  os.replace(tpl,str(layout));written=True
  checks=[]
  for path in ('/','/stul-dlya-posetiteley-rs42-chernyy-karkas-tkan-chernaya/','/order/'):
