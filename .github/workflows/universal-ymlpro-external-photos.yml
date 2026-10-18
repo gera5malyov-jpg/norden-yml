@@ -1,5 +1,8 @@
 name: Universal YML Pro external photo weekly refresh
 on:
+  # Every seven days, after the weekend supplier feed generation.
+  schedule:
+    - cron: '15 4 * * 1'
   push:
     branches: [main]
     paths:
@@ -24,7 +27,7 @@ jobs:
       NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
       UNIVERSAL_SHARD: ${{ matrix.shard }}
       UNIVERSAL_SHARD_COUNT: '12'
-      UNIVERSAL_APPLY: '0'
+      UNIVERSAL_APPLY: '1'
       UNIVERSAL_STRICT: '0'
     steps:
       - uses: actions/checkout@v4
@@ -33,17 +36,51 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Inventory all mapped YML Pro profiles without changing goods
+      - name: Update images only for uniquely mapped YML Pro product profiles
         shell: bash
         run: |
           set -o pipefail
           mkdir -p reports/ymlpro-shards
           python -u scripts/run_universal_ymlpro_photos.py 2>&1 | tee "reports/ymlpro-shards/shard-${{ matrix.shard }}.log"
-      - name: Archive per-profile audit log
+      - name: Archive per-profile refresh results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ymlpro-shard-${{ matrix.shard }}
           path: reports/ymlpro-shards/shard-${{ matrix.shard }}.log
+          if-no-files-found: warn
+          retention-days: 30
+  email-report:
+    name: Send one combined shop@office-mag.com report
+    if: always()
+    needs: [photo-refresh]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Collect all twelve supplier shard reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: ymlpro-shard-*
+          merge-multiple: true
+          path: reports/ymlpro-shards
+      - name: Email exact per-supplier outcomes, including skipped and errors
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: shop@office-mag.com
+          EXPECTED_SHARDS: '12'
+          YML_PHOTO_MODE: apply
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 scripts/send_ymlpro_photo_report.py
+      - name: Preserve sent-report text
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ymlpro-weekly-email-report-${{ github.run_id }}
+          path: reports/ymlpro-photo-email-report.txt
           if-no-files-found: warn
           retention-days: 30
