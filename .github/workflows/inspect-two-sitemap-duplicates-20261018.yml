@@ -57,19 +57,27 @@ jobs:
           trap 'rm -f "$p"' EXIT
           cat > "$p" <<'PHP'
           <?php
+          error_reporting(E_ALL);
+          ini_set('display_errors','1');
           $root='/home/web/vm-23f9aff9.na4u.ru/www';
-          chdir($root);
-          require_once $root.'/wa-config/SystemConfig.class.php';
-          waSystem::getInstance(null,new SystemConfig());
-          wa('shop');
-          $db=new waModel();
-          $targets=array('podstole','СФ-531201-Стол-левый-2200x1996x840-Дуб-Чарльстон-Бетон-Чикаго');
-          foreach($targets as $url){
-           $rows=$db->query('SELECT id,url,name,status,category_id FROM shop_product WHERE url = s:slug LIMIT 30',array('slug'=>$url))->fetchAll();
-           echo 'SITEMAP_DB='+json_encode(array('slug'=>$url,'count'=>count($rows),'rows'=>$rows),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          echo "SITEMAP_DB_BOOT=started\n";
+          $cfg=require $root.'/wa-config/db.php';
+          $c=isset($cfg['default'])?$cfg['default']:$cfg;
+          echo 'SITEMAP_DB_ENV='.json_encode(array('mysqli'=>class_exists('mysqli'),'config_fields'=>array_keys($c)),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          if(!class_exists('mysqli')) {echo "SITEMAP_DB_BOOT=unsupported-mysqli\n";exit(0);}
+          $conn=new mysqli($c['host'],$c['user'],$c['password'],$c['database'],isset($c['port'])?(int)$c['port']:3306);
+          $conn->set_charset('utf8mb4');
+          foreach(array('podstole','СФ-531201-Стол-левый-2200x1996x840-Дуб-Чарльстон-Бетон-Чикаго') as $url){
+           $stmt=$conn->prepare('SELECT id,url,name,status,category_id FROM shop_product WHERE url = ? LIMIT 30');
+           $stmt->bind_param('s',$url);
+           $stmt->execute();
+           $rows=$stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+           echo 'SITEMAP_DB='.json_encode(array('slug'=>$url,'count'=>count($rows),'rows'=>$rows),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+           $stmt->close();
           }
-          $indexes=$db->query('SHOW INDEX FROM shop_product WHERE Column_name = "url"')->fetchAll();
-          echo 'SITEMAP_DB_INDEX='+json_encode(array_map(function($r){return array('key'=>$r['Key_name'],'unique'=>!$r['Non_unique']);},$indexes),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          $rows=$conn->query('SHOW INDEX FROM shop_product WHERE Column_name = "url"')->fetch_all(MYSQLI_ASSOC);
+          echo 'SITEMAP_DB_INDEX='.json_encode(array_map(function($r){return array('key'=>$r['Key_name'],'unique'=>!$r['Non_unique']);},$rows),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          $conn->close();
           PHP
           chmod 644 "$p"
           echo SITEMAP_DB_BEFORE=php_bootstrap
