@@ -16,7 +16,9 @@ old_block="""    {* CANONICAL *}
     {/if}"""
 new_block="""    {* CANONICAL *}
     {* Only clean numbered category pages have their own canonical. *}
+    {$_seo_clean_page_canonical = false}
     {if $wa->domainUrl() == 'https://profikompany.ru' && $wa->param('action') == 'category' && $wa->get('page', 0) > 1 && preg_match('~[?]page=[0-9]+$~', $wa->currentUrl(false))}
+      {$_seo_clean_page_canonical = true}
       <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}?page={$wa->get('page', 0)|intval}" />
     {elseif !empty($canonical)}
       <link rel="canonical" href="{$canonical|escape}" />
@@ -35,7 +37,12 @@ def get(route):
 old=file.read_bytes();source=old.decode('utf-8')
 if sha(old)!=expected_sha or source.count(old_block)!=1 or 'Only clean numbered category pages' in source or '$_seo_pagination_number' in source:
  raise RuntimeError('PREFLIGHT 1: live template hash/anchor differ or already patched')
-new=source.replace(old_block,new_block,1).encode('utf-8')
+new_source=source.replace(old_block,new_block,1)
+fallback_old="      {if empty($canonical)}\n        {if $wa->currentUrl(false) == $_seo_url}"
+fallback_new="      {if empty($canonical) && !$_seo_clean_page_canonical}\n        {if $wa->currentUrl(false) == $_seo_url}"
+if new_source.count(fallback_old)!=1:
+ raise RuntimeError('PREFLIGHT 1: expected sole native SEO fallback missing')
+new=new_source.replace(fallback_old,fallback_new,1).encode('utf-8')
 if new.count(b'<link rel="canonical"')!=old.count(b'<link rel="canonical"')+1:
  raise RuntimeError('PREFLIGHT 1: unexpected canonical template delta')
 print('CANONICAL_PREFLIGHT='+json.dumps({'number':1,'ok':True,'source_sha':sha(old)}),flush=True)
