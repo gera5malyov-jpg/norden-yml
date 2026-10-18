@@ -1,0 +1,25 @@
+name: Metrica Ecommerce - deploy safely
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate tracker syntax
+        run: |
+          python3 -m py_compile storefront/deploy_metrica_ecommerce.py
+          node --check storefront/assets/megapolis-ecommerce-v1.js
+      - name: Deploy with rollback on any failed validation
+        run: python3 storefront/deploy_metrica_ecommerce.py
