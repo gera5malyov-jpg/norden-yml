@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/diag-canonical-cache-20261018.yml'
+      - 'storefront/diag_canonical_cache_20261018.py'
   workflow_dispatch:
 permissions:
   contents: read
