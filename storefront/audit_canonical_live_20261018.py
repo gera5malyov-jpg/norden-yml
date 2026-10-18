@@ -14,6 +14,27 @@ hits=[]
 for i,line in enumerate(lines):
  if ('CANONICAL' in line or 'canonical' in line or '_seo_pagination' in line or 'Scoped search indexing' in line) and i<260:
   hits.append({'line':i+1,'context':'\n'.join(lines[max(0,i-3):min(len(lines),i+7)])[:900]})
+# Find where the response head and SEO plugin inject their canonical tags.
+sources=[]
+for rel in ('wa-data/public/site/themes/pureMegapolis42/index.html',
+            'wa-data/public/shop/themes/pureMegapolis42/head.html'):
+ q=root/rel
+ if q.is_file():
+  for no,line in enumerate(q.read_text(encoding='utf-8',errors='replace').splitlines(),1):
+   if any(a in line.lower() for a in ('wa->head()', 'wa->head', 'canonical','shop->head')):
+    sources.append({'path':rel,'line':no,'code':line.strip()[:280]})
+plugin=root/'wa-apps/shop/plugins/seo'
+plugin_hits=[]
+if plugin.is_dir():
+ for file in plugin.rglob('*.php'):
+  if len(plugin_hits)>=35:break
+  if file.stat().st_size>250000:continue
+  try:
+   for no,line in enumerate(file.read_text(encoding='utf-8',errors='replace').splitlines(),1):
+    if 'canonical' in line.lower() and len(plugin_hits)<35:
+     plugin_hits.append({'path':str(file.relative_to(root)),'line':no,'code':line.strip()[:180]})
+  except Exception:pass
+print('HEAD_ORIGIN_AUDIT='+json.dumps({'theme_references':sources[:35],'plugin_mentions':plugin_hits},ensure_ascii=False),flush=True)
 print('CANONICAL_AUDIT='+json.dumps({'sha256':hashlib.sha256(s.encode()).hexdigest(),'bytes':len(s),'count_anchor':s.count('{* CANONICAL *}'),'count_simple':s.count('<link rel="canonical" href="{$canonical|escape}" />'),'count_pagination':s.count('$_seo_pagination_number'),'hits':hits[:15]},ensure_ascii=False),flush=True)
 logs=root/'wa-log'
 results={'files':[],'errors':[]}
