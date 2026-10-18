@@ -12,7 +12,7 @@ for relative in ['wa-data/public/site/themes/pureMegapolis42/index.html','wa-dat
         continue
     data=path.read_bytes()
     lines=data.decode('utf-8','replace').splitlines()
-    marks=['<title>', '_info_title', '_info_description','meta name="description"','meta(\'description\')','Scoped SEO improvements','megapolis-native-category-meta-stage55']
+    marks=['<title>', '_info_title', '_info_description','meta name="description"','meta(\'description\')','Scoped SEO improvements','megapolis-native-category-meta-stage55','$wa->head()','head|','og:description']
     found=set()
     for i,line in enumerate(lines):
         if any(mark in line for mark in marks):
