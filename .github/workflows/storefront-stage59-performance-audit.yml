@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/storefront-stage59-performance-audit.yml'
+      - 'storefront/stage59_server_perf_readonly.py'
 permissions:
   contents: read
 jobs:
