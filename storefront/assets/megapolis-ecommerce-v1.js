@@ -25,7 +25,8 @@
       root.closest('[data-product-id]')?.getAttribute('data-product-id') || (fallback && fallback.product_id) || '').trim();
     var id = pid || (sku && sku.value.trim()) || (fallback && fallback.sku_id) || '';
     if (!/^\d{1,18}$/.test(id)) return null;
-    var title = root.querySelector('.wa-name, .product-item__title, [itemprop="name"], h1') ||
+    var title = (root.matches && root.matches('#s-product-form') ? d.querySelector('h1') : null) ||
+      root.querySelector('.wa-name, .product-item__title, [itemprop="name"], h1') ||
       d.querySelector('h1[itemprop="name"],h1.product-name,h1');
     var name = clean(title && (title.getAttribute('content') || title.getAttribute('title') || title.textContent));
     var cost = price(root);
