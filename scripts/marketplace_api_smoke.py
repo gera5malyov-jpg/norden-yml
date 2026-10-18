@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Marketplace API checks every 6 hours; email only on confirmed outage."""
 from daily_api_health_check import (
-    RESULTS, ozon, wildberries, yandex_market, verify, send_failure_alert
+    RESULTS, ozon, wildberries, yandex_market, verify
 )
 
 
@@ -12,10 +12,12 @@ def main():
     for r in RESULTS:
         print(r["service"], r["status"], r["reason"])
     failures = [r for r in RESULTS if r["status"] == "FAIL"]
-    delivered = send_failure_alert(failures)
+    # Emails are sent once by the central daily notifier only.
     if failures:
         print("::error::Marketplace API failures:", len(failures))
-    return 1 if failures or not delivered else 0
+    else:
+        print("Marketplaces healthy; no email sent")
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":
