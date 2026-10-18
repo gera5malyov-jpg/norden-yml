@@ -12,10 +12,10 @@ base='https://profikompany.ru'
 expected_sha='87c29bf35cce60142392c3f831f040bbbbdb6e4e9c8879584eaf17d092b7ffff'
 old_block="    {$wa->head()}"
 new_block="""    {* Scoped category pagination: replace core canonical, never add a second tag. *}
-    {if $wa->domainUrl() == 'https://profikompany.ru' && $wa->param('action') == 'category' && $smarty.get.page|default:0|intval > 1 && count($smarty.get) == 1}
+    {$_megapolis_num = $smarty.get.page|default:0|intval}
+    {if $wa->domainUrl() == 'https://profikompany.ru' && $wa->param('action') == 'category' && $_megapolis_num > 1 && count($smarty.get) == 1}
       {$_megapolis_head = $wa->head()}
       {$_megapolis_root = $wa->currentUrl(true, true)}
-      {$_megapolis_num = $smarty.get.page|default:0|intval}
       {$_megapolis_old_tag = '<link rel="canonical" href="'|cat:$_megapolis_root|cat:'">'}
       {$_megapolis_new_tag = '<link rel="canonical" href="'|cat:$_megapolis_root|cat:'?page='|cat:$_megapolis_num|cat:'">'}
       {$_megapolis_head|replace:$_megapolis_old_tag:$_megapolis_new_tag}
