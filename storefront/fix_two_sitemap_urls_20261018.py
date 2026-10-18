@@ -3,7 +3,7 @@
 import json
 from stage52_disable_callback import execute
 
-REMOTE = r"""set -eu
+REMOTE = r'''set -eu
 python3 - <<'PY'
 from __future__ import print_function
 import concurrent.futures
@@ -142,7 +142,7 @@ except Exception as e:
         os.unlink(tmp)
     raise
 PY
-"""
+'''
 
 def main():
     output = execute(REMOTE)
