@@ -27,8 +27,6 @@ SOURCES = [
      "daily-api-health-", "daily-api-health.json", False),
     ("moex-trade-bot", "api-health-watch.yml",
      "tinvest-api-health-", "tinvest-api-health.json", False),
-    ("megapolis-smm", "api-finance-health.yml",
-     "finance-api-health-", "finance-api-health.json", True),
 ]
 SESSION = requests.Session()
 SESSION.headers.update({
