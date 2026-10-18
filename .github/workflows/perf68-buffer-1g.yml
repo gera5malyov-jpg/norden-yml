@@ -1,0 +1,26 @@
+name: Perf68 - Guarded InnoDB buffer tuning
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/perf68-buffer-1g.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-db-performance-tuning
+  cancel-in-progress: false
+jobs:
+  resize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/perf68_innodb_buffer_1g.py
+      - name: Verify headroom, back up config, apply online 1GiB buffer and test 10 storefront routes
+        run: python storefront/perf68_innodb_buffer_1g.py
