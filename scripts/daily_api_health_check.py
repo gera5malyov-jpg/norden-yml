@@ -325,7 +325,8 @@ def main():
         print(row["service"], row["status"], row["reason"], flush=True)
 
     failures = [row for row in RESULTS if row["status"] == "FAIL"]
-    email_ok = send_failure_alert(failures)
+    email_ok = (True if os.getenv("API_HEALTH_SKIP_EMAIL") == "1"
+                else send_failure_alert(failures))
     unchecked = [row for row in RESULTS if row["status"] in ("NO_KEY", "UNKNOWN")]
     if unchecked:
         print("::warning::Not confirmed (no key or API rate limit):",
