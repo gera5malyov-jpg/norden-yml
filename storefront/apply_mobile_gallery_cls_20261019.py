@@ -11,10 +11,12 @@ old='    <meta name="viewport" content="width=device-width, initial-scale=1" />'
 mark='megapolis-gallery-cls-20261019'
 css="""\n    {if $wa->domainUrl() == 'https://profikompany.ru' && $wa->param('action') == 'product'}
     <style id="megapolis-gallery-cls-20261019">
+    {literal}
     @media(max-width:767.98px){
     .product-gallery--extimg .product-gallery__main{aspect-ratio:1/1;overflow:hidden}
     .product-gallery--extimg .product-gallery__main img{max-height:100%;object-fit:contain}
     }
+    {/literal}
     </style>
     {/if}"""
 if text.count(old)!=1 or mark in text:raise RuntimeError('Guard failed; no writes')
