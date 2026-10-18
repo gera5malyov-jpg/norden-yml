@@ -3,11 +3,6 @@ on:
   schedule:
     - cron: '38 6 * * *'
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/central-api-health-alert.yml'
-      - 'scripts/central_api_health_notifier.py'
 permissions:
   contents: read
   actions: read
