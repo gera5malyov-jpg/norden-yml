@@ -23,9 +23,9 @@ def main():
      cdp.send('Network.enable')
      cdp.send('Network.emulateNetworkConditions',{'offline':False,'latency':120,'downloadThroughput':220000,'uploadThroughput':90000,'connectionType':'cellular4g'})
     page.add_init_script("""(() => {
-      window.__perf={lcp:0,lcpElement:'',cls:0,longTasks:[],jsErrors:[]};
+      window.__perf={lcp:0,lcpElement:'',cls:0,shifts:[],longTasks:[],jsErrors:[]};
       try{new PerformanceObserver(l=>l.getEntries().forEach(e=>{window.__perf.lcp=Math.round(e.startTime);window.__perf.lcpElement=(e.element?.tagName||'').toLowerCase()})).observe({type:'largest-contentful-paint',buffered:true})}catch(e){}
-      try{new PerformanceObserver(l=>l.getEntries().forEach(e=>{if(!e.hadRecentInput)window.__perf.cls+=e.value})).observe({type:'layout-shift',buffered:true})}catch(e){}
+      try{new PerformanceObserver(l=>l.getEntries().forEach(e=>{if(!e.hadRecentInput){window.__perf.cls+=e.value;window.__perf.shifts.push({value:e.value,sources:(e.sources||[]).slice(0,5).map(x=>({tag:x.node?.tagName,className:(typeof x.node?.className==='string'?x.node.className:'').slice(0,150),id:(x.node?.id||'').slice(0,80),previousRect:x.previousRect,currentRect:x.currentRect}))});}})).observe({type:'layout-shift',buffered:true})}catch(e){}
       try{new PerformanceObserver(l=>l.getEntries().forEach(e=>{window.__perf.longTasks.push(Math.round(e.duration))})).observe({type:'longtask',buffered:true})}catch(e){}
       window.addEventListener('error',e=>window.__perf.jsErrors.push((e.message||'js').slice(0,90)));
     })()""")
@@ -42,7 +42,7 @@ def main():
       const resources=performance.getEntriesByType('resource');
       const p=window.__perf||{};
       const slow=resources.filter(x=>x.duration>250).sort((a,b)=>b.duration-a.duration).slice(0,12).map(x=>({host:(new URL(x.name)).host,duration:Math.round(x.duration),type:x.initiatorType,path:(new URL(x.name)).pathname.slice(0,90)}));
-      return {ttfb:Math.round(nav.responseStart||0),dom:Math.round(nav.domContentLoadedEventEnd||0),load:Math.round(nav.loadEventEnd||0),fcp:Math.round((performance.getEntriesByType('paint').find(x=>x.name==='first-contentful-paint')||{}).startTime||0),lcp:p.lcp||0,lcpElement:p.lcpElement||'',cls:Math.round((p.cls||0)*10000)/10000,longTasks:p.longTasks?.slice(0,22)||[],errors:p.jsErrors?.slice(0,8)||[],scripts:document.scripts.length,images:document.images.length,unboundedImages:[...document.images].filter(x=>!x.hasAttribute('height')&&!x.hasAttribute('width')).length,resourceCount:resources.length,slowAssets:slow,viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,ymType:typeof window.ym,ecommerceEvents:Array.isArray(window.dataLayer)?window.dataLayer.filter(x=>x&&x.ecommerce).length:null,loadedEcommerce:!!window.__megapolisEcomV1};
+      return {ttfb:Math.round(nav.responseStart||0),dom:Math.round(nav.domContentLoadedEventEnd||0),load:Math.round(nav.loadEventEnd||0),fcp:Math.round((performance.getEntriesByType('paint').find(x=>x.name==='first-contentful-paint')||{}).startTime||0),lcp:p.lcp||0,lcpElement:p.lcpElement||'',cls:Math.round((p.cls||0)*10000)/10000,longTasks:p.longTasks?.slice(0,22)||[],errors:p.jsErrors?.slice(0,8)||[],shifts:p.shifts?.slice(0,20)||[],scripts:document.scripts.length,images:document.images.length,unboundedImages:[...document.images].filter(x=>!x.hasAttribute('height')&&!x.hasAttribute('width')).length,resourceCount:resources.length,slowAssets:slow,viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,ymType:typeof window.ym,ecommerceEvents:Array.isArray(window.dataLayer)?window.dataLayer.filter(x=>x&&x.ecommerce).length:null,loadedEcommerce:!!window.__megapolisEcomV1};
     }""")
      status=resp.status if resp else None
     except Exception as e:
