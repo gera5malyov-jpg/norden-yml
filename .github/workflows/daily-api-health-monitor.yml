@@ -3,11 +3,6 @@ on:
   schedule:
     - cron: '46 5 * * *'
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/daily-api-health-monitor.yml'
-      - 'scripts/daily_api_health_check.py'
 permissions:
   contents: read
 concurrency:
@@ -54,7 +49,7 @@ jobs:
         run: python -m pip install 'requests>=2.31,<3'
       - name: Compile health check and Dalli API client
         run: python -m py_compile scripts/daily_api_health_check.py dalli/dalli_api.py
-      - name: Run read-only checks and send alerts only for failures
+      - name: Run read-only checks and send complete daily report
         run: python scripts/daily_api_health_check.py
       - name: Preserve sanitized status report
         if: always()
