@@ -47,7 +47,7 @@ for path in files:
 unique_failures = []
 seen_failure_ids = set()
 for entry in failures:
-    match = re.search(r"(?:profile |profile_id:)(\\d+)", entry)
+    match = re.search(r"(?:profile |profile_id:)(\d+)", entry)
     if match and match.group(1) in seen_failure_ids:
         continue
     if match:
