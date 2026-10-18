@@ -66,6 +66,42 @@ def verify(name, required, callback):
                         "reason": reason[:160]})
 
 
+def ozon():
+    payload = data("POST", "https://api-seller.ozon.ru/v3/product/list",
+                   headers={"Client-Id": os.environ["OZON_CLIENT_ID"],
+                            "Api-Key": os.environ["OZON_API_KEY"],
+                            "Content-Type": "application/json"},
+                   json={"filter": {"visibility": "ALL"}, "limit": 1})
+    if not isinstance(payload, dict) or "result" not in payload:
+        raise APIProblem("Ozon: неожиданный ответ списка товаров")
+
+
+def yandex_market():
+    payload = data("GET", "https://api.partner.market.yandex.ru/v2/campaigns",
+                   params={"limit": 1},
+                   headers={"Api-Key": os.environ["YANDEX_MARKET_API_KEY"],
+                            "Accept": "application/json"})
+    if not isinstance(payload, dict) or "campaigns" not in payload:
+        raise APIProblem("Яндекс Маркет: неожиданный ответ")
+
+
+def wildberries():
+    payload = data("GET", "https://common-api.wildberries.ru/ping",
+                   headers={"Authorization": os.environ["WB_API_TOKEN"],
+                            "Accept": "application/json"})
+    if not isinstance(payload, dict):
+        raise APIProblem("Wildberries: неожиданный ответ")
+
+
+def baserow():
+    payload = data("GET", "http://147.78.67.6/api/database/rows/table/156/",
+                   params={"size": 1, "page": 1},
+                   headers={"Authorization": "Token " + os.environ["BASEROW_DATABASE_TOKEN"],
+                            "Accept": "application/json"})
+    if not isinstance(payload, dict) or "results" not in payload:
+        raise APIProblem("Baserow: неожиданный ответ")
+
+
 def webasyst():
     url = "https://profikompany.ru/api.php/shop.type.getList"
     token = os.environ["WEBASYST_API_TOKEN"].strip()
@@ -167,37 +203,62 @@ def netangels():
         raise APIProblem("NetAngels: неверный формат ответа")
 
 
-def send_alert(item):
+def send_report():
+    """Exactly one full status email daily; urgent subject when anything failed."""
     user = os.getenv("GMAIL_SMTP_USER", "").strip()
     password = os.getenv("GMAIL_APP_PASSWORD", "")
     if not user or not password:
-        print("::error::Cannot email: missing GMAIL_SMTP_USER / GMAIL_APP_PASSWORD", flush=True)
+        print("::error::Cannot send status report: Gmail SMTP secrets not configured", flush=True)
         return False
+
+    failures = [r for r in RESULTS if r["status"] != "OK"]
+    report_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    names = ", ".join(r["service"] for r in failures)
+    subject = ("ВАЖНО !!! ВНИМАНИЕ !! Не работает API: " + names
+               if failures else "Ежедневный отчет API: все сервисы работают")
+
+    lines = [
+        "Полный ежедневный контроль API — " + report_time,
+        "",
+        "Проверено: " + str(len(RESULTS)) + ". Исправно: " + str(len(RESULTS) - len(failures)) +
+        ". Проблемы: " + str(len(failures)) + ".",
+        "",
+    ]
+    for row in RESULTS:
+        status = "РАБОТАЕТ" if row["status"] == "OK" else "ОШИБКА"
+        lines.append(row["service"] + " - " + status +
+                     (": " + row["reason"] if row["reason"] else ""))
+    lines.extend([
+        "",
+        "Это чтение/проверка авторизации без изменения товаров, заказов и платежей.",
+        "Журнал проверки: " + RUN_URL,
+        "",
+        "Другие интеграции из отдельных репозиториев не входят в эту проверку.",
+        "Реестр текущих подключений и расписаний: https://github.com/gera5malyov-jpg/megapolis-smm/blob/main/reports/github-actions-inventory-2026-10-18.md",
+    ])
+
     msg = EmailMessage()
     msg["From"] = user
     msg["To"] = DESTINATION
-    msg["Subject"] = "ВАЖНО !!! ВНИМАНИЕ !! Не работает API: " + item["service"]
-    msg.set_content(
-        "При ежедневной проверке API обнаружена проблема.\n\n"
-        "Сервис: " + item["service"] + "\n"
-        "Причина: " + item["reason"] + "\n"
-        "Время (UTC): " + datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S") + "\n"
-        "Журнал GitHub Actions: " + RUN_URL + "\n\n"
-        "Проверка не вносила изменений в сервис. "
-        "Необходимо проверить доступность API, авторизацию и права ключа."
-    )
+    msg["Subject"] = subject
+    msg.set_content("\n".join(lines))
     try:
         with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as smtp:
             smtp.starttls()
             smtp.login(user, password)
             smtp.send_message(msg)
+        print("Full status email sent. Services:", len(RESULTS), "failures:", len(failures), flush=True)
         return True
     except (OSError, smtplib.SMTPException) as exc:
-        print("::error::Alert email failed: " + type(exc).__name__, flush=True)
+        print("::error::Report delivery failed: " + type(exc).__name__, flush=True)
         return False
 
 
 def main():
+    verify("Ozon", ("OZON_CLIENT_ID", "OZON_API_KEY"), ozon)
+    verify("Wildberries", ("WB_API_TOKEN",), wildberries)
+    verify("Яндекс Маркет", ("YANDEX_MARKET_API_KEY",), yandex_market)
+    verify("Baserow", ("BASEROW_DATABASE_TOKEN",), baserow)
     verify("Webasyst", ("WEBASYST_API_TOKEN",), webasyst)
     verify("Yandex KIT", ("YANDEX_KIT_TOKEN",), kit)
     verify("Norden", ("NORDEN_SECRET",), norden)
@@ -219,10 +280,7 @@ def main():
         print(row["service"], row["status"], row["reason"], flush=True)
 
     failures = [row for row in RESULTS if row["status"] != "OK"]
-    email_ok = True
-    for item in failures:
-        if not send_alert(item):
-            email_ok = False
+    email_ok = send_report()
     if failures:
         print("::error::Failed API checks: " + str(len(failures)), flush=True)
     return 1 if failures or not email_ok else 0
