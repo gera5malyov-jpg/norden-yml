@@ -25,7 +25,7 @@ for name in ['wa-config/config.php','wa-config/SystemConfig.class.php','wa-confi
  txt=p.read_text('utf8',errors='replace')
  # Never reveal configuration lines, passwords, API keys or connection strings.
  info('configuration',{'name':name,'present':True,'bytes':p.stat().st_size,
-  'has_cache_setting':bool(re.search(r'["\\']cache["\\']\s*=>|\$this->cache\s*=',txt)),
+  'has_cache_setting':('cache' in txt),
   'cache_keywords':{k:len(re.findall(r'\b'+k+r'\b',txt,re.I)) for k in ['file','memcache','redis','apcu','debug','compile_check','developer']}})
 for name in ['wa-cache','wa-data/cache','wa-log','wa-apps/shop/lib/classes/shopProductsCollection.class.php']:
  p=root/name
