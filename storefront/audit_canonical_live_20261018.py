@@ -41,3 +41,6 @@ if __name__ == '__main__':
     if len(rows)!=1:
         raise RuntimeError('Missing audit output')
     print(rows[0],flush=True)
+    for line in result.splitlines():
+        if line.startswith('CANONICAL_LOG_AUDIT='):
+            print(line,flush=True)
