@@ -42,6 +42,19 @@ for path in files:
         elif line.startswith("UNIVERSAL_SUMMARY="):
             summaries.append(line[18:220])
 
+# One failed profile is logged both as PROFILE_ERROR and RUN_FAILED.
+# Count the profile once without hiding failures that lack structured details.
+unique_failures = []
+seen_failure_ids = set()
+for entry in failures:
+    match = re.search(r"(?:profile |profile_id:)(\\d+)", entry)
+    if match and match.group(1) in seen_failure_ids:
+        continue
+    if match:
+        seen_failure_ids.add(match.group(1))
+    unique_failures.append(entry)
+failures = unique_failures
+
 missing = sorted(set(range(expected)) - seen_shards)
 updated = sum(int(row.get("updated") or 0) for row in result)
 changes = sum(int(row.get("changed") or 0) for row in result)
