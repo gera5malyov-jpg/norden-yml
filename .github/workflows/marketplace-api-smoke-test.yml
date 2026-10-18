@@ -1,20 +1,14 @@
-name: Marketplace API smoke test
-
+name: Marketplace API smoke test - failure alerts only
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "17 */6 * * *"
-  push:
-    paths:
-      - ".github/workflows/marketplace-api-smoke-test.yml"
-
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
 permissions:
   contents: read
-
 jobs:
   smoke-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
@@ -22,130 +16,12 @@ jobs:
       WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
       GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-
+      RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
-      - name: Check secret presence
-        id: secrets
-        continue-on-error: true
-        shell: bash
-        run: |
-          set -euo pipefail
-          missing=0
-          for name in OZON_CLIENT_ID OZON_API_KEY YANDEX_MARKET_API_KEY WB_API_TOKEN GMAIL_SMTP_USER GMAIL_APP_PASSWORD; do
-            if [ -z "${!name:-}" ]; then
-              echo "::error::Secret $name is missing or empty"
-              missing=1
-            else
-              echo "$name: PRESENT"
-            fi
-          done
-          exit "$missing"
-
-      - name: Ozon API read-only check
-        id: ozon
-        continue-on-error: true
-        shell: bash
-        run: |
-          set -euo pipefail
-          code=$(curl --silent --show-error --output /tmp/ozon.json --write-out "%{http_code}" \
-            --request POST "https://api-seller.ozon.ru/v3/product/list" \
-            --header "Client-Id: $OZON_CLIENT_ID" \
-            --header "Api-Key: $OZON_API_KEY" \
-            --header "Content-Type: application/json" \
-            --data '{"filter":{"visibility":"ALL"},"limit":1}')
-          if [ "$code" != "200" ]; then
-            echo "::error::Ozon API authentication/read check failed: HTTP $code"
-            exit 1
-          fi
-          echo "Ozon API: OK"
-
-      - name: Yandex Market API read-only check
-        id: yandex
-        continue-on-error: true
-        shell: bash
-        run: |
-          set -euo pipefail
-          code=$(curl --silent --show-error --output /tmp/yandex.json --write-out "%{http_code}" \
-            --request GET "https://api.partner.market.yandex.ru/v2/campaigns?limit=1" \
-            --header "Api-Key: $YANDEX_MARKET_API_KEY" \
-            --header "Accept: application/json")
-          if [ "$code" != "200" ]; then
-            echo "::error::Yandex Market API authentication/read check failed: HTTP $code"
-            exit 1
-          fi
-          echo "Yandex Market API: OK"
-
-      - name: Wildberries API read-only check
-        id: wb
-        continue-on-error: true
-        shell: bash
-        run: |
-          set -euo pipefail
-          code=$(curl --silent --show-error --output /tmp/wb.txt --write-out "%{http_code}" \
-            --request GET "https://common-api.wildberries.ru/ping" \
-            --header "Authorization: $WB_API_TOKEN")
-          if [ "$code" != "200" ]; then
-            echo "::error::Wildberries API authentication/read check failed: HTTP $code"
-            exit 1
-          fi
-          echo "Wildberries API: OK"
-
-      - name: Send email if a marketplace API check failed
-        if: ${{ steps.secrets.outcome != 'success' || steps.ozon.outcome != 'success' || steps.yandex.outcome != 'success' || steps.wb.outcome != 'success' }}
-        shell: bash
-        env:
-          STATUS_SECRETS: ${{ steps.secrets.outcome }}
-          STATUS_OZON: ${{ steps.ozon.outcome }}
-          STATUS_YANDEX: ${{ steps.yandex.outcome }}
-          STATUS_WB: ${{ steps.wb.outcome }}
-          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          python - <<'PY'
-          import os
-          import smtplib
-          from email.message import EmailMessage
-
-          def ru_status(value):
-              return "OK" if value == "success" else "ОШИБКА"
-
-          statuses = {
-              "GitHub Secrets": ru_status(os.environ.get("STATUS_SECRETS", "")),
-              "Ozon API": ru_status(os.environ.get("STATUS_OZON", "")),
-              "Яндекс Маркет API": ru_status(os.environ.get("STATUS_YANDEX", "")),
-              "Wildberries API": ru_status(os.environ.get("STATUS_WB", "")),
-          }
-
-          failed = [name for name, status in statuses.items() if status != "OK"]
-          subject = "ВАЖНО !!! ВНИМАНИЕ !! Не работает API: " + ", ".join(failed)
-
-          body = [
-              "Автоматическая проверка API в GitHub обнаружила проблему.",
-              "",
-              *[f"{name}: {status}" for name, status in statuses.items()],
-              "",
-              "Проверьте срок действия и права соответствующего API-ключа.",
-              "GitHub Actions: " + os.environ["RUN_URL"],
-              "",
-              "Репозиторий: gera5malyov-jpg/norden-yml",
-          ]
-
-          msg = EmailMessage()
-          msg["From"] = os.environ["GMAIL_SMTP_USER"]
-          msg["To"] = "shop@office-mag.com"
-          msg["Subject"] = subject
-          msg.set_content("\n".join(body))
-
-          with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as smtp:
-              smtp.starttls()
-              smtp.login(os.environ["GMAIL_SMTP_USER"], os.environ["GMAIL_APP_PASSWORD"])
-              smtp.send_message(msg)
-
-          print("Failure notification sent to shop@office-mag.com")
-          PY
-
-      - name: Fail workflow if any marketplace API check failed
-        if: ${{ steps.secrets.outcome != 'success' || steps.ozon.outcome != 'success' || steps.yandex.outcome != 'success' || steps.wb.outcome != 'success' }}
-        shell: bash
-        run: |
-          echo "::error::One or more marketplace API checks failed"
-          exit 1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'requests>=2.31,<3'
+      - name: Read-only API checks; email only on confirmed failures
+        run: python scripts/marketplace_api_smoke.py
