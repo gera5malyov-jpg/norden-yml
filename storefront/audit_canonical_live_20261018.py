@@ -33,6 +33,19 @@ if logs.is_dir():
      results['errors'].append({'file':str(p.relative_to(logs)),'message':row[:230]})
   except Exception:pass
 print('CANONICAL_LOG_AUDIT='+json.dumps({'files':results['files'],'error_tail':results['errors'][-20:]},ensure_ascii=False),flush=True)
+cfg=root/'wa-config/apps/shop/plugins.php'
+action=root/'wa-apps/shop/lib/actions/frontend/shopFrontendCategory.action.php'
+intext=path.read_text(encoding='utf-8')
+head_hits=[{'line':i+1,'text':'\\n'.join(intext.splitlines()[max(0,i-2):i+3])[:450]} for i,line in enumerate(intext.splitlines()) if 'wa->head(' in line]
+payload={'head_helpers':head_hits[:6],'plugin_config_exists':cfg.is_file()}
+if cfg.is_file():
+ code=cfg.read_text(encoding='utf-8')
+ payload['plugin_config_bytes']=len(code)
+ payload['plugin_config_active_names']=[m.group(1) for m in __import__('re').finditer(r"'([a-z0-9_]+)'\\s*=>",code)][:40]
+if action.is_file():
+ lines=action.read_text(encoding='utf-8').splitlines()
+ payload['category_action_snippets']=[{'line':i+1,'text':'\\n'.join(lines[max(0,i-3):i+4])[:900]} for i,line in enumerate(lines) if any(term in line for term in ('frontend_category','setCanonical','canonical'))][:14]
+print('CANONICAL_PLUGIN_CONTEXT='+json.dumps(payload,ensure_ascii=False),flush=True)
 PY
 '''
 if __name__ == '__main__':
@@ -42,5 +55,5 @@ if __name__ == '__main__':
         raise RuntimeError('Missing audit output')
     print(rows[0],flush=True)
     for line in result.splitlines():
-        if line.startswith('CANONICAL_LOG_AUDIT='):
+        if line.startswith(('CANONICAL_LOG_AUDIT=','CANONICAL_PLUGIN_CONTEXT=')):
             print(line,flush=True)
