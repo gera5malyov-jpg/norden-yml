@@ -139,9 +139,11 @@ def main():
     # extra emails. Only scheduled/manual runs notify.
     if os.getenv("API_ALERT_DRY_RUN") == "1":
         print("DRY_RUN: Email intentionally not sent")
-        return 0
+        return 2 if incomplete else 0
     mailed = send_failure_alert(failures)
-    return 0 if mailed else 1
+    if incomplete:
+        print("::error::Monitoring incomplete: " + ", ".join(incomplete))
+    return 2 if incomplete else (0 if mailed else 1)
 
 
 if __name__ == "__main__":
