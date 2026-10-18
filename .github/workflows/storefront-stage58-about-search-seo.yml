@@ -1,0 +1,27 @@
+name: Storefront Stage 58 - About and internal search SEO
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage58-about-search-seo.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  guarded-apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate narrow SEO deployment code
+        run: python -m py_compile storefront/stage58_about_search_seo.py
+      - name: Three preflight checks, private backup, safe edit and ten live acceptance checks
+        run: python storefront/stage58_about_search_seo.py
