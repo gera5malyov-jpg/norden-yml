@@ -1,0 +1,23 @@
+name: Perf61 - Read-only Webasyst bottleneck inventory
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/perf61-webasyst-readonly.yml'
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/perf61_server_bottleneck_readonly.py
+      - name: Inspect performance bottlenecks without changing production
+        run: python storefront/perf61_server_bottleneck_readonly.py
