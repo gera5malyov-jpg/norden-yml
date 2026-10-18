@@ -1,0 +1,60 @@
+name: Recover Garda Decor external photos with verified user-agent
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/garda-decor-photo-ua-recovery-once.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: universal-ymlpro-photo-refresh
+  cancel-in-progress: false
+jobs:
+  recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+      UNIVERSAL_PROFILE_IDS: '202'
+      UNIVERSAL_APPLY: '1'
+      UNIVERSAL_STRICT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate syntax of protected live patch
+        run: python3 -m py_compile scripts/patch_ymlpro_photo_user_agent.py scripts/run_universal_ymlpro_photos.py
+      - name: Patch guarded image validator and verify three fresh URLs
+        run: python3 -u scripts/patch_ymlpro_photo_user_agent.py
+      - name: Refresh Garda Decor product short-description photos
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p reports/ymlpro-shards
+          python3 -u scripts/run_universal_ymlpro_photos.py 2>&1 | tee reports/ymlpro-shards/shard-0.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          lines=Path('reports/ymlpro-shards/shard-0.log').read_text().splitlines()
+          results=[json.loads(x.split('=',1)[1]) for x in lines if x.startswith('UNIVERSAL_RESULT=')]
+          if len(results)!=1 or results[0].get('status')!='apply' or results[0].get('updated',0)<800:
+              raise SystemExit('Garda photo refresh not fully applied; check logs')
+          print('GARDA_PHOTOS_UPDATED_AND_VERIFIED='+str(results[0]['updated']))
+          PY
+      - name: Preserve recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: garda-photo-recovery-${{ github.run_id }}
+          path: reports/ymlpro-shards/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Send the requested additional supplier report
+        if: always()
+        env:
+          SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EXPECTED_SHARDS: '1'
+          YML_PHOTO_MODE: apply
+          RECIPIENT: shop@office-mag.com
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 scripts/send_ymlpro_photo_report.py
