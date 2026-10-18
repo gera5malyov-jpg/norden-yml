@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-10-17T08:01:11.762945+00:00",
+  "started_at": "2026-10-18T08:18:56.410184+00:00",
   "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
   "mode": "daily",
   "dry_run": false,
@@ -20,9 +20,19 @@
   },
   "warnings": [
     {
-      "sku": "AND-070542",
+      "sku": "AND-070735",
       "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"031c8ce1fd31b069457bc061ba734fba\"}"
+      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"d62ab4fdc10d84162ba5535b90c97b55\"}"
+    },
+    {
+      "sku": "AND-070742",
+      "stage": "image",
+      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"32751e1f7121a604a1fa7ce1df9580ce\"}"
+    },
+    {
+      "sku": "AND-070839",
+      "stage": "image",
+      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"92ca0554f8843ce2f3506a27182a703b\"}"
     }
   ],
   "errors": [
@@ -5590,10 +5600,250 @@
       "sku": "070577",
       "stage": "daily_new",
       "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070664",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070665",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070666",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070667",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070672",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070673",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070701",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070702",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070711",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070715",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070716",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070717",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070727",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070729",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070732",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070754",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070756",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070764",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070765",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070777",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070778",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070779",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070783",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070787",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070824",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070825",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070837",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070838",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070846",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070847",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070857",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070858",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070859",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070860",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070861",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070863",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070864",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070865",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070866",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070890",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070900",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070901",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070905",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070908",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070909",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070943",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070944",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "070972",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
     }
   ],
-  "images_uploaded": 0,
-  "image_errors": 1,
+  "images_uploaded": 2,
+  "image_errors": 3,
   "source_count_total": 69201,
   "source_unique_sku": 69056,
   "source_pages": 14,
@@ -10641,12 +10891,12 @@
     ]
   },
   "kit_updates": {
-    "price_updates": 2352,
-    "stock_updates": 4704,
+    "price_updates": 2452,
+    "stock_updates": 4904,
     "missing_zeroed": 0,
     "mapped_without_price": 0
   },
   "daily_new_created": 100,
-  "mapped_total": 2452,
-  "finished_at": "2026-10-17T11:04:25.701278+00:00"
+  "mapped_total": 2558,
+  "finished_at": "2026-10-18T10:58:09.403231+00:00"
 }
