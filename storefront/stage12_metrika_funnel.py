@@ -21,6 +21,7 @@ asset=theme/'js/metrika_funnel_v1.js'
 old=layout.read_text(encoding='utf-8')
 anchor='</head>'
 js=base64.b64decode('FUNNEL_B64').decode('utf-8')
+print('FUNNEL_PROBE='+json.dumps({'head_close':old.count('</head>'),'funnel_refs':old.count('metrika_funnel_v1.js'),'user_js_refs':old.count('user.js'),'matching_lines':[{'line':i+1,'content':line.strip()[:260]} for i,line in enumerate(old.splitlines()) if 'metrika_funnel_v1.js' in line or '</head>' in line or 'user.js' in line][:12]},ensure_ascii=False),flush=True)
 if old.count(anchor)!=1 or 'metrika_funnel_v1.js' in old:
  raise RuntimeError('Storefront head or existing funnel include changed; abort')
 if asset.exists() and asset.read_text(encoding='utf-8')!=js:
