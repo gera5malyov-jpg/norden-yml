@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""Aggregate three GitHub Actions health artifacts. Send ONE error-only email.
+"""Aggregate core and trading GitHub Actions results, send one outage-only email.
 
-Only this script sends API health email. Never reads secrets from foreign
-repositories; it reads only short, sanitized status artifacts. A fine-grained
-GH_MONITOR_TOKEN with Actions:read for the private megapolis-smm repository
-is required for that source. Its absence is not a confirmed API outage.
+The core report includes private finance checks via an isolated Baserow table.
+No GitHub personal access token or second SMTP account is required.
 """
 import io
 import json
