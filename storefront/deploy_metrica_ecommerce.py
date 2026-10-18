@@ -55,7 +55,7 @@ try:
  os.replace(tpl,str(layout));written=True
  checks=[]
  for path in ('/','/stul-signal-misaki-t-253-bezhevyy-kashemir/','/order/','/category/kompyuternye-kresla/'):
-  r=subprocess.run(['curl','-k','-sS','-L','--max-time','35','-w','\n%{http_code}','https://profikompany.ru'+path+'?ecom_deploy_check=20261018'],capture_output=True,text=True,timeout=40)
+  r=subprocess.run(['curl','-k','-sS','-L','--max-time','35','-w','\n%{http_code}','https://profikompany.ru'+path+'?ecom_deploy_check=20261018'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=40)
   html,status=r.stdout.rsplit('\n',1) if '\n' in r.stdout else ('','')
   head=html.split('</head>')[0]
   ok=(r.returncode==0 and status=='200' and head.count('megapolis-ecommerce-v1.js?v=20261018a')==1 and head.count('megapolis-funnel-v2.js')==1 and head.count('metrika_funnel_v1.js')==0 and head.count('ym(21811312, "init"')==1)
