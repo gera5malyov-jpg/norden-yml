@@ -1,0 +1,26 @@
+name: Perf72 - Online selective catalog filter index
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/perf72-online-index.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-db-performance-tuning
+  cancel-in-progress: false
+jobs:
+  guarded-index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/perf72_online_feature_index.py
+      - name: Add online selective feature index and verify SQL plus ten storefront pages
+        run: python storefront/perf72_online_feature_index.py
