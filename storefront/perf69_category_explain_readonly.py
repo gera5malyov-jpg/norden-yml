@@ -4,7 +4,7 @@ from stage52_disable_callback import execute
 
 REMOTE = r'''set -eu
 python3 - <<'PY'
-import pathlib,subprocess,re,hashlib,collections,json
+import pathlib,subprocess,re,hashlib,collections,json,time
 def emit(k,v):
  print('PERF69_'+k+'='+json.dumps(v,ensure_ascii=False),flush=True)
 def sqlrun(script,limit=25):
@@ -67,6 +67,12 @@ for sec,hashcode,query in sorted(queries,reverse=True):
    rows.append({'table':parts[2][:60],'access':parts[3][:30],'possible':parts[4][:120],
     'key':parts[5][:90],'estimated_rows':parts[8][:30],'extra':parts[9][:180]})
   emit('EXPLAIN',{'rank':len(seen),'pattern':hashcode,'slow_seconds':round(sec,3),'available':True,'steps':rows[:10]})
+ # Execute the original read-only SELECT with its original LIMIT; never display product data.
+ started=time.time()
+ result_rows=sqlrun(prefix+query,22)
+ emit('TIMING',{'rank':len(seen),'executed':result_rows is not None,
+  'seconds':round(time.time()-started,3),
+  'returned_rows':len(result_rows.splitlines()) if result_rows is not None else None})
  if len(seen)==3:break
 for table in ('shop_product','shop_product_skus','shop_product_features'):
  result=sqlrun(prefix+'SHOW INDEX FROM '+table+';',15)
