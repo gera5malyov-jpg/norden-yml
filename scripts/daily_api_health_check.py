@@ -124,6 +124,22 @@ def baserow():
         raise APIProblem("Baserow: неожиданный ответ")
 
 
+def e_bulky():
+    payload = data("GET", "https://api.e-bulky.ru/apiv2/testkey",
+                   params={"key": os.environ["E_BULKY"]})
+    if not isinstance(payload, (dict, list)):
+        raise APIProblem("E-Bulky: неожиданный ответ API")
+
+
+def moysklad():
+    payload = data("GET", "https://api.moysklad.ru/api/remap/1.2/entity/product",
+                   params={"limit": 1},
+                   headers={"Authorization": "Bearer " + os.environ["MOYSKLAD_TOKEN"],
+                            "Accept": "application/json;charset=utf-8"})
+    if not isinstance(payload, dict) or "meta" not in payload:
+        raise APIProblem("МойСклад: неожиданный ответ")
+
+
 def webasyst():
     url = "https://profikompany.ru/api.php/shop.type.getList"
     token = os.environ["WEBASYST_API_TOKEN"].strip()
@@ -281,6 +297,8 @@ def main():
     verify("Wildberries", ("WB_API_TOKEN",), wildberries)
     verify("Яндекс Маркет", ("YANDEX_MARKET_API_KEY",), yandex_market)
     verify("Baserow", ("BASEROW_DATABASE_TOKEN",), baserow)
+    verify("E-Bulky", ("E_BULKY",), e_bulky)
+    verify("МойСклад", ("MOYSKLAD_TOKEN",), moysklad)
     verify("Webasyst", ("WEBASYST_API_TOKEN",), webasyst)
     verify("Yandex KIT", ("YANDEX_KIT_TOKEN",), kit)
     verify("Norden", ("NORDEN_SECRET",), norden)
