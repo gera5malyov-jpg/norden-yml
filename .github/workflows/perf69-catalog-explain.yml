@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/perf69-catalog-explain.yml'
+      - 'storefront/perf69_category_explain_readonly.py'
 permissions:
   contents: read
 jobs:
