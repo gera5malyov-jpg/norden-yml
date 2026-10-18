@@ -3,10 +3,6 @@ on:
   # Every seven days, after the weekend supplier feed generation.
   schedule:
     - cron: '15 4 * * 1'
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/universal-ymlpro-external-photos.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: feature/universal-yml-import-20261015
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
