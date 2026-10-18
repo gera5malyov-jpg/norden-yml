@@ -23,7 +23,7 @@ print('GALLERY_PREFLIGHT='+json.dumps({'ok':True,'source_sha256':hashlib.sha256(
 folder=root.parent/'storefront-backups'/('gallery-cls-'+datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ'))
 folder.mkdir(mode=0o700,parents=True)
 backup=folder/'index.html'
-shutil.copy2(file,backup)
+shutil.copy2(str(file),str(backup))
 if backup.read_bytes()!=before:raise RuntimeError('Backup invalid')
 print('GALLERY_BACKUP='+json.dumps({'path':str(backup)}),flush=True)
 new=text.replace(old,old+css,1).encode('utf-8')
@@ -31,14 +31,14 @@ tmp=None
 written=False
 try:
  st=file.stat()
- with tempfile.NamedTemporaryFile('wb',dir=file.parent,delete=False) as fh:
+ with tempfile.NamedTemporaryFile('wb',dir=str(file.parent),delete=False) as fh:
   fh.write(new);tmp=fh.name
  os.chmod(tmp,st.st_mode & 0o777);os.chown(tmp,st.st_uid,st.st_gid)
  if file.read_bytes()!=before:raise RuntimeError('Concurrent edit')
- os.replace(tmp,file);tmp=None;written=True
+ os.replace(tmp,str(file));tmp=None;written=True
  cases=['/stul-dlya-posetiteley-rs42-chernyy-karkas-tkan-chernaya/','/stul-prozrachnyy-pedrali-queen/','/','/category/kompyuternye-kresla/','/category/kompyuternye-kresla/?page=2','/oplata/','/dostavka/','/o-kompanii/','/search/?query=%D0%91%D0%B8%D1%81%D1%82%D1%80%D0%BE','/order/']
  for i,url in enumerate(cases):
-  p=subprocess.run(['curl','-ksSL','--max-time','32','-w','\n%{http_code}','https://profikompany.ru'+url],capture_output=True,text=True,timeout=40)
+  p=subprocess.run(['curl','-ksSL','--max-time','32','-w','\n%{http_code}','https://profikompany.ru'+url],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=40)
   page,status=p.stdout.rsplit('\n',1)
   head=page.split('</head>',1)[0]
   ok=p.returncode==0 and status=='200' and (mark in head)==(i<2)
@@ -48,7 +48,7 @@ try:
  print('GALLERY_DEPLOY='+json.dumps({'ok':True,'tests':10,'backup':str(backup)}),flush=True)
 except Exception as e:
  if written and file.read_bytes()==new:
-  shutil.copy2(backup,file)
+  shutil.copy2(str(backup),str(file))
   print('GALLERY_ROLLBACK='+json.dumps({'restored':True,'reason':str(e)}),flush=True)
  raise
 PY
