@@ -1,15 +1,29 @@
-name: Universal YML PRO photo diagnostics
+name: Universal YML Pro external photo weekly refresh
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/universal-ymlpro-external-photos.yml'
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: universal-ymlpro-photo-refresh
+  cancel-in-progress: false
 jobs:
-  verify:
+  photo-refresh:
+    name: Supplier shard ${{ matrix.shard }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 175
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     env:
       NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
-      UNIVERSAL_PROFILE_IDS: '20'
+      UNIVERSAL_SHARD: ${{ matrix.shard }}
+      UNIVERSAL_SHARD_COUNT: '12'
       UNIVERSAL_APPLY: '0'
       UNIVERSAL_STRICT: '0'
     steps:
@@ -19,5 +33,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Read-only single supplier diagnostic
-        run: python -u scripts/run_universal_ymlpro_photos.py
+      - name: Inventory all mapped YML Pro profiles without changing goods
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p reports/ymlpro-shards
+          python -u scripts/run_universal_ymlpro_photos.py 2>&1 | tee "reports/ymlpro-shards/shard-${{ matrix.shard }}.log"
+      - name: Archive per-profile audit log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ymlpro-shard-${{ matrix.shard }}
+          path: reports/ymlpro-shards/shard-${{ matrix.shard }}.log
+          if-no-files-found: warn
+          retention-days: 30
