@@ -54,17 +54,29 @@ def verify(name, required, callback):
     except APIProblem as exc:
         RESULTS.append({"service": name, "status": "FAIL", "reason": str(exc)[:160]})
     except Exception as exc:
-        # Never show exception text: libraries may embed secrets in exceptions.
+        # Only Dalli errors have a known, sanitizable user-facing description.
+        reason = "Сбой проверки: " + type(exc).__name__
+        if type(exc).__name__ == "DalliApiError":
+            reason = str(exc)
+            for key in ("DALLI_TOKEN", "DALLI_TOKEN_MSK"):
+                token = os.getenv(key, "")
+                if token:
+                    reason = reason.replace(token, "[секрет скрыт]")
         RESULTS.append({"service": name, "status": "FAIL",
-                        "reason": "Сбой проверки: " + type(exc).__name__})
+                        "reason": reason[:160]})
 
 
 def webasyst():
     url = "https://profikompany.ru/api.php/shop.type.getList"
     token = os.environ["WEBASYST_API_TOKEN"].strip()
     # POST fallback matches the existing official Webasyst diagnostic.
-    result = data("GET", url, params={"format": "json"},
-                  headers={"Authorization": "Bearer " + token})
+    try:
+        result = data("GET", url, params={"format": "json"},
+                      headers={"Authorization": "Bearer " + token})
+    except APIProblem:
+        # Legacy Webasyst installs can require access_token in the query.
+        result = data("GET", url,
+                      params={"access_token": token, "format": "json"})
     if not isinstance(result, (dict, list)):
         raise APIProblem("Webasyst вернул неожиданный ответ")
 
