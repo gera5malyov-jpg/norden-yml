@@ -21,7 +21,7 @@ from daily_api_health_check import send_failure_alert
 
 OWNER = "gera5malyov-jpg"
 API_BASE = "https://api.github.com"
-MAX_AGE_HOURS = 27
+MAX_AGE_HOURS = 20
 SOURCES = [
     ("norden-yml", "daily-api-health-monitor.yml",
      "daily-api-health-", "daily-api-health.json", False),
