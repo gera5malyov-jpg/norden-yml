@@ -1,0 +1,35 @@
+name: Stage59 Webasyst performance source and mobile audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/storefront-stage59-performance-audit.yml'
+permissions:
+  contents: read
+jobs:
+  server-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage59_server_perf_readonly.py
+      - name: Inspect server config, cache and themes without modification
+        run: python storefront/stage59_server_perf_readonly.py
+  browser-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage59_browser_perf_readonly.py
+      - run: python -m pip install playwright==1.55.0
+      - name: Independent desktop and throttled mobile browser metrics
+        run: python storefront/stage59_browser_perf_readonly.py
