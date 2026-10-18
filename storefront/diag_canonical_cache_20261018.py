@@ -51,6 +51,37 @@ if cache.is_dir():
        matches.append({'path':str(path.relative_to(root)),'mtime':round(path.stat().st_mtime),'has_new':b'Only clean numbered category pages' in body,'has_old':b'{$canonical|escape}' in body,'size':len(body)})
     except Exception:pass
   except Exception as e:out['compiled_sample'].append({'root':str(d),'error':str(e)[:60]})
+# Target active hashed Webasyst/Shop-Script Smarty compilation directories.
+out['smarty_inspection']=[]
+for prefix in ('d0907d','d0907e'):
+ for app in ('site','shop'):
+  d=cache/prefix/'apps'/app/'templates'
+  if not d.exists():continue
+  row={'path':str(d.relative_to(root)),'subdirs':[],'recent_files':[],'canonical_sources':[]}
+  try:
+   row['subdirs']=[x.name for x in list(d.iterdir())[:25]]
+   p=subprocess.Popen(['find',str(d),'-maxdepth','7','-type','f','-mmin','-180'],
+                       stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,universal_newlines=True)
+   paths=p.communicate(timeout=12)[0].splitlines()
+   row['recent_count']=len(paths)
+   for fname in paths[:2000]:
+    path=pathlib.Path(fname)
+    if len(row['recent_files'])<12:
+     row['recent_files'].append(str(path.relative_to(d)))
+    try:
+     if not path.name.endswith('.php') or path.stat().st_size>300000:continue
+     data=path.read_bytes()
+     if b'canonical' not in data and b'CANONICAL' not in data:continue
+     if len(row['canonical_sources'])<6:
+      row['canonical_sources'].append({'path':str(path.relative_to(d)),
+                                       'size':len(data),
+                                       'age_sec':round(time.time()-path.stat().st_mtime),
+                                       'has_old_source':b'{$canonical|escape}' in data,
+                                       'has_new_source':b'Only clean numbered category pages' in data,
+                                       'has_index_label':b'index.html' in data})
+    except Exception:pass
+  except Exception as e:row['error']=str(e)[:150]
+  out['smarty_inspection'].append(row)
 print('CANONICAL_CACHE_AUDIT='+json.dumps(out,ensure_ascii=False),flush=True)
 PY
 """
