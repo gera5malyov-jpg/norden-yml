@@ -114,6 +114,15 @@ def main():
     for repo, workflow, prefix, filename, private in SOURCES:
         try:
             rows = recent_status(repo, workflow, prefix, filename, private)
+            if repo == "norden-yml":
+                required = {"Моё дело", "Ozon DirectBank", "Точка Банк"}
+                present = {r["service"] for r in rows}
+                if len(rows) < 19 or not required.issubset(present):
+                    raise RuntimeError("Core or finance monitoring coverage is incomplete")
+            if repo == "moex-trade-bot" and not any(
+                r["service"] == "Т-Инвестиции Sandbox" for r in rows
+            ):
+                raise RuntimeError("Trading API result missing")
             combined.extend(rows)
             print(repo, "status files verified, services:", len(rows))
         except Exception as exc:
