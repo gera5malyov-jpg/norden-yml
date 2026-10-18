@@ -1,0 +1,38 @@
+name: Centralized API outage email - all repositories
+on:
+  schedule:
+    - cron: '47 6 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/central-api-health-notifier.yml'
+      - 'scripts/central_api_health_notifier.py'
+permissions:
+  actions: read
+  contents: read
+concurrency:
+  group: central-api-health-email
+  cancel-in-progress: false
+jobs:
+  combine-reports:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      GH_MONITOR_TOKEN: ${{ secrets.GH_MONITOR_TOKEN }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      API_ALERT_DRY_RUN: ${{ github.event_name == 'push' && '1' || '0' }}
+      RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install read-only GitHub HTTP client
+        run: python -m pip install 'requests>=2.31,<3'
+      - name: Validate aggregator source
+        run: python -m py_compile scripts/central_api_health_notifier.py scripts/daily_api_health_check.py
+      - name: Aggregate GitHub API health artifacts; email only on confirmed outage
+        run: python scripts/central_api_health_notifier.py
