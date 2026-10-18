@@ -1,0 +1,21 @@
+name: Metrica Ecommerce Sources - read only
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: storefront-ecommerce-readonly
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read sources, never modify storefront
+        run: python3 storefront/metrica_ecommerce_readonly_audit.py
