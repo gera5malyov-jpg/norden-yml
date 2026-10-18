@@ -44,9 +44,9 @@ try:
  written=True
  checks=[]
  for path in ('/','/stul-signal-misaki-t-253-bezhevyy-kashemir/','/order/'):
-  p=subprocess.Popen(['curl','-k','-sS','-L','--max-time','32','-w','\\n%{http_code}','https://profikompany.ru'+path+'?dedupe_metrica_20261018=1'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
+  p=subprocess.Popen(['curl','-k','-sS','-L','--max-time','32','-w','\n%{http_code}','https://profikompany.ru'+path+'?dedupe_metrica_20261018=1'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
   data,_=p.communicate(timeout=38)
-  html,status=data.rsplit('\\n',1) if '\\n' in data else ('','')
+  html,status=data.rsplit('\n',1) if '\n' in data else ('','')
   head=html.split('</head>')[0]
   passed=(p.returncode==0 and status=='200' and head.count('metrika_funnel_v1.js')==0 and head.count(v2)==1 and head.count('ym(21811312, "init"')==1)
   checks.append({'path':path,'status':status,'v1':head.count('metrika_funnel_v1.js'),'v2':head.count(v2),'ok':passed})
