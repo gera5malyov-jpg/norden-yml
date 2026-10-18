@@ -74,7 +74,9 @@ def verify(name, required, callback):
         callback()
         RESULTS.append({"service": name, "status": "OK", "reason": ""})
     except APIProblem as exc:
-        RESULTS.append({"service": name, "status": "FAIL", "reason": str(exc)[:160]})
+        reason = str(exc)[:160]
+        status = "NO_KEY" if reason.startswith(("Не настроены секреты GitHub:", "Не настроен ключ")) else "FAIL"
+        RESULTS.append({"service": name, "status": status, "reason": reason})
     except Exception as exc:
         # Only Dalli errors have a known, sanitizable user-facing description.
         reason = "Сбой проверки: " + type(exc).__name__
@@ -251,19 +253,28 @@ def send_report():
 
     failures = [r for r in RESULTS if r["status"] != "OK"]
     report_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    names = ", ".join(r["service"] for r in failures)
-    subject = ("ВАЖНО !!! ВНИМАНИЕ !! Не работает API: " + names
-               if failures else "Ежедневный отчет API: все сервисы работают")
+    real_failures = [r for r in RESULTS if r["status"] == "FAIL"]
+    unconfigured = [r for r in RESULTS if r["status"] == "NO_KEY"]
+    if real_failures:
+        subject = ("ВАЖНО !!! ВНИМАНИЕ !! Не работает API: " +
+                   ", ".join(r["service"] for r in real_failures))
+    elif unconfigured:
+        subject = ("ВНИМАНИЕ: нет ключей для проверки API: " +
+                   ", ".join(r["service"] for r in unconfigured))
+    else:
+        subject = "Ежедневный отчет API: все сервисы работают"
 
     lines = [
         "Полный ежедневный контроль API — " + report_time,
         "",
-        "Проверено: " + str(len(RESULTS)) + ". Исправно: " + str(len(RESULTS) - len(failures)) +
-        ". Проблемы: " + str(len(failures)) + ".",
+        "Интеграций в списке: " + str(len(RESULTS)) +
+        ". Работает: " + str(len(RESULTS) - len(failures)) +
+        ". Сбои: " + str(len(real_failures)) +
+        ". Не удалось проверить из-за отсутствия ключа: " + str(len(unconfigured)) + ".",
         "",
     ]
     for row in RESULTS:
-        status = "РАБОТАЕТ" if row["status"] == "OK" else "ОШИБКА"
+        status = {"OK": "РАБОТАЕТ", "FAIL": "ОШИБКА", "NO_KEY": "НЕТ КЛЮЧА ДЛЯ ПРОВЕРКИ"}[row["status"]]
         lines.append(row["service"] + " - " + status +
                      (": " + row["reason"] if row["reason"] else ""))
     lines.extend([
