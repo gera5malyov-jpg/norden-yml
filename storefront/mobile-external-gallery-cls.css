@@ -1,0 +1,12 @@
+/* Scoped mobile layout stabilization for external product gallery.
+   Tested in Chrome on a representative Webasyst product page. */
+@media (max-width: 767.98px) {
+  .product-gallery--extimg .product-gallery__main {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+  .product-gallery--extimg .product-gallery__main img {
+    max-height: 100%;
+    object-fit: contain;
+  }
+}
