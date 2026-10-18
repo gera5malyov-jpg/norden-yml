@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/audit-live-meta-head-20261018.yml'
+      - 'storefront/audit_live_meta_head_20261018.py'
   workflow_dispatch:
 permissions:
   contents: read
