@@ -82,6 +82,22 @@ for prefix in ('d0907d','d0907e'):
     except Exception:pass
   except Exception as e:row['error']=str(e)[:150]
   out['smarty_inspection'].append(row)
+# Find compiled index.html variants and whether the canonical branch is stale.
+out['compiled_index_files']=[]
+for prefix in ('d0907d','d0907e'):
+ for app in ('site','shop'):
+  p=cache/prefix/'apps'/app/'templates'/'compiled'
+  if not p.is_dir():continue
+  command=['find',str(p),'-type','f','-name','*.file.index.html.php']
+  try:
+   found=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,universal_newlines=True).communicate(timeout=15)[0].splitlines()
+   for fullname in found[:12]:
+    file1=pathlib.Path(fullname);body=file1.read_text(encoding='utf-8',errors='replace')
+    k=body.find('CANONICAL')
+    if k<0:k=body.find('canonical')
+    snippet=body[max(0,k-800):min(len(body),k+1350)] if k>=0 else ''
+    out['compiled_index_files'].append({'path':str(file1.relative_to(root)),'mtime':round(file1.stat().st_mtime),'mtime_diff_to_source':round(file1.stat().st_mtime-index.stat().st_mtime),'contains_site_template_path':'wa-data/public/site/themes/pureMegapolis42/index.html' in body,'has_pagination_cond':'get(\\'page\\'' in body or 'Only clean numbered category pages' in body,'snippet':snippet[:1700]})
+  except Exception as e:out.setdefault('compiled_lookup_errors',[]).append(str(e)[:120])
 print('CANONICAL_CACHE_AUDIT='+json.dumps(out,ensure_ascii=False),flush=True)
 PY
 """
