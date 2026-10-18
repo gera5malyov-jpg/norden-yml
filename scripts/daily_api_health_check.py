@@ -10,7 +10,7 @@ from pathlib import Path
 
 import requests
 
-TIMEOUT = 25
+TIMEOUT = 45
 DESTINATION = "shop@office-mag.com"
 RUN_URL = os.getenv("RUN_URL", "")
 RESULTS = []
@@ -30,8 +30,9 @@ def require(*names):
 
 def data(method, url, **kwargs):
     """Do not expose tokens, request URLs or response bodies in logs."""
+    timeout = kwargs.pop("timeout", TIMEOUT)
     try:
-        response = SESSION.request(method, url, timeout=TIMEOUT, **kwargs)
+        response = SESSION.request(method, url, timeout=timeout, **kwargs)
     except requests.RequestException as exc:
         raise APIProblem("Ошибка сети: " + type(exc).__name__) from None
     if not 200 <= response.status_code < 300:
@@ -62,14 +63,15 @@ def webasyst():
     url = "https://profikompany.ru/api.php/shop.type.getList"
     token = os.environ["WEBASYST_API_TOKEN"].strip()
     # POST fallback matches the existing official Webasyst diagnostic.
-    result = data("POST", url, data={"access_token": token, "format": "json"})
+    result = data("GET", url, params={"format": "json"},
+                  headers={"Authorization": "Bearer " + token})
     if not isinstance(result, (dict, list)):
         raise APIProblem("Webasyst вернул неожиданный ответ")
 
 
 def kit():
     result = data("GET", "https://api.kit.yandex.net/v1/warehouses",
-                  params={"per_page": 1},
+                  params={"page": 1, "per_page": 100, "status": "ACTIVE"},
                   headers={"Authorization": "Bearer " + os.environ["YANDEX_KIT_TOKEN"],
                            "Accept": "application/json"})
     if not isinstance(result, (dict, list)):
@@ -78,7 +80,7 @@ def kit():
 
 def norden():
     result = data("GET", "https://norden.group/api-products/",
-                  params={"page": 1},
+                  params={"page": 1}, timeout=125,
                   headers={"secret": os.environ["NORDEN_SECRET"],
                            "Accept": "application/json"})
     if not isinstance(result, dict) or not isinstance(result.get("products"), list):
@@ -127,6 +129,7 @@ def pek():
 
 def dalli(account):
     # Calculation only. No shipping orders are created or modified.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from dalli.dalli_api import DalliClient
     token = os.environ["DALLI_TOKEN" if account == "spb" else "DALLI_TOKEN_MSK"]
     client = DalliClient(token=token, account=account)
@@ -204,7 +207,10 @@ def main():
         print(row["service"], row["status"], row["reason"], flush=True)
 
     failures = [row for row in RESULTS if row["status"] != "OK"]
-    email_ok = all(send_alert(item) for item in failures)
+    email_ok = True
+    for item in failures:
+        if not send_alert(item):
+            email_ok = False
     if failures:
         print("::error::Failed API checks: " + str(len(failures)), flush=True)
     return 1 if failures or not email_ok else 0
