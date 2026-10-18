@@ -1,0 +1,79 @@
+name: Diagnose two duplicate sitemap URLs (read only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-two-sitemap-duplicates-20261018.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-sitemap-inspection
+  cancel-in-progress: false
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read live Webasyst sitemap generator and exact URL rows
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,'storefront')
+          from stage52_disable_callback import execute
+          remote = r"""set -eu
+          python3 - <<'PYSOURCE'
+          import pathlib,os,json,re
+          root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
+          found=[]
+          for parent in [root/'wa-apps/shop/lib',root/'wa-apps/site/lib',root/'wa-plugins']:
+           if not parent.is_dir(): continue
+           for d,dirs,names in os.walk(parent):
+            dirs[:]=[n for n in dirs if n not in ('vendor','node_modules','.git','cache','temp')]
+            for name in names:
+             if 'sitemap' in name.lower() and name.endswith('.php'):
+              f=pathlib.Path(d)/name
+              found.append(str(f.relative_to(root)))
+              if len(found)>=40: break
+            if len(found)>=40:break
+          print('SITEMAP_CODE_FILES='+json.dumps(found,ensure_ascii=False),flush=True)
+          for fn in found[:9]:
+           f=root/fn
+           try:
+            lines=f.read_text(encoding='utf-8',errors='replace').splitlines()
+            keys=[{'line':i+1,'source':line.strip()[:260]} for i,line in enumerate(lines) if re.search('shop_product|limit |offset|distinct|group by|sitemap',line,re.I) and len(line.strip())>2]
+            print('SITEMAP_CODE='+json.dumps({'file':fn,'lines':len(lines),'relevant':keys[:38]},ensure_ascii=False),flush=True)
+           except Exception as e:print('SITEMAP_CODE_ERROR='+str(e)[:140],flush=True)
+          PYSOURCE
+          p=$(mktemp /tmp/sitemap-db-check-XXXXXX.php)
+          trap 'rm -f "$p"' EXIT
+          cat > "$p" <<'PHP'
+          <?php
+          $root='/home/web/vm-23f9aff9.na4u.ru/www';
+          chdir($root);
+          require_once $root.'/wa-config/SystemConfig.class.php';
+          waSystem::getInstance(null,new SystemConfig());
+          wa('shop');
+          $db=new waModel();
+          $targets=array('podstole','СФ-531201-Стол-левый-2200x1996x840-Дуб-Чарльстон-Бетон-Чикаго');
+          foreach($targets as $url){
+           $rows=$db->query('SELECT id,url,name,status,category_id FROM shop_product WHERE url = s:slug LIMIT 30',array('slug'=>$url))->fetchAll();
+           echo 'SITEMAP_DB='+json_encode(array('slug'=>$url,'count'=>count($rows),'rows'=>$rows),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          }
+          $indexes=$db->query('SHOW INDEX FROM shop_product WHERE Column_name = "url"')->fetchAll();
+          echo 'SITEMAP_DB_INDEX='+json_encode(array_map(function($r){return array('key'=>$r['Key_name'],'unique'=>!$r['Non_unique']);},$indexes),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+          PHP
+          chmod 644 "$p"
+          su -s /bin/bash web -c "php -d display_errors=1 -d log_errors=0 '$p'"
+          """
+          output=execute(remote)
+          for line in output.splitlines():
+              if line.startswith(('SITEMAP_CODE','SITEMAP_DB')):
+                  print(line,flush=True)
+          PY
