@@ -16,7 +16,7 @@ old_block="""    {* CANONICAL *}
     {/if}"""
 new_block="""    {* CANONICAL *}
     {* Only clean numbered category pages have their own canonical. *}
-    {if $wa->domainUrl() == 'https://profikompany.ru' && $wa->param('action') == 'category' && $wa->get('page', 0) > 1 && count($wa->get()) == 1}
+    {if $wa->domainUrl() == 'https://profikompany.ru' && $wa->param('action') == 'category' && $wa->get('page', 0) > 1 && preg_match('~[?]page=[0-9]+$~', $wa->currentUrl(false))}
       <link rel="canonical" href="{$wa->currentUrl(true, true)|escape}?page={$wa->get('page', 0)|intval}" />
     {elseif !empty($canonical)}
       <link rel="canonical" href="{$canonical|escape}" />
