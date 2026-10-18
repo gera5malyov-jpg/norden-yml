@@ -20,7 +20,6 @@ jobs:
     timeout-minutes: 8
     env:
       GITHUB_TOKEN: ${{ github.token }}
-      GH_MONITOR_TOKEN: ${{ secrets.GH_MONITOR_TOKEN }}
       GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -34,28 +33,5 @@ jobs:
         run: python -m pip install 'requests>=2.31,<3'
       - name: Compile and validate
         run: python -m py_compile scripts/central_api_health_notifier.py scripts/daily_api_health_check.py
-      - name: Inspect Baserow token read permissions (diagnostic)
-        if: github.event_name == 'push'
-        env:
-          BASEROW_DATABASE_TOKEN: ${{ secrets.BASEROW_DATABASE_TOKEN }}
-        run: |
-          python - <<'PY'
-          import os,requests
-          token=os.getenv("BASEROW_DATABASE_TOKEN","")
-          if not token:
-              print("BASEROW_TOKEN_UNSET")
-          else:
-              try:
-                  r=requests.get("http://147.78.67.6/api/database/tables/all-tables/",
-                      headers={"Authorization":"Token "+token},timeout=18)
-                  print("BASEROW_TABLES_HTTP",r.status_code)
-                  if r.ok:
-                      data=r.json()
-                      tables=data if isinstance(data,list) else data.get("results",[])
-                      print("BASEROW_TABLES_COUNT",len(tables))
-                      print("BASEROW_DB49_TABLE_IDS", [x.get("id") for x in tables if x.get("database_id")==49][:30])
-              except Exception as e:
-                  print("BASEROW_DIAGNOSTIC_FAILED",type(e).__name__)
-          PY
       - name: Gather sanitized statuses and email shop only if API actually fails
         run: python scripts/central_api_health_notifier.py
