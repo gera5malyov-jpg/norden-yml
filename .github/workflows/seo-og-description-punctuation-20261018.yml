@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/seo-og-description-punctuation-20261018.yml'
+      - 'storefront/fix_og_description_punctuation_20261018.py'
   workflow_dispatch:
 permissions:
   contents: read
