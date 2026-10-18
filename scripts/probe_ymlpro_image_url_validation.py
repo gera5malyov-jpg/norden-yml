@@ -20,11 +20,11 @@ $db=new waModel();
 $cls=new ReflectionClass('shopUnivimportPluginUniversalPhotoSync');
 $methodProfile=$cls->getMethod('profile');$methodProfile->setAccessible(true);
 $methodPlan=$cls->getMethod('plan');$methodPlan->setAccessible(true);
-function test_link($url,$verb,$follow) {
+function test_link($url,$verb,$follow,$agent='Mozilla/5.0 (compatible; catalog-photo-check/1.0)') {
  $ch=curl_init($url);$received=0;
  $opts=array(CURLOPT_CONNECTTIMEOUT=>7,CURLOPT_TIMEOUT=>20,CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2,
  CURLOPT_FOLLOWLOCATION=>$follow,CURLOPT_MAXREDIRS=>3,CURLOPT_NOBODY=>$verb==='head',
- CURLOPT_RETURNTRANSFER=>false,CURLOPT_USERAGENT=>'Mozilla/5.0 (compatible; catalog-photo-check/1.0)',
+ CURLOPT_RETURNTRANSFER=>false,CURLOPT_USERAGENT=>$agent,
  CURLOPT_WRITEFUNCTION=>function($ch,$bytes)use(&$received){$received+=strlen($bytes);return $received>350000?0:strlen($bytes);});
  if($verb==='get')$opts[CURLOPT_RANGE]='0-16383';
  if(defined('CURLOPT_PROTOCOLS'))$opts[CURLOPT_PROTOCOLS]=CURLPROTO_HTTPS;
@@ -48,7 +48,7 @@ foreach(array(91,202,311) as $id){
       if(empty($m[1]))continue;
       $url=$m[1];
       $host=parse_url($url,PHP_URL_HOST);
-      echo 'PHOTO_DIAG='.json_encode(array('id'=>$id,'sample'=>$i,'host'=>$host,'head'=>test_link($url,'head',false),
+      echo 'PHOTO_DIAG='.json_encode(array('id'=>$id,'sample'=>$i,'host'=>$host,'head_default'=>test_link($url,'head',false,''),'head_browser'=>test_link($url,'head',false),
        'get_range'=>test_link($url,'get',false),'get_follow'=>test_link($url,'get',true)),
        JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
    }
