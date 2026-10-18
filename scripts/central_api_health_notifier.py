@@ -55,9 +55,11 @@ def recent_status(repo, workflow, prefix, json_filename, private):
                private=private).get("workflow_runs", [])
     if not runs:
         raise RuntimeError("No workflow runs registered")
-    latest = runs[0]
-    if latest.get("status") != "completed":
-        raise RuntimeError("Newest API health check not completed")
+    # A new manual/push run may still be running during integration tests.
+    # Use the latest *completed* run, subject to the strict freshness gate.
+    latest = next((r for r in runs if r.get("status") == "completed"), None)
+    if latest is None:
+        raise RuntimeError("No completed API health check available")
     run_id = latest["id"]
     run_started = datetime.fromisoformat(latest["created_at"].replace("Z", "+00:00"))
     now = datetime.now(timezone.utc)
