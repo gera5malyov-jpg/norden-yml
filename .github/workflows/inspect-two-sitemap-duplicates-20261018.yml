@@ -43,12 +43,14 @@ jobs:
               if len(found)>=40: break
             if len(found)>=40:break
           print('SITEMAP_CODE_FILES='+json.dumps(found,ensure_ascii=False),flush=True)
-          for fn in found[:9]:
+          for fn in found[:1]:
            f=root/fn
            try:
             lines=f.read_text(encoding='utf-8',errors='replace').splitlines()
             keys=[{'line':i+1,'source':line.strip()[:260]} for i,line in enumerate(lines) if re.search('shop_product|limit |offset|distinct|group by|sitemap',line,re.I) and len(line.strip())>2]
             print('SITEMAP_CODE='+json.dumps({'file':fn,'lines':len(lines),'relevant':keys[:38]},ensure_ascii=False),flush=True)
+            if fn.endswith('shopSitemapConfig.class.php'):
+             print('SITEMAP_SOURCE='+json.dumps({'file':fn,'source':[str(i+1)+': '+line for i,line in enumerate(lines) if i<225 or i>333]},ensure_ascii=False),flush=True)
            except Exception as e:print('SITEMAP_CODE_ERROR='+str(e)[:140],flush=True)
           PYSOURCE
           p=$(mktemp /tmp/sitemap-db-check-XXXXXX.php)
@@ -70,10 +72,12 @@ jobs:
           echo 'SITEMAP_DB_INDEX='+json_encode(array_map(function($r){return array('key'=>$r['Key_name'],'unique'=>!$r['Non_unique']);},$indexes),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
           PHP
           chmod 644 "$p"
+          echo SITEMAP_DB_BEFORE=php_bootstrap
           su -s /bin/bash web -c "php -d display_errors=1 -d log_errors=0 '$p'"
+          echo SITEMAP_DB_AFTER=php_bootstrap
           """
           output=execute(remote)
           for line in output.splitlines():
-              if line.startswith(('SITEMAP_CODE','SITEMAP_DB')):
+              if line.startswith(('SITEMAP_CODE','SITEMAP_DB','SITEMAP_SOURCE')):
                   print(line,flush=True)
           PY
