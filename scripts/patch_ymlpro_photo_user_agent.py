@@ -31,7 +31,7 @@ import os,sys,tempfile
 from pathlib import Path
 f=Path(sys.argv[1]);original=f.read_text()
 old="CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2));"
-new="CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2,\\n              CURLOPT_USERAGENT=>'Mozilla/5.0 (compatible; catalog-photo-check/1.0)'));"
+new="CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2,\n              CURLOPT_USERAGENT=>'Mozilla/5.0 (compatible; catalog-photo-check/1.0)'));"
 if original.count(new)==1 and old not in original:
     print("GARDA_USER_AGENT_PATCH=already_present",flush=True)
 elif original.count(old)==1 and new not in original:
@@ -66,7 +66,7 @@ $db=new waModel();
 $config=$p->invoke(null,$db,202);
 $changes=$plan->invoke(null,202,$config,$db);
 $ok=(bool)$test->invoke(null,$changes['changes']);
-echo 'GARDA_USER_AGENT_VERIFY='.json_encode(array('planned'=>$changes['changed'],'head_images_reachable'=>$ok))."\\n";
+echo 'GARDA_USER_AGENT_VERIFY='.json_encode(array('planned'=>$changes['changed'],'head_images_reachable'=>$ok))."\n";
 if(!$ok || $changes['changed']<100)exit(2);
 PHP
 chmod 644 "$F"
