@@ -4,6 +4,7 @@ import json
 import os
 import smtplib
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from pathlib import Path
@@ -31,11 +32,32 @@ def require(*names):
 def data(method, url, **kwargs):
     """Do not expose tokens, request URLs or response bodies in logs."""
     timeout = kwargs.pop("timeout", TIMEOUT)
-    try:
-        response = SESSION.request(method, url, timeout=timeout, **kwargs)
-    except requests.RequestException as exc:
-        raise APIProblem("Ошибка сети: " + type(exc).__name__) from None
+    # A short 429 or 5xx from a shared API is not proof of a broken token.
+    # Retries are read-only and never apply to write operations.
+    retryable = method.upper() == "GET"
+    response = None
+    for attempt in range(4 if retryable else 1):
+        try:
+            response = SESSION.request(method, url, timeout=timeout, **kwargs)
+        except requests.RequestException as exc:
+            if retryable and attempt < 3:
+                time.sleep((2, 6, 12)[attempt])
+                continue
+            raise APIProblem("Ошибка сети: " + type(exc).__name__) from None
+        if retryable and response.status_code in (429, 500, 502, 503, 504) and attempt < 3:
+            raw_wait = response.headers.get("Retry-After", "")
+            try:
+                wait = min(30, max(2, int(raw_wait)))
+            except (ValueError, TypeError):
+                wait = (5, 12, 25)[attempt]
+            time.sleep(wait)
+            continue
+        break
+    if response is None:
+        raise APIProblem("API не вернул ответ")
     if not 200 <= response.status_code < 300:
+        if response.status_code == 429:
+            raise APIProblem("HTTP 429: лимит запросов API (после повторных попыток)")
         raise APIProblem("HTTP " + str(response.status_code))
     try:
         payload = response.json()
