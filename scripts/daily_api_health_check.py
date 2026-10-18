@@ -250,6 +250,41 @@ def netangels():
         raise APIProblem("NetAngels: неверный формат ответа")
 
 
+def include_finance_health():
+    """Read sanitized finance statuses from isolated Baserow table 871."""
+    expected = {"Моё дело", "Ozon DirectBank", "Точка Банк"}
+    try:
+        require("BASEROW_DATABASE_TOKEN")
+        payload = data("GET", "http://147.78.67.6/api/database/rows/table/871/",
+                       params={"size": 100, "user_field_names": "true"},
+                       headers={"Authorization": "Token " + os.environ["BASEROW_DATABASE_TOKEN"],
+                                "Accept": "application/json"})
+        rows = payload.get("results", []) if isinstance(payload, dict) else []
+        matches = [x for x in rows if x.get("Name") == "finance-api-health"]
+        if len(matches) != 1:
+            raise APIInconclusive("Служебная запись финансового мониторинга отсутствует")
+        report = json.loads(matches[0]["Status JSON"])
+        stamp = datetime.fromisoformat(report["checked_at"].replace("Z", "+00:00"))
+        age = datetime.now(timezone.utc) - stamp
+        if not timedelta(minutes=-5) <= age <= timedelta(hours=27):
+            raise APIInconclusive("Данные финансового мониторинга устарели")
+        services = report["services"]
+        names = {x["service"] for x in services}
+        if len(services) != 3 or names != expected:
+            raise APIInconclusive("Неполный список финансовых сервисов")
+        if any(x.get("status") not in ("OK", "FAIL", "UNKNOWN", "NO_KEY")
+               for x in services):
+            raise APIInconclusive("Недопустимый статус финансового API")
+        for x in services:
+            RESULTS.append({"service": x["service"],
+                            "status": x["status"],
+                            "reason": str(x.get("reason", ""))[:160]})
+    except Exception as exc:
+        RESULTS.append({"service": "Финансовые API (источник Baserow)",
+                        "status": "UNKNOWN",
+                        "reason": "Не удалось подтвердить результат: " + type(exc).__name__})
+
+
 def send_failure_alert(failures):
     """Send an email ONLY when one or more API checks genuinely failed."""
     if not failures:
@@ -314,6 +349,7 @@ def main():
     verify("Dalli СПб", ("DALLI_TOKEN",), lambda: dalli("spb"))
     verify("Dalli Москва", ("DALLI_TOKEN_MSK",), lambda: dalli("msk"))
     verify("NetAngels", ("NETANGELS_API_KEY",), netangels)
+    include_finance_health()
 
     folder = Path("reports")
     folder.mkdir(parents=True, exist_ok=True)
