@@ -33,5 +33,5 @@ jobs:
         run: python -m pip install 'requests>=2.31,<3'
       - name: Compile and validate
         run: python -m py_compile scripts/central_api_health_notifier.py scripts/daily_api_health_check.py
-      - name: Gather sanitized statuses and email shop only if API actually fails
+      - name: Aggregate 20 API status checks and email only on failures
         run: python scripts/central_api_health_notifier.py
