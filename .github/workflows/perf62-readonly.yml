@@ -1,0 +1,23 @@
+name: Perf62 - Disk and slow SQL read-only audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/perf62-readonly.yml'
+permissions:
+  contents: read
+jobs:
+  readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/perf62_slowlog_disk_readonly.py
+      - name: Aggregate slow SQL patterns and inspect disk usage without writes
+        run: python storefront/perf62_slowlog_disk_readonly.py
