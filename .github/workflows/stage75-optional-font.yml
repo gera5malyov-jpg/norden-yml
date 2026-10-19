@@ -1,0 +1,26 @@
+name: Stage75 - Optional Montserrat for stable mobile rendering
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/stage75-optional-font.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  guarded-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage75_optional_font_20261019.py
+      - name: Three prechecks, private backup, guarded rollout and 10 storefront checks
+        run: python storefront/stage75_optional_font_20261019.py
