@@ -30,7 +30,7 @@ def fetch(u):
   'canonical':re.findall(r'<link[^>]*rel="canonical"[^>]*>',head,re.I),
   'description':re.findall(r'<meta[^>]*name="description"[^>]*>',head,re.I),
   'robots':re.findall(r'<meta[^>]*name="robots"[^>]*>',head,re.I),
-  'has_font_new':newlink in head,'has_font_old':oldlink in head,
+  'has_font_new':newlink in body,'has_font_old':oldlink in body,
   'font_refs':re.findall(r'css/fonts/[^"\']+\.css[^"\']*',body,re.I)[:5],
   'phones':'2449264' in body,'product_buy':'megapolis-mobile-buy__button' in body,
   'has_product_gallery':('product-gallery--extimg' in body or 'product-gallery__main' in body)}
