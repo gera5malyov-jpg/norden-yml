@@ -56,6 +56,8 @@ baseline=[]
 for i,path in enumerate(routes):
  x=fetch(path)
  if x['rc'] or x['http']!='200' or not x['title'] or not x['phones'] or not x['has_font_old'] or x['has_font_new']:
+  emit('PAGE_DIAG',{'route':path,'rc':x['rc'],'http':x['http'],'title_count':len(x['title']),
+   'phones':x['phones'],'oldfont':x['has_font_old'],'newfont':x['has_font_new']})
   raise RuntimeError('PREFLIGHT 2: invalid live page '+path)
  baseline.append(x)
 emit('PREFLIGHT',{'check':2,'ok':True,'routes':len(routes)})
