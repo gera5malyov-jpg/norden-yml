@@ -39,12 +39,15 @@ font_source=oldcss.read_bytes()
 font_text=font_source.decode('utf8')
 emit('DIAG',{'old_link_count':txt.count(oldlink),'new_link_count':txt.count(newlink),'newcss_exists':newcss.exists(),
  'oldcss_exists':oldcss.is_file(),'contexts':[txt[max(0,m.start()-135):m.start()+160] for m in list(re.finditer(re.escape(oldlink),txt))[:2]]})
-if txt.count(oldlink)!=1 or newlink in txt or newcss.exists() or not oldcss.is_file():
+if txt.count(oldlink)!=2 or newlink in txt or newcss.exists() or not oldcss.is_file():
  raise RuntimeError('PREFLIGHT 1: old font link or source differs, abort')
+matches=list(re.finditer(re.escape(oldlink),txt))
+if not all("if $wa->domainUrl() == 'https://profikompany.ru' && $theme_settings.main__font == \\"montserrat\\"" in txt[max(0,m.start()-190):m.start()] for m in matches):
+ raise RuntimeError('Existing font references are not scoped to the expected site')
 if font_text.count('@font-face')!=18 or font_text.count('font-display:swap')!=18 or 'font-display:optional' in font_text:
  raise RuntimeError('PREFLIGHT 1: unexpected Montserrat font-face contents')
 updated_font=font_text.replace('font-display:swap','font-display:optional').encode('utf8')
-updated_html=txt.replace(oldlink,newlink,1).encode('utf8')
+updated_html=txt.replace(oldlink,newlink,2).encode('utf8')
 if font_text.count('montserrat-megapolis53-')!=18:
  raise RuntimeError('PREFLIGHT 1: font files mismatch')
 emit('PREFLIGHT',{'check':1,'ok':True,'face_count':18,'index_sha':sha(orig),
