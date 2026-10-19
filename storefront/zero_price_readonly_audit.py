@@ -41,9 +41,12 @@ for rel,lo,hi in [
  p=root/rel
  ls=p.read_text('utf8',errors='replace').splitlines()
  print('ZERO_CONTEXT='+json.dumps({'file':rel,'start':lo,'lines':[str(i+1)+': '+ls[i][:350] for i in range(lo-1,min(hi,len(ls)))]},ensure_ascii=False),flush=True)
+
+site=(root/'wa-data/public/site/themes/pureMegapolis42/index.html').read_text('utf8',errors='replace').splitlines()
+print('ZERO_HEAD='+json.dumps([{'n':i+1,'text':v.strip()[:250]} for i,v in enumerate(site) if ('head()' in v or 'wa->head' in v or 'og:' in v or 'wa->block' in v or 'title(' in v or 'meta(' in v or 'wa->headJs' in v)][:80],ensure_ascii=False),flush=True)
 PY
 '''
 if __name__ == '__main__':
  out=execute(REMOTE)
  for line in out.splitlines():
-  if line.startswith(('ZERO_AUDIT=','ZERO_TEMPLATES=','ZERO_CONTEXT=')): print(line, flush=True)
+  if line.startswith(('ZERO_AUDIT=','ZERO_TEMPLATES=','ZERO_CONTEXT=','ZERO_HEAD=')): print(line, flush=True)
