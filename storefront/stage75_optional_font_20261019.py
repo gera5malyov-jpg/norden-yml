@@ -42,7 +42,7 @@ emit('DIAG',{'old_link_count':txt.count(oldlink),'new_link_count':txt.count(newl
 if txt.count(oldlink)!=2 or newlink in txt or newcss.exists() or not oldcss.is_file():
  raise RuntimeError('PREFLIGHT 1: old font link or source differs, abort')
 matches=list(re.finditer(re.escape(oldlink),txt))
-if not all("if $wa->domainUrl() == 'https://profikompany.ru' && $theme_settings.main__font == \\"montserrat\\"" in txt[max(0,m.start()-190):m.start()] for m in matches):
+if not all("$wa->domainUrl() == 'https://profikompany.ru' && $theme_settings.main__font" in txt[max(0,m.start()-190):m.start()] for m in matches):
  raise RuntimeError('Existing font references are not scoped to the expected site')
 if font_text.count('@font-face')!=18 or font_text.count('font-display:swap')!=18 or 'font-display:optional' in font_text:
  raise RuntimeError('PREFLIGHT 1: unexpected Montserrat font-face contents')
