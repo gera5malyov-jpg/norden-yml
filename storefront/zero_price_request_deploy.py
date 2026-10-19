@@ -60,7 +60,8 @@ try:
      'cta': 'megapolis-request-price' in html,
      'zero_in_head': 'цена 0 руб.' in head.lower(),
      'zero_schema': '<meta itemprop="price" content="0">' in html,
-     'title':re.findall(r'<title[^>]*>(.*?)</title>',head,re.I|re.S)[:1]}
+     'title':re.findall(r'<title[^>]*>(.*?)</title>',head,re.I|re.S)[:1],
+     'zero_fragments':[head[max(0,m.start()-90):m.start()+80] for m in list(re.finditer('цена 0 руб.',head,re.I))[:5]]}
    print('PRICE_REQUEST_DEBUG='+json.dumps(flags,ensure_ascii=False),flush=True)
    ok=ok and flags['label'] and flags['cta'] and not flags['zero_in_head'] and not flags['zero_schema']
   if kind=='priced':
