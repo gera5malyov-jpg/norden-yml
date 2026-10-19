@@ -1,0 +1,27 @@
+name: Perf76 - Guarded Montserrat WOFF2 optimization
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/perf76-font-compression.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  fonts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/perf76_woff2_optimization.py
+      - run: python -m pip install fonttools==4.60.1 brotli==1.1.0
+      - name: Convert, back up, deploy with original WOFF fallback and ten live checks
+        run: python storefront/perf76_woff2_optimization.py
