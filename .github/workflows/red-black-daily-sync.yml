@@ -28,7 +28,7 @@ jobs:
           python-version: '3.12'
       - run: pip install --disable-pip-version-check -r kit-backup/requirements.txt
       - name: Проверить синтаксис
-        run: python -m py_compile red-kit/sync_red_black_supplier.py kit-backup/sync_kit_backup.py
+        run: python -m py_compile red-kit/sync_red_black_supplier.py
 
       - name: Проверка Red Black → KIT без записи
         env:
@@ -43,20 +43,6 @@ jobs:
           RED_MIN_FULL_FEED_OFFERS: '1000'
           RED_MAX_NEW_PRODUCTS: '200'
         run: python red-kit/sync_red_black_supplier.py
-
-      - name: Обновить Google-таблицу после первого или ручного запуска
-        if: ${{ github.event_name != 'schedule' }}
-        env:
-          YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-          NORDEN_SECRET: ${{ secrets.NORDEN_SECRET }}
-          SAMSON_API_KEY: ${{ secrets.SAMSON_API_KEY }}
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          GOOGLE_SHEET_ID: '1xZUeaWUr-6O3KK0MO-1U7IGBKXXfgcmZ-EJ-w-2wWug'
-          KIT_INCLUDE_PRODUCTS: 'false'
-          KIT_API_WORKERS: '8'
-          KIT_COMPACT_SHEETS: 'true'
-          YML_FALLBACK_URL: 'https://yastore-prod-persist.s3.yandex.net/feeds/yml/019a5a60-ce41-7872-aa9d-d7720c268dab.xml'
-        run: python kit-backup/sync_kit_backup.py
 
       - name: Приложить отчёты
         if: always()
