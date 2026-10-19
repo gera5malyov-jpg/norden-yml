@@ -672,8 +672,7 @@ def run(args):
             "purchase_price": "YML <opt1mln>",
             "customer_price": "закупочная цена × 1.30, округление вверх до 1 ₽",
             "compare_price": "закупочная цена × 1.60, округление вверх до 1 ₽",
-            "webasyst_main_stock": "точный YML <stock>",
-            "creation": "если точного артикула нет — создать новую карточку в KIT и Webasyst",
+            "creation": "если точного артикула нет — создать новую карточку только в KIT",
             "duplicate_guard": "перед созданием повторная точная проверка SKU/артикула",
             "purchase_price_storage": "закупочная цена отдельным полем не записывается",
         },
@@ -923,197 +922,22 @@ def run(args):
         kit.update_prices(kit_updates)
     report["kit_price_updates_sent"] = 0 if args.dry_run else len(kit_updates)
 
-    wa = WebasystClient(min_request_interval=float(
-        os.getenv("AFINALUX_WEBASYST_WRITE_DELAY", "0.55")
-    ))
-    types = listify(wa.call("shop.type.getList"))
-    target_type = exact_one(types, WEBASYST_TYPE, "тип товара Webasyst")
-    type_id = s(target_type.get("id"))
-
-    stocks = listify(wa.call("shop.stock.getList"))
-    target_stock = exact_one(stocks, WEBASYST_STOCK, "склад Webasyst")
-    stock_id = s(target_stock.get("id"))
-
-    wa_products = load_wa_products(wa, type_id)
-    wa_index, wa_ambiguous, wa_fallback = build_wa_index(
-        wa, wa_products, feed_items
-    )
-    report.update({
-        "webasyst_type_id": type_id,
-        "webasyst_stock_id": stock_id,
-        "webasyst_products_in_type_before": len(wa_products),
-        "webasyst_matched_before_creation": len(wa_index),
-        "webasyst_name_fallback_matches": wa_fallback,
-        "webasyst_ambiguous": dict(list(wa_ambiguous.items())[:100]),
-        "webasyst_created": 0,
-        "webasyst_would_create": 0,
-        "webasyst_existing_rerouted_to_type": 0,
-    })
-
-    missing_wa_keys = [
-        key for key in sorted(feed_items)
-        if key not in wa_index and key not in wa_ambiguous
-    ]
-
-    for key in missing_wa_keys:
-        item = feed_items[key]
-        code = item["vendor_code"]
-        try:
-            exact = global_wa_exact_sku(wa, code)
-            # De-duplicate same product/SKU pair if API search returns repeated rows.
-            uniq = {}
-            for product, sku in exact:
-                uniq[(s(product.get("id")), s(sku.get("id")))] = (product, sku)
-            exact = list(uniq.values())
-
-            if len(exact) > 1:
-                report["errors"].append({
-                    "stage": "webasyst_duplicate_guard",
-                    "vendor_code": code,
-                    "message": f"Найдено {len(exact)} карточек Webasyst с точным SKU",
-                })
-                continue
-
-            if len(exact) == 1:
-                product, sku = exact[0]
-                pid = s(product.get("id"))
-                if not args.dry_run and s(product.get("type_id")) != type_id:
-                    wa.call(
-                        "shop.product.update",
-                        http_method="POST",
-                        params={"id": pid},
-                        data={"type_id": type_id},
-                    )
-                    product["type_id"] = type_id
-                    report["webasyst_existing_rerouted_to_type"] += 1
-                wa_index[key] = (product, sku)
-                continue
-
-            if args.dry_run:
-                report["webasyst_would_create"] += 1
-                continue
-
-            created = wa.call(
-                "shop.product.add",
-                http_method="POST",
-                data={
-                    "name": item["name"] or code,
-                    "url": product_url(item["name"], code),
-                    "type_id": type_id,
-                    "currency": "RUB",
-                    "summary": extimg_summary(item.get("pictures") or []),
-                    "description": item.get("description") or "",
-                    "status": 1,
-                    "skus": [{
-                        "price": money_str(item["customer_price"]),
-                        "compare_price": money_str(item["compare_price"]),
-                        "stock": {stock_id: str(item["stock"])},
-                        "available": 1 if item["stock"] > 0 else 0,
-                        "status": 1,
-                    }],
-                },
-            )
-            product_id = extract_product_id(created)
-            if not product_id:
-                raise RuntimeError(
-                    f"shop.product.add did not return product id: {str(created)[:300]}"
-                )
-
-            skus = get_product_skus(wa, product_id)
-            if len(skus) != 1:
-                raise RuntimeError(
-                    f"New Webasyst product {product_id} unexpectedly has {len(skus)} SKUs"
-                )
-            sku_row = skus[0]
-            wa.call(
-                "shop.product.skus.update",
-                http_method="POST",
-                params={"id": s(sku_row.get("id"))},
-                data={
-                    "sku": code,
-                    "price": money_str(item["customer_price"]),
-                    "compare_price": money_str(item["compare_price"]),
-                    "stock": {stock_id: str(item["stock"])},
-                    "available": 1 if item["stock"] > 0 else 0,
-                    "status": 1,
-                },
-            )
-            sku_row["sku"] = code
-            wa_index[key] = ({"id": product_id, "type_id": type_id}, sku_row)
-            report["webasyst_created"] += 1
-        except Exception as exc:
-            report["errors"].append({
-                "stage": "webasyst_create",
-                "vendor_code": code,
-                "message": str(exc)[:1000],
-            })
-
-    report["webasyst_matched_after_creation"] = len(wa_index)
-    report["webasyst_unmatched_after_creation"] = [
-        feed_items[k]["vendor_code"]
-        for k in sorted(set(feed_items) - set(wa_index))
-        if k not in wa_ambiguous
-    ][:100]
-
-    wa_updates = 0
-    wa_samples = []
-    for key, (product, sku) in sorted(wa_index.items()):
-        item = feed_items[key]
-        try:
-            payload = {
-                "price": money_str(item["customer_price"]),
-                "compare_price": money_str(item["compare_price"]),
-                "stock": {stock_id: str(item["stock"])},
-                "available": 1 if item["stock"] > 0 else 0,
-                "status": 1,
-            }
-            if not args.dry_run:
-                wa.call(
-                    "shop.product.skus.update",
-                    http_method="POST",
-                    params={"id": s(sku.get("id"))},
-                    data=payload,
-                )
-            wa_updates += 1
-            if len(wa_samples) < 30:
-                wa_samples.append({
-                    "vendor_code": item["vendor_code"],
-                    "product_id": s(product.get("id")),
-                    "sku_id": s(sku.get("id")),
-                    "purchase": money_str(item["purchase"]),
-                    "customer_price": money_str(item["customer_price"]),
-                    "compare_price": money_str(item["compare_price"]),
-                    "stock": item["stock"],
-                })
-        except Exception as exc:
-            report["errors"].append({
-                "stage": "webasyst_update",
-                "vendor_code": item["vendor_code"],
-                "product_id": s(product.get("id")),
-                "message": str(exc)[:1000],
-            })
-
-    report["webasyst_updates_planned"] = wa_updates
-    report["webasyst_updates_sent"] = 0 if args.dry_run else wa_updates
-    report["samples"] = wa_samples
+    # KIT-only synchronization. Owner disabled all Afina Garden writes to Webasyst.
+    # Finish here, before any Webasyst client is created or called.
+    report["webasyst_sync"] = "disabled_by_owner"
+    report["webasyst_created"] = 0
+    report["webasyst_updates_sent"] = 0
     report["finished_at"] = now_iso()
-    expected_existing = min(len(feed_items), max(kit_brand_count, len(wa_products)))
-    coverage_floor = max(1, expected_existing - 3)
-    coverage_ok = (
-        len(kit_index) >= coverage_floor
-        and len(wa_index) >= coverage_floor
-    )
+    expected_kit = min(len(feed_items), max(kit_brand_count, len(kit_index)))
+    coverage_floor = max(1, expected_kit - 3)
+    coverage_ok = len(kit_index) >= coverage_floor
     if not coverage_ok:
         report["warnings"].append({
-            "stage": "coverage",
-            "message": (
-                f"Неполное сопоставление: KIT {len(kit_index)}/{kit_brand_count}, "
-                f"Webasyst {len(wa_index)}/{len(wa_products)}"
-            ),
+            "stage": "kit_coverage",
+            "message": f"Неполное сопоставление KIT: {len(kit_index)}/{kit_brand_count}",
         })
     report["status"] = "ok" if not report["errors"] and coverage_ok else "degraded"
     report["complete"] = not report["errors"] and coverage_ok
-
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(
         json.dumps(report, ensure_ascii=False, indent=2),
