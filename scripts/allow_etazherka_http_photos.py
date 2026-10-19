@@ -63,7 +63,7 @@ REMOTE
 """
 
 
-SOURCE_PATCH = r"""set -euo pipefail
+SOURCE_PATCH = r'''set -euo pipefail
 python3 - <<'REMOTE'
 import os, pathlib, shutil, subprocess, tempfile
 from datetime import datetime,timezone
@@ -108,8 +108,7 @@ elif s.count(needle)==1:
 else:
  raise RuntimeError('Guard mismatch in YML Pro source resolver, refusing edit')
 REMOTE
-"""
-
+'''
 RUN = r"""set -euo pipefail
 cd /home/web/vm-23f9aff9.na4u.ru/www
 F="$(mktemp /tmp/etazherka-photo-XXXXXX.php)"
