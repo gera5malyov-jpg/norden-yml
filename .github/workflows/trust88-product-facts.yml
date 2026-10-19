@@ -1,0 +1,26 @@
+name: Trust88 - Verified buyer information near order
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/trust88-product-facts.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  trust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/trust88_verified_buyer_facts.py
+      - name: Back up existing buyer info and verify 12 representative pages
+        run: python storefront/trust88_verified_buyer_facts.py
