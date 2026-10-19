@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/nav87-mobile-catalog.yml'
+      - 'storefront/nav87_mobile_catalog_shortcuts.py'
 permissions:
   contents: read
 concurrency:
