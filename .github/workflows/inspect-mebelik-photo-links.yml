@@ -1,0 +1,21 @@
+name: Inspect Mebelik photo links
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/inspect_mebelik_photo_links.py
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Inspect YML Pro profile and product image linkage
+        run: python3 -u scripts/inspect_mebelik_photo_links.py
