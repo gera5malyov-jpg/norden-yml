@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/gallery90-mobile-contain.yml'
+      - 'storefront/gallery90_mobile_contain.py'
 permissions:
   contents: read
 concurrency:
