@@ -46,6 +46,7 @@ curl_setopt_array($ch,array(CURLOPT_NOBODY=>true,CURLOPT_RETURNTRANSFER=>true,
  CURLOPT_CONNECTTIMEOUT=>7,CURLOPT_TIMEOUT=>15,CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2,
  CURLOPT_CAINFO=>'/home/web/vm-23f9aff9.na4u.ru/www/wa-config/mebelik-globalsign-root-r46.pem'));
 curl_exec($ch);$status=(int)curl_getinfo($ch,CURLINFO_HTTP_CODE);$type=(string)curl_getinfo($ch,CURLINFO_CONTENT_TYPE);curl_close($ch);
+echo 'MBK_LEGACY_TEST='.json_encode(array('id'=>$changes[0]['id'],'sample_host'=>parse_url($m[1],PHP_URL_HOST),'status'=>$status,'mime'=>$type),JSON_UNESCAPED_UNICODE)."\n";
 if(($status!==200 && $status!==206) || stripos($type,'image/')!==0)throw new RuntimeException('New Mebelik sample image unreachable');
 $backup_dir=wa()->getDataPath('plugins/univimport/rollback',false,'shop',true);
 if(!is_dir($backup_dir))waFiles::create($backup_dir);
