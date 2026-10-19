@@ -47,7 +47,7 @@ for p in files:
   s=s.replace(raw,booldisplay.replace('{$f_value}','{$f_value|escape}'))
   item='{if (!$f_code|in_array:$_disabled_features && empty($_enabled_features)) || (!empty($_enabled_features) && $f_code|in_array:$_enabled_features)}'
   if s.count(item)!=1:raise RuntimeError('List filter anchor changed')
-  s=s.replace(item,item+' && !'+suppression,1)
+  s=s.replace(item,item[:-1]+' && !'+suppression+'}',1)
  else:
   raw='{$f_value}'
   c=s.count(raw)
