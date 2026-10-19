@@ -29,9 +29,19 @@ for rel in paths:
   if len(matches)>=55:break
   matches.append({'line':i+1,'text':line.strip()[:280]})
  print('ZERO_AUDIT='+json.dumps({'file':rel,'size':p.stat().st_size,'lines':len(lines),'matches':matches},ensure_ascii=False),flush=True)
+
+print('ZERO_TEMPLATES='+json.dumps([{'file':str(p.relative_to(root)),'size':p.stat().st_size,'matches':[w for w in ['product-prices','product-price','itemprop="price"','product-add','{$wa->title()','property="og:title"'] if w in p.read_text('utf8',errors='replace')]} for theme in ('site','shop') for p in (root/('wa-data/public/'+theme+'/themes/pureMegapolis42')).rglob('*.html') if p.is_file() and p.stat().st_size<450000 and any(w in p.read_text('utf8',errors='replace') for w in ('product-prices','product-price','itemprop="price"','product-add','{$wa->title()','property="og:title"'))][:65],ensure_ascii=False),flush=True)
+for rel,lo,hi in [
+ ('wa-data/public/site/themes/pureMegapolis42/index.html',93,130),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.cart.html',65,155),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.cart.html',179,325),
+ ('wa-data/public/shop/themes/pureMegapolis42/product.html',205,260)]:
+ p=root/rel
+ ls=p.read_text('utf8',errors='replace').splitlines()
+ print('ZERO_CONTEXT='+json.dumps({'file':rel,'start':lo,'lines':[str(i+1)+': '+ls[i][:350] for i in range(lo-1,min(hi,len(ls)))]},ensure_ascii=False),flush=True)
 PY
 '''
 if __name__ == '__main__':
  out=execute(REMOTE)
  for line in out.splitlines():
-  if line.startswith('ZERO_AUDIT='): print(line, flush=True)
+  if line.startswith(('ZERO_AUDIT=','ZERO_TEMPLATES=','ZERO_CONTEXT=')): print(line, flush=True)
