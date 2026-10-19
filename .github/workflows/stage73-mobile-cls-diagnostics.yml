@@ -1,0 +1,22 @@
+name: Stage73 - Mobile layout shift diagnosis
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/stage73-mobile-cls-diagnostics.yml'
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage73_mobile_cls_diagnostics.py
+      - run: python -m pip install playwright==1.55.0
+      - name: Capture shifted DOM nodes and LCP
+        run: python storefront/stage73_mobile_cls_diagnostics.py
