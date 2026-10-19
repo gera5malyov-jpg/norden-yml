@@ -50,6 +50,17 @@ foreach($urls as $url){
  foreach($prod->features as $code=>$v){$value=is_array($v)?implode(' | ',array_map('strval',$v)):(string)$v;$s[]=array('code'=>$code,'name'=>isset($prod->features[$code])?$code:$code,'display'=>mb_substr($value,0,180,'UTF-8'));}
  out('SAMPLE',array('product'=>$p,'feature_count'=>count($s),'features'=>array_slice($s,0,80)));
 }
+
+$interesting=array('trebuetsya_sborka','kenner_e56a8b5bc681','kenner_bdab156dd83f','bryend','postavshchik_1','kit_id','tip_yandex','tip_ozon','obedinenie_v_odnu_kartochku','kharakristiki');
+$marks="'".implode("','",array_map('addslashes',$interesting))."'";
+$technical=$m->query("SELECT id,code,name,type,status,selectable,multiple FROM shop_feature WHERE code IN (".$marks.") OR name LIKE '%Глубина%' OR name LIKE '%Высота%' ORDER BY id DESC LIMIT 100")->fetchAll();
+out('TARGET_DEFS',$technical);
+$raw=$m->query("SELECT v.id,v.feature_id,f.code,f.name,v.value FROM shop_feature_values_varchar v JOIN shop_feature f ON f.id=v.feature_id WHERE LOWER(TRIM(v.value)) IN ('true','false','null','undefined','nan','yes','no') LIMIT 100")->fetchAll();
+out('RAW_BOOLEANS',array_slice($raw,0,95));
+$rawCounts=$m->query("SELECT LOWER(TRIM(v.value)) value,COUNT(*) distinct_feature_value_ids,COUNT(DISTINCT v.feature_id) feature_definitions FROM shop_feature_values_varchar v WHERE LOWER(TRIM(v.value)) IN ('true','false','null','undefined','nan','yes','no') GROUP BY LOWER(TRIM(v.value))")->fetchAll();
+out('RAW_BOOLEAN_COUNTS',$rawCounts);
+$sampleKinds=$m->query("SELECT type_id,COUNT(*) products FROM shop_product WHERE category_id>0 AND status=1 GROUP BY type_id ORDER BY products DESC LIMIT 14")->fetchAll();
+out('TOP_PRODUCT_TYPES',$sampleKinds);
 PHP
 chmod 644 "$p"
 su -s /bin/bash web -c "php -d display_errors=0 -d log_errors=1 '$p'"
