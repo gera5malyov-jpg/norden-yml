@@ -94,7 +94,8 @@ try:
    and after['form']==orig['form'] and after['purchase']==orig['purchase']
    and after['trust']==orig['trust'] and after['menu']==orig['menu']
    and after['font76']==orig['font76'])
-  css_ok='megapolis-gallery-mobile-fit-v2' in after['body'] and 'height:clamp(220px,36vh,320px)' in after['body']
+  has_gallery_style='megapolis-gallery-cls-20261019' in orig['body']
+  css_ok=(('megapolis-gallery-mobile-fit-v2' in after['body'] and 'height:clamp(220px,36vh,320px)' in after['body']) if has_gallery_style else 'megapolis-gallery-mobile-fit-v2' not in after['body'])
   ok=bool(stable and css_ok)
   say('TEST',{'number':i+1,'path':path,'ok':ok,'http':after['status'],'gallery_links_kept':after['thumbnails']==orig['thumbnails']})
   if not ok:
