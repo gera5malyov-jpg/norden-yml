@@ -55,4 +55,4 @@ su -s /bin/bash web -c "php -d display_errors=0 '$F'"
 """
 out=execute(remote)
 for line in out.splitlines():
- if line.startswith(('MBK_AUDIT_OLD=','MBK_AUDIT_TOTAL=')):print(line,flush=True)
+ if line.startswith(('MBK_AUDIT_OLD=','MBK_AUDIT_TOTAL=','MBK_AUDIT_DIAG=')):print(line,flush=True)
