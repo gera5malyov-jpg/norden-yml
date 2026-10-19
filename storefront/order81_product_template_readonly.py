@@ -15,6 +15,12 @@ for theme in themes:
   if not matched:continue
   if 'product-stocks' not in text and 's-product-form' not in text and 'product-prices' not in text:continue
   lines=text.splitlines()
+  if path.name=='product.cart.html':
+   fragments=[str(n+1)+': '+lines[n][:500] for n in range(min(len(lines),370)) if (n>=5 and n<340)]
+   print('ORDER81_SOURCE='+json.dumps({'file':str(path.relative_to(root)),'lines':fragments},ensure_ascii=False),flush=True)
+  if path.name=='product.html':
+   fragments=[str(n+1)+': '+lines[n][:500] for n in range(min(len(lines),270)) if (n>=170 and n<265)]
+   print('ORDER81_PRODUCT='+json.dumps({'file':str(path.relative_to(root)),'lines':fragments},ensure_ascii=False),flush=True)
   result=[]
   for i,line in enumerate(lines):
    if any(m in line for m in markers):
