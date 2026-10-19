@@ -1,0 +1,27 @@
+name: Nav87 - Simplify mobile catalog navigation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/nav87-mobile-catalog.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Static Python validation
+        run: python -m py_compile storefront/nav87_mobile_catalog_shortcuts.py
+      - name: Protected template update with backup and 11 checks
+        run: python storefront/nav87_mobile_catalog_shortcuts.py
