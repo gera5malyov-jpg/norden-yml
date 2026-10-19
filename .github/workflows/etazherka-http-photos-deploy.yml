@@ -1,0 +1,27 @@
+name: Permit HTTP photos for Etazherka (YML Pro ID 8)
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/allow_etazherka_http_photos.py
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: etazherka-http-photo-deploy
+  cancel-in-progress: false
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Narrow PHP validation adjustment and refresh profile 8 only
+        run: python3 -u scripts/allow_etazherka_http_photos.py
