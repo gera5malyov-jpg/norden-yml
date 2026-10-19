@@ -1,9 +1,5 @@
 name: Repair Mebelik external product images
 on:
-  push:
-    branches: [main]
-    paths:
-      - scripts/fix_mebelik_photo_links.py
   workflow_dispatch:
 permissions:
   contents: read
