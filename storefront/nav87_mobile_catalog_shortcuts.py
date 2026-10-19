@@ -44,7 +44,7 @@ tail=r"""      {if $wa->domainUrl() == 'https://profikompany.ru'}
       </style>
       {/literal}
       {/if}
-'''
+"""
 def http(path):
  p=subprocess.Popen(['curl','-ksSL','--compressed','--max-time','31','-w','\n%{http_code}', 'https://profikompany.ru'+path],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
  out,err=p.communicate(timeout=39)
