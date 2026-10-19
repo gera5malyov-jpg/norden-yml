@@ -1,0 +1,26 @@
+name: Perf79 - Font Awesome on demand
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/perf79-fontawesome-on-demand.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/perf79_fontawesome_on_demand.py
+      - name: Guarded site-only icon lazy load, backup, and ten regression tests
+        run: python storefront/perf79_fontawesome_on_demand.py
