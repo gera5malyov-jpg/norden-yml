@@ -1,0 +1,26 @@
+name: Order82 - Green orderability status
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/order82-status.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/order82_available_for_order.py
+      - name: Back up template and apply scoped status with three preflights and ten checks
+        run: python storefront/order82_available_for_order.py
