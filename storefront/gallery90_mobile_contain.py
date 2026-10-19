@@ -27,7 +27,7 @@ def fetch(path):
   'form':'id="s-product-form"' in body,
   'purchase':'megapolis-orderable-20261019' in body,
   'trust':'megapolis-verified-trust-20261019' in body,
-  'menu':'megapolis-mobile-catalog-shortcuts-20261019' in body,
+  'menu':'class="megapolis-menu-quick"' in body,
   'font76':'montserrat.megapolis76.css' in body,
  }
 before=file.read_bytes();text=before.decode('utf8')
