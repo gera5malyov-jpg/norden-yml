@@ -1,0 +1,26 @@
+name: Feature storefront markup readonly
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/feature-storefront-markup-audit.yml'
+      - 'storefront/features_theme_readonly_audit.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m py_compile storefront/features_theme_readonly_audit.py
+      - run: python3 storefront/features_theme_readonly_audit.py
