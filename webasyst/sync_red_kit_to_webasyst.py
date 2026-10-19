@@ -258,6 +258,10 @@ def is_scalar_feature(row):
 
 
 def main():
+    # Explicit owner opt-in is required for any Red-Black -> Webasyst writes.
+    if not DRY_RUN and os.getenv("RED_BLACK_WEBASYST_WRITE_ENABLED") != "1":
+        print("Red-Black -> Webasyst import disabled by owner on 2026-10-19", flush=True)
+        return 2
     # One-shot de-duplication for the queued optimized run created while the
     # previous safe RED sync was already executing. If that previous run
     # committed a complete report, this specific queued run reuses it instead
