@@ -34,7 +34,7 @@ su -s /bin/bash web -c "php -d display_errors=0 '$F'"
 printf 'ETZ_DIAG=plugin_dirs\n'
 find wa-apps/shop/plugins -maxdepth 1 -type d -iname '*yml*' | head -15 | sed 's/^/ETZ_DIAG=plugin_dir:/'
 printf 'ETZ_DIAG=plugin_source_search\n'
-grep -Rln --include='*.php' -e 'Детали файла' -e 'Изменить файл' -e 'shop_yml_profiles' wa-apps/shop/plugins/yml* 2>/dev/null | head -30 | sed 's/^/ETZ_DIAG=php_candidate:/'
+grep -Rln --include='*.html' --include='*.php' --include='*.js' -e 'Детали файла' -e 'Изменить файл' -e 'Источник: URL' -e 'file_url' -e 'sourceFile' wa-apps/shop/plugins/yml* 2>/dev/null | head -40 | sed 's/^/ETZ_DIAG=source_candidate:/'\nprintf 'ETZ_DIAG=plugin_profile_model\\n'\npython3 - <<'PY'\nfrom pathlib import Path\nfor name in ('wa-apps/shop/plugins/yml/lib/models/shopYmlProfiles.model.php','wa-apps/shop/plugins/yml/lib/config/db.php'):\n p=Path(name); s=p.read_text(encoding='utf-8',errors='replace').splitlines()\n print('ETZ_DIAG=codefile:'+name+' lines='+str(len(s)))\n for i,line in enumerate(s):\n  if any(k in line.lower() for k in ('source', 'file', 'url', 'config', 'profile')) and i<230:\n   print('ETZ_DIAG=code:'+str(i+1)+': '+line[:250])\nPY
 """
 out=execute(remote)
 for line in out.splitlines():
