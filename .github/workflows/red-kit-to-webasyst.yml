@@ -16,6 +16,9 @@ concurrency:
 
 jobs:
   sync:
+    # Red-Black -> Webasyst disabled by owner 2026-10-19.
+    # Retained for reference; even manual dispatches must skip this job.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 240
     steps:
