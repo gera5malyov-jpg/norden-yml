@@ -33,6 +33,7 @@ for rel in paths:
 print('ZERO_TEMPLATES='+json.dumps([{'file':str(p.relative_to(root)),'size':p.stat().st_size,'matches':[w for w in ['product-prices','product-price','itemprop="price"','product-add','{$wa->title()','property="og:title"'] if w in p.read_text('utf8',errors='replace')]} for theme in ('site','shop') for p in (root/('wa-data/public/'+theme+'/themes/pureMegapolis42')).rglob('*.html') if p.is_file() and p.stat().st_size<450000 and any(w in p.read_text('utf8',errors='replace') for w in ('product-prices','product-price','itemprop="price"','product-add','{$wa->title()','property="og:title"'))][:65],ensure_ascii=False),flush=True)
 for rel,lo,hi in [
  ('wa-data/public/site/themes/pureMegapolis42/index.html',93,130),
+ ('wa-data/public/site/themes/pureMegapolis42/index.html',276,316),
  ('wa-data/public/shop/themes/pureMegapolis42/product.cart.html',65,155),
  ('wa-data/public/shop/themes/pureMegapolis42/product.cart.html',179,325),
  ('wa-data/public/shop/themes/pureMegapolis42/product.html',205,260),
