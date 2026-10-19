@@ -36,7 +36,7 @@ function testLink($url) {
 }
 if($url){
  echo 'MBK_FEED='.json_encode(array('https_head'=>testLink($url)),JSON_UNESCAPED_UNICODE)."\n";
- if(stripos($url,'https://')===0)echo 'MBK_FEED_HTTP='.json_encode(array('http_head'=>testLink('http://'.substr($url,8))),JSON_UNESCAPED_UNICODE)."\n";
+ if(stripos($url,'https://')===0)echo 'MBK_FEED_HTTP='.json_encode(array('http_head'=>testLink('http://'.substr($url,8)),'no_www_https'=>testLink(str_replace('://www.mebelik.ru/', '://mebelik.ru/', $url))),JSON_UNESCAPED_UNICODE)."\n";
 }
 $rows=$db->query('SELECT m.shop_id,p.url,p.summary FROM shop_yml_products m JOIN shop_product p ON m.shop_id=p.id WHERE m.profile_id=28 LIMIT 3')->fetchAll();
 foreach($rows as $row){
@@ -45,9 +45,9 @@ foreach($rows as $row){
  $src=html_entity_decode($m[1],ENT_QUOTES,'UTF-8');
  $parts=parse_url($src);
  $https=str_replace('http://','https://',$src);
- $canonical=preg_replace('~^https?://www\\.mebelik\\.ru~i','https://mebelik.ru',$src);
+ $canonical=preg_replace('~^https?://www[.]mebelik[.]ru~i','https://mebelik.ru',$src);
  echo 'MBK_IMAGE='.json_encode(array('id'=>(int)$row['shop_id'],'product_url'=>$row['url'],'scheme'=>isset($parts['scheme'])?$parts['scheme']:'',
- 'path'=>isset($parts['path'])?substr($parts['path'],0,220):'','http'=>testLink($src),'https'=>testLink($https),'canonical'=>testLink($canonical)),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
+ 'path'=>isset($parts['path'])?substr($parts['path'],0,220):'','canonical_host'=>parse_url($canonical, PHP_URL_HOST),'http'=>testLink($src),'https'=>testLink($https),'canonical'=>testLink($canonical)),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
 }
 $idx=$db->query('SELECT picture_url FROM shop_yml_offer_index WHERE profile_id=28 AND picture_url IS NOT NULL AND picture_url!="" LIMIT 4')->fetchAll();
 foreach($idx as $row){$p=parse_url($row['picture_url']);echo 'MBK_OFFER_IMG='.json_encode(array('scheme'=>isset($p['scheme'])?$p['scheme']:'','host'=>isset($p['host'])?$p['host']:'','path'=>isset($p['path'])?substr($p['path'],0,160):''),JSON_UNESCAPED_SLASHES)."\n";}
