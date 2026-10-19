@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/zero-price-readonly-audit.yml'
+      - 'storefront/zero_price_readonly_audit.py'
 permissions:
   contents: read
 concurrency:
