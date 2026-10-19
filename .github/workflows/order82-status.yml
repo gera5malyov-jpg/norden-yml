@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/order82-status.yml'
+      - 'storefront/order82_available_for_order.py'
 permissions:
   contents: read
 concurrency:
