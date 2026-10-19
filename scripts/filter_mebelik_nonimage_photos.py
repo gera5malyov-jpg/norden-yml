@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]/"storefront"))
 from stage52_disable_callback import execute
 
-PATCH=r"""set -euo pipefail
+PATCH=r'''set -euo pipefail
 python3 - <<'REMOTE'
 import os,pathlib,shutil,subprocess,tempfile
 from datetime import datetime,timezone
@@ -49,7 +49,7 @@ else:
   if os.path.exists(tmp):os.unlink(tmp)
  print('MBK_FILTER_PATCH=patched_backup_created_and_php_linted',flush=True)
 REMOTE
-"""
+'''
 
 APPLY=r"""set -euo pipefail
 cd /home/web/vm-23f9aff9.na4u.ru/www
