@@ -49,7 +49,7 @@ if old_gate in s and old_photo_pattern in piece:
     os.chmod(tmpname, stat.st_mode)
     os.chown(tmpname, stat.st_uid, stat.st_gid)
     try:
-        check = subprocess.run(['php', '-l', tmpname], capture_output=True, text=True, timeout=20)
+        check = subprocess.run(['php', '-l', tmpname], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, timeout=20)
         if check.returncode: raise RuntimeError('PHP lint failed: ' + check.stderr[:250])
         os.rename(tmpname, str(target))
     finally:
