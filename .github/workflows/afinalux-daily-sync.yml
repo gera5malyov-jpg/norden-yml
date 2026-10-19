@@ -1,4 +1,4 @@
-name: Afina Garden → KIT → Webasyst — ежедневно
+name: Afina Garden → KIT only — ежедневно
 
 on:
   schedule:
@@ -35,16 +35,13 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests
 
       - name: Проверить код
-        run: python -m py_compile afinalux-kit/sync_afinalux.py webasyst/client.py
+        run: python -m py_compile afinalux-kit/sync_afinalux.py
 
-      - name: Обновить Afina Garden в KIT и Webasyst
+      - name: Обновить Afina Garden только в KIT
         id: sync
         continue-on-error: true
         env:
           YANDEX_KIT_TOKEN: ${{ secrets.YANDEX_KIT_TOKEN }}
-          WEBASYST_BASE_URL: https://profikompany.ru
-          WEBASYST_API_TOKEN: ${{ secrets.WEBASYST_API_TOKEN }}
-          AFINALUX_WEBASYST_WRITE_DELAY: '0.55'
         shell: bash
         run: |
           set -euo pipefail
