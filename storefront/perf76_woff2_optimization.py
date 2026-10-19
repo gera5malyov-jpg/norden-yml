@@ -89,10 +89,17 @@ import base64,datetime,hashlib,io,json,os,pathlib,re,shutil,subprocess,tempfile,
 root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
 theme=root/'wa-data/public/site/themes/pureMegapolis42'
 fonts=theme/'css/fonts'
-template=theme/'index.html'
+template=None
 old_name="montserrat.megapolis75.css?v=20261019"
 new_name="montserrat.megapolis76.css?v=20261019b"
 payload=base64.b64decode("'''+encoded+r'''")
+candidates=[]
+for folder in (theme,root/'wa-data/public/shop/themes/pureMegapolis42'):
+ for candidate in folder.rglob('*.html'):
+  if old_name in candidate.read_text('utf8',errors='replace'):
+   candidates.append(candidate)
+if len(candidates)!=1:raise RuntimeError('Expected exactly one active theme font reference; found '+str(len(candidates)))
+template=candidates[0]
 source=template.read_bytes()
 text=source.decode("utf8")
 zipfile_data=zipfile.ZipFile(io.BytesIO(payload))
@@ -132,7 +139,7 @@ try:
   os.rename(tmp_name,str(output))
   written.append(output)
   if output.read_bytes()!=content:raise RuntimeError('Asset write validation failed')
- with tempfile.NamedTemporaryFile('wb',dir=str(theme),prefix='.font76-theme-',delete=False) as tmp:
+ with tempfile.NamedTemporaryFile('wb',dir=str(template.parent),prefix='.font76-theme-',delete=False) as tmp:
   tmp.write(updated); tmp_name=tmp.name
  st=template.stat()
  os.chmod(tmp_name,st.st_mode&0o777);os.chown(tmp_name,st.st_uid,st.st_gid)
