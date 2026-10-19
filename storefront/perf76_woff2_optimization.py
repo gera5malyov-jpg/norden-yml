@@ -106,7 +106,7 @@ zipfile_data=zipfile.ZipFile(io.BytesIO(payload))
 entries=zipfile_data.namelist()
 woff2=[name for name in entries if re.match(r'^montserrat-megapolis53-\d{2}\.woff2$',name)]
 new_assets=[fonts/name for name in entries]
-if text.count(old_name)!=1 or new_name in text:
+if text.count(old_name)!=2 or new_name in text:
  raise RuntimeError('Theme font reference guard: original_count='+str(text.count(old_name))+' current_new='+str(text.count(new_name))+' template='+str(template.relative_to(root)))
 if len(entries)!=19 or len(woff2)!=18 or len(set(entries))!=19 or any(p.exists() for p in new_assets):
  raise RuntimeError('Unexpected bundle or asset collision; do not edit')
@@ -125,7 +125,7 @@ if backup.read_bytes()!=source:raise RuntimeError('Font backup mismatch')
 print('FONT76_BACKUP='+json.dumps({'file':str(backup),'source_sha':hashlib.sha256(source).hexdigest()}),flush=True)
 written=[]
 theme_written=False
-updated=text.replace(old_name,new_name,1).encode('utf8')
+updated=text.replace(old_name,new_name,2).encode('utf8')
 try:
  for name in entries:
   if '/' in name or '\\' in name:raise RuntimeError('Path traversal')
