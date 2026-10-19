@@ -41,6 +41,8 @@ foreach($rows as $r){
   $stats['legacy_links']++;
   $old=$legacy[0];
   $fixed=preg_replace('~^https?://(www[.])?mebelik[.]ru~i','https://mebelik.ru',$old);
+  if($stats['legacy_links']<=8){$altered=preg_replace_callback('~(\\[extimg\\]\\s*)(https?://(?:www[.])?mebelik[.]ru)([^\\s<\\[\\]]*)(\\s*\\[/extimg\\])~iu',function($x){return $x[1].'https://mebelik.ru'.$x[3].$x[4];},$summary);
+  echo 'MBK_AUDIT_DIAG='.json_encode(array('id'=>$r['id'],'original'=>$old,'normalized'=>$fixed,'rawprefix'=>substr($summary,0,160),'old_regex_changed'=>($altered!==$summary)),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";}
   echo 'MBK_AUDIT_OLD='.json_encode(array('id'=>(int)$r['id'],'name'=>$r['name'],
    'native_image'=>((int)$r['image_id']>0),'external_count'=>count($m[1]),
    'old_protocol'=>parse_url($old,PHP_URL_SCHEME),'test_canonical'=>probe($fixed)),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
