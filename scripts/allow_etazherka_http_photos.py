@@ -62,6 +62,54 @@ else:
 REMOTE
 """
 
+
+SOURCE_PATCH = r"""set -euo pipefail
+python3 - <<'REMOTE'
+import os, pathlib, shutil, subprocess, tempfile
+from datetime import datetime,timezone
+
+root=pathlib.Path('/home/web/vm-23f9aff9.na4u.ru/www')
+target=root/'wa-apps/shop/plugins/univimport/lib/classes/shopUnivimportPluginUniversalPhotoSync.class.php'
+s=target.read_text(encoding='utf-8')
+needle="$url=isset($c['url'])?trim((string)$c['url']):'';"
+added="""$url=isset($c['url'])?trim((string)$c['url']):'';
+        // Profile 8 uses YML Pro's separate File Manager rather than legacy config.url.
+        // Read the same source as shopYmlFactory::getFile(), do not alter plugin settings.
+        if ($url==='' && (int)$id===8 && trim((string)$row['name'])==='Этажерка') {
+            $fileInfo=shopYmlFilesHelper::getFileInfo(8);
+            if (is_array($fileInfo) && isset($fileInfo['upload_type'])
+                && strtolower((string)$fileInfo['upload_type'])==='url'
+                && !empty($fileInfo['url'])) {
+                $url=trim((string)$fileInfo['url']);
+            }
+        }"""
+if added in s:
+ print('STAGE52_ETAZHERKA_SOURCE_PATCH='+str({'patched':False,'already_active':True}),flush=True)
+elif s.count(needle)==1:
+ new=s.replace(needle,added,1)
+ base=root.parent/'storefront-backups'
+ base.mkdir(parents=True,exist_ok=True)
+ backup=base/('etazherka-source-reader-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'.php')
+ shutil.copy2(str(target),str(backup))
+ os.chmod(str(backup),0o600)
+ stat=target.stat()
+ with tempfile.NamedTemporaryFile('w',encoding='utf-8',dir=str(target.parent),prefix='.etzsrc-',delete=False) as f:
+  f.write(new)
+  tmp=f.name
+ os.chmod(tmp,stat.st_mode)
+ os.chown(tmp,stat.st_uid,stat.st_gid)
+ try:
+  v=subprocess.run(['php','-l',tmp],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=20)
+  if v.returncode:raise RuntimeError('PHP lint failed')
+  os.rename(tmp,str(target))
+ finally:
+  if os.path.exists(tmp):os.unlink(tmp)
+ print('STAGE52_ETAZHERKA_SOURCE_PATCH='+str({'patched':True,'lint':'ok','backup':str(backup)}),flush=True)
+else:
+ raise RuntimeError('Guard mismatch in YML Pro source resolver, refusing edit')
+REMOTE
+"""
+
 RUN = r"""set -euo pipefail
 cd /home/web/vm-23f9aff9.na4u.ru/www
 F="$(mktemp /tmp/etazherka-photo-XXXXXX.php)"
@@ -96,6 +144,9 @@ def main():
     output = execute(PATCH)
     if 'STAGE52_ETAZHERKA_PATCH=' not in output:
         raise RuntimeError('Could not verify server PHP change')
+    source_output = execute(SOURCE_PATCH)
+    if 'STAGE52_ETAZHERKA_SOURCE_PATCH=' not in source_output:
+        raise RuntimeError('Could not verify YML Pro source resolver patch')
     output = execute(RUN)
     for line in output.splitlines():
         if line.startswith(('STAGE52_ETAZHERKA_PREVIEW=', 'STAGE52_ETAZHERKA_APPLY=')):
