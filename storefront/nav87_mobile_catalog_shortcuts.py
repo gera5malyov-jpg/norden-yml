@@ -10,7 +10,7 @@ source=file.read_text('utf8')
 marker='megapolis-mobile-catalog-shortcuts-20261019'
 before_anchor='      <ul class="mobile-nav__list">\n        {foreach $_catalogs as $cat_item}'
 after_anchor='      </ul>\n    {/if}\n\n    {* PAGES *}'
-top=r'''      {if $wa->domainUrl() == 'https://profikompany.ru'}
+top=r"""      {if $wa->domainUrl() == 'https://profikompany.ru'}
       {* megapolis-mobile-catalog-shortcuts-20261019: shortcuts and full category tree, unchanged category data *}
       <section class="megapolis-menu-quick" aria-label="Основные разделы каталога">
         <div class="megapolis-menu-quick__title">Популярные разделы</div>
@@ -26,8 +26,8 @@ top=r'''      {if $wa->domainUrl() == 'https://profikompany.ru'}
       <details class="megapolis-menu-all">
         <summary>Все категории <span aria-hidden="true">⌄</span></summary>
       {/if}
-'''
-tail=r'''      {if $wa->domainUrl() == 'https://profikompany.ru'}
+"""
+tail=r"""      {if $wa->domainUrl() == 'https://profikompany.ru'}
       </details>
       {literal}
       <style id="megapolis-mobile-catalog-style-20261019">
