@@ -5,7 +5,9 @@ from collections import Counter
 import datetime
 import json
 import os
+import re
 import sys
+from html.parser import HTMLParser
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -40,7 +42,8 @@ def read_response(url, limit=5_000_000):
         with urllib.request.urlopen(request, timeout=22) as response:
             code = response.status
             content = response.read(limit) if limit else b""
-            return {"url": url, "status": code, "body": content, "final_url": response.url}
+            return {"url": url, "status": code, "body": content, "final_url": response.url,
+                    "x_robots_tags": response.headers.get_all("X-Robots-Tag", [])}
     except urllib.error.HTTPError as error:
         return {"url": url, "status": error.code, "body": b"", "final_url": error.geturl()}
     except Exception as error:
@@ -50,6 +53,44 @@ def read_response(url, limit=5_000_000):
 def site_url(url):
     parsed = urllib.parse.urlparse(url)
     return parsed.scheme == "https" and parsed.netloc == "profikompany.ru" and parsed.path.startswith("/")
+
+
+class _MainHeadRobots(HTMLParser):
+    """Inspect only the FIRST page head, never embedded widget/iframe documents."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.head_seen = False
+        self.in_head = False
+        self.directives = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag.lower() == "head" and not self.head_seen:
+            self.head_seen = True
+            self.in_head = True
+        elif tag.lower() == "meta" and self.in_head:
+            attrs = dict((str(k).lower(), v or "") for k, v in attrs)
+            if attrs.get("name", "").lower() in ("robots", "yandex", "googlebot"):
+                self.directives.append(attrs.get("content", ""))
+
+    def handle_endtag(self, tag):
+        if tag.lower() == "head":
+            self.in_head = False
+
+
+def head_indexing_directives(html):
+    """Return robots directives from the page's primary <head> only."""
+    parser = _MainHeadRobots()
+    parser.feed(html.decode("utf-8", "replace") if isinstance(html, bytes) else html)
+    return parser.directives if parser.head_seen else None
+
+
+def directives_block_indexing(directives):
+    """noindex, nofollow or none on the main document are SEO blockers."""
+    if not directives:
+        return False
+    tokens = {x.lower() for value in directives for x in re.split(r"[\s,;]+", value) if x}
+    return bool(tokens.intersection({"noindex", "nofollow", "none"}))
+
 
 
 def main():
@@ -120,6 +161,47 @@ def main():
             if response.get("status") != 200:
                 result["failures"].append(item)
 
+    # Check what YandexBot actually receives in the main document, not inside
+    # third-party widgets (e.g. VK iframe, whose own document can say noindex).
+    commercial_routes = [
+        "/", "/category/kompyuternye-kresla/", "/category/mebel-dlya-ofisa/",
+        "/category/krovati/", "/category/stul/",
+        "/category/kompyuternye-kresla/?page=2",
+        "/stul-kenner-313sd-chernyy-zhemchug-e10-334-322382/",
+    ]
+    protected_routes = [
+        "/search/?query=test", "/order/", "/compare/",
+    ]
+    result["indexability"] = []
+    for path, should_index in [(p, True) for p in commercial_routes] + [
+        (p, False) for p in protected_routes
+    ]:
+        page = read_response(SITE + path)
+        directives = head_indexing_directives(page.get("body", b"")) if page.get("status") == 200 else None
+        header_directives = page.get("x_robots_tags", [])
+        combined = (directives or []) + header_directives
+        blocked = directives_block_indexing(combined)
+        error = None
+        if page.get("status") != 200:
+            error = "unexpected_status"
+        elif directives is None:
+            error = "missing_primary_html_head"
+        elif should_index and blocked:
+            error = "commercial_page_blocked_from_indexing"
+        elif not should_index and not any(
+            "noindex" in str(x).lower() or "none" in str(x).lower() for x in combined
+        ):
+            error = "technical_page_missing_noindex"
+        record = {"url": SITE + path, "status": page.get("status"),
+                  "should_index": should_index, "meta_robots": directives,
+                  "x_robots_tags": header_directives, "blocked": blocked,
+                  "error": error}
+        result["indexability"].append(record)
+        if error:
+            result["failures"].append({"url": record["url"], "error": error,
+                                       "status": page.get("status"),
+                                       "directives": combined})
+
     os.makedirs("seo-reports", exist_ok=True)
     with open("seo-reports/sitemap-daily.json", "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
@@ -131,6 +213,8 @@ def main():
         "cross_sitemap_duplicates": sum(d.get("duplicates_across", 0) for d in result["child_sitemaps"]),
         "unique_urls_in_sitemaps": len(all_locs),
         "sample_checked": len(result["checks"]),
+        "indexability_checked": len(result["indexability"]),
+        "indexability_failures": sum(bool(x["error"]) for x in result["indexability"]),
         "failures": len(result["failures"]),
     }, ensure_ascii=False))
     for item in result["failures"][:30]:
