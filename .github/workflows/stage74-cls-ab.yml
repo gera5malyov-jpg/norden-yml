@@ -1,0 +1,22 @@
+name: Stage74 - Controlled mobile CLS font icon trial
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/stage74-cls-ab.yml'
+permissions:
+  contents: read
+jobs:
+  trial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/stage74_cls_ab.py
+      - run: python -m pip install playwright==1.55.0
+      - name: Compare unmodified baseline with isolated font and icon experiments
+        run: python storefront/stage74_cls_ab.py
