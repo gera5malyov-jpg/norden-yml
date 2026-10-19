@@ -38,7 +38,7 @@ txt=orig.decode('utf8')
 font_source=oldcss.read_bytes()
 font_text=font_source.decode('utf8')
 emit('DIAG',{'old_link_count':txt.count(oldlink),'new_link_count':txt.count(newlink),'newcss_exists':newcss.exists(),
- 'oldcss_exists':oldcss.is_file(),'references':re.findall(r'.{0,70}montserrat\\.megapolis53\\.css.{0,100}',txt)[:3]})
+ 'oldcss_exists':oldcss.is_file(),'contexts':[txt[max(0,m.start()-135):m.start()+160] for m in list(re.finditer(re.escape(oldlink),txt))[:2]]})
 if txt.count(oldlink)!=1 or newlink in txt or newcss.exists() or not oldcss.is_file():
  raise RuntimeError('PREFLIGHT 1: old font link or source differs, abort')
 if font_text.count('@font-face')!=18 or font_text.count('font-display:swap')!=18 or 'font-display:optional' in font_text:
