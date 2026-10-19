@@ -17,7 +17,7 @@ old="""              <div class="megapolis-purchase-trust__title">Перед о�
               </nav>"""
 new="""              {* megapolis-verified-trust-20261019: references to existing public terms only, no invented ratings. *}
               <div class="megapolis-purchase-trust__title">Покупка с понятными условиями</div>
-              <nav class="megapolis-purchase-trust__facts" aria-label="Информация о продавце и условиях">
+              <nav class="megapolis-purchase-trust__facts megapolis-verified-trust-20261019" aria-label="Информация о продавце и условиях">
                 <a href="/oplata/"><strong>Для организаций</strong><span>Счёт и документы к заказу</span></a>
                 <a href="/garantiya/"><strong>Гарантия и возврат</strong><span>Условия и порядок обращения</span></a>
                 <a href="/dostavka/"><strong>Доставка по России</strong><span>Стоимость согласуем отдельно</span></a>
@@ -26,7 +26,7 @@ new="""              {* megapolis-verified-trust-20261019: references to existin
               <p class="megapolis-purchase-trust__seller"><a href="/o-kompanii/">Информация о компании «Мегаполис»</a></p>"""
 oldcss="""                .megapolis-purchase-trust__links{display:flex;gap:7px 18px;flex-wrap:wrap;margin:5px 0 10px}"""
 newcss="""                .megapolis-purchase-trust__facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0 12px}
-                .megapolis-purchase-trust__facts a{min-height:70px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:10px 11px;background:#fff;border:1px solid #e3ded8;border-radius:6px;text-decoration:none;color:#302c28}
+                .megapolis-purchase-trust .megapolis-purchase-trust__facts a{min-height:70px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:10px 11px;background:#fff;border:1px solid #e3ded8;border-radius:6px;text-decoration:none;color:#302c28}
                 .megapolis-purchase-trust__facts a strong{font-size:13px;color:#2f2821;line-height:1.35}
                 .megapolis-purchase-trust__facts a span{font-size:12px;line-height:1.35;color:#5e5954}
                 .megapolis-purchase-trust__seller{margin-top:7px!important}
@@ -74,7 +74,7 @@ if any(base[i]['has_marker'] for i in range(len(base))):
  raise RuntimeError('Preflight 3 duplicate deployment')
 print('TRUST88_PRE='+json.dumps({'check':3,'ok':True,'nav_and_seo_preserved':True}),flush=True)
 updated=source.replace(old,new,1).replace(oldcss,newcss,1)
-if updated==source or updated.count(marker)!=1 or updated.count('{literal}')!=source.count('{literal}'):
+if updated==source or updated.count(marker)!=2 or updated.count('{literal}')!=source.count('{literal}'):
  raise RuntimeError('Generated code invalid')
 folder=root.parent/'storefront-backups'/('trust88-'+datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')+'-'+str(os.getpid()))
 folder.mkdir(parents=True,mode=0o700)
