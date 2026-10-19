@@ -51,7 +51,7 @@ try:
  ]
  for path,kind in cases:
   p=subprocess.run(['curl','-ksSL','--compressed','--max-time','35','-w','\n%{http_code}',
-       'https://profikompany.ru'+path],capture_output=True,text=True,timeout=42)
+       'https://profikompany.ru'+path],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=42)
   html,status=p.stdout.rsplit('\n',1) if '\n' in p.stdout else ('','')
   head=html.split('</head>',1)[0]
   ok=(p.returncode==0 and status=='200' and len(html)>3000)
