@@ -46,7 +46,10 @@ jobs:
             'images_mode'=>isset($c['images'])?$c['images']:'unset',
             'http_login_nonempty'=>!empty($c['http_login']),
             'http_auth_nonempty'=>!empty($c['http_auth']),
-            'config_keys'=>array_keys($c)
+            'local_file_nonempty'=>!empty($c['local_file']),
+            'server_file_nonempty'=>!empty($c['server_file']),
+            'category_urls_nonempty'=>!empty($c['category_urls']),
+            'file_field_is_path_only'=>true
           );
           echo 'STAGE52_PROFILE_SOURCE='.json_encode($result,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)."\n";
           PHP
