@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/stage75-optional-font.yml'
+      - 'storefront/stage75_optional_font_20261019.py'
 permissions:
   contents: read
 concurrency:
