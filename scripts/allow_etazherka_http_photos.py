@@ -35,15 +35,15 @@ new_photo_pattern = '(https?://'
 if old_gate in s and old_photo_pattern in piece:
     if s.count(old_gate) != 1 or piece.count(old_photo_pattern) != 1:
         raise RuntimeError('Unexpected validation code; no patch')
-    after = s.replace(old_gate, new_gate, 1)
-    after = after[:start] + after[start:end].replace(old_photo_pattern, new_photo_pattern, 1) + after[end:]
+    after = s[:start] + piece.replace(old_photo_pattern, new_photo_pattern, 1) + s[end:]
+    after = after.replace(old_gate, new_gate, 1)
     base = root.parent / 'storefront-backups'
     base.mkdir(exist_ok=True, parents=True)
     backup = base / ('etazherka-photo-policy-' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '.php')
-    shutil.copy2(target, backup)
-    os.chmod(backup, 0o600)
+    shutil.copy2(str(target), str(backup))
+    os.chmod(str(backup), 0o600)
     stat = target.stat()
-    with tempfile.NamedTemporaryFile('w', encoding='utf-8', dir=target.parent, prefix='.etazherka-', delete=False) as tmp:
+    with tempfile.NamedTemporaryFile('w', encoding='utf-8', dir=str(target.parent), prefix='.etazherka-', delete=False) as tmp:
         tmp.write(after)
         tmpname = tmp.name
     os.chmod(tmpname, stat.st_mode)
@@ -51,7 +51,7 @@ if old_gate in s and old_photo_pattern in piece:
     try:
         check = subprocess.run(['php', '-l', tmpname], capture_output=True, text=True, timeout=20)
         if check.returncode: raise RuntimeError('PHP lint failed: ' + check.stderr[:250])
-        os.replace(tmpname, target)
+        os.rename(tmpname, str(target))
     finally:
         if os.path.exists(tmpname): os.unlink(tmpname)
     print('STAGE52_ETAZHERKA_PATCH=' + str({'patched':True,'backup':str(backup),'php_lint':'ok'}),flush=True)
