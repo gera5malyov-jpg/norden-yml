@@ -1,0 +1,27 @@
+name: Filter Mebelik documents from photo gallery
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/filter_mebelik_nonimage_photos.py
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mebelik-photo-link-fix
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Safely exclude PDF HTML video from Mebelik galleries and reapply image URLs
+        run: python3 -u scripts/filter_mebelik_nonimage_photos.py
