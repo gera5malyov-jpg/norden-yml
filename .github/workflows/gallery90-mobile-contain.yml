@@ -1,0 +1,27 @@
+name: Gallery90 - Mobile product photos fully visible
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery90-mobile-contain.yml'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-seo-layout
+  cancel-in-progress: false
+jobs:
+  fit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate Python and template script
+        run: python -m py_compile storefront/gallery90_mobile_contain.py
+      - name: Apply guarded mobile gallery fix with backup and 12 live checks
+        run: python storefront/gallery90_mobile_contain.py
