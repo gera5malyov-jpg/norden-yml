@@ -31,6 +31,7 @@ def fetch(u):
   'description':re.findall(r'<meta[^>]*name="description"[^>]*>',head,re.I),
   'robots':re.findall(r'<meta[^>]*name="robots"[^>]*>',head,re.I),
   'has_font_new':newlink in head,'has_font_old':oldlink in head,
+  'font_refs':re.findall(r'css/fonts/[^"\']+\.css[^"\']*',body,re.I)[:5],
   'phones':'2449264' in body,'product_buy':'megapolis-mobile-buy__button' in body,
   'has_product_gallery':('product-gallery--extimg' in body or 'product-gallery__main' in body)}
 orig=index.read_bytes()
@@ -57,7 +58,7 @@ for i,path in enumerate(routes):
  x=fetch(path)
  if x['rc'] or x['http']!='200' or not x['title'] or not x['phones'] or not x['has_font_old'] or x['has_font_new']:
   emit('PAGE_DIAG',{'route':path,'rc':x['rc'],'http':x['http'],'title_count':len(x['title']),
-   'phones':x['phones'],'oldfont':x['has_font_old'],'newfont':x['has_font_new']})
+   'phones':x['phones'],'oldfont':x['has_font_old'],'newfont':x['has_font_new'],'font_refs':x['font_refs']})
   raise RuntimeError('PREFLIGHT 2: invalid live page '+path)
  baseline.append(x)
 emit('PREFLIGHT',{'check':2,'ok':True,'routes':len(routes)})
