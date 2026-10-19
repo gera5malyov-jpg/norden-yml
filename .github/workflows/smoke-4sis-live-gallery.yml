@@ -1,12 +1,7 @@
-name: Monitor 4sis external photo gallery on storefront
+name: 4sis gallery check (manual only)
+# Automatic 12-hour gallery monitoring disabled by owner on 2026-10-19.
+# Retain manual diagnostics only; no scheduled or push triggers.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'storefront/smoke_4sis_live_gallery.py'
-      - '.github/workflows/smoke-4sis-live-gallery.yml'
-  schedule:
-    - cron: '23 6,18 * * *'
   workflow_dispatch:
 permissions:
   contents: read
