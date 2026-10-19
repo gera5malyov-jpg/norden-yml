@@ -1,0 +1,22 @@
+name: Perf73 - Mobile CLS root cause
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/perf73-mobile-cls.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile storefront/perf73_mobile_cls_sources_readonly.py
+      - run: python -m pip install playwright==1.55.0
+      - name: Capture mobile layout shifts and fonts without any store writes
+        run: python storefront/perf73_mobile_cls_sources_readonly.py
