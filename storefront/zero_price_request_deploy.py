@@ -56,7 +56,13 @@ try:
   head=html.split('</head>',1)[0]
   ok=(p.returncode==0 and status=='200' and len(html)>3000)
   if kind=='quote':
-   ok=ok and 'Цена по запросу' in html and 'megapolis-request-price' in html and 'цена 0 руб.' not in head.lower() and '<meta itemprop="price" content="0">' not in html
+   flags={'label': 'Цена по запросу' in html,
+     'cta': 'megapolis-request-price' in html,
+     'zero_in_head': 'цена 0 руб.' in head.lower(),
+     'zero_schema': '<meta itemprop="price" content="0">' in html,
+     'title':re.findall(r'<title[^>]*>(.*?)</title>',head,re.I|re.S)[:1]}
+   print('PRICE_REQUEST_DEBUG='+json.dumps(flags,ensure_ascii=False),flush=True)
+   ok=ok and flags['label'] and flags['cta'] and not flags['zero_in_head'] and not flags['zero_schema']
   if kind=='priced':
    ok=ok and '12 240' in html and '<meta itemprop="price" content="12240">' in html and 'class="product-add"' in html
   if kind=='home':
