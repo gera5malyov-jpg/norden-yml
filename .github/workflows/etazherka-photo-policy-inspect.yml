@@ -1,0 +1,45 @@
+name: Inspect Etazherka photo URL policy
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/etazherka-photo-policy-inspect.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read URL-validation code only
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, 'storefront')
+          from stage52_disable_callback import execute
+          remote = """set -euo pipefail
+          python3 - <<'REMOTE'
+          from pathlib import Path
+          p=Path('/home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/univimport/lib/classes/shopUnivimportPluginUniversalPhotoSync.class.php')
+          a=p.read_text(encoding='utf-8').splitlines()
+          indices=[i for i,l in enumerate(a) if any(w in l.lower() for w in ('insecure_images','https://','parse_url(','http://','preg_match(', 'missing_photos','photo_reachability'))]
+          selected=set()
+          for i in indices:
+              for j in range(max(0,i-10),min(len(a),i+11)): selected.add(j)
+          print('STAGE52_INSPECT_META='+str({'total_lines':len(a),'matched_lines':len(indices)}))
+          for i in sorted(selected):
+              line=a[i].strip()
+              if len(line)>300:line=line[:300]+'...'
+              print('STAGE52_INSPECT_LINE='+str(i+1)+': '+line)
+          REMOTE
+          """
+          out=execute(remote)
+          print('inspection_complete='+str('STAGE52_INSPECT_META=' in out))
+          PY
