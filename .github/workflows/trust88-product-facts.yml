@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/trust88-product-facts.yml'
+      - 'storefront/trust88_verified_buyer_facts.py'
 permissions:
   contents: read
 concurrency:
