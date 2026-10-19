@@ -1,0 +1,21 @@
+name: Site86 nav trust source
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/site86-nav-trust-source.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python storefront/site86_nav_trust_sources.py
