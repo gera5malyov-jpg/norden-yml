@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/perf76-font-compression.yml'
+      - 'storefront/perf76_woff2_optimization.py'
 permissions:
   contents: read
 concurrency:
