@@ -17,14 +17,14 @@ labelmap="{if "+labelvar+" == '"+name_pairs[0][0]+"'}"+name_pairs[0][1]
 for old,new in name_pairs[1:]:
  labelmap+="{elseif "+labelvar+" == '"+old+"'}"+new
 labelmap+="{else}{"+labelvar+"|escape}{/if}"
-booldisplay=("{if is_string($f_value) && in_array($f_code, $_megapolis_bool_feature_codes)"
+booldisplay=("{if !is_array($f_value) && in_array($f_code, $_megapolis_bool_feature_codes)"
   " && strtolower(trim($f_value)) == 'true'}Да"
-  "{elseif is_string($f_value) && in_array($f_code, $_megapolis_bool_feature_codes)"
+  "{elseif !is_array($f_value) && in_array($f_code, $_megapolis_bool_feature_codes)"
   " && strtolower(trim($f_value)) == 'false'}Нет"
   "{else}{$f_value}{/if}")
 badnames="['model','tsvet_karkasa']"
 # Never replace invalid supplier color/model/collection tokens with a fabricated specification.
-suppression=("(is_string($f_value) && "
+suppression=("(!is_array($f_value) && "
  "((in_array($f_code, ['model','tsvet_karkasa']) && in_array(strtolower(trim($f_value)), ['true','false']))"
  " || in_array(strtolower(trim($f_value)), ['nan','undefined','null'])))")
 before={};after={};counts={}
@@ -89,7 +89,8 @@ try:
   details={'route':route,'http':code,'ok':bool(good)}
   if kind=='kenner':
    # Rendered HTML must contain the human-readable boolean and normalized label.
-   details['boolean_yes']=bool(re.search(r'Tребуется сборка.{0,600}?Да',body,re.S))
+   details['boolean_yes']=bool(re.search(r'Требуется сборка.{0,600}?Да',body,re.S))
+   details['feature_excerpt']=(re.search(r'Требуется сборка.{0,850}',body,re.S).group(0)[:280] if 'Требуется сборка' in body else 'NOT_PRESENT')
    details['normalized_depth']='РазмерГлубина' not in body and 'Глубина' in body
    good=good and details['boolean_yes'] and details['normalized_depth']
   if kind=='order':good=good and 'noindex,follow' in body
