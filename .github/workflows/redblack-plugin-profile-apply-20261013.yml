@@ -6,6 +6,8 @@ on:
 permissions: {contents: read}
 jobs:
   inspect:
+    # Disabled by owner 2026-10-19: do not re-enable Red-Black Webasyst imports.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
