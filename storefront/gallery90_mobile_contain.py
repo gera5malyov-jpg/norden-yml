@@ -97,7 +97,10 @@ try:
   css_ok='megapolis-gallery-mobile-fit-v2' in after['body'] and 'height:clamp(220px,36vh,320px)' in after['body']
   ok=bool(stable and css_ok)
   say('TEST',{'number':i+1,'path':path,'ok':ok,'http':after['status'],'gallery_links_kept':after['thumbnails']==orig['thumbnails']})
-  if not ok:raise RuntimeError('Storefront postcheck failed: '+path)
+  if not ok:
+   fields=['rc','status','title','robots','canonical','productgallery','thumbnails','form','purchase','trust','menu','font76']
+   say('DIFF',{'route':path,'changed':{key:{'before':str(orig[key])[:130],'after':str(after[key])[:130]} for key in fields if orig[key]!=after[key]},'css_ok':css_ok})
+   raise RuntimeError('Storefront postcheck failed: '+path)
  if file.read_text('utf8')!=updated:raise RuntimeError('Live file changed unexpectedly')
  say('DONE',{'success':True,'postchecks':len(routes),'backup':str(backup),
   'fit':'contain','mobile_gallery_max_height_px':320,'source_images_unchanged':True,
