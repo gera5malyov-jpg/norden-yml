@@ -35,13 +35,22 @@ for name in ('lib/models/shopYmlProfiles.model.php','lib/config/db.php'):
  for i,line in enumerate(s):
   if any(k in line.lower() for k in ('source','file','url','config')) and i<250:
    print('ETZ_DIAG=code:%s:%s:%s'%(name,i+1,line[:250]))
-for p in root.rglob('*'):
- if p.suffix not in ('.php','.html','.js'):continue
- if p.stat().st_size>800000:continue
- try:s=p.read_text(encoding='utf-8',errors='replace')
- except Exception:continue
- if any(x in s for x in ('Изменить файл','Детали файла','Источник: URL')):
-  print('ETZ_DIAG=ui_candidate:'+str(p))
+for name in ('js/modules/files/details.js','js/modules/files/index.js','templates/actions/profile/file_details_dialog.html','templates/actions/profile/file_selector.html'):
+ p=root/name
+ if not p.is_file():continue
+ lines=p.read_text(encoding='utf-8',errors='replace').splitlines()
+ print('ETZ_DIAG=inspect:'+name+':'+str(len(lines)))
+ for i,line in enumerate(lines[:220]):
+  print('ETZ_DIAG=inspect_line:'+str(i+1)+':'+line[:240])
+print('ETZ_DIAG=file_controllers')
+for p in root.rglob('*.php'):
+ if '/actions/' not in str(p):continue
+ if 'file' not in p.name.lower() and 'profile' not in p.name.lower():continue
+ if p.stat().st_size>90000:continue
+ s=p.read_text(encoding='utf-8',errors='replace')
+ if any(k in s for k in ('file_details','file_selector','getFile','fileUrl','file_url','url')):
+  print('ETZ_DIAG=controller:'+str(p))
+
 PY
 """
 output=execute(remote)
