@@ -1,9 +1,5 @@
 name: Permit HTTP photos for Etazherka (YML Pro ID 8)
 on:
-  push:
-    branches: [main]
-    paths:
-      - scripts/allow_etazherka_http_photos.py
   workflow_dispatch:
 permissions:
   contents: read
