@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/order81-purchase-readonly.yml'
+      - 'storefront/order81_product_template_readonly.py'
 permissions:
   contents: read
 jobs:
