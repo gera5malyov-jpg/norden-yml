@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/zero-price-request-deploy.yml'
+      - 'storefront/zero_price_request_deploy.py'
 permissions:
   contents: read
 concurrency:
