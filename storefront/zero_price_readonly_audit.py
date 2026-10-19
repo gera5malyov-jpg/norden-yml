@@ -35,7 +35,9 @@ for rel,lo,hi in [
  ('wa-data/public/site/themes/pureMegapolis42/index.html',93,130),
  ('wa-data/public/shop/themes/pureMegapolis42/product.cart.html',65,155),
  ('wa-data/public/shop/themes/pureMegapolis42/product.cart.html',179,325),
- ('wa-data/public/shop/themes/pureMegapolis42/product.html',205,260)]:
+ ('wa-data/public/shop/themes/pureMegapolis42/product.html',205,260),
+ ('wa-data/public/shop/themes/pureMegapolis42/products.html',1,210),
+ ('wa-data/public/shop/themes/pureMegapolis42/list-thumbs.html',1,210)]:
  p=root/rel
  ls=p.read_text('utf8',errors='replace').splitlines()
  print('ZERO_CONTEXT='+json.dumps({'file':rel,'start':lo,'lines':[str(i+1)+': '+ls[i][:350] for i in range(lo-1,min(hi,len(ls)))]},ensure_ascii=False),flush=True)
