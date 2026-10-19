@@ -1,0 +1,24 @@
+name: Audit Mebelik external photo and PDF links
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/audit_mebelik_photo_pdf.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Inspect all product photo URLs and PDF links without changes
+        run: python3 -u scripts/audit_mebelik_photo_pdf.py
