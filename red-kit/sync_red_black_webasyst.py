@@ -184,6 +184,9 @@ def load_snapshot():
 
 
 def run(dry_run=False):
+    # Explicit owner opt-in is required for any Red-Black -> Webasyst writes.
+    if not dry_run and os.getenv("RED_BLACK_WEBASYST_WRITE_ENABLED") != "1":
+        raise RuntimeError("Red-Black -> Webasyst import disabled by owner on 2026-10-19")
     snapshot, offers = load_snapshot()
     wa = WebasystClient(min_request_interval=WRITE_DELAY)
 
