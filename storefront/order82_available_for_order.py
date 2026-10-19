@@ -26,13 +26,13 @@ def fetch(path):
   'https://profikompany.ru'+path],stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
  data,error=p.communicate(timeout=35)
  html,code=data.rsplit('\n',1)
- return {'code':code,'rc':p.returncode,'label':html.count(marker),'title':html.split('</head>',1)[0].count('<title'),
+ return {'code':code,'rc':p.returncode,'label':html.count(marker),'disabled':('value="Купить" disabled="disabled"' in html),'title':html.split('</head>',1)[0].count('<title'),
  'robots':'noindex,follow' in html.split('</head>',1)[0]}
 before=[fetch(u) for u in urls]
-if not all(p['code']=='200' and p['title']==1 and p['label']==0 for p in before):
+if not all(p['code']=='200' and p['title']==1 for p in before):
  raise RuntimeError('Live baseline not healthy')
 print('ORDER82_PREFLIGHT=ten_routes_healthy',flush=True)
-if not before[7]['robots'] or before[2]['robots']:raise RuntimeError('SEO control preflight failed')
+if not before[7]['robots'] or before[2]['robots'] or not before[1]['disabled'] or before[0]['disabled']:raise RuntimeError('SEO or orderability preflight failed')
 print('ORDER82_PREFLIGHT=seo_guards_healthy',flush=True)
 folder=root.parent/'storefront-backups'/('order82-'+datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ'))
 folder.mkdir(parents=True,mode=0o700)
@@ -50,7 +50,7 @@ try:
  os.rename(tmp,str(target));saved=True
  for i,u in enumerate(urls):
   value=fetch(u);good=(value['code']=='200' and value['title']==1 and value['robots']==before[i]['robots']
-    and (value['label']>0 if i<2 else value['label']==0))
+    and (value['label']>0 if i==0 else value['label']==0) and value['disabled']==before[i]['disabled'])
   print('ORDER82_TEST='+json.dumps({'route':u,'ok':good,'label':value['label']}),flush=True)
   if not good:raise RuntimeError('Postcheck failed: '+u)
  print('ORDER82_DEPLOY=success',flush=True)
