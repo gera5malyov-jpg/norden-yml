@@ -1,11 +1,6 @@
-name: Backfill Webasyst suppliers
+name: Backfill Webasyst suppliers - manual only
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/backfill_megasuppliers_existing.py'
-      - '.github/workflows/backfill-megasuppliers-existing.yml'
   workflow_dispatch:
 
 permissions:
@@ -38,5 +33,3 @@ jobs:
             git commit -m "Save supplier backfill report [skip ci]"
             git push origin HEAD:main || true
           fi
-
-# trigger supplier backfill
