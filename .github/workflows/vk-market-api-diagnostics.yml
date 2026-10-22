@@ -1,0 +1,54 @@
+name: VK Market API diagnostics
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  access-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check access without revealing token
+        env:
+          VK_TOKEN: ${{ secrets.VK_KL }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, sys, urllib.parse, urllib.request, urllib.error
+
+          token = os.getenv("VK_TOKEN", "")
+          if not token:
+              print("VK_KL is missing or empty.")
+              sys.exit(2)
+
+          def probe(method, fields):
+              data = {"access_token": token, "v": "5.199", **fields}
+              req = urllib.request.Request(
+                  f"https://api.vk.com/method/{method}",
+                  data=urllib.parse.urlencode(data).encode("utf-8"),
+                  method="POST",
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=20) as response:
+                      result = json.load(response)
+              except (urllib.error.URLError, TimeoutError, ValueError) as exc:
+                  print(f"{method}: transport or parsing failure ({type(exc).__name__})")
+                  return False
+              if "error" in result:
+                  error = result["error"]
+                  # Do not log token or full request_params supplied by VK.
+                  print(f"{method}: ERROR code={error.get('error_code')} message={str(error.get('error_msg', ''))[:150]}")
+                  return False
+              response = result.get("response", {})
+              if method == "market.get":
+                  print(f"{method}: OK count={response.get('count')} returned={len(response.get('items', []))}")
+              else:
+                  print(f"{method}: OK")
+              return True
+
+          market_ok = probe("market.get", {"owner_id": "-48258076", "count": "1"})
+          print("Result: " + ("market read access confirmed" if market_ok else "market read access unavailable with this token"))
+          PY
