@@ -4,7 +4,6 @@
   "protocol": "WireGuard",
   "baseline": false,
   "profiles": [
-    "VPNTYPE-AMS1.conf",
     "VPNTYPE-AMS5.conf",
     "VPNTYPE-AST1.conf",
     "VPNTYPE-DAL1.conf",
@@ -20,7 +19,6 @@
     "VPNTYPE-TEL3.conf"
   ],
   "sha256": {
-    "VPNTYPE-AMS1.conf": "6cc8fe31145b8b13aba240342923d1708f0bd5dd4edc8842722d35dade62f568",
     "VPNTYPE-AMS5.conf": "f361e07623af2bd412fdecc700912355d1819bf179f9235d6789ee0219f8e39b",
     "VPNTYPE-AST1.conf": "6086632479c5aedb36282f92c408b4f8d0d1edf6eb4b31339abdd7102f07bb31",
     "VPNTYPE-DAL1.conf": "5c7cdd5e449cc3370a67e0c91c62ed4281897118d0ab30b951f277dcc0795f75",
@@ -36,7 +34,6 @@
     "VPNTYPE-TEL3.conf": "527f0f7658266efe06162778f9a9b1fac79970ae5e206f7783e2e69de43c63a3"
   },
   "labels": {
-    "VPNTYPE-AMS1.conf": "🇳🇱 Нидерланды Амстердам 100 Мбит/с WireGuard",
     "VPNTYPE-AMS5.conf": "🇳🇱 Нидерланды Амстердам 5 100 Мбит/с WireGuard",
     "VPNTYPE-AST1.conf": "🇰🇿 Казахстан Астана 100 Мбит/с WireGuard",
     "VPNTYPE-DAL1.conf": "🇺🇸 США Даллас 100 Мбит/с WireGuard",
@@ -51,10 +48,10 @@
     "VPNTYPE-STO1.conf": "🇸🇪 Швеция Стокгольм 100 Мбит/с WireGuard",
     "VPNTYPE-TEL3.conf": "🇮🇱 Израиль Тель-Авив 3 100 Мбит/с WireGuard"
   },
-  "updated_at": "2026-10-21T11:42:48.407209+00:00",
-  "added_on_last_scan": [
-    "VPNTYPE-DAL1.conf"
+  "updated_at": "2026-10-22T11:45:34.290409+00:00",
+  "added_on_last_scan": [],
+  "removed_on_last_scan": [
+    "VPNTYPE-AMS1.conf"
   ],
-  "removed_on_last_scan": [],
   "updated_on_last_scan": []
 }
