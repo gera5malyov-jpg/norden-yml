@@ -1,8 +1,8 @@
 {
   "api_format": "json",
   "api_product_count": 110724,
-  "changed_count": 28,
-  "checked_at_utc": "2026-10-23T21:26:39+00:00",
+  "changed_count": 3,
+  "checked_at_utc": "2026-10-24T04:39:08+00:00",
   "detected_stock_field_paths": [
     "stock.msk.value",
     "stock.ptg.value",
@@ -453,7 +453,7 @@
     "1139": "5f58b38c458d706b3d09eaa68c35a6b2b26e4a762688d092fbec08408643864c",
     "11390": "f83a5cc3a891ebeac1186a5e35bda5680edb6085075a82adb3229f2fb360cfad",
     "11391": "298c98e5f7ec14dc523180cf055037cf746b51cb439a68e6f4150ca263931b14",
-    "11398": "216adf80d4ea57fa50cb1700d6f8a54403b8526877b067e2c95c53ab0a26a7e3",
+    "11398": "5cc7ed3f0ba2a0d799f8ad9a2188d60d35591ed2a5e9d541ad878924f779d0a5",
     "11403": "1e410ff7845b6a1f07ea128a7ec818aa61d1a548fa984444ddb1ad9ea140da8e",
     "11405": "5963aba75b9186aa5e1b2c48536922a27b9357062fbd06e14452441e561f8c4a",
     "114059": "306502a0bd486effbe0d7898345cacecb6d5fc35c3eb1c04da9b23754c32183c",
@@ -1126,7 +1126,7 @@
     "123166": "9488fb1d0f9075b544c1042ba27487fc43996e1da3fa8b901ad7bc4c3772d2a9",
     "123167": "88310423ddf37dad17e6ebe3d4a5ccc3647b670df5f7ce02f004b12e98a16cea",
     "123173": "35bb40d1d1dd58689342a52cd9573b5e7e6b5cec9415c227e96ab93888a9a177",
-    "123178": "6a768d7fb6b89035fdee3969e232c8fcd700f5883f0f87a377ed967fde5e1496",
+    "123178": "4400bbd4087c26bcd40a3f18f79b3c0b531486535a8074e99f367b2fcb923eea",
     "123195": "261fb8ef51732b81d40bf0307aed62ef1faa19018e540b8e046f7366125fff3a",
     "1233": "9587dec09f9407bb9f47c858dcdab38486b815d64964399207cd41ac47a3cb43",
     "123310": "8b26f52fbb36550c744eec420f7b9748449cb33a0b82299c92b1bf7f11455add",
@@ -5562,7 +5562,7 @@
     "428": "128a11a5727d37fe5459d9c9514b5f41d87ca7c9abd82e975ae563ed95d57d19",
     "4284": "dc43dcab728fde342a0dce40af0ad0535c13609d9dfbc087b5adfb2998969d75",
     "4286": "5ec54bded664c607a5c1cc96a8ef0f0ff0f74715e8455465471313a4329e7bab",
-    "43": "dd16851482eee4165833d7da6ee2e3be75510069249f7f5eccdd8a8d88bc99b4",
+    "43": "aaa516a781de140b20f12f78c7d75c7b102a72fdc8660d8aa45b1e5bbbddf33b",
     "430": "87a5fde5a64ee3f56b2e392a03a53274150ab411b7d38e3d5cc8c547cf9170ba",
     "4300": "0f1d4ce93a1bbe13b93c1fd87663bb79594a4e75e958ebd23c670932cc8927a8",
     "4301": "4a7795503f30d32fda824c4e6fa5bf1611aff064e3438a7d2983fa3d8275ea34",
@@ -8097,10 +8097,8 @@
     "9999": "7f2fea9d27e9099935a6810855c5b8e357773778e9112d6ecb8b0becf469a02e"
   },
   "out_of_stock_all_warehouses_filtered_count": 102642,
-  "removed_from_in_stock_count": 1,
-  "removed_from_in_stock_offer_keys": [
-    "27785"
-  ],
+  "removed_from_in_stock_count": 0,
+  "removed_from_in_stock_offer_keys": [],
   "source_url": "https://lk.tdandrey.ru/partner-export/v1/a163560406b5776bda46922e46cf300ce492",
   "tombstones": {
     "101477": {
@@ -8522,10 +8520,8 @@
       "name": "Пятигорск"
     }
   ],
-  "zero_on_all_warehouses_count": 1,
-  "zero_on_all_warehouses_offer_keys": [
-    "27785"
-  ],
+  "zero_on_all_warehouses_count": 0,
+  "zero_on_all_warehouses_offer_keys": [],
   "zero_stock_count": 100,
   "zero_stock_offer_keys": [
     "101477",
