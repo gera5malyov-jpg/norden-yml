@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<yml_catalog date="2026-10-25T04:45:39+00:00">
+<yml_catalog date="2026-10-25T11:33:36+00:00">
   <shop>
     <name>TD Andrey</name>
     <company>TD Andrey</company>
@@ -2497,7 +2497,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">7742</param>
 <param name="Розничная цена СПБ">13577</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">7742</param>
 <param name="Розничная цена Москва">13577</param>
 <param name="Остаток Пятигорск">1</param>
@@ -2521,7 +2521,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -61900,64 +61900,6 @@
 <param name="categoryes[0][1].parentId">76</param>
 <param name="categoryes[0][1].name">Столешницы</param>
 </offer>
-<offer id="4866" available="true">
-<name>Столешница 2500 мм 38 мм</name>
-<price>13393</price>
-<currencyId>RUR</currencyId>
-<vendor>Стендмебель</vendor>
-<vendorCode>050632</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-01-26/09f996d4-7cf4-11ec-872f-00155d000a00_09f996d7-7cf4-11ec-872f-00155d000a00/fff41501_2c1b_11e8_80cc_1062ebdf3e34_35dd49c6_ea56_11ed_8ef6_00155da28800.jpg</picture>
-<description>Столешница 2500 мм 38 мм мраморный берег</description>
-<param name="Остаток СПБ">1</param>
-<param name="Оптовая цена СПБ">7637</param>
-<param name="Розничная цена СПБ">13393</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">7637</param>
-<param name="Розничная цена Москва">13393</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">7910</param>
-<param name="Розничная цена Пятигорск">13393</param>
-<param name="id">4866</param>
-<param name="name">Столешница 2500 мм 38 мм</param>
-<param name="name2">мраморный берег</param>
-<param name="sku">050632</param>
-<param name="vendor.id">1</param>
-<param name="vendor.name">Стендмебель</param>
-<param name="description">Столешница 2500 мм 38 мм мраморный берег</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">1</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">7637</param>
-<param name="price.spb.valueRetail">13393</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">7637</param>
-<param name="price.msk.valueRetail">13393</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">7910</param>
-<param name="price.ptg.valueRetail">13393</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2024-01-26/09f996d4-7cf4-11ec-872f-00155d000a00_09f996d7-7cf4-11ec-872f-00155d000a00/fff41501_2c1b_11e8_80cc_1062ebdf3e34_35dd49c6_ea56_11ed_8ef6_00155da28800.jpg</param>
-<param name="images[0].name">fff41501_2c1b_11e8_80cc_1062ebdf3e34_35dd49c6_ea56_11ed_8ef6_00155da28800.jpg</param>
-<param name="size.width">250</param>
-<param name="size.height">3.8</param>
-<param name="size.lenght">60</param>
-<param name="size.weight">30</param>
-<param name="packages.count">1</param>
-<param name="packages.items[0].name"></param>
-<param name="packages.items[0].width">0</param>
-<param name="packages.items[0].height">0</param>
-<param name="packages.items[0].lenght">0</param>
-<param name="packages.items[0].weight">0</param>
-<param name="categoryes[0][0].id">76</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для кухни</param>
-<param name="categoryes[0][1].id">118</param>
-<param name="categoryes[0][1].parentId">76</param>
-<param name="categoryes[0][1].name">Столешницы</param>
-</offer>
 <offer id="4867" available="true">
 <name>Столешница 2500 мм 38 мм</name>
 <price>13393</price>
@@ -77335,7 +77277,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">7476</param>
 <param name="Розничная цена СПБ">13110</param>
-<param name="Остаток Москва">3</param>
+<param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">7476</param>
 <param name="Розничная цена Москва">13110</param>
 <param name="Остаток Пятигорск">0</param>
@@ -77362,7 +77304,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">3</param>
+<param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -77426,7 +77368,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">7476</param>
 <param name="Розничная цена СПБ">13110</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">7476</param>
 <param name="Розничная цена Москва">13110</param>
 <param name="Остаток Пятигорск">2</param>
@@ -77453,7 +77395,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -106965,7 +106907,7 @@
 <currencyId>RUR</currencyId>
 <vendor>Стендмебель</vendor>
 <vendorCode>240931</vendorCode>
-<param name="Остаток СПБ">30</param>
+<param name="Остаток СПБ">28</param>
 <param name="Оптовая цена СПБ">1164</param>
 <param name="Розничная цена СПБ">2041</param>
 <param name="Остаток Москва">0</param>
@@ -106982,7 +106924,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description"></param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">30</param>
+<param name="stock.spb.value">28</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -109863,50 +109805,6 @@
 <param name="categoryes[0][1].parentId">76</param>
 <param name="categoryes[0][1].name">Модульные кухни</param>
 </offer>
-<offer id="10875" available="true">
-<name>Ф-51-М Пасаденна (ШН1Я 800-М) ЛДСП</name>
-<price>3245</price>
-<currencyId>RUR</currencyId>
-<vendor>Стендмебель</vendor>
-<vendorCode>280371</vendorCode>
-<param name="Остаток СПБ">2</param>
-<param name="Оптовая цена СПБ">1850</param>
-<param name="Розничная цена СПБ">3245</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">1850</param>
-<param name="Розничная цена Москва">3245</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">0</param>
-<param name="Розничная цена Пятигорск">3245</param>
-<param name="id">10875</param>
-<param name="name">Ф-51-М Пасаденна (ШН1Я 800-М) ЛДСП</param>
-<param name="name2">дуб вотан (замена на дуб крафт золотой)</param>
-<param name="sku">280371</param>
-<param name="vendor.id">1</param>
-<param name="vendor.name">Стендмебель</param>
-<param name="description"></param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">1850</param>
-<param name="price.spb.valueRetail">3245</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">1850</param>
-<param name="price.msk.valueRetail">3245</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">0</param>
-<param name="price.ptg.valueRetail">3245</param>
-<param name="categoryes[0][0].id">76</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для кухни</param>
-<param name="categoryes[0][1].id">82</param>
-<param name="categoryes[0][1].parentId">76</param>
-<param name="categoryes[0][1].name">Модульные кухни</param>
-</offer>
 <offer id="10876" available="true">
 <name>Ф-51-М Пасаденна (ШН1Я 800-М) ЛДСП</name>
 <price>3599</price>
@@ -109916,7 +109814,7 @@
 <param name="Остаток СПБ">59</param>
 <param name="Оптовая цена СПБ">2052</param>
 <param name="Розничная цена СПБ">3599</param>
-<param name="Остаток Москва">13</param>
+<param name="Остаток Москва">12</param>
 <param name="Оптовая цена Москва">2052</param>
 <param name="Розничная цена Москва">3599</param>
 <param name="Остаток Пятигорск">0</param>
@@ -109932,7 +109830,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">59</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">13</param>
+<param name="stock.msk.value">12</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -222399,7 +222297,7 @@
 <param name="categoryes[0][1].name">Шкафы-купе</param>
 </offer>
 <offer id="27334" available="true">
-<name>Андрей-1 шкаф-купе (1700*2100*580 мм)</name>
+<name>Андрей-1 шкаф-купе (1700*2100*580 мм) СНЯТО С ПРОИЗВОДСТВА</name>
 <price>35796</price>
 <currencyId>RUR</currencyId>
 <vendor>Стендмебель</vendor>
@@ -222429,7 +222327,7 @@
 <param name="Оптовая цена Пятигорск">21141</param>
 <param name="Розничная цена Пятигорск">35796</param>
 <param name="id">27334</param>
-<param name="name">Андрей-1 шкаф-купе (1700*2100*580 мм)</param>
+<param name="name">Андрей-1 шкаф-купе (1700*2100*580 мм) СНЯТО С ПРОИЗВОДСТВА</param>
 <param name="name2">анкор/анкор</param>
 <param name="sku">120781</param>
 <param name="vendor.id">1</param>
@@ -286065,7 +285963,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">12364</param>
 <param name="Розничная цена Москва">21680</param>
-<param name="Остаток Пятигорск">3</param>
+<param name="Остаток Пятигорск">2</param>
 <param name="Оптовая цена Пятигорск">0</param>
 <param name="Розничная цена Пятигорск">21680</param>
 <param name="id">30245</param>
@@ -286091,7 +285989,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">3</param>
+<param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">12364</param>
 <param name="price.spb.valueRetail">21680</param>
@@ -290265,7 +290163,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">20611</param>
 <param name="Розничная цена Москва">36147</param>
-<param name="Остаток Пятигорск">3</param>
+<param name="Остаток Пятигорск">2</param>
 <param name="Оптовая цена Пятигорск">21347</param>
 <param name="Розничная цена Пятигорск">36147</param>
 <param name="id">31064</param>
@@ -290289,7 +290187,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">3</param>
+<param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">20611</param>
 <param name="price.spb.valueRetail">36147</param>
@@ -320178,7 +320076,7 @@
 Гладильная доска - зеркало надежно крепится к каркасу с помощью прочной трельяжной петли.
 Универсальная сборка (на обе стороны).
 Товар поставляется  в разобранном виде.</description>
-<param name="Остаток СПБ">5</param>
+<param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">7799</param>
 <param name="Розничная цена СПБ">13677</param>
 <param name="Остаток Москва">0</param>
@@ -320206,7 +320104,7 @@
 Универсальная сборка (на обе стороны).
 Товар поставляется  в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">5</param>
+<param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -334562,7 +334460,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">10150</param>
 <param name="Розничная цена СПБ">17802</param>
-<param name="Остаток Москва">3</param>
+<param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">10150</param>
 <param name="Розничная цена Москва">17802</param>
 <param name="Остаток Пятигорск">0</param>
@@ -334586,7 +334484,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">3</param>
+<param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -345749,7 +345647,7 @@
 <param name="categoryes[0][1].name">Модульные кухни</param>
 </offer>
 <offer id="58709" available="true">
-<name>Ф-104 Пасаденна (ШВС 450) МДФ</name>
+<name>Ф-104 Пасаденна (ШВС 450) МДФ СНЯТО С ПРОИЗВОДСТВА</name>
 <price>3223</price>
 <currencyId>RUR</currencyId>
 <vendor>Стендмебель</vendor>
@@ -345767,7 +345665,7 @@
 <param name="Оптовая цена Пятигорск">1900</param>
 <param name="Розничная цена Пятигорск">3223</param>
 <param name="id">58709</param>
-<param name="name">Ф-104 Пасаденна (ШВС 450) МДФ</param>
+<param name="name">Ф-104 Пасаденна (ШВС 450) МДФ СНЯТО С ПРОИЗВОДСТВА</param>
 <param name="name2">бетон графит</param>
 <param name="sku">050768</param>
 <param name="vendor.id">1</param>
@@ -351891,7 +351789,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">12397</param>
 <param name="Розничная цена СПБ">21743</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">12397</param>
 <param name="Розничная цена Москва">21743</param>
 <param name="Остаток Пятигорск">1</param>
@@ -351916,7 +351814,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -352177,7 +352075,7 @@
 Опоры: Пластик 20мм
 Задняя стенка: ЛДВП
 Товар продается в разобранном виде.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">6937</param>
 <param name="Розничная цена СПБ">12166</param>
 <param name="Остаток Москва">0</param>
@@ -352203,7 +352101,7 @@
 Задняя стенка: ЛДВП
 Товар продается в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -352390,7 +352288,7 @@
 <param name="categoryes[0][1].name">Модульные кухни</param>
 </offer>
 <offer id="60278" available="true">
-<name>НЕЛЬСОН ШК 01 (СОЛО-1) Шкаф (1.200х2,200х0,500)</name>
+<name>НЕЛЬСОН ШК 01 (СОЛО-1) Шкаф (1.200х2,200х0,500) СНЯТО С ПРОИЗВОДСТВА</name>
 <price>24825</price>
 <currencyId>RUR</currencyId>
 <vendor>Стендмебель</vendor>
@@ -352417,7 +352315,7 @@
 <param name="Оптовая цена Пятигорск">14660</param>
 <param name="Розничная цена Пятигорск">24825</param>
 <param name="id">60278</param>
-<param name="name">НЕЛЬСОН ШК 01 (СОЛО-1) Шкаф (1.200х2,200х0,500)</param>
+<param name="name">НЕЛЬСОН ШК 01 (СОЛО-1) Шкаф (1.200х2,200х0,500) СНЯТО С ПРОИЗВОДСТВА</param>
 <param name="name2">дуб крафт белый/дуб крафт белый</param>
 <param name="sku">120493</param>
 <param name="vendor.id">1</param>
@@ -357678,7 +357576,7 @@
 – Лицевая фурнитура отсутствует. Ящики открываются с помощью захвата рукой.
 – Сборка универсальная, собирается как на левую, так и на правую сторону
 – Направляющие: роликовые</description>
-<param name="Остаток СПБ">3</param>
+<param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">4680</param>
 <param name="Розничная цена СПБ">8206</param>
 <param name="Остаток Москва">0</param>
@@ -357702,7 +357600,7 @@
 – Сборка универсальная, собирается как на левую, так и на правую сторону
 – Направляющие: роликовые</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
+<param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -364426,89 +364324,6 @@
 <param name="categoryes[0][1].parentId">125</param>
 <param name="categoryes[0][1].name">Комоды</param>
 </offer>
-<offer id="67445" available="true">
-<name>Хелен КМ 05 Комод 6 ящиков (1502х958х460)</name>
-<price>16583</price>
-<currencyId>RUR</currencyId>
-<vendor>Стендмебель</vendor>
-<vendorCode>365283</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-06-06/273d7f91-2636-11ee-967a-00155da28800_273d7f92-2636-11ee-967a-00155da28800/helen_km-05_shagren-belaja_zakr_m.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-06-06/273d7f91-2636-11ee-967a-00155da28800_273d7f92-2636-11ee-967a-00155da28800/helen_km-05_shagren-belaja_otkr_m.jpg</picture>
-<description>Размеры (ШxГxВ): 1502х958х460
-Корпус: ЛДСП - Белый Шагрень
-Фасад: ЛДСП - Белый Шагрень
-Комод квазар, благодаря лаконичному дизайну, станет прекрасным дополнением любого современного интерьера. Отлично подойдет для детской, спальной и прихожей. Комод изготовлен из высококачественного ЛДСП класса Е1, экологичного и безопасного материала. Мебель безвредна для здоровья, не имеет неприятного запаха. Соответствует всем требованиям и нормам РФ.
-Шесть больших, вместительных ящиков, позволят решить вопрос хранения значительного количества вещей. Мы используем шариковый механизм выдвижения с функцией фиксации и защиты от выпадения.
-Комод квазар входит в модульную линейку квазар. Это позволяет использовать единый стиль мебели во всем интерьере.
-Для открывания ящиков предусмотрены специальные ниши.</description>
-<param name="Остаток СПБ">0</param>
-<param name="Оптовая цена СПБ">9457</param>
-<param name="Розничная цена СПБ">16583</param>
-<param name="Остаток Москва">1</param>
-<param name="Оптовая цена Москва">9457</param>
-<param name="Розничная цена Москва">16583</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">9795</param>
-<param name="Розничная цена Пятигорск">16583</param>
-<param name="id">67445</param>
-<param name="name">Хелен КМ 05 Комод 6 ящиков (1502х958х460)</param>
-<param name="name2">белый/белый</param>
-<param name="sku">365283</param>
-<param name="vendor.id">1</param>
-<param name="vendor.name">Стендмебель</param>
-<param name="description">Размеры (ШxГxВ): 1502х958х460
-Корпус: ЛДСП - Белый Шагрень
-Фасад: ЛДСП - Белый Шагрень
-Комод квазар, благодаря лаконичному дизайну, станет прекрасным дополнением любого современного интерьера. Отлично подойдет для детской, спальной и прихожей. Комод изготовлен из высококачественного ЛДСП класса Е1, экологичного и безопасного материала. Мебель безвредна для здоровья, не имеет неприятного запаха. Соответствует всем требованиям и нормам РФ.
-Шесть больших, вместительных ящиков, позволят решить вопрос хранения значительного количества вещей. Мы используем шариковый механизм выдвижения с функцией фиксации и защиты от выпадения.
-Комод квазар входит в модульную линейку квазар. Это позволяет использовать единый стиль мебели во всем интерьере.
-Для открывания ящиков предусмотрены специальные ниши.</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">0</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">9457</param>
-<param name="price.spb.valueRetail">16583</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">9457</param>
-<param name="price.msk.valueRetail">16583</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">9795</param>
-<param name="price.ptg.valueRetail">16583</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2024-06-06/273d7f91-2636-11ee-967a-00155da28800_273d7f92-2636-11ee-967a-00155da28800/helen_km-05_shagren-belaja_zakr_m.jpg</param>
-<param name="images[0].name">Хелен_КМ 05_шагрень белая_закр_м.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2024-06-06/273d7f91-2636-11ee-967a-00155da28800_273d7f92-2636-11ee-967a-00155da28800/helen_km-05_shagren-belaja_otkr_m.jpg</param>
-<param name="images[1].name">Хелен_КМ 05_шагрень белая_откр_м.jpg</param>
-<param name="size.width">150.2</param>
-<param name="size.height">95.8</param>
-<param name="size.lenght">46</param>
-<param name="size.weight">71.6</param>
-<param name="packages.count">3</param>
-<param name="packages.items[0].name">Упаковка 1</param>
-<param name="packages.items[0].width">45.4</param>
-<param name="packages.items[0].height">15</param>
-<param name="packages.items[0].lenght">0</param>
-<param name="packages.items[0].weight">0</param>
-<param name="packages.items[1].name">Упаковка 2</param>
-<param name="packages.items[1].width">47</param>
-<param name="packages.items[1].height">6.7</param>
-<param name="packages.items[1].lenght">0</param>
-<param name="packages.items[1].weight">0</param>
-<param name="packages.items[2].name">Упаковка 3</param>
-<param name="packages.items[2].width">50.6</param>
-<param name="packages.items[2].height">7.4</param>
-<param name="packages.items[2].lenght">0</param>
-<param name="packages.items[2].weight">0</param>
-<param name="categoryes[0][0].id">125</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для спальни</param>
-<param name="categoryes[0][1].id">129</param>
-<param name="categoryes[0][1].parentId">125</param>
-<param name="categoryes[0][1].name">Комоды</param>
-</offer>
 <offer id="67446" available="true">
 <name>Хелен КМ 05 Комод 6 ящиков (1502х958х460)</name>
 <price>16934</price>
@@ -364524,7 +364339,7 @@
 Шесть больших, вместительных ящиков, позволят решить вопрос хранения значительного количества вещей. Мы используем шариковый механизм выдвижения с функцией фиксации и защиты от выпадения.
 Комод квазар входит в модульную линейку квазар. Это позволяет использовать единый стиль мебели во всем интерьере.
 Для открывания ящиков предусмотрены специальные ниши.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">9653</param>
 <param name="Розничная цена СПБ">16934</param>
 <param name="Остаток Москва">0</param>
@@ -364547,7 +364362,7 @@
 Комод квазар входит в модульную линейку квазар. Это позволяет использовать единый стиль мебели во всем интерьере.
 Для открывания ящиков предусмотрены специальные ниши.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -391283,77 +391098,6 @@
 <param name="categoryes[0][1].parentId">37</param>
 <param name="categoryes[0][1].name">Стенки</param>
 </offer>
-<offer id="119762" available="true">
-<name>Хелен КМ 06 Комод 4 ящика (1502х958х460)</name>
-<price>14721</price>
-<currencyId>RUR</currencyId>
-<vendor>Стендмебель</vendor>
-<vendorCode>381817</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-06-06/222376a8-2637-11ee-967a-00155da28800_5fa67cfc-e5be-11ee-8118-00155da28800/km-06-grafit.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-06-06/222376a8-2637-11ee-967a-00155da28800_5fa67cfc-e5be-11ee-8118-00155da28800/km-06-grafit-vn.jpg</picture>
-<description>Размер (ШхВхГ) 1500х960х465 мм</description>
-<param name="Остаток СПБ">0</param>
-<param name="Оптовая цена СПБ">8393</param>
-<param name="Розничная цена СПБ">14721</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">8393</param>
-<param name="Розничная цена Москва">14721</param>
-<param name="Остаток Пятигорск">1</param>
-<param name="Оптовая цена Пятигорск">8693</param>
-<param name="Розничная цена Пятигорск">14721</param>
-<param name="id">119762</param>
-<param name="name">Хелен КМ 06 Комод 4 ящика (1502х958х460)</param>
-<param name="name2">серый графит/дуб крафт золото</param>
-<param name="sku">381817</param>
-<param name="vendor.id">1</param>
-<param name="vendor.name">Стендмебель</param>
-<param name="description">Размер (ШхВхГ) 1500х960х465 мм</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">0</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">1</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">8393</param>
-<param name="price.spb.valueRetail">14721</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">8393</param>
-<param name="price.msk.valueRetail">14721</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">8693</param>
-<param name="price.ptg.valueRetail">14721</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2024-06-06/222376a8-2637-11ee-967a-00155da28800_5fa67cfc-e5be-11ee-8118-00155da28800/km-06-grafit.jpg</param>
-<param name="images[0].name">КМ 06 графит.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2024-06-06/222376a8-2637-11ee-967a-00155da28800_5fa67cfc-e5be-11ee-8118-00155da28800/km-06-grafit-vn.jpg</param>
-<param name="images[1].name">КМ 06 графит ВН.jpg</param>
-<param name="size.width">150.2</param>
-<param name="size.height">95.8</param>
-<param name="size.lenght">46</param>
-<param name="size.weight">62.9</param>
-<param name="packages.count">3</param>
-<param name="packages.items[0].name">Упаковка 1</param>
-<param name="packages.items[0].width">45.4</param>
-<param name="packages.items[0].height">9</param>
-<param name="packages.items[0].lenght">0</param>
-<param name="packages.items[0].weight">0</param>
-<param name="packages.items[1].name">Упаковка 2</param>
-<param name="packages.items[1].width">50.6</param>
-<param name="packages.items[1].height">10.6</param>
-<param name="packages.items[1].lenght">0</param>
-<param name="packages.items[1].weight">0</param>
-<param name="packages.items[2].name">Упаковка 3</param>
-<param name="packages.items[2].width">47</param>
-<param name="packages.items[2].height">5.4</param>
-<param name="packages.items[2].lenght">0</param>
-<param name="packages.items[2].weight">0</param>
-<param name="categoryes[0][0].id">125</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для спальни</param>
-<param name="categoryes[0][1].id">129</param>
-<param name="categoryes[0][1].parentId">125</param>
-<param name="categoryes[0][1].name">Комоды</param>
-</offer>
 <offer id="119764" available="true">
 <name>Хелен КМ 04 Комод 8 ящиков (1002х958х460)</name>
 <price>14721</price>
@@ -409352,7 +409096,7 @@
 Габаритные размеры: Ш*В*Г 2260*1610*844 мм
 Спальное место 800*1800 мм
 Вес 148,1 кг</description>
-<param name="Остаток СПБ">8</param>
+<param name="Остаток СПБ">7</param>
 <param name="Оптовая цена СПБ">18879</param>
 <param name="Розничная цена СПБ">33108</param>
 <param name="Остаток Москва">14</param>
@@ -409372,7 +409116,7 @@
 Спальное место 800*1800 мм
 Вес 148,1 кг</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">8</param>
+<param name="stock.spb.value">7</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">14</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -413872,7 +413616,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">8331</param>
 <param name="Розничная цена Москва">14613</param>
-<param name="Остаток Пятигорск">2</param>
+<param name="Остаток Пятигорск">1</param>
 <param name="Оптовая цена Пятигорск">8628</param>
 <param name="Розничная цена Пятигорск">14613</param>
 <param name="id">124437</param>
@@ -413895,7 +413639,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">2</param>
+<param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">8331</param>
 <param name="price.spb.valueRetail">14613</param>
@@ -431294,7 +431038,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="Остаток СПБ">6</param>
 <param name="Оптовая цена СПБ">8680</param>
 <param name="Розничная цена СПБ">15222</param>
-<param name="Остаток Москва">3</param>
+<param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">8680</param>
 <param name="Розничная цена Москва">15222</param>
 <param name="Остаток Пятигорск">0</param>
@@ -431328,7 +431072,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">6</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">3</param>
+<param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -431576,7 +431320,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Опоры стола имеют пластиковые подпятники, предохраняющие напольные покрытия от повреждения.
 Сборка стола не универсальная.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">6</param>
+<param name="Остаток СПБ">5</param>
 <param name="Оптовая цена СПБ">8680</param>
 <param name="Розничная цена СПБ">15222</param>
 <param name="Остаток Москва">3</param>
@@ -431611,7 +431355,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Сборка стола не универсальная.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">6</param>
+<param name="stock.spb.value">5</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">3</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -431944,84 +431688,6 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2025-07-07/c124bad8-01a1-11ec-891c-00155d000a00_f519e820-4b4f-11f0-8a36-00155da28800/belyj-s-tisneniem--atele-svetloe.jpg</param>
 <param name="images[0].name">Белый с тиснением + Ателье светлое.jpg</param>
 <param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2025-07-07/c124bad8-01a1-11ec-891c-00155d000a00_f519e820-4b4f-11f0-8a36-00155da28800/1.jpg</param>
-<param name="images[1].name">1.jpg</param>
-<param name="size.width">131.6</param>
-<param name="size.height">185</param>
-<param name="size.lenght">60</param>
-<param name="size.weight">68.4</param>
-<param name="packages.count">0</param>
-<param name="categoryes[0][0].id">37</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для гостиной</param>
-<param name="categoryes[0][1].id">39</param>
-<param name="categoryes[0][1].parentId">37</param>
-<param name="categoryes[0][1].name">Компьютерные столы</param>
-</offer>
-<offer id="128581" available="true">
-<name>Стол компьютерный Квартет-11 (1850*1316*600)</name>
-<price>17802</price>
-<currencyId>RUR</currencyId>
-<vendor>Тэкс</vendor>
-<vendorCode>406289</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-07-07/c124bad8-01a1-11ec-891c-00155d000a00_086d179d-4b50-11f0-8a36-00155da28800/dub-kraft-zolotoj--grafit.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-07-07/c124bad8-01a1-11ec-891c-00155d000a00_086d179d-4b50-11f0-8a36-00155da28800/1.jpg</picture>
-<description>Стол компьютерный Квартет-11 (1850*1316*600) дуб крафт золотой/графит серый
-Размер: (ВхШхГ) 1850х1316х600
-Корпус: ЛДСП-Венге/Ясень Шимо/Дуб крафт золотой/Белый с тиснением
-Фасад: ЛДСП-Дуб Молочный/Дуб Сонома/Белый с тиснением/Белый с тиснением
-Ручки: Пластик.
-Ящик: Роликовые направляющие.
-Лицевая фурнитура в цвет корпуса.
-Опоры стола имеют пластиковые подпятники, предохраняющие напольные покрытия от повреждения.
-Сборка стола не универсальная.
-Товар поставляется в разобранном виде.
-Вес	68.4 кг
-Объем	0.11</description>
-<param name="Остаток СПБ">1</param>
-<param name="Оптовая цена СПБ">10150</param>
-<param name="Розничная цена СПБ">17802</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">10150</param>
-<param name="Розничная цена Москва">17802</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">10513</param>
-<param name="Розничная цена Пятигорск">17802</param>
-<param name="id">128581</param>
-<param name="name">Стол компьютерный Квартет-11 (1850*1316*600)</param>
-<param name="name2">дуб крафт золотой/графит серый</param>
-<param name="sku">406289</param>
-<param name="vendor.id">2</param>
-<param name="vendor.name">Тэкс</param>
-<param name="description">Стол компьютерный Квартет-11 (1850*1316*600) дуб крафт золотой/графит серый
-Размер: (ВхШхГ) 1850х1316х600
-Корпус: ЛДСП-Венге/Ясень Шимо/Дуб крафт золотой/Белый с тиснением
-Фасад: ЛДСП-Дуб Молочный/Дуб Сонома/Белый с тиснением/Белый с тиснением
-Ручки: Пластик.
-Ящик: Роликовые направляющие.
-Лицевая фурнитура в цвет корпуса.
-Опоры стола имеют пластиковые подпятники, предохраняющие напольные покрытия от повреждения.
-Сборка стола не универсальная.
-Товар поставляется в разобранном виде.
-Вес	68.4 кг
-Объем	0.11</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">1</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">10150</param>
-<param name="price.spb.valueRetail">17802</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">10150</param>
-<param name="price.msk.valueRetail">17802</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">10513</param>
-<param name="price.ptg.valueRetail">17802</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2025-07-07/c124bad8-01a1-11ec-891c-00155d000a00_086d179d-4b50-11f0-8a36-00155da28800/dub-kraft-zolotoj--grafit.jpg</param>
-<param name="images[0].name">Дуб крафт золотой + Графит.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2025-07-07/c124bad8-01a1-11ec-891c-00155d000a00_086d179d-4b50-11f0-8a36-00155da28800/1.jpg</param>
 <param name="images[1].name">1.jpg</param>
 <param name="size.width">131.6</param>
 <param name="size.height">185</param>
@@ -436690,7 +436356,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="Остаток СПБ">54</param>
 <param name="Оптовая цена СПБ">6860</param>
 <param name="Розничная цена СПБ">12032</param>
-<param name="Остаток Москва">59</param>
+<param name="Остаток Москва">53</param>
 <param name="Оптовая цена Москва">6860</param>
 <param name="Розничная цена Москва">12032</param>
 <param name="Остаток Пятигорск">0</param>
@@ -436716,7 +436382,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">54</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">59</param>
+<param name="stock.msk.value">53</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -437505,10 +437171,10 @@ Cушилка для посуды в верхний шкаф с наружным
 Словно воздушная, мебель коллекции Хелен выполнена в скандинавском стиле и, воплощая простоту и экологичность, выглядит изящно. Она органично впишется в светлые интерьеры комнаты, создавая особый уют и теплую атмосферу своими ровными и спокойными линиями без лишнего декора. Ее гармоничную поверхность не нарушают даже ручки, интегрированные внутри.
 При создании мебели Хелен были использованы исключительно высококачественные материалы и фурнитура, безопасные для вашего здоровья и гарантирующие долговечность службы с сохранением внешнего вида.
 Вес 97,8 кг</description>
-<param name="Остаток СПБ">27</param>
+<param name="Остаток СПБ">25</param>
 <param name="Оптовая цена СПБ">9030</param>
 <param name="Розничная цена СПБ">15840</param>
-<param name="Остаток Москва">28</param>
+<param name="Остаток Москва">23</param>
 <param name="Оптовая цена Москва">9030</param>
 <param name="Розничная цена Москва">15840</param>
 <param name="Остаток Пятигорск">0</param>
@@ -437528,9 +437194,9 @@ Cушилка для посуды в верхний шкаф с наружным
 При создании мебели Хелен были использованы исключительно высококачественные материалы и фурнитура, безопасные для вашего здоровья и гарантирующие долговечность службы с сохранением внешнего вида.
 Вес 97,8 кг</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">27</param>
+<param name="stock.spb.value">25</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">28</param>
+<param name="stock.msk.value">23</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -437589,7 +437255,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">9450</param>
 <param name="Розничная цена СПБ">16575</param>
-<param name="Остаток Москва">87</param>
+<param name="Остаток Москва">86</param>
 <param name="Оптовая цена Москва">9450</param>
 <param name="Розничная цена Москва">16575</param>
 <param name="Остаток Пятигорск">0</param>
@@ -437612,7 +437278,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">87</param>
+<param name="stock.msk.value">86</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -437827,7 +437493,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="Остаток СПБ">7</param>
 <param name="Оптовая цена СПБ">13089</param>
 <param name="Розничная цена СПБ">21313</param>
-<param name="Остаток Москва">10</param>
+<param name="Остаток Москва">9</param>
 <param name="Оптовая цена Москва">13089</param>
 <param name="Розничная цена Москва">21313</param>
 <param name="Остаток Пятигорск">0</param>
@@ -437849,7 +437515,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">7</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">10</param>
+<param name="stock.msk.value">9</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
