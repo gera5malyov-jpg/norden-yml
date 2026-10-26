@@ -1,13 +1,16 @@
-TEST=ozonstocksync-1.7.1
+TEST=ozonstocksync-1.8.0
 --- PHP LINT ---
+No syntax errors detected in webasyst/ozonstocksync/lib/actions/backend/shopOzonstocksyncPluginBackendCommissionStatus.controller.php
+No syntax errors detected in webasyst/ozonstocksync/lib/actions/backend/shopOzonstocksyncPluginBackendRefreshCommissions.controller.php
 No syntax errors detected in webasyst/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
 No syntax errors detected in webasyst/ozonstocksync/lib/shopOzonstocksync.plugin.php
 No syntax errors detected in webasyst/ozonstocksync/lib/config/settings.php
 No syntax errors detected in webasyst/ozonstocksync/lib/config/plugin.php
 No syntax errors detected in webasyst/ozonstocksync/lib/config/rfbs_commissions.php
 No syntax errors detected in webasyst/ozonstocksync/lib/cli/shopOzonstocksyncPluginSync.cli.php
+No syntax errors detected in webasyst/ozonstocksync/lib/cli/shopOzonstocksyncPluginCommissions.cli.php
 --- CONTRACT ---
-version_1_7_1=OK
+version_1_8_0=OK
 custom_getControls=OK
 type_margin_ui=OK
 type_margin_setting=OK
@@ -49,4 +52,11 @@ no_stale_fallback_for_existing=OK
 account_scoped_commissions=OK
 live_cache_timestamped=OK
 ui_never_uses_old_table=OK
+standalone_refresh=OK
+no_api_writes_from_refresh=OK
+queue_ui=OK
+queue_controller=OK
+status_controller=OK
+separate_cli=OK
+separate_cli_queue_only=OK
 TEST_STATUS=OK
