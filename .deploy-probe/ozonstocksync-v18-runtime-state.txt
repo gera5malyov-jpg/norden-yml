@@ -1,0 +1,16 @@
+SERVER_TIME=2026-10-26 16:40:56 +0300
+
+Fatal error: Uncaught Error: Class 'mysqli' not found in /home/web/vm-23f9aff9.na4u.ru/www/wa-system/database/waDbMysqliAdapter.class.php:35
+Stack trace:
+#0 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/database/waDbAdapter.class.php(30): waDbMysqliAdapter->connect(Array)
+#1 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/database/waDbConnector.class.php(52): waDbAdapter->__construct(Array)
+#2 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/database/waModel.class.php(77): waDbConnector::getConnection('default', false)
+#3 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/contact/waContact.class.php(72): waModel->__construct()
+#4 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/user/waUser.class.php(22): waContact->init()
+#5 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/user/waAuthUser.class.php(32): waUser->init()
+#6 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/user/waAuthUser.class.php(27): waAuthUser->init()
+#7 /home/web/vm-23f9aff9.na4u.ru/www/wa-system/waSystem.class.php(251): waAuthUser->__construct(NULL, Array)
+#8 /home/web/vm-23f9aff9.na4u in /home/web/vm-23f9aff9.na4u.ru/www/wa-system/database/waDbMysqliAdapter.class.php on line 35
+CRON_COUNT=2
+
+SSH_EXIT=0
