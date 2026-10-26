@@ -139,7 +139,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html .= '<div class="ozs-settings">';
         $html .= '<div class="ozs-hero">';
         $html .= '<div><div class="ozs-title">Ozon Stock Sync</div><div class="ozs-subtitle">Остатки, цены и безопасное создание новых карточек из списка «Грузить в Ozon»</div></div>';
-        $html .= '<span class="ozs-version">v1.8.3</span>';
+        $html .= '<span class="ozs-version">v1.8.4</span>';
         $html .= '</div>';
 
         $html .= '<div class="ozs-summary-grid">';
@@ -220,7 +220,11 @@ class shopOzonstocksyncPlugin extends shopPlugin
                 } else {
                     $reason = isset($this->ui_missing_causes[$search]) ? $this->ui_missing_causes[$search] : array();
                     $cause = isset($reason['reason']) ? $reason['reason'] : '';
-                    if ($cause === 'no_webasyst_sku') {
+                    if ($cause === 'lookup_failed_for_some_offers') {
+                        $cause_text = 'Ozon отклонил часть запросов по артикулу';
+                    } elseif ($cause === 'large_type_exact_lookup_pending') {
+                        $cause_text = 'нужна отдельная проверка SKU (>100)';
+                    } elseif ($cause === 'no_webasyst_sku') {
                         $cause_text = 'нет SKU в Webasyst';
                     } elseif ($cause === 'no_matching_ozon_offer') {
                         $cause_text = 'артикул не совпал с предложениями Ozon';
