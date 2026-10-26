@@ -3,6 +3,14 @@ class shopOzonstocksyncPluginSyncCli extends waCliController
 {
     public function execute()
     {
+        // Guaranteed legacy CLI entrypoint: commissions mode is completely read-only toward Ozon.
+        // Do not execute normal run(), createMissingProducts, stock or price sending in this mode.
+        if (in_array('commissions=1', (array)$_SERVER['argv'], true)) {
+            require_once dirname(__FILE__) . '/shopOzonstocksyncPluginCommissions.cli.php';
+            $worker = new shopOzonstocksyncPluginCommissionsCli();
+            $worker->execute();
+            return;
+        }
         $plugin = wa('shop')->getPlugin('ozonstocksync');
         $settings = array();
 
