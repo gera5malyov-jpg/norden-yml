@@ -3,6 +3,7 @@ class shopOzonstocksyncPluginSync
 {
     const STOCKS_URL = 'https://api-seller.ozon.ru/v2/products/stocks';
     const PRICES_URL = 'https://api-seller.ozon.ru/v1/product/import/prices';
+    const INFO_PRICES_URL = 'https://api-seller.ozon.ru/v5/product/info/prices';
     const PRODUCT_LIST_URL = 'https://api-seller.ozon.ru/v3/product/list';
     const PRODUCT_INFO_LIST_URL = 'https://api-seller.ozon.ru/v3/product/info/list';
     const PRODUCT_IMPORT_URL = 'https://api-seller.ozon.ru/v3/product/import';
@@ -24,6 +25,8 @@ class shopOzonstocksyncPluginSync
     private $log_file = 'ozonstocksync.log';
     private $account_log_file = null;
     private $commission_map = null;
+    private $live_rfbs_cache = array();
+    private $live_rfbs_observed = array();
 
     public function __construct($settings)
     {
@@ -107,7 +110,7 @@ class shopOzonstocksyncPluginSync
                 }
 
                 if ($update_prices) {
-                    $price_items = $this->collectPrices($mapping, $this->getForcePriceTouchDelta());
+                    $price_items = $this->collectPrices($mapping, $this->getForcePriceTouchDelta(), $account);
                     foreach ($price_items as $item) {
                         $account_price_items[$item['offer_id']] = $item;
                     }
@@ -149,6 +152,9 @@ class shopOzonstocksyncPluginSync
             $this->account_log_file = null;
         }
 
+        if ($update_prices) {
+            $this->saveLiveCommissionSummary();
+        }
         $this->log('FINISH_ACCOUNTS: accounts=' . count($accounts) . ', sent_stocks=' . $total_sent_stocks . ', sent_prices=' . $total_sent_prices . ', create_submitted=' . $total_create_submitted . ', create_would_create=' . $total_create_would_create . ', create_skipped_existing=' . $total_create_skipped_existing . ', create_errors=' . $total_create_errors . ', errors=' . $total_errors);
         return array(
             'accounts' => count($accounts),
@@ -311,7 +317,7 @@ class shopOzonstocksyncPluginSync
         return $items;
     }
 
-    private function collectPrices($mapping, $force_price_touch_delta = 0)
+    private function collectPrices($mapping, $force_price_touch_delta = 0, $account = array())
     {
         $set_id = trim((string)$mapping['set_id']);
         $only_available = (int)$this->get('only_available', 1) === 1;
@@ -339,6 +345,11 @@ class shopOzonstocksyncPluginSync
             $product_ids[(int)$row['product_id']] = (int)$row['product_id'];
         }
         $tips = $this->loadTipOzonValues(array_values($product_ids));
+        $offer_ids = array();
+        foreach ($rows as $row) {
+            $offer_ids[] = trim((string)$row['sku']);
+        }
+        $live_commissions = $this->fetchLiveRfbsRates($offer_ids, $account);
 
         $items = array();
         $skipped_no_cost = 0; $skipped_no_tip = 0; $skipped_no_commission = 0; $skipped_bad_price = 0;
@@ -362,12 +373,23 @@ class shopOzonstocksyncPluginSync
                 continue;
             }
             $tip = trim((string)$tips[$product_id]);
-            $commissions = $this->getCommissionForTip($tip);
-            if (!$commissions) {
+            if (!isset($live_commissions[$offer_id])) {
                 $skipped_no_commission++;
-                $this->log('PRICE_ERROR_NO_COMMISSION: offer_id=' . $offer_id . ', product_id=' . $product_id . ', tip_ozon=' . $tip . ', normalized_tip=' . $this->normalizeTip($tip));
+                $this->log('PRICE_SKIP_NO_LIVE_RFBS: offer_id=' . $offer_id . ', product_id=' . $product_id . ', tip_ozon=' . $tip . ', reason=API_rate_missing_or_invalid');
                 continue;
             }
+            // A rate from Ozon applies to this offer and account, not every product with the same type name.
+            // The ordinary rFBS rates are flat above 300 RUB. Do not use a stale table as fallback.
+            // Special >500000 RUB tariff types need their price-tier rule, so fail closed for now.
+            $legacy = $this->getCommissionForTip($tip);
+            if (is_array($legacy) && isset($legacy['over_500000'])) {
+                $skipped_no_commission++;
+                $this->log('PRICE_SKIP_SPECIAL_RFBS_TIER: offer_id=' . $offer_id . ', tip_ozon=' . $tip);
+                continue;
+            }
+            $rate = (float)$live_commissions[$offer_id];
+            $commissions = array($rate, $rate, $rate, $rate);
+            $this->recordLiveRfbsRate($tip, $account, $offer_id, $rate);
             $price_data = $this->calculatePrices($cost, $commissions, $tip);
             if (!$price_data) {
                 $skipped_bad_price++;
@@ -1361,6 +1383,108 @@ class shopOzonstocksyncPluginSync
             } catch (Exception $e) {}
         }
         return $dict;
+    }
+
+
+    /**
+     * Fetch effective rFBS selling commission for each existing Ozon offer.
+     * If Ozon cannot confirm a rate, no price is calculated from the historical static table.
+     * Account-specific rates must never leak across seller accounts.
+     */
+    private function fetchLiveRfbsRates($offer_ids, $account)
+    {
+        $result = array();
+        $client_id = isset($account['client_id']) ? trim((string)$account['client_id']) : '';
+        $api_key = isset($account['api_key']) ? (string)$account['api_key'] : '';
+        $account_name = isset($account['name']) ? (string)$account['name'] : 'unknown';
+        if ($client_id === '' || $api_key === '') {
+            $this->log('LIVE_RFBS_NO_ACCOUNT: account=' . $account_name);
+            return $result;
+        }
+        $missing = array();
+        foreach ($offer_ids as $offer_id) {
+            $offer_id = trim((string)$offer_id);
+            if ($offer_id === '') continue;
+            $cache_key = $client_id . ':' . $offer_id;
+            if (array_key_exists($cache_key, $this->live_rfbs_cache)) {
+                if ($this->live_rfbs_cache[$cache_key] !== null) {
+                    $result[$offer_id] = $this->live_rfbs_cache[$cache_key];
+                }
+            } else {
+                $missing[$offer_id] = $offer_id;
+            }
+        }
+        foreach (array_chunk(array_values($missing), 100) as $batch) {
+            $response = null;
+            for ($attempt = 1; $attempt <= 2; $attempt++) {
+                $response = $this->sendToOzon(
+                    self::INFO_PRICES_URL,
+                    array('cursor' => '', 'filter' => array('offer_id' => $batch, 'visibility' => 'ALL'), 'limit' => 1000),
+                    $client_id,
+                    $api_key
+                );
+                if ($response['ok'] || !$this->shouldRetryOzonResponse($response) || $attempt === 2) break;
+                $this->sleepIfPositive(3, 'LIVE_RFBS_API_RETRY account=' . $account_name);
+            }
+            if (!$response || !$response['ok']) {
+                $this->log('LIVE_RFBS_API_ERROR: account=' . $account_name . ', http=' . ($response ? $response['code'] : 0) . ', offers=' . count($batch) . ', action=skip_prices');
+                foreach ($batch as $offer_id) $this->live_rfbs_cache[$client_id . ':' . $offer_id] = null;
+                continue;
+            }
+            $decoded = json_decode((string)$response['body'], true);
+            if (!is_array($decoded) || !isset($decoded['items']) || !is_array($decoded['items'])) {
+                $this->log('LIVE_RFBS_INVALID_RESPONSE: account=' . $account_name . ', offers=' . count($batch) . ', action=skip_prices');
+                foreach ($batch as $offer_id) $this->live_rfbs_cache[$client_id . ':' . $offer_id] = null;
+                continue;
+            }
+            $expected = array_fill_keys($batch, true);
+            foreach ($batch as $offer_id) $this->live_rfbs_cache[$client_id . ':' . $offer_id] = null;
+            foreach ($decoded['items'] as $item) {
+                if (!is_array($item)) continue;
+                $offer_id = isset($item['offer_id']) ? trim((string)$item['offer_id']) : '';
+                if (!isset($expected[$offer_id])) continue;
+                $commissions = isset($item['commissions']) && is_array($item['commissions']) ? $item['commissions'] : array();
+                $percent = isset($commissions['sales_percent_rfbs']) ? $commissions['sales_percent_rfbs'] : null;
+                if (!is_numeric($percent) || (float)$percent <= 0 || (float)$percent >= 95) continue;
+                $rate = (float)$percent / 100;
+                $this->live_rfbs_cache[$client_id . ':' . $offer_id] = $rate;
+                $result[$offer_id] = $rate;
+            }
+            $this->log('LIVE_RFBS_FETCHED: account=' . $account_name . ', requested=' . count($batch) . ', valid=' . count(array_intersect_key($result, $expected)));
+        }
+        return $result;
+    }
+
+    private function recordLiveRfbsRate($tip, $account, $offer_id, $rate)
+    {
+        $key = $this->normalizeTip($tip);
+        $client_id = isset($account['client_id']) ? (string)$account['client_id'] : '';
+        if ($key === '' || $client_id === '') return;
+        $this->live_rfbs_observed[$key][$client_id . ':' . $offer_id] = $rate;
+    }
+
+    private function saveLiveCommissionSummary()
+    {
+        if (!$this->live_rfbs_observed) return;
+        $types = array();
+        foreach ($this->live_rfbs_observed as $tip => $rates) {
+            if (!$rates) continue;
+            $values = array_values($rates);
+            $types[$tip] = array(
+                'min' => min($values), 'max' => max($values), 'count' => count($values)
+            );
+        }
+        if (!$types) return;
+        $payload = json_encode(array('updated_at' => time(), 'types' => $types), JSON_UNESCAPED_UNICODE);
+        if ($payload === false) return;
+        $path = wa()->getDataPath('plugins/ozonstocksync/rfbs_live_rates.json', false, 'shop', true);
+        $temp = $path . '.tmp.' . getmypid();
+        if (file_put_contents($temp, $payload, LOCK_EX) === false || !rename($temp, $path)) {
+            @unlink($temp);
+            $this->log('LIVE_RFBS_CACHE_WRITE_ERROR: path=shop/ozonstocksync/rfbs_live_rates.json');
+            return;
+        }
+        $this->log('LIVE_RFBS_CACHE_UPDATED: types=' . count($types));
     }
 
     private function getCommissionForTip($tip)
