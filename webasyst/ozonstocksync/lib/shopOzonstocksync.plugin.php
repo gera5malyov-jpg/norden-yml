@@ -3,6 +3,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
 {
     private $ui_commission_map = null;
     private $ui_commission_details = array();
+    private $ui_missing_causes = array();
     private $ui_live_commission_updated = 0;
     private $ui_feature_warning = '';
 
@@ -138,7 +139,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html .= '<div class="ozs-settings">';
         $html .= '<div class="ozs-hero">';
         $html .= '<div><div class="ozs-title">Ozon Stock Sync</div><div class="ozs-subtitle">Остатки, цены и безопасное создание новых карточек из списка «Грузить в Ozon»</div></div>';
-        $html .= '<span class="ozs-version">v1.8.1</span>';
+        $html .= '<span class="ozs-version">v1.8.2</span>';
         $html .= '</div>';
 
         $html .= '<div class="ozs-summary-grid">';
@@ -217,7 +218,18 @@ class shopOzonstocksyncPlugin extends shopPlugin
                         $c_display .= $this->renderCommissionOffers($commission);
                     }
                 } else {
-                    $c_display = '<span class="ozs-bad" title="Нет подтверждённой ставки по совпавшим offer_id в подключённых кабинетах Ozon">не подтверждена</span>';
+                    $reason = isset($this->ui_missing_causes[$search]) ? $this->ui_missing_causes[$search] : array();
+                    $cause = isset($reason['reason']) ? $reason['reason'] : '';
+                    if ($cause === 'no_webasyst_sku') {
+                        $cause_text = 'нет SKU в Webasyst';
+                    } elseif ($cause === 'no_matching_ozon_offer') {
+                        $cause_text = 'артикул не совпал с предложениями Ozon';
+                    } elseif ($cause === 'no_valid_rfbs_commission') {
+                        $cause_text = 'Ozon не вернул ставку rFBS';
+                    } else {
+                        $cause_text = 'ставка пока не подтверждена';
+                    }
+                    $c_display = '<span class="ozs-bad">' . $this->e($cause_text) . '</span>';
                     $total_display = '—';
                     $commission_class = ' ozs-row-warning';
                 }
@@ -691,6 +703,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
                     if ($this->ui_live_commission_updated > 0) {
                         $this->ui_commission_map = $data['types'];
                         $this->ui_commission_details = isset($data['by_type']) && is_array($data['by_type']) ? $data['by_type'] : array();
+                        $this->ui_missing_causes = isset($data['missing_types']) && is_array($data['missing_types']) ? $data['missing_types'] : array();
                     }
                 }
             }
