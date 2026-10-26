@@ -90,11 +90,11 @@ command -v crontab >/dev/null
 OLD_CRON=$(crontab -u web -l 2>/dev/null || true)
 CMD="flock -n /tmp/ozonstocksync-commissions.lock /usr/bin/php $ROOT/cli.php shop ozonstocksyncPluginSync commissions=1"
 {
-    printf "%s\n" "$OLD_CRON" | grep -v "ozonstocksyncPluginCommissions" || true
+    printf "%s\n" "$OLD_CRON" | grep -v "ozonstocksyncPluginCommissions" | grep -v "ozonstocksyncPluginSync commissions=1" || true
     echo "* * * * * $CMD queued_only=1 >> $ROOT/wa-log/ozonstocksync-commissions-cron.log 2>&1"
     echo "10 4 * * * $CMD >> $ROOT/wa-log/ozonstocksync-commissions-cron.log 2>&1"
 } | crontab -u web -
-crontab -u web -l | grep 'ozonstocksyncPluginCommissions'
+crontab -u web -l | grep 'ozonstocksyncPluginSync commissions=1'
 echo 'COMMISSION_CRON=OK'
 DEPLOY_OK=1
 echo 'DEPLOY_STATUS=OK'
