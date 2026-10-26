@@ -176,7 +176,112 @@
             ]
         }
     ],
-    "accounts_checked": 4
+    "accounts_checked": 4,
+    "price_api_checks": [
+        {
+            "account": "Мегаполис",
+            "account_index": 1,
+            "http_ok": true,
+            "http_code": 200,
+            "returned_items": 2,
+            "items": [
+                {
+                    "offer_id": "SAMS-291012",
+                    "product_id": 3035060742,
+                    "sales_percent_rfbs": 50,
+                    "commission_fields": [
+                        "fbo_deliv_to_customer_amount",
+                        "fbo_direct_flow_trans_max_amount",
+                        "fbo_direct_flow_trans_min_amount",
+                        "fbo_return_flow_amount",
+                        "fbs_deliv_to_customer_amount",
+                        "fbs_direct_flow_trans_min_amount",
+                        "fbs_direct_flow_trans_max_amount",
+                        "fbs_first_mile_max_amount",
+                        "fbs_first_mile_min_amount",
+                        "fbs_return_flow_amount",
+                        "sales_percent_fbo",
+                        "sales_percent_fbs",
+                        "sales_percent_rfbs",
+                        "sales_percent_fbp"
+                    ],
+                    "price_present": true,
+                    "price_currency": "RUB"
+                },
+                {
+                    "offer_id": "SAMS-290517",
+                    "product_id": 3250306481,
+                    "sales_percent_rfbs": 50,
+                    "commission_fields": [
+                        "fbo_deliv_to_customer_amount",
+                        "fbo_direct_flow_trans_max_amount",
+                        "fbo_direct_flow_trans_min_amount",
+                        "fbo_return_flow_amount",
+                        "fbs_deliv_to_customer_amount",
+                        "fbs_direct_flow_trans_min_amount",
+                        "fbs_direct_flow_trans_max_amount",
+                        "fbs_first_mile_max_amount",
+                        "fbs_first_mile_min_amount",
+                        "fbs_return_flow_amount",
+                        "sales_percent_fbo",
+                        "sales_percent_fbs",
+                        "sales_percent_rfbs",
+                        "sales_percent_fbp"
+                    ],
+                    "price_present": true,
+                    "price_currency": "RUB"
+                }
+            ],
+            "result_top_keys": [
+                "items",
+                "cursor",
+                "total",
+                "total_items"
+            ]
+        },
+        {
+            "account": "Профи",
+            "account_index": 2,
+            "http_ok": true,
+            "http_code": 200,
+            "returned_items": 0,
+            "items": [],
+            "result_top_keys": [
+                "items",
+                "cursor",
+                "total",
+                "total_items"
+            ]
+        },
+        {
+            "account": "Норден 2 НДС",
+            "account_index": 3,
+            "http_ok": true,
+            "http_code": 200,
+            "returned_items": 0,
+            "items": [],
+            "result_top_keys": [
+                "items",
+                "cursor",
+                "total",
+                "total_items"
+            ]
+        },
+        {
+            "account": "Мегаполис Р",
+            "account_index": 4,
+            "http_ok": true,
+            "http_code": 200,
+            "returned_items": 0,
+            "items": [],
+            "result_top_keys": [
+                "items",
+                "cursor",
+                "total",
+                "total_items"
+            ]
+        }
+    ]
 }
 
 EXIT=0
