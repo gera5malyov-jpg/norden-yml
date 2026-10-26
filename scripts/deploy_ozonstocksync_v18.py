@@ -86,7 +86,7 @@ chown web:web /tmp/ozs_commission_health.php
 su -s /bin/bash web -c 'php -d display_errors=0 /tmp/ozs_commission_health.php'
 command -v crontab >/dev/null
 OLD_CRON=$(crontab -u web -l 2>/dev/null || true)
-CMD="flock -n /tmp/ozonstocksync-commissions.lock /usr/bin/php $ROOT/cli.php shop ozonstocksyncPluginCommissions"
+CMD="flock -n /tmp/ozonstocksync-commissions.lock /usr/bin/php $ROOT/cli.php shop ozonstocksyncPluginSync commissions=1"
 {
     printf "%s\n" "$OLD_CRON" | grep -v "ozonstocksyncPluginCommissions" || true
     echo "* * * * * $CMD queued_only=1 >> $ROOT/wa-log/ozonstocksync-commissions-cron.log 2>&1"
