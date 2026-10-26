@@ -59,6 +59,26 @@ jobs:
           echo 'LIVE_RATE_CACHED_TYPES='.count($rate_types)."\n";
           echo 'OFFICE_CHAIR_COMMISSION='.(is_array($office_rate)?json_encode($office_rate,JSON_UNESCAPED_UNICODE):'not_in_cache')."\n";
           echo 'LIVE_RATE_NOT_STALE='.($rate_updated>0 && $rate_updated>=time()-86400?'YES':'NO')."\n";
+          // Read only the tail of current plugin logs. Output aggregated counts, no offer IDs or secrets.
+          $logfiles=glob($root.'/wa-log/ozonstocksync*.log');
+          echo 'OZS_LOG_FILES='.count($logfiles)."\n";
+          foreach(array_slice($logfiles,0,12) as $logfile){
+              $size=@filesize($logfile);
+              if($size===false || $size<1)continue;
+              $bytes=@file_get_contents($logfile,false,null,max(0,$size-300000),300000);
+              if(!is_string($bytes))continue;
+              $lines=preg_split('/\\r?\\n/',$bytes);
+              $last_rfbs='';$last_account='';$last_finish='';$last_price='';$rfbs_count=0;$price_errors=0;
+              foreach($lines as $line){
+                  if(strpos($line,'LIVE_RFBS_')!==false){$last_rfbs=substr($line,0,19);$rfbs_count++;}
+                  if(strpos($line,'ACCOUNT_MODE:')!==false)$last_account=substr($line,0,19);
+                  if(strpos($line,'FINISH_ACCOUNTS:')!==false)$last_finish=substr($line,0,19);
+                  if(strpos($line,'ACCOUNT_PRICES_FINISH:')!==false)$last_price=substr($line,0,19);
+                  if(strpos($line,'PRICE_SKIP_NO_LIVE_RFBS')!==false)$price_errors++;
+              }
+              echo 'OZS_LOG_SUMMARY='.basename($logfile).' / bytes='.$size.' / last_rfbs='.$last_rfbs.' / rfbs_hits='.$rfbs_count.' / last_mode='.$last_account.' / last_finish='.$last_finish.' / last_price='.$last_price.' / missing_rate_skips='.$price_errors."\n";
+          }
+
 
 
           require_once $root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php';
