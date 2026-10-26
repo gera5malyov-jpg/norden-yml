@@ -30,7 +30,7 @@ with tempfile.TemporaryDirectory() as td:
     try:
         root = '/home/web/vm-23f9aff9.na4u.ru/www'
         remote = ("cd " + root + " && flock -n /tmp/ozonstocksync-commissions.lock " +
-                  "su -s /bin/bash web -c '/usr/bin/php cli.php shop ozonstocksyncPluginCommissions'")
+                  "su -s /bin/bash web -c '/usr/bin/php cli.php shop ozonstocksyncPluginSync commissions=1'")
         cmd=['ssh','-i',private,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no',
              '-o','UserKnownHostsFile=/dev/null','root@45.86.180.49',remote]
         result=subprocess.run(cmd, capture_output=True,text=True,timeout=780)
