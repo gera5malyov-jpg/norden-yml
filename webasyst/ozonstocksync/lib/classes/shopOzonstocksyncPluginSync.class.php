@@ -199,11 +199,18 @@ class shopOzonstocksyncPluginSync
             }
         }
         unset($pids);
+        $type_diagnostics = array();
+        foreach ($tips as $tip) {
+            if (!isset($type_diagnostics[$tip])) {
+                $type_diagnostics[$tip] = array('webasyst_skus' => 0, 'ozon_offer_matches' => 0, 'invalid_rates' => 0);
+            }
+        }
         $by_offer = array();
         foreach ($rows as $row) {
             $offer = trim((string)$row['sku']);
             $pid = (int)$row['product_id'];
             if ($offer === '' || !isset($tips[$pid])) continue;
+            $type_diagnostics[$tips[$pid]]['webasyst_skus']++;
             if (isset($by_offer[$offer]) && $by_offer[$offer] !== $tips[$pid]) {
                 $by_offer[$offer] = false; // Ambiguous SKU: never silently attribute a different type.
             } elseif (!array_key_exists($offer, $by_offer)) {
@@ -250,11 +257,15 @@ class shopOzonstocksyncPluginSync
                     if ($offer === '' || isset($seen_offer[$offer])) continue;
                     $seen_offer[$offer] = true;
                     if (!isset($by_offer[$offer]) || $by_offer[$offer] === false) continue;
+                    $tip = $by_offer[$offer];
+                    $type_diagnostics[$tip]['ozon_offer_matches']++;
                     $fees = isset($item['commissions']) && is_array($item['commissions']) ? $item['commissions'] : array();
                     $value = isset($fees['sales_percent_rfbs']) ? $fees['sales_percent_rfbs'] : null;
-                    if (!is_numeric($value) || (float)$value <= 0 || (float)$value >= 95) continue;
+                    if (!is_numeric($value) || (float)$value <= 0 || (float)$value >= 95) {
+                        $type_diagnostics[$tip]['invalid_rates']++;
+                        continue;
+                    }
                     $rate = (float)$value / 100;
-                    $tip = $by_offer[$offer];
                     if (!isset($summary[$tip])) {
                         $summary[$tip] = array('min' => $rate, 'max' => $rate, 'count' => 0);
                     }
@@ -287,10 +298,18 @@ class shopOzonstocksyncPluginSync
             $this->log('RFBS_INDEPENDENT_ACCOUNT: index=' . $account['index'] . ', pages=' . $pages . ', valid=' . $matched);
         }
         if (!$total || !$summary) throw new waException('No confirmed live rFBS commissions; old cache preserved');
+        $missing_types = array();
+        foreach ($type_diagnostics as $tip => $status) {
+            if (!isset($summary[$tip])) {
+                $status['reason'] = $status['webasyst_skus'] === 0 ? 'no_webasyst_sku'
+                    : ($status['ozon_offer_matches'] === 0 ? 'no_matching_ozon_offer' : 'no_valid_rfbs_commission');
+                $missing_types[$tip] = $status;
+            }
+        }
 
         $payload = json_encode(array(
             'updated_at' => time(), 'source' => 'ozon_seller_api', 'types' => $summary,
-            'by_type' => $items_by_type,
+            'by_type' => $items_by_type, 'missing_types' => $missing_types,
             'accounts' => $account_stats, 'offers' => $total
         ), JSON_UNESCAPED_UNICODE);
         if ($payload === false) throw new waException('Cannot encode rFBS commission snapshot');
