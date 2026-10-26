@@ -19,7 +19,7 @@ jobs:
           set -euo pipefail
           mkdir -p .deploy-probe
           {
-            echo "TEST=ozonstocksync-1.8.3"
+            echo "TEST=ozonstocksync-1.8.4"
             echo "--- PHP LINT ---"
             find webasyst/ozonstocksync -name '*.php' -print0 | while IFS= read -r -d '' f; do php -l "$f"; done
             echo "--- CONTRACT ---"
@@ -31,7 +31,7 @@ jobs:
           settings=(root/'lib/config/settings.php').read_text(encoding='utf-8')
           info=(root/'lib/config/plugin.php').read_text(encoding='utf-8')
           checks={
-              'version_1_8_3': "'version' => '1.8.3'" in info,
+              'version_1_8_4': "'version' => '1.8.4'" in info,
               'custom_getControls': 'function getControls' in plugin,
               'type_margin_ui': 'type_margin_percent' in plugin,
               'type_margin_setting': "'type_margin_percent'" in settings,
