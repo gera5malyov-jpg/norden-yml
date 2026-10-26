@@ -8,6 +8,15 @@ class shopOzonstocksyncPluginCommissionsCli extends waCliController
     public function execute()
     {
         $status_file = wa()->getDataPath('plugins/ozonstocksync/rfbs_refresh_status.json', false, 'shop', true);
+        // The minute-level queue worker does nothing unless the admin button requested a refresh.
+        $queue_only = in_array('queued_only=1', (array)$_SERVER['argv'], true);
+        if ($queue_only) {
+            $request = is_readable($status_file) ? json_decode((string)file_get_contents($status_file), true) : null;
+            if (!is_array($request) || !isset($request['status']) || $request['status'] !== 'queued') {
+                echo "RFBS_NO_MANUAL_REQUEST" . PHP_EOL;
+                return;
+            }
+        }
         $this->writeStatus($status_file, array('status' => 'running', 'started_at' => time()));
         try {
             $plugin = wa('shop')->getPlugin('ozonstocksync');
