@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-10-25T10:49:47.363630+00:00",
+  "started_at": "2026-10-26T11:47:29.104016+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=336",
   "type_name": "deephouse-336",
@@ -8,8 +8,8 @@
   "webasyst_stock_id": "66",
   "kit_stock": "МСК",
   "kit_stock_id": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
-  "kit_variants_scanned": 1220,
-  "kit_webasyst_336_variants": 1183,
+  "kit_variants_scanned": 1226,
+  "kit_webasyst_336_variants": 1189,
   "kit_duplicate_skus": 0,
   "webasyst_products": 1922,
   "webasyst_duplicate_skus": 0,
@@ -1819,6 +1819,11 @@
     {
       "sku": "DEEP-62128",
       "variant_id": "01a0ce0d-eca9-7ec2-b762-7b773b15039e",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-62212",
+      "variant_id": "01a177c9-fc57-7300-92e3-08695fea69f0",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
@@ -5877,6 +5882,11 @@
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
+      "sku": "DEEP-67436",
+      "variant_id": "01a177e6-c67f-78ef-9963-b2107e7f75dc",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
       "sku": "DEEP-67468",
       "variant_id": "01a0cde3-f1ce-778f-8282-b1cd9e7ead9c",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
@@ -5887,6 +5897,21 @@
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
+      "sku": "DEEP-67607",
+      "variant_id": "01a177cf-022f-7b80-b0f8-e415e9e4ec1e",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-67608",
+      "variant_id": "01a177cf-3d6c-7197-a9d8-30349d3084ce",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-67609",
+      "variant_id": "01a177cf-6b93-7d31-a8bf-46032e20d0e0",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
       "sku": "DEEP-67614",
       "variant_id": "01a11b69-4508-7e87-a1f8-07c2177d0036",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
@@ -5894,6 +5919,11 @@
     {
       "sku": "DEEP-67615",
       "variant_id": "01a11b69-6483-723f-9713-15541b062817",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-67616",
+      "variant_id": "01a177e6-24c4-712c-b3fc-da466379ab83",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
@@ -6003,6 +6033,6 @@
   "complete": false,
   "webasyst_routing_feature_code": "kenner_f93046718124",
   "webasyst_336_products": 1922,
-  "finished_at": "2026-10-25T11:04:26.955880+00:00",
+  "finished_at": "2026-10-26T12:02:45.898916+00:00",
   "status": "degraded"
 }
