@@ -302,7 +302,8 @@ class shopOzonstocksyncPluginSync
         // Webasyst type still missing from the snapshot by an exact, read-only lookup.
         $missing_keys = array();
         foreach ($type_diagnostics as $tip => $type_status) {
-            if (!isset($summary[$tip])) $missing_keys[$tip] = true;
+            // Limit optional second-pass calls per run to avoid overloading seller API.
+            if (!isset($summary[$tip]) && $type_status['webasyst_skus'] <= 100) $missing_keys[$tip] = true;
         }
         if ($missing_keys) {
             $target_offers = array();
@@ -312,7 +313,7 @@ class shopOzonstocksyncPluginSync
             $this->log('RFBS_EXACT_FALLBACK_START: types=' . count($missing_keys) . ', offers=' . count($target_offers));
             foreach ($accounts as $account_pos => $account) {
                 $extra = 0;
-                foreach (array_chunk(array_values($target_offers), 100) as $batch) {
+                foreach (array_chunk(array_values($target_offers), 20) as $batch) {
                     $response = null;
                     for ($attempt = 1; $attempt <= 3; $attempt++) {
                         $response = $this->sendToOzon(
@@ -323,16 +324,42 @@ class shopOzonstocksyncPluginSync
                         if ($response['ok'] || !$this->shouldRetryOzonResponse($response) || $attempt === 3) break;
                         sleep(3);
                     }
-                    if (!$response || !$response['ok']) {
+                    $items = array();
+                    if ($response && $response['ok']) {
+                        $decoded = json_decode((string)$response['body'], true);
+                        if (!is_array($decoded) || !isset($decoded['items']) || !is_array($decoded['items'])) {
+                            throw new waException('Ozon exact rFBS response invalid: account ' . $account['index']);
+                        }
+                        $items = $decoded['items'];
+                    } elseif ($response && (int)$response['code'] === 400) {
+                        // Some offer IDs make a batch invalid. Test individually rather than
+                        // aborting the refresh or silently assigning a guessed commission.
+                        foreach ($batch as $single_offer) {
+                            $single = $this->sendToOzon(
+                                self::INFO_PRICES_URL,
+                                array('cursor' => '', 'filter' => array('offer_id' => array((string)$single_offer), 'visibility' => 'ALL'), 'limit' => 100),
+                                $account['client_id'], $account['api_key']
+                            );
+                            if (!$single['ok']) {
+                                $tip = isset($by_offer[$single_offer]) ? $by_offer[$single_offer] : '';
+                                if (is_string($tip) && isset($type_diagnostics[$tip])) {
+                                    $type_diagnostics[$tip]['exact_api_errors'] =
+                                        (int)(isset($type_diagnostics[$tip]['exact_api_errors']) ? $type_diagnostics[$tip]['exact_api_errors'] : 0) + 1;
+                                }
+                                $this->log('RFBS_EXACT_SKIPPED_API: account=' . $account['index'] . ', http=' . (int)$single['code']);
+                                continue;
+                            }
+                            $decoded = json_decode((string)$single['body'], true);
+                            if (is_array($decoded) && isset($decoded['items']) && is_array($decoded['items'])) {
+                                foreach ($decoded['items'] as $item) $items[] = $item;
+                            }
+                        }
+                    } else {
                         throw new waException('Ozon exact rFBS lookup failed: account ' . $account['index']
                             . ', HTTP ' . ($response ? (int)$response['code'] : 0));
                     }
-                    $decoded = json_decode((string)$response['body'], true);
-                    if (!is_array($decoded) || !isset($decoded['items']) || !is_array($decoded['items'])) {
-                        throw new waException('Ozon exact rFBS lookup response invalid: account ' . $account['index']);
-                    }
                     $requested = array_fill_keys($batch, true);
-                    foreach ($decoded['items'] as $item) {
+                    foreach ($items as $item) {
                         if (!is_array($item)) continue;
                         $offer = isset($item['offer_id']) ? trim((string)$item['offer_id']) : '';
                         if (!isset($requested[$offer]) || !isset($by_offer[$offer]) || $by_offer[$offer] === false) continue;
@@ -367,7 +394,8 @@ class shopOzonstocksyncPluginSync
         foreach ($type_diagnostics as $tip => $status) {
             if (!isset($summary[$tip])) {
                 $status['reason'] = $status['webasyst_skus'] === 0 ? 'no_webasyst_sku'
-                    : ($status['ozon_offer_matches'] === 0 ? 'no_matching_ozon_offer' : 'no_valid_rfbs_commission');
+                    : (!empty($status['exact_api_errors']) ? 'lookup_failed_for_some_offers'
+                    : ($status['ozon_offer_matches'] === 0 ? 'no_matching_ozon_offer' : 'no_valid_rfbs_commission'));
                 $missing_types[$tip] = $status;
             }
         }
