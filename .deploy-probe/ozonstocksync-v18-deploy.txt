@@ -1,4 +1,4 @@
-BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-v18-20261026-164700.tgz
+BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-v18-20261026-165828.tgz
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginSync.cli.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginCommissions.cli.php
@@ -11,7 +11,6 @@ No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plug
 VERSION=1.8.0
 BUTTON=YES
 UI_HEALTH=OK
-* * * * * flock -n /tmp/ozonstocksync-commissions.lock /usr/bin/php /home/web/vm-23f9aff9.na4u.ru/www/cli.php shop ozonstocksyncPluginCommissions queued_only=1 >> /home/web/vm-23f9aff9.na4u.ru/www/wa-log/ozonstocksync-commissions-cron.log 2>&1
-10 4 * * * flock -n /tmp/ozonstocksync-commissions.lock /usr/bin/php /home/web/vm-23f9aff9.na4u.ru/www/cli.php shop ozonstocksyncPluginCommissions >> /home/web/vm-23f9aff9.na4u.ru/www/wa-log/ozonstocksync-commissions-cron.log 2>&1
-COMMISSION_CRON=OK
-DEPLOY_STATUS=OK
+ROLLBACK=OK
+
+DEPLOY_STATUS=FAILED
