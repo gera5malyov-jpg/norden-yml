@@ -46,6 +46,20 @@ jobs:
           $tm=$p->getSettings('type_margin_percent');
           if(is_string($tm)){$d=json_decode($tm,true);if(is_array($d))$tm=$d;}
           echo 'VERSION='.$p->getVersion()."\n";
+          // Read-only audit of the commissions materialized after price synchronization.
+          $rate_path=wa()->getDataPath('plugins/ozonstocksync/rfbs_live_rates.json',false,'shop',true);
+          $rate_raw=is_readable($rate_path)?file_get_contents($rate_path):'';
+          $rate_json=json_decode($rate_raw,true);
+          $rate_types=is_array($rate_json) && isset($rate_json['types']) && is_array($rate_json['types'])?$rate_json['types']:array();
+          $rate_updated=is_array($rate_json)&&isset($rate_json['updated_at'])?(int)$rate_json['updated_at']:0;
+          $office_rate=isset($rate_types['офисное кресло'])?$rate_types['офисное кресло']:null;
+          echo 'LIVE_RATE_CACHE='.(is_array($rate_json)?'YES':'NO')."\n";
+          echo 'LIVE_RATE_CACHE_UPDATED='.($rate_updated?date('Y-m-d H:i:s',$rate_updated):'none')."\n";
+          echo 'LIVE_RATE_CACHE_AGE_SECONDS='.($rate_updated?(time()-$rate_updated):'unknown')."\n";
+          echo 'LIVE_RATE_CACHED_TYPES='.count($rate_types)."\n";
+          echo 'OFFICE_CHAIR_COMMISSION='.(is_array($office_rate)?json_encode($office_rate,JSON_UNESCAPED_UNICODE):'not_in_cache')."\n";
+          echo 'LIVE_RATE_NOT_STALE='.($rate_updated>0 && $rate_updated>=time()-86400?'YES':'NO')."\n";
+
 
           require_once $root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php';
           $rc=new ReflectionClass('shopOzonstocksyncPluginSync');
@@ -135,7 +149,7 @@ jobs:
           echo 'DUPLICATE_GUARD_DETECTED='.($guard_detected?'YES':'NO_MATCH_IN_SAMPLE')."\n";
 
           $ui_ok=(strpos($html,'ozs-stock-picker')!==false && strpos($html,'_mapping_rows_present')!==false);
-          $ok=($p->getVersion()==='1.7.0' && count($m[0])>0 && $serializer_ok && $parser_ok && $ui_ok && $allowlist_ok && $create_before_sync && $saved_remote_guard && $second_guard && $guard_api_ok);
+          $ok=($p->getVersion()==='1.7.1' && count($m[0])>0 && $serializer_ok && $parser_ok && $ui_ok && $allowlist_ok && $create_before_sync && $saved_remote_guard && $second_guard && $guard_api_ok);
           echo 'SERIALIZER='.($serializer_ok?'OK':'FAIL')."\n";
           echo 'PARSER='.($parser_ok?'OK':'FAIL')."\n";
           echo 'MULTI_STOCK_UI='.($ui_ok?'OK':'FAIL')."\n";
