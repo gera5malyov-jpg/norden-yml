@@ -1,9 +1,9 @@
 {
-  "started_at": "2026-10-25T11:48:18.595569+00:00",
-  "finished_at": "2026-10-25T11:48:18.595592+00:00",
+  "started_at": "2026-10-26T13:21:05.158564+00:00",
+  "finished_at": "2026-10-26T13:21:05.158582+00:00",
   "status": "error",
   "dry_run": false,
   "feed_url": "https://afinalux.ru/index.php?route=feed/yandex_yml",
   "brand_expected": "Afina Garden",
-  "error": "Cannot download Afina Garden feed after retries: HTTPConnectionPool(host='afinalux.ru', port=80): Max retries exceeded with url: /index.php?route=feed/yandex_yml (Caused by ConnectTimeoutError(<HTTPConnection(host='afinalux.ru', port=80) at 0x7fca03a92d50>, 'Connection to afinalux.ru timed out. (connect timeout=10)'))"
+  "error": "Cannot download Afina Garden feed after retries: HTTPConnectionPool(host='afinalux.ru', port=80): Max retries exceeded with url: /index.php?route=feed/yandex_yml (Caused by ConnectTimeoutError(<HTTPConnection(host='afinalux.ru', port=80) at 0x7f3c8ace6ba0>, 'Connection to afinalux.ru timed out. (connect timeout=10)'))"
 }
