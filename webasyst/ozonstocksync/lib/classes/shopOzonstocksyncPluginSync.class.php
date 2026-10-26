@@ -214,6 +214,7 @@ class shopOzonstocksyncPluginSync
         if (!$by_offer) throw new waException('No product types matched to offers');
 
         $summary = array();
+        $items_by_type = array();
         $account_stats = array();
         $total = 0;
         foreach ($accounts as $account) {
@@ -260,6 +261,17 @@ class shopOzonstocksyncPluginSync
                     $summary[$tip]['min'] = min($summary[$tip]['min'], $rate);
                     $summary[$tip]['max'] = max($summary[$tip]['max'], $rate);
                     $summary[$tip]['count']++;
+                    // A product type can have several legitimate, exact Ozon commissions.
+                    // Preserve each rate separately instead of showing a misleading min-max.
+                    $pct_key = $this->formatRateKey($rate * 100);
+                    if (!isset($summary[$tip]['rates'])) $summary[$tip]['rates'] = array();
+                    if (!isset($summary[$tip]['rates'][$pct_key])) $summary[$tip]['rates'][$pct_key] = 0;
+                    $summary[$tip]['rates'][$pct_key]++;
+                    $items_by_type[$tip][] = array(
+                        'offer_id' => $offer,
+                        'account' => (int)$account['index'],
+                        'percent' => (float)$pct_key
+                    );
                     $matched++;
                 }
                 $next = isset($decoded['cursor']) ? trim((string)$decoded['cursor']) : '';
@@ -278,6 +290,7 @@ class shopOzonstocksyncPluginSync
 
         $payload = json_encode(array(
             'updated_at' => time(), 'source' => 'ozon_seller_api', 'types' => $summary,
+            'by_type' => $items_by_type,
             'accounts' => $account_stats, 'offers' => $total
         ), JSON_UNESCAPED_UNICODE);
         if ($payload === false) throw new waException('Cannot encode rFBS commission snapshot');
@@ -290,6 +303,12 @@ class shopOzonstocksyncPluginSync
         $this->log('RFBS_INDEPENDENT_REFRESH_OK: types=' . count($summary) . ', offers=' . $total);
         return array('updated_at' => time(), 'types' => count($summary),
                      'offers' => $total, 'accounts' => $account_stats);
+    }
+
+    private function formatRateKey($value)
+    {
+        $fixed = number_format((float)$value, 4, '.', '');
+        return rtrim(rtrim($fixed, '0'), '.');
     }
 
     private function parseAccounts()
