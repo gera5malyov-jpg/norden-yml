@@ -395,7 +395,8 @@ class shopOzonstocksyncPluginSync
             if (!isset($summary[$tip])) {
                 $status['reason'] = $status['webasyst_skus'] === 0 ? 'no_webasyst_sku'
                     : (!empty($status['exact_api_errors']) ? 'lookup_failed_for_some_offers'
-                    : ($status['ozon_offer_matches'] === 0 ? 'no_matching_ozon_offer' : 'no_valid_rfbs_commission'));
+                    : ($status['webasyst_skus'] > 100 && $status['ozon_offer_matches'] === 0 ? 'large_type_exact_lookup_pending'
+                    : ($status['ozon_offer_matches'] === 0 ? 'no_matching_ozon_offer' : 'no_valid_rfbs_commission')));
                 $missing_types[$tip] = $status;
             }
         }
