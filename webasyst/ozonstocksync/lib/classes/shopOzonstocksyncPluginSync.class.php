@@ -152,9 +152,7 @@ class shopOzonstocksyncPluginSync
             $this->account_log_file = null;
         }
 
-        if ($update_prices) {
-            $this->saveLiveCommissionSummary();
-        }
+        // The separate daily refresh owns the complete commission snapshot.
         $this->log('FINISH_ACCOUNTS: accounts=' . count($accounts) . ', sent_stocks=' . $total_sent_stocks . ', sent_prices=' . $total_sent_prices . ', create_submitted=' . $total_create_submitted . ', create_would_create=' . $total_create_would_create . ', create_skipped_existing=' . $total_create_skipped_existing . ', create_errors=' . $total_create_errors . ', errors=' . $total_errors);
         return array(
             'accounts' => count($accounts),
@@ -167,6 +165,131 @@ class shopOzonstocksyncPluginSync
             'errors' => $total_errors,
             'dry_run' => $dry_run
         );
+    }
+
+    /**
+     * Independent, read-only (toward Ozon) full rFBS refresh.
+     * Never sends stock, product or price mutations to the marketplace.
+     */
+    public function refreshCommissions()
+    {
+        $accounts = $this->parseAccounts();
+        if (!$accounts) throw new waException('Ozon accounts are not configured');
+
+        $feature_code = trim((string)$this->get('tip_feature_code', 'tip_ozon'));
+        if ($feature_code === '') $feature_code = 'tip_ozon';
+        $model = new waModel();
+        $feature = $model->query('SELECT id FROM shop_feature WHERE code = s:code LIMIT 1',
+            array('code' => $feature_code))->fetchAssoc();
+        if (!$feature) throw new waException('Ozon product type feature not found');
+
+        $rows = $model->query(
+            'SELECT DISTINCT s.product_id, s.sku FROM shop_product_skus s '
+            . 'INNER JOIN shop_product_features pf ON pf.product_id = s.product_id AND pf.feature_id = i:feature_id '
+            . "WHERE s.sku IS NOT NULL AND s.sku <> ''",
+            array('feature_id' => (int)$feature['id'])
+        )->fetchAll();
+        $pids = array();
+        foreach ($rows as $row) $pids[(int)$row['product_id']] = (int)$row['product_id'];
+        $tips = array();
+        foreach (array_chunk(array_values($pids), 250) as $batch) {
+            foreach ($this->loadTipOzonValues($batch) as $pid => $tip) {
+                $key = $this->normalizeTip($tip);
+                if ($key !== '') $tips[(int)$pid] = $key;
+            }
+        }
+        unset($pids);
+        $by_offer = array();
+        foreach ($rows as $row) {
+            $offer = trim((string)$row['sku']);
+            $pid = (int)$row['product_id'];
+            if ($offer === '' || !isset($tips[$pid])) continue;
+            if (isset($by_offer[$offer]) && $by_offer[$offer] !== $tips[$pid]) {
+                $by_offer[$offer] = false; // Ambiguous SKU: never silently attribute a different type.
+            } elseif (!array_key_exists($offer, $by_offer)) {
+                $by_offer[$offer] = $tips[$pid];
+            }
+        }
+        unset($rows, $tips);
+        if (!$by_offer) throw new waException('No product types matched to offers');
+
+        $summary = array();
+        $account_stats = array();
+        $total = 0;
+        foreach ($accounts as $account) {
+            $cursor = '';
+            $seen_cursor = array();
+            $seen_offer = array();
+            $matched = 0;
+            $pages = 0;
+            while (true) {
+                if ($pages >= 1000) throw new waException('Commission API pagination safety limit reached');
+                $response = null;
+                for ($attempt = 1; $attempt <= 3; $attempt++) {
+                    $response = $this->sendToOzon(
+                        self::INFO_PRICES_URL,
+                        array('cursor' => $cursor, 'filter' => array('visibility' => 'ALL'), 'limit' => 1000),
+                        $account['client_id'], $account['api_key']
+                    );
+                    if ($response['ok'] || !$this->shouldRetryOzonResponse($response) || $attempt === 3) break;
+                    sleep(3);
+                }
+                if (!$response || !$response['ok']) {
+                    throw new waException('Ozon commission API failed: account ' . $account['index']
+                        . ' HTTP ' . ($response ? (int)$response['code'] : 0));
+                }
+                $decoded = json_decode((string)$response['body'], true);
+                if (!is_array($decoded) || !isset($decoded['items']) || !is_array($decoded['items'])) {
+                    throw new waException('Ozon commission API response invalid: account ' . $account['index']);
+                }
+                $pages++;
+                foreach ($decoded['items'] as $item) {
+                    if (!is_array($item)) continue;
+                    $offer = isset($item['offer_id']) ? trim((string)$item['offer_id']) : '';
+                    if ($offer === '' || isset($seen_offer[$offer])) continue;
+                    $seen_offer[$offer] = true;
+                    if (!isset($by_offer[$offer]) || $by_offer[$offer] === false) continue;
+                    $fees = isset($item['commissions']) && is_array($item['commissions']) ? $item['commissions'] : array();
+                    $value = isset($fees['sales_percent_rfbs']) ? $fees['sales_percent_rfbs'] : null;
+                    if (!is_numeric($value) || (float)$value <= 0 || (float)$value >= 95) continue;
+                    $rate = (float)$value / 100;
+                    $tip = $by_offer[$offer];
+                    if (!isset($summary[$tip])) {
+                        $summary[$tip] = array('min' => $rate, 'max' => $rate, 'count' => 0);
+                    }
+                    $summary[$tip]['min'] = min($summary[$tip]['min'], $rate);
+                    $summary[$tip]['max'] = max($summary[$tip]['max'], $rate);
+                    $summary[$tip]['count']++;
+                    $matched++;
+                }
+                $next = isset($decoded['cursor']) ? trim((string)$decoded['cursor']) : '';
+                if ($next === '') break;
+                if ($next === $cursor || isset($seen_cursor[$next])) {
+                    throw new waException('Ozon commission pagination repeated a cursor');
+                }
+                $seen_cursor[$next] = true;
+                $cursor = $next;
+            }
+            $account_stats[] = array('index' => (int)$account['index'], 'matched' => $matched, 'pages' => $pages);
+            $total += $matched;
+            $this->log('RFBS_INDEPENDENT_ACCOUNT: index=' . $account['index'] . ', pages=' . $pages . ', valid=' . $matched);
+        }
+        if (!$total || !$summary) throw new waException('No confirmed live rFBS commissions; old cache preserved');
+
+        $payload = json_encode(array(
+            'updated_at' => time(), 'source' => 'ozon_seller_api', 'types' => $summary,
+            'accounts' => $account_stats, 'offers' => $total
+        ), JSON_UNESCAPED_UNICODE);
+        if ($payload === false) throw new waException('Cannot encode rFBS commission snapshot');
+        $path = wa()->getDataPath('plugins/ozonstocksync/rfbs_live_rates.json', false, 'shop', true);
+        $tmp = $path . '.new.' . getmypid();
+        if (file_put_contents($tmp, $payload, LOCK_EX) === false || !rename($tmp, $path)) {
+            @unlink($tmp);
+            throw new waException('Could not atomically write commissions snapshot');
+        }
+        $this->log('RFBS_INDEPENDENT_REFRESH_OK: types=' . count($summary) . ', offers=' . $total);
+        return array('updated_at' => time(), 'types' => count($summary),
+                     'offers' => $total, 'accounts' => $account_stats);
     }
 
     private function parseAccounts()
