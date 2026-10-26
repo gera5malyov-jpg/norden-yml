@@ -120,3 +120,12 @@ tail -n 200 /home/web/vm-23f9aff9.na4u.ru/www/wa-log/ozonstocksync_profi.log | e
 - Для создания совершенно новой карточки до появления товара в API временно применяется прежняя консервативная встроенная ставка; после появления предложения цена считается по API.
 - Для особых тарифов мототехники свыше 500 000 ₽ расчёт цены без полноценного подтверждения диапазона блокируется.
 - Изменение требует установки новой версии на Webasyst и хотя бы одного запуска синхронизации цен для заполнения отображаемых комиссий.
+
+
+## v1.8.0 - independent live rFBS commissions (26.10.2026)
+
+- Standalone CLI: `php cli.php shop ozonstocksyncPluginCommissions`. It reads all current rFBS offer rates for every configured Ozon account and stores a timestamped aggregate in `wa-data`.
+- It never changes prices, stocks, or product cards. A failed refresh preserves the last valid snapshot and shows an error in its status.
+- Settings button «Обновить комиссии сейчас» queues an authenticated, CSRF-validated one-off refresh; `queued_only=1` CLI checks the queue.
+- Daily scheduled cron and queue polling run under separate `flock`; last successful refresh and stale rates are visible in the UI.
+- The ordinary stock/price synchronizer continues to fetch live per-offer rates for pricing, independently of the saved snapshot.
