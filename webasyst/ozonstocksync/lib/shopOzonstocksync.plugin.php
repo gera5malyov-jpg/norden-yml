@@ -829,7 +829,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
             var btn=document.getElementById("ozs-rate-refresh"), rateState=document.getElementById("ozs-rate-state"), ratePoll=null;
             if(btn && rateState){
                 function notify(msg){rateState.textContent=msg;}
-                function token(){var m=document.cookie.match(/(?:^|;\\s*)_csrf=([^;]+)/);return m?decodeURIComponent(m[1]):"";}
+                function token(){var field=document.querySelector("input[name=_csrf]");if(field&&field.value)return field.value;var m=document.cookie.match(/(?:^|;\\s*)_csrf=([^;]+)/);return m?decodeURIComponent(m[1]):"";}
                 function refreshStatus(){
                     fetch(btn.getAttribute("data-status-url"),{credentials:"same-origin"})
                     .then(function(r){return r.json();})
@@ -859,7 +859,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
                         refreshStatus();
                         if(ratePoll)clearInterval(ratePoll);
                         ratePoll=setInterval(refreshStatus,5000);
-                    }).catch(function(){btn.disabled=false;notify("Ошибка запроса.");});
+                    }).catch(function(e){btn.disabled=false;notify("Ошибка запроса к серверу: "+(e&&e.message?e.message:"ответ недоступен"));});
                 });
                 refreshStatus();
             }
