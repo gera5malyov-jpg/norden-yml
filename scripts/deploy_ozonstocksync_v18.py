@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deploy Ozon Stock Sync v1.8.0 safely using the existing Netangels VM SSH API."""
+"""Deploy Ozon Stock Sync v1.8.2 safely using the existing Netangels VM SSH API."""
 import json
 import os
 import pathlib
@@ -75,7 +75,7 @@ wa('shop');
 $p=wa('shop')->getPlugin('ozonstocksync',true);
 $controls=$p->getControls(array('namespace'=>'shop_ozonstocksync'));
 $html=isset($controls['ozonstocksync_ui'])?(string)$controls['ozonstocksync_ui']:'';
-$ok=$p->getVersion()==='1.8.0' &&
+$ok=$p->getVersion()==='1.8.2' &&
     strpos($html,'ozs-rate-refresh')!==false &&
     strpos($html,'type_margin_percent')!==false &&
     file_exists($root.'/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginCommissions.cli.php');
