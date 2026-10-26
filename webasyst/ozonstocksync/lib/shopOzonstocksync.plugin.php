@@ -137,7 +137,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html .= '<div class="ozs-settings">';
         $html .= '<div class="ozs-hero">';
         $html .= '<div><div class="ozs-title">Ozon Stock Sync</div><div class="ozs-subtitle">Остатки, цены и безопасное создание новых карточек из списка «Грузить в Ozon»</div></div>';
-        $html .= '<span class="ozs-version">v1.7.1</span>';
+        $html .= '<span class="ozs-version">v1.8.0</span>';
         $html .= '</div>';
 
         $html .= '<div class="ozs-summary-grid">';
@@ -166,6 +166,10 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html .= $this->inputField($namespace, 'round_step', 'Округление вверх, ₽', 'number', 'Шаг округления цены', '1');
         $html .= '</div>';
         $html .= '<div class="ozs-formula">Цена = Закупка × (1 + наценка) ÷ (1 − комиссия Ozon − эквайринг). В Ozon себестоимость не отправляется.</div>';
+        $refresh_url = $this->getInteractionUrl('refreshCommissions');
+        $status_url = $this->getInteractionUrl('commissionStatus');
+        $html .= '<div class="ozs-rate-actions"><button type="button" class="button" id="ozs-rate-refresh" data-refresh-url="' . $this->e($refresh_url) . '" data-status-url="' . $this->e($status_url) . '">Обновить комиссии сейчас</button>';
+        $html .= '<span id="ozs-rate-state">Независимое обновление через Ozon API ежедневно. Кнопка не меняет цены и остатки.</span></div>';
         $html .= '<div class="ozs-alert ozs-alert-info"><b>Создание новых карточек:</b> разрешено только товарам из единственного списка Webasyst <b>«Грузить в Ozon»</b> (ID: <code>ozon_upload</code>). Существующие карточки перед импортом проверяются и этим механизмом не обновляются. Удаление товара из списка запрещает только будущую попытку создания и не удаляет карточку из Ozon.</div>';
         $html .= '</div></details>';
 
@@ -184,11 +188,14 @@ class shopOzonstocksyncPlugin extends shopPlugin
             $html .= '<div class="ozs-type-toolbar">';
             $html .= '<input type="search" id="ozs-type-search" class="ozs-search" placeholder="Найти тип товара…">';
             $updated = $this->ui_live_commission_updated ? date('d.m.Y H:i', $this->ui_live_commission_updated) : 'ещё не получены';
-            $html .= '<div class="ozs-legend">Комиссии: Ozon Seller API rFBS, последняя проверка: ' . $this->e($updated) . ' · эквайринг: ' . $this->formatPercent($acquiring) . '</div>';
+            $html .= '<div class="ozs-legend">Комиссии: Ozon Seller API rFBS, последняя проверка: ' . $this->e($updated) . ' · эквайринг: ' . $this->formatPercent($acquiring) . '</div>'; 
+            if ($this->ui_live_commission_updated && $this->ui_live_commission_updated < time()-86400) {
+                $html .= '<div class="ozs-alert ozs-alert-warning">Сохранённые комиссии старше 24 часов. Для расчёта цен плагин всё равно проверяет ставку через API, а не использует устаревшее значение.</div>';
+            }
             $html .= '</div>';
 
             if ($missing_commissions > 0) {
-                $html .= '<div class="ozs-alert ozs-alert-warning">Для ' . (int)$missing_commissions . ' типов актуальная ставка Ozon ещё не подтверждена через API. Цены без подтверждённой ставки не отправляются; данные появятся после синхронизации цен.</div>';
+                $html .= '<div class="ozs-alert ozs-alert-warning">Для ' . (int)$missing_commissions . ' типов актуальная ставка Ozon ещё не подтверждена через API. Цены без подтверждённой ставки не отправляются; данные появятся после независимого обновления комиссий.</div>';
             }
 
             $html .= '<div class="ozs-table-wrap"><table class="ozs-table">';
@@ -676,7 +683,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
                 if (is_array($data) && isset($data['types']) && is_array($data['types'])) {
                     $this->ui_live_commission_updated = isset($data['updated_at']) ? (int)$data['updated_at'] : 0;
                     // Old snapshots must never silently be represented as current commissions.
-                    if ($this->ui_live_commission_updated > 0 && $this->ui_live_commission_updated >= time() - 86400) {
+                    if ($this->ui_live_commission_updated > 0) {
                         $this->ui_commission_map = $data['types'];
                     }
                 }
@@ -783,6 +790,9 @@ class shopOzonstocksyncPlugin extends shopPlugin
         .ozs-rate-note{display:block;margin-top:2px;color:var(--text-color-hint,#777);font-size:10px}
         .ozs-bad{color:var(--red,#d33);font-weight:600}
         .ozs-row-warning{background:rgba(255,180,0,.06)}
+        .ozs-rate-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:13px 0}
+        .ozs-rate-actions span{font-size:12px;color:var(--text-color-hint,#777)}
+        .ozs-rate-actions button{cursor:pointer}
         .ozs-alert{border-radius:8px;padding:9px 11px;margin:0 0 10px;font-size:12px}
         .ozs-alert-warning{background:rgba(255,180,0,.11)}
         .ozs-empty{padding:22px;text-align:center;color:var(--text-color-hint,#777)}
@@ -816,6 +826,43 @@ class shopOzonstocksyncPlugin extends shopPlugin
     private function settingsJs()
     {
         return '<script>(function(){
+            var btn=document.getElementById("ozs-rate-refresh"), rateState=document.getElementById("ozs-rate-state"), ratePoll=null;
+            if(btn && rateState){
+                function notify(msg){rateState.textContent=msg;}
+                function token(){var m=document.cookie.match(/(?:^|;\\s*)_csrf=([^;]+)/);return m?decodeURIComponent(m[1]):"";}
+                function refreshStatus(){
+                    fetch(btn.getAttribute("data-status-url"),{credentials:"same-origin"})
+                    .then(function(r){return r.json();})
+                    .then(function(out){
+                        if(out.status!=="ok"||!out.data)return;
+                        var d=out.data;
+                        if(d.status==="success"){
+                            clearInterval(ratePoll);ratePoll=null;btn.disabled=false;
+                            notify("Комиссии обновлены: "+(d.result&&d.result.types||0)+" типов. Обновите страницу для просмотра ставок.");
+                        }else if(d.status==="error"){
+                            clearInterval(ratePoll);ratePoll=null;btn.disabled=false;
+                            notify("Ошибка обновления: "+(d.error||"проверьте журнал плагина"));
+                        }else if(d.status==="running"){notify("Получение комиссий Ozon выполняется...");}
+                        else if(d.status==="queued"){notify("Заявка принята: запуск при ближайшей минутной проверке.");}
+                    }).catch(function(){notify("Не удалось прочитать статус. Проверьте позже.");});
+                }
+                btn.addEventListener("click",function(){
+                    btn.disabled=true;notify("Отправка запроса...");
+                    fetch(btn.getAttribute("data-refresh-url"),{
+                        method:"POST",credentials:"same-origin",
+                        headers:{"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","X-Requested-With":"XMLHttpRequest"},
+                        body:"_csrf="+encodeURIComponent(token())
+                    }).then(function(r){return r.json();})
+                    .then(function(out){
+                        if(out.status!=="ok"){btn.disabled=false;notify("Не удалось запустить обновление. Проверьте доступ и CSRF.");return;}
+                        notify("Запрос принят. Подгрузка комиссий не меняет цены и остатки.");
+                        refreshStatus();
+                        if(ratePoll)clearInterval(ratePoll);
+                        ratePoll=setInterval(refreshStatus,5000);
+                    }).catch(function(){btn.disabled=false;notify("Ошибка запроса.");});
+                });
+                refreshStatus();
+            }
             var q=document.getElementById("ozs-type-search");
             if(q){q.addEventListener("input",function(){var needle=(q.value||"").toLowerCase().trim();var rows=document.querySelectorAll(".ozs-type-row");for(var i=0;i<rows.length;i++){var hay=(rows[i].getAttribute("data-search")||"").toLowerCase();rows[i].style.display=(!needle||hay.indexOf(needle)!==-1)?"":"none";}});}
 
