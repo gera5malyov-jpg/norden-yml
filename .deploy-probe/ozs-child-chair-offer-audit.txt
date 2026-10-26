@@ -1,19 +1,19 @@
 {
-    "target": "Детский стул",
+    "target": "Информационный стенд",
     "plugin_version": "1.8.2",
-    "webasyst_product_count": 1,
+    "webasyst_product_count": 2,
     "products": [
         {
-            "product_id": 772617,
-            "name": "Стул для ученика с полиуретановыми сиденьем и спинкой ШС-04",
-            "url": "stul-dlya-uchenika-s-poliuretanovymi-sidenem-i-spinkoy-model-shs-04",
+            "product_id": 1216436,
+            "name": "Доска-стенд \"Уголок покупателя\" 50х75 см, 4 кармана А4, 3 плоских + 1 объемный, ЭКОНОМ, 291012",
+            "url": "doska-stend-ugolok-pokupatelya-50kh75-sm-4-karmana-a4-3-ploskikh-1-obemnyy-ekonom-brauberg-291012",
             "status": "1",
             "skus": [
                 {
-                    "sku_id": 30945617,
-                    "webasyst_sku": "AF-30945617",
+                    "sku_id": 31395572,
+                    "webasyst_sku": "SAMS-291012",
                     "available": "1",
-                    "webasyst_stock": null,
+                    "webasyst_stock": "7.000",
                     "account_checks": [
                         {
                             "account_index": 1,
@@ -30,10 +30,16 @@
                                 "lover-zerkala",
                                 "ozon-lo"
                             ],
-                            "product_in_export_set": false,
+                            "product_in_export_set": true,
                             "api_ok": true,
                             "http_status": null,
-                            "found_offers": []
+                            "found_offers": [
+                                {
+                                    "offer_id": "SAMS-291012",
+                                    "ozon_product_id": 3035060742,
+                                    "ozon_sku": 3089128895
+                                }
+                            ]
                         },
                         {
                             "account_index": 2,
@@ -41,7 +47,7 @@
                             "configured_sets": [
                                 "ozon_natur"
                             ],
-                            "product_in_export_set": false,
+                            "product_in_export_set": true,
                             "api_ok": true,
                             "http_status": null,
                             "found_offers": []
@@ -69,16 +75,31 @@
                             "found_offers": []
                         }
                     ],
-                    "export_table_rows": [],
+                    "export_table_rows": [
+                        {
+                            "id": "8956",
+                            "ozon_product_id": "3035060742",
+                            "ozon_offer_id": "0",
+                            "shop_sku_id": "31395572"
+                        }
+                    ],
                     "webasyst_sets": [
-                        "inmedix"
+                        "ozon_natur"
                     ]
-                },
+                }
+            ]
+        },
+        {
+            "product_id": 1217285,
+            "name": "Стенд мобильный для баннера \"X-banner А1\", размер рекламного поля 700х1800 мм, углепластик, 290517",
+            "url": "stend-mobilnyy-dlya-bannera-x-banner-a1-razmer-reklamnogo-polya-700kh1800-mm-ugleplastik-290517",
+            "status": "1",
+            "skus": [
                 {
-                    "sku_id": 30945620,
-                    "webasyst_sku": "AF-30945620",
+                    "sku_id": 31396421,
+                    "webasyst_sku": "SAMS-290517",
                     "available": "1",
-                    "webasyst_stock": null,
+                    "webasyst_stock": "83.000",
                     "account_checks": [
                         {
                             "account_index": 1,
@@ -95,10 +116,16 @@
                                 "lover-zerkala",
                                 "ozon-lo"
                             ],
-                            "product_in_export_set": false,
+                            "product_in_export_set": true,
                             "api_ok": true,
                             "http_status": null,
-                            "found_offers": []
+                            "found_offers": [
+                                {
+                                    "offer_id": "SAMS-290517",
+                                    "ozon_product_id": 3250306481,
+                                    "ozon_sku": 3250947287
+                                }
+                            ]
                         },
                         {
                             "account_index": 2,
@@ -106,7 +133,7 @@
                             "configured_sets": [
                                 "ozon_natur"
                             ],
-                            "product_in_export_set": false,
+                            "product_in_export_set": true,
                             "api_ok": true,
                             "http_status": null,
                             "found_offers": []
@@ -134,9 +161,16 @@
                             "found_offers": []
                         }
                     ],
-                    "export_table_rows": [],
+                    "export_table_rows": [
+                        {
+                            "id": "9105",
+                            "ozon_product_id": "3250306481",
+                            "ozon_offer_id": "0",
+                            "shop_sku_id": "31396421"
+                        }
+                    ],
                     "webasyst_sets": [
-                        "inmedix"
+                        "ozon_natur"
                     ]
                 }
             ]
