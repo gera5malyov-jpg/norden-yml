@@ -1,5 +1,5 @@
 <?php
-// Read-only production diagnostic for Webasyst tip_ozon = "Детский стул".
+// Read-only production diagnostic for Webasyst tip_ozon = "Информационный стенд".
 error_reporting(E_ERROR);
 $root = '/home/web/vm-23f9aff9.na4u.ru/www';
 chdir($root);
@@ -9,7 +9,7 @@ wa('shop');
 $plugin = wa('shop')->getPlugin('ozonstocksync', true);
 require_once $root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php';
 $model = new waModel();
-$out = array('target' => 'Детский стул', 'plugin_version' => $plugin->getVersion());
+$out = array('target' => 'Информационный стенд', 'plugin_version' => $plugin->getVersion());
 $feature = $model->query("SELECT id FROM shop_feature WHERE code='tip_ozon' LIMIT 1")->fetchAssoc();
 if (!$feature) throw new Exception('tip_ozon feature not found');
 $feature_id = (int)$feature['id'];
@@ -17,7 +17,7 @@ $ids = array();
 foreach (array('shop_feature_values_varchar', 'shop_feature_values_text') as $table) {
     try {
         $dict = $model->query('SELECT id FROM `'.$table.'` WHERE feature_id = i:id AND value = s:value',
-            array('id'=>$feature_id, 'value'=>'Детский стул'))->fetchAll();
+            array('id'=>$feature_id, 'value'=>'Информационный стенд'))->fetchAll();
         foreach ($dict as $row) $ids[(int)$row['id']] = (int)$row['id'];
     } catch (Exception $e) {}
 }
@@ -32,7 +32,7 @@ if ($ids) {
     }
 }
 if (!$pids && isset($columns['value_varchar'])) {
-    $rows=$model->query("SELECT DISTINCT product_id FROM shop_product_features WHERE feature_id=i:id AND value_varchar=s:value",array('id'=>$feature_id, 'value'=>'Детский стул'))->fetchAll();
+    $rows=$model->query("SELECT DISTINCT product_id FROM shop_product_features WHERE feature_id=i:id AND value_varchar=s:value",array('id'=>$feature_id, 'value'=>'Информационный стенд'))->fetchAll();
     foreach ($rows as $row)$pids[(int)$row['product_id']]=(int)$row['product_id'];
 }
 $out['webasyst_product_count']=count($pids);
