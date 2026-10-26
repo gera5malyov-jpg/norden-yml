@@ -62,6 +62,8 @@ rollback() {
 trap rollback EXIT
 tar -xzf "$ARCHIVE" -C "$PLUGIN"
 chown -R web:web "$PLUGIN"
+# New controller classes must be discovered by the Webasyst autoloader.
+rm -f "$ROOT/wa-cache/apps/shop/config/autoload.php"
 find "$PLUGIN" -name '*.php' -print0 | while IFS= read -r -d '' file; do php -l "$file"; done
 cat >/tmp/ozs_commission_health.php <<'PHP'
 <?php
