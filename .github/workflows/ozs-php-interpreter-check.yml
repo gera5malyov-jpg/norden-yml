@@ -1,0 +1,31 @@
+name: Ozon commission PHP interpreter probe
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozs-php-interpreter-check.yml'
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - run: python3 scripts/ozs_web_php_probe.py
+      - name: Save result
+        if: always()
+        run: |
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/ozs-web-php-probe.txt || echo 'CHECK_FAILED' > .deploy-probe/ozs-web-php-probe.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/ozs-web-php-probe.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save Webasyst PHP interpreter probe [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
