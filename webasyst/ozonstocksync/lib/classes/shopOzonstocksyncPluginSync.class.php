@@ -320,8 +320,16 @@ class shopOzonstocksyncPluginSync
             throw new waException('Could not atomically write commissions snapshot');
         }
         $this->log('RFBS_INDEPENDENT_REFRESH_OK: types=' . count($summary) . ', offers=' . $total);
+        $variable_types = array();
+        foreach ($summary as $tip => $details) {
+            if (isset($details['rates']) && count($details['rates']) > 1) {
+                $variable_types[$tip] = $details['rates'];
+            }
+        }
         return array('updated_at' => time(), 'types' => count($summary),
-                     'offers' => $total, 'accounts' => $account_stats);
+                     'offers' => $total, 'accounts' => $account_stats,
+                     'missing_types' => $missing_types,
+                     'variable_rate_types' => $variable_types);
     }
 
     private function formatRateKey($value)
