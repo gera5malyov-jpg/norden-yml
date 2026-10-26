@@ -2,6 +2,7 @@
 class shopOzonstocksyncPlugin extends shopPlugin
 {
     private $ui_commission_map = null;
+    private $ui_commission_details = array();
     private $ui_live_commission_updated = 0;
     private $ui_feature_warning = '';
 
@@ -137,7 +138,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html .= '<div class="ozs-settings">';
         $html .= '<div class="ozs-hero">';
         $html .= '<div><div class="ozs-title">Ozon Stock Sync</div><div class="ozs-subtitle">Остатки, цены и безопасное создание новых карточек из списка «Грузить в Ozon»</div></div>';
-        $html .= '<span class="ozs-version">v1.8.0</span>';
+        $html .= '<span class="ozs-version">v1.8.1</span>';
         $html .= '</div>';
 
         $html .= '<div class="ozs-summary-grid">';
@@ -195,11 +196,11 @@ class shopOzonstocksyncPlugin extends shopPlugin
             $html .= '</div>';
 
             if ($missing_commissions > 0) {
-                $html .= '<div class="ozs-alert ozs-alert-warning">Для ' . (int)$missing_commissions . ' типов актуальная ставка Ozon ещё не подтверждена через API. Цены без подтверждённой ставки не отправляются; данные появятся после независимого обновления комиссий.</div>';
+                $html .= '<div class="ozs-alert ozs-alert-warning">Для ' . (int)$missing_commissions . ' типов нет подтверждённой ставки по сопоставленным артикулам в подключённых кабинетах Ozon. Количество товаров в Webasyst не равно количеству опубликованных предложений Ozon: карточки могут отсутствовать, быть под другим артикулом или API может не возвращать ставку. Расчёт цены таких товаров не использует приблизительную ставку.</div>';
             }
 
             $html .= '<div class="ozs-table-wrap"><table class="ozs-table">';
-            $html .= '<thead><tr><th>Тип товара Ozon</th><th class="ozs-num">Товаров</th><th>Комиссия Ozon</th><th>Эквайринг</th><th>Итого комиссия</th><th>Наценка, %</th></tr></thead><tbody>';
+            $html .= '<thead><tr><th>Тип товара Ozon</th><th class="ozs-num">Товаров</th><th class="ozs-num">Подтверждено Ozon</th><th>Комиссия Ozon</th><th>Эквайринг</th><th>Итого комиссия</th><th>Наценка, %</th></tr></thead><tbody>';
 
             foreach ($type_rows as $row) {
                 $tip = $row['tip'];
@@ -212,8 +213,11 @@ class shopOzonstocksyncPlugin extends shopPlugin
                     $c_display = $this->commissionDisplay($commission, 0);
                     $total_display = $this->commissionDisplay($commission, $acquiring);
                     $commission_class = '';
+                    if (!empty($commission['live_rates']) && count($commission['live_rates']) > 1) {
+                        $c_display .= $this->renderCommissionOffers($commission);
+                    }
                 } else {
-                    $c_display = '<span class="ozs-bad">нет данных API</span>';
+                    $c_display = '<span class="ozs-bad" title="Нет подтверждённой ставки по совпавшим offer_id в подключённых кабинетах Ozon">не подтверждена</span>';
                     $total_display = '—';
                     $commission_class = ' ozs-row-warning';
                 }
@@ -221,6 +225,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
                 $html .= '<tr class="ozs-type-row' . $commission_class . '" data-search="' . $this->e($search) . '">';
                 $html .= '<td><b>' . $this->e($tip) . '</b></td>';
                 $html .= '<td class="ozs-num">' . (int)$row['count'] . '</td>';
+                $html .= '<td class="ozs-num">' . (int)(isset($commission['count']) ? $commission['count'] : 0) . '</td>';
                 $html .= '<td>' . $c_display . '</td>';
                 $html .= '<td>' . $this->formatPercent($acquiring) . '</td>';
                 $html .= '<td><b>' . $total_display . '</b></td>';
@@ -685,6 +690,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
                     // Old snapshots must never silently be represented as current commissions.
                     if ($this->ui_live_commission_updated > 0) {
                         $this->ui_commission_map = $data['types'];
+                        $this->ui_commission_details = isset($data['by_type']) && is_array($data['by_type']) ? $data['by_type'] : array();
                     }
                 }
             }
@@ -693,21 +699,59 @@ class shopOzonstocksyncPlugin extends shopPlugin
         if (!isset($this->ui_commission_map[$key])) return null;
         $summary = $this->ui_commission_map[$key];
         if (!is_array($summary) || !isset($summary['min']) || !isset($summary['max'])) return null;
-        return array('live_min' => (float)$summary['min'], 'live_max' => (float)$summary['max']);
+        return array(
+            'live_min' => (float)$summary['min'],
+            'live_max' => (float)$summary['max'],
+            'live_rates' => isset($summary['rates']) && is_array($summary['rates']) ? $summary['rates'] : array(),
+            'count' => isset($summary['count']) ? (int)$summary['count'] : 0,
+            'offers' => isset($this->ui_commission_details[$key]) && is_array($this->ui_commission_details[$key]) ? $this->ui_commission_details[$key] : array()
+        );
     }
 
     private function commissionDisplay($commission, $extra_percent)
     {
+        if (!empty($commission['live_rates']) && is_array($commission['live_rates'])) {
+            $rates = $commission['live_rates'];
+            ksort($rates, SORT_NUMERIC);
+            $parts = array();
+            foreach ($rates as $percent => $count) {
+                if (!is_numeric($percent)) continue;
+                $parts[] = $this->formatPercent((float)$percent + (float)$extra_percent);
+            }
+            if ($parts) return $this->e(implode(' / ', $parts));
+        }
+        // Old snapshot: cannot infer the individual exact rates from a min/max range.
         if (isset($commission['live_min']) && isset($commission['live_max'])) {
             $min = 100 * $commission['live_min'] + (float)$extra_percent;
             $max = 100 * $commission['live_max'] + (float)$extra_percent;
-            if (abs($min - $max) < 0.00001) {
-                return $this->formatPercent($min);
-            }
-            return '<span title="Ставка различается по товарам или аккаунтам">' .
-                $this->e($this->formatNumber($min) . '–' . $this->formatNumber($max) . '%') . '</span>';
+            if (abs($min - $max) < 0.00001) return $this->formatPercent($min);
+            return '<span title="Снимок без точных ставок по артикулам. Требуется обновление.">' .
+                $this->e('нужна детализация (' . $this->formatPercent($min) . ' - ' . $this->formatPercent($max) . ')') .
+                '</span>';
         }
         return '—';
+    }
+
+    private function renderCommissionOffers($commission)
+    {
+        $rows = isset($commission['offers']) && is_array($commission['offers']) ? $commission['offers'] : array();
+        if (!$rows) return '<small>Точные ставки по артикулам появятся после обновления комиссий.</small>';
+        usort($rows, function($a, $b) {
+            $ai = isset($a['account']) ? (int)$a['account'] : 0;
+            $bi = isset($b['account']) ? (int)$b['account'] : 0;
+            if ($ai !== $bi) return $ai < $bi ? -1 : 1;
+            return strcmp((string)$a['offer_id'], (string)$b['offer_id']);
+        });
+        $html = '<details class="ozs-commission-details"><summary>Точно по артикулам (' . count($rows) . ')</summary>';
+        $html .= '<div class="ozs-commission-scroll"><table><thead><tr><th>Аккаунт</th><th>Артикул Ozon (offer_id)</th><th>Комиссия rFBS</th></tr></thead><tbody>';
+        foreach ($rows as $item) {
+            $account = isset($item['account']) ? (int)$item['account'] : 0;
+            $name = trim((string)$this->getSettings('account_name' . ($account === 1 ? '' : '_' . $account)));
+            if ($name === '') $name = 'Аккаунт ' . $account;
+            $html .= '<tr><td>' . $this->e($name) . '</td><td>' . $this->e((string)$item['offer_id']) . '</td><td>' . $this->formatPercent((float)$item['percent']) . '</td></tr>';
+        }
+        $html .= '</tbody></table></div></details>';
+        return $html;
     }
 
     private function normalizeTip($value)
@@ -790,6 +834,11 @@ class shopOzonstocksyncPlugin extends shopPlugin
         .ozs-rate-note{display:block;margin-top:2px;color:var(--text-color-hint,#777);font-size:10px}
         .ozs-bad{color:var(--red,#d33);font-weight:600}
         .ozs-row-warning{background:rgba(255,180,0,.06)}
+        .ozs-commission-details{margin-top:5px;max-width:430px;font-size:12px}
+        .ozs-commission-details summary{cursor:pointer;color:var(--link-color,#286ed5)}
+        .ozs-commission-scroll{max-height:300px;overflow:auto}
+        .ozs-commission-scroll table{width:100%;border-collapse:collapse;font-size:11px}
+        .ozs-commission-scroll td,.ozs-commission-scroll th{padding:3px;border-bottom:1px solid #ddd;text-align:left}
         .ozs-rate-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:13px 0}
         .ozs-rate-actions span{font-size:12px;color:var(--text-color-hint,#777)}
         .ozs-rate-actions button{cursor:pointer}
