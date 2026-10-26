@@ -297,6 +297,71 @@ class shopOzonstocksyncPluginSync
             $total += $matched;
             $this->log('RFBS_INDEPENDENT_ACCOUNT: index=' . $account['index'] . ', pages=' . $pages . ', valid=' . $matched);
         }
+        // Some existing Ozon offers are discoverable via offer_id while absent from
+        // the unfiltered /v5/product/info/prices cursor pages. Resolve any whole
+        // Webasyst type still missing from the snapshot by an exact, read-only lookup.
+        $missing_keys = array();
+        foreach ($type_diagnostics as $tip => $type_status) {
+            if (!isset($summary[$tip])) $missing_keys[$tip] = true;
+        }
+        if ($missing_keys) {
+            $target_offers = array();
+            foreach ($by_offer as $offer => $tip) {
+                if ($tip !== false && isset($missing_keys[$tip])) $target_offers[$offer] = $offer;
+            }
+            $this->log('RFBS_EXACT_FALLBACK_START: types=' . count($missing_keys) . ', offers=' . count($target_offers));
+            foreach ($accounts as $account_pos => $account) {
+                $extra = 0;
+                foreach (array_chunk(array_values($target_offers), 100) as $batch) {
+                    $response = null;
+                    for ($attempt = 1; $attempt <= 3; $attempt++) {
+                        $response = $this->sendToOzon(
+                            self::INFO_PRICES_URL,
+                            array('cursor' => '', 'filter' => array('offer_id' => $batch, 'visibility' => 'ALL'), 'limit' => 1000),
+                            $account['client_id'], $account['api_key']
+                        );
+                        if ($response['ok'] || !$this->shouldRetryOzonResponse($response) || $attempt === 3) break;
+                        sleep(3);
+                    }
+                    if (!$response || !$response['ok']) {
+                        throw new waException('Ozon exact rFBS lookup failed: account ' . $account['index']
+                            . ', HTTP ' . ($response ? (int)$response['code'] : 0));
+                    }
+                    $decoded = json_decode((string)$response['body'], true);
+                    if (!is_array($decoded) || !isset($decoded['items']) || !is_array($decoded['items'])) {
+                        throw new waException('Ozon exact rFBS lookup response invalid: account ' . $account['index']);
+                    }
+                    $requested = array_fill_keys($batch, true);
+                    foreach ($decoded['items'] as $item) {
+                        if (!is_array($item)) continue;
+                        $offer = isset($item['offer_id']) ? trim((string)$item['offer_id']) : '';
+                        if (!isset($requested[$offer]) || !isset($by_offer[$offer]) || $by_offer[$offer] === false) continue;
+                        $tip = $by_offer[$offer];
+                        if (!isset($missing_keys[$tip])) continue;
+                        $type_diagnostics[$tip]['ozon_offer_matches']++;
+                        $commissions = isset($item['commissions']) && is_array($item['commissions']) ? $item['commissions'] : array();
+                        $value = isset($commissions['sales_percent_rfbs']) ? $commissions['sales_percent_rfbs'] : null;
+                        if (!is_numeric($value) || (float)$value <= 0 || (float)$value >= 95) {
+                            $type_diagnostics[$tip]['invalid_rates']++;
+                            continue;
+                        }
+                        $rate = (float)$value / 100;
+                        if (!isset($summary[$tip])) $summary[$tip] = array('min'=>$rate,'max'=>$rate,'count'=>0,'rates'=>array());
+                        $summary[$tip]['min'] = min($summary[$tip]['min'], $rate);
+                        $summary[$tip]['max'] = max($summary[$tip]['max'], $rate);
+                        $summary[$tip]['count']++;
+                        $pct = $this->formatRateKey((float)$value);
+                        if (!isset($summary[$tip]['rates'][$pct])) $summary[$tip]['rates'][$pct] = 0;
+                        $summary[$tip]['rates'][$pct]++;
+                        $items_by_type[$tip][] = array('offer_id'=>$offer,'account'=>(int)$account['index'],'percent'=>(float)$pct);
+                        $total++;
+                        $extra++;
+                    }
+                }
+                if (isset($account_stats[$account_pos])) $account_stats[$account_pos]['matched'] += $extra;
+                $this->log('RFBS_EXACT_FALLBACK_ACCOUNT: index=' . $account['index'] . ', added=' . $extra);
+            }
+        }
         if (!$total || !$summary) throw new waException('No confirmed live rFBS commissions; old cache preserved');
         $missing_types = array();
         foreach ($type_diagnostics as $tip => $status) {
