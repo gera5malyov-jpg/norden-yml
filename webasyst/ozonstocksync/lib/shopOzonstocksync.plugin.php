@@ -166,8 +166,8 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html .= $this->inputField($namespace, 'round_step', 'Округление вверх, ₽', 'number', 'Шаг округления цены', '1');
         $html .= '</div>';
         $html .= '<div class="ozs-formula">Цена = Закупка × (1 + наценка) ÷ (1 − комиссия Ozon − эквайринг). В Ozon себестоимость не отправляется.</div>';
-        $refresh_url = $this->getInteractionUrl('refreshCommissions');
-        $status_url = $this->getInteractionUrl('commissionStatus');
+        $refresh_url = wa()->getConfig()->getBackendUrl(true) . 'shop/?plugin=ozonstocksync&action=refreshCommissions';
+        $status_url = wa()->getConfig()->getBackendUrl(true) . 'shop/?plugin=ozonstocksync&action=commissionStatus';
         $html .= '<div class="ozs-rate-actions"><button type="button" class="button" id="ozs-rate-refresh" data-refresh-url="' . $this->e($refresh_url) . '" data-status-url="' . $this->e($status_url) . '">Обновить комиссии сейчас</button>';
         $html .= '<span id="ozs-rate-state">Независимое обновление через Ozon API ежедневно. Кнопка не меняет цены и остатки.</span></div>';
         $html .= '<div class="ozs-alert ozs-alert-info"><b>Создание новых карточек:</b> разрешено только товарам из единственного списка Webasyst <b>«Грузить в Ozon»</b> (ID: <code>ozon_upload</code>). Существующие карточки перед импортом проверяются и этим механизмом не обновляются. Удаление товара из списка запрещает только будущую попытку создания и не удаляет карточку из Ozon.</div>';
