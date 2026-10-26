@@ -139,7 +139,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html .= '<div class="ozs-settings">';
         $html .= '<div class="ozs-hero">';
         $html .= '<div><div class="ozs-title">Ozon Stock Sync</div><div class="ozs-subtitle">Остатки, цены и безопасное создание новых карточек из списка «Грузить в Ozon»</div></div>';
-        $html .= '<span class="ozs-version">v1.8.2</span>';
+        $html .= '<span class="ozs-version">v1.8.3</span>';
         $html .= '</div>';
 
         $html .= '<div class="ozs-summary-grid">';
