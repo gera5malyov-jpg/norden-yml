@@ -1,0 +1,168 @@
+name: Deploy Ozon live rFBS commissions once
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozonstocksync-live-commission-deploy-once.yml'
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - name: PHP lint and prepare a narrowly scoped archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l webasyst/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
+          php -l webasyst/ozonstocksync/lib/shopOzonstocksync.plugin.php
+          php -l webasyst/ozonstocksync/lib/config/plugin.php
+          tar -czf /tmp/ozs-rfbs-1.7.1.tgz -C webasyst/ozonstocksync \
+            lib/classes/shopOzonstocksyncPluginSync.class.php \
+            lib/shopOzonstocksync.plugin.php \
+            lib/config/plugin.php
+      - name: Safely deploy only the changed files and verify against live Ozon API
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess, tempfile, urllib.parse, urllib.request
+          report=pathlib.Path('.deploy-probe/ozonstocksync-live-commission-deploy.txt')
+          log=[]
+          def note(s):
+              log.append(str(s))
+              print(s)
+          base='6034cf77d8fe89124954f8c1c390b00d0a0e93b3'
+          paths=[
+              'lib/classes/shopOzonstocksyncPluginSync.class.php',
+              'lib/shopOzonstocksync.plugin.php',
+              'lib/config/plugin.php'
+          ]
+          expected={}
+          for path in paths:
+              original=subprocess.check_output(['git','show',base+':webasyst/ozonstocksync/'+path])
+              expected[path]=hashlib.sha256(original).hexdigest()
+          key_value=os.environ['NETANGELS_API_KEY'].strip()
+          if not key_value: raise RuntimeError('NETANGELS_API_KEY is missing')
+          def req(url, method='GET', data=None, headers=None):
+              request=urllib.request.Request(url,data=data,method=method,headers=headers or {})
+              with urllib.request.urlopen(request,timeout=30) as response:
+                  body=response.read().decode('utf-8')
+                  return json.loads(body) if body else {}
+          token=req('https://panel.netangels.ru/api/gateway/token/','POST',
+              urllib.parse.urlencode({'api_key':key_value}).encode(),
+              {'Content-Type':'application/x-www-form-urlencoded','User-Agent':'ozs-live-rfbs-deploy/1.0'})['token']
+          headers={'Authorization':'Bearer '+token,'Content-Type':'application/json',
+              'Accept':'application/json','User-Agent':'ozs-live-rfbs-deploy/1.0'}
+          with tempfile.TemporaryDirectory() as temp_dir:
+              key=temp_dir+'/id'
+              subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-f',key],check=True)
+              pub=pathlib.Path(key+'.pub').read_text().strip()
+              kid=req('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/create/','POST',
+                  json.dumps({'key':pub,'name':'chatgpt-ozs-rfbs-'+os.environ.get('GITHUB_RUN_ID','manual')}).encode(),
+                  headers)['id']
+              common=['-i',key,'-o','BatchMode=yes','-o','StrictHostKeyChecking=no',
+                  '-o','UserKnownHostsFile=/dev/null']
+              remote_host='root@45.86.180.49'
+              archive='/tmp/ozs-rfbs-1.7.1-'+os.environ.get('GITHUB_RUN_ID','manual')+'.tgz'
+              try:
+                  transfer=subprocess.run(['scp']+common+['/tmp/ozs-rfbs-1.7.1.tgz',remote_host+':'+archive],
+                      text=True,capture_output=True,timeout=90)
+                  if transfer.returncode: raise RuntimeError('SCP failed: '+transfer.stderr[:500])
+                  root='/home/web/vm-23f9aff9.na4u.ru/www'
+                  plugin=root+'/wa-apps/shop/plugins/ozonstocksync'
+                  lines=[
+                      'set -Eeuo pipefail',
+                      'PLUGIN='+plugin,
+                      'ARCHIVE='+archive,
+                      'BACKUP_DIR='+root+'/wa-data/protected/shop/ozonstocksync-backups',
+                      'mkdir -p "$BACKUP_DIR"',
+                      'STAMP=$(date +%Y%m%d-%H%M%S)',
+                      'BAK="$BACKUP_DIR/ozs-rfbs-live-$STAMP.tgz"',
+                      'STAGE=$(mktemp -d /tmp/ozs-rfbs-stage.XXXXXX)',
+                      'INSTALLED=0',
+                      "cleanup() { rc=$?; if [ \"$rc\" -ne 0 ] && [ \"$INSTALLED\" -eq 1 ]; then tar -xzf \"$BAK\" -C \"$PLUGIN\"; chown -R web:web \"$PLUGIN/lib\"; echo ROLLBACK=OK; fi; rm -rf \"$STAGE\" \"$ARCHIVE\" /tmp/ozs_rfbs_health.php; exit \"$rc\"; }",
+                      'trap cleanup EXIT',
+                      'test -d "$PLUGIN"',
+                  ]
+                  for path in paths:
+                      lines+=['test -f "$PLUGIN/'+path+'"',
+                        'ACTUAL=$(sha256sum "$PLUGIN/'+path+'" | cut -d" " -f1)',
+                        'if [ "$ACTUAL" != "'+expected[path]+'" ]; then echo DRIFT_DETECTED='+path+'; exit 7; fi']
+                  lines+= [
+                      'echo PREDEPLOY_DRIFT_CHECK=OK',
+                      'tar -xzf "$ARCHIVE" -C "$STAGE"',
+                      'php -l "$STAGE/lib/classes/shopOzonstocksyncPluginSync.class.php"',
+                      'php -l "$STAGE/lib/shopOzonstocksync.plugin.php"',
+                      'php -l "$STAGE/lib/config/plugin.php"',
+                      'tar -czf "$BAK" -C "$PLUGIN" '+' '.join(paths),
+                      'echo BACKUP="$BAK"',
+                      'INSTALLED=1'
+                  ]
+                  for path in paths:
+                      lines+=['cp -p "$STAGE/'+path+'" "$PLUGIN/'+path+'"','chown web:web "$PLUGIN/'+path+'"',
+                          'php -l "$PLUGIN/'+path+'"']
+                  lines+= [
+                      "cat >/tmp/ozs_rfbs_health.php <<'PHP'",
+                      "<?php",
+                      "$root='/home/web/vm-23f9aff9.na4u.ru/www';",
+                      "chdir($root); require_once $root.'/wa-config/SystemConfig.class.php';",
+                      "waSystem::getInstance(null,new SystemConfig()); wa('shop');",
+                      "$p=wa('shop')->getPlugin('ozonstocksync',true);",
+                      "$controls=$p->getControls(array('namespace'=>'shop_ozonstocksync'));",
+                      "$html=isset($controls['ozonstocksync_ui'])?(string)$controls['ozonstocksync_ui']:'';",
+                      "$ui_ok=(strpos($html,'v1.7.1')!==false && strpos($html,'Комиссии: Ozon Seller API rFBS')!==false && strpos($html,'type_margin_percent')!==false && strpos($html,'ozs-stock-picker')!==false);",
+                      "echo 'VERSION='.$p->getVersion().\"\\n\";",
+                      "echo 'UI='.($ui_ok?'OK':'FAIL').\"\\n\";",
+                      "require_once $root.'/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php';",
+                      "$sync=new shopOzonstocksyncPluginSync(array());",
+                      "$rm=new ReflectionMethod($sync,'fetchLiveRfbsRates'); $rm->setAccessible(true);",
+                      "$model=new waModel();",
+                      "$samples=$model->query(\"SELECT DISTINCT s.sku FROM ozon_exported_product e INNER JOIN shop_product_skus s ON s.id=e.shop_sku_id WHERE e.ozon_product_id>0 AND s.sku<>'' ORDER BY s.sku LIMIT 30\")->fetchAll();",
+                      "$offers=array(); foreach($samples as $sample){$offers[]=(string)$sample['sku'];}",
+                      "$cid=trim((string)$p->getSettings('client_id')); $key=trim((string)$p->getSettings('api_key'));",
+                      "$rates=array();",
+                      "if($cid!=='' && $key!=='' && $offers){$rates=$rm->invoke($sync,$offers,array('client_id'=>$cid,'api_key'=>$key,'name'=>'live-proof'));}",
+                      "echo 'LIVE_RFBS_CHECKED_OFFERS='.count($offers).\"\\n\";",
+                      "echo 'LIVE_RFBS_VALID_OFFERS='.count($rates).\"\\n\";",
+                      "$ok=($ui_ok && $p->getVersion()==='1.7.1' && count($rates)>0);",
+                      "echo 'HEALTH='.($ok?'OK':'FAIL').\"\\n\";",
+                      "exit($ok?0:2);",
+                      "PHP",
+                      'chown web:web /tmp/ozs_rfbs_health.php',
+                      "su -s /bin/bash web -c 'php -d display_errors=1 -d log_errors=0 /tmp/ozs_rfbs_health.php'",
+                      'echo DEPLOY_STATUS=OK'
+                  ]
+                  remote=subprocess.run(['ssh']+common+[remote_host,'bash -se'],input='\n'.join(lines)+'\n',
+                      text=True,capture_output=True,timeout=330)
+                  note(remote.stdout)
+                  if remote.stderr.strip(): note('STDERR='+remote.stderr[:1500])
+                  if remote.returncode: raise RuntimeError('Remote deploy/health check failed (exit '+str(remote.returncode)+')')
+              finally:
+                  try:
+                      req('https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/'+str(kid)+'/','DELETE',None,headers)
+                  except Exception:
+                      note('SSH_KEY_CLEANUP_WARNING=manual_review_required')
+                  report.write_text('\n'.join(log)+'\n',encoding='utf-8')
+          PY
+      - name: Save production result
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy-probe
+          test -f .deploy-probe/ozonstocksync-live-commission-deploy.txt || echo "DEPLOY_STATUS=FAILED_NO_REPORT" > .deploy-probe/ozonstocksync-live-commission-deploy.txt
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add .deploy-probe/ozonstocksync-live-commission-deploy.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Save live rFBS commission deployment report [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
