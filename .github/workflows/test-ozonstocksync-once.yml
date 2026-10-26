@@ -19,7 +19,7 @@ jobs:
           set -euo pipefail
           mkdir -p .deploy-probe
           {
-            echo "TEST=ozonstocksync-1.7.1"
+            echo "TEST=ozonstocksync-1.8.0"
             echo "--- PHP LINT ---"
             find webasyst/ozonstocksync -name '*.php' -print0 | while IFS= read -r -d '' f; do php -l "$f"; done
             echo "--- CONTRACT ---"
@@ -31,7 +31,7 @@ jobs:
           settings=(root/'lib/config/settings.php').read_text(encoding='utf-8')
           info=(root/'lib/config/plugin.php').read_text(encoding='utf-8')
           checks={
-              'version_1_7_1': "'version' => '1.7.1'" in info,
+              'version_1_8_0': "'version' => '1.8.0'" in info,
               'custom_getControls': 'function getControls' in plugin,
               'type_margin_ui': 'type_margin_percent' in plugin,
               'type_margin_setting': "'type_margin_percent'" in settings,
@@ -73,6 +73,14 @@ jobs:
               'account_scoped_commissions': "$client_id . ':' . $offer_id" in sync,
               'live_cache_timestamped': 'saveLiveCommissionSummary' in sync and 'updated_at' in plugin,
               'ui_never_uses_old_table': "config/rfbs_commissions.php" not in plugin,
+              'standalone_refresh': 'public function refreshCommissions()' in sync,
+              'no_api_writes_from_refresh': 'RFBS_INDEPENDENT_REFRESH_OK' in sync and 'self::INFO_PRICES_URL' in sync,
+              'queue_ui': 'ozs-rate-refresh' in plugin and 'refreshCommissions' in plugin,
+              'queue_controller': (root/'lib/actions/backend/shopOzonstocksyncPluginBackendRefreshCommissions.controller.php').exists(),
+              'status_controller': (root/'lib/actions/backend/shopOzonstocksyncPluginBackendCommissionStatus.controller.php').exists(),
+              'separate_cli': (root/'lib/cli/shopOzonstocksyncPluginCommissions.cli.php').exists(),
+              'separate_cli_queue_only': 'queued_only=1' in (root/'lib/cli/shopOzonstocksyncPluginCommissions.cli.php').read_text(),
+
           }
           for k,v in checks.items():
               print(f'{k}={"OK" if v else "FAIL"}')
