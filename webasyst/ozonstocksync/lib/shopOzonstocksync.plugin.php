@@ -2,6 +2,7 @@
 class shopOzonstocksyncPlugin extends shopPlugin
 {
     private $ui_commission_map = null;
+    private $ui_live_commission_updated = 0;
     private $ui_feature_warning = '';
 
     public function getControls($params = array())
@@ -136,7 +137,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
         $html .= '<div class="ozs-settings">';
         $html .= '<div class="ozs-hero">';
         $html .= '<div><div class="ozs-title">Ozon Stock Sync</div><div class="ozs-subtitle">Остатки, цены и безопасное создание новых карточек из списка «Грузить в Ozon»</div></div>';
-        $html .= '<span class="ozs-version">v1.7.0</span>';
+        $html .= '<span class="ozs-version">v1.7.1</span>';
         $html .= '</div>';
 
         $html .= '<div class="ozs-summary-grid">';
@@ -182,11 +183,12 @@ class shopOzonstocksyncPlugin extends shopPlugin
         } else {
             $html .= '<div class="ozs-type-toolbar">';
             $html .= '<input type="search" id="ozs-type-search" class="ozs-search" placeholder="Найти тип товара…">';
-            $html .= '<div class="ozs-legend">Комиссии: таблица Ozon с 28.08.2026 · эквайринг: ' . $this->formatPercent($acquiring) . '</div>';
+            $updated = $this->ui_live_commission_updated ? date('d.m.Y H:i', $this->ui_live_commission_updated) : 'ещё не получены';
+            $html .= '<div class="ozs-legend">Комиссии: Ozon Seller API rFBS, последняя проверка: ' . $this->e($updated) . ' · эквайринг: ' . $this->formatPercent($acquiring) . '</div>';
             $html .= '</div>';
 
             if ($missing_commissions > 0) {
-                $html .= '<div class="ozs-alert ozs-alert-warning">Для ' . (int)$missing_commissions . ' типов ставка не найдена в таблице комиссий. Для них цена не будет отправлена, пока тип не будет исправлен или ставка не появится в таблице.</div>';
+                $html .= '<div class="ozs-alert ozs-alert-warning">Для ' . (int)$missing_commissions . ' типов актуальная ставка Ozon ещё не подтверждена через API. Цены без подтверждённой ставки не отправляются; данные появятся после синхронизации цен.</div>';
             }
 
             $html .= '<div class="ozs-table-wrap"><table class="ozs-table">';
@@ -204,7 +206,7 @@ class shopOzonstocksyncPlugin extends shopPlugin
                     $total_display = $this->commissionDisplay($commission, $acquiring);
                     $commission_class = '';
                 } else {
-                    $c_display = '<span class="ozs-bad">не найдена</span>';
+                    $c_display = '<span class="ozs-bad">нет данных API</span>';
                     $total_display = '—';
                     $commission_class = ' ozs-row-warning';
                 }
@@ -667,42 +669,38 @@ class shopOzonstocksyncPlugin extends shopPlugin
     private function getUiCommissionForTip($tip)
     {
         if ($this->ui_commission_map === null) {
-            $file = dirname(__FILE__) . '/config/rfbs_commissions.php';
-            $this->ui_commission_map = file_exists($file) ? include($file) : array();
+            $this->ui_commission_map = array();
+            $file = wa()->getDataPath('plugins/ozonstocksync/rfbs_live_rates.json', false, 'shop', true);
+            if (is_readable($file)) {
+                $data = json_decode((string)file_get_contents($file), true);
+                if (is_array($data) && isset($data['types']) && is_array($data['types'])) {
+                    $this->ui_live_commission_updated = isset($data['updated_at']) ? (int)$data['updated_at'] : 0;
+                    // Old snapshots must never silently be represented as current commissions.
+                    if ($this->ui_live_commission_updated > 0 && $this->ui_live_commission_updated >= time() - 86400) {
+                        $this->ui_commission_map = $data['types'];
+                    }
+                }
+            }
         }
         $key = $this->normalizeTip($tip);
-        return isset($this->ui_commission_map[$key]) ? $this->ui_commission_map[$key] : null;
+        if (!isset($this->ui_commission_map[$key])) return null;
+        $summary = $this->ui_commission_map[$key];
+        if (!is_array($summary) || !isset($summary['min']) || !isset($summary['max'])) return null;
+        return array('live_min' => (float)$summary['min'], 'live_max' => (float)$summary['max']);
     }
 
     private function commissionDisplay($commission, $extra_percent)
     {
-        if (!is_array($commission) || !isset($commission[0])) {
-            return '—';
-        }
-        $rates = array();
-        foreach (array(0, 1, 2, 3) as $idx) {
-            if (isset($commission[$idx])) {
-                $rates[] = round(((float)$commission[$idx] * 100) + (float)$extra_percent, 4);
+        if (isset($commission['live_min']) && isset($commission['live_max'])) {
+            $min = 100 * $commission['live_min'] + (float)$extra_percent;
+            $max = 100 * $commission['live_max'] + (float)$extra_percent;
+            if (abs($min - $max) < 0.00001) {
+                return $this->formatPercent($min);
             }
+            return '<span title="Ставка различается по товарам или аккаунтам">' .
+                $this->e($this->formatNumber($min) . '–' . $this->formatNumber($max) . '%') . '</span>';
         }
-        if (!$rates) {
-            return '—';
-        }
-
-        $unique = array_values(array_unique(array_map(array($this, 'formatNumber'), $rates)));
-        if (count($unique) === 1) {
-            $display = $unique[0] . '%';
-        } else {
-            $min = min($rates);
-            $max = max($rates);
-            $display = '<span title="Ставка зависит от ценового диапазона">' . $this->e($this->formatNumber($min) . '–' . $this->formatNumber($max) . '%') . '</span>';
-        }
-
-        if (isset($commission['over_500000'])) {
-            $over = ((float)$commission['over_500000'] * 100) + (float)$extra_percent;
-            $display .= '<small class="ozs-rate-note">&gt;500 000 ₽: ' . $this->e($this->formatPercent($over)) . '</small>';
-        }
-        return $display;
+        return '—';
     }
 
     private function normalizeTip($value)
