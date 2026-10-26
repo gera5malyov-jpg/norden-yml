@@ -91,4 +91,29 @@ foreach($pids as $pid) {
     }
     $out['products'][]=$product;
 }
+$out['price_api_checks'] = array();
+$method = new ReflectionMethod($sync, 'sendToOzon');$method->setAccessible(true);
+$offers = array('SAMS-291012', 'SAMS-290517');
+foreach ($accounts as $account) {
+    $response=$method->invoke($sync, 'https://api-seller.ozon.ru/v5/product/info/prices',
+        array('cursor'=>'','filter'=>array('offer_id'=>$offers,'visibility'=>'ALL'),'limit'=>1000),
+        $account['client_id'],$account['api_key']);
+    $json=json_decode((string)($response['body']??''),true);
+    $items=array();
+    foreach (($json['items']??array()) as $item) {
+        $pct=$item['commissions']['sales_percent_rfbs']??null;
+        $items[]=array(
+            'offer_id'=>$item['offer_id']??'',
+            'product_id'=>$item['product_id']??null,
+            'sales_percent_rfbs'=>$pct,
+            'commission_fields'=>isset($item['commissions']) ? array_keys($item['commissions']) : array(),
+            'price_present'=>isset($item['price']),
+            'price_currency'=>$item['price']['currency_code']??null
+        );
+    }
+    $out['price_api_checks'][]=array('account'=>$account['name'],'account_index'=>$account['index'],
+      'http_ok'=>(bool)($response['ok']??false),'http_code'=>$response['code']??null,
+      'returned_items'=>count($items),'items'=>$items,
+      'result_top_keys'=>is_array($json)?array_keys($json):array());
+}
 echo json_encode($out, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL;
