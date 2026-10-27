@@ -1,10 +1,10 @@
 {
   "status": "ok",
-  "generated_at": "2026-10-27T00:14:46.548503+00:00",
+  "generated_at": "2026-10-27T08:30:31.634207+00:00",
   "public_yml": "https://price.tetchair.ru/feeds/tetchair-msk-yml.xml",
-  "offers": 1207,
+  "offers": 1209,
   "categories": 121,
-  "cards_seen": 19208,
+  "cards_seen": 19204,
   "catalog_pages": 1360,
   "multi_page_categories": 121,
   "catalog_unique": 1593,
@@ -12,6 +12,10 @@
   "direct_lookup_matched": 0,
   "direct_lookup_errors": 167,
   "direct_lookup_error_sample": [
+    {
+      "code": "21551",
+      "error": "wholesale_not_found"
+    },
     {
       "code": "19664",
       "error": "wholesale_not_found"
@@ -21,7 +25,7 @@
       "error": "wholesale_not_found"
     },
     {
-      "code": "21551",
+      "code": "19666",
       "error": "wholesale_not_found"
     },
     {
@@ -29,19 +33,23 @@
       "error": "wholesale_not_found"
     },
     {
-      "code": "19663",
-      "error": "wholesale_not_found"
-    },
-    {
       "code": "21552",
       "error": "wholesale_not_found"
     },
     {
-      "code": "19666",
+      "code": "19667",
       "error": "wholesale_not_found"
     },
     {
-      "code": "19667",
+      "code": "19663",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "20220",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "19801",
       "error": "wholesale_not_found"
     },
     {
@@ -53,11 +61,7 @@
       "error": "wholesale_not_found"
     },
     {
-      "code": "19801",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "19670",
+      "code": "19669",
       "error": "wholesale_not_found"
     },
     {
@@ -65,11 +69,7 @@
       "error": "wholesale_not_found"
     },
     {
-      "code": "19669",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "20220",
+      "code": "19670",
       "error": "wholesale_not_found"
     },
     {
@@ -77,7 +77,23 @@
       "error": "wholesale_not_found"
     },
     {
+      "code": "21372",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "20246",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "20244",
+      "error": "wholesale_not_found"
+    },
+    {
       "code": "20221",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "20222",
       "error": "wholesale_not_found"
     },
     {
@@ -89,35 +105,7 @@
       "error": "wholesale_not_found"
     },
     {
-      "code": "21372",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "20222",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "20244",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "20246",
-      "error": "wholesale_not_found"
-    },
-    {
       "code": "21374",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "24364",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "21375",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "21376",
       "error": "wholesale_not_found"
     },
     {
@@ -125,15 +113,11 @@
       "error": "wholesale_not_found"
     },
     {
-      "code": "24363",
-      "error": "wholesale_not_found"
-    },
-    {
       "code": "21834",
       "error": "wholesale_not_found"
     },
     {
-      "code": "21656",
+      "code": "21375",
       "error": "wholesale_not_found"
     },
     {
@@ -141,19 +125,19 @@
       "error": "wholesale_not_found"
     },
     {
-      "code": "24425",
+      "code": "24364",
       "error": "wholesale_not_found"
     },
     {
-      "code": "24424",
+      "code": "21656",
       "error": "wholesale_not_found"
     },
     {
-      "code": "24423",
+      "code": "24363",
       "error": "wholesale_not_found"
     },
     {
-      "code": "24422",
+      "code": "21376",
       "error": "wholesale_not_found"
     },
     {
@@ -165,7 +149,19 @@
       "error": "wholesale_not_found"
     },
     {
+      "code": "24425",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "24422",
+      "error": "wholesale_not_found"
+    },
+    {
       "code": "24426",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "24424",
       "error": "wholesale_not_found"
     },
     {
@@ -173,7 +169,31 @@
       "error": "wholesale_not_found"
     },
     {
+      "code": "24423",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "24494",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "24504",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "24498",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "24495",
+      "error": "wholesale_not_found"
+    },
+    {
       "code": "24499",
+      "error": "wholesale_not_found"
+    },
+    {
+      "code": "24500",
       "error": "wholesale_not_found"
     },
     {
@@ -185,37 +205,17 @@
       "error": "wholesale_not_found"
     },
     {
-      "code": "24504",
+      "code": "24506",
       "error": "wholesale_not_found"
     },
     {
-      "code": "24500",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "24498",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "24494",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "24495",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "24558",
-      "error": "wholesale_not_found"
-    },
-    {
-      "code": "24579",
+      "code": "24585",
       "error": "wholesale_not_found"
     }
   ],
-  "matched_wholesale": 1040,
+  "matched_wholesale": 1042,
   "missing_wholesale": 167,
-  "coverage": 0.86164,
+  "coverage": 0.861869,
   "missing_sample": [
     "21551",
     "21552",
@@ -318,7 +318,7 @@
     "24549",
     "24550"
   ],
-  "retail_mismatch_count": 224,
+  "retail_mismatch_count": 225,
   "retail_mismatch_sample": [
     {
       "code": "25816",
