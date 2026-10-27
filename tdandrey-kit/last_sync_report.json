@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-10-26T09:19:51.906988+00:00",
+  "started_at": "2026-10-27T09:19:05.066721+00:00",
   "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
   "mode": "daily",
   "dry_run": false,
@@ -679,6 +679,26 @@
       "sku": "010040",
       "stage": "daily_new",
       "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "010080",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "010090",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "010130",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "010140",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
     }
   ],
   "images_uploaded": 0,
@@ -711,9 +731,9 @@
   ],
   "webasyst": {
     "type_id": "126",
-    "products_in_type": 11444,
-    "matched": 6402,
-    "price_updates": 6402,
+    "products_in_type": 11446,
+    "matched": 6404,
+    "price_updates": 6404,
     "missing_zeroed": 2361,
     "errors": [
       {
@@ -5739,12 +5759,12 @@
     ]
   },
   "kit_updates": {
-    "price_updates": 3264,
-    "stock_updates": 6528,
+    "price_updates": 3364,
+    "stock_updates": 6728,
     "missing_zeroed": 0,
     "mapped_without_price": 0
   },
   "daily_new_created": 100,
-  "mapped_total": 3364,
-  "finished_at": "2026-10-26T10:52:42.963412+00:00"
+  "mapped_total": 3464,
+  "finished_at": "2026-10-27T10:55:57.268697+00:00"
 }
