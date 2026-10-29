@@ -1,0 +1,50 @@
+name: CDEK SPB to Moscow PVZ-to-door calc 20261029
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cdek-spb-to-moscow-pvz-door-20261029.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    env:
+      CDEK_CLIENT_ID: ${{ secrets.CDEK_CLIENT_ID }}
+      CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
+    steps:
+      - name: Request CDEK API rates
+        shell: python
+        run: |
+          import json, os, requests
+          base = 'https://api.cdek.ru/v2'
+          token_response = requests.post(
+              base+'/oauth/token', data={
+                  'grant_type':'client_credentials',
+                  'client_id':os.environ['CDEK_CLIENT_ID'],
+                  'client_secret':os.environ['CDEK_CLIENT_SECRET'],
+              }, timeout=30)
+          token_response.raise_for_status()
+          token = token_response.json()['access_token']
+          h = {'Authorization':'Bearer '+token, 'Content-Type':'application/json'}
+          for city in ['Санкт-Петербург','Москва']:
+              r=requests.get(base+'/location/cities',headers=h,params={'city':city,'country_codes':'RU','size':100},timeout=30)
+              r.raise_for_status()
+              matches=[x for x in r.json() if x.get('city','').strip().lower()==city.lower()]
+              print('CITY',city,[(x['code'],x.get('region')) for x in matches])
+          body={
+              'type':1,
+              'from_location':{'code':137},
+              'to_location':{'code':44},
+              'packages':[{'weight':10688, 'length':108,'width':18,'height':76}],
+          }
+          print('CALCULATOR_REQUEST',json.dumps(body,ensure_ascii=False))
+          r=requests.post(base+'/calculator/tarifflist',headers=h,json=body,timeout=45)
+          print('STATUS',r.status_code)
+          print('RESULT',r.text)
+          r.raise_for_status()
+          data=r.json()
+          matches=[t for t in data.get('tariff_codes',[]) if t.get('delivery_mode')==3]
+          print('PVZ_TO_ADDRESS',json.dumps(matches,ensure_ascii=False))
