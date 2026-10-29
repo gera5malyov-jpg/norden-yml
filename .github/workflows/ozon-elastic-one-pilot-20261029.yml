@@ -57,7 +57,7 @@ jobs:
           if not safe:raise SystemExit('No pilot matches')
           _,pid,current,floor,ceiling=safe[0]
           print('PILOT_BEFORE',json.dumps({'product_id':pid,'offer_id':prices[pid].get('offer_id'),'current':current,'floor':floor,'max_action_price':ceiling},ensure_ascii=False),flush=True)
-          code,d=post('/v1/actions/products/update',{'action_id':aid,'products':[{'product_id':pid,'action_price':int(ceiling)}]})
+          code,d=post('/v1/actions/products/update',{'action_id':aid,'products':[{'product_id':pid,'action_price':str(int(ceiling))}]})
           print('PILOT_UPDATE',code,json.dumps(d,ensure_ascii=False)[:1800],flush=True)
           if code>=400:raise SystemExit('Pilot update failed')
           time.sleep(5)
