@@ -1,0 +1,53 @@
+name: Ozon pricing three controls pilot 20261029
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-three-controls-pilot-20261029.yml'
+permissions:
+  contents: read
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - run: python -m pip install requests
+      - name: Enable pilot product in lowest external price strategy with protection
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,json,requests,time
+          s=requests.Session();s.headers.update({'Client-Id':os.environ['OZON_CLIENT_ID'],'Api-Key':os.environ['OZON_API_KEY'],'Content-Type':'application/json'})
+          def post(path,body):
+            r=s.post('https://api-seller.ozon.ru'+path,json=body,timeout=120)
+            try:d=r.json()
+            except:d={'raw':r.text[:600]}
+            if r.status_code>=400:print('HTTP_ERROR',path,r.status_code,str(d)[:1200],flush=True)
+            return r.status_code,d
+          code,dd=post('/v5/product/info/prices',{'cursor':'','filter':{'visibility':'ALL'},'limit':1000})
+          if code>=400:raise SystemExit('Cannot read products')
+          product=next((x for x in dd.get('items') or [] if float((x.get('price') or {}).get('min_price') or 0)>0 and not (x.get('price') or {}).get('price_strategy_enabled') and x.get('offer_id')),None)
+          if not product:raise SystemExit('No safe pilot product')
+          oid=str(product['offer_id']);pid=str(product['product_id']);p=product['price']
+          sc,sl=post('/v1/pricing-strategy/list',{'page':1,'limit':49})
+          opts=[x for x in sl.get('strategies',[]) if x.get('type')=='MIN_EXT_PRICE' and x.get('enabled')]
+          if sc>=400 or len(opts)!=1:raise SystemExit('MIN_EXT_PRICE strategy unavailable or ambiguous')
+          sid=str(opts[0]['id'])
+          ic,inf=post('/v1/pricing-strategy/info',{'strategy_id':sid})
+          print('STRATEGY_INFO',json.dumps({'status':ic,'response':inf},ensure_ascii=False)[:2500],flush=True)
+          ac,ad=post('/v1/pricing-strategy/products/add',{'strategy_id':sid,'product_id':[pid]})
+          print('ADD_RESULT',json.dumps({'status':ac,'data':ad},ensure_ascii=False)[:2000],flush=True)
+          if ac>=400 or int((ad.get('result') or {}).get('failed_product_count') or 0)>0:raise SystemExit('Strategy add failed')
+          fc,fd=post('/v1/product/import/prices',{'prices':[{'offer_id':oid,'auto_action_enabled':'ENABLED','auto_add_to_ozon_actions_list_enabled':'ENABLED','min_price_for_auto_actions_enabled':True,'price_strategy_enabled':'ENABLED'}]})
+          print('FLAG_RESULT',json.dumps({'status':fc,'data':fd},ensure_ascii=False)[:2500],flush=True)
+          if fc>=400 or not any(x.get('updated') for x in fd.get('result') or []):raise SystemExit('Price flag update failed')
+          tc,td=post('/v1/product/action/timer/update',{'product_ids':[pid]})
+          print('TIMER_RESULT',json.dumps({'status':tc,'data':td},ensure_ascii=False)[:800],flush=True)
+          time.sleep(4)
+          vc,vd=post('/v5/product/info/prices',{'cursor':'','filter':{'offer_id':[oid]},'limit':1000})
+          matching=[x for x in vd.get('items') or [] if str(x.get('offer_id'))==oid]
+          print('PILOT_JSON',json.dumps({'offer_id':oid,'product_id':pid,'price_before':p.get('price'),'min_price_before':p.get('min_price'),'status':vc,'found':bool(matching),'price_after':matching[0].get('price') if matching else None},ensure_ascii=False),flush=True)
+          if not matching or not (matching[0].get('price') or {}).get('price_strategy_enabled'):raise SystemExit('Strategy not reflected in pricing data')
+          PY
