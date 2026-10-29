@@ -1,0 +1,28 @@
+name: Ozon strategy membership probe
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-strategy-member-probe.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - name: Get assigned products
+        env:
+          CLIENT: ${{ secrets.OZON_CLIENT_ID }}
+          KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,requests,json
+          h={'Client-Id':os.environ['CLIENT'],'Api-Key':os.environ['KEY']}
+          root='https://api-seller.ozon.ru'
+          def call(path,data):
+              r=requests.post(root+path,headers=h,json=data,timeout=60)
+              print(path,r.status_code,json.dumps(r.json(),ensure_ascii=False)[:2200],flush=True)
+          sid='3abf9219-eb93-4cd1-b483-05c2290e3614'
+          call('/v1/pricing-strategy/products/list',{'strategy_id':sid})
+          call('/v1/pricing-strategy/strategy-ids-by-product-ids',{'product_id':['419777151','1249368655']})
+          PY
