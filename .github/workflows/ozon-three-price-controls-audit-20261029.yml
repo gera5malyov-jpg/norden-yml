@@ -1,0 +1,60 @@
+name: Ozon three price controls audit 20261029
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-three-price-controls-audit-20261029.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - run: python -m pip install requests
+      - name: Read product flags, floors, strategies and timers
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,json,requests,time,collections
+          s=requests.Session();s.headers.update({'Client-Id':os.environ['OZON_CLIENT_ID'],'Api-Key':os.environ['OZON_API_KEY'],'Content-Type':'application/json'})
+          base='https://api-seller.ozon.ru'
+          def call(path,body):
+            for i in range(8):
+              r=s.post(base+path,json=body,timeout=90)
+              if r.status_code==429 or r.status_code>=500:
+                time.sleep(min(15,2+i)); continue
+              if r.status_code>=400: return {'error':r.status_code,'message':r.text[:500]}
+              return r.json()
+            return {'error':'retry_limit'}
+          items=[];seen=set();cur=''; pages=0
+          while True:
+            d=call('/v5/product/info/prices',{'cursor':cur,'filter':{'visibility':'ALL'},'limit':1000})
+            if 'error' in d: raise SystemExit('PRODUCTS_ERROR '+str(d))
+            pages+=1; rows=d.get('items') or []
+            for x in rows:
+              if x.get('product_id') is not None and x['product_id'] not in seen: seen.add(x['product_id']);items.append(x)
+            nxt=d.get('cursor') or ''
+            if not rows or not nxt or nxt==cur: break
+            cur=nxt
+          def fl(x):
+            try:return float(x or 0)
+            except:return 0
+          floors=[x for x in items if fl((x.get('price') or {}).get('min_price'))>0]
+          nofloors=[{'offer_id':x.get('offer_id'),'product_id':x.get('product_id'),'price':(x.get('price') or {}).get('price')} for x in items if fl((x.get('price') or {}).get('min_price'))<=0]
+          strategies=call('/v1/pricing-strategy/list',{'page':1,'limit':49})
+          cleanstrategies=[{k:x.get(k) for k in ('id','name','type','enabled','status','strategy_type','min_price_percent')} for x in (strategies.get('strategies') or [])] if isinstance(strategies,dict) else []
+          pids=[str(x.get('product_id')) for x in items]
+          timercount=collections.Counter(); timerexample=[]
+          for i in range(0,len(pids),1000):
+            d=call('/v1/product/action/timer/status',{'product_ids':pids[i:i+1000]})
+            if 'error' in d:timercount['api_error']+=1;continue
+            for st in d.get('statuses') or []:
+              timercount['enabled' if st.get('min_price_for_auto_actions_enabled') else 'disabled']+=1
+              if len(timerexample)<2:timerexample.append({k:st.get(k) for k in ('product_id','expired_at','min_price_for_auto_actions_enabled')})
+          out={'products_total':len(items),'pages':pages,'with_min_price':len(floors),'without_min_price':len(nofloors),'no_floor_samples':nofloors[:15],'auto_action_off':sum(not (x.get('price') or {}).get('auto_action_enabled') for x in items),'auto_add_off':sum(not (x.get('price') or {}).get('auto_add_to_ozon_actions_list_enabled') for x in items),'price_strategy_off':sum(not (x.get('price') or {}).get('price_strategy_enabled') for x in items),'strategy_info':cleanstrategies,'strategy_error':strategies.get('error') if isinstance(strategies,dict) else None,'timer_count':dict(timercount),'timer_samples':timerexample}
+          print('AUDIT_JSON '+json.dumps(out,ensure_ascii=False,sort_keys=True),flush=True)
+          PY
