@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-10-27T11:19:42.524564+00:00",
+  "started_at": "2026-10-29T12:25:39.709537+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=336",
   "type_name": "deephouse-336",
@@ -8,8 +8,8 @@
   "webasyst_stock_id": "66",
   "kit_stock": "МСК",
   "kit_stock_id": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
-  "kit_variants_scanned": 1226,
-  "kit_webasyst_336_variants": 1189,
+  "kit_variants_scanned": 1228,
+  "kit_webasyst_336_variants": 1191,
   "kit_duplicate_skus": 0,
   "webasyst_products": 1927,
   "webasyst_duplicate_skus": 0,
@@ -5572,6 +5572,11 @@
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
+      "sku": "DEEP-66661",
+      "variant_id": "01a18234-24d5-72ce-ab64-b9b4bff86b27",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
       "sku": "DEEP-66662",
       "variant_id": "01a0c66e-8c70-7cd0-9f95-287ac2a842b7",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
@@ -5659,6 +5664,11 @@
     {
       "sku": "DEEP-66679",
       "variant_id": "01a10be8-fe56-7f30-a699-16a6327115b1",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-66680",
+      "variant_id": "01a18225-4531-76d5-b989-dbf8254e9cb4",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
@@ -5962,7 +5972,7 @@
       ],
       "price": "2990.00",
       "compare_price": "4485.00",
-      "stock": 23,
+      "stock": 20,
       "images_in_summary": 1
     },
     {
@@ -5978,7 +5988,7 @@
       ],
       "price": "2990.00",
       "compare_price": "4485.00",
-      "stock": 17,
+      "stock": 14,
       "images_in_summary": 1
     },
     {
@@ -6033,6 +6043,6 @@
   "complete": false,
   "webasyst_routing_feature_code": "kenner_f93046718124",
   "webasyst_336_products": 1927,
-  "finished_at": "2026-10-27T11:34:58.774090+00:00",
+  "finished_at": "2026-10-29T12:40:42.592858+00:00",
   "status": "degraded"
 }
