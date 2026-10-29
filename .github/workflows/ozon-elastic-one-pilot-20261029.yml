@@ -1,0 +1,72 @@
+name: Ozon elastic promotion single-product verification
+on:
+  push:
+    paths:
+      - '.github/workflows/ozon-elastic-one-pilot-20261029.yml'
+permissions:
+  contents: read
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - name: Test new Ozon action price API and check minimum
+        env:
+          CID: ${{ secrets.OZON_CLIENT_ID }}
+          API: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import requests,os,json,time
+          s=requests.Session()
+          s.headers.update({'Client-Id':os.environ['CID'],'Api-Key':os.environ['API'],'Content-Type':'application/json'})
+          url='https://api-seller.ozon.ru'
+          def post(p,b):
+            r=s.post(url+p,json=b,timeout=100)
+            try:d=r.json()
+            except:d={'raw':r.text[:400]}
+            if r.status_code>=400:print('ERROR',p,r.status_code,str(d)[:500],flush=True)
+            return r.status_code,d
+          aid=1977747
+          cur='';prices={}
+          while True:
+            code,d=post('/v5/product/info/prices',{'cursor':cur,'limit':1000,'filter':{'visibility':'ALL'}})
+            if code!=200:raise SystemExit('Product prices unavailable')
+            for x in d.get('items') or []:prices[int(x['product_id'])]=x
+            nxt=d.get('cursor') or ''
+            if not nxt or nxt==cur:break
+            cur=nxt
+          candidates=[];offset=0
+          while True:
+            code,d=post('/v1/actions/candidates',{'action_id':aid,'limit':1000,'offset':offset})
+            if code!=200:raise SystemExit('Candidate list unavailable')
+            rows=(d.get('result') or {}).get('products') or []
+            candidates+=rows
+            if len(rows)<1000:break
+            offset+=1000
+          safe=[]
+          for x in candidates:
+            pid=int(x.get('id') or x.get('product_id') or 0)
+            p=(prices.get(pid) or {}).get('price') or {}
+            floor=float(p.get('min_price') or 0)
+            max_price=float(x.get('max_action_price') or 0)
+            current=float(p.get('price') or 0)
+            if floor>0 and max_price>=floor and current>max_price and max_price>0:
+              safe.append((round((current-max_price)/current,6),pid,current,floor,max_price))
+          safe.sort()
+          print('SAFE_COUNTS',len(candidates),len(safe),flush=True)
+          if not safe:raise SystemExit('No pilot matches')
+          _,pid,current,floor,ceiling=safe[0]
+          print('PILOT_BEFORE',json.dumps({'product_id':pid,'offer_id':prices[pid].get('offer_id'),'current':current,'floor':floor,'max_action_price':ceiling},ensure_ascii=False),flush=True)
+          code,d=post('/v1/actions/products/update',{'action_id':aid,'products':[{'product_id':pid,'action_price':ceiling}]})
+          print('PILOT_UPDATE',code,json.dumps(d,ensure_ascii=False)[:1800],flush=True)
+          if code>=400:raise SystemExit('Pilot update failed')
+          time.sleep(5)
+          code,after=post('/v5/product/info/prices',{'cursor':'','limit':1000,'filter':{'product_id':[str(pid)]}})
+          matches=[x for x in after.get('items') or [] if int(x.get('product_id') or 0)==pid]
+          print('PILOT_PRICE_AFTER',json.dumps(matches,ensure_ascii=False)[:2500],flush=True)
+          code,participants=post('/v1/actions/products',{'action_id':aid,'limit':1000,'offset':0})
+          print('PILOT_MEMBER',any(int(x.get('id') or x.get('product_id') or 0)==pid for x in (participants.get('result') or {}).get('products') or []),flush=True)
+          if matches:
+            nextmin=float((matches[0].get('price') or {}).get('min_price') or 0)
+            if nextmin+0.001<floor:raise SystemExit('SAFETY: minimum price was reduced')
+          PY
