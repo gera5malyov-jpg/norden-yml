@@ -1,0 +1,93 @@
+name: Ozon TNVED marking disagreement audit 20261030
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-marking-discrepancy-audit-20261030.yml']
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read Ozon product validation errors and TNVED attribute state
+        run: |
+          python - <<'PY'
+          import sys,json,re,collections,time
+          from pathlib import Path
+          sys.path.insert(0,'ozon')
+          import tnved_sync as oz
+          catalog=oz.list_products()
+          ids=[int(p['product_id']) for p in catalog if p.get('product_id')]
+          attrs=oz.get_product_attributes(ids)
+          info=collections.defaultdict(dict)
+          for p in attrs:
+              k=int(p.get('id') or p.get('product_id') or 0)
+              v=oz.attr_value_tuple(oz.find_product_attr(p,22232) or {})
+              info[k]={'offer':p.get('offer_id'),'name':p.get('name'),'code':str(v[1])[:10] if v else None,'dictionary_value_id':int(v[0]) if v else 0,'full_text':str(v[1])[:100] if v else None}
+          counts=collections.Counter()
+          issues=[]
+          states=collections.Counter()
+          samples=[]
+          endpoints={}
+          for endpoint in ['/v2/product/info/list','/v3/product/info/list']:
+              try:
+                  sample=oz.post(endpoint,{'product_id':ids[:3]})
+                  endpoints[endpoint]={'result_type':type(sample.get('result')).__name__,'keys':list(sample.keys()),'result_keys':list((sample.get('result') or {}).keys()) if isinstance(sample.get('result'),dict) else [],'example':json.dumps(sample,ensure_ascii=False)[:2200]}
+                  if sample.get('items') is not None or (sample.get('result') or {}).get('items') is not None:active_endpoint=endpoint;break
+              except Exception as e:
+                  endpoints[endpoint]={'error':str(e)[:500]}
+          else:active_endpoint=None
+          if active_endpoint:
+              for batch in oz.chunks(ids,500):
+                  try:
+                      response=oz.post(active_endpoint,{'product_id':batch})
+                      result=response.get('result') or {}
+                      items=response.get('items') or (result.get('items') if isinstance(result,dict) else None) or []
+                      for p in items:
+                          pid=int(p.get('id') or p.get('product_id') or 0)
+                          status=p.get('status') or {}
+                          if not isinstance(status,dict):status={'state':str(status)}
+                          state=str(status.get('state') or p.get('state') or '')
+                          if state:states[state]+=1
+                          errors=status.get('item_errors') or status.get('errors') or p.get('item_errors') or p.get('errors') or []
+                          if not isinstance(errors,list): errors=[]
+                          tnved_errors=[]
+                          for err in errors:
+                              raw=json.dumps(err,ensure_ascii=False).lower()
+                              key=str(err.get('code') or err.get('error') or 'no_code')
+                              counts[key]+=1
+                              if any(z in raw for z in ['тн вэд','тнвэд','tnved','22232','маркировк','marking','gtin','23536']):
+                                  tnved_errors.append(err)
+                          if tnved_errors:
+                              issues.append({'offer':info.get(pid,{}).get('offer') or p.get('offer_id'),'pid':pid,'code':info.get(pid,{}).get('code'),'errors':tnved_errors[:8]})
+                          if len(samples)<7:samples.append({'product_id':pid,'status':status,'fields':list(p.keys())})
+                  except Exception as e:
+                      counts['REQUEST_FAILED']+=1
+                      print('BATCH_ERROR',str(e)[:350],flush=True)
+                  time.sleep(.15)
+          present=[v for v in info.values() if v['code']]
+          empty=[v for v in info.values() if not v['code']]
+          zero_dictionary=[v for v in present if not v['dictionary_value_id']]
+          malformed=[v for v in present if not re.fullmatch(r'\d{10}',v['code'])]
+          report={'total_catalog':len(catalog),'attribute_products':len(attrs),'filled':len(present),'empty':len(empty),'dictionary_zero':len(zero_dictionary),'malformed':len(malformed),'endpoints':endpoints,'product_status_counts':dict(states),'validation_error_counts':dict(counts),'marking_related_errors_count':len(issues),'marking_related_errors':issues,'sample_product_infos':samples,'dictionary_zero_examples':zero_dictionary[:40],'malformed_examples':malformed[:30],'empty_examples':empty[:60]}
+          p=Path('ozon/tnved_marking_discrepancy_20261030.json')
+          p.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('AUDIT_RESULT',json.dumps({k:v for k,v in report.items() if k not in ['marking_related_errors','sample_product_infos','dictionary_zero_examples','malformed_examples','empty_examples']},ensure_ascii=False)[:14000],flush=True)
+          PY
+      - name: Save audit
+        if: always()
+        run: |
+          test -f ozon/tnved_marking_discrepancy_20261030.json || echo '{"error":"failed before producing data"}' > ozon/tnved_marking_discrepancy_20261030.json
+          cp ozon/tnved_marking_discrepancy_20261030.json /tmp/report-tnved.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/report-tnved.json ozon/tnved_marking_discrepancy_20261030.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ozon/tnved_marking_discrepancy_20261030.json
+          if ! git diff --cached --quiet; then git commit -m 'Read-only Ozon discrepancy audit: TNVED vs marking moderation errors'; git push; fi
