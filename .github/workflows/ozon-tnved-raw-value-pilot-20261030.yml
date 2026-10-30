@@ -1,0 +1,46 @@
+name: Pilot Ozon TNVED code without dropdown entry
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-tnved-raw-value-pilot-20261030.yml']
+permissions:
+  contents: read
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test raw TNVED attribute for bamboo folding screen and lockable cash box
+        run: |
+          python - <<'PY'
+          import sys,json,time
+          sys.path.insert(0,'ozon')
+          import tnved_sync as m
+          targets=[('RED-00-00011830','9403820000 - Мебель из бамбука'),('SAMS-290457','8303004000 - Ящики для хранения денег, ценностей')]
+          catalog=m.list_products()
+          byoffer={str(x.get('offer_id')):int(x['product_id']) for x in catalog if x.get('product_id')}
+          before=m.get_product_attributes([byoffer[o] for o,c in targets if o in byoffer])
+          b={str(x.get('offer_id')):x for x in before}
+          for offer,label in targets:
+            p=b.get(offer)
+            if not p:continue
+            prev=m.attr_value_tuple(m.find_product_attr(p,22232) or {})
+            if prev:print('SKIP_ALREADY_FILLED',offer,prev,flush=True);continue
+            try:
+              response=m.post('/v1/product/attributes/update',{'items':[{'offer_id':offer,'attributes':[{'complex_id':0,'id':22232,'values':[{'dictionary_value_id':0,'value':label}]}]}]})
+              print('RAW_POST',offer,response,flush=True)
+              time.sleep(4)
+              if response.get('task_id'):
+                state=m.post('/v1/product/import/info',{'task_id':int(response['task_id'])})
+                print('TASK',offer,json.dumps(state,ensure_ascii=False)[:3000],flush=True)
+            except Exception as e:
+              print('RAW_ERROR',offer,str(e)[:1500],flush=True)
+          time.sleep(4)
+          after=m.get_product_attributes([byoffer[o] for o,c in targets if o in byoffer])
+          for p in after:
+            print('READBACK',p['offer_id'],m.attr_value_tuple(m.find_product_attr(p,22232) or {}),flush=True)
+          PY
