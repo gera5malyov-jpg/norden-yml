@@ -1,0 +1,206 @@
+name: Ozon TNVED remaining final second pass
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-tnved-final479-second-pass-20261030.yml']
+permissions:
+  contents: write
+concurrency:
+  group: ozon-tnved-final-479-pass2
+  cancel-in-progress: false
+jobs:
+  fill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply supported codes without modifying other product attributes
+        run: |
+          python - <<'PY'
+          import re,sys,json,time,collections
+          from pathlib import Path
+          sys.path.insert(0,'ozon')
+          import tnved_sync as m
+          snapshot=json.loads(Path('ozon/tnved_evidence_remaining_20261030.json').read_text())
+          catalog=m.list_products()
+          id_by_offer={str(p['offer_id']):int(p['product_id']) for p in catalog if p.get('product_id') and p.get('offer_id')}
+          wood={'ЛДСП','МДФ','Фанера','Дерево','Шпон','Массив дерева','Массив сосны','Массив березы','Массив бука'}
+          padded=re.compile(r'ТКАНЬ|МЯГКОЕ СИДЕНЬЕ|МЯГКИМ СИДЕНЬЕМ|ПОЛУМЯГК|ВЕЛЮР|ЭКОКОЖ|КОЖЗАМ|КОЖ/ЗАМ|КОЖ\\ЗАМ|ШЕНИЛЛ|НУБУК|РОГОЖКА|ИСКУССТВЕННАЯ КОЖА|DARK GREY PU|BEIGE PU|TEXTILE')
+          lift=re.compile('ГАЗЛИФТ|РЕГУЛИРУЕМАЯ ВЫСОТА|ВЫСОТА РЕГУЛИРУЕТСЯ|РЕГУЛИРОВКА ВЫСОТЫ|ГИДРАВЛИЧЕСКИЙ ПОДЪЕМ')
+          def rule(x):
+            g=tuple(x['group']);a=x['attrs'];t=x['name'].upper()
+            mat=a.get('Материал корпуса','');ob=a.get('Материал обивки','')
+            top=a.get('Материал столешницы','');base=a.get('Материал подстолья','')
+            def matches(words):return any(w in t for w in words)
+            if g in [(17027916,95048),(17027916,95023),(17027916,95053)]:
+              if mat in wood and (ob and ob!='Без обивки' or padded.search(t)):
+                if not matches(['РОТАНГ','РАТТАН','БАМБУК']):return ('9401610000','upholstered wooden seating')
+              if mat=='Металл' and (ob and ob!='Без обивки' or padded.search(t)) and not lift.search(t):
+                return ('9401710009','metal frame upholstered seating')
+              if mat=='Пластик' and ob=='Без обивки':return ('9401800009','unupholstered plastic chair')
+              if mat=='Массив дерева' and ob=='Без обивки':return ('9401690000','wooden chair without upholstery')
+            if g==(17027916,95044):
+              if mat in wood and ob and ob!='Без обивки':return ('9401610000','upholstered wooden ottoman')
+              if mat=='Металл' and ob and ob!='Без обивки':return ('9401710009','upholstered metal ottoman')
+            if g==(80375615,95030) and mat in wood and ob and ob!='Без обивки' and not matches(['РОТАНГ','РАТТАН']):
+              return ('9401610000','upholstered wood armchair')
+            if g==(17028726,96029):
+              if 'ШИРМА' in t and 'БАМБУК' in t:
+                return ('9403820000','folding bamboo screen, made of bamboo')
+            if g==(17027918,95015):
+              # Mixed-material dining tables: material of load-bearing frame decides the furniture material.
+              if top and base and all(z in wood for z in top.split('; ')) and all(z in wood for z in base.split('; ')):
+                return ('9403601009','wooden living/dining table, no other frame material')
+              if 'Металл'==base and top in ('ЛДСП','МДФ','МДФ; Шпон','Шпон; МДФ','Металл'):
+                return ('9403208009','metal frame dining table')
+              if base in wood and top=='Стекло':return ('9403601009','wood frame dining table with glass top - provisional')
+            if g==(17027918,95002):
+              if base=='Металл':return ('9403208009','metal support coffee table')
+              if base in wood and top in wood:return ('9403601009','wooden coffee table')
+            if g==(80731485,95098):
+              if mat=='Металл' and matches(['СТЕЛЛАЖ','СИСТЕМА ХРАНЕНИЯ']):return ('9403208009','metal storage rack')
+              if mat in wood and matches(['СТЕЛЛАЖ','ЭТАЖЕРКА']):return ('9403609009','wooden storage shelving')
+              if x['offer']=='SAMS-640205':return ('9403309900','LDSP Monolit office open shelf 125 cm')
+            if g==(17027918,95101) and top in wood and base in wood:return ('9403601009','wooden vanity table')
+            if g==(17027916,95021) and mat=='Металл' and ob and ob!='Без обивки':return ('9401710009','padded metal bench')
+            if g==(80443823,613346845) and mat=='Металл':return ('9401790009','metal bench without upholstery')
+            if g==(17027917,94995) and 'КРОВАТ' in t and not 'МЕТАЛЛ' in t and matches(['ЛДСП','ДУБ','ЯСЕНЬ','ВЕНГЕ','КРАФТ','ОРЕХ','МДФ','БЕЛЛА','ГАРМОНИЯ']):return ('9403500009','wooden bedroom bed')
+            if g==(17027917,970713329) and matches(['КРОВАТ','МЕТАЛЛ']) and mat=='Металл':return ('9403202009','metal medical bed')
+            if g==(17027919,93671) and mat=='Металл' and matches(['ВЕШАЛКА','КРЮЧ']):return ('8302500000','metal wall hooks and hangers')
+            if g==(44082285,970848956) and matches(['ЯЩИК ДЛЯ ДЕНЕГ','ЯЩИК ДЛЯ ЦЕННОСТЕЙ']):return ('8303004000','lockable metal cash box')
+            if g==(17027914,115946522) and matches(['МАТРАС','EVS']):return ('9404291000','mattress EVS spring system')
+            if g==(93167672,98058) and matches(['ШКАФ КАРТОТЕЧНЫЙ','ШКАФ МЕТАЛЛИЧЕСКИЙ ДЛЯ ДОКУМЕНТОВ']):return ('9403109300','metal office filing cabinet')
+            if g==(17027908,93670) and matches(['ВЕШАЛКА НАПОЛЬНАЯ']) and not matches(['ДЕРЕВО','МДФ']):return ('9403208009','metal floor hanger inferred from model')
+            if g==(17027918,95006) and base=='Металл' and top in ('ЛДСП','Стекло'):return ('9403208009','metal framed console table')
+            if g==(80770870,95092) and mat=='ЛДСП' and matches(['СТЕНКА','ЦЕНТРАЛЬНАЯ СЕКЦИЯ']):return ('9403601009','LDSP living wall')
+            if g==(80711064,971162059) and mat=='Металл' and matches(['ПРИКРОВАТНАЯ ТУМБА']):return ('9403208009','metal bedside table')
+            # Supplemental evidence-based matches for remaining named furniture.
+            if g in [(17027916,95048),(17027916,95023),(17027916,95053)]:
+              if mat in wood and not ob and matches(['ТКАНЬ','ТКАНЕВ','МЯГК','ВЕЛЮР','ЗАМША','НУБУК','VELVET','VERONA','VELUTTO','VATICAN','КОЖЗАМ','КОЖ/ЗАМ']):
+                return ('9401610000','wooden upholstered seat identified by upholstery name')
+              if mat in ('Металл','Хромированная сталь') and not ob and matches(['ТКАНЬ','МЯГК','ВЕЛЮР','ЗАМША','НУБУК','VELVET','КОЖЗАМ','КОЖ/ЗАМ','PU)','PU ']):
+                return ('9401710009','metal upholstered seat identified by fabric in title')
+              if mat in ('Металл','Хромированная сталь') and ob and ob!='Без обивки':
+                return ('9401710009','metal seat upholstered, verified frame and cover')
+              if mat in ('Металл','Хромированная сталь') and ob=='Без обивки' and matches(['ПОЛИПРОПИЛЕН']):
+                return ('9401800009','unupholstered plastic seat with metal pedestal')
+              if mat=='Массив дерева' and not ob and matches(['СТУЛ ЖЕСТКИЙ','ТАБУРЕТ МИНИ','ТАБУРЕТ СТРЕМЯНКА','ТАБУРЕТ РЭЙ']):
+                return ('9401690000','solid wood nonupholstered stool/chair')
+              if mat=='Металл' and not ob and matches(['К/З','КОЖА','КОЖ/ЗАМ','ТКАНЬ','ВЕЛЮР','КОЖЗАМ']):
+                return ('9401710009','metal stool with upholstered seat indicated')
+            if g==(80731485,95098):
+              if mat=='Металл' and matches(['ЭТАЖЕРКА','СТЕЛЛАЖ','ТЕЛЕЖКА','ЛАДЬЯ','СИСТЕМА ХРАНЕНИЯ']):
+                return ('9403208009','metal shelving rack')
+              if mat=='ЛДСП' and matches(['КОРOБ','КОРОБ','ПЕНАЛ','УГЛОВОЕ ЗАВЕРШЕНИЕ']):
+                return ('9403609009','wooden modular storage element')
+            if g==(17027918,95015):
+              if base=='Металл' and top in ('Массив дерева','МДФ','МДФ; Шпон','ЛДСП'):
+                return ('9403208009','dining table on load-bearing metal legs')
+              if top in ('ЛДСП','МДФ','Шпон','Шпон; МДФ','МДФ; Шпон') and base in wood:
+                return ('9403601009','wood-framed dining table')
+            if g==(17027918,95002):
+              if base in wood and top in ('Стекло','ЛДСП','МДФ','Шпон','Тамбурат','Пластик'):
+                return ('9403601009','living room table with wooden load-bearing frame')
+              if top=='ЛДСП' and not base and matches(['СТОЛ ЖУРНАЛЬНЫЙ','СТОЛ ПОДКАТНОЙ']):
+                return ('9403601009','wooden living room side table')
+            if g==(17027918,504866270):
+              if matches(['МЕТАЛЛОКАРКАС','НА МЕТАЛЛОКАРКАСЕ']) and top in ('МДФ','ЛДСП'):
+                return ('9403105100','metal-frame office desk')
+            if g==(17027914,115946522) and matches(['МАТРАС','EVS']) and matches(['EVS','ПРУЖИННЫЙ']):
+              return ('9404291000','EVS spring mattress')
+            if g==(17027918,95101) and top in wood and base in wood:
+              return ('9403601009','wooden cosmetic vanity table')
+            if g==(17027917,94995) and matches(['КРОВАТЬ','КРОВАТ']) and matches(['ДЕРЕВ','МДФ','ЛДСП','ЯСЕНЬ','ДУБ','СОНОМА','КРАФТ','БЕЛЛА','ГАРМОНИЯ']) and not matches(['МЕТАЛЛИЧЕСКАЯ']):
+              return ('9403500009','wooden bed with documented decorative finish')
+            if g==(80770870,95009) and matches(['КУХОННЫЙ УГОЛОК']) and matches(['ДУБ','ВЕНГЕ','СОНОМА']):
+              return ('9403601009','wooden kitchen corner furniture set')
+            if g==(17027919,93671) and mat=='Металл':
+              return ('8302500000','metal wall hooks')
+            if g==(17027917,970713329) and matches(['КРОВАТЬ']) and matches(['МАССИВ','МДФ','ДУБ','ЛДСП','ВЕНГЕ']):
+              return ('9403500009','bedroom bed with wood surface')
+            return None
+          raw=[]
+          for x in snapshot['missing']:
+            if x['offer'] not in id_by_offer:continue
+            choice=rule(x)
+            if choice:raw.append(dict(x,code=choice[0],reason=choice[1]))
+          # Keep original snapshot metadata; re-read to prevent overwriting any existing code
+          current=m.get_product_attributes([id_by_offer[x['offer']] for x in raw])
+          byoffer={str(p.get('offer_id')):p for p in current}
+          safe=[]
+          for x in raw:
+            p=byoffer.get(x['offer'])
+            if not p or p.get('name')!=x['name']:continue
+            if (int(p.get('description_category_id') or 0),int(p.get('type_id') or 0))!=tuple(x['group']):continue
+            if m.attr_value_tuple(m.find_product_attr(p,22232) or {}):continue
+            safe.append(x)
+          # Search exact code in live Ozon category dictionary, reusing confirmed dictionary values
+          codes=collections.defaultdict(list)
+          for x in snapshot['filled']:
+            if x.get('code') and x.get('dictionary_id'):
+              codes[(tuple(x['group']),str(x['code']))].append((int(x['dictionary_id']),None))
+          cache={}
+          approved=[];unmapped=[]
+          for x in safe:
+            key=(tuple(x['group']),x['code'])
+            if key not in cache:
+              sources={v[0] for v in codes.get(key,[])}
+              opts=[]
+              try:
+                opts=m.post('/v1/description-category/attribute/values/search',{
+                  'attribute_id':22232,
+                  'description_category_id':x['group'][0],
+                  'type_id':x['group'][1],
+                  'value':x['code'],
+                  'limit':100,
+                }).get('result') or []
+              except Exception as e:
+                print('DICT_ERROR',key,str(e)[:160],flush=True)
+              exact=[z for z in opts if str(z.get('value') or '').startswith(x['code']) and int(z.get('id') or 0)>0]
+              if len(exact)==1:cache[key]=(int(exact[0]['id']),str(exact[0]['value']))
+              elif len(sources)==1:
+                source_id=next(iter(sources))
+                sample=next((z for z in snapshot['filled'] if tuple(z['group'])==key[0] and z['code']==key[1] and int(z.get('dictionary_id') or 0)==source_id),None)
+                if sample: cache[key]=(source_id,code_label:=x['code']+' - '+str((next((z.get('value') for z in exact if int(z.get('id') or 0)==source_id),'') or '')))
+                else:cache[key]=None
+              else:cache[key]=None
+            if cache[key] and not cache[key][1].endswith(' - '):
+              approved.append(dict(x,dictionary_value_id=cache[key][0],dictionary_label=cache[key][1]))
+            else:
+              unmapped.append({'offer':x['offer'],'code':x['code'],'reason':'code_not_in_Ozon_dictionary'})
+          print('AUDIT',json.dumps({'catalog':len(catalog),'raw_candidates':len(raw),'still_unfilled':len(safe),'approved':len(approved),'unmapped':len(unmapped)},ensure_ascii=False),flush=True)
+          remaining,quota,usage,reset=m.get_daily_update_remaining()
+          if remaining is not None:approved=approved[:max(0,remaining)]
+          tasks=[];errors=[]
+          for batch in m.chunks(approved,40):
+            body={'items':[{'offer_id':x['offer'],'attributes':[{'complex_id':0,'id':22232,'values':[{'dictionary_value_id':x['dictionary_value_id'],'value':x['dictionary_label']}]}]} for x in batch]}
+            try:tasks.append(m.post('/v1/product/attributes/update',body).get('task_id'))
+            except Exception as e:errors.append({'batch':[x['offer'] for x in batch],'error':str(e)[:300]})
+            time.sleep(.35)
+          time.sleep(12)
+          updated=m.get_product_attributes([id_by_offer[x['offer']] for x in approved])
+          newby={str(x.get('offer_id')):x for x in updated}
+          confirmed=[]
+          for x in approved:
+            p=newby.get(x['offer'])
+            v=m.attr_value_tuple(m.find_product_attr(p,22232) or {}) if p else None
+            if v and int(v[0])==x['dictionary_value_id']:confirmed.append(x['offer'])
+          report={'total_catalog':len(catalog),'snapshot_missing':len(snapshot['missing']),'raw_candidates':len(raw),'still_unfilled':len(safe),'approved':len(approved),'confirmed_immediate':len(confirmed),'unconfirmed':[x['offer'] for x in approved if x['offer'] not in confirmed],'unmapped':unmapped,'tasks':tasks,'errors':errors,'approved_details':[{'offer':x['offer'],'code':x['code'],'reason':x['reason']} for x in approved]}
+          Path('ozon/tnved_final479_pass2_result_20261030.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('RESULT',json.dumps({k:v for k,v in report.items() if k not in ('approved_details','unmapped')},ensure_ascii=False)[:5500],flush=True)
+          PY
+      - name: Commit report
+        if: always()
+        run: |
+          if [ ! -f ozon/tnved_final479_pass2_result_20261030.json ]; then echo '{"error":"failed before report"}' > ozon/tnved_final479_pass2_result_20261030.json; fi
+          cp ozon/tnved_final479_pass2_result_20261030.json /tmp/final479.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/final479.json ozon/tnved_final479_pass2_result_20261030.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ozon/tnved_final479_pass2_result_20261030.json
+          if ! git diff --cached --quiet; then git commit -m 'Record 479 product TNVED safe final sweep'; git push; fi
