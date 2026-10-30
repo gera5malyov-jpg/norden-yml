@@ -1,0 +1,51 @@
+name: Ozon test missing marking flag for one wooden furniture SKU
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-one-marking-flag-test-20261030.yml']
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set false on a confirmed ordinary wooden furniture item and read moderation status
+        run: |
+          python - <<'PY'
+          import sys,json,time
+          sys.path.insert(0,'ozon')
+          import tnved_sync as o
+          offer='RED-00-00008407'
+          cat=o.list_products()
+          ids={str(x.get('offer_id')):int(x['product_id']) for x in cat if x.get('product_id')}
+          pid=ids[offer]
+          cards=o.get_product_attributes([pid])
+          p=next(x for x in cards if x.get('offer_id')==offer)
+          name=p.get('name') or ''
+          c=o.attr_value_tuple(o.find_product_attr(p,22232) or {})
+          m=o.attr_value_tuple(o.find_product_attr(p,23536) or {})
+          print('BEFORE',json.dumps({'offer':offer,'name':name,'tnved':c,'mark':m},ensure_ascii=False),flush=True)
+          if not c or not str(c[1]).startswith('9403601009'):raise SystemExit('Not confirmed ordinary wooden furniture')
+          if any(s in name.casefold() for s in ('медицин','костыл','поручен','туалет','ходунк')):raise SystemExit('Medical/rehab product excluded')
+          try:
+              reply=o.post('/v1/product/attributes/update',{'items':[{'offer_id':offer,'attributes':[{'complex_id':0,'id':23536,'values':[{'value':'false'}]}]}]})
+              print('IMPORT',reply,flush=True)
+              task=reply.get('task_id')
+              time.sleep(7)
+              if task:
+                  res=o.post('/v1/product/import/info',{'task_id':int(task)})
+                  print('TASK',json.dumps(res,ensure_ascii=False)[:3300],flush=True)
+          except Exception as e:print('IMPORT_ERROR',str(e)[:1200],flush=True)
+          cards=o.get_product_attributes([pid])
+          p=next(x for x in cards if x.get('offer_id')==offer)
+          print('AFTER',json.dumps({'tnved':o.attr_value_tuple(o.find_product_attr(p,22232) or {}),'mark':o.attr_value_tuple(o.find_product_attr(p,23536) or {})},ensure_ascii=False),flush=True)
+          time.sleep(5)
+          d=o.post('/v3/product/info/list',{'product_id':[pid]})
+          x=(d.get('items') or [{}])[0]
+          print('CARD_ERRORS',json.dumps(x.get('errors') or [],ensure_ascii=False)[:5000],flush=True)
+          PY
