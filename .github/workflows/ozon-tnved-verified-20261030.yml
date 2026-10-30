@@ -97,7 +97,7 @@ jobs:
                       skipped[p.get('offer_id') or str(p.get('product_id'))]='no_unique_verified_match'
                       continue
                   dic,val=next(iter(matches))
-                  chosen.append({'offer_id':str(p.get('offer_id') or ''),'product_id':p.get('product_id'),'name':p.get('name'),'group':list(group),'attribute_id':aid,'dictionary_value_id':dic,'value':val,'source':method})
+                  chosen.append({'offer_id':str(p.get('offer_id') or ''),'product_id':p.get('product_id') or p.get('id'),'name':p.get('name'),'group':list(group),'attribute_id':aid,'dictionary_value_id':dic,'value':val,'source':method})
           allow_offers=set(["AF-31310974","9710020018079","9710020019449","9710020019011","AF-31200960","SAMS-980103","SAMS-980479","AF-31311114","AF-31311117","AF-31311115","AF-31311113","AF-31315051","AF-31315049","AF-31315050","AF-31353772","364658364658","AF-31205337","AF-31205338","9710020021089","9710020020969","AF-31201348","RED-00-00000160","RED-00-00012249","RED-00-_0009083","RED-00-00009413","RED-00-_0009085","RED-00-00012250","RED-00-_0009084","RED-00-_0009086","RED-00-00004046","RED-00-00004860","RED-00-00003155","RED-00-00003158","RED-00-00003157","RED-00-00004628","RED-00-_0009087","RED-00-_0009088","RED-00-00003159","RED-00-00003156","RED-00-00004048","AF-31200599","AF-31200598","AF-31200597","AF-31201187","SAMS-641255","AF-31202850","AF-31200485","SAMS-238926"])
           chosen=[x for x in chosen if x['offer_id'] in allow_offers or x['source']=='samson_wood_office_shelf_height_verified']
           # Respect Ozon daily limit and capped rollout.
