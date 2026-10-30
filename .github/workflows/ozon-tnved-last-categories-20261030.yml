@@ -16,7 +16,7 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      APPLY: 'false'
+      APPLY: 'true'
     steps:
       - uses: actions/checkout@v4
       - name: Select furniture only when material and construction support exact ten-digit code
