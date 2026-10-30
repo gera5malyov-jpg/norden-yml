@@ -1,0 +1,132 @@
+name: Ozon TNVED verified matches 20261030
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-tnved-verified-20261030.yml']
+permissions:
+  contents: write
+concurrency:
+  group: ozon-tnved-verified-20261030
+  cancel-in-progress: false
+jobs:
+  fill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      APPLY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Identify proven matching TNVED, optionally apply limited changes
+        run: |
+          python - <<'PY'
+          import os,sys,re,unicodedata,json,time,collections
+          sys.path.insert(0,'ozon')
+          import tnved_sync as m
+          from pathlib import Path
+          APPLY=os.environ['APPLY']=='true'
+          source=m.list_products()
+          products=m.get_product_attributes([int(x['product_id']) for x in source if x.get('product_id')])
+          def keyname(s):
+              s=unicodedata.normalize('NFKC',str(s or '')).replace('Ё','Е').replace('ё','е').upper()
+              s=re.sub(r'[«»"“”]','',s)
+              s=re.sub(r'\s+',' ',s).strip()
+              return s
+          colors=r'(?:БЕЛ(?:ЫЙ|АЯ|ОЕ)|ЧЕРН(?:ЫЙ|АЯ|ОЕ)|СЕР(?:ЫЙ|АЯ|ОЕ)|КОРИЧНЕВ(?:ЫЙ|АЯ|ОЕ)|БЕЖЕВ(?:ЫЙ|АЯ|ОЕ)|ЗЕЛЕН(?:ЫЙ|АЯ|ОЕ)|СИН(?:ИЙ|ЯЯ|ЕЕ)|КРАСН(?:ЫЙ|АЯ|ОЕ)|ОРАНЖЕВ(?:ЫЙ|АЯ|ОЕ)|ЖЕЛТ(?:ЫЙ|АЯ|ОЕ)|РОЗОВ(?:ЫЙ|АЯ|ОЕ)|ГОЛУБ(?:ОЙ|АЯ|ОЕ)|ГРАФИТ|КАШЕМИР|ВЕНГЕ|СОНОМА|ЗОЛОТО|СЕРЕБРО|ДУБ|БЕЛФОРТ|ОРЕХ|БЕЛЫЙ|ЧЕРНЫЙ)'
+          def family(s):
+              s=keyname(s)
+              # Only remove a short decorative shade after a comma or dash.
+              for sep in [', ',' - ']:
+                  if sep in s:
+                      head,tail=s.rsplit(sep,1)
+                      if len(head)>=19 and len(tail)<=40 and re.search(colors,tail) and not re.search(r'\b(?:НОЖКИ|КАРКАС|ОСНОВАНИЕ|МАССИВ|МЕТАЛЛ|ПЛАСТИК|ЛДСП|НАТУРАЛЬНЫЙ|ИСКУССТВЕННЫЙ|ДЕРЕВО|ВРАЩЕНИЕ|ПОДЪЕМ|РАСКЛАДНОЙ)\b',tail):
+                          s=head.strip()
+              return re.sub(r'\s+',' ',s)
+          groups=collections.defaultdict(list)
+          for p in products:
+              group=(int(p.get('description_category_id') or 0),int(p.get('type_id') or 0))
+              groups[group].append(p)
+          valid={'7009920000','9010600000','9403401000','9403202009'}
+          special={(17028712,93366):('7009920000','ЗЕРКАЛО'),(17028933,91495):('9010600000','ЭКРАН'),(80771432,95089):('9403401000','КУХНЯ'),(17027917,94997):('9403202009','КРОВАТЬ РАСКЛАДНАЯ')}
+          chosen=[];missing_total=0;already_total=0;skipped={}
+          for group,rows in groups.items():
+              if not all(group):continue
+              meta=m.get_category_attributes(*group)
+              att=next((a for a in meta if int(a.get('id') or 0)==22232),None)
+              if not att:continue
+              aid=int(att['id'])
+              refs=collections.defaultdict(set)
+              code_refs=collections.defaultdict(list)
+              unresolved=[]
+              for p in rows:
+                  val=m.attr_value_tuple(m.find_product_attr(p,aid) or {})
+                  if val:
+                      already_total+=1
+                      if re.match(r'^\d{10}\s*-',val[1]) and val[0]>0:
+                          refs[keyname(p.get('name'))].add(val)
+                          refs[family(p.get('name'))].add(val)
+                          code_refs[val[1][:10]].append(val)
+                  else:
+                      missing_total+=1;unresolved.append(p)
+              for p in unresolved:
+                  title=keyname(p.get('name'))
+                  family_name=family(title)
+                  matches=refs.get(title,set())
+                  method='exact_same_name' if len(matches)==1 else None
+                  if len(matches)!=1 and len(family_name)>=22 and family_name!=title:
+                      matches=refs.get(family_name,set())
+                      method='same_model_and_only_color_suffix' if len(matches)==1 else None
+                  if len(matches)!=1 and group in special:
+                      code,keyword=special[group]
+                      if keyword in title and code in code_refs:
+                          matches=set(code_refs[code])
+                          method='homogeneous_type_verified_from_existing' if len(matches)==1 else None
+                  if len(matches)!=1 or not method:
+                      skipped[p.get('offer_id') or str(p.get('product_id'))]='no_unique_verified_match'
+                      continue
+                  dic,val=next(iter(matches))
+                  chosen.append({'offer_id':str(p.get('offer_id') or ''),'product_id':p.get('product_id'),'name':p.get('name'),'group':list(group),'attribute_id':aid,'dictionary_value_id':dic,'value':val,'source':method})
+          # Respect Ozon daily limit and capped rollout.
+          remaining,quota,usage,reset=m.get_daily_update_remaining()
+          permitted=min(len(chosen),350,remaining if remaining is not None else 350)
+          selected=chosen[:max(0,permitted)]
+          report={'apply':APPLY,'total_catalog':len(products),'already_filled':already_total,'missing':missing_total,'verified_candidates':len(chosen),'selected':len(selected),'deferred':len(chosen)-len(selected),'daily_quota':quota,'daily_used':usage,'daily_remaining':remaining,'proposals':chosen,'requested':[],'tasks':[],'errors':[],'rechecked_filled':None}
+          if APPLY:
+              for batch in m.chunks(selected,40):
+                  req={'items':[{'offer_id':x['offer_id'],'attributes':[{'complex_id':0,'id':x['attribute_id'],'values':[{'dictionary_value_id':int(x['dictionary_value_id']),'value':x['value']}]}]} for x in batch]}
+                  try:
+                      response=m.post('/v1/product/attributes/update',req)
+                      report['tasks'].append(response.get('task_id'))
+                      report['requested'].extend([x['offer_id'] for x in batch])
+                  except Exception as e:
+                      report['errors'].append({'offers':[x['offer_id'] for x in batch],'error':str(e)[:400]})
+                  time.sleep(.4)
+              time.sleep(9)
+              new=m.get_product_attributes([int(x['product_id']) for x in selected])
+              confirmed=0
+              byid={str(p.get('offer_id')):p for p in new}
+              for item in selected:
+                  prod=byid.get(item['offer_id'])
+                  if not prod:continue
+                  value=m.attr_value_tuple(m.find_product_attr(prod,item['attribute_id']) or {})
+                  if value and int(value[0])==int(item['dictionary_value_id']):confirmed+=1
+              report['rechecked_filled']=confirmed
+          output=Path('ozon/tnved_verified_20261030.json')
+          output.write_text(json.dumps(report,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          print('RESULT_JSON',json.dumps({k:v for k,v in report.items() if k not in ('proposals','requested')},ensure_ascii=False)[:5000],flush=True)
+          PY
+      - name: Save run report
+        if: always()
+        run: |
+          if [ ! -f ozon/tnved_verified_20261030.json ]; then
+            echo '{"error":"Failed before report"}' > ozon/tnved_verified_20261030.json
+          fi
+          cp ozon/tnved_verified_20261030.json /tmp/tnved_verified.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/tnved_verified.json ozon/tnved_verified_20261030.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ozon/tnved_verified_20261030.json
+          if ! git diff --cached --quiet; then git commit -m 'Record Ozon TNVED verified mapping audit'; git push; fi
