@@ -72,6 +72,15 @@ jobs:
                   code='9401390000';why='swiveling office seat with height adjustment'
               elif group==(80375615,95024) and t.startswith('ДИВАН ДВУХМЕСТНЫЙ РЕТРО') and mat=='Массив березы' and ob and ob!='Без обивки' and not re.search('КРОВАТЬ|РАСКЛАД|ТРАНСФОРМ',t):
                   code='9401610000';why='non-convertible upholstered solid birch sofa'
+              elif group==(80375615,95024) and t.startswith('ДИВАН БАРХАТ') and mat=='Массив березы' and ob and ob!='Без обивки' and not re.search('КРОВАТЬ|РАСКЛАД|ТРАНСФОРМ',t):
+                  code='9401610000';why='fixed upholstered birch sofa BARHAT'
+              elif group==(17027916,95044) and re.match(r'^ПУФ(?:ИК)?\\b',t) and ob and ob!='Без обивки' and not re.search('КРОВАТЬ|РАСКЛАД|ТРАНСФОРМ',t):
+                  if mat in ['Дерево','Массив дерева','Массив березы']:
+                      code='9401610000';why='upholstered wooden ottoman'
+                  elif mat=='Металл':
+                      code='9401710009';why='upholstered metal ottoman'
+              elif group==(17027908,93670) and x['offer'].startswith('SAMS-') and 'ВЕШАЛКА' in t and 'МЕТАЛЛ' in t:
+                  code='9403208009';why='metal floor coat stand'
               if code:
                   values=by_group[group][code]
                   if len(values)==1:
@@ -128,18 +137,18 @@ jobs:
               fresh=api.get_product_attributes([pid_by_offer[x['offer_id']] for x in selected])
               check={str(x.get('offer_id')):x for x in fresh}
               report['confirmed']=sum(1 for x in selected if (lambda p: p and (lambda v: v and int(v[0])==x['dictionary_value_id'])(api.attr_value_tuple(api.find_product_attr(p,22232) or {})))(check.get(x['offer_id'])))
-          Path('ozon/tnved_cabinets_batch_20261030.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+          Path('ozon/tnved_seating_batch_20261030.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
           print('RESULT_JSON',json.dumps({k:v for k,v in report.items() if k!='proposals'},ensure_ascii=False)[:5500],flush=True)
           PY
       - name: Save audit
         if: always()
         run: |
-          if [ ! -f ozon/tnved_cabinets_batch_20261030.json ]; then echo '{"error":"audit failed"}' > ozon/tnved_cabinets_batch_20261030.json; fi
-          cp ozon/tnved_cabinets_batch_20261030.json /tmp/tnved_next.json
+          if [ ! -f ozon/tnved_seating_batch_20261030.json ]; then echo '{"error":"audit failed"}' > ozon/tnved_seating_batch_20261030.json; fi
+          cp ozon/tnved_seating_batch_20261030.json /tmp/tnved_next.json
           git fetch origin main
           git reset --hard origin/main
-          cp /tmp/tnved_next.json ozon/tnved_cabinets_batch_20261030.json
+          cp /tmp/tnved_next.json ozon/tnved_seating_batch_20261030.json
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ozon/tnved_cabinets_batch_20261030.json
+          git add ozon/tnved_seating_batch_20261030.json
           if ! git diff --cached --quiet; then git commit -m 'Record guarded TNVED next batch audit'; git push; fi
