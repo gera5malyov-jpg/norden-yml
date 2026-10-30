@@ -15,7 +15,7 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      APPLY: 'false'
+      APPLY: 'true'
     steps:
       - uses: actions/checkout@v4
       - name: Identify proven matching TNVED, optionally apply limited changes
@@ -82,11 +82,24 @@ jobs:
                       if keyword in title and code in code_refs:
                           matches=set(code_refs[code])
                           method='homogeneous_type_verified_from_existing' if len(matches)==1 else None
+                  # Office shelving is LДСП furniture. Samson confirms the materials and sizes
+                  # of BUDGET and KANZ office shelf ranges. Height threshold is explicit in EAEU 940330.
+                  if group==(80731485,95098) and str(p.get('offer_id') or '').startswith('SAMS-') and 'ШКАФ (СТЕЛЛАЖ)' in title and re.search(r'БЮДЖЕТ|КАНЦ|ПРИОРИТЕТ',title):
+                      dims=re.search(r'(\d{2,4})\s*[ХX×]\s*(\d{2,4})\s*[ХX×]\s*(\d{2,4})',title)
+                      if dims:
+                          height=int(dims.group(3))
+                          code='9403301900' if height<=800 else '9403309900'
+                          candidates=set(code_refs.get(code) or [])
+                          if len(candidates)==1:
+                              matches=candidates
+                              method='samson_wood_office_shelf_height_verified'
                   if len(matches)!=1 or not method:
                       skipped[p.get('offer_id') or str(p.get('product_id'))]='no_unique_verified_match'
                       continue
                   dic,val=next(iter(matches))
                   chosen.append({'offer_id':str(p.get('offer_id') or ''),'product_id':p.get('product_id'),'name':p.get('name'),'group':list(group),'attribute_id':aid,'dictionary_value_id':dic,'value':val,'source':method})
+          allow_offers=set(["AF-31310974","9710020018079","9710020019449","9710020019011","AF-31200960","SAMS-980103","SAMS-980479","AF-31311114","AF-31311117","AF-31311115","AF-31311113","AF-31315051","AF-31315049","AF-31315050","AF-31353772","364658364658","AF-31205337","AF-31205338","9710020021089","9710020020969","AF-31201348","RED-00-00000160","RED-00-00012249","RED-00-_0009083","RED-00-00009413","RED-00-_0009085","RED-00-00012250","RED-00-_0009084","RED-00-_0009086","RED-00-00004046","RED-00-00004860","RED-00-00003155","RED-00-00003158","RED-00-00003157","RED-00-00004628","RED-00-_0009087","RED-00-_0009088","RED-00-00003159","RED-00-00003156","RED-00-00004048","AF-31200599","AF-31200598","AF-31200597","AF-31201187","SAMS-641255","AF-31202850","AF-31200485","SAMS-238926"])
+          chosen=[x for x in chosen if x['offer_id'] in allow_offers or x['source']=='samson_wood_office_shelf_height_verified']
           # Respect Ozon daily limit and capped rollout.
           remaining,quota,usage,reset=m.get_daily_update_remaining()
           permitted=min(len(chosen),350,remaining if remaining is not None else 350)
