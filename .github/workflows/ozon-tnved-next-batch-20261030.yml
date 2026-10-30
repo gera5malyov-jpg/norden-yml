@@ -96,9 +96,9 @@ jobs:
           cap=min(len(verified),250,remaining if remaining is not None else 250)
           selected=verified[:max(0,cap)]
           report={'apply':os.environ['APPLY']=='true','catalog_total':len(catalog),'snapshot_missing':len(snapshot['missing']),'candidate_total':len(candidates),'by_method':dict(counts),'live_verified':len(verified),'stale':stale,'selected':len(selected),'quota':lim,'quota_used':used,'proposals':verified,'tasks':[],'write_errors':[],'confirmed':0}
+          dictionary_cache={}
           if report['apply']:
               for batch in api.chunks(selected,35):
-                  req={'items':[{'offer_id':x['offer_id'],'attributes':[{'complex_id':0,'id':22232,'values':[{'dictionary_value_id':x['dictionary_value_id'],'value':next((z['code'] for z in snapshot['filled'] if z['offer']==x['value_source']),'')+' - '+next((z['name'] for z in [],''),'' )}]}]} for x in []]}
                   # The complete dictionary display value is required, not just the numeric code.
                   items=[]
                   for x in batch:
