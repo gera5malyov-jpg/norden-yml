@@ -1,0 +1,66 @@
+name: Ozon TNVED category evidence audit 20261030
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-tnved-evidence-audit-20261030.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Analyze missing TNVED and existing codes without modifying Ozon
+        run: |
+          python - <<'PY'
+          import os,sys,json,collections
+          sys.path.insert(0,'ozon')
+          import tnved_sync as m
+          products=m.list_products()
+          details=m.get_product_attributes([int(x['product_id']) for x in products if x.get('product_id')])
+          groups=collections.defaultdict(list)
+          for p in details:
+              key=(int(p.get('description_category_id') or 0),int(p.get('type_id') or 0))
+              groups[key].append(p)
+          result={'products':len(products),'details':len(details),'groups':[],'missing_total':0,'filled_total':0,'no_attr_groups':[]}
+          for key,ps in sorted(groups.items(),key=lambda it:-len(it[1])):
+              if not all(key):continue
+              metas=m.get_category_attributes(*key)
+              cand=[x for x in metas if m.is_tnved_name(x.get('name')) or int(x.get('id') or 0)==22232]
+              if len(cand)!=1:
+                  result['no_attr_groups'].append({'group':key,'candidates':len(cand),'count':len(ps)});continue
+              a=cand[0];aid=int(a['id'])
+              filled=[];missing=[];codes=collections.Counter()
+              for p in ps:
+                  attr=m.find_product_attr(p,aid)
+                  value=m.attr_value_tuple(attr or {})
+                  if value:
+                      codes[(str(value[0]),value[1])]+=1
+                      if len(filled)<7:filled.append({'offer_id':p.get('offer_id'),'name':p.get('name'),'code':value[1],'dictionary_id':value[0]})
+                  else:
+                      if len(missing)<13:missing.append({'offer_id':p.get('offer_id'),'name':p.get('name')})
+              missing_count=len(ps)-sum(codes.values())
+              result['missing_total']+=missing_count
+              result['filled_total']+=sum(codes.values())
+              if not missing_count:continue
+              result['groups'].append({'category_id':key[0],'type_id':key[1],'attribute_id':aid,'required':a.get('is_required'),'total':len(ps),'missing':missing_count,'filled':len(ps)-missing_count,'existing_codes':[{'dictionary_id':z[0],'code':z[1],'n':v} for z,v in codes.most_common(20)],'missing_samples':missing,'filled_samples':filled})
+          out='ozon/tnved_evidence_audit_20261030.json'
+          with open(out,'w',encoding='utf-8') as f:json.dump(result,f,ensure_ascii=False,indent=2)
+          print('AUDIT_SUMMARY',json.dumps({'products':result['products'],'details':result['details'],'missing':result['missing_total'],'filled':result['filled_total'],'groups_with_missing':len(result['groups']),'top_groups':[{k:x[k] for k in ('category_id','type_id','total','missing','filled','existing_codes')} for x in result['groups'][:16]]},ensure_ascii=False)[:15000],flush=True)
+          PY
+      - name: Save audit
+        run: |
+          cp ozon/tnved_evidence_audit_20261030.json /tmp/tnved_audit.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/tnved_audit.json ozon/tnved_evidence_audit_20261030.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ozon/tnved_evidence_audit_20261030.json
+          if ! git diff --cached --quiet; then git commit -m 'Audit Ozon TNVED code patterns and missing card groups'; git push; fi
