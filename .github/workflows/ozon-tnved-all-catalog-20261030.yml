@@ -16,7 +16,7 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      APPLY: 'false'
+      APPLY: 'true'
     steps:
       - uses: actions/checkout@v4
       - name: Select furniture only when material and construction support exact ten-digit code
@@ -195,7 +195,7 @@ jobs:
                   stale.append(row['offer_id']);continue
               verified.append(row)
           remaining,lim,used,reset=api.get_daily_update_remaining()
-          cap=min(len(verified),250,remaining if remaining is not None else 250)
+          cap=min(len(verified),remaining if remaining is not None else len(verified))
           selected=verified[:max(0,cap)]
           report={'apply':os.environ['APPLY']=='true','catalog_total':len(catalog),'snapshot_missing':len(snapshot['missing']),'candidate_total':len(candidates),'by_method':dict(counts),'live_verified':len(verified),'stale':stale,'selected':len(selected),'quota':lim,'quota_used':used,'proposals':verified,'tasks':[],'write_errors':[],'confirmed':0}
           # Validate exact code text against a second live Ozon card in the same category.
