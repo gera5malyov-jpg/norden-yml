@@ -1,0 +1,40 @@
+name: Clear invalid raw Ozon TNVED pilot values
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-tnved-clear-invalid-pilot-20261030.yml']
+permissions:
+  contents: read
+jobs:
+  clear:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clear exactly two invalid dropdown strings from one-card test
+        run: |
+          python - <<'PY'
+          import sys,json,time
+          sys.path.insert(0,'ozon')
+          import tnved_sync as m
+          offers={'RED-00-00011830','SAMS-290457'}
+          catalog=m.list_products()
+          id_by={str(x.get('offer_id')):int(x['product_id']) for x in catalog if x.get('product_id')}
+          cards=m.get_product_attributes([id_by[o] for o in offers if o in id_by])
+          targets=[]
+          for p in cards:
+            offer=str(p.get('offer_id') or '')
+            value=m.attr_value_tuple(m.find_product_attr(p,22232) or {})
+            if value and value[0]==0 and value[1].startswith(('9403820000','8303004000')):
+              targets.append(offer)
+          print('CLEAR_TARGETS',targets,flush=True)
+          for offer in targets:
+            response=m.post('/v1/product/attributes/update',{'items':[{'offer_id':offer,'attributes':[{'complex_id':0,'id':22232,'values':[]}]}]})
+            print('CLEAR_REPLY',offer,response,flush=True)
+          time.sleep(6)
+          after=m.get_product_attributes([id_by[o] for o in targets])
+          for p in after:print('READBACK',p.get('offer_id'),m.attr_value_tuple(m.find_product_attr(p,22232) or {}),flush=True)
+          PY
