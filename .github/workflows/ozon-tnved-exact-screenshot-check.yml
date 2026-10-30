@@ -1,0 +1,49 @@
+name: Ozon TNVED screenshot exact check
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-tnved-exact-screenshot-check.yml']
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect screenshot product codes and related category codes
+        run: |
+          python - <<'PY'
+          import sys,json,collections
+          sys.path.insert(0,'ozon')
+          import tnved_sync as o
+          names=['RED-00-00013441','RED-00-00013561','RED-00-00012190','RED-00-00012276','RED-00-00004276','AND-250606','9710020043694','AF-31205103','RED-00-00000563','RED-00-00010478','RED-00-00001736']
+          catalog=o.list_products()
+          by_offer={str(x['offer_id']):x for x in catalog}
+          ids=[int(by_offer[n]['product_id']) for n in names if n in by_offer]
+          attrs=o.get_product_attributes(ids)
+          details={}
+          for group in o.chunks(ids,100):
+              for x in o.post('/v3/product/info/list',{'product_id':group}).get('items') or []:
+                  details[str(x.get('offer_id'))]=x
+          rows=[]
+          for p in attrs:
+              offer=str(p.get('offer_id'))
+              fields={str(a.get('id')):a.get('values') for a in p.get('attributes') or []}
+              x=details.get(offer,{})
+              rows.append({'offer':offer,'name':p.get('name'),'category':p.get('description_category_id'),'type':p.get('type_id'),'tnved':o.attr_value_tuple(o.find_product_attr(p,22232) or {}),'marking':o.attr_value_tuple(o.find_product_attr(p,23536) or {}),'errors':x.get('errors') or [],'fields':fields})
+          with open('ozon/tnved_screenshot_exact_check.json','w') as f:json.dump(rows,f,ensure_ascii=False,indent=2)
+          for r in rows:print('ITEM',r['offer'],r['name'],'TNVED',r['tnved'],'MARK',r['marking'],'ERR',json.dumps(r['errors'],ensure_ascii=False)[:400],flush=True)
+          PY
+      - name: Save report
+        run: |
+          cp ozon/tnved_screenshot_exact_check.json /tmp/t.json
+          git fetch origin main && git reset --hard origin/main
+          cp /tmp/t.json ozon/tnved_screenshot_exact_check.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ozon/tnved_screenshot_exact_check.json
+          git diff --cached --quiet || (git commit -m 'Audit 11 exact Ozon screenshot products' && git push)
