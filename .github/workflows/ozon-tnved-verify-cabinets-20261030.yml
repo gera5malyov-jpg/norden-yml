@@ -1,0 +1,49 @@
+name: Ozon TNVED verify cabinet import tasks
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-tnved-verify-cabinets-20261030.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check async import errors and actual attribute values
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json,sys,collections
+          sys.path.insert(0,'ozon')
+          import tnved_sync as m
+          latest=json.load(open('ozon/tnved_cabinets_batch_20261030.json'))
+          desired=latest.get('proposals') or []
+          accepted={x['offer_id']:x for x in desired if x.get('method') in ('swiveling office seat with height adjustment','wooden office cabinet with doors, over 80 cm')}
+          for task_id in latest.get('tasks') or []:
+              try:
+                  state=m.post('/v1/product/import/info',{'task_id':int(task_id)})
+                  items=(state.get('result') or {}).get('items') or []
+                  errors=[]
+                  statuses=collections.Counter()
+                  for x in items:
+                      statuses[str(x.get('status'))]+=1
+                      for err in x.get('errors') or []:
+                          if len(errors)<20: errors.append({'offer_id':x.get('offer_id'),'code':err.get('code'),'attribute_id':err.get('attribute_id'),'message':str(err.get('message') or err.get('description') or '')[:180]})
+                  print('TASK_REPORT',json.dumps({'id':task_id,'total':len(items),'statuses':dict(statuses),'errors':errors},ensure_ascii=False),flush=True)
+              except Exception as e:print('TASK_ERROR',task_id,str(e)[:300],flush=True)
+          products=m.list_products()
+          offerids={str(x.get('offer_id') or ''):int(x['product_id']) for x in products if x.get('product_id')}
+          ids=[offerids[k] for k in accepted if k in offerids]
+          rows=m.get_product_attributes(ids)
+          byid={str(p.get('offer_id')):p for p in rows}
+          good=[];bad=[]
+          for offer,item in accepted.items():
+              p=byid.get(offer)
+              val=m.attr_value_tuple(m.find_product_attr(p,22232) or {}) if p else None
+              if val and str(val[1]).startswith(item['code']) and int(val[0])==int(item['dictionary_value_id']):good.append(offer)
+              else:bad.append({'offer':offer,'val':val})
+          print('VERIFICATION_JSON',json.dumps({'proposals':len(accepted),'confirmed':len(good),'missing':len(bad),'missing_sample':bad[:25]},ensure_ascii=False),flush=True)
+          PY
