@@ -1,0 +1,82 @@
+name: Ozon TNVED batch wooden rocking chairs
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-tnved-rocking-chairs-20261030.yml']
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply code 9401610000 only to verified upholstered plywood rocking chairs
+        run: |
+          python - <<'PY'
+          import os,sys,json,re,time
+          from pathlib import Path
+          sys.path.insert(0,'ozon')
+          import tnved_sync as api
+          group=(80375615,95035)
+          code='9401610000'
+          dictionary=api.get_dictionary_values(group[0],group[1],22232)
+          match=[z for z in dictionary if str(z.get('value') or '').startswith(code)]
+          if len(match)!=1:
+              raise SystemExit('No unique TNVED Ozon dictionary entry 9401610000; no writes')
+          ident=int(match[0]['id']);label=str(match[0]['value'])
+          catalog=api.list_products()
+          mapid={str(x.get('offer_id')):int(x['product_id']) for x in catalog if x.get('offer_id') and x.get('product_id')}
+          candidate=[x for x in json.loads(Path('ozon/tnved_evidence_extended_20261030.json').read_text())['missing'] if tuple(x['group'])==group]
+          targets=[]
+          for x in candidate:
+              t=x['name'].upper();a=x['attrs']
+              if x['offer'] not in mapid:continue
+              if not re.search(r'КРЕСЛО[- ](?:КАЧАЛКА|МАЯТНИК)|КРЕСЛО МАЯТНИК',t):continue
+              if a.get('Материал корпуса')!='Фанера':continue
+              if not a.get('Материал обивки') or a['Материал обивки']=='Без обивки':continue
+              if re.search(r'ЛОЗА|РОТАНГ|РАТТАН|БАМБУК|ПЛЕТЕН|КРОВАТЬ|ТРАНСФОРМ',t):continue
+              targets.append(x)
+          details=api.get_product_attributes([mapid[x['offer']] for x in targets])
+          byoffer={str(x.get('offer_id')):x for x in details}
+          safe=[]
+          for x in targets:
+              z=byoffer.get(x['offer'])
+              if not z or z.get('name')!=x['name'] or (int(z.get('description_category_id') or 0),int(z.get('type_id') or 0))!=group:continue
+              if api.attr_value_tuple(api.find_product_attr(z,22232) or {}):continue
+              safe.append(x)
+          remaining,quota,used,reset=api.get_daily_update_remaining()
+          if remaining is not None:safe=safe[:remaining]
+          tasks=[];failures=[]
+          for batch in api.chunks(safe,35):
+              payload={'items':[{'offer_id':x['offer'],'attributes':[{'complex_id':0,'id':22232,'values':[{'dictionary_value_id':ident,'value':label}]}]} for x in batch]}
+              try:tasks.append(api.post('/v1/product/attributes/update',payload).get('task_id'))
+              except Exception as e:failures.append({'offers':[x['offer'] for x in batch],'reason':str(e)[:220]})
+              time.sleep(.3)
+          time.sleep(9)
+          refreshed=api.get_product_attributes([mapid[x['offer']] for x in safe])
+          latest={str(x.get('offer_id')):x for x in refreshed}
+          filled=[]
+          for x in safe:
+              card=latest.get(x['offer'])
+              val=api.attr_value_tuple(api.find_product_attr(card,22232) or {}) if card else None
+              if val and int(val[0])==ident and val[1].startswith(code):filled.append(x['offer'])
+          result={'eligible':len(targets),'safe':len(safe),'confirmed':len(filled),'unconfirmed':[x['offer'] for x in safe if x['offer'] not in filled],'errors':failures,'tasks':tasks,'code':code}
+          Path('ozon/tnved_rocking_chairs_report_20261030.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+          print('ROCKERS_REPORT_JSON',json.dumps(result,ensure_ascii=False),flush=True)
+          PY
+      - name: Save report
+        if: always()
+        run: |
+          test -f ozon/tnved_rocking_chairs_report_20261030.json || echo '{"error":"failed before report"}' > ozon/tnved_rocking_chairs_report_20261030.json
+          cp ozon/tnved_rocking_chairs_report_20261030.json /tmp/rockers.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/rockers.json ozon/tnved_rocking_chairs_report_20261030.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ozon/tnved_rocking_chairs_report_20261030.json
+          if ! git diff --cached --quiet; then git commit -m 'Record Ozon TNVED upholstered rocking chairs update'; git push; fi
