@@ -1,0 +1,89 @@
+name: Ozon finish protected strategy for final five products
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-strategy-last-five-20261030.yml']
+permissions:
+  contents: read
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - run: pip install requests
+      - name: Preserve sale and refund prices while adding floor and strategy
+        env:
+          CID: ${{ secrets.OZON_CLIENT_ID }}
+          KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,time,json,requests
+          session=requests.Session()
+          session.headers.update({'Client-Id':os.environ['CID'],'Api-Key':os.environ['KEY'],'Content-Type':'application/json'})
+          def api(path,body):
+            for n in range(7):
+              r=session.post('https://api-seller.ozon.ru'+path,json=body,timeout=120)
+              if r.status_code in [429,500,502,503,504]:
+                time.sleep(n+2);continue
+              try:d=r.json() if r.content else {}
+              except:d={'raw':r.text[:200]}
+              return r.status_code,d
+            raise RuntimeError('Retries exhausted')
+          def check(path,body):
+            code,d=api(path,body)
+            if code!=200:raise RuntimeError(path+' '+str(code)+' '+str(d)[:350])
+            return d
+          def catalog():
+            rows={};cur=''
+            while True:
+              d=check('/v5/product/info/prices',{'cursor':cur,'filter':{'visibility':'ALL'},'limit':1000})
+              for x in d.get('items') or []:rows[str(x['product_id'])]=x
+              nxt=d.get('cursor') or ''
+              if not nxt or nxt==cur:break
+              cur=nxt
+            return rows
+          products=catalog()
+          missing=[x for x in products.values() if float((x.get('price') or {}).get('min_price') or 0)<=0]
+          changed=[];errors=[]
+          for x in missing:
+            p=x['price'];offer=x['offer_id']
+            original_price=str(p.get('price') or 0)
+            original_refund=str((p.get('declared_price') or {}).get('amount') or 0)
+            if float(original_price)<=0:
+              errors.append({'offer':offer,'error':'no_current_price'});continue
+            payload={'prices':[{'offer_id':offer,'price':original_price,'old_price':str(p.get('old_price') or 0),'min_price':original_price,'currency_code':p.get('currency_code') or 'RUB','declared_price':original_refund}]}
+            code,d=api('/v1/product/import/prices',payload)
+            results=d.get('result') or []
+            if code==200 and results and results[0].get('updated'):
+              changed.append(offer)
+            else:
+              errors.append({'offer':offer,'status':code,'detail':str(d)[:450]})
+          time.sleep(5)
+          fresh=catalog()
+          still_no_floor=[x['offer_id'] for x in fresh.values() if float((x.get('price') or {}).get('min_price') or 0)<=0]
+          strategies=check('/v1/pricing-strategy/list',{'page':1,'limit':49}).get('strategies') or []
+          chosen=[s for s in strategies if s.get('enabled') and s.get('type')=='MIN_EXT_PRICE']
+          if len(chosen)!=1:raise SystemExit('Target strategy missing')
+          sid=str(chosen[0]['id'])
+          membership={}
+          for st in strategies:
+            d=check('/v1/pricing-strategy/products/list',{'strategy_id':str(st['id'])})
+            membership[str(st['id'])]=set(map(str,(d.get('result') or {}).get('product_id') or []))
+          currently=set().union(*membership.values()) if membership else set()
+          target=[pid for pid,x in fresh.items() if pid not in currently and float((x.get('price') or {}).get('min_price') or 0)>0]
+          for start in range(0,len(target),50):
+            group=target[start:start+50]
+            code,d=api('/v1/pricing-strategy/products/add',{'strategy_id':sid,'product_id':group})
+            if code!=200 or (d.get('result') or {}).get('failed_product_count'):
+              errors.append({'strategy_batch':group,'status':code,'detail':str(d)[:400]})
+          time.sleep(5)
+          checked_members={}
+          for st in strategies:
+            d=check('/v1/pricing-strategy/products/list',{'strategy_id':str(st['id'])})
+            checked_members[str(st['id'])]=set(map(str,(d.get('result') or {}).get('product_id') or []))
+          assigned=set().union(*checked_members.values()) if checked_members else set()
+          unassigned=[x['offer_id'] for pid,x in fresh.items() if pid not in assigned]
+          report={'products_total':len(fresh),'missing_floor_before':len(missing),'floors_updated':changed,'floors_missing_after':still_no_floor,'strategy_add_attempt':len(target),'assigned_total':len(set(fresh)&assigned),'unassigned':unassigned,'errors':errors}
+          print('FINAL_REPORT_JSON',json.dumps(report,ensure_ascii=False),flush=True)
+          if still_no_floor or unassigned or errors:raise SystemExit('Not all items protected and assigned')
+          PY
