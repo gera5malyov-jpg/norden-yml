@@ -304,7 +304,7 @@ jobs:
                       try:
                           group_key=(group[0],group[1],code)
                           if group_key not in dictionary_matches_cache:
-                              options=api.get_dictionary_values(group[0],group[1],22232)
+                              options=(api.post('/v1/description-category/attribute/values/search',{'attribute_id':22232,'description_category_id':group[0],'type_id':group[1],'value':code,'limit':100}).get('result') or [])
                               dictionary_matches_cache[group_key]=set(int(z.get('id') or 0) for z in options if str(z.get('value') or '').startswith(code))
                           dictionary_ids=dictionary_matches_cache[group_key]
                           if len(dictionary_ids)==1:values=dictionary_ids
@@ -352,7 +352,7 @@ jobs:
               else:
                   key=(tuple(x['group']),x['dictionary_value_id'])
                   if key[0] not in dictionary_values_cache:
-                      dictionary_values_cache[key[0]]=api.get_dictionary_values(x['group'][0],x['group'][1],22232)
+                      dictionary_values_cache[key[0]]=(api.post('/v1/description-category/attribute/values/search',{'attribute_id':22232,'description_category_id':x['group'][0],'type_id':x['group'][1],'value':x['code'],'limit':100}).get('result') or [])
                   opts=dictionary_values_cache[key[0]]
                   matches=[z for z in opts if int(z.get('id') or 0)==x['dictionary_value_id'] and str(z.get('value') or '').startswith(x['code'])]
                   if len(matches)!=1:raise RuntimeError('Missing Ozon code dictionary for '+x['offer_id'])
