@@ -1,0 +1,52 @@
+name: Ozon price floor one-product pilot
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-five-floor-pilot-20261030.yml']
+permissions:
+  contents: read
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests
+      - name: Set floor equal to existing price on one missing-floor product
+        env:
+          CID: ${{ secrets.OZON_CLIENT_ID }}
+          KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,json,requests,time
+          s=requests.Session()
+          s.headers.update({'Client-Id':os.environ['CID'],'Api-Key':os.environ['KEY'],'Content-Type':'application/json'})
+          def post(path,data):
+            r=s.post('https://api-seller.ozon.ru'+path,json=data,timeout=90)
+            try:d=r.json()
+            except:d={'raw':r.text[:300]}
+            return r.status_code,d
+          cur='';target=None
+          while True:
+            st,d=post('/v5/product/info/prices',{'cursor':cur,'filter':{'visibility':'ALL'},'limit':1000})
+            if st!=200:raise SystemExit(str(d))
+            for row in d.get('items') or []:
+              if row.get('offer_id')=='AF-31212341':target=row
+            if target:break
+            nxt=d.get('cursor') or ''
+            if not nxt or nxt==cur:break
+            cur=nxt
+          if target is None:raise SystemExit('Target missing')
+          p=target['price'];oid=target['offer_id']
+          before={'offer_id':oid,'product_id':target['product_id'],'price':p}
+          print('PILOT_BEFORE',json.dumps(before,ensure_ascii=False),flush=True)
+          floor=str(p.get('price') or 0)
+          if float(floor)<=0:raise SystemExit('No current price')
+          payload={'prices':[{'offer_id':oid,'price':floor,'old_price':str(p.get('old_price') or 0),'min_price':floor,'currency_code':p.get('currency_code') or 'RUB','declared_price':floor}]}
+          st,res=post('/v1/product/import/prices',payload)
+          print('PILOT_IMPORT',st,json.dumps(res,ensure_ascii=False),flush=True)
+          if st!=200:raise SystemExit('Import rejected')
+          time.sleep(5)
+          st,d=post('/v5/product/info/prices',{'cursor':'','filter':{'offer_id':[oid]},'limit':1000})
+          rows=[x for x in d.get('items') or [] if x.get('offer_id')==oid]
+          print('PILOT_AFTER',json.dumps(rows,ensure_ascii=False)[:2500],flush=True)
+          if not rows or float((rows[0].get('price') or {}).get('min_price') or 0)<float(floor):raise SystemExit('Floor not confirmed')
+          PY
