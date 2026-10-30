@@ -1,0 +1,98 @@
+name: Ozon assign unassigned products to protected pricing strategy
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-strategy-assign-all-20261030.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - run: pip install requests
+      - name: Attach eligible products in batches of 50 and verify
+        env:
+          CID: ${{ secrets.OZON_CLIENT_ID }}
+          KEY: ${{ secrets.OZON_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,time,json,requests
+          s=requests.Session()
+          s.headers.update({'Client-Id':os.environ['CID'],'Api-Key':os.environ['KEY'],'Content-Type':'application/json'})
+          def api(path,body):
+            for i in range(10):
+              try:
+                r=s.post('https://api-seller.ozon.ru'+path,json=body,timeout=120)
+                if r.status_code in (429,500,502,503,504):
+                  time.sleep(min(20,i+2));continue
+                d=r.json() if r.content else {}
+                return r.status_code,d
+              except (requests.RequestException,ValueError):
+                time.sleep(min(20,i+2))
+            raise RuntimeError('Ozon request failed: '+path)
+          def checked(path,body):
+            status,data=api(path,body)
+            if status!=200:raise RuntimeError(path+' HTTP '+str(status)+' '+str(data)[:300])
+            return data
+          def products():
+            found={};cursor=''
+            while True:
+              d=checked('/v5/product/info/prices',{'cursor':cursor,'filter':{'visibility':'ALL'},'limit':1000})
+              rows=d.get('items') or []
+              for x in rows:found[str(x['product_id'])]=x
+              nxt=d.get('cursor') or ''
+              if not nxt or nxt==cursor:break
+              cursor=nxt
+            return found
+          def memberships(strategies):
+            sets={}
+            for st in strategies:
+              sid=str(st['id'])
+              d=checked('/v1/pricing-strategy/products/list',{'strategy_id':sid})
+              sets[sid]=set(str(pid) for pid in (d.get('result') or {}).get('product_id') or [])
+            return sets
+          def batch(xs,n):
+            for i in range(0,len(xs),n):yield xs[i:i+n]
+          catalog=products()
+          strategies=checked('/v1/pricing-strategy/list',{'page':1,'limit':49}).get('strategies') or []
+          preferred=[x for x in strategies if x.get('enabled') is True and x.get('type')=='MIN_EXT_PRICE']
+          if len(preferred)!=1:raise RuntimeError('Expected exactly one enabled MIN_EXT_PRICE strategy')
+          sid=str(preferred[0]['id'])
+          before=memberships(strategies)
+          assigned=set().union(*before.values()) if before else set()
+          protected=[];excluded=[]
+          for pid,row in catalog.items():
+            p=row.get('price') or {}
+            try:floor=float(p.get('min_price') or 0);price=float(p.get('price') or 0)
+            except (TypeError,ValueError):floor=0;price=0
+            if floor<=0 or price<=0:
+              excluded.append({'offer_id':row.get('offer_id'),'reason':'missing_price_or_floor'})
+            else:protected.append(pid)
+          missing=[pid for pid in protected if pid not in assigned]
+          print('BASELINE_JSON',json.dumps({'total':len(catalog),'protected':len(protected),'excluded':excluded,'assigned_before':len(assigned & set(catalog)),'target':sid,'to_add':len(missing)},ensure_ascii=False),flush=True)
+          errors=[]
+          for num,group in enumerate(batch(missing,50),1):
+            status,d=api('/v1/pricing-strategy/products/add',{'strategy_id':sid,'product_id':group})
+            result=d.get('result') or {}
+            if status!=200 or result.get('failed_product_count') or result.get('errors'):
+              errors.append({'batch':num,'count':len(group),'http':status,'detail':str(result or d)[:600]})
+            if num%20==0:print('PROGRESS',num,'batches',flush=True)
+            time.sleep(0.2)
+          time.sleep(8)
+          after=memberships(strategies)
+          now=set().union(*after.values()) if after else set()
+          remaining=[pid for pid in protected if pid not in now]
+          for group in batch(remaining,50):
+            status,d=api('/v1/pricing-strategy/products/add',{'strategy_id':sid,'product_id':group})
+            if status!=200 or (d.get('result') or {}).get('failed_product_count'):
+              errors.append({'retry_count':len(group),'http':status,'detail':str(d)[:400]})
+          time.sleep(8)
+          final=memberships(strategies)
+          active=set().union(*final.values()) if final else set()
+          unresolved=[catalog[pid].get('offer_id') for pid in protected if pid not in active]
+          print('FINAL_REPORT_JSON',json.dumps({'total':len(catalog),'protected':len(protected),'newly_assigned':len(set(missing)&active),'attached_total':len(set(catalog)&active),'unassigned_protected':len(unresolved),'unassigned_samples':unresolved[:30],'no_floor_or_price':excluded,'strategy_counts':{k:len(v) for k,v in final.items()},'errors':errors[:30]},ensure_ascii=False,sort_keys=True),flush=True)
+          if unresolved:raise SystemExit('Some protected products remain without strategy')
+          PY
