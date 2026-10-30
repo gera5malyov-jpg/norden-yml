@@ -1,0 +1,40 @@
+name: CDEK Moscow to Cherepovets 20261030 one-time
+
+on:
+  push:
+    paths:
+      - '.github/workflows/tmp-cdek-moscow-cherepovets-20261030.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  calc:
+    runs-on: ubuntu-latest
+    env:
+      CDEK_CLIENT_ID: ${{ secrets.CDEK_CLIENT_ID }}
+      CDEK_CLIENT_SECRET: ${{ secrets.CDEK_CLIENT_SECRET }}
+    steps:
+      - name: Quote
+        shell: python
+        run: |
+          import json, os, requests
+          b = 'https://api.cdek.ru/v2'
+          r = requests.post(b+'/oauth/token', data={'grant_type':'client_credentials','client_id':os.environ['CDEK_CLIENT_ID'],'client_secret':os.environ['CDEK_CLIENT_SECRET']},timeout=30)
+          r.raise_for_status()
+          h={'Authorization':'Bearer '+r.json()['access_token'],'Content-Type':'application/json'}
+          for city in ['Москва','Череповец']:
+              r=requests.get(b+'/location/cities',headers=h,params={'city':city,'country_codes':'RU','size':100},timeout=30)
+              r.raise_for_status()
+              print('CITY',city,json.dumps([{'code':p.get('code'),'region':p.get('region')} for p in r.json() if p.get('city','').strip().lower()==city.lower()],ensure_ascii=False))
+          r=requests.get(b+'/deliverypoints',headers=h,params={'code':'CHRP6'},timeout=30)
+          print('POINT_CODE',r.status_code)
+          if r.ok:
+              print('POINT',json.dumps([{'code':p.get('code'),'status':p.get('status'),'weight_max':p.get('weight_max'),'address':p.get('location',{}).get('address_full'),'is_handout':p.get('is_handout')} for p in r.json()],ensure_ascii=False))
+          for w in [50000,48500]:
+              req={'type':1,'from_location':{'code':44},'to_location':{'code':403},'packages':[{'weight':w,'length':164,'width':51,'height':17}]}
+              r=requests.post(b+'/calculator/tarifflist',headers=h,json=req,timeout=45)
+              print('QUOTE_STATUS',w,r.status_code)
+              print('QUOTE_RESPONSE',w,r.text)
+              r.raise_for_status()
+              print('PVZ_TO_PVZ',w,json.dumps([p for p in r.json().get('tariff_codes',[]) if p.get('delivery_mode')==4],ensure_ascii=False))
