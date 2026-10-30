@@ -1,0 +1,94 @@
+name: Ozon clear stale marking warnings for furniture
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-clear-marking-warning-380-20261030.yml']
+permissions:
+  contents: write
+concurrency:
+  group: ozon-marking-warning-repair
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Re-save existing false marking flag only for validated non-medical furniture
+        run: |
+          python - <<'PY'
+          import json,sys,time,collections
+          from pathlib import Path
+          sys.path.insert(0,'ozon')
+          import tnved_sync as oz
+          d=json.loads(Path('ozon/tnved_marking_discrepancy_20261030.json').read_text())
+          suspect={int(x['pid']):x for x in d.get('marking_related_errors',[]) if x.get('pid') and any(y.get('attribute_id')==23536 for y in x.get('errors',[]))}
+          ids=list(suspect)
+          live_errors={}
+          for group in oz.chunks(ids,150):
+              r=oz.post('/v3/product/info/list',{'product_id':group})
+              for item in r.get('items') or []:
+                  pid=int(item.get('id') or item.get('product_id') or 0)
+                  errorlist=item.get('errors') or []
+                  if any(int(e.get('attribute_id') or 0)==23536 for e in errorlist):
+                      live_errors[pid]=item
+          cards=oz.get_product_attributes(list(live_errors))
+          selected=[]
+          excluded=collections.Counter()
+          for p in cards:
+              pid=int(p.get('id') or p.get('product_id') or 0)
+              if pid not in live_errors:continue
+              title=str(p.get('name') or '').casefold()
+              offer=str(p.get('offer_id') or '')
+              code=oz.attr_value_tuple(oz.find_product_attr(p,22232) or {})
+              mark=oz.attr_value_tuple(oz.find_product_attr(p,23536) or {})
+              if not code or not str(code[1]).startswith('9403') or code[0]==0:
+                  excluded['not_verified_furniture_code']+=1;continue
+              if any(x in title for x in ('медицин','костыл','поручень','поручни','ходунк','реабилитац','инвалид','опорная трость','трость тактильная')):
+                  excluded['medical_or_rehab']+=1;continue
+              if mark and str(mark[1]).strip().lower() not in ('false',''):
+                  excluded['marking_already_true']+=1;continue
+              selected.append({'offer_id':offer,'product_id':pid,'code':str(code[1])[:10],'previous_mark':mark})
+          remaining,quota,usage,reset=oz.get_daily_update_remaining()
+          if remaining is not None:
+              selected=selected[:max(0,remaining)]
+          replies=[];errors=[]
+          for batch in oz.chunks(selected,40):
+              req={'items':[{'offer_id':x['offer_id'],'attributes':[{'complex_id':0,'id':23536,'values':[{'value':'false'}]}]} for x in batch]}
+              try:
+                  result=oz.post('/v1/product/attributes/update',req)
+                  replies.append(result.get('task_id'))
+              except Exception as e:
+                  errors.append({'offers':[x['offer_id'] for x in batch],'error':str(e)[:300]})
+              time.sleep(.4)
+          time.sleep(12)
+          after_error_ids=[]
+          after_error_details=[]
+          for batch in oz.chunks([x['product_id'] for x in selected],150):
+              r=oz.post('/v3/product/info/list',{'product_id':batch})
+              for item in r.get('items') or []:
+                  err=[x for x in item.get('errors') or [] if int(x.get('attribute_id') or 0)==23536]
+                  if err:
+                      after_error_ids.append(int(item.get('id') or 0))
+                      if len(after_error_details)<20:
+                          after_error_details.append({'offer_id':item.get('offer_id'),'errors':err})
+          remaining_by_id={x['product_id']:x['offer_id'] for x in selected}
+          report={'audited_previous_warnings':len(ids),'still_warning_before':len(live_errors),'eligible_resave':len(selected),'excluded':dict(excluded),'submitted_tasks':replies,'write_errors':errors,'still_warning_after_immediate':len(after_error_ids),'cleared_warning_immediate':len(selected)-len(after_error_ids),'unresolved_offer_ids':[remaining_by_id.get(i) for i in after_error_ids],'unresolved_details_sample':after_error_details,'selected_offer_ids':[x['offer_id'] for x in selected]}
+          Path('ozon/ozon_marking_warning_repair_20261030.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+          print('REPAIR_REPORT',json.dumps({k:v for k,v in report.items() if k not in ('selected_offer_ids','unresolved_offer_ids','unresolved_details_sample')},ensure_ascii=False)[:12000],flush=True)
+          PY
+      - name: Save report
+        if: always()
+        run: |
+          test -f ozon/ozon_marking_warning_repair_20261030.json || echo '{"error":"failed before report"}' > ozon/ozon_marking_warning_repair_20261030.json
+          cp ozon/ozon_marking_warning_repair_20261030.json /tmp/marking-report.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/marking-report.json ozon/ozon_marking_warning_repair_20261030.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ozon/ozon_marking_warning_repair_20261030.json
+          if ! git diff --cached --quiet; then git commit -m 'Audit Ozon stale marking attribute warning corrections'; git push; fi
