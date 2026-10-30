@@ -1,0 +1,45 @@
+name: Ozon final TNVED inventory verification 20261030
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-tnved-final-verification-20261030.yml']
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read current attribute 22232 for every product
+        run: |
+          python - <<'PY'
+          import sys,json,collections
+          from pathlib import Path
+          sys.path.insert(0,'ozon')
+          import tnved_sync as m
+          p=m.list_products()
+          a=m.get_product_attributes([int(x['product_id']) for x in p if x.get('product_id')])
+          present=0;missing=[]
+          for x in a:
+              v=m.attr_value_tuple(m.find_product_attr(x,22232) or {})
+              if v and (v[0] or v[1]):present+=1
+              else:missing.append({'offer_id':x.get('offer_id'),'name':x.get('name'),'group':[x.get('description_category_id'),x.get('type_id')]})
+          groups=collections.Counter((x['group'][0],x['group'][1]) for x in missing)
+          report={'checked':len(a),'filled':present,'missing':len(missing),'largest_unfilled_groups':[{'category':k[0],'type':k[1],'missing':v} for k,v in groups.most_common(20)],'run_urls':['https://github.com/gera5malyov-jpg/norden-yml/actions/runs/41034108803','https://github.com/gera5malyov-jpg/norden-yml/actions/runs/41034460085','https://github.com/gera5malyov-jpg/norden-yml/actions/runs/41034853819','https://github.com/gera5malyov-jpg/norden-yml/actions/runs/41034921674']}
+          Path('ozon/tnved_final_summary_20261030.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+          print('FINAL_AUDIT_JSON',json.dumps(report,ensure_ascii=False),flush=True)
+          PY
+      - name: Save summary
+        run: |
+          cp ozon/tnved_final_summary_20261030.json /tmp/summary.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/summary.json ozon/tnved_final_summary_20261030.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ozon/tnved_final_summary_20261030.json
+          if ! git diff --cached --quiet; then git commit -m 'Save verified Ozon TNVED completion counts'; git push; fi
