@@ -42,7 +42,7 @@ jobs:
               swing=a.get('Тип механизма качания','')
               if swing and swing not in ['Без механизма качания','Нет']:return True
               return False
-          candidates=[];counts=collections.Counter()
+          candidates=[];counts=collections.Counter();dictionary_matches_cache={};dictionary_values_cache={}
           for x in snapshot['missing']:
               group=tuple(x['group']);t=x['name'].upper();a=x['attrs']
               mat=a.get('Материал корпуса','')
@@ -302,8 +302,11 @@ jobs:
                   values=by_group[group][code]
                   if len(values)!=1:
                       try:
-                          options=api.get_dictionary_values(group[0],group[1],22232)
-                          dictionary_ids=set(int(z.get('id') or 0) for z in options if str(z.get('value') or '').startswith(code))
+                          group_key=(group[0],group[1],code)
+                          if group_key not in dictionary_matches_cache:
+                              options=api.get_dictionary_values(group[0],group[1],22232)
+                              dictionary_matches_cache[group_key]=set(int(z.get('id') or 0) for z in options if str(z.get('value') or '').startswith(code))
+                          dictionary_ids=dictionary_matches_cache[group_key]
                           if len(dictionary_ids)==1:values=dictionary_ids
                       except Exception:
                           pass
@@ -348,7 +351,9 @@ jobs:
                   verified_values[(tuple(x['group']),x['dictionary_value_id'])]=attr[1]
               else:
                   key=(tuple(x['group']),x['dictionary_value_id'])
-                  opts=api.get_dictionary_values(x['group'][0],x['group'][1],22232)
+                  if key[0] not in dictionary_values_cache:
+                      dictionary_values_cache[key[0]]=api.get_dictionary_values(x['group'][0],x['group'][1],22232)
+                  opts=dictionary_values_cache[key[0]]
                   matches=[z for z in opts if int(z.get('id') or 0)==x['dictionary_value_id'] and str(z.get('value') or '').startswith(x['code'])]
                   if len(matches)!=1:raise RuntimeError('Missing Ozon code dictionary for '+x['offer_id'])
                   verified_values[key]=str(matches[0]['value'])
