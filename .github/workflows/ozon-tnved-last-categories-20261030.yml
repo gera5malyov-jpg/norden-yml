@@ -351,9 +351,10 @@ jobs:
                   verified_values[(tuple(x['group']),x['dictionary_value_id'])]=attr[1]
               else:
                   key=(tuple(x['group']),x['dictionary_value_id'])
-                  if key[0] not in dictionary_values_cache:
-                      dictionary_values_cache[key[0]]=(api.post('/v1/description-category/attribute/values/search',{'attribute_id':22232,'description_category_id':x['group'][0],'type_id':x['group'][1],'value':x['code'],'limit':100}).get('result') or [])
-                  opts=dictionary_values_cache[key[0]]
+                  dkey=(tuple(x['group']),x['code'])
+                  if dkey not in dictionary_values_cache:
+                      dictionary_values_cache[dkey]=(api.post('/v1/description-category/attribute/values/search',{'attribute_id':22232,'description_category_id':x['group'][0],'type_id':x['group'][1],'value':x['code'],'limit':100}).get('result') or [])
+                  opts=dictionary_values_cache[dkey]
                   matches=[z for z in opts if int(z.get('id') or 0)==x['dictionary_value_id'] and str(z.get('value') or '').startswith(x['code'])]
                   if len(matches)!=1:raise RuntimeError('Missing Ozon code dictionary for '+x['offer_id'])
                   verified_values[key]=str(matches[0]['value'])
