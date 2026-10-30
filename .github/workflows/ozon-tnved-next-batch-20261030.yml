@@ -74,7 +74,7 @@ jobs:
                   code='9401610000';why='non-convertible upholstered solid birch sofa'
               elif group==(80375615,95024) and t.startswith('ДИВАН БАРХАТ') and mat=='Массив березы' and ob and ob!='Без обивки' and not re.search('КРОВАТЬ|РАСКЛАД|ТРАНСФОРМ',t):
                   code='9401610000';why='fixed upholstered birch sofa BARHAT'
-              elif group==(17027916,95044) and re.match(r'^ПУФ(?:ИК)?\\b',t) and ob and ob!='Без обивки' and not re.search('КРОВАТЬ|РАСКЛАД|ТРАНСФОРМ',t):
+              elif group==(17027916,95044) and re.match(r'^ПУФ(?:ИК)?\b',t) and ob and ob!='Без обивки' and not re.search('КРОВАТЬ|РАСКЛАД|ТРАНСФОРМ',t):
                   if mat in ['Дерево','Массив дерева','Массив березы']:
                       code='9401610000';why='upholstered wooden ottoman'
                   elif mat=='Металл':
