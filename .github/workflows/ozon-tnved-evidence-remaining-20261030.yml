@@ -1,0 +1,71 @@
+name: Ozon TNVED remaining products evidence snapshot
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-tnved-evidence-remaining-20261030.yml']
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect current missing TNVED and verified reference attributes
+        run: |
+          python - <<'PY'
+          import sys,json,collections
+          sys.path.insert(0,'ozon')
+          import tnved_sync as m
+          from pathlib import Path
+          catalog=m.list_products()
+          data=m.get_product_attributes([int(x['product_id']) for x in catalog if x.get('product_id')])
+          groups=collections.defaultdict(list)
+          for p in data:
+              g=(int(p.get('description_category_id') or 0),int(p.get('type_id') or 0))
+              groups[g].append(p)
+          out={'count':len(data),'missing':[],'filled':[],'groups':{}}
+          for g,arr in groups.items():
+              if not all(g):continue
+              metadata=m.get_category_attributes(*g)
+              tnved=[x for x in metadata if int(x.get('id') or 0)==22232]
+              if len(tnved)!=1:continue
+              dictionary={int(x['id']):str(x.get('name') or '') for x in metadata if x.get('id')}
+              evidence={}
+              codes=collections.Counter()
+              for item in arr:
+                  attrs={}
+                  for a in item.get('attributes') or []:
+                      aid=int(a.get('id') or a.get('attribute_id') or 0)
+                      name=dictionary.get(aid,'')
+                      if aid==22232 or not name:continue
+                      if any(k in name.casefold() for k in ['материал','каркас','основан','конструкц','назначени','особенност','поверхност','высот','длина','ширина','обивк','тип меб','комплектац','механизм','вес','состав','тип товар','количеств']):
+                          vals=[str(z.get('value') or '')[:120] for z in a.get('values') or [] if z.get('value')]
+                          if vals:attrs[name]='; '.join(vals)[:130]
+                  name=str(item.get('name') or '')
+                  val=m.attr_value_tuple(m.find_product_attr(item,22232) or {})
+                  row={'offer':str(item.get('offer_id') or ''),'name':name,'group':[g[0],g[1]],'attrs':attrs}
+                  if val:
+                      row['code']=val[1][:10]
+                      row['dictionary_id']=val[0]
+                      out['filled'].append(row)
+                      codes[val[1][:10]]+=1
+                  else:out['missing'].append(row)
+              out['groups'][f'{g[0]}:{g[1]}']={'count':len(arr),'codes':dict(codes)}
+          path=Path('ozon/tnved_evidence_remaining_20261030.json')
+          path.write_text(json.dumps(out,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
+          print('SNAPSHOT_JSON',json.dumps({'count':out['count'],'missing':len(out['missing']),'filled':len(out['filled']),'groups':len(out['groups'])},ensure_ascii=False),flush=True)
+          PY
+      - name: Save snapshot
+        run: |
+          cp ozon/tnved_evidence_remaining_20261030.json /tmp/snapshot.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/snapshot.json ozon/tnved_evidence_remaining_20261030.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ozon/tnved_evidence_remaining_20261030.json
+          if ! git diff --cached --quiet; then git commit -m 'Save expanded Ozon TNVED reference evidence'; git push; fi
