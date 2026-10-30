@@ -96,6 +96,30 @@ def classify(p, attrnames):
         if any(x in t for x in ('ДЕРЕВЯННАЯ','ДЕРЕВО','МДФ','ЛДСП')) and not 'БАМБУК' in t:
             return '9403609009','wooden folding screen'
         # Bamboo 9403820000 exists in TNVED but not in Ozon dictionary for this category
+    # Manufacturer Red Black: VALS / BARHAT are birch-framed upholstered seating.
+    if g == (17027916,95048):
+        if t.startswith(('КРЕСЛО ВАЛЬС','СТУЛ ВАЛЬС','КРЕСЛО БАРХАТ','КРЕСЛО ВИКТОРИЯ')):
+            return '9401610000','Red Black birch frame upholstered chair confirmed by manufacturer'
+        if 'СТУЛ ПЛАСТИКОВЫЙ' in t and '620-PL' in t:
+            return '9401800009','Red Black plastic non-upholstered dining chair'
+        if 'СТУЛ-ЛЕСТНИЦА ТРАНСФОРМЕР' in t or 'СТУЛ-СТРЕМЯНКА МАССИВ' in t:
+            return '9401690000','solid wood stepladder chair'
+        if 'СТУЛ АРФА' in t and 'ЖЕСТКОЕ' in t:
+            return '9401690000','hard wood chair seat'
+        if 'СТУЛ ДЛЯ ПЕРСОНАЛА И ПОСЕТИТЕЛЕЙ' in t and 'ХРОМИРОВАННЫЙ КАРКАС' in t and 'КОЖЗАМ' in t:
+            return '9401710009','metal chromed visitor chair upholstered with faux leather'
+    if g == (17028726,96029) and t.startswith('ШИРМА') and str(p.get('offer_id') or '').startswith('RED-') and 'БАМБУК' not in t:
+        # Manufacturer red-black.ru: printed room screens consist of pine frame and artificial canvas.
+        return '9403609009','Red Black pine-framed decorative folding screen'
+    if g == (17027918,95015):
+        if 'СТОЛ ОБЕДЕННЫЙ SERRA' in t:
+            return '9403601009','dining table with beech-wood legs'
+        if 'СТОЛ ОБЕДЕННЫЙ БОСТОН' in t and 'МЕТАЛЛ' in t:
+            return '9403208009','metal-framed BOSTON dining table'
+        if t.startswith(('СТОЛ ОБЕДЕННЫЙ ВАЛЬС','СТОЛ ВАЛЬС','СТОЛ МИЛОРД','СТОЛ "МИЛОРД"')):
+            return '9403601009','Red Black wooden dining table'
+    if g == (80375615,95030) and t.startswith('КРЕСЛО "GAP"'):
+        return '9401800009','beanbag armchair with loose soft filling'
     return None, 'unknown or insufficient material/construction'
 
 def main():
