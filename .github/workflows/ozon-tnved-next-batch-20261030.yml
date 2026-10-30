@@ -65,6 +65,11 @@ jobs:
                   h=height(a,'Высота, см')
                   if h>80:code='9403309900';why='wooden office open shelving, above 80 cm'
                   elif 0<h<=80:code='9403301900';why='wooden office open shelving, at most 80 cm'
+              elif group==(80731485,95098) and x['offer'].startswith('SAMS-') and mat=='ЛДСП' and re.search(r'^ШКАФ (ПОЛУЗАКРЫТЫЙ|ЗАКРЫТЫЙ)',t) and re.search(r'БЮДЖЕТ|КАНЦ|МОНОЛИТ|ПРИОРИТЕТ',t):
+                  h=height(a,'Высота, см')
+                  if h>80:code='9403309100';why='wooden office cabinet with doors, over 80 cm'
+              elif group==(79164512,95041) and ('КРЕСЛО' in t) and ('ПОСЕТИТЕЛ' not in t) and a.get('Материал крестовины') and height(a,'Мин. высота сиденья, см')>0 and height(a,'Макс. высота сиденья, см')-height(a,'Мин. высота сиденья, см')>3:
+                  code='9401390000';why='swiveling office seat with height adjustment'
               elif group==(80375615,95024) and t.startswith('ДИВАН ДВУХМЕСТНЫЙ РЕТРО') and mat=='Массив березы' and ob and ob!='Без обивки' and not re.search('КРОВАТЬ|РАСКЛАД|ТРАНСФОРМ',t):
                   code='9401610000';why='non-convertible upholstered solid birch sofa'
               if code:
@@ -123,18 +128,18 @@ jobs:
               fresh=api.get_product_attributes([pid_by_offer[x['offer_id']] for x in selected])
               check={str(x.get('offer_id')):x for x in fresh}
               report['confirmed']=sum(1 for x in selected if (lambda p: p and (lambda v: v and int(v[0])==x['dictionary_value_id'])(api.attr_value_tuple(api.find_product_attr(p,22232) or {})))(check.get(x['offer_id'])))
-          Path('ozon/tnved_next_batch_20261030.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+          Path('ozon/tnved_cabinets_batch_20261030.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
           print('RESULT_JSON',json.dumps({k:v for k,v in report.items() if k!='proposals'},ensure_ascii=False)[:5500],flush=True)
           PY
       - name: Save audit
         if: always()
         run: |
-          if [ ! -f ozon/tnved_next_batch_20261030.json ]; then echo '{"error":"audit failed"}' > ozon/tnved_next_batch_20261030.json; fi
-          cp ozon/tnved_next_batch_20261030.json /tmp/tnved_next.json
+          if [ ! -f ozon/tnved_cabinets_batch_20261030.json ]; then echo '{"error":"audit failed"}' > ozon/tnved_cabinets_batch_20261030.json; fi
+          cp ozon/tnved_cabinets_batch_20261030.json /tmp/tnved_next.json
           git fetch origin main
           git reset --hard origin/main
-          cp /tmp/tnved_next.json ozon/tnved_next_batch_20261030.json
+          cp /tmp/tnved_next.json ozon/tnved_cabinets_batch_20261030.json
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ozon/tnved_next_batch_20261030.json
+          git add ozon/tnved_cabinets_batch_20261030.json
           if ! git diff --cached --quiet; then git commit -m 'Record guarded TNVED next batch audit'; git push; fi
