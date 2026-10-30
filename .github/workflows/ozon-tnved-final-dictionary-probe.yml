@@ -1,0 +1,38 @@
+name: Ozon TNVED final dictionary lookup
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-tnved-final-dictionary-probe.yml']
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check actual allowed Ozon TNVED IDs for missing product families
+        run: |
+          python - <<'PY'
+          import sys,json
+          sys.path.insert(0,'ozon')
+          import tnved_sync as o
+          categories=[
+            (17027916,95044,['9401800009','9401610000','9401710009']),
+            (17027917,94995,['9403500009']),
+            (17027918,95005,['9403109800','9403208009','9403105100']),
+            (17027918,95002,['9403208009','9403601009']),
+            (17028726,96029,['9403820000','9403609009'])
+          ]
+          for cat,typ,codes in categories:
+            for code in codes:
+              try:
+                d=o.post('/v1/description-category/attribute/values/search',{'description_category_id':cat,'type_id':typ,'attribute_id':22232,'value':code,'limit':100})
+                result=d.get('result') or []
+                options=[{'id':x.get('id'),'value':x.get('value')} for x in result if str(x.get('value') or '').startswith(code)]
+                print('DICTIONARY',cat,typ,code,json.dumps(options,ensure_ascii=False)[:1500],flush=True)
+              except Exception as e:print('ERROR',cat,typ,code,str(e)[:250],flush=True)
+          PY
