@@ -40,7 +40,7 @@ jobs:
           print('PILOT_BEFORE',json.dumps(before,ensure_ascii=False),flush=True)
           floor=str(p.get('price') or 0)
           if float(floor)<=0:raise SystemExit('No current price')
-          payload={'prices':[{'offer_id':oid,'price':floor,'old_price':str(p.get('old_price') or 0),'min_price':floor,'currency_code':p.get('currency_code') or 'RUB','declared_price':floor}]}
+          payload={'prices':[{'offer_id':oid,'price':floor,'old_price':str(p.get('old_price') or 0),'min_price':floor,'currency_code':p.get('currency_code') or 'RUB','declared_price':str((p.get('declared_price') or {}).get('amount') or 0)}]}
           st,res=post('/v1/product/import/prices',payload)
           print('PILOT_IMPORT',st,json.dumps(res,ensure_ascii=False),flush=True)
           if st!=200:raise SystemExit('Import rejected')
