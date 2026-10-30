@@ -81,13 +81,13 @@ jobs:
                       code='9401710009';why='upholstered metal ottoman'
               elif group==(17027908,93670) and x['offer'].startswith('SAMS-') and 'ВЕШАЛКА' in t and 'МЕТАЛЛ' in t:
                   code='9403208009';why='metal floor coat stand'
-              elif group==(17027918,95015) and re.search(r'^СТОЛ ОБЕДЕННЫЙ\\b',t):
+              elif group==(17027918,95015) and re.search(r'^СТОЛ ОБЕДЕННЫЙ\b',t):
                   # Exclude any decorative/structural glass, ceramics or metal to avoid the wrong material class.
                   forbidden=r'СТЕКЛ|КЕРАМИ|МРАМОР|КАМЕНЬ|МЕТАЛЛ|СТАЛЬ|ХРОМ|БЕТОН|СТЕКЛОКЕРАМИК|ЛОФТ|ТРАНСФОРМ'
                   wood={'МДФ','ЛДСП','Массив дерева','Дерево','Шпон','Массив сосны','Массив бука'}
                   if not re.search(forbidden,t) and a.get('Материал столешницы') in wood and base in wood:
                       code='9403601009';why='wooden dining table, wooden top and supports'
-              elif group==(17027918,95002) and re.search(r'^(СТОЛ ЖУРНАЛЬНЫЙ|ЖУРНАЛЬНЫЙ СТОЛ|СТОЛИК ЖУРНАЛЬНЫЙ)\\b',t):
+              elif group==(17027918,95002) and re.search(r'^(СТОЛ ЖУРНАЛЬНЫЙ|ЖУРНАЛЬНЫЙ СТОЛ|СТОЛИК ЖУРНАЛЬНЫЙ)\b',t):
                   forbidden=r'СТЕКЛ|КЕРАМИ|МРАМОР|КАМЕНЬ|МЕТАЛЛ|СТАЛЬ|ХРОМ|БЕТОН|ЛОФТ|ТРАНСФОРМ'
                   wood={'МДФ','ЛДСП','Массив дерева','Дерево','Шпон','Массив сосны','Массив бука'}
                   if not re.search(forbidden,t) and a.get('Материал столешницы') in wood and base in wood:
