@@ -1,0 +1,56 @@
+name: Ozon marking cross-check TNVED and 23536
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ozon-marking-attributes-crosscheck-20261030.yml']
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare code and marking boolean attribute on every card
+        run: |
+          python - <<'PY'
+          import sys,json,collections,re
+          from pathlib import Path
+          sys.path.insert(0,'ozon')
+          import tnved_sync as o
+          catalog=o.list_products()
+          attrs=o.get_product_attributes([int(x['product_id']) for x in catalog if x.get('product_id')])
+          combos=collections.Counter()
+          code_counts=collections.Counter()
+          mark_counts=collections.Counter()
+          invalid=[]
+          pending=[]
+          by_group=collections.Counter()
+          for x in attrs:
+              code=o.attr_value_tuple(o.find_product_attr(x,22232) or {})
+              mark=o.attr_value_tuple(o.find_product_attr(x,23536) or {})
+              c_state='missing' if not code else 'code_with_dictionary' if code[0]>0 and re.match(r'^\d{10}',code[1]) else 'invalid_or_raw'
+              m_state='missing' if not mark else str(mark[1]).strip().casefold()
+              combos[(c_state,m_state)]+=1
+              code_counts[c_state]+=1
+              mark_counts[m_state]+=1
+              if c_state=='invalid_or_raw' and len(invalid)<90:invalid.append({'offer_id':x.get('offer_id'),'code':code,'mark':mark})
+              if (c_state!='code_with_dictionary' or m_state=='missing'):
+                  by_group[(int(x.get('description_category_id') or 0),int(x.get('type_id') or 0),c_state,m_state)]+=1
+          out={'catalog':len(catalog),'attributes':len(attrs),'code_status_counts':dict(code_counts),'mark_status_counts':dict(mark_counts),'cross_table':[{'code_status':k[0],'mark_status':k[1],'n':v} for k,v in combos.most_common()],'invalid_samples':invalid,'top_problem_groups':[{'category':k[0],'type':k[1],'code_status':k[2],'mark_status':k[3],'n':v} for k,v in by_group.most_common(30)]}
+          Path('ozon/tnved_marking_23536_crosscheck_20261030.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
+          print('RESULT_JSON',json.dumps({k:v for k,v in out.items() if k not in ['invalid_samples','top_problem_groups']},ensure_ascii=False)[:13000],flush=True)
+          PY
+      - name: Save report
+        run: |
+          cp ozon/tnved_marking_23536_crosscheck_20261030.json /tmp/t.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/t.json ozon/tnved_marking_23536_crosscheck_20261030.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ozon/tnved_marking_23536_crosscheck_20261030.json
+          if ! git diff --cached --quiet; then git commit -m 'Audit Ozon marking boolean attribute alongside TNVED'; git push; fi
