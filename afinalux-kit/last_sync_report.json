@@ -1,9 +1,106 @@
 {
-  "started_at": "2026-10-30T13:13:23.652208+00:00",
-  "finished_at": "2026-10-30T13:13:23.652227+00:00",
-  "status": "error",
+  "started_at": "2026-10-31T12:47:56.053715+00:00",
+  "status": "ok",
   "dry_run": false,
   "feed_url": "https://afinalux.ru/index.php?route=feed/yandex_yml",
   "brand_expected": "Afina Garden",
-  "error": "Cannot download Afina Garden feed after retries: HTTPConnectionPool(host='afinalux.ru', port=80): Max retries exceeded with url: /index.php?route=feed/yandex_yml (Caused by ConnectTimeoutError(<HTTPConnection(host='afinalux.ru', port=80) at 0x7283575ceea0>, 'Connection to afinalux.ru timed out. (connect timeout=10)'))"
+  "webasyst_type": "afinalux",
+  "webasyst_stock": "Основной склад",
+  "rules": {
+    "purchase_price": "YML <opt1mln>",
+    "customer_price": "закупочная цена × 1.30, округление вверх до 1 ₽",
+    "compare_price": "закупочная цена × 1.60, округление вверх до 1 ₽",
+    "creation": "если точного артикула нет — создать новую карточку только в KIT",
+    "duplicate_guard": "перед созданием повторная точная проверка SKU/артикула",
+    "purchase_price_storage": "закупочная цена отдельным полем не записывается"
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1015H Black (3x6)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1015H Black (3x6)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1015H Black (3x6)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1033W White (6х6)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1033W White (6х6)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1033W White (6х6)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1057W White (7х12)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1057W White (7х12)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1057W White (7х12)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1092W White (6х9)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1092W White (6х9)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image",
+      "vendor_code": "AFM-1092W White (6х9)",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    }
+  ],
+  "feed_offers_total": 280,
+  "feed_brand_items_unique": 280,
+  "feed_categories": 26,
+  "feed_non_brand_offers": 0,
+  "feed_invalid_purchase": [],
+  "feed_duplicate_vendor_codes": [],
+  "feed_zero_stock": 2,
+  "kit_afina_active_variants_before": 299,
+  "kit_matched_before_creation": 276,
+  "kit_detailed_reads": 299,
+  "kit_ambiguous": {},
+  "kit_created": 4,
+  "kit_would_create": 0,
+  "kit_reused_exact_sku": 0,
+  "kit_brand_fixed": 0,
+  "kit_images_uploaded": 0,
+  "kit_image_errors": 12,
+  "kit_matched_after_creation": 280,
+  "kit_unmatched_after_creation": [],
+  "kit_price_updates_planned": 280,
+  "kit_price_updates_sent": 280,
+  "webasyst_sync": "disabled_by_owner",
+  "webasyst_created": 0,
+  "webasyst_updates_sent": 0,
+  "finished_at": "2026-10-31T13:43:58.775995+00:00",
+  "complete": true
 }
