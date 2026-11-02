@@ -1,4 +1,4 @@
-BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-v18-20261102-141456.tgz
+BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-v18-20261102-141803.tgz
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginActionTimer.cli.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginSync.cli.php
@@ -22,7 +22,7 @@ No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plug
 ACTION_TIMER_CRON=OK
 {
     "status": "error",
-    "started_at": "2026-11-02T11:14:57+00:00",
+    "started_at": "2026-11-02T11:18:03+00:00",
     "read_only": false,
     "accounts": [
         {
@@ -35,7 +35,7 @@ ACTION_TIMER_CRON=OK
             "skipped_disabled": 0,
             "skipped_fresh": 0,
             "errors": [
-                "\/v3\/product\/list HTTP 403"
+                "\/v3\/product\/list HTTP 403 (7 Api-key has expired, generate a new one)"
             ]
         },
         {
@@ -48,7 +48,7 @@ ACTION_TIMER_CRON=OK
             "skipped_disabled": 0,
             "skipped_fresh": 0,
             "errors": [
-                "\/v3\/product\/list HTTP 403"
+                "\/v3\/product\/list HTTP 403 (7 Api-key has expired, generate a new one)"
             ]
         },
         {
@@ -61,7 +61,7 @@ ACTION_TIMER_CRON=OK
             "skipped_disabled": 0,
             "skipped_fresh": 0,
             "errors": [
-                "\/v3\/product\/list HTTP 403"
+                "\/v3\/product\/list HTTP 403 (7 Api-key has expired, generate a new one)"
             ]
         },
         {
@@ -87,7 +87,7 @@ ACTION_TIMER_CRON=OK
             "errors": []
         }
     ],
-    "finished_at": "2026-11-02T11:14:58+00:00"
+    "finished_at": "2026-11-02T11:18:05+00:00"
 }
 ROLLBACK=OK
 \nREMOTE_STDERR=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
