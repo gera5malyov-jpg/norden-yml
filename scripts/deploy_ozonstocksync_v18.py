@@ -113,7 +113,10 @@ crontab -u web -l | grep -F 'action_timer_worker.php'
 echo 'ACTION_TIMER_CRON=OK'
 # First renewal during deployment, with independent lock and read-back verification.
 cd "$ROOT"
+set +e
 timeout 1800 su -s /bin/bash web -c "$TIMER_CMD"
+TIMER_RC=$?
+set -e
 STATUS_PATH="$ROOT/wa-data/protected/shop/plugins/ozonstocksync/action_timer_status.json"
 if [ ! -s "$STATUS_PATH" ]; then
     echo 'ACTION_TIMER_ERROR=NO_STATUS_REPORT'
@@ -122,8 +125,16 @@ if [ ! -s "$STATUS_PATH" ]; then
 fi
 echo 'ACTION_TIMER_STATUS_REPORT:'
 cat "$STATUS_PATH"
-echo 'ACTION_TIMER_FIRST_RUN=OK'
+# Keep the safely installed daily worker even when Ozon reports an individual
+# API authorization failure. The timer worker has already recorded its error,
+# and will retry at the next cron occurrence without changing price settings.
 DEPLOY_OK=1
+if [ "$TIMER_RC" -ne 0 ]; then
+    echo 'ACTION_TIMER_FIRST_RUN=OZON_API_ERROR'
+    echo 'DEPLOY_STATUS=INSTALLED_WITH_OZON_ERRORS'
+    exit "$TIMER_RC"
+fi
+echo 'ACTION_TIMER_FIRST_RUN=OK'
 echo 'DEPLOY_STATUS=OK'
 '''
             run = subprocess.run(['ssh'] + ssh_args + ['root@' + HOST, 'bash -se'],
