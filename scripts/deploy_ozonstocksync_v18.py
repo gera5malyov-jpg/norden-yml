@@ -96,11 +96,28 @@ CMD="flock -n /tmp/ozonstocksync-commissions.lock /usr/bin/php $ROOT/cli.php sho
 } | crontab -u web -
 crontab -u web -l | grep 'ozonstocksyncPluginSync commissions=1'
 echo 'COMMISSION_CRON=OK'
+# The independent action-timer worker ONLY prolongs an already-enabled
+# minimum-price protection; it does not change prices, stocks or promotion opt-ins.
+TIMER="$PLUGIN/lib/cli/shopOzonstocksyncPluginActionTimer.cli.php"
+test -f "$TIMER"
+php -l "$TIMER"
+OLD_CRON=$(crontab -u web -l 2>/dev/null || true)
+TIMER_CMD="flock -n /tmp/ozonstocksync-action-timer.lock /usr/bin/php $ROOT/cli.php shop ozonstocksyncPluginActionTimer"
+{
+    printf "%s\\n" "$OLD_CRON" | grep -v "ozonstocksyncPluginActionTimer" || true
+    echo "20 5 * * * $TIMER_CMD >> $ROOT/wa-log/ozonstocksync-action-timer-cron.log 2>&1"
+} | crontab -u web -
+crontab -u web -l | grep -F 'ozonstocksyncPluginActionTimer'
+echo 'ACTION_TIMER_CRON=OK'
+# First renewal during deployment, with independent lock and read-back verification.
+cd "$ROOT"
+timeout 1800 su -s /bin/bash web -c "$TIMER_CMD"
+echo 'ACTION_TIMER_FIRST_RUN=OK'
 DEPLOY_OK=1
 echo 'DEPLOY_STATUS=OK'
 '''
             run = subprocess.run(['ssh'] + ssh_args + ['root@' + HOST, 'bash -se'],
-                                 input=script, capture_output=True, text=True, timeout=400)
+                                 input=script, capture_output=True, text=True, timeout=2100)
             text = run.stdout
             if run.returncode:
                 text += '\nDEPLOY_STATUS=FAILED\n'
