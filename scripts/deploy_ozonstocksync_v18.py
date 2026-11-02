@@ -100,9 +100,11 @@ echo 'COMMISSION_CRON=OK'
 # minimum-price protection; it does not change prices, stocks or promotion opt-ins.
 TIMER="$PLUGIN/lib/cli/shopOzonstocksyncPluginActionTimer.cli.php"
 test -f "$TIMER"
+test -f "$PLUGIN/lib/cli/action_timer_worker.php"
 php -l "$TIMER"
+php -l "$PLUGIN/lib/cli/action_timer_worker.php"
 OLD_CRON=$(crontab -u web -l 2>/dev/null || true)
-TIMER_CMD="flock -n /tmp/ozonstocksync-action-timer.lock /usr/bin/php $ROOT/cli.php shop ozonstocksyncPluginActionTimer"
+TIMER_CMD="flock -n /tmp/ozonstocksync-action-timer.lock /usr/bin/php $PLUGIN/lib/cli/action_timer_worker.php"
 {
     printf "%s\\n" "$OLD_CRON" | grep -v "ozonstocksyncPluginActionTimer" || true
     echo "20 5 * * * $TIMER_CMD >> $ROOT/wa-log/ozonstocksync-action-timer-cron.log 2>&1"
