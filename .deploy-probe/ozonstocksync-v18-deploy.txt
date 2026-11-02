@@ -1,4 +1,4 @@
-BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-v18-20261102-141323.tgz
+BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-v18-20261102-141456.tgz
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginActionTimer.cli.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginSync.cli.php
@@ -18,6 +18,81 @@ UI_HEALTH=OK
 COMMISSION_CRON=OK
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginActionTimer.cli.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/action_timer_worker.php
+20 5 * * * flock -n /tmp/ozonstocksync-action-timer.lock /usr/bin/php /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/action_timer_worker.php >> /home/web/vm-23f9aff9.na4u.ru/www/wa-log/ozonstocksync-action-timer-cron.log 2>&1
+ACTION_TIMER_CRON=OK
+{
+    "status": "error",
+    "started_at": "2026-11-02T11:14:57+00:00",
+    "read_only": false,
+    "accounts": [
+        {
+            "name": "Мегаполис",
+            "index": 1,
+            "seen": 0,
+            "enabled": 0,
+            "due": 0,
+            "renewed": 0,
+            "skipped_disabled": 0,
+            "skipped_fresh": 0,
+            "errors": [
+                "\/v3\/product\/list HTTP 403"
+            ]
+        },
+        {
+            "name": "Профи",
+            "index": 2,
+            "seen": 0,
+            "enabled": 0,
+            "due": 0,
+            "renewed": 0,
+            "skipped_disabled": 0,
+            "skipped_fresh": 0,
+            "errors": [
+                "\/v3\/product\/list HTTP 403"
+            ]
+        },
+        {
+            "name": "Норден 2 НДС",
+            "index": 3,
+            "seen": 0,
+            "enabled": 0,
+            "due": 0,
+            "renewed": 0,
+            "skipped_disabled": 0,
+            "skipped_fresh": 0,
+            "errors": [
+                "\/v3\/product\/list HTTP 403"
+            ]
+        },
+        {
+            "name": "Мегаполис Р",
+            "index": 4,
+            "seen": 0,
+            "enabled": 0,
+            "due": 0,
+            "renewed": 0,
+            "skipped_disabled": 0,
+            "skipped_fresh": 0,
+            "errors": []
+        },
+        {
+            "name": "МЕГАПОЛИС Инмедикс",
+            "index": 5,
+            "seen": 724,
+            "enabled": 0,
+            "due": 0,
+            "renewed": 0,
+            "skipped_disabled": 724,
+            "skipped_fresh": 0,
+            "errors": []
+        }
+    ],
+    "finished_at": "2026-11-02T11:14:58+00:00"
+}
 ROLLBACK=OK
+\nREMOTE_STDERR=Warning: Permanently added '45.86.180.49' (ED25519) to the list of known hosts.
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
 
 DEPLOY_STATUS=FAILED
