@@ -3,39 +3,399 @@
   "gallery_fetch_workers": 12,
   "source_offers": 1398,
   "source_duplicates": 0,
-  "kit_treez_indexed": 1407,
-  "checked": 1388,
+  "kit_treez_indexed": 1417,
+  "checked": 1398,
   "gallery_bigger_than_xml": 8,
-  "already_complete": 1385,
-  "repaired": 2,
-  "images_uploaded": 8,
-  "gallery_images_found": 21,
-  "image_errors": 13,
-  "missing_in_kit": 10,
+  "already_complete": 1388,
+  "repaired": 7,
+  "images_uploaded": 18,
+  "gallery_images_found": 91,
+  "image_errors": 73,
+  "missing_in_kit": 0,
   "warnings": [
-    {
-      "source_code": "41.1020-0041-GR-47",
-      "stage": "image",
-      "url": "https://treez.ru/photos/resize/1600_1800/41.1020-0041-GR.jpg",
-      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
-    },
     {
       "source_code": "41.1020-0041-GR-47",
       "stage": "image",
       "url": "https://treez.ru/photos/resize/1600_1800/41.1020-0041-GR-1",
       "message": "404 Client Error: Not Found for url: https://treez.ru/photos/resize/1000_1286/41.1020-0041-GR-1"
-    },
-    {
-      "source_code": "41.1020-0041-GR-47",
-      "stage": "image",
-      "url": "https://treez.ru/photos/resize/1600_1800/41.1020-0041-GR-4.jpg",
-      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "source_code": "41.1020-0041-GR-55",
       "stage": "image",
       "url": "https://treez.ru/photos/resize/1600_1800/41.1020-0041-GR-1",
       "message": "404 Client Error: Not Found for url: https://treez.ru/photos/resize/1000_1286/41.1020-0041-GR-1"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-3.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-5.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-6.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-7.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-90.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-91.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-92.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-3.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-5.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-6.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-7.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-90.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-91.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-92.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-3.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-5.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-6.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-7.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-90.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-91.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-33",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-OR-92.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-43",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-43",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-1.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-43",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-2.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-43",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-3.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-43",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-5.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-43",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-6.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-43",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-90.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-43",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-91.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-43",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-92.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-43",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-93.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-62",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-62",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-1.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-62",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-2.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-62",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-3.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-62",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-5.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-62",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-6.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-62",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-90.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-62",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-91.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-62",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-92.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-62",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-125-BL-93.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-1.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-2.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-3.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-5.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-6.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-90.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-91.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-23",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-92.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-1.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-2.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-3.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-5.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-6.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-90.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-91.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-27",
+      "stage": "image",
+      "url": "https://treez.ru/photos/resize/1600_1800/41.33-25-24-126-BL-92.jpg",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "source_code": "41.33-25-24-126-BL-33",
@@ -94,6 +454,16 @@
   ],
   "errors": [
     {
+      "source_code": "41.33-25-24-126-BL-23",
+      "variant_id": "01a19c82-3fb8-76e1-b0d6-4a7a4fc9f5f1",
+      "message": "Не удалось загрузить изображения галереи"
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-27",
+      "variant_id": "01a19c83-5be7-76bd-9f68-5fc9d03e8034",
+      "message": "Не удалось загрузить изображения галереи"
+    },
+    {
       "source_code": "41.33-25-24-126-BL-33",
       "variant_id": "01a13038-4486-70a2-8909-95d73d9812bf",
       "message": "Не удалось загрузить изображения галереи"
@@ -104,13 +474,55 @@
       "source_code": "41.1020-0041-GR-47",
       "xml_images": 5,
       "gallery_images": 6,
-      "kit_images_before": 4
+      "kit_images_before": 5
     },
     {
       "source_code": "41.1020-0041-GR-55",
       "xml_images": 5,
       "gallery_images": 6,
-      "kit_images_before": 4
+      "kit_images_before": 5
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-23",
+      "xml_images": 10,
+      "gallery_images": 10,
+      "kit_images_before": 2
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-27",
+      "xml_images": 10,
+      "gallery_images": 10,
+      "kit_images_before": 2
+    },
+    {
+      "source_code": "41.33-25-24-126-OR-33",
+      "xml_images": 10,
+      "gallery_images": 10,
+      "kit_images_before": 2
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-43",
+      "xml_images": 11,
+      "gallery_images": 11,
+      "kit_images_before": 1
+    },
+    {
+      "source_code": "41.33-25-24-125-BL-62",
+      "xml_images": 11,
+      "gallery_images": 11,
+      "kit_images_before": 1
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-23",
+      "xml_images": 9,
+      "gallery_images": 9,
+      "kit_images_before": 0
+    },
+    {
+      "source_code": "41.33-25-24-126-BL-27",
+      "xml_images": 9,
+      "gallery_images": 9,
+      "kit_images_before": 0
     },
     {
       "source_code": "41.33-25-24-126-BL-33",
