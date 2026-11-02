@@ -112,6 +112,14 @@ echo 'ACTION_TIMER_CRON=OK'
 # First renewal during deployment, with independent lock and read-back verification.
 cd "$ROOT"
 timeout 1800 su -s /bin/bash web -c "$TIMER_CMD"
+STATUS_PATH="$ROOT/wa-data/protected/shop/plugins/ozonstocksync/action_timer_status.json"
+if [ ! -s "$STATUS_PATH" ]; then
+    echo 'ACTION_TIMER_ERROR=NO_STATUS_REPORT'
+    find "$ROOT/wa-data" -name action_timer_status.json -print 2>/dev/null | head -10
+    exit 12
+fi
+echo 'ACTION_TIMER_STATUS_REPORT:'
+cat "$STATUS_PATH"
 echo 'ACTION_TIMER_FIRST_RUN=OK'
 DEPLOY_OK=1
 echo 'DEPLOY_STATUS=OK'
