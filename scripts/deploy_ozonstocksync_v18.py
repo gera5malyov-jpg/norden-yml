@@ -106,10 +106,10 @@ php -l "$PLUGIN/lib/cli/action_timer_worker.php"
 OLD_CRON=$(crontab -u web -l 2>/dev/null || true)
 TIMER_CMD="flock -n /tmp/ozonstocksync-action-timer.lock /usr/bin/php $PLUGIN/lib/cli/action_timer_worker.php"
 {
-    printf "%s\\n" "$OLD_CRON" | grep -v "ozonstocksyncPluginActionTimer" || true
+    printf "%s\\n" "$OLD_CRON" | grep -Ev "ozonstocksyncPluginActionTimer|action_timer_worker.php" || true
     echo "20 5 * * * $TIMER_CMD >> $ROOT/wa-log/ozonstocksync-action-timer-cron.log 2>&1"
 } | crontab -u web -
-crontab -u web -l | grep -F 'ozonstocksyncPluginActionTimer'
+crontab -u web -l | grep -F 'action_timer_worker.php'
 echo 'ACTION_TIMER_CRON=OK'
 # First renewal during deployment, with independent lock and read-back verification.
 cd "$ROOT"
@@ -129,6 +129,8 @@ echo 'DEPLOY_STATUS=OK'
             run = subprocess.run(['ssh'] + ssh_args + ['root@' + HOST, 'bash -se'],
                                  input=script, capture_output=True, text=True, timeout=2100)
             text = run.stdout
+            if run.stderr.strip():
+                text += '\\nREMOTE_STDERR=' + run.stderr[-1800:]
             if run.returncode:
                 text += '\nDEPLOY_STATUS=FAILED\n'
             REPORT.parent.mkdir(parents=True, exist_ok=True)
