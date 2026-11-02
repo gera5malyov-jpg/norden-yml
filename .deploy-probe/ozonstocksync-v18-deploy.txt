@@ -1,4 +1,4 @@
-BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-v18-20261102-140849.tgz
+BACKUP=/home/web/vm-23f9aff9.na4u.ru/www/wa-data/protected/shop/ozonstocksync-backups/ozonstocksync-v18-20261102-141030.tgz
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/classes/shopOzonstocksyncPluginSync.class.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginActionTimer.cli.php
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginSync.cli.php
@@ -18,5 +18,7 @@ COMMISSION_CRON=OK
 No syntax errors detected in /home/web/vm-23f9aff9.na4u.ru/www/wa-apps/shop/plugins/ozonstocksync/lib/cli/shopOzonstocksyncPluginActionTimer.cli.php
 20 5 * * * flock -n /tmp/ozonstocksync-action-timer.lock /usr/bin/php /home/web/vm-23f9aff9.na4u.ru/www/cli.php shop ozonstocksyncPluginActionTimer >> /home/web/vm-23f9aff9.na4u.ru/www/wa-log/ozonstocksync-action-timer-cron.log 2>&1
 ACTION_TIMER_CRON=OK
-ACTION_TIMER_FIRST_RUN=OK
-DEPLOY_STATUS=OK
+ACTION_TIMER_ERROR=NO_STATUS_REPORT
+ROLLBACK=OK
+
+DEPLOY_STATUS=FAILED
