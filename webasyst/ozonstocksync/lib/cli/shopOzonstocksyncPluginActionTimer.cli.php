@@ -168,8 +168,23 @@ class shopOzonstocksyncPluginActionTimerCli extends waCliController
                 if (!is_array($decoded)) throw new waException('Invalid JSON for ' . $path);
                 return $decoded;
             }
-            // Never log credentials or raw API responses.
-            $last_error = $path . ' HTTP ' . $code . ($error ? ' (transport error)' : '');
+            // Log only the structured Ozon error code/message, never headers, tokens
+            // or raw response bodies. This distinguishes expired keys from blocked scopes.
+            $api_message = '';
+            if (is_string($body) && $body !== '') {
+                $error_data = json_decode($body, true);
+                if (is_array($error_data)) {
+                    $code_label = isset($error_data['code']) && is_scalar($error_data['code'])
+                        ? (string)$error_data['code'] : '';
+                    $message_label = isset($error_data['message']) && is_string($error_data['message'])
+                        ? $error_data['message'] : '';
+                    $api_message = substr(preg_replace('/[\\r\\n\\t]+/', ' ', $code_label . ' ' . $message_label), 0, 180);
+                    $api_message = trim($api_message);
+                }
+            }
+            $last_error = $path . ' HTTP ' . $code
+                . ($api_message !== '' ? ' (' . $api_message . ')' : '')
+                . ($error ? ' (transport error)' : '');
             if (!($code === 0 || $code === 429 || $code >= 500) || $attempt === 4) break;
             sleep(min(20, 3 * $attempt));
         }
