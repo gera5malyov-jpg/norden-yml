@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-11-02T14:16:23.665332+00:00",
+  "started_at": "2026-11-03T13:28:24.425889+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=336",
   "type_name": "deephouse-336",
@@ -11,8 +11,8 @@
   "kit_variants_scanned": 1252,
   "kit_webasyst_336_variants": 1215,
   "kit_duplicate_skus": 0,
-  "webasyst_products": 1933,
-  "webasyst_duplicate_skus": 0,
+  "webasyst_products": 1936,
+  "webasyst_duplicate_skus": 1,
   "processed": 5,
   "created": 0,
   "updated_prices_stock": 5,
@@ -6009,7 +6009,7 @@
     {
       "sku": "DEEP-67492",
       "variant_id": "01a0cde3-fedb-7a77-838a-35070a766bf5",
-      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+      "message": "duplicate Webasyst SKU in type 24: DEEP-67492"
     },
     {
       "sku": "DEEP-67496",
@@ -6162,7 +6162,7 @@
   ],
   "complete": false,
   "webasyst_routing_feature_code": "kenner_f93046718124",
-  "webasyst_336_products": 1933,
-  "finished_at": "2026-11-02T14:31:10.825889+00:00",
+  "webasyst_336_products": 1936,
+  "finished_at": "2026-11-03T13:43:59.538591+00:00",
   "status": "degraded"
 }
