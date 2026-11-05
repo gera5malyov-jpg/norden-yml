@@ -117,7 +117,7 @@ jobs:
                   python3 -c 'import sys; s=open(sys.argv[1]).read().splitlines()[92]; print("line93_length",len(s)); needles=["preg_match_all","__extimg_matches","__has_extimg"]; [(print("term",k,"at",i,"fragment:",s[max(0,i-145):i+330])) for k in needles for i in [s.find(k)] if i>=0]' "$C"
                   echo "===FINISH==="
                   '''
-                  p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=12","root@45.86.180.49","bash","-s"],input=script,text=True,capture_output=True,timeout=125)
+                  p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=12","root@45.86.180.49","bash","-s"],input=script,text=True,encoding="utf-8",errors="replace",capture_output=True,timeout=125)
                   print(p.stdout[-24000:])
                   if p.returncode:
                       print("REMOTE_SSH_FAILURE",p.returncode,p.stderr[-500:])
