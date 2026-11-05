@@ -1,0 +1,66 @@
+name: Diagnose one Webasyst product HTTP 500 (read-only)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/diagnose-product-500-20261105.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - name: Read-only inspection of failing product and PHP errors
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os,subprocess,tempfile,urllib.parse,urllib.request
+          from pathlib import Path
+          def api(url, method="GET", data=None, headers=None):
+              req=urllib.request.Request(url,method=method,data=data,headers=headers or {})
+              with urllib.request.urlopen(req,timeout=25) as r:
+                  body=r.read().decode()
+                  return json.loads(body) if body else {}
+          secret=os.environ.get("NETANGELS_API_KEY","").strip()
+          if not secret:
+              raise RuntimeError("NETANGELS_API_KEY not configured")
+          auth=api("https://panel.netangels.ru/api/gateway/token/","POST",urllib.parse.urlencode({"api_key":secret}).encode(),{"Content-Type":"application/x-www-form-urlencoded"})["token"]
+          headers={"Authorization":"Bearer "+auth,"Content-Type":"application/json"}
+          with tempfile.TemporaryDirectory() as td:
+              key=td+"/tempkey"
+              subprocess.run(["ssh-keygen","-q","-t","ed25519","-N","","-f",key],check=True)
+              created=api("https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/create/","POST",json.dumps({"key":Path(key+".pub").read_text().strip(),"name":"product-500-inspect-"+os.environ.get("GITHUB_RUN_ID","manual")}).encode(),headers)
+              key_id=created["id"]
+              try:
+                  script=r'''set +e
+                  ROOT=/home/web/vm-23f9aff9.na4u.ru/www
+                  echo "===DATE==="; date -Is
+                  echo "===BEFORE LOG MTIMES==="
+                  find "$ROOT/wa-log" -maxdepth 3 -type f -mmin -20 -printf '%TY-%Tm-%TdT%TH:%TM %s %p\n' 2>/dev/null | sort -r | head -35
+                  echo "===PRODUCT GET (loopback origin)==="
+                  curl -sS -L --max-time 18 -o /dev/null --resolve profikompany.ru:443:127.0.0.1 -w 'product http=%{http_code} total=%{time_total}\n' 'https://profikompany.ru/stul-barnyy-750-venskiy-tverdyy-belenyy-dub/'
+                  echo "===HOME GET==="
+                  curl -sS -L --max-time 18 -o /dev/null --resolve profikompany.ru:443:127.0.0.1 -w 'home http=%{http_code} total=%{time_total}\n' 'https://profikompany.ru/'
+                  sleep 2
+                  echo "===RECENT RELEVANT LOGS (LAST 120 LINES PER LOG)==="
+                  find "$ROOT/wa-log" -maxdepth 4 -type f -mmin -15 \( -name '*.log' -o -name '*.txt' \) -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -20 | cut -d' ' -f2- | while IFS= read -r f; do
+                    echo "FILE $f"
+                    tail -n 120 "$f" 2>/dev/null | grep -Ei -B 2 -A 7 'Fatal error|Uncaught|exception|PHP (Warning|Parse error|Notice)|Smarty|error:|stul-barnyy-750-venskiy|shopFrontendProduct|product.html' | tail -45 | cut -c 1-250 | sed -E 's/([A-Za-z0-9_.+-]+)@([A-Za-z0-9.-]+)/[EMAIL]/g;s/(token|password|key|secret|authorization)[[:space:]]*[:=][[:space:]]*[^ ,;]+/\1=[REDACTED]/Ig;s/([?&][[:alnum:]_-]+)=([^& ]+)/\1=[REDACTED]/g' || true
+                  done
+                  echo "===PHP/NGINX LOGS==="
+                  for p in /var/log/nginx/error.log /var/log/apache2/error.log /var/log/php8.1-fpm.log /var/log/php8.2-fpm.log /var/log/php8.3-fpm.log /var/log/php8.4-fpm.log; do
+                    if [ -f "$p" ]; then echo "FILE $p"; tail -n 180 "$p" | grep -Ei 'fatal|uncaught|upstream|error|exception|php message' | tail -18 | cut -c 1-250 | sed -E 's/([A-Za-z0-9_.+-]+)@([A-Za-z0-9.-]+)/[EMAIL]/g' ; fi
+                  done
+                  echo "===FINISH==="
+                  '''
+                  p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=12","root@45.86.180.49","bash","-s"],input=script,text=True,capture_output=True,timeout=125)
+                  print(p.stdout[-24000:])
+                  if p.returncode:
+                      print("REMOTE_SSH_FAILURE",p.returncode,p.stderr[-500:])
+              finally:
+                  try: api("https://api-ms.netangels.ru/api/v1/cloud/vms/44780/ssh/"+str(key_id)+"/","DELETE",None,headers)
+                  except Exception as e: print("WARNING: temporary SSH key cleanup:",type(e).__name__)
+          PY
