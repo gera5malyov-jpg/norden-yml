@@ -1,0 +1,27 @@
+name: Verify Ozon Stock Sync after API key rotation
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-ozs-post-key-rotation-20261105.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify timer, current Ozon authorization, and sync logs
+        run: python3 scripts/verify_ozs_post_key_rotation.py
+      - name: Archive execution report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ozs-key-rotation-check
+          path: .deploy-probe/ozs-key-rotation-check-20261105.txt
+          retention-days: 7
+          if-no-files-found: ignore
