@@ -1,6 +1,6 @@
 {
   "status": "УСПЕШНО",
-  "started_at": "2026-10-22T10:35:04+00:00",
+  "started_at": "2026-11-05T13:27:57+00:00",
   "dry_run": false,
   "source": "https://yourroom.ru/",
   "supplier": "ВашаКомната",
@@ -20,92 +20,28 @@
   "missing_rule": "если URL исчез из полного sitemap — остаток 0",
   "description_rule": "упоминания ВашаКомната/Вашакомната.РФ/yourroom.ru удаляются",
   "photo_rule": "используются только изображения без водяного знака; сначала ищется чистый оригинал, затем пробуется программное удаление; без пригодного фото карточка не создается",
-  "sitemap_urls": 534,
-  "product_pages_requested": 534,
-  "product_cards_parsed": 534,
+  "sitemap_urls": 532,
+  "product_pages_requested": 532,
+  "product_cards_parsed": 532,
   "created": 4,
   "updated": 519,
-  "zeroed_missing": 11,
-  "skipped_no_clean_photo": 11,
+  "zeroed_missing": 15,
+  "skipped_no_clean_photo": 9,
   "skipped_no_price": 0,
   "price_updates": 523,
-  "stock_updates": 534,
+  "stock_updates": 538,
   "images_clean_original": 162,
-  "images_clean_alternate": 1827,
+  "images_clean_alternate": 1830,
   "images_watermark_removed": 12,
   "images_rejected_watermark_or_error": 88,
-  "images_uploaded": 86,
-  "image_upload_errors": 53,
+  "images_uploaded": 109,
+  "image_upload_errors": 34,
   "parse_errors": [],
   "errors": [],
   "warnings": [
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
@@ -113,39 +49,31 @@
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
@@ -185,11 +113,7 @@
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
@@ -1458,7 +1382,7 @@
         "Страна-производитель": "Россия",
         "Цвет": "Ваниль матовая / Ясень шимо светлый"
       },
-      "description_preview": "Размер лестницы: 400х850х1500 мм Максимально рекомендованная нагрузка на верхний и нижний ярус 80-85 кг. Внимание! Матрас в комплектацию не входит и приобретается дополнительно.",
+      "description_preview": "Двухъярусная кровать \"Бемби-11\" - яркий, надежный и многофункциональный мебельный комплекс для детской комнаты. Благодаря встроенной системе хранения и компактному расположению спальных мест, модель позволяет сэкономить полезную площадь комнаты для игр и учебы. Конструктивные особенности и хранение Кровать представляет собой продуманный двухэтажный блок с повышенной функциональностью: Два спальных места: Расположены друг над другом. Оснащены прочным глухим основанием (настил ЛДСП). Безопасность:",
       "source_images": 6,
       "clean_images": 6,
       "clean_modes": [
@@ -4547,7 +4471,7 @@
         "Страна-производитель": "Россия",
         "Цвет": "Графит / Дуб крафт золотой"
       },
-      "description_preview": "Мебельный комплект «Макарена -4» считается максимально эргономичным, компактным и вместительным. Имеет два больших шкафа, несколько вместительных выдвижных ящиков, расположенных внизу и в середине стенки, а также небольшой сервант, тумбу и место под телевизор. Благодаря такой комплектации и дизайну, с помощью стенки «Макарена - 4» можно не просто украсить свою гостиную, но и сделать ее светлой и комфортной.",
+      "description_preview": "Стенка для гостиной \"Макарена-4\" - это классическая, проверенная временем мебельная горка симметричной формы. Модель отличается максимальной эргономичностью и вместительностью. Конструкция объединяет сразу два полноценных платяных шкафа по бокам, центральную ТВ-зону, сервант и выдвижные ящики, что позволяет отказаться от покупки лишних комодов и шкафов в комнате. Конструкция и внутреннее наполнение Комплекс четко разделен на функциональные секции: Два боковых шкафа: Стенка комплектуется двумя по",
       "source_images": 3,
       "clean_images": 3,
       "clean_modes": [
@@ -5065,7 +4989,7 @@
         "Страна-производитель": "Россия",
         "Цвет": "Сиреневый металлик / Дуб Крафт белый"
       },
-      "description_preview": "Размер лестницы: 400х850х1500 мм Максимально рекомендованная нагрузка на верхний и нижний ярус 80-85 кг. Внимание! Матрас приобретается отдельно!",
+      "description_preview": "Двухъярусная кровать \"Бемби-11\" - яркий, надежный и многофункциональный мебельный комплекс для детской комнаты. Благодаря встроенной системе хранения и компактному расположению спальных мест, модель позволяет сэкономить полезную площадь комнаты для игр и учебы. Конструктивные особенности и хранение Кровать представляет собой продуманный двухэтажный блок с повышенной функциональностью: Два спальных места: Расположены друг над другом. Оснащены прочным глухим основанием (настил ЛДСП). Безопасность:",
       "source_images": 2,
       "clean_images": 2,
       "clean_modes": [
@@ -5101,7 +5025,7 @@
         "Страна-производитель": "Россия",
         "Цвет": "Милк / Ясень шимо светлый"
       },
-      "description_preview": "Размер лестницы: 400х850х1500 мм Максимально рекомендованная нагрузка на верхний и нижний ярус 80-85 кг. Внимание! Матрас приобретается отдельно!",
+      "description_preview": "Двухъярусная кровать \"Бемби-11\" - яркий, надежный и многофункциональный мебельный комплекс для детской комнаты. Благодаря встроенной системе хранения и компактному расположению спальных мест, модель позволяет сэкономить полезную площадь комнаты для игр и учебы. Конструктивные особенности и хранение Кровать представляет собой продуманный двухэтажный блок с повышенной функциональностью: Два спальных места: Расположены друг над другом. Оснащены прочным глухим основанием (настил ЛДСП). Безопасность:",
       "source_images": 2,
       "clean_images": 2,
       "clean_modes": [
@@ -5368,8 +5292,8 @@
     {
       "source_url": "https://yourroom.ru/products/170811175053180323115410",
       "name": "Матрас Классик h17 см СЛ - 800х1400 мм",
-      "customer_price": "2990",
-      "old_price": "3740",
+      "customer_price": "2790",
+      "old_price": "3490",
       "manufacturer": "Виктория",
       "category_path": [
         "Матрасы, наматрасники",
@@ -5493,10 +5417,41 @@
       ]
     },
     {
+      "source_url": "https://yourroom.ru/products/tumba-prikrovatnaya-verona-msp-1-dub-zolotoj--kamen-tjomnyj-2-2-2-2-2-2-2-2-2",
+      "name": "Тумба прикроватная \"Презент\" (МСП-1) СЛ - Дуб золотой / Камень тёмный",
+      "customer_price": "2490",
+      "old_price": "3110",
+      "manufacturer": "СВ-Мебель - Просто хорошая мебель",
+      "category_path": [
+        "Спальни",
+        "Тумбы прикроватные"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "501x358x414 мм",
+        "Вес": "31 кг",
+        "Объем": "0.02 м³",
+        "Срок гарантии, месяцев": "24 месяца",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб золотой / Камень тёмный"
+      },
+      "description_preview": "Максимальная нагрузка на крышку - 15кг Используемые материалы: Корпус - ЛДСП 16мм Дуб Крафт золотой. Фасад - ЛДСП 16мм Камень железный. Кромочный материал - Кромка 0,4х19 Вяз швейцарский, Кромка 0,4х19 Ателье (цемент) темный. Задние стенки и дно ящиков из ЛДВП. Направляющие: FIRMAX роликовые 300 мм.",
+      "source_images": 7,
+      "clean_images": 7,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
       "source_url": "https://yourroom.ru/products/navesnaya-polka-ameliya-pl-01-12-m-ost-sl",
       "name": "Навесная полка \"Амелия\" (ПЛ-01) 1,2 м СЛ - дуб Анкор светлый",
-      "customer_price": "811",
-      "old_price": "990",
+      "customer_price": "706",
+      "old_price": "860",
       "manufacturer": "Стендмебель",
       "category_path": [
         "Распашные шкафы",
@@ -5528,8 +5483,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-prikrovatnaya-s-nadstrojkoj-vegas-yasen-shimo-temnyjkofe-s-molokom-2-2-2",
       "name": "Тумба прикроватная с надстройкой \"Вегас\" ТБ 2 СЛ - Ясень шимо темный/Кофе с молоком",
-      "customer_price": "1790",
-      "old_price": "2560",
+      "customer_price": "1490",
+      "old_price": "2130",
       "manufacturer": "Стендмебель СЛ",
       "category_path": [
         "Спальни",
@@ -7286,6 +7241,38 @@
       ]
     },
     {
+      "source_url": "https://yourroom.ru/products/shkaf-2-stvorchatyj-shk-2-vega-dub-kraft-seryj--belyj-2",
+      "name": "Шкаф \"Вега\" ШК-2 СЛ - Дуб крафт серый / Белый",
+      "customer_price": "7990",
+      "old_price": "10650",
+      "manufacturer": "Интерьер-Центр",
+      "category_path": [
+        "Распашные шкафы",
+        "Двухдверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "600x420x2200 мм",
+        "Вес": "47.1 кг",
+        "Объем": "0.11 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "24",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб крафт серый / Белый"
+      },
+      "description_preview": "Шкаф станет элементом прихожей Вега или дополнит самостоятельный интерьер - Ручка пластик - Шкаф комплектуется выкатной штангой Дополнительно шкаф возможно укомплектовать зеркалом Вега ШК-2 Также Вы можете ознакомиться с товаром данной модели с улучшенной фурнитурой: Шкаф 2-створчатый ШК-2 \"Вега\"",
+      "source_images": 4,
+      "clean_images": 4,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
       "source_url": "https://yourroom.ru/products/shkaf-bergen-shk-1600-kashemir-uluchshennaya-furnitura",
       "name": "Шкаф четырехдверный \"Берген\" ШК-1600 (Улучшенная фурнитура) - Кашемир",
       "customer_price": "26083",
@@ -7573,8 +7560,8 @@
     {
       "source_url": "https://yourroom.ru/products/matras-ergoform-ppu-h14-sm-2-2-2-2",
       "name": "Матрас \"Эргоформ\" (ППУ) h14 см СЛ - 1600х2000 мм",
-      "customer_price": "6490",
-      "old_price": "6490",
+      "customer_price": "5790",
+      "old_price": "5790",
       "manufacturer": "Виктория",
       "category_path": [
         "Матрасы, наматрасники",
@@ -8465,7 +8452,7 @@
       "source_url": "https://yourroom.ru/products/matras-debyut-2-h-17-sm-800kh2000-mm",
       "name": "Матрас \"Нова\" блок независимых пружин h 17 см - 800х2000 мм",
       "customer_price": "7964",
-      "old_price": "7964",
+      "old_price": "8453",
       "manufacturer": "Мелодия Сна",
       "category_path": [
         "Матрасы, наматрасники",
@@ -10927,8 +10914,8 @@
     {
       "source_url": "https://yourroom.ru/products/polka-antresol-allegro-9-frezerovka-provans-bodega-belayasandal-belyj",
       "name": "Полка-антресоль \"Аллегро-9\" - Фрезеровка \"Прованс\", Бодега белая/Сандал белый",
-      "customer_price": "6027",
-      "old_price": "7530",
+      "customer_price": "6317",
+      "old_price": "7900",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -10961,8 +10948,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-allegro-9-matovoe-steklo-frezerovka-provans-bodega-belayasandal-belyj",
       "name": "Пенал \"Аллегро-9\" Матовое стекло - Фрезеровка \"Прованс\", Бодега белая/Сандал белый",
-      "customer_price": "11964",
-      "old_price": "14960",
+      "customer_price": "12453",
+      "old_price": "15570",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -11020,8 +11007,8 @@
     {
       "source_url": "https://yourroom.ru/products/obuvnitsa-innes-6",
       "name": "Обувница \"Иннэс-6\" - Бодега белая/Сандал белый",
-      "customer_price": "6607",
-      "old_price": "8260",
+      "customer_price": "6806",
+      "old_price": "8510",
       "manufacturer": "Диал",
       "category_path": [
         "Мебель для прихожей",
@@ -11052,8 +11039,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-innes-6-s-yashchikami",
       "name": "Пенал \"Иннэс-6\" с ящиками - Бодега белая/Сандал белый",
-      "customer_price": "11946",
-      "old_price": "14930",
+      "customer_price": "12308",
+      "old_price": "15390",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -11086,8 +11073,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-prikhozhaya-innes-6-4",
       "name": "Модульная прихожая \"Иннэс-6\" №4 - Бодега белая/Сандал белый",
-      "customer_price": "45721",
-      "old_price": "57150",
+      "customer_price": "47205",
+      "old_price": "59010",
       "manufacturer": "Диал",
       "category_path": [
         "Мебель для прихожей",
@@ -11120,8 +11107,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-innes-7-dub-kraft-zolotoj--monblan",
       "name": "Антресоль \"Иннэс-7\" - Дуб крафт золотой / Монблан",
-      "customer_price": "4706",
-      "old_price": "5880",
+      "customer_price": "4887",
+      "old_price": "6110",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -11155,8 +11142,8 @@
     {
       "source_url": "https://yourroom.ru/products/otkrytaya-polka-innes-7-2-dub-kraft-zolotoj",
       "name": "Открытая полка \"Иннэс-7\" №2 - Дуб Крафт Золотой",
-      "customer_price": "2932",
-      "old_price": "3670",
+      "customer_price": "3113",
+      "old_price": "3890",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -11212,8 +11199,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-pod-tv-innes-7-2-1800-dub-kraft-zolotoj--tiramisu-matovyj",
       "name": "Тумба под ТВ \"Иннэс-7\" №2 (1800) - Дуб крафт золотой / Тирамису матовый",
-      "customer_price": "8435",
-      "old_price": "10540",
+      "customer_price": "8742",
+      "old_price": "10930",
       "manufacturer": "Диал",
       "category_path": [
         "Гостиные",
@@ -11248,8 +11235,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-prikrovatnaya-innes-7-6-belyj--beton-snezhnyj",
       "name": "Тумба прикроватная \"Иннэс-7\" №6 - Белый / Бетон снежный",
-      "customer_price": "5032",
-      "old_price": "6290",
+      "customer_price": "4887",
+      "old_price": "6110",
       "manufacturer": "Диал",
       "category_path": [
         "Спальни",
@@ -11310,8 +11297,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-innes-7-1420-m-s-podemnym-mekhanizmom-dub-kraft-zolotoj--tiramisu-matovyj",
       "name": "Кровать \"Иннэс-7\" 1,4*2,0 м с подъемным механизмом - Дуб крафт золотой / Тирамису матовый",
-      "customer_price": "22951",
-      "old_price": "28690",
+      "customer_price": "23729",
+      "old_price": "29660",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -11346,8 +11333,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-ket-1-4-yashchika-belyj",
       "name": "Комод \"Кэт-1\" 4 ящика - Белый",
-      "customer_price": "8073",
-      "old_price": "10090",
+      "customer_price": "8398",
+      "old_price": "10500",
       "manufacturer": "Диал",
       "category_path": [
         "Комоды"
@@ -11560,8 +11547,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-vysokij-ket-1-s-antresolyu",
       "name": "Шкаф двухдверный высокий \"Кэт-1\" с антресолью - Графит",
-      "customer_price": "19765",
-      "old_price": "24710",
+      "customer_price": "18824",
+      "old_price": "23530",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -11593,8 +11580,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-ket-1-yasen-ankor-svetlyj--grafit",
       "name": "Шкаф двухдверный \"Кэт-1\" - Ясень Анкор светлый / Графит",
-      "customer_price": "12073",
-      "old_price": "15090",
+      "customer_price": "13068",
+      "old_price": "16340",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -11628,8 +11615,8 @@
     {
       "source_url": "https://yourroom.ru/products/vykatnaya-krovat-ket-1-0819-m-grafit",
       "name": "Выкатная кровать \"Кэт-1\" 0,8*1,9 м - Графит",
-      "customer_price": "7204",
-      "old_price": "9010",
+      "customer_price": "7222",
+      "old_price": "9030",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -11668,8 +11655,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-1-0920-m-s-yashchikom-belyj",
       "name": "Кровать \"Кэт-1\" 0,9*2,0 м с ящиком - Белый",
-      "customer_price": "9919",
-      "old_price": "12400",
+      "customer_price": "10969",
+      "old_price": "13710",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -11707,8 +11694,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-ket-1-s-yashchikami-grafit",
       "name": "Шкаф трехдверный \"Кэт-1\" с ящиками - Графит",
-      "customer_price": "22806",
-      "old_price": "28510",
+      "customer_price": "23331",
+      "old_price": "29160",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -11741,8 +11728,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-1-1420-m-s-osnovaniem-ldsp-belyj",
       "name": "Кровать \"Кэт-1\" 1,4*2,0 м с основанием ЛДСП - Белый",
-      "customer_price": "10570",
-      "old_price": "13210",
+      "customer_price": "11620",
+      "old_price": "14530",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -11776,8 +11763,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-1-1420-m-s-osnovaniem-ldsp-grafit",
       "name": "Кровать \"Кэт-1\" 1,4*2,0 м с основанием ЛДСП - Графит",
-      "customer_price": "11403",
-      "old_price": "14250",
+      "customer_price": "11928",
+      "old_price": "14910",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -11848,8 +11835,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-prikhozhaya-ket-1-1-yasen-ankor-svetlyj--grafit",
       "name": "Модульная прихожая \"Кэт-1\" №1 - Ясень Анкор светлый / Графит",
-      "customer_price": "27747",
-      "old_price": "34680",
+      "customer_price": "30263",
+      "old_price": "37830",
       "manufacturer": "Диал",
       "category_path": [
         "Мебель для прихожей",
@@ -11992,8 +11979,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-spalnya-ket-1-3-grafit",
       "name": "Модульная спальня \"Кэт-1\" №3 - Графит",
-      "customer_price": "66481",
-      "old_price": "83100",
+      "customer_price": "67622",
+      "old_price": "84530",
       "manufacturer": "Диал",
       "category_path": [
         "Спальни",
@@ -12226,8 +12213,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-ket-3-pravyj-kashemir--tiramisu-matovyj",
       "name": "Пенал \"Кэт-3\" - Правый, Кашемир / Тирамису матовый",
-      "customer_price": "13810",
-      "old_price": "17260",
+      "customer_price": "14770",
+      "old_price": "18460",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -12375,8 +12362,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-3-1420-m-s-osnovaniem-ldsp-art031-m1-kashemir--sontex-milk",
       "name": "Кровать арт.031-М1 (Полосы) 1,4*2,0 м с основанием ЛДСП - Кашемир / Сонтекс милк (кожзам)",
-      "customer_price": "20797",
-      "old_price": "24470",
+      "customer_price": "21774",
+      "old_price": "25620",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -12410,8 +12397,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-prikrovatnaya-ket-4-2-yashchika-bodega-belaya",
       "name": "Тумба прикроватная \"Кэт-4\" 2 ящика - Бодега белая",
-      "customer_price": "7276",
-      "old_price": "9100",
+      "customer_price": "7421",
+      "old_price": "9280",
       "manufacturer": "Диал",
       "category_path": [
         "Спальни",
@@ -12443,8 +12430,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-ket-4-bodega-belaya",
       "name": "Шкаф двухдверный \"Кэт-4\" - Бодега белая",
-      "customer_price": "19946",
-      "old_price": "24930",
+      "customer_price": "21159",
+      "old_price": "26450",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -12475,8 +12462,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-ket-4-dub-venge",
       "name": "Шкаф четырехдверный \"Кэт-4\" - Дуб Венге",
-      "customer_price": "40073",
-      "old_price": "50090",
+      "customer_price": "42879",
+      "old_price": "53600",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -12992,8 +12979,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-ket-6-pravyj-sandal-belyj--bodega-belaya",
       "name": "Пенал \"Кэт-6\" - Правый, Бодега белая/Сандал белый",
-      "customer_price": "11041",
-      "old_price": "13800",
+      "customer_price": "11566",
+      "old_price": "14460",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -13025,8 +13012,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-6-1220m-s-osnovaniem-ldsp-art017",
       "name": "Кровать \"Кэт-6\" 1,2*2,0м с основанием ЛДСП (арт.017) - Низкий щиток, Бодега белая/Сандал белый",
-      "customer_price": "14046",
-      "old_price": "17560",
+      "customer_price": "14480",
+      "old_price": "18100",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -13061,8 +13048,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-detskaya-kolibri-1",
       "name": "Модульная детская \"Колибри\" №1 - Бодега белая/Сандал белый",
-      "customer_price": "63296",
-      "old_price": "79120",
+      "customer_price": "66047",
+      "old_price": "82560",
       "manufacturer": "Диал",
       "category_path": [
         "Детская мебель",
@@ -13101,8 +13088,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-kupe-art-009-15-m-yasen-tjomnyj--yasen-svetlyj",
       "name": "Шкаф-купе арт. 009 1,5 м - Ясень тёмный / Ясень светлый",
-      "customer_price": "24888",
-      "old_price": "31110",
+      "customer_price": "26209",
+      "old_price": "32760",
       "manufacturer": "Диал",
       "category_path": [
         "Шкафы-купе"
@@ -13131,8 +13118,8 @@
     {
       "source_url": "https://yourroom.ru/products/polka-sharm-pl-2",
       "name": "Полка \"Шарм\" ПЛ-2 - Ясень Анкор светлый",
-      "customer_price": "2063",
-      "old_price": "2580",
+      "customer_price": "2082",
+      "old_price": "2600",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -13160,8 +13147,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-sharm-shk-3-s-yashchikami",
       "name": "Шкаф трехдверный \"Шарм\" ШК-3 с ящиками - Ясень Анкор светлый",
-      "customer_price": "32833",
-      "old_price": "41040",
+      "customer_price": "33992",
+      "old_price": "42490",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -13191,8 +13178,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-art031-m1-polosy-1420-m-s-osnovaniem-ldsp-yasen-ankor-svetlyj--sonteks-milk-velyur",
       "name": "Кровать арт.031-М1 (Полосы) 1,4*2,0 м с основанием ЛДСП - Ясень Анкор Светлый / Сонтекс милк (кожзам)",
-      "customer_price": "20634",
-      "old_price": "24280",
+      "customer_price": "21503",
+      "old_price": "25300",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -13358,8 +13345,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-gostinaya-sharm-2",
       "name": "Модульная гостиная \"Шарм\" №2 - Ясень Анкор светлый",
-      "customer_price": "57051",
-      "old_price": "71310",
+      "customer_price": "58554",
+      "old_price": "73190",
       "manufacturer": "Диал",
       "category_path": [
         "Гостиные",
@@ -15209,132 +15196,6 @@
         "clean_alternate",
         "clean_alternate",
         "clean_alternate",
-        "clean_alternate",
-        "clean_alternate",
-        "clean_alternate",
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/divan-krovat-lavis-dkd-20001-0920-m-s-osnovaniem-ldsp-belyjbelyj-soft-seryj-emalit",
-      "name": "Диван-кровать \"Лавис\" ДКД 2000.1 0,9*2,0 м с основанием ЛДСП - Белый/Белый софт-Серый эмалит",
-      "customer_price": "32916",
-      "old_price": "36570",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Кровати и тахты",
-        "Односпальные кровати"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "2032x950x930 мм",
-        "Вес": "100.06 кг",
-        "Объем": "1.77 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Ширина спального места": "900",
-        "Длина спального места": "2000",
-        "Основание": "Настил",
-        "Подъемный механизм": "Нет",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Материал обивки": "Без обивки",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт-Серый эмалит"
-      },
-      "description_preview": "Кровать-диван \"Лавис\" ДКД 2000.1 - это односпальная подростковая тахта с тремя спинками и встроенной системой хранения. Модель входит в состав одноименной модульной детской серии и совмещает функции полноценного спального места ночью и зоны для отдыха или приема гостей днем. Материалы и цветовое исполнение Корпус: выполнен из матового ЛДСП в чистом белом цвете. Рельефные фасады: спинки выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпуска",
-      "source_images": 1,
-      "clean_images": 1,
-      "clean_modes": [
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/stellazh-lavis-sd-4501-belyjbelyj-soft-roza",
-      "name": "Стеллаж \"Лавис\" СД 450.1 - Белый/Белый софт-Роза",
-      "customer_price": "13981",
-      "old_price": "15530",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Распашные шкафы",
-        "Стеллажи"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "450x445x2200 мм",
-        "Вес": "74.4 кг",
-        "Объем": "0.44 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт-Роза"
-      },
-      "description_preview": "Стеллаж \"Лавис\" СД 450.1 - это высокий, узкий и вместительный шкаф-пенал открытого типа для детской или подростковой комнаты. Он занимает минимум места на полу, но за счет своей высоты позволяет аккуратно разложить множество книг, учебников, наград и личных вещей ребенка. Применяемые материалы и палитра Рельефные фасады: фасады ящиков выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпускается в широком разнообразии модных оттенков, что поз",
-      "source_images": 2,
-      "clean_images": 2,
-      "clean_modes": [
-        "clean_alternate",
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/stellazh-lavis-sd-9011-belyj-belyj-soft",
-      "name": "Стеллаж \"Лавис\" СД 900.1 - Белый/ Белый софт",
-      "customer_price": "23234",
-      "old_price": "25820",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Распашные шкафы",
-        "Стеллажи"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "900x445x2200 мм",
-        "Вес": "83.62 кг",
-        "Объем": "0.87 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/ Белый софт"
-      },
-      "description_preview": "Стеллаж \"Лавис\" СД 901.1 - это высокий, широкий и вместительный шкаф-пенал открытого типа для детской или подростковой комнаты. За счет увеличенной ширины, стеллаж позволяет аккуратно разложить множество книг, учебников, наград и личных вещей ребенка. Применяемые материалы и палитра Рельефные фасады: створки выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпускается в широком разнообразии модных оттенков, что позволяет легко вписать мебель",
-      "source_images": 1,
-      "clean_images": 1,
-      "clean_modes": [
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-lavis-shd-9001-belyjbelyj-soft-persik-soft",
-      "name": "Шкаф двухдверный \"Лавис\" ШД 900.1 - Белый/Белый софт-Персик софт",
-      "customer_price": "28091",
-      "old_price": "31210",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Распашные шкафы",
-        "Двухдверные шкафы"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "900x445x2200 мм",
-        "Вес": "103.97 кг",
-        "Объем": "0.9 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Тип петель": "Без доводчиков",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт-Персик софт"
-      },
-      "description_preview": "Шкаф двухдверный \"Ки-Ки\" ШД 900.1 - это полноценный, вместительный платяной шкаф для детской или подростковой комнаты. Благодаря ширине в 90 см он позволяет организовать основное хранение всего гардероба ребенка в одном месте, не перегружая при этом интерьер благодаря светлому дизайну. Применяемые материалы и палитра Рельефные фасады: ящики выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпускается в широком разнообразии модных оттенков, ч",
-      "source_images": 4,
-      "clean_images": 4,
-      "clean_modes": [
         "clean_alternate",
         "clean_alternate",
         "clean_alternate",
@@ -17260,8 +17121,8 @@
     }
   ],
   "complete": true,
-  "days_since_last_success": 27.9,
-  "sitemap_urls_total": 7721,
+  "days_since_last_success": 14.02,
+  "sitemap_urls_total": 7649,
   "warehouse_id": "019a5ab3-c024-706c-8b63-9059588d3d76",
-  "finished_at": "2026-10-22T12:59:38+00:00"
+  "finished_at": "2026-11-05T15:11:12+00:00"
 }
