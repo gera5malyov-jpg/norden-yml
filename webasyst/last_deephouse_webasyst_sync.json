@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-11-03T13:28:24.425889+00:00",
+  "started_at": "2026-11-05T13:49:43.365686+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=336",
   "type_name": "deephouse-336",
@@ -8,10 +8,10 @@
   "webasyst_stock_id": "66",
   "kit_stock": "МСК",
   "kit_stock_id": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
-  "kit_variants_scanned": 1252,
-  "kit_webasyst_336_variants": 1215,
+  "kit_variants_scanned": 1255,
+  "kit_webasyst_336_variants": 1218,
   "kit_duplicate_skus": 0,
-  "webasyst_products": 1936,
+  "webasyst_products": 1937,
   "webasyst_duplicate_skus": 1,
   "processed": 5,
   "created": 0,
@@ -179,6 +179,11 @@
     {
       "sku": "DEEP-56158",
       "variant_id": "01a0ce4b-7f52-70e0-9c5a-2245a823702a",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-56178",
+      "variant_id": "01a1abf4-5f5d-724b-bb1f-176d7256061a",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
@@ -1794,6 +1799,11 @@
     {
       "sku": "DEEP-61643",
       "variant_id": "01a0ce10-4fe8-723f-86d7-116c328fa92f",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
+      "sku": "DEEP-61645",
+      "variant_id": "01a1abc4-122c-7edf-b5a8-e555951bdcc0",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
@@ -5972,6 +5982,11 @@
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
+      "sku": "DEEP-67370",
+      "variant_id": "01a1abec-7ee0-7889-a790-0532c703ab11",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
       "sku": "DEEP-67436",
       "variant_id": "01a177e6-c67f-78ef-9963-b2107e7f75dc",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
@@ -6162,7 +6177,7 @@
   ],
   "complete": false,
   "webasyst_routing_feature_code": "kenner_f93046718124",
-  "webasyst_336_products": 1936,
-  "finished_at": "2026-11-03T13:43:59.538591+00:00",
+  "webasyst_336_products": 1937,
+  "finished_at": "2026-11-05T14:04:25.815174+00:00",
   "status": "degraded"
 }
