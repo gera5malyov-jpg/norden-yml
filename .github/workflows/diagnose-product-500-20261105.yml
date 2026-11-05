@@ -54,6 +54,36 @@ jobs:
                   for p in /var/log/nginx/error.log /var/log/apache2/error.log /var/log/php8.1-fpm.log /var/log/php8.2-fpm.log /var/log/php8.3-fpm.log /var/log/php8.4-fpm.log; do
                     if [ -f "$p" ]; then echo "FILE $p"; tail -n 180 "$p" | grep -Ei 'fatal|uncaught|upstream|error|exception|php message' | tail -18 | cut -c 1-250 | sed -E 's/([A-Za-z0-9_.+-]+)@([A-Za-z0-9.-]+)/[EMAIL]/g' ; fi
                   done
+                  echo "===PRODUCT-COMPARISON==="
+                  for slug in stul-barnyy-750-venskiy-tverdyy-belenyy-dub stul-barnyy-dobrin-kruger-arm-black-siniy-velvet-lar-e2041-19 stul-barnyy-dobrin-charly-black-korichnevyy-tvid-leo45 stul-signal-katana-t-259-kapuchino-kashemir stul-signal-hugo-brego-22-svetlo-bezhevyy-chernyy-povorotnyy beskarkasnoe-kreslo-dobrin-connor-belyy-iskusstvennyy-krolik-01; do
+                    printf "%s " "$slug"; curl -sS -L -k --max-time 15 -o /dev/null --resolve profikompany.ru:443:127.0.0.1 -w '%{http_code}\n' "https://profikompany.ru/$slug/"; done
+                  echo "===ROOT CHECK==="; readlink -f "$ROOT"; ls -ld "$ROOT" /home/web/profikompany.ru/www 2>/dev/null
+                  echo "===LOG PATH CANDIDATES==="
+                  find /home/web /var/log -maxdepth 4 -type f \( -iname '*php*error*' -o -iname '*php*log*' -o -iname '*error*.log' \) -printf '%TY-%Tm-%TdT%TH:%TM %s %p\n' 2>/dev/null | sort -r | head -35
+                  echo "===DATABASE READ-ONLY PRODUCT LOOKUP==="
+                  cd "$ROOT" || exit 1
+                  php -d display_errors=0 -r '
+                  try {
+                    $all=include "wa-config/db.php";
+                    $db=$all["default"] ?? reset($all);
+                    if (!is_array($db)) {echo "DB_CONFIG_FORMAT_UNKNOWN\n";exit;}
+                    $host=$db["host"]??"localhost";$user=$db["user"]??"";$pass=$db["password"]??"";$name=$db["database"]??"";
+                    $port=(int)($db["port"]??3306);
+                    mysqli_report(MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT);
+                    $m=new mysqli($host,$user,$pass,$name,$port);$m->set_charset("utf8mb4");
+                    $sql="SELECT id,url,name,status,category_id,type_id FROM shop_product WHERE url IN (?,?,?,?,?,?)";
+                    $q=$m->prepare($sql);
+                    $one="stul-barnyy-750-venskiy-tverdyy-belenyy-dub";
+                    $two="stul-barnyy-dobrin-kruger-arm-black-siniy-velvet-lar-e2041-19";
+                    $three="stul-barnyy-dobrin-charly-black-korichnevyy-tvid-leo45";
+                    $four="stul-signal-katana-t-259-kapuchino-kashemir";
+                    $five="stul-signal-hugo-brego-22-svetlo-bezhevyy-chernyy-povorotnyy";
+                    $six="beskarkasnoe-kreslo-dobrin-connor-belyy-iskusstvennyy-krolik-01";
+                    $q->bind_param("ssssss",$one,$two,$three,$four,$five,$six);
+                    $q->execute();
+                    foreach($q->get_result() as $row){echo json_encode($row,JSON_UNESCAPED_UNICODE|JSON_INVALID_UTF8_SUBSTITUTE)."\n";}
+                  } catch(Throwable $e) {echo "DATABASE_READ_ERROR ".get_class($e)."\n";}
+                  '
                   echo "===FINISH==="
                   '''
                   p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=12","root@45.86.180.49","bash","-s"],input=script,text=True,capture_output=True,timeout=125)
