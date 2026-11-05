@@ -109,6 +109,12 @@ jobs:
                   else echo "compiled template no longer present"; fi
                   echo "===ORIGINAL PRODUCT TEMPLATE CANDIDATES==="
                   find "$ROOT/wa-data/public/shop/themes" -name product.html -type f -printf '%TY-%Tm-%Td %s %p\n' 2>/dev/null | sort -r | head -12
+                  echo "===EXTERNAL IMAGE SOURCE TEMPLATE CONTEXT==="
+                  SRC="$ROOT/wa-data/public/shop/themes/pureMegapolis42/product.html"
+                  grep -n -E -B 14 -A 21 'preg_match_all|__extimg_matches|__has_extimg' "$SRC" | head -110 | cut -c 1-250
+                  echo "===COMPILED LINE 93: RELEVANT SEGMENTS==="
+                  C="$ROOT/wa-cache/df119d/apps/shop/templates/compiled/shop_ru_RU/91/b9/94/91b9949015c58bfd7acb172d8abad1b94efda313.file.product.html.php"
+                  python3 -c 'import sys; s=open(sys.argv[1]).read().splitlines()[92]; print("line93_length",len(s)); needles=["preg_match_all","__extimg_matches","__has_extimg"]; [(print("term",k,"at",i,"fragment:",s[max(0,i-145):i+330])) for k in needles for i in [s.find(k)] if i>=0]' "$C"
                   echo "===FINISH==="
                   '''
                   p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=12","root@45.86.180.49","bash","-s"],input=script,text=True,capture_output=True,timeout=125)
