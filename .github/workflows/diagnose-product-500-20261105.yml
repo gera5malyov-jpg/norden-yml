@@ -100,6 +100,15 @@ jobs:
                   fi
                   echo "===PHP AS WEB EXTENSIONS==="
                   runuser -u web -- php -r 'echo "PHP_VERSION=",PHP_VERSION," mysqli=",extension_loaded("mysqli")?"yes":"no"," pdo_mysql=",extension_loaded("pdo_mysql")?"yes":"no","\n";' 2>&1
+                  echo "===COMPILED PRODUCT TEMPLATE HEADER AND FAILING LINE==="
+                  C="$ROOT/wa-cache/df119d/apps/shop/templates/compiled/shop_ru_RU/91/b9/94/91b9949015c58bfd7acb172d8abad1b94efda313.file.product.html.php"
+                  if [ -f "$C" ]; then
+                    head -n 32 "$C" | cut -c 1-320
+                    echo "--EXACT 80..104--"
+                    nl -ba "$C" | sed -n '80,104p' | cut -c 1-450
+                  else echo "compiled template no longer present"; fi
+                  echo "===ORIGINAL PRODUCT TEMPLATE CANDIDATES==="
+                  find "$ROOT/wa-data/public/shop/themes" -name product.html -type f -printf '%TY-%Tm-%Td %s %p\n' 2>/dev/null | sort -r | head -12
                   echo "===FINISH==="
                   '''
                   p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=12","root@45.86.180.49","bash","-s"],input=script,text=True,capture_output=True,timeout=125)
