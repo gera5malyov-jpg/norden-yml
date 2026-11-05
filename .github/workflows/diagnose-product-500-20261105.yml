@@ -84,6 +84,22 @@ jobs:
                     foreach($q->get_result() as $row){echo json_encode($row,JSON_UNESCAPED_UNICODE|JSON_INVALID_UTF8_SUBSTITUTE)."\n";}
                   } catch(Throwable $e) {echo "DATABASE_READ_ERROR ".get_class($e)."\n";}
                   '
+                  echo "===CAPTURE NEW PHP ERRORS FROM SINGLE REQUEST==="
+                  PHPLOG=/home/web/log/php-errors.log
+                  B=$(stat -c %s "$PHPLOG" 2>/dev/null || echo 0)
+                  echo "php_log_start_bytes=$B"
+                  curl -sS -k -L --max-time 12 -o /dev/null --resolve profikompany.ru:443:127.0.0.1 -w 'target_response=%{http_code}\n' 'https://profikompany.ru/stul-barnyy-750-venskiy-tverdyy-belenyy-dub/'
+                  sleep 2
+                  A=$(stat -c %s "$PHPLOG" 2>/dev/null || echo 0)
+                  echo "php_log_new_bytes=$((A-B))"
+                  if [ "$A" -gt "$B" ] && [ $((A-B)) -lt 300000 ]; then
+                    dd if="$PHPLOG" iflag=skip_bytes,count_bytes skip="$B" count="$((A-B))" status=none 2>/dev/null | tail -n 220 | cut -c 1-330 | sed -E 's/([[:alnum:]_.+-]+)@([[:alnum:].-]+)/[EMAIL]/g;s/(token|password|key|secret|authorization)[[:space:]]*[:=][[:space:]]*[^ ,;]+/\1=[REDACTED]/Ig;s/([?&][[:alnum:]_-]+)=([^& ]+)/\1=[REDACTED]/g' | tail -110
+                  else
+                    echo "===PHP ERROR LOG TAIL: FILTERED==="
+                    tail -n 200 "$PHPLOG" 2>/dev/null | grep -Ei -A 9 -B 1 'Fatal|Uncaught|Error|Warning|Parse|exception|Smarty' | tail -55 | cut -c 1-280
+                  fi
+                  echo "===PHP AS WEB EXTENSIONS==="
+                  runuser -u web -- php -r 'echo "PHP_VERSION=",PHP_VERSION," mysqli=",extension_loaded("mysqli")?"yes":"no"," pdo_mysql=",extension_loaded("pdo_mysql")?"yes":"no","\n";' 2>&1
                   echo "===FINISH==="
                   '''
                   p=subprocess.run(["ssh","-i",key,"-o","BatchMode=yes","-o","StrictHostKeyChecking=no","-o","UserKnownHostsFile=/dev/null","-o","ConnectTimeout=12","root@45.86.180.49","bash","-s"],input=script,text=True,capture_output=True,timeout=125)
