@@ -4,7 +4,7 @@ import json
 from collections import Counter
 from tnved_sync import post, list_products, get_product_attributes
 
-TASK_IDS = [5981594662, 5981594734, 5981594818, 5981594906, 5981594966]
+TASK_IDS = [5981644069]
 
 for task_id in TASK_IDS:
     try:
