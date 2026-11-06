@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/ozon-tnved-skipped-probe.yml'
+      - 'ozon/tnved_skipped_probe.py'
 permissions:
   contents: read
 jobs:
