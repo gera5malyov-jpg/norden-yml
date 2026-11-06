@@ -1,0 +1,30 @@
+name: Ozon TN VED dictionary audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-tnved-dictionary-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      DRY_RUN: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read Ozon dictionary values without changing products
+        run: python ozon/tnved_dictionary_audit.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tnved-dictionary
+          path: ozon/tnved_dictionary_20261106.json
+          retention-days: 7
