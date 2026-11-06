@@ -1,0 +1,22 @@
+name: Repair 7 Ozon TN VED and invalid hashtags
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-tnved-hashtag-repair.yml'
+permissions:
+  contents: read
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Write clean hashtags and TN VED only
+        run: python ozon/tnved_hashtag_repair.py
