@@ -34,7 +34,7 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      DRY_RUN: ${{ github.event_name == 'push' && 'true' || (github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false') }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
       MAX_UPDATES_PER_RUN: '500'
       UPDATE_BATCH_SIZE: '50'
       TNVED_OVERRIDES: ozon/tnved_overrides.json
