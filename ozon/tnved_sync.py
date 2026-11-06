@@ -165,6 +165,20 @@ def resolve_override(raw, category_id, type_id, attribute_id, dictionary_cache):
         return None
     if isinstance(raw, str):
         raw = {"value": raw}
+    # A ten-digit TN VED code is resolved against the live Ozon dictionary for
+    # this exact category/type. It must have exactly one matching dictionary entry.
+    code = str(raw.get("code") or "").strip()
+    if code:
+        if len(code) != 10 or not code.isdigit():
+            return None
+        key = (category_id, type_id, attribute_id)
+        if key not in dictionary_cache:
+            dictionary_cache[key] = get_dictionary_values(category_id, type_id, attribute_id)
+        matches = [entry for entry in dictionary_cache[key]
+                   if str(entry.get("value") or "").split(" - ")[0].strip() == code]
+        if len(matches) != 1 or not int(matches[0].get("id") or 0):
+            return None
+        return (int(matches[0]["id"]), str(matches[0]["value"]))
     value = str(raw.get("value") or "").strip()
     dictionary_value_id = int(raw.get("dictionary_value_id") or 0)
     if dictionary_value_id:
