@@ -8,6 +8,8 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
+from tnved_rules import suggest as suggest_tnved
+
 BASE_URL = "https://api-seller.ozon.ru"
 CLIENT_ID = os.environ.get("OZON_CLIENT_ID", "").strip()
 API_KEY = os.environ.get("OZON_API_KEY", "").strip()
@@ -218,6 +220,7 @@ def main():
             skipped_no_tnved_attr.add((category_id, type_id))
 
     known_by_model = defaultdict(set)
+    known_by_category_code = defaultdict(set)
     missing = []
     already_filled = 0
 
@@ -234,6 +237,7 @@ def main():
         model_id = int((product.get("model_info") or {}).get("model_id") or 0)
         if value:
             already_filled += 1
+            known_by_category_code[(group, value[1].split(' ')[0])].add(value)
             if model_id:
                 known_by_model[(group, model_id)].add(value)
         else:
@@ -293,6 +297,14 @@ def main():
             if len(candidates) == 1:
                 resolved = next(iter(candidates))
                 source = f"same Ozon model_id={item['model_id']}"
+
+        if not resolved:
+            suggested_code = suggest_tnved(product)
+            if suggested_code:
+                matches = known_by_category_code.get((group, suggested_code), set())
+                if len(matches) == 1:
+                    resolved = next(iter(matches))
+                    source = "construction + in-category verified code"
 
         if not resolved:
             key = f"{category_id}:{type_id}"
