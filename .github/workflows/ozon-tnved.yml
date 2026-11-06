@@ -1,6 +1,12 @@
 name: Ozon TN VED sync
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-tnved.yml'
+      - 'ozon/tnved_sync.py'
+      - 'ozon/tnved_overrides.json'
   schedule:
     - cron: '37 3 * * *'
   workflow_dispatch:
@@ -28,11 +34,12 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+      DRY_RUN: ${{ github.event_name == 'push' && 'true' || (github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false') }}
       MAX_UPDATES_PER_RUN: '500'
       UPDATE_BATCH_SIZE: '50'
       TNVED_OVERRIDES: ozon/tnved_overrides.json
       TNVED_SUMMARY: ozon/tnved_summary.md
+      TNVED_AUDIT_PATH: ozon/tnved_audit.json
 
     steps:
       - name: Checkout
@@ -53,6 +60,17 @@ jobs:
 
       - name: Sync missing TN VED
         run: python ozon/tnved_sync.py
+
+      - name: Upload audit and report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tnved-audit
+          path: |
+            ozon/tnved_summary.md
+            ozon/tnved_audit.json
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Add report to job summary
         if: always()
