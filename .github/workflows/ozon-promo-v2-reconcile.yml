@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/ozon-promo-v2-reconcile.yml'
+      - 'ozon/promo_v2_reconcile.py'
   workflow_dispatch:
     inputs:
       dry_run:
