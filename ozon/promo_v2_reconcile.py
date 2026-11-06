@@ -233,8 +233,8 @@ def main():
                 p = selected_price.get(pid)
                 if p is not None and floor <= p <= ceiling:
                     row = {"product_id": pid, "action_price": money(p)}
-                    if str(action.get("action_type") or "") == "STOCK_DISCOUNT":
-                        row["stock"] = "1"
+                    # Since 19 Oct 2026, stock is not accepted for boosting actions.
+                    # Quantity, if applicable, must be managed via Ozon-specific controls.
                     plan.append((aid, row))
         report["planned_additions"] = len(plan)
 
