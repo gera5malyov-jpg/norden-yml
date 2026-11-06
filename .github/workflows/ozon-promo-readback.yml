@@ -1,0 +1,85 @@
+name: Verify Ozon promotions against minimum prices
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-promo-readback.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install requests
+      - name: Read only fresh price and action membership
+        run: |
+          python - <<'PY'
+          import os,time,json,requests,decimal
+          S=requests.Session()
+          S.headers.update({"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"})
+          BASE="https://api-seller.ozon.ru"
+          def call(method,path,payload=None):
+            for i in range(9):
+              r=S.request(method,BASE+path,json=payload,timeout=150)
+              if r.status_code==429 or r.status_code>=500:
+                time.sleep(min(20,2+i*2));continue
+              r.raise_for_status()
+              return r.json()
+            raise RuntimeError("API retries exhausted: "+path)
+          def money(v):
+            try:return decimal.Decimal(str(v or "0"))
+            except:return decimal.Decimal("0")
+          rows=[];seen=set();cursor=""
+          while True:
+            d=call("POST","/v5/product/info/prices",{"cursor":cursor,"filter":{"visibility":"ALL"},"limit":1000})
+            page=d.get("items") or []
+            for x in page:
+              pid=int(x.get("product_id") or 0)
+              if pid and pid not in seen:rows.append(x);seen.add(pid)
+            nxt=d.get("cursor") or ""
+            if not page or not nxt or nxt==cursor:break
+            cursor=nxt
+          bypid={int(x["product_id"]):x for x in rows}
+          actions=call("GET","/v1/actions").get("result") or []
+          report={"product_prices_loaded":len(rows),"actions":[],"below_min_total":0,"unknown_price_total":0,"missing_action_price_total":0}
+          for a in actions:
+            aid=a["id"];offs=0;products=[]
+            while True:
+              d=call("POST","/v1/actions/products",{"action_id":aid,"limit":1000,"offset":offs})
+              page=(d.get("result") or {}).get("products") or []
+              products.extend(page)
+              if len(page)<1000:break
+              offs+=1000
+            bad=[]; unknown=0; no_ap=0
+            for x in products:
+              pid=int(x.get("id") or x.get("product_id") or 0)
+              master=bypid.get(pid)
+              if not master:unknown+=1;continue
+              floor=money((master.get("price") or {}).get("min_price"))
+              ap=money(x.get("action_price"))
+              if ap<=0:no_ap+=1;continue
+              if floor>0 and ap<floor:
+                bad.append({"offer_id":master.get("offer_id"),"product_id":pid,"promo_price":str(ap),"minimum_price":str(floor)})
+            report["actions"].append({"id":aid,"title":a.get("title"),"type":a.get("action_type"),"participants":len(products),"below_min_count":len(bad),"below_min_sample":bad[:50],"unknown_price":unknown,"missing_action_price":no_ap})
+            report["below_min_total"]+=len(bad)
+            report["unknown_price_total"]+=unknown
+            report["missing_action_price_total"]+=no_ap
+          os.makedirs("ozon",exist_ok=True)
+          with open("ozon/promo_readback_latest.json","w",encoding="utf-8") as f:json.dump(report,f,ensure_ascii=False,indent=2)
+          print("PROMO_READBACK",json.dumps(report,ensure_ascii=False)[:12000])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ozon-promo-readback
+          path: ozon/promo_readback_latest.json
+          retention-days: 7
