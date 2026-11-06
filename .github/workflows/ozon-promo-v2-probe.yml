@@ -1,0 +1,33 @@
+name: Probe Ozon promotion API v2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-promo-v2-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - run: |
+          python - <<'PY'
+          import urllib.request,urllib.error,json,os
+          h={"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"}
+          def req(path,body):
+            r=urllib.request.Request("https://api-seller.ozon.ru"+path,data=json.dumps(body).encode(),headers=h)
+            try:
+              with urllib.request.urlopen(r,timeout=60) as fp:return fp.status,json.loads(fp.read())
+            except urllib.error.HTTPError as e:return e.code, e.read().decode("utf-8","replace")[:1400]
+          for path,aid in [("/v2/actions/products",1977747),("/v2/actions/candidates",1977747),("/v2/actions/products",4469666),("/v2/actions/candidates",4469666)]:
+            code,d=req(path,{"action_id":aid,"limit":2,"last_id":""})
+            print("PROBE",path,aid,"status",code,"value",json.dumps(d,ensure_ascii=False)[:3900])
+          PY
