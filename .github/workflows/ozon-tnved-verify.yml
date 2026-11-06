@@ -1,0 +1,26 @@
+name: Verify Ozon TN VED updates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-tnved-verify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify tasks and readback of product attributes
+        run: python ozon/tnved_check.py
