@@ -244,6 +244,31 @@ def main():
                 "attribute_id": attribute_id,
             })
 
+    # Read-only diagnostic artifact. Kept in GitHub Actions artifacts, never committed.
+    audit_path = os.environ.get("TNVED_AUDIT_PATH", "").strip()
+    if audit_path:
+        audit = []
+        for p in products:
+            group = (int(p.get("description_category_id") or 0), int(p.get("type_id") or 0))
+            meta = tnved_attr_by_group.get(group)
+            if not meta:
+                continue
+            attrs = []
+            for a in (p.get("attributes") or []):
+                vals = [str(v.get("value") or "")[:120] for v in (a.get("values") or [])]
+                vals = [v for v in vals if v and len(v) < 120]
+                if vals and len(attrs) < 35:
+                    attrs.append([int(a.get("id") or 0), vals[:3]])
+            a = find_product_attr(p, int(meta.get("id") or 0))
+            audit.append({
+                "offer_id": p.get("offer_id"), "name": p.get("name"),
+                "category": group[0], "type": group[1],
+                "model_id": (p.get("model_info") or {}).get("model_id"),
+                "tnved": attr_value_tuple(a or {}), "attributes": attrs,
+            })
+        Path(audit_path).write_text(json.dumps(audit, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        print(f"Diagnostic inventory saved: {len(audit)} products")
+
     overrides = load_overrides()
     dictionary_cache = {}
     proposals = []
