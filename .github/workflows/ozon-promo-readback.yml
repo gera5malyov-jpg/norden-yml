@@ -36,7 +36,7 @@ jobs:
               return r.json()
             raise RuntimeError("API retries exhausted: "+path)
           def money(v):
-            try:return decimal.Decimal(str(v or "0"))
+            try:return decimal.Decimal(str((v.get("amount") if isinstance(v,dict) else v) or "0"))
             except:return decimal.Decimal("0")
           rows=[];seen=set();cursor=""
           while True:
@@ -52,13 +52,17 @@ jobs:
           actions=call("GET","/v1/actions").get("result") or []
           report={"product_prices_loaded":len(rows),"actions":[],"below_min_total":0,"unknown_price_total":0,"missing_action_price_total":0}
           for a in actions:
-            aid=a["id"];offs=0;products=[]
+            aid=a["id"];last_id="";products=[]
             while True:
-              d=call("POST","/v1/actions/products",{"action_id":aid,"limit":1000,"offset":offs})
-              page=(d.get("result") or {}).get("products") or []
+              d=call("POST","/v2/actions/products",{"action_id":aid,"limit":100,"last_id":last_id})
+              page=d.get("products") or []
               products.extend(page)
-              if len(page)<1000:break
-              offs+=1000
+              nxt=str(d.get("last_id") or "")
+              if not page or len(products)>=int(d.get("total") or 0)>0:break
+              if not nxt or nxt==last_id:
+                if len(page)>=100:raise RuntimeError("Incomplete v2 paging")
+                break
+              last_id=nxt
             bad=[]; unknown=0; no_ap=0
             for x in products:
               pid=int(x.get("id") or x.get("product_id") or 0)
