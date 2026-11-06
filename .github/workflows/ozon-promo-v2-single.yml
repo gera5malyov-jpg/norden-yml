@@ -1,0 +1,42 @@
+name: Ozon promo API v2 safe single-product test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-promo-v2-single.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - run: |
+          python - <<'PY'
+          import json,urllib.request,urllib.error,os
+          h={"Client-Id":os.environ["OZON_CLIENT_ID"],"Api-Key":os.environ["OZON_API_KEY"],"Content-Type":"application/json"}
+          def api(path,payload):
+            r=urllib.request.Request("https://api-seller.ozon.ru"+path,data=json.dumps(payload).encode(),headers=h)
+            try:
+              with urllib.request.urlopen(r,timeout=90) as fp:return fp.status,json.loads(fp.read())
+            except urllib.error.HTTPError as e:return e.code,e.read().decode("utf-8","replace")[:1800]
+          aid=1977747
+          pid=419777151
+          code,info=api("/v2/actions/candidates",{"action_id":aid,"limit":100,"last_id":""})
+          if code!=200:raise SystemExit("Cannot get candidates")
+          c=next((x for x in info.get("products",[]) if int(x["id"])==pid),None)
+          if c is None:raise SystemExit("Chosen sample no longer in first candidate page; test skipped safely")
+          floor=float(c.get("min_seller_price",{}).get("amount") or 0)
+          ceiling=float(c.get("max_action_price",{}).get("amount") or 0)
+          if not floor or ceiling<floor:raise SystemExit("Sample not safe anymore")
+          payload={"action_id":aid,"products":[{"product_id":pid,"action_price":{"amount":str(int(ceiling)),"currency":"RUB"}}]}
+          status,result=api("/v1/actions/products/update",payload)
+          print("V2_SINGLE_WRITE",status,json.dumps(result,ensure_ascii=False)[:2300],"pid",pid,"floor",floor,"ceiling",ceiling)
+          if status!=200:raise SystemExit(2)
+          PY
