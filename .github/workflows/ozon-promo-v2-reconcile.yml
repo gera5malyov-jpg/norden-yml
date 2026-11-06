@@ -1,0 +1,46 @@
+name: Ozon v2 safe promotion reconciliation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-promo-v2-reconcile.yml'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Read-only reconciliation'
+        required: true
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ozon-promo-v2-reconcile
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      DRY_RUN: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reconcile promo prices with minimums
+        run: python ozon/promo_v2_reconcile.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ozon-promo-v2-reconciliation
+          path: ozon/promo_v2_reconcile_report.json
+          retention-days: 7
