@@ -3,7 +3,7 @@
 import json
 from tnved_sync import post
 OFFERS=["RED-00-00012003","RED-00-00010489","RED-00-00012053","RED-00-00012051","RED-00-00010541","RED-00-00010505","SAMS-530581"]
-for task_id in [5981953233,5981953269]:
+for task_id in [5981992617]:
     try:
         r=post("/v1/product/import/info",{"task_id":task_id}).get("result") or {}
         for item in r.get("items") or []:
