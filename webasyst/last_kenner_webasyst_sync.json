@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-11-05T12:34:08.249787+00:00",
+  "started_at": "2026-11-06T12:19:57.101953+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=334",
   "type_name": "kennermebel-334",
@@ -15,10 +15,10 @@
   "webasyst_duplicate_skus": 0,
   "processed": 88,
   "created": 0,
-  "updated_prices_stock": 3,
+  "updated_prices_stock": 6,
   "summaries_updated_from_kit": 0,
   "kit_variants_without_images": 1,
-  "unchanged": 85,
+  "unchanged": 82,
   "features_created": 0,
   "feature_values_written": 0,
   "file_urls_resolved": 1426,
@@ -109,24 +109,54 @@
   "sample_new": [],
   "sample_updates": [
     {
-      "sku": "334-320851",
+      "sku": "334-320835",
+      "fields": [
+        "stock"
+      ],
+      "price": "16700.00",
+      "compare_price": "16700.00",
+      "stock": 6,
+      "images_in_summary": 24
+    },
+    {
+      "sku": "334-320850",
       "fields": [
         "stock"
       ],
       "price": "17340.00",
       "compare_price": "17340.00",
-      "stock": 108,
+      "stock": 62,
+      "images_in_summary": 16
+    },
+    {
+      "sku": "334-321927",
+      "fields": [
+        "stock"
+      ],
+      "price": "35400.00",
+      "compare_price": "58500.00",
+      "stock": 2,
       "images_in_summary": 17
     },
     {
-      "sku": "334-320852",
+      "sku": "334-322383",
       "fields": [
         "stock"
       ],
-      "price": "17340.00",
-      "compare_price": "17340.00",
-      "stock": 54,
-      "images_in_summary": 13
+      "price": "12240.00",
+      "compare_price": "12240.00",
+      "stock": 9,
+      "images_in_summary": 11
+    },
+    {
+      "sku": "334-323471",
+      "fields": [
+        "stock"
+      ],
+      "price": "42050.00",
+      "compare_price": "42050.00",
+      "stock": 17,
+      "images_in_summary": 19
     },
     {
       "sku": "334-324878",
@@ -135,13 +165,13 @@
       ],
       "price": "42440.00",
       "compare_price": "64500.00",
-      "stock": 7,
+      "stock": 6,
       "images_in_summary": 21
     }
   ],
   "complete": false,
   "webasyst_routing_feature_code": "kenner_f93046718124",
   "webasyst_334_products": 88,
-  "finished_at": "2026-11-05T13:26:48.046037+00:00",
+  "finished_at": "2026-11-06T13:14:38.521866+00:00",
   "status": "degraded"
 }
