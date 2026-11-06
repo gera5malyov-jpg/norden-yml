@@ -22,6 +22,6 @@ try:
     d=post("/v4/product/info/attributes",{"filter":{"offer_id":OFFERS,"visibility":"ALL"},"limit":1000})
     for item in d.get("result") or []:
         print("ATTR",item.get("offer_id"),"id",item.get("id"),
-          "tnved",json.dumps([x for x in item.get("attributes") or [] if int(x.get("id") or 0) in (22232,23536)],ensure_ascii=False),
+          "tnved_and_hashtags",json.dumps([x for x in item.get("attributes") or [] if int(x.get("id") or 0) in (22232,23536,23171)],ensure_ascii=False),
           "group",item.get("description_category_id"),item.get("type_id"),flush=True)
 except Exception as exc:print("ATTR_ERROR",str(exc)[:1500],flush=True)
