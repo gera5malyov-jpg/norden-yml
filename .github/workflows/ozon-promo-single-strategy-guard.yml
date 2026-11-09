@@ -1,0 +1,21 @@
+name: Test guarded removal of one SKU from Ozon pricing strategy
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-promo-single-strategy-guard.yml'
+permissions:
+  contents: read
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python ozon/promo_single_strategy_guard_20261109.py
