@@ -150,33 +150,48 @@ def main():
         "confirmed_additions": 0,
         "rejected_additions": [],
         "final_action_counts": [],
+        "actual_new_participations": 0,
+        "actual_removed_participations": 0,
+        "newly_active_from_plan": 0,
+        "accepted_but_not_active": 0,
+        "accepted_but_not_active_samples": [],
+        "final_participating_total": 0,
     }
     try:
         price_by_pid = load_prices()
         report["prices_loaded"] = len(price_by_pid)
         actions = api("/v1/actions", method="GET").get("result") or []
         participant_rows, current_ap, violations = active_prices_and_bad(actions, price_by_pid)
+        initial_memberships = {(int(aid), int(row.get("id") or 0))
+                               for aid, rows in participant_rows.items()
+                               for row in rows if int(row.get("id") or 0)}
         report["below_min_before"] = len(violations)
         for action in actions:
             aid = int(action["id"])
             report["actions"].append({"id": aid, "title": action.get("title"), "type": action.get("action_type"), "participants_before": len(participant_rows[aid]), "candidates": 0, "safe_candidates": 0, "confirmed_additions": 0})
 
-        # Remove out-of-policy participants by setting a price above the action's
-        # entry ceiling (new unified Ozon price logic). Only for actual violations.
+        # With current Ozon API, an action price strictly above its permitted
+        # entry ceiling deactivates the item. Never set a price below the
+        # seller's configured floor; Ozon can otherwise lower the floor itself.
         if not DRY_RUN:
+            removals_by_action = defaultdict(list)
             for aid, pid, floor, row in violations:
                 limit = num(row.get("max_action_price"))
                 if limit <= 0:
                     report["remove_rejected"].append({"action_id": aid, "product_id": pid, "reason": "missing max_action_price"})
                     continue
                 leave_price = max(floor, limit + Decimal("1"))
-                data = api("/v1/actions/products/update", {"action_id": aid, "products": [
-                    {"product_id": pid, "action_price": money(leave_price)}
-                ]})
-                removed = data.get("deactivated_product_ids") or data.get("deactivated_ids") or []
-                report["remove_confirmed"] += len(removed)
-                if int(pid) not in [int(x) for x in removed]:
-                    report["remove_rejected"].append({"action_id": aid, "product_id": pid, "response": data})
+                removals_by_action[aid].append({"product_id": pid, "action_price": money(leave_price)})
+            for aid, to_remove in removals_by_action.items():
+                for batch in chunks(to_remove, 100):
+                    data = api("/v1/actions/products/update", {"action_id": aid, "products": batch})
+                    removed = {int(x) for x in (data.get("deactivated_product_ids") or data.get("deactivated_ids") or [])}
+                    report["remove_confirmed"] += len(removed)
+                    for row in batch:
+                        pid = int(row["product_id"])
+                        if pid not in removed:
+                            report["remove_rejected"].append({"action_id": aid, "product_id": pid, "response": data})
+                    print("REMOVE_BATCH", aid, "requested", len(batch), "confirmed", len(removed), flush=True)
 
         # Refresh participant prices if removal changed unified prices.
         if violations and not DRY_RUN:
@@ -252,6 +267,8 @@ def main():
                     report["confirmed_additions"] += len(confirmed)
                     if rejected:
                         report["rejected_additions"].extend([{"action_id": aid, "entry": r} for r in rejected][:250])
+                    print("ADD_BATCH", aid, "requested", len(batch),
+                          "acknowledged", len(confirmed), "rejected", len(rejected), flush=True)
 
             # An independent v2 readback is the final source of truth.
             time.sleep(4)
@@ -266,6 +283,20 @@ def main():
                 {"id": int(a["id"]), "title": a.get("title"), "participants": len(final_rows[int(a["id"])])}
                 for a in actions
             ]
+            final_memberships = {(int(aid), int(row.get("id") or 0))
+                                 for aid, rows in final_rows.items()
+                                 for row in rows if int(row.get("id") or 0)}
+            proposed_memberships = {(int(aid), int(row["product_id"])) for aid, row in plan}
+            report["actual_new_participations"] = len(final_memberships - initial_memberships)
+            report["actual_removed_participations"] = len(initial_memberships - final_memberships)
+            report["newly_active_from_plan"] = len((final_memberships - initial_memberships) & proposed_memberships)
+            accepted_but_missing = sorted(proposed_memberships - final_memberships)
+            report["accepted_but_not_active"] = len(accepted_but_missing)
+            report["accepted_but_not_active_samples"] = [
+                {"action_id": aid, "product_id": pid}
+                for aid, pid in accepted_but_missing[:60]
+            ]
+            report["final_participating_total"] = len(final_memberships)
             if final_bad:
                 raise RuntimeError(f"{len(final_bad)} promotional prices remain below minimum")
         print("PROMO_V2_REPORT", json.dumps(report, ensure_ascii=False, sort_keys=True), flush=True)
