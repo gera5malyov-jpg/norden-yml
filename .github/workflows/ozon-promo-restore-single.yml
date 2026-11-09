@@ -1,0 +1,21 @@
+name: Restore one Ozon minimum after guarded test
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-promo-restore-single.yml'
+permissions:
+  contents: read
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python ozon/promo_restore_single_min_20261109.py
