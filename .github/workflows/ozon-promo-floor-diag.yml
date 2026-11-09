@@ -1,0 +1,28 @@
+name: Diagnose below-floor Ozon promotion participants
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-promo-floor-diag.yml'
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read promotion participation and auto flags
+        run: python ozon/promo_floor_diagnostics_20261109.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: promo-floor-diagnostics
+          path: ozon/promo_floor_violations_20261109.json
+          retention-days: 7
