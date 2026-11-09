@@ -1,0 +1,29 @@
+name: Verify full Ozon TN VED catalog Nov 9
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-tnved-final-readback-20261109.yml'
+permissions:
+  contents: read
+jobs:
+  readback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      DRY_RUN: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read back all product TN VED fields
+        run: python ozon/tnved_verify_remaining_20261109.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ozon-tnved-final-readback
+          path: ozon/tnved_final_readback_20261109.json
+          retention-days: 14
