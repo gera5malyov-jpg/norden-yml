@@ -1,0 +1,36 @@
+name: Apply verified Ozon TN VED codes 2026-11-09
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-tnved-apply-20261109.yml'
+permissions:
+  contents: read
+concurrency:
+  group: ozon-tnved-sync
+  cancel-in-progress: false
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      DRY_RUN: 'false'
+      MAX_UPDATES_PER_RUN: '500'
+      UPDATE_BATCH_SIZE: '50'
+      TNVED_OVERRIDES: ozon/tnved_overrides.json
+      TNVED_SUMMARY: ozon/tnved_summary.md
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fill only unambiguous missing TN VED codes
+        run: python ozon/tnved_sync.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ozon-tnved-apply-20261109
+          path: ozon/tnved_summary.md
+          retention-days: 7
