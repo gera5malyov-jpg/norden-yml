@@ -1,0 +1,21 @@
+name: Test Ozon promo below-min persistence on one SKU
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-promo-single-guard.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python ozon/promo_single_guard_probe_20261109.py
