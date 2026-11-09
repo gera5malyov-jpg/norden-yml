@@ -1,6 +1,6 @@
 {
   "status": "УСПЕШНО",
-  "started_at": "2026-10-26T11:29:51+00:00",
+  "started_at": "2026-11-09T14:16:33+00:00",
   "dry_run": false,
   "source": "https://yourroom.ru/",
   "supplier": "ВашаКомната",
@@ -20,22 +20,22 @@
   "missing_rule": "если URL исчез из полного sitemap — остаток 0",
   "description_rule": "упоминания ВашаКомната/Вашакомната.РФ/yourroom.ru удаляются",
   "photo_rule": "используются только изображения без водяного знака; сначала ищется чистый оригинал, затем пробуется программное удаление; без пригодного фото карточка не создается",
-  "sitemap_urls": 533,
-  "product_pages_requested": 533,
-  "product_cards_parsed": 533,
-  "created": 3,
-  "updated": 519,
-  "zeroed_missing": 18,
-  "skipped_no_clean_photo": 11,
+  "sitemap_urls": 531,
+  "product_pages_requested": 531,
+  "product_cards_parsed": 531,
+  "created": 2,
+  "updated": 517,
+  "zeroed_missing": 23,
+  "skipped_no_clean_photo": 12,
   "skipped_no_price": 0,
-  "price_updates": 522,
-  "stock_updates": 540,
+  "price_updates": 519,
+  "stock_updates": 542,
   "images_clean_original": 208,
-  "images_clean_alternate": 1616,
-  "images_watermark_removed": 12,
+  "images_clean_alternate": 1615,
+  "images_watermark_removed": 11,
   "images_rejected_watermark_or_error": 63,
-  "images_uploaded": 32,
-  "image_upload_errors": 31,
+  "images_uploaded": 28,
+  "image_upload_errors": 34,
   "parse_errors": [],
   "errors": [],
   "warnings": [
@@ -81,7 +81,15 @@
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
@@ -97,7 +105,11 @@
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
@@ -326,8 +338,8 @@
     {
       "source_url": "https://yourroom.ru/products/spalnyj-garnitur-nikol-2",
       "name": "Спальный гарнитур \"Николь\" №2 - Венге / Лиственница светлая",
-      "customer_price": "57622",
-      "old_price": "72030",
+      "customer_price": "61278",
+      "old_price": "76600",
       "manufacturer": "Эра",
       "category_path": [
         "Спальни",
@@ -7195,6 +7207,31 @@
       ]
     },
     {
+      "source_url": "https://yourroom.ru/products/veshalka-v500-nika-venge-2",
+      "name": "Вешалка \"Ника\" В500 СЛ - Венге",
+      "customer_price": "1790",
+      "old_price": "2560",
+      "manufacturer": "Эра",
+      "category_path": [
+        "Мебель для прихожей",
+        "Вешалки для одежды"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "500x206x1548 мм",
+        "Вес": "31 кг",
+        "Объем": "0.02 м³",
+        "Страна-производитель": "Россия",
+        "Цвет": "Венге"
+      },
+      "description_preview": "",
+      "source_images": 2,
+      "clean_images": 2,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-era-1-18-m",
       "name": "Модульная кухня \"Эра\" №1 1,8 м - Дуб горный / Белый / Мрамор черный",
       "customer_price": "18269",
@@ -7690,36 +7727,6 @@
         "Цвет": "дуб крафт золотой / белый древесный"
       },
       "description_preview": "Комплект состоит из: Шкаф Бастион ЛДСП 1,0 м H301A02/0910 Петля мебельная с доводчиком тип А - 12 шт Шкаф двухдверный \"Бастион\" - это стильный и функциональный элемент мебели, который станет незаменимым помощником в организации пространства. Шкаф выполнен в современном стиле, что позволяет ему гармонично вписаться в любой интерьер. За двумя распашными дверями шкафа расположены четыре полки, на которых можно разместить сложенную одежду, постельное и нижнее белье, разнообразные аксессуары и коробк",
-      "source_images": 3,
-      "clean_images": 3,
-      "clean_modes": [
-        "clean_alternate",
-        "clean_alternate",
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/shkaf-virola-shk-800-2",
-      "name": "Шкаф \"Вирола\" ШК-800 СЛ - Дуб крафт серый / Белый глянец",
-      "customer_price": "9990",
-      "old_price": "20810",
-      "manufacturer": "Интерьер-Центр",
-      "category_path": [
-        "Распашные шкафы",
-        "Двухдверные шкафы"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "800x570x2000 мм",
-        "Вес": "74 кг",
-        "Объем": "0.1 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "ЛДСП",
-        "Тип петель": "Без доводчиков",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "24",
-        "Страна-производитель": "Россия"
-      },
-      "description_preview": "Шкаф станет элементом модульной коллекции Вирола или дополнит самостоятельный интерьер. Штанга: горизонтальная. Лицевая фурнитура отсутствует. Фасады открываются с помощью захвата рукой. Также Вы можете ознакомиться с товаром данной модели с улучшенной фурнитурой: Шкаф \"Вирола\"",
       "source_images": 3,
       "clean_images": 3,
       "clean_modes": [
@@ -10561,8 +10568,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-vysokaya-allegro-9-frezerovka-romb-bodega-belayasandal-belyj",
       "name": "Тумба высокая \"Аллегро-9\" - Фрезеровка \"Ромб\", Бодега белая/Сандал белый",
-      "customer_price": "12145",
-      "old_price": "15180",
+      "customer_price": "12598",
+      "old_price": "15750",
       "manufacturer": "Диал",
       "category_path": [
         "Гостиные",
@@ -10621,8 +10628,8 @@
     {
       "source_url": "https://yourroom.ru/products/obuvnitsa-otkrytaya-innes-6",
       "name": "Обувница открытая \"Иннэс-6\" (Мини) 600 - Бодега белая",
-      "customer_price": "2968",
-      "old_price": "3710",
+      "customer_price": "3077",
+      "old_price": "3850",
       "manufacturer": "Диал",
       "category_path": [
         "Мебель для прихожей",
@@ -10651,8 +10658,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-innes-7-belyj--beton-snezhnyj",
       "name": "Антресоль \"Иннэс-7\" - Белый / Бетон снежный",
-      "customer_price": "4453",
-      "old_price": "5570",
+      "customer_price": "4579",
+      "old_price": "5720",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -10685,8 +10692,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-innes-7-4-belyj--beton-snezhnyj",
       "name": "Комод \"Иннэс-7\" №4 - Белый / Бетон снежный",
-      "customer_price": "9032",
-      "old_price": "11290",
+      "customer_price": "9340",
+      "old_price": "11680",
       "manufacturer": "Диал",
       "category_path": [
         "Комоды"
@@ -10715,8 +10722,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-innes-7-dub-kraft-zolotoj--monblan",
       "name": "Пенал \"Иннэс-7\" - Дуб крафт золотой / Монблан",
-      "customer_price": "8923",
-      "old_price": "11150",
+      "customer_price": "9376",
+      "old_price": "11720",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -10747,8 +10754,8 @@
     {
       "source_url": "https://yourroom.ru/products/polki-uglovye-innes-7-belyj",
       "name": "Полки угловые \"Иннэс-7\" - Белый",
-      "customer_price": "7403",
-      "old_price": "9250",
+      "customer_price": "7693",
+      "old_price": "9620",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -10777,8 +10784,8 @@
     {
       "source_url": "https://yourroom.ru/products/stol-innes-7-1-belyj--beton-snezhnyj",
       "name": "Стол \"Иннэс-7\" №1 - Белый / Бетон снежный",
-      "customer_price": "5358",
-      "old_price": "6700",
+      "customer_price": "5231",
+      "old_price": "6540",
       "manufacturer": "Диал",
       "category_path": [
         "Столы",
@@ -10808,8 +10815,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-innes-7-1-400-dub-kraft-zolotoj--tiramisu-matovyj",
       "name": "Шкаф однодверный \"Иннэс-7\" №1 - Дуб крафт золотой / Тирамису матовый",
-      "customer_price": "12181",
-      "old_price": "15230",
+      "customer_price": "12833",
+      "old_price": "16040",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -10842,8 +10849,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-innes-7-2-belyj--beton-snezhnyj",
       "name": "Шкаф однодверный \"Иннэс-7\" №2 (2 штанги) - Белый / Бетон снежный",
-      "customer_price": "11349",
-      "old_price": "14190",
+      "customer_price": "11783",
+      "old_price": "14730",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -10938,8 +10945,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-innes-7-3-s-polkami-dub-kraft-zolotoj--tiramisu-matovyj",
       "name": "Шкаф двухдверный \"Иннэс-7\" №3 с полками - Дуб крафт золотой / Тирамису матовый",
-      "customer_price": "20851",
-      "old_price": "26060",
+      "customer_price": "24200",
+      "old_price": "30250",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -10971,8 +10978,8 @@
     {
       "source_url": "https://yourroom.ru/products/veshalka-innes-10",
       "name": "Вешалка \"Иннэс-10\" - Графит / Ясень анкор светлый",
-      "customer_price": "24145",
-      "old_price": "30180",
+      "customer_price": "24417",
+      "old_price": "30520",
       "manufacturer": "Диал",
       "category_path": [
         "Мебель для прихожей",
@@ -11004,8 +11011,8 @@
     {
       "source_url": "https://yourroom.ru/products/veshalka-ket-1-1-grafit",
       "name": "Вешалка \"Кэт-1\" №1 - Графит",
-      "customer_price": "9466",
-      "old_price": "11830",
+      "customer_price": "9702",
+      "old_price": "12130",
       "manufacturer": "Диал",
       "category_path": [
         "Мебель для прихожей",
@@ -11040,8 +11047,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-ket-1-2-stvorki-4-yashchika-belyj",
       "name": "Комод \"Кэт-1\" 2 створки 4 ящика - Белый",
-      "customer_price": "10516",
-      "old_price": "13150",
+      "customer_price": "11150",
+      "old_price": "13940",
       "manufacturer": "Диал",
       "category_path": [
         "Комоды"
@@ -11072,8 +11079,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-ket-1-5-yashchikov-grafit",
       "name": "Комод \"Кэт-1\" 5 ящиков - Графит",
-      "customer_price": "9267",
-      "old_price": "11580",
+      "customer_price": "9086",
+      "old_price": "11360",
       "manufacturer": "Диал",
       "category_path": [
         "Комоды"
@@ -11248,8 +11255,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-1-0920-m-s-osnovaniem-ldsp-grafit",
       "name": "Кровать \"Кэт-1\" 0,9*2,0 м с основанием ЛДСП - Графит",
-      "customer_price": "7819",
-      "old_price": "9770",
+      "customer_price": "8091",
+      "old_price": "10110",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -11285,8 +11292,8 @@
     {
       "source_url": "https://yourroom.ru/products/yashchik-dlya-krovati-ket-1-yasen-ankor-svetlyj",
       "name": "Ящик для кровати \"Кэт-1\" - Ясень Анкор светлый",
-      "customer_price": "3131",
-      "old_price": "3910",
+      "customer_price": "3421",
+      "old_price": "4280",
       "manufacturer": "Диал",
       "category_path": [
         "Элементы модульных систем",
@@ -11381,8 +11388,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-prikhozhaya-ket-1-1-grafit",
       "name": "Модульная прихожая \"Кэт-1\" №1 - Графит",
-      "customer_price": "30788",
-      "old_price": "38490",
+      "customer_price": "31621",
+      "old_price": "39530",
       "manufacturer": "Диал",
       "category_path": [
         "Мебель для прихожей",
@@ -11816,8 +11823,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-3-1620-m-s-podemnym-mekhanizmom-art031-m1-kashemir--sontex-milk-kozhzam",
       "name": "Кровать арт.031-М1 (Полосы) 1,6*2,0 м с подъемным механизмом - Кашемир / Сонтекс милк (кожзам)",
-      "customer_price": "28200",
-      "old_price": "33180",
+      "customer_price": "28960",
+      "old_price": "34070",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -11850,8 +11857,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-ket-4-s-zerkalom-2",
       "name": "Шкаф трехдверный \"Кэт-4\" с зеркалом - Дуб Венге",
-      "customer_price": "33014",
-      "old_price": "41270",
+      "customer_price": "35349",
+      "old_price": "44190",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -11883,8 +11890,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-ket-4-bodega-belaya",
       "name": "Шкаф четырехдверный \"Кэт-4\" - Бодега белая",
-      "customer_price": "39929",
-      "old_price": "49910",
+      "customer_price": "42390",
+      "old_price": "52990",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -11915,8 +11922,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-uglovoj-ket-4-s-zerkalom-dub-venge",
       "name": "Шкаф угловой \"Кэт-4\" с зеркалом - Дуб Венге",
-      "customer_price": "19476",
-      "old_price": "24350",
+      "customer_price": "20743",
+      "old_price": "25930",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -11948,8 +11955,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-uglovoj-ket-4-s-zerkalom-bodega-belaya",
       "name": "Шкаф угловой \"Кэт-4\" с зеркалом - Бодега белая",
-      "customer_price": "19349",
-      "old_price": "24190",
+      "customer_price": "20399",
+      "old_price": "25500",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -12699,8 +12706,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-ket-6-4-yashchika",
       "name": "Комод \"Кэт-6\" 4 ящика - Бодега белая/Сандал белый",
-      "customer_price": "12417",
-      "old_price": "15520",
+      "customer_price": "12869",
+      "old_price": "16090",
       "manufacturer": "Диал",
       "category_path": [
         "Комоды"
@@ -12729,8 +12736,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-prikrovatnaya-ket-6-500",
       "name": "Тумба прикроватная \"Кэт-6\" 500 - Бодега белая/Сандал белый",
-      "customer_price": "6082",
-      "old_price": "7600",
+      "customer_price": "6064",
+      "old_price": "7580",
       "manufacturer": "Диал",
       "category_path": [
         "Спальни",
@@ -12760,8 +12767,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-6-1620m-s-osnovaniem-ldsp-art017-2",
       "name": "Кровать \"Кэт-6\" 1,6*2,0м с основанием ЛДСП (арт.017) - Высокий щиток, Бодега белая/Сандал белый",
-      "customer_price": "17829",
-      "old_price": "22290",
+      "customer_price": "18408",
+      "old_price": "23010",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -12796,8 +12803,8 @@
     {
       "source_url": "https://yourroom.ru/products/stol-zhurnalnyj-transformer-belyj",
       "name": "Стол журнальный трансформер - Белый",
-      "customer_price": "11856",
-      "old_price": "14820",
+      "customer_price": "12018",
+      "old_price": "15020",
       "manufacturer": "Диал",
       "category_path": [
         "Столы",
@@ -12826,8 +12833,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-sharm-an-1",
       "name": "Антресоль \"Шарм\" АН-1 - Ясень Анкор светлый",
-      "customer_price": "4453",
-      "old_price": "5570",
+      "customer_price": "4561",
+      "old_price": "5700",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -12855,8 +12862,8 @@
     {
       "source_url": "https://yourroom.ru/products/zerkalo-sharm-z-1",
       "name": "Зеркало \"Шарм\" З-1 - Ясень Анкор светлый",
-      "customer_price": "3711",
-      "old_price": "4640",
+      "customer_price": "3765",
+      "old_price": "4710",
       "manufacturer": "Диал",
       "category_path": [
         "Мебель для прихожей",
@@ -12885,8 +12892,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-art031-m1-polosy-1420-m-s-podemnym-mekhanizmom-yasen-ankor-svetlyj--sonteks-milk-kozhzam",
       "name": "Кровать арт.031-М1 (Полосы) 1,4*2,0 м с подъемным механизмом - Ясень Анкор Светлый / Сонтекс милк (кожзам)",
-      "customer_price": "26842",
-      "old_price": "31580",
+      "customer_price": "27458",
+      "old_price": "32300",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -15139,162 +15146,6 @@
       ]
     },
     {
-      "source_url": "https://yourroom.ru/products/divan-krovat-lavis-dkd-20001-0920-m-s-osnovaniem-ldsp-belyjbelyj-soft-persik-soft",
-      "name": "Диван-кровать \"Лавис\" ДКД 2000.1 0,9*2,0 м с основанием ЛДСП - Белый/Белый софт-Персик софт",
-      "customer_price": "32916",
-      "old_price": "36570",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Кровати и тахты",
-        "Односпальные кровати"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "2032x950x930 мм",
-        "Вес": "100.06 кг",
-        "Объем": "1.77 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Ширина спального места": "900",
-        "Длина спального места": "2000",
-        "Основание": "Настил",
-        "Подъемный механизм": "Нет",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Материал обивки": "Без обивки",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт-Персик софт"
-      },
-      "description_preview": "Кровать-диван \"Лавис\" ДКД 2000.1 - это односпальная подростковая тахта с тремя спинками и встроенной системой хранения. Модель входит в состав одноименной модульной детской серии и совмещает функции полноценного спального места ночью и зоны для отдыха или приема гостей днем. Материалы и цветовое исполнение Корпус: выполнен из матового ЛДСП в чистом белом цвете. Рельефные фасады: спинки выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпуска",
-      "source_images": 3,
-      "clean_images": 3,
-      "clean_modes": [
-        "clean_alternate",
-        "clean_alternate",
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/nadstrojka-lavis-nd-10401-belyjbelyj-soft",
-      "name": "Надстройка \"Лавис\" НД 1040.1 - Белый/Белый софт",
-      "customer_price": "4997",
-      "old_price": "5550",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Элементы модульных систем",
-        "Дополнительные опции"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "1040x266x1090 мм",
-        "Вес": "31 кг",
-        "Объем": "0.61 м³",
-        "Материал каркаса": "ЛДСП",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Страна-производитель": "Россия"
-      },
-      "description_preview": "Надстройка \"Лавис\" НД 1040.1 - это удобная и практичная настенная полка-стеллаж, которая создана специально для письменного стола из этой же детской серии. Она монтируется над рабочей зоной и помогает организовать место для учебы и творчества, разгружая поверхность стола. Дизайн и материалы Цвет и текстура: каркас мебели выполнен из чистого белого матового ЛДСП. Карниз сделан из прочного МДФ в цвете \"Белый софт\" Как она устроена внутри Открытое хранение: на полки можно поставить учебники, органа",
-      "source_images": 3,
-      "clean_images": 3,
-      "clean_modes": [
-        "clean_alternate",
-        "clean_alternate",
-        "watermark_removed"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/stellazh-lavis-sd-9011-belyjbelyj-soft-grafit-soft",
-      "name": "Стеллаж \"Лавис\" СД 900.1 - Белый/Белый софт-Графит софт",
-      "customer_price": "23234",
-      "old_price": "25820",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Распашные шкафы",
-        "Стеллажи"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "900x445x2200 мм",
-        "Вес": "83.62 кг",
-        "Объем": "0.87 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт-Графит софт"
-      },
-      "description_preview": "Стеллаж \"Лавис\" СД 901.1 - это высокий, широкий и вместительный шкаф-пенал открытого типа для детской или подростковой комнаты. За счет увеличенной ширины, стеллаж позволяет аккуратно разложить множество книг, учебников, наград и личных вещей ребенка. Применяемые материалы и палитра Рельефные фасады: створки выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпускается в широком разнообразии модных оттенков, что позволяет легко вписать мебель",
-      "source_images": 1,
-      "clean_images": 1,
-      "clean_modes": [
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/stol-pismennyj-lavis-std-10701-belyjbelyj-soft-lazur-soft",
-      "name": "Стол письменный \"Лавис\" СТД 1070.1 - Белый/Белый софт-Лазурь софт",
-      "customer_price": "14788",
-      "old_price": "16430",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Столы",
-        "Письменные столы"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "1070x590x760 мм",
-        "Вес": "41.62 кг",
-        "Объем": "0.5 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Тип сборки": "Не универсальная",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Материал столешницы": "ЛДСП",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт-Лазурь софт"
-      },
-      "description_preview": "Письменный стол \"Лавис\" СТД 1070.1 - это удобное и красивое рабочее место, созданное специально для школьников и подростков. За счет светлых оттенков и плавных линий стол не смотрится громоздко и отлично подходит для создания уютной атмосферы в детской комнате. Применяемые материалы и палитра Рельефные фасады: створки выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпускается в широком разнообразии модных оттенков, что позволяет легко впис",
-      "source_images": 2,
-      "clean_images": 2,
-      "clean_modes": [
-        "clean_alternate",
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/stol-pismennyj-lavis-std-10701-belyjbelyj-soft-grafit-soft",
-      "name": "Стол письменный \"Лавис\" СТД 1070.1 - Белый/Белый софт-Графит софт",
-      "customer_price": "14788",
-      "old_price": "16430",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Столы",
-        "Письменные столы"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "1070x590x760 мм",
-        "Вес": "41.62 кг",
-        "Объем": "0.5 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Тип сборки": "Не универсальная",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Материал столешницы": "ЛДСП",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт-Графит софт"
-      },
-      "description_preview": "Письменный стол \"Лавис\" СТД 1070.1 - это удобное и красивое рабочее место, созданное специально для школьников и подростков. За счет светлых оттенков и плавных линий стол не смотрится громоздко и отлично подходит для создания уютной атмосферы в детской комнате. Применяемые материалы и палитра Рельефные фасады: створки выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпускается в широком разнообразии модных оттенков, что позволяет легко впис",
-      "source_images": 1,
-      "clean_images": 1,
-      "clean_modes": [
-        "clean_alternate"
-      ]
-    },
-    {
       "source_url": "https://yourroom.ru/products/stul-kantsler-2sht-seryj-soft-velyur",
       "name": "Стул \"Канцлер\" 2шт. - Серый софт (велюр)",
       "customer_price": "12301",
@@ -17015,11 +16866,101 @@
         "clean_alternate",
         "clean_alternate"
       ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-10-m-h-300-mm-dub-kraft-zolotoj--belyj-drevesnyj",
+      "name": "Антресоль \"Бастион\" 1,0 м (h 300 мм) - Дуб крафт золотой / Белый древесный",
+      "customer_price": "3149",
+      "old_price": "3149",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1000x520x300 мм",
+        "Вес": "31 кг",
+        "Объем": "0.03 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб крафт золотой / Белый древесный"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальность. В комплекте предусмотрены специал",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-10-m-h-300-mm-dub-kraft-zolotoj",
+      "name": "Антресоль \"Бастион\" 1,0 м (h 300 мм) - Дуб крафт золотой",
+      "customer_price": "3149",
+      "old_price": "3149",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1000x520x300 мм",
+        "Вес": "31 кг",
+        "Объем": "0.03 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб крафт золотой"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальность. В комплекте предусмотрены специал",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-16-m-h-300-mm-grafit",
+      "name": "Антресоль \"Бастион\" 1,6 м (h 300 мм) - Графит",
+      "customer_price": "6181",
+      "old_price": "6181",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1600x520x300 мм",
+        "Вес": "41 кг",
+        "Объем": "0.33 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Графит"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальность. В комплекте предусмотрены специал",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
     }
   ],
   "complete": true,
-  "days_since_last_success": 27.89,
-  "sitemap_urls_total": 7719,
+  "days_since_last_success": 14.04,
+  "sitemap_urls_total": 7739,
   "warehouse_id": "019a5ab3-c024-706c-8b63-9059588d3d76",
-  "finished_at": "2026-10-26T13:12:09+00:00"
+  "finished_at": "2026-11-09T15:49:44+00:00"
 }
