@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-11-09T14:23:37.758034+00:00",
+  "started_at": "2026-11-10T14:22:05.271784+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=336",
   "type_name": "deephouse-336",
@@ -8,11 +8,11 @@
   "webasyst_stock_id": "66",
   "kit_stock": "МСК",
   "kit_stock_id": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
-  "kit_variants_scanned": 1261,
-  "kit_webasyst_336_variants": 1224,
+  "kit_variants_scanned": 1263,
+  "kit_webasyst_336_variants": 1226,
   "kit_duplicate_skus": 0,
-  "webasyst_products": 1941,
-  "webasyst_duplicate_skus": 1,
+  "webasyst_products": 1945,
+  "webasyst_duplicate_skus": 2,
   "processed": 5,
   "created": 0,
   "updated_prices_stock": 5,
@@ -4252,6 +4252,11 @@
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
+      "sku": "DEEP-65220",
+      "variant_id": "01a1c5d5-0331-7041-ac85-b58206479dd3",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
       "sku": "DEEP-65222",
       "variant_id": "01a0ce87-8275-7f0c-8817-2946e9747ad0",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
@@ -6007,6 +6012,11 @@
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
     },
     {
+      "sku": "DEEP-67465",
+      "variant_id": "01a1c5bb-0e46-77e7-97db-51c7f0a37502",
+      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+    },
+    {
       "sku": "DEEP-67466",
       "variant_id": "01a191bd-03f1-7d60-ae4f-eb282795e582",
       "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
@@ -6014,7 +6024,7 @@
     {
       "sku": "DEEP-67468",
       "variant_id": "01a0cde3-f1ce-778f-8282-b1cd9e7ead9c",
-      "message": "invalid_param: Код deephouse336_a9cdcd751b63 уже существует."
+      "message": "duplicate Webasyst SKU in type 24: DEEP-67468"
     },
     {
       "sku": "DEEP-67469",
@@ -6207,7 +6217,7 @@
   ],
   "complete": false,
   "webasyst_routing_feature_code": "kenner_f93046718124",
-  "webasyst_336_products": 1941,
-  "finished_at": "2026-11-09T14:38:30.531055+00:00",
+  "webasyst_336_products": 1945,
+  "finished_at": "2026-11-10T14:36:45.492294+00:00",
   "status": "degraded"
 }
