@@ -1,6 +1,6 @@
 {
   "status": "УСПЕШНО",
-  "started_at": "2026-10-27T10:53:52+00:00",
+  "started_at": "2026-11-10T13:44:10+00:00",
   "dry_run": false,
   "source": "https://yourroom.ru/",
   "supplier": "ВашаКомната",
@@ -20,28 +20,48 @@
   "missing_rule": "если URL исчез из полного sitemap — остаток 0",
   "description_rule": "упоминания ВашаКомната/Вашакомната.РФ/yourroom.ru удаляются",
   "photo_rule": "используются только изображения без водяного знака; сначала ищется чистый оригинал, затем пробуется программное удаление; без пригодного фото карточка не создается",
-  "sitemap_urls": 547,
-  "product_pages_requested": 547,
-  "product_cards_parsed": 547,
-  "created": 3,
-  "updated": 536,
-  "zeroed_missing": 12,
+  "sitemap_urls": 554,
+  "product_pages_requested": 554,
+  "product_cards_parsed": 554,
+  "created": 11,
+  "updated": 535,
+  "zeroed_missing": 16,
   "skipped_no_clean_photo": 8,
   "skipped_no_price": 0,
-  "price_updates": 539,
-  "stock_updates": 551,
+  "price_updates": 546,
+  "stock_updates": 562,
   "images_clean_original": 203,
-  "images_clean_alternate": 1698,
-  "images_watermark_removed": 17,
+  "images_clean_alternate": 1728,
+  "images_watermark_removed": 16,
   "images_rejected_watermark_or_error": 45,
-  "images_uploaded": 155,
-  "image_upload_errors": 30,
+  "images_uploaded": 81,
+  "image_upload_errors": 38,
   "parse_errors": [],
   "errors": [],
   "warnings": [
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
@@ -69,7 +89,19 @@
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
@@ -89,7 +121,7 @@
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
@@ -97,15 +129,7 @@
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
-    },
-    {
-      "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
@@ -113,7 +137,15 @@
     },
     {
       "stage": "kit_image_upload",
-      "message": "HTTPSConnectionPool(host='api.kit.yandex.net', port=443): Max retries exceeded with url: /v1/files (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2427)')))"
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
     },
     {
       "stage": "kit_image_upload",
@@ -5621,6 +5653,40 @@
       ]
     },
     {
+      "source_url": "https://yourroom.ru/products/komod-3-yashchika-prezent-msp-1-dub-zolotoj--kamen-tjomnyj-2-2-2-2-2-2",
+      "name": "Комод 3 ящика \"Презент\" (МСП-1) СЛ - Дуб золотой / Камень тёмный",
+      "customer_price": "7990",
+      "old_price": "12290",
+      "manufacturer": "СВ-Мебель - Просто хорошая мебель",
+      "category_path": [
+        "Комоды"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "901x390x726 мм",
+        "Вес": "32.25 кг",
+        "Объем": "0.02 м³",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "24 месяца",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб золотой / Камень тёмный"
+      },
+      "description_preview": "Максимальная нагрузка на крышку - 15кг Используемые материалы: Корпус - ЛДСП 16мм Дуб Крафт золотой. Фасад - ЛДСП 16мм Камень железный. Кромочный материал - Кромка 0,4х19 Вяз швейцарский, Кромка 0,4х19 Ателье (цемент) темный. Направляющие: FIRMAX роликовые 350 мм. Ручка SV-40 (128мм). Комод 3 ящика. Ш*В*Г 901*726*390 мм. Комод комплектуется тремя выдвижными ящиками. Обратите внимание, что в конструкции комода вместо нижней вязки используются планки.",
+      "source_images": 10,
+      "clean_images": 10,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
       "source_url": "https://yourroom.ru/products/mojka-nakladnaya-pravaya-800600-mm-2-2-2-2-2",
       "name": "Мойка накладная 800*600 мм правая, нержавеющая сталь СЛ",
       "customer_price": "3990",
@@ -7635,7 +7701,7 @@
         "Длина спального места": "2000",
         "Ширина спального места": "1400",
         "Основание": "Ортопедическое",
-        "Подъемный механизм": "Нет",
+        "Подъемный механизм": "да",
         "Нужна ли сборка": "Да",
         "Материал обивки": "Без обивки",
         "Страна-производитель": "Россия",
@@ -11823,8 +11889,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-innes-7-2-belyj--beton-snezhnyj",
       "name": "Комод \"Иннэс-7\" №2 - Белый / Бетон снежный",
-      "customer_price": "12580",
-      "old_price": "15730",
+      "customer_price": "12779",
+      "old_price": "15970",
       "manufacturer": "Диал",
       "category_path": [
         "Комоды"
@@ -11855,8 +11921,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-pristavnaya-innes-7-belyj--beton-snezhnyj",
       "name": "Тумба приставная \"Иннэс-7\" - Белый / Бетон снежный",
-      "customer_price": "2950",
-      "old_price": "3690",
+      "customer_price": "2914",
+      "old_price": "3640",
       "manufacturer": "Диал",
       "category_path": [
         "Спальни",
@@ -12045,8 +12111,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-innes-7-1420-m-s-osnovaniem-ldsp-belyj--beton-snezhnyj",
       "name": "Кровать \"Иннэс-7\" 1,4*2,0 м с основанием ЛДСП - Белый / Бетон снежный",
-      "customer_price": "15693",
-      "old_price": "19620",
+      "customer_price": "16598",
+      "old_price": "20750",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -12081,8 +12147,8 @@
     {
       "source_url": "https://yourroom.ru/products/veshalka-ket-1-1-yasen-ankor-svetlyj",
       "name": "Вешалка \"Кэт-1\" №1 - Ясень Анкор светлый / Графит",
-      "customer_price": "8724",
-      "old_price": "10910",
+      "customer_price": "9466",
+      "old_price": "11830",
       "manufacturer": "Диал",
       "category_path": [
         "Мебель для прихожей",
@@ -12116,8 +12182,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-ket-1-1-stvorka-4-yashchika-belyj",
       "name": "Комод \"Кэт-1\" 1 створка 4 ящика - Белый",
-      "customer_price": "8362",
-      "old_price": "10450",
+      "customer_price": "8760",
+      "old_price": "10950",
       "manufacturer": "Диал",
       "category_path": [
         "Комоды"
@@ -12148,8 +12214,8 @@
     {
       "source_url": "https://yourroom.ru/products/stol-pismennyj-ket-1-belyj",
       "name": "Стол письменный \"Кэт-1\" - Белый",
-      "customer_price": "4978",
-      "old_price": "6220",
+      "customer_price": "5394",
+      "old_price": "6740",
       "manufacturer": "Диал",
       "category_path": [
         "Столы",
@@ -12183,8 +12249,8 @@
     {
       "source_url": "https://yourroom.ru/products/stol-pismennyj-ket-1-yasen-ankor-svetlyj--grafit",
       "name": "Стол письменный \"Кэт-1\" - Ясень Анкор светлый / Графит",
-      "customer_price": "5050",
-      "old_price": "6310",
+      "customer_price": "5430",
+      "old_price": "6790",
       "manufacturer": "Диал",
       "category_path": [
         "Столы",
@@ -12217,8 +12283,8 @@
     {
       "source_url": "https://yourroom.ru/products/stol-pismennyj-ket-1-s-yashchikami-grafit",
       "name": "Стол письменный \"Кэт-1\" с ящиками - Графит",
-      "customer_price": "7204",
-      "old_price": "9010",
+      "customer_price": "7168",
+      "old_price": "8960",
       "manufacturer": "Диал",
       "category_path": [
         "Столы",
@@ -12290,8 +12356,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-1-0920-m-s-yashchikami-belyj",
       "name": "Кровать \"Кэт-1\" 0,9*2,0 м с ящиками - Белый",
-      "customer_price": "13050",
-      "old_price": "16310",
+      "customer_price": "14371",
+      "old_price": "17960",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -12367,8 +12433,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-1-1620-m-s-osnovaniem-ldsp-belyj",
       "name": "Кровать \"Кэт-1\" 1,6*2,0 м с основанием ЛДСП - Белый",
-      "customer_price": "11258",
-      "old_price": "14070",
+      "customer_price": "12417",
+      "old_price": "15520",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -12574,8 +12640,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-ket-3-levyj-kashemir--tiramisu-matovyj",
       "name": "Пенал \"Кэт-3\" - Левый, Кашемир / Тирамису матовый",
-      "customer_price": "13810",
-      "old_price": "17260",
+      "customer_price": "14770",
+      "old_price": "18460",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -12669,8 +12735,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-3-1420-m-s-podkhemnym-mekhanizmom-art031-m1-kashemir--alysia-003-velyur",
       "name": "Кровать арт.031-М1 (Полосы) 1,4*2,0 м с подъемным механизмом - Кашемир / Алисия 003 (велюр)",
-      "customer_price": "26860",
-      "old_price": "31600",
+      "customer_price": "27440",
+      "old_price": "32280",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -12704,8 +12770,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-ket-4-s-zerkalom-bodega-belaya",
       "name": "Пенал \"Кэт-4\" с зеркалом - Бодега белая",
-      "customer_price": "13666",
-      "old_price": "17080",
+      "customer_price": "14498",
+      "old_price": "18120",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -12735,8 +12801,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-4-1420-m-s-osnovaniem-ldsp-art001-m1-venge-linum--caiman-korichnevyj",
       "name": "Кровать \"Кэт-4\" 1,4*2,0 м с основанием ЛДСП (арт.001-М1) - Венге Linum / Caiman коричневый",
-      "customer_price": "18064",
-      "old_price": "22580",
+      "customer_price": "18752",
+      "old_price": "23440",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -12774,8 +12840,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ket-4-1420-m-s-podemnym-mekhanizmom-art033-m1-venge-linum--caiman-korichnevyj",
       "name": "Кровать \"Кэт-4\" 1,4*2,0 м с подъемным механизмом (арт.033-М1) - Венге Linum / Caiman коричневый",
-      "customer_price": "26517",
-      "old_price": "33150",
+      "customer_price": "26969",
+      "old_price": "33710",
       "manufacturer": "Диал",
       "category_path": [
         "Кровати и тахты",
@@ -13428,8 +13494,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-ket-6-2-stvorka-4-yashchika",
       "name": "Комод \"Кэт-6\" 2 створка 4 ящика - Бодега белая/Сандал белый",
-      "customer_price": "13991",
-      "old_price": "17490",
+      "customer_price": "14552",
+      "old_price": "18190",
       "manufacturer": "Диал",
       "category_path": [
         "Комоды"
@@ -13460,8 +13526,8 @@
     {
       "source_url": "https://yourroom.ru/products/zerkalo-kolibri-bodega-belayasandal-belyj",
       "name": "Зеркало \"Колибри\" МДФ - Сандал белый",
-      "customer_price": "3511",
-      "old_price": "4390",
+      "customer_price": "3638",
+      "old_price": "4550",
       "manufacturer": "Диал",
       "category_path": [
         "Спальни",
@@ -13486,8 +13552,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-kolibri-mdf-s-yashchikami",
       "name": "Пенал \"Колибри\" МДФ с ящиками - Бодега белая/Сандал белый",
-      "customer_price": "11946",
-      "old_price": "14930",
+      "customer_price": "12308",
+      "old_price": "15390",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -13518,8 +13584,8 @@
     {
       "source_url": "https://yourroom.ru/products/polka-navesnaya-kolibri-1900",
       "name": "Полка навесная \"Колибри\" 1900 - Бодега белая/Сандал белый",
-      "customer_price": "5249",
-      "old_price": "6560",
+      "customer_price": "5557",
+      "old_price": "6950",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -13549,8 +13615,8 @@
     {
       "source_url": "https://yourroom.ru/products/stol-zhurnalnyj-transformer-kamen-temnyj",
       "name": "Стол журнальный трансформер - Камень Темный",
-      "customer_price": "12688",
-      "old_price": "15860",
+      "customer_price": "12887",
+      "old_price": "16110",
       "manufacturer": "Диал",
       "category_path": [
         "Столы",
@@ -13579,8 +13645,8 @@
     {
       "source_url": "https://yourroom.ru/products/polka-sharm-pl-1",
       "name": "Полка \"Шарм\" ПЛ-1 - Ясень Анкор светлый",
-      "customer_price": "1249",
-      "old_price": "1560",
+      "customer_price": "1303",
+      "old_price": "1630",
       "manufacturer": "Диал",
       "category_path": [
         "Распашные шкафы",
@@ -13609,8 +13675,8 @@
     {
       "source_url": "https://yourroom.ru/products/stol-sharm-st-1",
       "name": "Стол \"Шарм\" СТ-1 - Ясень Анкор светлый",
-      "customer_price": "16145",
-      "old_price": "20180",
+      "customer_price": "16453",
+      "old_price": "20570",
       "manufacturer": "Диал",
       "category_path": [
         "Столы",
@@ -15351,137 +15417,6 @@
       },
       "description_preview": "Письменный стол \"Ки-Ки\" СТД 1070.1 - это удобное и красивое рабочее место, созданное специально для школьников и подростков. За счет светлых оттенков и плавных линий стол не смотрится громоздко и отлично подходит для создания уютной атмосферы в детской комнате. Применяемые материалы и палитра Каркас: собран из плотной древесно-стружечной плиты (ЛДСП) толщиной 16 мм в базовом белом цвете с матовой текстурой. Фасад: изготовлены из износостойкого МДФ (16 мм) в благородном оттенке \"Белое дерево\". По",
       "source_images": 4,
-      "clean_images": 3,
-      "clean_modes": [
-        "clean_alternate",
-        "clean_alternate",
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/krovat-lavis-krd-9001-0920-m-s-osnovaniem-ldsp-belyjbelyj-soft-seryj-emalit",
-      "name": "Кровать \"Лавис\" КРД 900.1 0,9*2,0 м с основанием ЛДСП - Белый/Белый софт-Серый эмалит",
-      "customer_price": "18748",
-      "old_price": "20830",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Кровати и тахты",
-        "Односпальные кровати"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "970x2032x900 мм",
-        "Вес": "60.4 кг",
-        "Объем": "1.8 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Ширина спального места": "900",
-        "Длина спального места": "2000",
-        "Основание": "Настил",
-        "Подъемный механизм": "Нет",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Материал обивки": "Без обивки",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт-Серый эмалит"
-      },
-      "description_preview": "Кровать \"Лавис\" КРД 900.1 - это односпальная подростковая кровать с двумя спинками. Модель входит в состав одноименной модульной детской серии и совмещает функции полноценного спального места ночью и зоны для отдыха или приема гостей днем. Материалы и цветовое исполнение Богатая палитра: коллекция выпускается в широком разнообразии модных оттенков, что позволяет легко вписать мебель в любой интерьер. Конструктивные особенности Основание: в комплекте идет прочный жесткий настил (щиты ЛДСП), спосо",
-      "source_images": 2,
-      "clean_images": 2,
-      "clean_modes": [
-        "clean_alternate",
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/stol-pismennyj-lavis-std-10701-belyjbelyj-soft-seryj-emalit",
-      "name": "Стол письменный \"Лавис\" СТД 1070.1 - Белый/Белый софт-Серый эмалит",
-      "customer_price": "14788",
-      "old_price": "16430",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Столы",
-        "Письменные столы"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "1070x590x760 мм",
-        "Вес": "41.62 кг",
-        "Объем": "0.5 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Тип сборки": "Не универсальная",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Материал столешницы": "ЛДСП",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт-Серый эмалит"
-      },
-      "description_preview": "Письменный стол \"Лавис\" СТД 1070.1 - это удобное и красивое рабочее место, созданное специально для школьников и подростков. За счет светлых оттенков и плавных линий стол не смотрится громоздко и отлично подходит для создания уютной атмосферы в детской комнате. Применяемые материалы и палитра Рельефные фасады: створки выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпускается в широком разнообразии модных оттенков, что позволяет легко впис",
-      "source_images": 2,
-      "clean_images": 2,
-      "clean_modes": [
-        "clean_alternate",
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/stol-pismennyj-lavis-std-10701-belyjbelyj-soft",
-      "name": "Стол письменный \"Лавис\" СТД 1070.1 - Белый/Белый софт",
-      "customer_price": "14788",
-      "old_price": "16430",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Столы",
-        "Письменные столы"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "1070x590x760 мм",
-        "Вес": "41.62 кг",
-        "Объем": "0.5 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Тип сборки": "Не универсальная",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Материал столешницы": "ЛДСП",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт"
-      },
-      "description_preview": "Письменный стол \"Лавис\" СТД 1070.1 - это удобное и красивое рабочее место, созданное специально для школьников и подростков. За счет светлых оттенков и плавных линий стол не смотрится громоздко и отлично подходит для создания уютной атмосферы в детской комнате. Применяемые материалы и палитра Рельефные фасады: створки выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпускается в широком разнообразии модных оттенков, что позволяет легко впис",
-      "source_images": 3,
-      "clean_images": 3,
-      "clean_modes": [
-        "clean_alternate",
-        "clean_alternate",
-        "watermark_removed"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-lavis-shd-9001-belyjbelyj-soft-roza",
-      "name": "Шкаф двухдверный \"Лавис\" ШД 900.1 - Белый/Белый софт-Роза",
-      "customer_price": "28091",
-      "old_price": "31210",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Распашные шкафы",
-        "Двухдверные шкафы"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "900x445x2200 мм",
-        "Вес": "103.97 кг",
-        "Объем": "0.9 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Тип петель": "Без доводчиков",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт-Роза"
-      },
-      "description_preview": "Шкаф двухдверный \"Ки-Ки\" ШД 900.1 - это полноценный, вместительный платяной шкаф для детской или подростковой комнаты. Благодаря ширине в 90 см он позволяет организовать основное хранение всего гардероба ребенка в одном месте, не перегружая при этом интерьер благодаря светлому дизайну. Применяемые материалы и палитра Рельефные фасады: ящики выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпускается в широком разнообразии модных оттенков, ч",
-      "source_images": 3,
       "clean_images": 3,
       "clean_modes": [
         "clean_alternate",
@@ -17458,11 +17393,313 @@
         "clean_alternate",
         "clean_alternate"
       ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-04-m-h-300-mm-molochnyj-shokolad",
+      "name": "Антресоль \"Бастион\" 0,4 м (h 300 мм) - Молочный шоколад",
+      "customer_price": "2199",
+      "old_price": "2199",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "400x520x300 мм",
+        "Вес": "31 кг",
+        "Объем": "0.02 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Молочный шоколад"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для однодверного шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над стандартным однодверным шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальнос",
+      "source_images": 2,
+      "clean_images": 2,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-05-m-h-300-mm-molochnyj-shokolad",
+      "name": "Антресоль \"Бастион\" 0,5 м (h 300 мм) - Молочный шоколад",
+      "customer_price": "2444",
+      "old_price": "2444",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "500x520x300 мм",
+        "Вес": "31 кг",
+        "Объем": "0.02 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Молочный шоколад"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для однодверного шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над стандартным однодверным шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальнос",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-05-m-h-300-mm-grafit",
+      "name": "Антресоль \"Бастион\" 0,5 м (h 300 мм) - Графит",
+      "customer_price": "2226",
+      "old_price": "2226",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "500x520x300 мм",
+        "Вес": "31 кг",
+        "Объем": "0.02 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Графит"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для однодверного шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над стандартным однодверным шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальнос",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-08-m-h-300-mm-molochnyj-shokolad",
+      "name": "Антресоль \"Бастион\" 0,8 м (h 300 мм) - Молочный шоколад",
+      "customer_price": "3638",
+      "old_price": "3638",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "800x520x300 мм",
+        "Вес": "31 кг",
+        "Объем": "0.03 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Молочный шоколад"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальность. В комплекте предусмотрены специал",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-16-m-h-300-mm-molochnyj-shokolad",
+      "name": "Антресоль \"Бастион\" 1,6 м (h 300 мм) - Молочный шоколад",
+      "customer_price": "7349",
+      "old_price": "7349",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1600x520x300 мм",
+        "Вес": "41 кг",
+        "Объем": "0.33 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Молочный шоколад"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальность. В комплекте предусмотрены специал",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-16-m-h-300-mm-dub-kraft-zolotoj--grafit",
+      "name": "Антресоль \"Бастион\" 1,6 м (h 300 мм) - Дуб крафт золотой / Графит",
+      "customer_price": "6181",
+      "old_price": "6181",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1600x520x300 мм",
+        "Вес": "41 кг",
+        "Объем": "0.33 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб крафт золотой / Графит"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальность. В комплекте предусмотрены специал",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-20-m-h-300-mm-belyj-drevesnyj--belyj-glyanets",
+      "name": "Антресоль \"Бастион\" 2,0 м (h 300 мм) - Белый древесный / Белый глянец",
+      "customer_price": "7005",
+      "old_price": "7005",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "2000x520x300 мм",
+        "Вес": "49 кг",
+        "Объем": "0.42 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Белый древесный / Белый глянец"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальность. В комплекте предусмотрены специал",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bastion-04-m-s-antresolyu-h-25m-grafit",
+      "name": "Шкаф однодверный \"Бастион\" 0,4 м с антресолью (h 2,5м) - Графит",
+      "customer_price": "9095",
+      "old_price": "9095",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Однодверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "400x520x2500 мм",
+        "Вес": "53 кг",
+        "Объем": "0.11 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Графит"
+      },
+      "description_preview": "Состав комплекта Шкаф однодверный \"Бастион\" 0,4 м Графит В комплекте 1 шт Габариты ШхГхВ (мм) 400 x 520 x 2200 Антресоль \"Бастион\" 0,4 м (h 300 мм) Графит В комплекте 1 шт Габариты ШхГхВ (мм) 400 x 520 x 300 Шкаф \"Бастион\" с антресолью - это функциональное и компактное решение для хранения вещей, идеально подходящее для небольших комнат, прихожих или узких ниш. Главная особенность модели - универсальное наполнение, конфигурацию которого вы выбираете сами во время сборки. Габариты Общая высота: 2",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bastion-04m-s-zerkalom-i-antresolyu-h-25-m-dub-kraft-zolotoj--grafit",
+      "name": "Шкаф однодверный \"Бастион\" 0,4м с зеркалом и антресолью (h 2,5 м) - Дуб крафт золотой / Графит",
+      "customer_price": "11204",
+      "old_price": "11204",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Однодверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "400x520x2500 мм",
+        "Вес": "59 кг",
+        "Объем": "0.12 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "Зеркало; ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб крафт золотой / Графит"
+      },
+      "description_preview": "Состав комплекта Зеркало фасадное для шкафов Бастион, Гермес, Авангард, Корд 260 мм (для 0,4м, 0,8м, 1,2м, 1,6м, ШКУ) В комплекте 1 шт Габариты ШхГхВ (мм) 260 x 4 x 1960 Шкаф однодверный \"Бастион\" 0,4 м Дуб крафт золотой / Графит В комплекте 1 шт Габариты ШхГхВ (мм) 400 x 520 x 2200 Антресоль \"Бастион\" 0,4 м (h 300 мм) Дуб крафт золотой / Графит В комплекте 1 шт Габариты ШхГхВ (мм) 400 x 520 x 300 Шкаф однодверный Бастион с зеркалом и антресолью – это универсальное решение, которое совмещает в с",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bastion-05-m-s-antresolyu-dub-kraft-zolotoj",
+      "name": "Шкаф однодверный \"Бастион\" 0,5 м с антресолью - Дуб крафт золотой",
+      "customer_price": "9756",
+      "old_price": "9756",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Однодверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "500x520x2600 мм",
+        "Вес": "60 кг",
+        "Объем": "0.8 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб крафт золотой"
+      },
+      "description_preview": "Состав комплекта Шкаф однодверный \"Бастион\" 0,5 м Дуб крафт золотой В комплекте 1 шт Габариты ШхГхВ (мм) 500 x 520 x 2200 Антресоль \"Бастион\" 0,5 м Дуб крафт золотой В комплекте 1 шт Габариты ШхГхВ (мм) 500 x 520 x 400 Шкаф \"Бастион\" с антресолью - это функциональное и компактное решение для хранения вещей, идеально подходящее для небольших комнат, прихожих или узких ниш. Главная особенность модели - универсальное наполнение, конфигурацию которого вы выбираете сами во время сборки. Габариты Обща",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
     }
   ],
   "complete": true,
-  "days_since_last_success": 27.86,
-  "sitemap_urls_total": 7719,
+  "days_since_last_success": 14.04,
+  "sitemap_urls_total": 7751,
   "warehouse_id": "019a5ab3-c024-706c-8b63-9059588d3d76",
-  "finished_at": "2026-10-27T12:51:03+00:00"
+  "finished_at": "2026-11-10T15:24:08+00:00"
 }
