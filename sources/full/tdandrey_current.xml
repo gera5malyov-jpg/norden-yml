@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<yml_catalog date="2026-11-10T07:21:16+00:00">
+<yml_catalog date="2026-11-10T19:47:03+00:00">
   <shop>
     <name>TD Andrey</name>
     <company>TD Andrey</company>
@@ -1711,7 +1711,7 @@
 Классическое сочетание цветов.
 Возможность приобретения отдельных модулей и создания индивидуальных композиций.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">3</param>
+<param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">1708</param>
 <param name="Розничная цена СПБ">2998</param>
 <param name="Остаток Москва">5</param>
@@ -1733,7 +1733,7 @@
 Возможность приобретения отдельных модулей и создания индивидуальных композиций.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
+<param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">5</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -3455,7 +3455,7 @@
 <param name="Остаток Москва">4</param>
 <param name="Оптовая цена Москва">4998</param>
 <param name="Розничная цена Москва">8768</param>
-<param name="Остаток Пятигорск">7</param>
+<param name="Остаток Пятигорск">1</param>
 <param name="Оптовая цена Пятигорск">5177</param>
 <param name="Розничная цена Пятигорск">8768</param>
 <param name="id">61</param>
@@ -3477,7 +3477,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">4</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">7</param>
+<param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">4998</param>
 <param name="price.spb.valueRetail">8768</param>
@@ -11683,7 +11683,7 @@
 <param name="Остаток Москва">9</param>
 <param name="Оптовая цена Москва">3150</param>
 <param name="Розничная цена Москва">5528</param>
-<param name="Остаток Пятигорск">3</param>
+<param name="Остаток Пятигорск">2</param>
 <param name="Оптовая цена Пятигорск">3263</param>
 <param name="Розничная цена Пятигорск">5528</param>
 <param name="id">287</param>
@@ -11698,7 +11698,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">9</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">3</param>
+<param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">3150</param>
 <param name="price.spb.valueRetail">5528</param>
@@ -13630,7 +13630,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">4683</param>
 <param name="Розничная цена Москва">8216</param>
-<param name="Остаток Пятигорск">1</param>
+<param name="Остаток Пятигорск">0</param>
 <param name="Оптовая цена Пятигорск">4850</param>
 <param name="Розничная цена Пятигорск">8216</param>
 <param name="id">336</param>
@@ -13645,7 +13645,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">1</param>
+<param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">4683</param>
 <param name="price.spb.valueRetail">8216</param>
@@ -13801,7 +13801,7 @@
 <param name="Остаток СПБ">31</param>
 <param name="Оптовая цена СПБ">5075</param>
 <param name="Розничная цена СПБ">8901</param>
-<param name="Остаток Москва">8</param>
+<param name="Остаток Москва">7</param>
 <param name="Оптовая цена Москва">5075</param>
 <param name="Розничная цена Москва">8901</param>
 <param name="Остаток Пятигорск">1</param>
@@ -13817,7 +13817,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">31</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">8</param>
+<param name="stock.msk.value">7</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -27851,83 +27851,6 @@
 <param name="categoryes[0][1].parentId">76</param>
 <param name="categoryes[0][1].name">Обеденные столы</param>
 </offer>
-<offer id="923" available="true">
-<name>Гостиная Оскар-18 центральная секция ОГЦС-1 (2100х1900х430)</name>
-<price>21451</price>
-<currencyId>RUR</currencyId>
-<vendor>Тэкс</vendor>
-<vendorCode>120367</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2023-10-14/e20f4bc2-c2e4-11e8-80db-1062ebdf3e34_619adb31-7ab3-11ec-872f-00155d000a00/8.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2023-10-14/e20f4bc2-c2e4-11e8-80db-1062ebdf3e34_619adb31-7ab3-11ec-872f-00155d000a00/2.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-09-30/e20f4bc2-c2e4-11e8-80db-1062ebdf3e34_619adb31-7ab3-11ec-872f-00155d000a00/kompozicziya-oskar-18-dub-kraft-zolotoj-atele-2.jpg</picture>
-<description>Размер: (ВхШхГ) 2100х1900х430  
-Ниша под ТВ: 900х1100х430
-Материал: ЛДСП
-Цветовое решение: Дуб Крафт золотой + Ателье светлое
-Ручки: Пластик.
-Опоры: Пластик.
-Практичный дизайн, продуманный функционал гостиной.
-Тонированное стекло с эффектным пескоструйным рисунком.
-Возможность приобретения отдельных модулей и создания собственных композиций.
-Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">1</param>
-<param name="Оптовая цена СПБ">12233</param>
-<param name="Розничная цена СПБ">21451</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">12233</param>
-<param name="Розничная цена Москва">21451</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">0</param>
-<param name="Розничная цена Пятигорск">21451</param>
-<param name="id">923</param>
-<param name="name">Гостиная Оскар-18 центральная секция ОГЦС-1 (2100х1900х430)</param>
-<param name="name2">дуб крафт золотой/ателье светлое СНЯТО С ПРОИЗВОДСТВА</param>
-<param name="sku">120367</param>
-<param name="vendor.id">2</param>
-<param name="vendor.name">Тэкс</param>
-<param name="description">Размер: (ВхШхГ) 2100х1900х430  
-Ниша под ТВ: 900х1100х430
-Материал: ЛДСП
-Цветовое решение: Дуб Крафт золотой + Ателье светлое
-Ручки: Пластик.
-Опоры: Пластик.
-Практичный дизайн, продуманный функционал гостиной.
-Тонированное стекло с эффектным пескоструйным рисунком.
-Возможность приобретения отдельных модулей и создания собственных композиций.
-Товар поставляется в разобранном виде.</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">1</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">12233</param>
-<param name="price.spb.valueRetail">21451</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">12233</param>
-<param name="price.msk.valueRetail">21451</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">0</param>
-<param name="price.ptg.valueRetail">21451</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2023-10-14/e20f4bc2-c2e4-11e8-80db-1062ebdf3e34_619adb31-7ab3-11ec-872f-00155d000a00/8.jpg</param>
-<param name="images[0].name">8.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2023-10-14/e20f4bc2-c2e4-11e8-80db-1062ebdf3e34_619adb31-7ab3-11ec-872f-00155d000a00/2.jpg</param>
-<param name="images[1].name">2.jpg</param>
-<param name="images[2].url">https://lk.tdandrey.ru/upload/products/p2024-09-30/e20f4bc2-c2e4-11e8-80db-1062ebdf3e34_619adb31-7ab3-11ec-872f-00155d000a00/kompozicziya-oskar-18-dub-kraft-zolotoj-atele-2.jpg</param>
-<param name="images[2].name">kompozicziya-oskar-18-dub-kraft-zolotoj-atele-2.jpg</param>
-<param name="size.width">190</param>
-<param name="size.height">210</param>
-<param name="size.lenght">43</param>
-<param name="size.weight">117</param>
-<param name="packages.count">0</param>
-<param name="categoryes[0][0].id">37</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для гостиной</param>
-<param name="categoryes[0][1].id">40</param>
-<param name="categoryes[0][1].parentId">37</param>
-<param name="categoryes[0][1].name">Модульные гостиные</param>
-</offer>
 <offer id="934" available="true">
 <name>Шкаф торцевой Мадлен (2200х366х526)</name>
 <price>12158</price>
@@ -33627,7 +33550,7 @@
 <param name="Остаток СПБ">12</param>
 <param name="Оптовая цена СПБ">1312</param>
 <param name="Розничная цена СПБ">2305</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">1312</param>
 <param name="Розничная цена Москва">2305</param>
 <param name="Остаток Пятигорск">14</param>
@@ -33643,7 +33566,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">12</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">14</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -40826,7 +40749,7 @@
 <param name="Остаток СПБ">13</param>
 <param name="Оптовая цена СПБ">1484</param>
 <param name="Розничная цена СПБ">2605</param>
-<param name="Остаток Москва">12</param>
+<param name="Остаток Москва">11</param>
 <param name="Оптовая цена Москва">1484</param>
 <param name="Розничная цена Москва">2605</param>
 <param name="Остаток Пятигорск">25</param>
@@ -40842,7 +40765,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">13</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">12</param>
+<param name="stock.msk.value">11</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">25</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -41305,7 +41228,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">1827</param>
 <param name="Розничная цена СПБ">3206</param>
-<param name="Остаток Москва">8</param>
+<param name="Остаток Москва">5</param>
 <param name="Оптовая цена Москва">1827</param>
 <param name="Розничная цена Москва">3206</param>
 <param name="Остаток Пятигорск">5</param>
@@ -41321,7 +41244,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">8</param>
+<param name="stock.msk.value">5</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">5</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -41464,7 +41387,7 @@
 <param name="Остаток СПБ">11</param>
 <param name="Оптовая цена СПБ">2310</param>
 <param name="Розничная цена СПБ">4058</param>
-<param name="Остаток Москва">14</param>
+<param name="Остаток Москва">13</param>
 <param name="Оптовая цена Москва">2310</param>
 <param name="Розничная цена Москва">4058</param>
 <param name="Остаток Пятигорск">4</param>
@@ -41480,7 +41403,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">11</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">14</param>
+<param name="stock.msk.value">13</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">4</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -57440,10 +57363,10 @@
 <vendorCode>291922</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2023-11-02/f9f32e7d-7ceb-11ec-872f-00155d000a00_376e418f-b313-11e7-80c8-1062ebdf3e34/shnu_1000-m-1.jpg</picture>
 <description>ШНУ 1000-М корпус шкаф нижний приставной б/ст белый</description>
-<param name="Остаток СПБ">10</param>
+<param name="Остаток СПБ">9</param>
 <param name="Оптовая цена СПБ">2184</param>
 <param name="Розничная цена СПБ">3833</param>
-<param name="Остаток Москва">18</param>
+<param name="Остаток Москва">16</param>
 <param name="Оптовая цена Москва">2184</param>
 <param name="Розничная цена Москва">3833</param>
 <param name="Остаток Пятигорск">6</param>
@@ -57457,9 +57380,9 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description">ШНУ 1000-М корпус шкаф нижний приставной б/ст белый</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">10</param>
+<param name="stock.spb.value">9</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">18</param>
+<param name="stock.msk.value">16</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">6</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -59506,7 +59429,7 @@
 <param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">1029</param>
 <param name="Розничная цена Москва">1812</param>
-<param name="Остаток Пятигорск">1</param>
+<param name="Остаток Пятигорск">0</param>
 <param name="Оптовая цена Пятигорск">1066</param>
 <param name="Розничная цена Пятигорск">1812</param>
 <param name="id">4760</param>
@@ -59521,7 +59444,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">1</param>
+<param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">1029</param>
 <param name="price.spb.valueRetail">1812</param>
@@ -62014,7 +61937,7 @@
 <param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">5299</param>
 <param name="Розничная цена СПБ">9294</param>
-<param name="Остаток Москва">6</param>
+<param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">5299</param>
 <param name="Розничная цена Москва">9294</param>
 <param name="Остаток Пятигорск">0</param>
@@ -62030,7 +61953,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">6</param>
+<param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -64774,7 +64697,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">8960</param>
 <param name="Розничная цена СПБ">15715</param>
-<param name="Остаток Москва">3</param>
+<param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">8960</param>
 <param name="Розничная цена Москва">15715</param>
 <param name="Остаток Пятигорск">2</param>
@@ -64790,7 +64713,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">3</param>
+<param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -65058,7 +64981,7 @@
 <picture>https://lk.tdandrey.ru/upload/products/p2024-09-25/beb7fb59-7cf5-11ec-872f-00155d000a00_63e9d589-a336-11eb-891c-00155d000a00/f-20-snimok.jpg</picture>
 <picture>https://lk.tdandrey.ru/upload/products/p2024-09-25/beb7fb59-7cf5-11ec-872f-00155d000a00_63e9d589-a336-11eb-891c-00155d000a00/f-20-shnu-1000-snimok.jpg</picture>
 <description>Ф-20-М Альфа (ШНУ 1000 М) МДФ холст вулкан</description>
-<param name="Остаток СПБ">3</param>
+<param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">1607</param>
 <param name="Розничная цена СПБ">2822</param>
 <param name="Остаток Москва">0</param>
@@ -65075,7 +64998,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description">Ф-20-М Альфа (ШНУ 1000 М) МДФ холст вулкан</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
+<param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -68545,10 +68468,10 @@
 <vendorCode>291168</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2023-11-02/5058f77e-44b1-11e9-8b3a-00155d000a00_376e418f-b313-11e7-80c8-1062ebdf3e34/shn_400-1.jpg</picture>
 <description>ШН 400 корпус шкаф нижний</description>
-<param name="Остаток СПБ">8</param>
+<param name="Остаток СПБ">7</param>
 <param name="Оптовая цена СПБ">1456</param>
 <param name="Розничная цена СПБ">2555</param>
-<param name="Остаток Москва">13</param>
+<param name="Остаток Москва">14</param>
 <param name="Оптовая цена Москва">1456</param>
 <param name="Розничная цена Москва">2555</param>
 <param name="Остаток Пятигорск">8</param>
@@ -68562,9 +68485,9 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description">ШН 400 корпус шкаф нижний</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">8</param>
+<param name="stock.spb.value">7</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">13</param>
+<param name="stock.msk.value">14</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">8</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -68704,7 +68627,7 @@
 <vendorCode>291621</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2023-11-02/6b21e296-44b1-11e9-8b3a-00155d000a00_376e418f-b313-11e7-80c8-1062ebdf3e34/shn_500.jpg</picture>
 <description>ШН 500 корпус шкаф нижний</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">3</param>
 <param name="Оптовая цена СПБ">1631</param>
 <param name="Розничная цена СПБ">2864</param>
 <param name="Остаток Москва">33</param>
@@ -68721,7 +68644,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description">ШН 500 корпус шкаф нижний</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">3</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">33</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -68763,7 +68686,7 @@
 <param name="Остаток Москва">27</param>
 <param name="Оптовая цена Москва">1792</param>
 <param name="Розничная цена Москва">3148</param>
-<param name="Остаток Пятигорск">10</param>
+<param name="Остаток Пятигорск">9</param>
 <param name="Оптовая цена Пятигорск">1856</param>
 <param name="Розничная цена Пятигорск">3148</param>
 <param name="id">5990</param>
@@ -68778,7 +68701,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">27</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">10</param>
+<param name="stock.ptg.value">9</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">1792</param>
 <param name="price.spb.valueRetail">3148</param>
@@ -68866,7 +68789,7 @@
 <param name="Остаток СПБ">9</param>
 <param name="Оптовая цена СПБ">1848</param>
 <param name="Розничная цена СПБ">3248</param>
-<param name="Остаток Москва">28</param>
+<param name="Остаток Москва">26</param>
 <param name="Оптовая цена Москва">1848</param>
 <param name="Розничная цена Москва">3248</param>
 <param name="Остаток Пятигорск">9</param>
@@ -68882,7 +68805,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">9</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">28</param>
+<param name="stock.msk.value">26</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">9</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -68922,7 +68845,7 @@
 <param name="Остаток Москва">28</param>
 <param name="Оптовая цена Москва">2037</param>
 <param name="Розничная цена Москва">3574</param>
-<param name="Остаток Пятигорск">5</param>
+<param name="Остаток Пятигорск">4</param>
 <param name="Оптовая цена Пятигорск">2110</param>
 <param name="Розничная цена Пятигорск">3574</param>
 <param name="id">5993</param>
@@ -68937,7 +68860,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">28</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">5</param>
+<param name="stock.ptg.value">4</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">2037</param>
 <param name="price.spb.valueRetail">3574</param>
@@ -75670,70 +75593,6 @@
 <param name="categoryes[0][1].parentId">37</param>
 <param name="categoryes[0][1].name">Модульные гостиные</param>
 </offer>
-<offer id="7254" available="true">
-<name>"Ливорно" Полка навесная ЛН-1</name>
-<price>2806</price>
-<currencyId>RUR</currencyId>
-<vendor>Тэкс</vendor>
-<vendorCode>160578</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2023-10-15/748b7a8c-e104-11e9-a3b9-00155d000a00_748b7a8d-e104-11e9-a3b9-00155d000a00/2.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-10-18/748b7a8c-e104-11e9-a3b9-00155d000a00_748b7a8d-e104-11e9-a3b9-00155d000a00/l-linorno-2.jpg</picture>
-<description>Размер: (ВхШхГ) 266х1260х266
-Материал: ЛДСП 
-Цветовое решение: Дуб Сонома
-Навесная полка - универсальный модуль, способный уравновесить любую композицию, составленную из мебели коллекции «Ливорно». Полки можно размещать на стене как симметрично, так и ассиметрично в зависимости от составленной Вами компоновки.
-Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">0</param>
-<param name="Оптовая цена СПБ">1596</param>
-<param name="Розничная цена СПБ">2806</param>
-<param name="Остаток Москва">1</param>
-<param name="Оптовая цена Москва">1596</param>
-<param name="Розничная цена Москва">2806</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">1653</param>
-<param name="Розничная цена Пятигорск">2806</param>
-<param name="id">7254</param>
-<param name="name">"Ливорно" Полка навесная ЛН-1</param>
-<param name="name2">дуб сонома</param>
-<param name="sku">160578</param>
-<param name="vendor.id">2</param>
-<param name="vendor.name">Тэкс</param>
-<param name="description">Размер: (ВхШхГ) 266х1260х266
-Материал: ЛДСП 
-Цветовое решение: Дуб Сонома
-Навесная полка - универсальный модуль, способный уравновесить любую композицию, составленную из мебели коллекции «Ливорно». Полки можно размещать на стене как симметрично, так и ассиметрично в зависимости от составленной Вами компоновки.
-Товар поставляется в разобранном виде.</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">0</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">1596</param>
-<param name="price.spb.valueRetail">2806</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">1596</param>
-<param name="price.msk.valueRetail">2806</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">1653</param>
-<param name="price.ptg.valueRetail">2806</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2023-10-15/748b7a8c-e104-11e9-a3b9-00155d000a00_748b7a8d-e104-11e9-a3b9-00155d000a00/2.jpg</param>
-<param name="images[0].name">2.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2024-10-18/748b7a8c-e104-11e9-a3b9-00155d000a00_748b7a8d-e104-11e9-a3b9-00155d000a00/l-linorno-2.jpg</param>
-<param name="images[1].name">l-linorno-2.jpg</param>
-<param name="size.width">126</param>
-<param name="size.height">26.6</param>
-<param name="size.lenght">26.6</param>
-<param name="size.weight">9</param>
-<param name="packages.count">0</param>
-<param name="categoryes[0][0].id">37</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для гостиной</param>
-<param name="categoryes[0][1].id">40</param>
-<param name="categoryes[0][1].parentId">37</param>
-<param name="categoryes[0][1].name">Модульные гостиные</param>
-</offer>
 <offer id="7255" available="true">
 <name>"Ливорно" Полка навесная ЛН-1</name>
 <price>2806</price>
@@ -78844,7 +78703,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">8694</param>
 <param name="Розничная цена Москва">15247</param>
-<param name="Остаток Пятигорск">2</param>
+<param name="Остаток Пятигорск">1</param>
 <param name="Оптовая цена Пятигорск">9005</param>
 <param name="Розничная цена Пятигорск">15247</param>
 <param name="id">7516</param>
@@ -78870,7 +78729,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">2</param>
+<param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">8694</param>
 <param name="price.spb.valueRetail">15247</param>
@@ -79208,7 +79067,7 @@
 <param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">7476</param>
 <param name="Розничная цена Москва">13110</param>
-<param name="Остаток Пятигорск">3</param>
+<param name="Остаток Пятигорск">0</param>
 <param name="Оптовая цена Пятигорск">7743</param>
 <param name="Розничная цена Пятигорск">13110</param>
 <param name="id">7521</param>
@@ -79234,7 +79093,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">3</param>
+<param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">7476</param>
 <param name="price.spb.valueRetail">13110</param>
@@ -79299,7 +79158,7 @@
 <param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">7476</param>
 <param name="Розничная цена Москва">13110</param>
-<param name="Остаток Пятигорск">1</param>
+<param name="Остаток Пятигорск">0</param>
 <param name="Оптовая цена Пятигорск">7743</param>
 <param name="Розничная цена Пятигорск">13110</param>
 <param name="id">7522</param>
@@ -79325,7 +79184,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">1</param>
+<param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">7476</param>
 <param name="price.spb.valueRetail">13110</param>
@@ -79862,7 +79721,7 @@
 Создаст полноценное рабочее место для школьника, студента или офисного сотрудника.
 Сборка возможна только так, как показано на фотографии.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">4221</param>
 <param name="Розничная цена СПБ">7406</param>
 <param name="Остаток Москва">0</param>
@@ -79888,7 +79747,7 @@
 Сборка возможна только так, как показано на фотографии.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -80310,7 +80169,7 @@
 Создаст полноценное рабочее место для школьника, студента или офисного сотрудника.
 Сборка возможна только так, как показано на фотографии.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">10101</param>
 <param name="Розничная цена СПБ">17719</param>
 <param name="Остаток Москва">0</param>
@@ -80321,7 +80180,7 @@
 <param name="Розничная цена Пятигорск">17719</param>
 <param name="id">7536</param>
 <param name="name">СТОЛ КОМПЬЮТЕРНЫЙ №6 (1,5х1,82х0,814)</param>
-<param name="name2">анкор/анкор</param>
+<param name="name2">анкор/анкор (СНЯТ С ПРО-ВА)</param>
 <param name="sku">040833</param>
 <param name="vendor.id">1</param>
 <param name="vendor.name">Стендмебель</param>
@@ -80338,7 +80197,7 @@
 Сборка возможна только так, как показано на фотографии.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -80624,7 +80483,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">8176</param>
 <param name="Розничная цена Москва">14337</param>
-<param name="Остаток Пятигорск">2</param>
+<param name="Остаток Пятигорск">1</param>
 <param name="Оптовая цена Пятигорск">8468</param>
 <param name="Розничная цена Пятигорск">14337</param>
 <param name="id">7541</param>
@@ -80649,7 +80508,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">2</param>
+<param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">8176</param>
 <param name="price.spb.valueRetail">14337</param>
@@ -92208,7 +92067,7 @@
 <param name="Остаток СПБ">14</param>
 <param name="Оптовая цена СПБ">2751</param>
 <param name="Розничная цена СПБ">4826</param>
-<param name="Остаток Москва">5</param>
+<param name="Остаток Москва">3</param>
 <param name="Оптовая цена Москва">2751</param>
 <param name="Розничная цена Москва">4826</param>
 <param name="Остаток Пятигорск">11</param>
@@ -92224,7 +92083,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">14</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">5</param>
+<param name="stock.msk.value">3</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">11</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -96073,7 +95932,7 @@
 <param name="Остаток СПБ">15</param>
 <param name="Оптовая цена СПБ">829</param>
 <param name="Розничная цена СПБ">1461</param>
-<param name="Остаток Москва">4</param>
+<param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">829</param>
 <param name="Розничная цена Москва">1461</param>
 <param name="Остаток Пятигорск">6</param>
@@ -96089,7 +95948,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">15</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">4</param>
+<param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">6</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -98420,7 +98279,7 @@
 <param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">3417</param>
 <param name="Розничная цена СПБ">5995</param>
-<param name="Остаток Москва">4</param>
+<param name="Остаток Москва">3</param>
 <param name="Оптовая цена Москва">3417</param>
 <param name="Розничная цена Москва">5995</param>
 <param name="Остаток Пятигорск">6</param>
@@ -98436,7 +98295,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">4</param>
+<param name="stock.msk.value">3</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">6</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -109076,7 +108935,7 @@
 <currencyId>RUR</currencyId>
 <vendor>Стендмебель</vendor>
 <vendorCode>240931</vendorCode>
-<param name="Остаток СПБ">18</param>
+<param name="Остаток СПБ">17</param>
 <param name="Оптовая цена СПБ">1164</param>
 <param name="Розничная цена СПБ">2041</param>
 <param name="Остаток Москва">0</param>
@@ -109093,7 +108952,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description"></param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">18</param>
+<param name="stock.spb.value">17</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -132852,7 +132711,7 @@
 <param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">5061</param>
 <param name="Розничная цена Москва">8876</param>
-<param name="Остаток Пятигорск">2</param>
+<param name="Остаток Пятигорск">1</param>
 <param name="Оптовая цена Пятигорск">5242</param>
 <param name="Розничная цена Пятигорск">8876</param>
 <param name="id">13374</param>
@@ -132877,7 +132736,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">2</param>
+<param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">5061</param>
 <param name="price.spb.valueRetail">8876</param>
@@ -133030,7 +132889,7 @@
 Надежная фурнитура. 
 Матрас в стоимость кровати не входит.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">11</param>
+<param name="Остаток СПБ">10</param>
 <param name="Оптовая цена СПБ">5208</param>
 <param name="Розничная цена СПБ">9135</param>
 <param name="Остаток Москва">3</param>
@@ -133057,7 +132916,7 @@
 Матрас в стоимость кровати не входит.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">11</param>
+<param name="stock.spb.value">10</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">3</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -134656,7 +134515,7 @@
 <param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">9107</param>
 <param name="Розничная цена СПБ">15974</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">9107</param>
 <param name="Розничная цена Москва">15974</param>
 <param name="Остаток Пятигорск">2</param>
@@ -134678,7 +134537,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -162405,7 +162264,7 @@
 <param name="Остаток СПБ">7</param>
 <param name="Оптовая цена СПБ">1785</param>
 <param name="Розничная цена СПБ">3131</param>
-<param name="Остаток Москва">13</param>
+<param name="Остаток Москва">10</param>
 <param name="Оптовая цена Москва">1785</param>
 <param name="Розничная цена Москва">3131</param>
 <param name="Остаток Пятигорск">5</param>
@@ -162421,7 +162280,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">7</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">13</param>
+<param name="stock.msk.value">10</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">5</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -166592,7 +166451,7 @@
 <param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">12320</param>
 <param name="Розничная цена Москва">21610</param>
-<param name="Остаток Пятигорск">0</param>
+<param name="Остаток Пятигорск">2</param>
 <param name="Оптовая цена Пятигорск">12760</param>
 <param name="Розничная цена Пятигорск">21610</param>
 <param name="id">14729</param>
@@ -166615,7 +166474,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
+<param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">12320</param>
 <param name="price.spb.valueRetail">21610</param>
@@ -168912,7 +168771,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">1939</param>
 <param name="Розничная цена Москва">3407</param>
-<param name="Остаток Пятигорск">7</param>
+<param name="Остаток Пятигорск">6</param>
 <param name="Оптовая цена Пятигорск">2008</param>
 <param name="Розничная цена Пятигорск">3407</param>
 <param name="id">14789</param>
@@ -168927,7 +168786,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">7</param>
+<param name="stock.ptg.value">6</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">1939</param>
 <param name="price.spb.valueRetail">3407</param>
@@ -168965,7 +168824,7 @@
 <picture>https://lk.tdandrey.ru/upload/products/p2024-09-17/342657da-a338-11eb-891c-00155d000a00_63e9d589-a336-11eb-891c-00155d000a00/105-snimok_1.jpg</picture>
 <picture>https://lk.tdandrey.ru/upload/products/p2024-09-17/342657da-a338-11eb-891c-00155d000a00_63e9d589-a336-11eb-891c-00155d000a00/vulkan-600-snimok_1.jpg</picture>
 <description>Ф-105 Альфа (ШВ 600, ШН 600, ШНМ 600) МДФ холст вулкан</description>
-<param name="Остаток СПБ">25</param>
+<param name="Остаток СПБ">24</param>
 <param name="Оптовая цена СПБ">1939</param>
 <param name="Розничная цена СПБ">3407</param>
 <param name="Остаток Москва">0</param>
@@ -168982,7 +168841,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description">Ф-105 Альфа (ШВ 600, ШН 600, ШНМ 600) МДФ холст вулкан</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">25</param>
+<param name="stock.spb.value">24</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -169782,7 +169641,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">1211</param>
 <param name="Розничная цена Москва">2129</param>
-<param name="Остаток Пятигорск">8</param>
+<param name="Остаток Пятигорск">7</param>
 <param name="Оптовая цена Пятигорск">1254</param>
 <param name="Розничная цена Пятигорск">2129</param>
 <param name="id">14814</param>
@@ -169797,7 +169656,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">8</param>
+<param name="stock.ptg.value">7</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">1211</param>
 <param name="price.spb.valueRetail">2129</param>
@@ -169912,7 +169771,7 @@
 <picture>https://lk.tdandrey.ru/upload/products/p2024-09-25/bf561c5a-a33d-11eb-891c-00155d000a00_63e9d589-a336-11eb-891c-00155d000a00/f-20-shv-400-snimok.jpg</picture>
 <picture>https://lk.tdandrey.ru/upload/products/p2024-09-25/bf561c5a-a33d-11eb-891c-00155d000a00_63e9d589-a336-11eb-891c-00155d000a00/f-20-shn-400-1-snimok.jpg</picture>
 <description>Ф-20 Альфа (ШВ 400, ШН 400) МДФ холст вулкан</description>
-<param name="Остаток СПБ">3</param>
+<param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">1211</param>
 <param name="Розничная цена СПБ">2129</param>
 <param name="Остаток Москва">6</param>
@@ -169929,7 +169788,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description">Ф-20 Альфа (ШВ 400, ШН 400) МДФ холст вулкан</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
+<param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">6</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -171336,7 +171195,7 @@
 <param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">1355</param>
 <param name="Розничная цена СПБ">2380</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">1355</param>
 <param name="Розничная цена Москва">2380</param>
 <param name="Остаток Пятигорск">1</param>
@@ -171352,7 +171211,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -171460,7 +171319,7 @@
 <param name="Остаток СПБ">6</param>
 <param name="Оптовая цена СПБ">1218</param>
 <param name="Розничная цена СПБ">2138</param>
-<param name="Остаток Москва">10</param>
+<param name="Остаток Москва">9</param>
 <param name="Оптовая цена Москва">1218</param>
 <param name="Розничная цена Москва">2138</param>
 <param name="Остаток Пятигорск">7</param>
@@ -171476,7 +171335,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">6</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">10</param>
+<param name="stock.msk.value">9</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">7</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -171829,7 +171688,7 @@
 <picture>https://lk.tdandrey.ru/upload/products/p2024-10-03/7f608552-a33f-11eb-891c-00155d000a00_63e9d589-a336-11eb-891c-00155d000a00/f-23-snimok.jpg</picture>
 <picture>https://lk.tdandrey.ru/upload/products/p2024-10-03/7f608552-a33f-11eb-891c-00155d000a00_63e9d589-a336-11eb-891c-00155d000a00/f-23-shn3ja-400-snimok.jpg</picture>
 <description>Ф-23 Альфа (ШН3Я 400) МДФ холст вулкан</description>
-<param name="Остаток СПБ">3</param>
+<param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">1485</param>
 <param name="Розничная цена СПБ">2605</param>
 <param name="Остаток Москва">0</param>
@@ -171846,7 +171705,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description">Ф-23 Альфа (ШН3Я 400) МДФ холст вулкан</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
+<param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -173134,7 +172993,7 @@
 <param name="Остаток СПБ">7</param>
 <param name="Оптовая цена СПБ">2293</param>
 <param name="Розничная цена СПБ">4025</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">2293</param>
 <param name="Розничная цена Москва">4025</param>
 <param name="Остаток Пятигорск">8</param>
@@ -173150,7 +173009,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">7</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">8</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -175929,7 +175788,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">1550</param>
 <param name="Розничная цена Москва">2722</param>
-<param name="Остаток Пятигорск">10</param>
+<param name="Остаток Пятигорск">9</param>
 <param name="Оптовая цена Пятигорск">1605</param>
 <param name="Розничная цена Пятигорск">2722</param>
 <param name="id">14974</param>
@@ -175944,7 +175803,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">10</param>
+<param name="stock.ptg.value">9</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">1550</param>
 <param name="price.spb.valueRetail">2722</param>
@@ -177065,7 +176924,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">1939</param>
 <param name="Розничная цена Москва">3407</param>
-<param name="Остаток Пятигорск">12</param>
+<param name="Остаток Пятигорск">11</param>
 <param name="Оптовая цена Пятигорск">2008</param>
 <param name="Розничная цена Пятигорск">3407</param>
 <param name="id">14994</param>
@@ -177080,7 +176939,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">12</param>
+<param name="stock.ptg.value">11</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">1939</param>
 <param name="price.spb.valueRetail">3407</param>
@@ -177516,7 +177375,7 @@
 <param name="Остаток СПБ">3</param>
 <param name="Оптовая цена СПБ">1947</param>
 <param name="Розничная цена СПБ">3415</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">1947</param>
 <param name="Розничная цена Москва">3415</param>
 <param name="Остаток Пятигорск">5</param>
@@ -177532,7 +177391,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">3</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">5</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -177581,7 +177440,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">2040</param>
 <param name="Розничная цена Москва">3582</param>
-<param name="Остаток Пятигорск">8</param>
+<param name="Остаток Пятигорск">7</param>
 <param name="Оптовая цена Пятигорск">2113</param>
 <param name="Розничная цена Пятигорск">3582</param>
 <param name="id">15009</param>
@@ -177596,7 +177455,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">8</param>
+<param name="stock.ptg.value">7</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">2040</param>
 <param name="price.spb.valueRetail">3582</param>
@@ -177769,7 +177628,7 @@
 <picture>https://lk.tdandrey.ru/upload/products/p2024-10-09/3cc834cc-a341-11eb-891c-00155d000a00_63e9d589-a336-11eb-891c-00155d000a00/f-50-shv-800-snimok.jpg</picture>
 <picture>https://lk.tdandrey.ru/upload/products/p2024-10-09/3cc834cc-a341-11eb-891c-00155d000a00_63e9d589-a336-11eb-891c-00155d000a00/f-50-shn-800-snimok.jpg</picture>
 <description>Ф-50 Альфа (ШВ 800, ШН 800) МДФ холст вулкан</description>
-<param name="Остаток СПБ">3</param>
+<param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">2300</param>
 <param name="Розничная цена СПБ">4033</param>
 <param name="Остаток Москва">1</param>
@@ -177786,7 +177645,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description">Ф-50 Альфа (ШВ 800, ШН 800) МДФ холст вулкан</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
+<param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -187874,7 +187733,7 @@
 <param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">693</param>
 <param name="Розничная цена Москва">1219</param>
-<param name="Остаток Пятигорск">3</param>
+<param name="Остаток Пятигорск">4</param>
 <param name="Оптовая цена Пятигорск">718</param>
 <param name="Розничная цена Пятигорск">1219</param>
 <param name="id">17944</param>
@@ -187889,7 +187748,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">3</param>
+<param name="stock.ptg.value">4</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">693</param>
 <param name="price.spb.valueRetail">1219</param>
@@ -198735,7 +198594,7 @@
 <param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">5768</param>
 <param name="Розничная цена Москва">10120</param>
-<param name="Остаток Пятигорск">1</param>
+<param name="Остаток Пятигорск">0</param>
 <param name="Оптовая цена Пятигорск">5974</param>
 <param name="Розничная цена Пятигорск">10120</param>
 <param name="id">18731</param>
@@ -198757,7 +198616,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">1</param>
+<param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">5768</param>
 <param name="price.spb.valueRetail">10120</param>
@@ -199460,7 +199319,7 @@
 Выдвижные ящики установлены на роликовых направляющих.
 Максимальная нагрузка для выдвижных ящиков на дно: 8-10 кг.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">3</param>
+<param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">6609</param>
 <param name="Розничная цена СПБ">11588</param>
 <param name="Остаток Москва">0</param>
@@ -199486,7 +199345,7 @@
 Максимальная нагрузка для выдвижных ящиков на дно: 8-10 кг.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
+<param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -200483,7 +200342,7 @@
 Выдвижная панель для клавиатуры установлена на роликовые направляющие.
 Стол оборудован функциональной надстройкой.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">1</param>
+<param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">8484</param>
 <param name="Розничная цена СПБ">14880</param>
 <param name="Остаток Москва">1</param>
@@ -200508,7 +200367,7 @@
 Стол оборудован функциональной надстройкой.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">1</param>
+<param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -201192,7 +201051,7 @@
 <param name="Остаток СПБ">7</param>
 <param name="Оптовая цена СПБ">5656</param>
 <param name="Розничная цена СПБ">9920</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">5656</param>
 <param name="Розничная цена Москва">9920</param>
 <param name="Остаток Пятигорск">0</param>
@@ -201215,7 +201074,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">7</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -225023,7 +224882,7 @@
 <param name="Остаток СПБ">10</param>
 <param name="Оптовая цена СПБ">980</param>
 <param name="Розничная цена СПБ">1720</param>
-<param name="Остаток Москва">13</param>
+<param name="Остаток Москва">11</param>
 <param name="Оптовая цена Москва">980</param>
 <param name="Розничная цена Москва">1720</param>
 <param name="Остаток Пятигорск">6</param>
@@ -225039,7 +224898,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">10</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">13</param>
+<param name="stock.msk.value">11</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">6</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -226794,7 +226653,7 @@
 <vendor>Стендмебель</vendor>
 <vendorCode>292502</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2023-10-31/b782a639-b324-11e7-80c8-1062ebdf3e34_376e418f-b313-11e7-80c8-1062ebdf3e34/shv_500-1.jpg</picture>
-<param name="Остаток СПБ">6</param>
+<param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">1204</param>
 <param name="Розничная цена СПБ">2113</param>
 <param name="Остаток Москва">20</param>
@@ -226811,7 +226670,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description"></param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">6</param>
+<param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">20</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -226901,7 +226760,7 @@
 <param name="Остаток СПБ">13</param>
 <param name="Оптовая цена СПБ">1099</param>
 <param name="Розничная цена СПБ">1929</param>
-<param name="Остаток Москва">21</param>
+<param name="Остаток Москва">19</param>
 <param name="Оптовая цена Москва">1099</param>
 <param name="Розничная цена Москва">1929</param>
 <param name="Остаток Пятигорск">9</param>
@@ -226917,7 +226776,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">13</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">21</param>
+<param name="stock.msk.value">19</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">9</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -226956,7 +226815,7 @@
 <param name="Остаток Москва">16</param>
 <param name="Оптовая цена Москва">1218</param>
 <param name="Розничная цена Москва">2138</param>
-<param name="Остаток Пятигорск">1</param>
+<param name="Остаток Пятигорск">0</param>
 <param name="Оптовая цена Пятигорск">1262</param>
 <param name="Розничная цена Пятигорск">2138</param>
 <param name="id">27381</param>
@@ -226971,7 +226830,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">16</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">1</param>
+<param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">1218</param>
 <param name="price.spb.valueRetail">2138</param>
@@ -227262,10 +227121,10 @@
 <vendor>Стендмебель</vendor>
 <vendorCode>292043</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2023-10-31/b782a63b-b324-11e7-80c8-1062ebdf3e34_376e418f-b313-11e7-80c8-1062ebdf3e34/shv_800-1.jpg</picture>
-<param name="Остаток СПБ">6</param>
+<param name="Остаток СПБ">5</param>
 <param name="Оптовая цена СПБ">1603</param>
 <param name="Розничная цена СПБ">2814</param>
-<param name="Остаток Москва">4</param>
+<param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">1603</param>
 <param name="Розничная цена Москва">2814</param>
 <param name="Остаток Пятигорск">2</param>
@@ -227279,9 +227138,9 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description"></param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">6</param>
+<param name="stock.spb.value">5</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">4</param>
+<param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -227422,10 +227281,10 @@
 <vendor>Стендмебель</vendor>
 <vendorCode>290582</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2023-10-31/b782a63a-b324-11e7-80c8-1062ebdf3e34_376e418f-b313-11e7-80c8-1062ebdf3e34/shv_600.jpg</picture>
-<param name="Остаток СПБ">17</param>
+<param name="Остаток СПБ">12</param>
 <param name="Оптовая цена СПБ">1379</param>
 <param name="Розничная цена СПБ">2422</param>
-<param name="Остаток Москва">3</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">1379</param>
 <param name="Розничная цена Москва">2422</param>
 <param name="Остаток Пятигорск">0</param>
@@ -227439,9 +227298,9 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description"></param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">17</param>
+<param name="stock.spb.value">12</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">3</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -227480,7 +227339,7 @@
 <param name="Остаток Москва">14</param>
 <param name="Оптовая цена Москва">1519</param>
 <param name="Розничная цена Москва">2664</param>
-<param name="Остаток Пятигорск">24</param>
+<param name="Остаток Пятигорск">23</param>
 <param name="Оптовая цена Пятигорск">1573</param>
 <param name="Розничная цена Пятигорск">2664</param>
 <param name="id">27391</param>
@@ -227495,7 +227354,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">14</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">24</param>
+<param name="stock.ptg.value">23</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">1519</param>
 <param name="price.spb.valueRetail">2664</param>
@@ -228788,7 +228647,7 @@
 <vendorCode>291428</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2024-11-07/b782a663-b324-11e7-80c8-1062ebdf3e34_376e418f-b313-11e7-80c8-1062ebdf3e34/shnm-500-belyj-snimok.jpg</picture>
 <description>ШНМ 500 корпус шкаф нижний мойка (500*840*474) белый</description>
-<param name="Остаток СПБ">13</param>
+<param name="Остаток СПБ">11</param>
 <param name="Оптовая цена СПБ">1351</param>
 <param name="Розничная цена СПБ">2371</param>
 <param name="Остаток Москва">26</param>
@@ -228805,7 +228664,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description">ШНМ 500 корпус шкаф нижний мойка (500*840*474) белый</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">13</param>
+<param name="stock.spb.value">11</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">26</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -228950,7 +228809,7 @@
 <param name="Остаток СПБ">13</param>
 <param name="Оптовая цена СПБ">1477</param>
 <param name="Розничная цена СПБ">2597</param>
-<param name="Остаток Москва">16</param>
+<param name="Остаток Москва">14</param>
 <param name="Оптовая цена Москва">1477</param>
 <param name="Розничная цена Москва">2597</param>
 <param name="Остаток Пятигорск">7</param>
@@ -228966,7 +228825,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">13</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">16</param>
+<param name="stock.msk.value">14</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">7</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -229109,7 +228968,7 @@
 <param name="Остаток СПБ">11</param>
 <param name="Оптовая цена СПБ">1631</param>
 <param name="Розничная цена СПБ">2864</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">1631</param>
 <param name="Розничная цена Москва">2864</param>
 <param name="Остаток Пятигорск">5</param>
@@ -229125,7 +228984,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">11</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">5</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -231997,7 +231856,7 @@
 <vendor>Стендмебель</vendor>
 <vendorCode>120226</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2024-06-03/ec2e8ec7-b49a-11e7-80c8-1062ebdf3e34_ec2e8eba-b49a-11e7-80c8-1062ebdf3e34/ec2e8ec7_b49a_11e7_80c8_1062ebdf3e34_5fdb2dc4_043e_11ed_8dfa_00155d000a00.jpg</picture>
-<param name="Остаток СПБ">0</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">1550</param>
 <param name="Розничная цена СПБ">2722</param>
 <param name="Остаток Москва">0</param>
@@ -232014,7 +231873,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description"></param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">0</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -266485,7 +266344,7 @@
 <param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">1327</param>
 <param name="Розничная цена СПБ">2330</param>
-<param name="Остаток Москва">3</param>
+<param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">1327</param>
 <param name="Розничная цена Москва">2330</param>
 <param name="Остаток Пятигорск">0</param>
@@ -266501,7 +266360,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">3</param>
+<param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -267937,7 +267796,7 @@
 <param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">2213</param>
 <param name="Розничная цена СПБ">3883</param>
-<param name="Остаток Москва">5</param>
+<param name="Остаток Москва">4</param>
 <param name="Оптовая цена Москва">2213</param>
 <param name="Розничная цена Москва">3883</param>
 <param name="Остаток Пятигорск">0</param>
@@ -267953,7 +267812,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">5</param>
+<param name="stock.msk.value">4</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -281441,7 +281300,7 @@
 <param name="Остаток Москва">4</param>
 <param name="Оптовая цена Москва">1197</param>
 <param name="Розничная цена Москва">2104</param>
-<param name="Остаток Пятигорск">4</param>
+<param name="Остаток Пятигорск">2</param>
 <param name="Оптовая цена Пятигорск">1240</param>
 <param name="Розничная цена Пятигорск">2104</param>
 <param name="id">29954</param>
@@ -281460,7 +281319,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">4</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">4</param>
+<param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">1197</param>
 <param name="price.spb.valueRetail">2104</param>
@@ -281963,7 +281822,7 @@
 <param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">6930</param>
 <param name="Розничная цена СПБ">12158</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">3</param>
 <param name="Оптовая цена Москва">6930</param>
 <param name="Розничная цена Москва">12158</param>
 <param name="Остаток Пятигорск">2</param>
@@ -281985,7 +281844,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">3</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -284056,7 +283915,7 @@
 Сочетание двух цветов ЛДСП: темного и светлого придаст комнате стиль, современность и оригинальность. 
 Стенка Лима идеально смотрится в любой современной комнате.
 Товар продается в разобранном виде.</description>
-<param name="Остаток СПБ">1</param>
+<param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">7434</param>
 <param name="Розничная цена СПБ">13043</param>
 <param name="Остаток Москва">0</param>
@@ -284085,7 +283944,7 @@
 Стенка Лима идеально смотрится в любой современной комнате.
 Товар продается в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">1</param>
+<param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -287029,7 +286888,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">7728</param>
 <param name="Розничная цена СПБ">13552</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">7728</param>
 <param name="Розничная цена Москва">13552</param>
 <param name="Остаток Пятигорск">0</param>
@@ -287053,7 +286912,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -287124,7 +286983,7 @@
 <param name="Остаток СПБ">3</param>
 <param name="Оптовая цена СПБ">5635</param>
 <param name="Розничная цена СПБ">9886</param>
-<param name="Остаток Москва">6</param>
+<param name="Остаток Москва">5</param>
 <param name="Оптовая цена Москва">5635</param>
 <param name="Розничная цена Москва">9886</param>
 <param name="Остаток Пятигорск">2</param>
@@ -287146,7 +287005,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">3</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">6</param>
+<param name="stock.msk.value">5</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -289091,81 +288950,6 @@
 <param name="size.weight">0</param>
 <param name="packages.count">0</param>
 </offer>
-<offer id="30878" available="true">
-<name>Гостиная "Флора" (2700х2100х540)</name>
-<price>36849</price>
-<currencyId>RUR</currencyId>
-<vendor>БТС</vendor>
-<vendorCode>090076</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-11-05/452301ca-b8bb-11e7-80c8-1062ebdf3e34_6c40f9ec-acaa-11eb-891c-00155d000a00/flora-v-jaseni-belom-na-belom-fone.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-11-05/452301ca-b8bb-11e7-80c8-1062ebdf3e34_6c40f9ec-acaa-11eb-891c-00155d000a00/gostinaja-flora_vnutrennee-naponenie.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-11-05/452301ca-b8bb-11e7-80c8-1062ebdf3e34_6c40f9ec-acaa-11eb-891c-00155d000a00/flora-jasen-belyj-min.jpg</picture>
-<description>Размер: (ШхВхГ) 2700х2100х540
-Ниша под ТВ: 1000х798х432
-Материал корпуса/фасада: ЛДСП/ЛДСП
-Цвет корпуса/фасада: Ясень Белый
-Гостиная Флора невероятно вместительный вариант. 
-В ней вы сможете расположить телевизор, всю необходимую аудиотехнику, а верхние и нижние ящики прекрасно подойдут для документов и личных вещей. 
-Кроме того, модель гостиной Флора имеет два полноценных шкафа, один из которых двустворчатый и оснащен штангой для вешалок с вашей одеждой.
-Корпус изделия изготовлен из ЛДСП цвета ясень шимо, фасады выполнены в цвете дуб аталанта - это прекарсное цветвое решение для светлого итерьера тёплых оттенков, наличие зеркальной дверцы с лаконичным цветочным принтом позволяет расширить пространство.
-Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">1</param>
-<param name="Оптовая цена СПБ">21013</param>
-<param name="Розничная цена СПБ">36849</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">21013</param>
-<param name="Розничная цена Москва">36849</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">21763</param>
-<param name="Розничная цена Пятигорск">36849</param>
-<param name="id">30878</param>
-<param name="name">Гостиная "Флора" (2700х2100х540)</param>
-<param name="name2">ясень белый</param>
-<param name="sku">090076</param>
-<param name="vendor.id">3</param>
-<param name="vendor.name">БТС</param>
-<param name="description">Размер: (ШхВхГ) 2700х2100х540
-Ниша под ТВ: 1000х798х432
-Материал корпуса/фасада: ЛДСП/ЛДСП
-Цвет корпуса/фасада: Ясень Белый
-Гостиная Флора невероятно вместительный вариант. 
-В ней вы сможете расположить телевизор, всю необходимую аудиотехнику, а верхние и нижние ящики прекрасно подойдут для документов и личных вещей. 
-Кроме того, модель гостиной Флора имеет два полноценных шкафа, один из которых двустворчатый и оснащен штангой для вешалок с вашей одеждой.
-Корпус изделия изготовлен из ЛДСП цвета ясень шимо, фасады выполнены в цвете дуб аталанта - это прекарсное цветвое решение для светлого итерьера тёплых оттенков, наличие зеркальной дверцы с лаконичным цветочным принтом позволяет расширить пространство.
-Товар поставляется в разобранном виде.</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">1</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">21013</param>
-<param name="price.spb.valueRetail">36849</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">21013</param>
-<param name="price.msk.valueRetail">36849</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">21763</param>
-<param name="price.ptg.valueRetail">36849</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2024-11-05/452301ca-b8bb-11e7-80c8-1062ebdf3e34_6c40f9ec-acaa-11eb-891c-00155d000a00/flora-v-jaseni-belom-na-belom-fone.jpg</param>
-<param name="images[0].name">Флора-в-ясени-белом-на-белом-фоне.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2024-11-05/452301ca-b8bb-11e7-80c8-1062ebdf3e34_6c40f9ec-acaa-11eb-891c-00155d000a00/gostinaja-flora_vnutrennee-naponenie.jpg</param>
-<param name="images[1].name">Гостиная-Флора_внутреннее-напонение.jpg</param>
-<param name="images[2].url">https://lk.tdandrey.ru/upload/products/p2024-11-05/452301ca-b8bb-11e7-80c8-1062ebdf3e34_6c40f9ec-acaa-11eb-891c-00155d000a00/flora-jasen-belyj-min.jpg</param>
-<param name="images[2].name">Флора-ясень-белый-min.jpg</param>
-<param name="size.width">270</param>
-<param name="size.height">210</param>
-<param name="size.lenght">54</param>
-<param name="size.weight">196.7</param>
-<param name="packages.count">0</param>
-<param name="categoryes[0][0].id">37</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для гостиной</param>
-<param name="categoryes[0][1].id">73</param>
-<param name="categoryes[0][1].parentId">37</param>
-<param name="categoryes[0][1].name">Стенки</param>
-</offer>
 <offer id="30905" available="true">
 <name>"Белла" шкаф 2-х створчатый (800х2120х470)</name>
 <price>18312</price>
@@ -289255,7 +289039,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">15102</param>
 <param name="Розничная цена СПБ">26486</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">15102</param>
 <param name="Розничная цена Москва">26486</param>
 <param name="Остаток Пятигорск">0</param>
@@ -289278,7 +289062,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -289326,7 +289110,7 @@
 Вместительные выдвижные ящики.
 Закрытые и открытые полки позволяют максимально эффективно использовать пространство.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">16939</param>
 <param name="Розничная цена СПБ">29709</param>
 <param name="Остаток Москва">0</param>
@@ -289354,7 +289138,7 @@
 Закрытые и открытые полки позволяют максимально эффективно использовать пространство.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -289401,7 +289185,7 @@
 Узкий пенал Белла будет прекрасным местом хранения в любой комнате.
 Модель может использоваться как самостоятельный предмет интерьера, так и стать дополнительным модулем в сочетании с гостиной или шкафом одноименной коллекции. 
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">5214</param>
 <param name="Розничная цена СПБ">9143</param>
 <param name="Остаток Москва">0</param>
@@ -289425,7 +289209,7 @@
 Модель может использоваться как самостоятельный предмет интерьера, так и стать дополнительным модулем в сочетании с гостиной или шкафом одноименной коллекции. 
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -289482,7 +289266,7 @@
 Небольшая и доступная по цене гостиная Флоренция идеально подойдет для малогабаритной квартиры.
 Нижние ящики дополнены стеклянными дверцами, украшенными цветочным орнаментом и стразами, гостиная включает в себя ТВ-зону и открытые полки для хранения вещей и предметов интерьера.
 Товар поставляется  в разобранном виде.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">6230</param>
 <param name="Розничная цена СПБ">10925</param>
 <param name="Остаток Москва">0</param>
@@ -289505,7 +289289,7 @@
 Нижние ящики дополнены стеклянными дверцами, украшенными цветочным орнаментом и стразами, гостиная включает в себя ТВ-зону и открытые полки для хранения вещей и предметов интерьера.
 Товар поставляется  в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -292582,7 +292366,7 @@
 Практичный вариант для малогабаритного помещения - стол-книжка Стандарт.
 При необходимости столешница компактной модели раскладывается на две стороны и превращается в полноценный обеденный стол, за которым поместится немало гостей.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">0</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">3941</param>
 <param name="Розничная цена СПБ">6914</param>
 <param name="Остаток Москва">9</param>
@@ -292604,7 +292388,7 @@
 При необходимости столешница компактной модели раскладывается на две стороны и превращается в полноценный обеденный стол, за которым поместится немало гостей.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">0</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">9</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -306181,57 +305965,13 @@
 <param name="categoryes[2][1].parentId">1</param>
 <param name="categoryes[2][1].name">Письменные столы</param>
 </offer>
-<offer id="45220" available="true">
-<name>Ф-30 Каталея  (16мм) (ШВ 500, ШН 500, ШНМ 500) МДФ</name>
-<price>2989</price>
-<currencyId>RUR</currencyId>
-<vendor>Стендмебель</vendor>
-<vendorCode>322617</vendorCode>
-<param name="Остаток СПБ">1</param>
-<param name="Оптовая цена СПБ">1701</param>
-<param name="Розничная цена СПБ">2989</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">1701</param>
-<param name="Розничная цена Москва">2989</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">1762</param>
-<param name="Розничная цена Пятигорск">2989</param>
-<param name="id">45220</param>
-<param name="name">Ф-30 Каталея  (16мм) (ШВ 500, ШН 500, ШНМ 500) МДФ</param>
-<param name="name2">канадский дуб панцифик (СНЯТО С ПРО-ВА)</param>
-<param name="sku">322617</param>
-<param name="vendor.id">1</param>
-<param name="vendor.name">Стендмебель</param>
-<param name="description"></param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">1</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">1701</param>
-<param name="price.spb.valueRetail">2989</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">1701</param>
-<param name="price.msk.valueRetail">2989</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">1762</param>
-<param name="price.ptg.valueRetail">2989</param>
-<param name="categoryes[0][0].id">76</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для кухни</param>
-<param name="categoryes[0][1].id">82</param>
-<param name="categoryes[0][1].parentId">76</param>
-<param name="categoryes[0][1].name">Модульные кухни</param>
-</offer>
 <offer id="45221" available="true">
 <name>Ф-30 Каталея  (16мм) (ШВ 500, ШН 500, ШНМ 500) МДФ</name>
 <price>2989</price>
 <currencyId>RUR</currencyId>
 <vendor>Стендмебель</vendor>
 <vendorCode>322618</vendorCode>
-<param name="Остаток СПБ">5</param>
+<param name="Остаток СПБ">3</param>
 <param name="Оптовая цена СПБ">1701</param>
 <param name="Розничная цена СПБ">2989</param>
 <param name="Остаток Москва">0</param>
@@ -306248,7 +305988,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description"></param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">5</param>
+<param name="stock.spb.value">3</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -306275,7 +306015,7 @@
 <currencyId>RUR</currencyId>
 <vendor>Стендмебель</vendor>
 <vendorCode>322619</vendorCode>
-<param name="Остаток СПБ">3</param>
+<param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">1701</param>
 <param name="Розничная цена СПБ">2989</param>
 <param name="Остаток Москва">0</param>
@@ -306292,7 +306032,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description"></param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
+<param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -306627,7 +306367,7 @@
 <currencyId>RUR</currencyId>
 <vendor>Стендмебель</vendor>
 <vendorCode>343537</vendorCode>
-<param name="Остаток СПБ">6</param>
+<param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">2019</param>
 <param name="Розничная цена СПБ">3540</param>
 <param name="Остаток Москва">0</param>
@@ -306644,7 +306384,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description"></param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">6</param>
+<param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -306803,7 +306543,7 @@
 <currencyId>RUR</currencyId>
 <vendor>Стендмебель</vendor>
 <vendorCode>343539</vendorCode>
-<param name="Остаток СПБ">8</param>
+<param name="Остаток СПБ">6</param>
 <param name="Оптовая цена СПБ">2019</param>
 <param name="Розничная цена СПБ">3540</param>
 <param name="Остаток Москва">0</param>
@@ -306820,7 +306560,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description"></param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">8</param>
+<param name="stock.spb.value">6</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -307199,7 +306939,7 @@
 <currencyId>RUR</currencyId>
 <vendor>Стендмебель</vendor>
 <vendorCode>344315</vendorCode>
-<param name="Остаток СПБ">5</param>
+<param name="Остаток СПБ">3</param>
 <param name="Оптовая цена СПБ">2380</param>
 <param name="Розничная цена СПБ">4175</param>
 <param name="Остаток Москва">0</param>
@@ -307216,7 +306956,7 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description"></param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">5</param>
+<param name="stock.spb.value">3</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -311226,7 +310966,7 @@
 <param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">1344</param>
 <param name="Розничная цена СПБ">2363</param>
-<param name="Остаток Москва">6</param>
+<param name="Остаток Москва">4</param>
 <param name="Оптовая цена Москва">1344</param>
 <param name="Розничная цена Москва">2363</param>
 <param name="Остаток Пятигорск">18</param>
@@ -311242,7 +310982,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">6</param>
+<param name="stock.msk.value">4</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">18</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -316472,7 +316212,7 @@
 <param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">18886</param>
 <param name="Розничная цена СПБ">33124</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">18886</param>
 <param name="Розничная цена Москва">33124</param>
 <param name="Остаток Пятигорск">0</param>
@@ -316495,7 +316235,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -321199,7 +320939,7 @@
 Гладильная доска - зеркало надежно крепится к каркасу с помощью прочной трельяжной петли.
 Универсальная сборка (на обе стороны).
 Товар поставляется  в разобранном виде.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">7799</param>
 <param name="Розничная цена СПБ">13677</param>
 <param name="Остаток Москва">0</param>
@@ -321227,7 +320967,7 @@
 Универсальная сборка (на обе стороны).
 Товар поставляется  в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -326132,7 +325872,7 @@
 <param name="Остаток СПБ">26</param>
 <param name="Оптовая цена СПБ">42</param>
 <param name="Розничная цена СПБ">75</param>
-<param name="Остаток Москва">37</param>
+<param name="Остаток Москва">31</param>
 <param name="Оптовая цена Москва">42</param>
 <param name="Розничная цена Москва">75</param>
 <param name="Остаток Пятигорск">33</param>
@@ -326148,7 +325888,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">26</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">37</param>
+<param name="stock.msk.value">31</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">33</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -326441,7 +326181,7 @@
 <param name="Остаток СПБ">24</param>
 <param name="Оптовая цена СПБ">865</param>
 <param name="Розничная цена СПБ">1520</param>
-<param name="Остаток Москва">97</param>
+<param name="Остаток Москва">96</param>
 <param name="Оптовая цена Москва">865</param>
 <param name="Розничная цена Москва">1520</param>
 <param name="Остаток Пятигорск">24</param>
@@ -326459,7 +326199,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">24</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">97</param>
+<param name="stock.msk.value">96</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">24</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -326552,7 +326292,7 @@
 <description>Размер: (ШхВ) 4000х100
 Пластиковый с уплотнителем, высотой 100 мм. 
 Крепится к техническим опорам с помощью клипс.</description>
-<param name="Остаток СПБ">14</param>
+<param name="Остаток СПБ">13</param>
 <param name="Оптовая цена СПБ">865</param>
 <param name="Розничная цена СПБ">1520</param>
 <param name="Остаток Москва">0</param>
@@ -326571,7 +326311,7 @@
 Пластиковый с уплотнителем, высотой 100 мм. 
 Крепится к техническим опорам с помощью клипс.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">14</param>
+<param name="stock.spb.value">13</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -332672,7 +332412,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">678</param>
 <param name="Розничная цена СПБ">1194</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">678</param>
 <param name="Розничная цена Москва">1194</param>
 <param name="Остаток Пятигорск">4</param>
@@ -332688,7 +332428,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">4</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -341137,7 +340877,7 @@
 <param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">3185</param>
 <param name="Розничная цена СПБ">5584</param>
-<param name="Остаток Москва">6</param>
+<param name="Остаток Москва">5</param>
 <param name="Оптовая цена Москва">3185</param>
 <param name="Розничная цена Москва">5584</param>
 <param name="Остаток Пятигорск">3</param>
@@ -341156,7 +340896,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">6</param>
+<param name="stock.msk.value">5</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">3</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -344698,7 +344438,7 @@
 <param name="Остаток СПБ">5</param>
 <param name="Оптовая цена СПБ">5082</param>
 <param name="Розничная цена СПБ">8918</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">5082</param>
 <param name="Розничная цена Москва">8918</param>
 <param name="Остаток Пятигорск">3</param>
@@ -344722,7 +344462,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">5</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">3</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -344784,7 +344524,7 @@
 <param name="Остаток СПБ">3</param>
 <param name="Оптовая цена СПБ">6958</param>
 <param name="Розничная цена СПБ">12208</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">6958</param>
 <param name="Розничная цена Москва">12208</param>
 <param name="Остаток Пятигорск">2</param>
@@ -344809,7 +344549,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">3</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -345507,7 +345247,7 @@
 Вставки в виде узких стрел цвета венге.
 Фасады без ручек обеспечивают должный уровень безопасности.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">3</param>
+<param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">19572</param>
 <param name="Розничная цена СПБ">34327</param>
 <param name="Остаток Москва">2</param>
@@ -345533,7 +345273,7 @@
 Фасады без ручек обеспечивают должный уровень безопасности.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
+<param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -345698,7 +345438,7 @@
 Фасады без ручек обеспечивают должный уровень безопасности.
 Матрас в стоимость кровати не входит.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">8491</param>
 <param name="Розничная цена СПБ">14896</param>
 <param name="Остаток Москва">0</param>
@@ -345725,7 +345465,7 @@
 Матрас в стоимость кровати не входит.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -350767,7 +350507,7 @@
 <param name="Остаток СПБ">56</param>
 <param name="Оптовая цена СПБ">726</param>
 <param name="Розничная цена СПБ">1278</param>
-<param name="Остаток Москва">24</param>
+<param name="Остаток Москва">20</param>
 <param name="Оптовая цена Москва">726</param>
 <param name="Розничная цена Москва">1278</param>
 <param name="Остаток Пятигорск">24</param>
@@ -350783,7 +350523,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">56</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">24</param>
+<param name="stock.msk.value">20</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">24</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -350819,7 +350559,7 @@
 <param name="Остаток СПБ">16</param>
 <param name="Оптовая цена СПБ">726</param>
 <param name="Розничная цена СПБ">1278</param>
-<param name="Остаток Москва">225</param>
+<param name="Остаток Москва">222</param>
 <param name="Оптовая цена Москва">726</param>
 <param name="Розничная цена Москва">1278</param>
 <param name="Остаток Пятигорск">0</param>
@@ -350835,7 +350575,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">16</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">225</param>
+<param name="stock.msk.value">222</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -351510,7 +351250,7 @@
 <param name="Остаток СПБ">31</param>
 <param name="Оптовая цена СПБ">59</param>
 <param name="Розничная цена СПБ">109</param>
-<param name="Остаток Москва">82</param>
+<param name="Остаток Москва">76</param>
 <param name="Оптовая цена Москва">59</param>
 <param name="Розничная цена Москва">109</param>
 <param name="Остаток Пятигорск">44</param>
@@ -351526,7 +351266,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">31</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">82</param>
+<param name="stock.msk.value">76</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">44</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -351668,7 +351408,7 @@
 <param name="Остаток СПБ">14</param>
 <param name="Оптовая цена СПБ">437</param>
 <param name="Розничная цена СПБ">768</param>
-<param name="Остаток Москва">80</param>
+<param name="Остаток Москва">74</param>
 <param name="Оптовая цена Москва">437</param>
 <param name="Розничная цена Москва">768</param>
 <param name="Остаток Пятигорск">2</param>
@@ -351684,7 +351424,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">14</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">80</param>
+<param name="stock.msk.value">74</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -352830,7 +352570,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">8778</param>
 <param name="Розничная цена СПБ">15397</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">8778</param>
 <param name="Розничная цена Москва">15397</param>
 <param name="Остаток Пятигорск">1</param>
@@ -352855,7 +352595,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -356382,7 +356122,7 @@
 <param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">17801</param>
 <param name="Розничная цена СПБ">31214</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">17801</param>
 <param name="Розничная цена Москва">31214</param>
 <param name="Остаток Пятигорск">0</param>
@@ -356406,7 +356146,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -360243,7 +359983,7 @@
 <param name="Остаток СПБ">6</param>
 <param name="Оптовая цена СПБ">1806</param>
 <param name="Розничная цена СПБ">3173</param>
-<param name="Остаток Москва">3</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">1806</param>
 <param name="Розничная цена Москва">3173</param>
 <param name="Остаток Пятигорск">0</param>
@@ -360259,7 +359999,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">6</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">3</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -365068,7 +364808,7 @@
 <param name="Остаток СПБ">3</param>
 <param name="Оптовая цена СПБ">19026</param>
 <param name="Розничная цена СПБ">33367</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">19026</param>
 <param name="Розничная цена Москва">33367</param>
 <param name="Остаток Пятигорск">0</param>
@@ -365090,7 +364830,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">3</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -377350,7 +377090,7 @@
 <param name="Остаток СПБ">13</param>
 <param name="Оптовая цена СПБ">2317</param>
 <param name="Розничная цена СПБ">4066</param>
-<param name="Остаток Москва">28</param>
+<param name="Остаток Москва">25</param>
 <param name="Оптовая цена Москва">2317</param>
 <param name="Розничная цена Москва">4066</param>
 <param name="Остаток Пятигорск">3</param>
@@ -377366,7 +377106,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">13</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">28</param>
+<param name="stock.msk.value">25</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">3</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -378593,7 +378333,7 @@
 Основание выполняет важную роль в обеспечении надежной поддержки спящего человека, а также выгодно отличаются бесшумностью во время эксплуатации.
 Основание за счёт жёсткой ровной поверхности совместимы с матрасом любого типа: как с пружинным, так и беспружинным.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">4</param>
+<param name="Остаток СПБ">3</param>
 <param name="Оптовая цена СПБ">5166</param>
 <param name="Розничная цена СПБ">9060</param>
 <param name="Остаток Москва">0</param>
@@ -378615,7 +378355,7 @@
 Основание за счёт жёсткой ровной поверхности совместимы с матрасом любого типа: как с пружинным, так и беспружинным.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">4</param>
+<param name="stock.spb.value">3</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -380313,7 +380053,7 @@
 <param name="Остаток СПБ">39</param>
 <param name="Оптовая цена СПБ">65</param>
 <param name="Розничная цена СПБ">117</param>
-<param name="Остаток Москва">68</param>
+<param name="Остаток Москва">64</param>
 <param name="Оптовая цена Москва">65</param>
 <param name="Розничная цена Москва">117</param>
 <param name="Остаток Пятигорск">7</param>
@@ -380329,7 +380069,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">39</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">68</param>
+<param name="stock.msk.value">64</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">7</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -380627,7 +380367,7 @@
 <param name="Остаток СПБ">12</param>
 <param name="Оптовая цена СПБ">87</param>
 <param name="Розничная цена СПБ">159</param>
-<param name="Остаток Москва">62</param>
+<param name="Остаток Москва">58</param>
 <param name="Оптовая цена Москва">87</param>
 <param name="Розничная цена Москва">159</param>
 <param name="Остаток Пятигорск">0</param>
@@ -380643,7 +380383,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">12</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">62</param>
+<param name="stock.msk.value">58</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -380949,7 +380689,7 @@
 <param name="Остаток СПБ">27</param>
 <param name="Оптовая цена СПБ">277</param>
 <param name="Розничная цена СПБ">493</param>
-<param name="Остаток Москва">41</param>
+<param name="Остаток Москва">39</param>
 <param name="Оптовая цена Москва">277</param>
 <param name="Розничная цена Москва">493</param>
 <param name="Остаток Пятигорск">3</param>
@@ -380965,7 +380705,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">27</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">41</param>
+<param name="stock.msk.value">39</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">3</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -381045,10 +380785,10 @@
 <vendorCode>220971</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2024-10-23/eaa1c80a-96a0-11ea-ab4f-00155d000a00_00000000-0000-0000-0000-000000000000/planka-torec-snimok.jpg</picture>
 <description>Планка  алюминиевая 4мм к стеновой панели завершающая (торцевая)</description>
-<param name="Остаток СПБ">63</param>
+<param name="Остаток СПБ">61</param>
 <param name="Оптовая цена СПБ">84</param>
 <param name="Розничная цена СПБ">150</param>
-<param name="Остаток Москва">53</param>
+<param name="Остаток Москва">51</param>
 <param name="Оптовая цена Москва">84</param>
 <param name="Розничная цена Москва">150</param>
 <param name="Остаток Пятигорск">14</param>
@@ -381062,9 +380802,9 @@
 <param name="vendor.name">Тэкс</param>
 <param name="description">Планка  алюминиевая 4мм к стеновой панели завершающая (торцевая)</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">63</param>
+<param name="stock.spb.value">61</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">53</param>
+<param name="stock.msk.value">51</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">14</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -381099,7 +380839,7 @@
 <param name="Остаток СПБ">6</param>
 <param name="Оптовая цена СПБ">101</param>
 <param name="Розничная цена СПБ">184</param>
-<param name="Остаток Москва">20</param>
+<param name="Остаток Москва">18</param>
 <param name="Оптовая цена Москва">101</param>
 <param name="Розничная цена Москва">184</param>
 <param name="Остаток Пятигорск">0</param>
@@ -381115,7 +380855,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">6</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">20</param>
+<param name="stock.msk.value">18</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -381140,7 +380880,7 @@
 <param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">358</param>
 <param name="Розничная цена СПБ">635</param>
-<param name="Остаток Москва">16</param>
+<param name="Остаток Москва">15</param>
 <param name="Оптовая цена Москва">358</param>
 <param name="Розничная цена Москва">635</param>
 <param name="Остаток Пятигорск">11</param>
@@ -381157,7 +380897,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">16</param>
+<param name="stock.msk.value">15</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">11</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -381542,7 +381282,7 @@
 <param name="Остаток Москва">12</param>
 <param name="Оптовая цена Москва">168</param>
 <param name="Розничная цена Москва">301</param>
-<param name="Остаток Пятигорск">23</param>
+<param name="Остаток Пятигорск">24</param>
 <param name="Оптовая цена Пятигорск">174</param>
 <param name="Розничная цена Пятигорск">301</param>
 <param name="id">104216</param>
@@ -381557,7 +381297,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">12</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">23</param>
+<param name="stock.ptg.value">24</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">168</param>
 <param name="price.spb.valueRetail">301</param>
@@ -381580,7 +381320,7 @@
 <param name="Остаток Москва">14</param>
 <param name="Оптовая цена Москва">171</param>
 <param name="Розничная цена Москва">301</param>
-<param name="Остаток Пятигорск">3</param>
+<param name="Остаток Пятигорск">2</param>
 <param name="Оптовая цена Пятигорск">177</param>
 <param name="Розничная цена Пятигорск">301</param>
 <param name="id">104283</param>
@@ -381595,7 +381335,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">14</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">3</param>
+<param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">171</param>
 <param name="price.spb.valueRetail">301</param>
@@ -381708,10 +381448,10 @@
 <vendorCode>100926</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2024-10-23/3662bfa6-96a1-11ea-ab4f-00155d000a00_00000000-0000-0000-0000-000000000000/ugol-snimok.jpg</picture>
 <description>Планка  алюминиевая 4мм к стеновой панели угловая</description>
-<param name="Остаток СПБ">45</param>
+<param name="Остаток СПБ">44</param>
 <param name="Оптовая цена СПБ">95</param>
 <param name="Розничная цена СПБ">167</param>
-<param name="Остаток Москва">38</param>
+<param name="Остаток Москва">37</param>
 <param name="Оптовая цена Москва">95</param>
 <param name="Розничная цена Москва">167</param>
 <param name="Остаток Пятигорск">5</param>
@@ -381725,9 +381465,9 @@
 <param name="vendor.name">Тэкс</param>
 <param name="description">Планка  алюминиевая 4мм к стеновой панели угловая</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">45</param>
+<param name="stock.spb.value">44</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">38</param>
+<param name="stock.msk.value">37</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">5</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -381764,7 +381504,7 @@
 <param name="Остаток СПБ">51</param>
 <param name="Оптовая цена СПБ">383</param>
 <param name="Розничная цена СПБ">676</param>
-<param name="Остаток Москва">251</param>
+<param name="Остаток Москва">244</param>
 <param name="Оптовая цена Москва">383</param>
 <param name="Розничная цена Москва">676</param>
 <param name="Остаток Пятигорск">26</param>
@@ -381780,7 +381520,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">51</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">251</param>
+<param name="stock.msk.value">244</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">26</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -391373,7 +391113,7 @@
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">9359</param>
 <param name="Розничная цена Москва">16416</param>
-<param name="Остаток Пятигорск">3</param>
+<param name="Остаток Пятигорск">2</param>
 <param name="Оптовая цена Пятигорск">9693</param>
 <param name="Розничная цена Пятигорск">16416</param>
 <param name="id">119767</param>
@@ -391397,7 +391137,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">3</param>
+<param name="stock.ptg.value">2</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">9359</param>
 <param name="price.spb.valueRetail">16416</param>
@@ -392208,7 +391948,7 @@
 Опоры: Пластик 20мм
 Задняя стенка: ЛДВП
 Товар продается в разобранном виде.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">6937</param>
 <param name="Розничная цена СПБ">12166</param>
 <param name="Остаток Москва">0</param>
@@ -392234,7 +391974,7 @@
 Задняя стенка: ЛДВП
 Товар продается в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -404754,7 +404494,7 @@
 <param name="Остаток Москва">5</param>
 <param name="Оптовая цена Москва">3136</param>
 <param name="Розничная цена Москва">5503</param>
-<param name="Остаток Пятигорск">16</param>
+<param name="Остаток Пятигорск">15</param>
 <param name="Оптовая цена Пятигорск">3248</param>
 <param name="Розничная цена Пятигорск">5503</param>
 <param name="id">122427</param>
@@ -404769,7 +404509,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">5</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">16</param>
+<param name="stock.ptg.value">15</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">3136</param>
 <param name="price.spb.valueRetail">5503</param>
@@ -404801,10 +404541,10 @@
 <vendorCode>384664</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2024-11-07/10b22532-1e54-11ef-b62d-00155da28800_10b22533-1e54-11ef-b62d-00155da28800/shn3ja-600-belyj-snimok.jpg</picture>
 <description>ШН3Я 600 корпус шкаф нижн. с 3 ящ (600*820*474) белый Полновыкатные направляющие</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">3003</param>
 <param name="Розничная цена СПБ">5269</param>
-<param name="Остаток Москва">5</param>
+<param name="Остаток Москва">4</param>
 <param name="Оптовая цена Москва">3003</param>
 <param name="Розничная цена Москва">5269</param>
 <param name="Остаток Пятигорск">8</param>
@@ -404818,9 +404558,9 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description">ШН3Я 600 корпус шкаф нижн. с 3 ящ (600*820*474) белый Полновыкатные направляющие</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">5</param>
+<param name="stock.msk.value">4</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">8</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -404854,10 +404594,10 @@
 <vendorCode>384660</vendorCode>
 <picture>https://lk.tdandrey.ru/upload/products/p2024-11-06/cc4f11ac-1e53-11ef-b62d-00155da28800_cc4f11ad-1e53-11ef-b62d-00155da28800/shn3ja-400-belyj-snimok.jpg</picture>
 <description>ШН3Я 400 корпус шкаф нижн. с 3 ящ (400*820*474)белый, Полновыкатные направляющие</description>
-<param name="Остаток СПБ">9</param>
+<param name="Остаток СПБ">8</param>
 <param name="Оптовая цена СПБ">2674</param>
 <param name="Розничная цена СПБ">4693</param>
-<param name="Остаток Москва">18</param>
+<param name="Остаток Москва">15</param>
 <param name="Оптовая цена Москва">2674</param>
 <param name="Розничная цена Москва">4693</param>
 <param name="Остаток Пятигорск">15</param>
@@ -404871,9 +404611,9 @@
 <param name="vendor.name">Стендмебель</param>
 <param name="description">ШН3Я 400 корпус шкаф нижн. с 3 ящ (400*820*474)белый, Полновыкатные направляющие</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">9</param>
+<param name="stock.spb.value">8</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">18</param>
+<param name="stock.msk.value">15</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">15</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -405228,7 +404968,7 @@
 <param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">2769</param>
 <param name="Розничная цена СПБ">4855</param>
-<param name="Остаток Москва">5</param>
+<param name="Остаток Москва">4</param>
 <param name="Оптовая цена Москва">2769</param>
 <param name="Розничная цена Москва">4855</param>
 <param name="Остаток Пятигорск">0</param>
@@ -405244,7 +404984,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">5</param>
+<param name="stock.msk.value">4</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -405783,7 +405523,7 @@
 Также шкаф оснащен встроенными ящиками, а центральная дверь шкафа зеркальная.
 Ящики: Роликовые направляющие.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">15102</param>
 <param name="Розничная цена СПБ">26486</param>
 <param name="Остаток Москва">0</param>
@@ -405807,7 +405547,7 @@
 Ящики: Роликовые направляющие.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -406225,7 +405965,7 @@
 <param name="Остаток СПБ">5</param>
 <param name="Оптовая цена СПБ">2880</param>
 <param name="Розничная цена СПБ">5050</param>
-<param name="Остаток Москва">5</param>
+<param name="Остаток Москва">4</param>
 <param name="Оптовая цена Москва">2880</param>
 <param name="Розничная цена Москва">5050</param>
 <param name="Остаток Пятигорск">0</param>
@@ -406241,7 +405981,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">5</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">5</param>
+<param name="stock.msk.value">4</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -406695,7 +406435,7 @@
 <param name="Остаток СПБ">27</param>
 <param name="Оптовая цена СПБ">2450</param>
 <param name="Розничная цена СПБ">4300</param>
-<param name="Остаток Москва">15</param>
+<param name="Остаток Москва">13</param>
 <param name="Оптовая цена Москва">2450</param>
 <param name="Розничная цена Москва">4300</param>
 <param name="Остаток Пятигорск">8</param>
@@ -406711,7 +406451,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">27</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">15</param>
+<param name="stock.msk.value">13</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">8</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -406748,7 +406488,7 @@
 <param name="Остаток СПБ">12</param>
 <param name="Оптовая цена СПБ">2744</param>
 <param name="Розничная цена СПБ">4818</param>
-<param name="Остаток Москва">24</param>
+<param name="Остаток Москва">23</param>
 <param name="Оптовая цена Москва">2744</param>
 <param name="Розничная цена Москва">4818</param>
 <param name="Остаток Пятигорск">6</param>
@@ -406764,7 +406504,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">12</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">24</param>
+<param name="stock.msk.value">23</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">6</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -407487,7 +407227,7 @@
 <param name="Остаток Москва">28</param>
 <param name="Оптовая цена Москва">3052</param>
 <param name="Розничная цена Москва">5352</param>
-<param name="Остаток Пятигорск">9</param>
+<param name="Остаток Пятигорск">8</param>
 <param name="Оптовая цена Пятигорск">3161</param>
 <param name="Розничная цена Пятигорск">5352</param>
 <param name="id">122942</param>
@@ -407502,7 +407242,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">28</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">9</param>
+<param name="stock.ptg.value">8</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">3052</param>
 <param name="price.spb.valueRetail">5352</param>
@@ -407586,7 +407326,7 @@
 <param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">5327</param>
 <param name="Розничная цена СПБ">9344</param>
-<param name="Остаток Москва">4</param>
+<param name="Остаток Москва">3</param>
 <param name="Оптовая цена Москва">5327</param>
 <param name="Розничная цена Москва">9344</param>
 <param name="Остаток Пятигорск">22</param>
@@ -407602,7 +407342,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">4</param>
+<param name="stock.msk.value">3</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">22</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -407699,7 +407439,7 @@
 <param name="Остаток СПБ">5</param>
 <param name="Оптовая цена СПБ">5684</param>
 <param name="Розничная цена СПБ">9970</param>
-<param name="Остаток Москва">7</param>
+<param name="Остаток Москва">6</param>
 <param name="Оптовая цена Москва">5684</param>
 <param name="Розничная цена Москва">9970</param>
 <param name="Остаток Пятигорск">10</param>
@@ -407715,7 +407455,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">5</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">7</param>
+<param name="stock.msk.value">6</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">10</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -407863,7 +407603,7 @@
 <param name="Остаток СПБ">8</param>
 <param name="Оптовая цена СПБ">1827</param>
 <param name="Розничная цена СПБ">3206</param>
-<param name="Остаток Москва">11</param>
+<param name="Остаток Москва">10</param>
 <param name="Оптовая цена Москва">1827</param>
 <param name="Розничная цена Москва">3206</param>
 <param name="Остаток Пятигорск">7</param>
@@ -407879,7 +407619,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">8</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">11</param>
+<param name="stock.msk.value">10</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">7</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -409689,7 +409429,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">18879</param>
 <param name="Розничная цена СПБ">33108</param>
-<param name="Остаток Москва">3</param>
+<param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">18879</param>
 <param name="Розничная цена Москва">33108</param>
 <param name="Остаток Пятигорск">11</param>
@@ -409708,7 +409448,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">3</param>
+<param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">11</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -410338,7 +410078,7 @@
 Ручка: С-6 
 
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">23464</param>
 <param name="Розничная цена СПБ">41149</param>
 <param name="Остаток Москва">0</param>
@@ -410364,7 +410104,7 @@
 
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -410713,7 +410453,7 @@
 При необходимости столешница компактной модели раскладывается на две стороны и превращается в полноценный обеденный стол, за которым поместится немало гостей.
 Товар поставляется в разобранном виде.
 Вес 31,7 кг</description>
-<param name="Остаток СПБ">21</param>
+<param name="Остаток СПБ">20</param>
 <param name="Оптовая цена СПБ">3941</param>
 <param name="Розничная цена СПБ">6914</param>
 <param name="Остаток Москва">18</param>
@@ -410737,7 +410477,7 @@
 Товар поставляется в разобранном виде.
 Вес 31,7 кг</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">21</param>
+<param name="stock.spb.value">20</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">18</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -426599,7 +426339,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">18662</param>
 <param name="Розничная цена СПБ">32732</param>
-<param name="Остаток Москва">6</param>
+<param name="Остаток Москва">7</param>
 <param name="Оптовая цена Москва">18662</param>
 <param name="Розничная цена Москва">32732</param>
 <param name="Остаток Пятигорск">0</param>
@@ -426616,7 +426356,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">6</param>
+<param name="stock.msk.value">7</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -427137,76 +426877,6 @@
 <param name="size.height">146</param>
 <param name="size.lenght">40</param>
 <param name="size.weight">30.8</param>
-<param name="packages.count">0</param>
-<param name="categoryes[0][0].id">37</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для гостиной</param>
-<param name="categoryes[0][1].id">72</param>
-<param name="categoryes[0][1].parentId">37</param>
-<param name="categoryes[0][1].name">Стеллажи</param>
-<param name="categoryes[1][0].id">1</param>
-<param name="categoryes[1][0].parentId">0</param>
-<param name="categoryes[1][0].name">Детская мебель</param>
-<param name="categoryes[1][1].id">10</param>
-<param name="categoryes[1][1].parentId">1</param>
-<param name="categoryes[1][1].name">Детские шкафы и стеллажи</param>
-</offer>
-<offer id="126815" available="true">
-<name>РУНА СТЛ 02 Стеллаж (СНЯТ С ПРО-ВА)</name>
-<price>6997</price>
-<currencyId>RUR</currencyId>
-<vendor>Стендмебель</vendor>
-<vendorCode>404397</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-03-26/0dfe091c-096f-11f0-8e4c-00155da28800_0dfe091d-096f-11f0-8e4c-00155da28800/runa-stl-02-snimok.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-03-26/0dfe091c-096f-11f0-8e4c-00155da28800_0dfe091d-096f-11f0-8e4c-00155da28800/runa-stl-02-1-snimok.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-03-26/0dfe091c-096f-11f0-8e4c-00155da28800_0dfe091d-096f-11f0-8e4c-00155da28800/runa-stl-02-2-snimok.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-03-26/0dfe091c-096f-11f0-8e4c-00155da28800_0dfe091d-096f-11f0-8e4c-00155da28800/runa-stl-02-3-snimok.jpg</picture>
-<description>РУНА СТЛ 02 Стеллаж Фасад БЕЛЫЙ/Корпус БЕЛЫЙ
-Крепление к стене. Ш*В*Г 700*1200*400 мм</description>
-<param name="Остаток СПБ">0</param>
-<param name="Оптовая цена СПБ">3990</param>
-<param name="Розничная цена СПБ">6997</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">3990</param>
-<param name="Розничная цена Москва">6997</param>
-<param name="Остаток Пятигорск">1</param>
-<param name="Оптовая цена Пятигорск">4133</param>
-<param name="Розничная цена Пятигорск">6997</param>
-<param name="id">126815</param>
-<param name="name">РУНА СТЛ 02 Стеллаж (СНЯТ С ПРО-ВА)</param>
-<param name="name2">Фасад БЕЛЫЙ/Корпус БЕЛЫЙ</param>
-<param name="sku">404397</param>
-<param name="vendor.id">1</param>
-<param name="vendor.name">Стендмебель</param>
-<param name="description">РУНА СТЛ 02 Стеллаж Фасад БЕЛЫЙ/Корпус БЕЛЫЙ
-Крепление к стене. Ш*В*Г 700*1200*400 мм</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">0</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">1</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">3990</param>
-<param name="price.spb.valueRetail">6997</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">3990</param>
-<param name="price.msk.valueRetail">6997</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">4133</param>
-<param name="price.ptg.valueRetail">6997</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2025-03-26/0dfe091c-096f-11f0-8e4c-00155da28800_0dfe091d-096f-11f0-8e4c-00155da28800/runa-stl-02-snimok.jpg</param>
-<param name="images[0].name">Руна СТЛ 02 Снимок.JPG</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2025-03-26/0dfe091c-096f-11f0-8e4c-00155da28800_0dfe091d-096f-11f0-8e4c-00155da28800/runa-stl-02-1-snimok.jpg</param>
-<param name="images[1].name">Руна СТЛ 02 1 Снимок.JPG</param>
-<param name="images[2].url">https://lk.tdandrey.ru/upload/products/p2025-03-26/0dfe091c-096f-11f0-8e4c-00155da28800_0dfe091d-096f-11f0-8e4c-00155da28800/runa-stl-02-2-snimok.jpg</param>
-<param name="images[2].name">Руна СТЛ 02 2 Снимок.JPG</param>
-<param name="images[3].url">https://lk.tdandrey.ru/upload/products/p2025-03-26/0dfe091c-096f-11f0-8e4c-00155da28800_0dfe091d-096f-11f0-8e4c-00155da28800/runa-stl-02-3-snimok.jpg</param>
-<param name="images[3].name">Руна СТЛ 02 3 Снимок.JPG</param>
-<param name="size.width">70</param>
-<param name="size.height">120</param>
-<param name="size.lenght">40</param>
-<param name="size.weight">32.5</param>
 <param name="packages.count">0</param>
 <param name="categoryes[0][0].id">37</param>
 <param name="categoryes[0][0].parentId">0</param>
@@ -428095,7 +427765,7 @@
 Габаритные размеры: Ш*В*Г 1200*1320*550 мм
 Материал: ЛДСП
 Объем: 0,081 м куб.</description>
-<param name="Остаток СПБ">2</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">4984</param>
 <param name="Розничная цена СПБ">8742</param>
 <param name="Остаток Москва">2</param>
@@ -428115,7 +427785,7 @@
 Материал: ЛДСП
 Объем: 0,081 м куб.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">2</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -428427,7 +428097,7 @@
 <param name="Остаток СПБ">12</param>
 <param name="Оптовая цена СПБ">8722</param>
 <param name="Розничная цена СПБ">15297</param>
-<param name="Остаток Москва">5</param>
+<param name="Остаток Москва">4</param>
 <param name="Оптовая цена Москва">8722</param>
 <param name="Розничная цена Москва">15297</param>
 <param name="Остаток Пятигорск">10</param>
@@ -428446,7 +428116,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">12</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">5</param>
+<param name="stock.msk.value">4</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">10</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -428519,7 +428189,7 @@
 <param name="Остаток СПБ">8</param>
 <param name="Оптовая цена СПБ">13153</param>
 <param name="Розничная цена СПБ">23071</param>
-<param name="Остаток Москва">15</param>
+<param name="Остаток Москва">14</param>
 <param name="Оптовая цена Москва">13153</param>
 <param name="Розничная цена Москва">23071</param>
 <param name="Остаток Пятигорск">9</param>
@@ -428539,7 +428209,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">8</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">15</param>
+<param name="stock.msk.value">14</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">9</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -431841,7 +431511,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">8680</param>
 <param name="Розничная цена СПБ">15222</param>
-<param name="Остаток Москва">7</param>
+<param name="Остаток Москва">6</param>
 <param name="Оптовая цена Москва">8680</param>
 <param name="Розничная цена Москва">15222</param>
 <param name="Остаток Пятигорск">3</param>
@@ -431875,7 +431545,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">7</param>
+<param name="stock.msk.value">6</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">3</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -432320,7 +431990,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">10150</param>
 <param name="Розничная цена СПБ">17802</param>
-<param name="Остаток Москва">11</param>
+<param name="Остаток Москва">10</param>
 <param name="Оптовая цена Москва">10150</param>
 <param name="Розничная цена Москва">17802</param>
 <param name="Остаток Пятигорск">1</param>
@@ -432347,7 +432017,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">11</param>
+<param name="stock.msk.value">10</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -433111,7 +432781,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Стеновая панель является завершающим и не менее важным элементом во время обустройства рабочей зоны на кухне. 
 Изделие обладает износостойкостью, легко монтируется на стену, не требует особых усилий во время уходе, скрывает все дефекты и изъяны на стене, а также имеет привлекательным дизайном.
 Стеновые панели (кухонные фартуки) на основе МДФ, толщина 4 мм.</description>
-<param name="Остаток СПБ">12</param>
+<param name="Остаток СПБ">11</param>
 <param name="Оптовая цена СПБ">4116</param>
 <param name="Розничная цена СПБ">7223</param>
 <param name="Остаток Москва">0</param>
@@ -433133,7 +432803,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Изделие обладает износостойкостью, легко монтируется на стену, не требует особых усилий во время уходе, скрывает все дефекты и изъяны на стене, а также имеет привлекательным дизайном.
 Стеновые панели (кухонные фартуки) на основе МДФ, толщина 4 мм.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">12</param>
+<param name="stock.spb.value">11</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -437140,13 +436810,13 @@ Cушилка для посуды в верхний шкаф с наружным
 Сборка стола не универсальная.
 Товар поставляется в разобранном виде.
 Вес 70,3 кг</description>
-<param name="Остаток СПБ">7</param>
+<param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">6860</param>
 <param name="Розничная цена СПБ">12032</param>
 <param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">6860</param>
 <param name="Розничная цена Москва">12032</param>
-<param name="Остаток Пятигорск">37</param>
+<param name="Остаток Пятигорск">36</param>
 <param name="Оптовая цена Пятигорск">7105</param>
 <param name="Розничная цена Пятигорск">12032</param>
 <param name="id">129820</param>
@@ -437167,11 +436837,11 @@ Cушилка для посуды в верхний шкаф с наружным
 Товар поставляется в разобранном виде.
 Вес 70,3 кг</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">7</param>
+<param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">37</param>
+<param name="stock.ptg.value">36</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">6860</param>
 <param name="price.spb.valueRetail">12032</param>
@@ -437185,91 +436855,6 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="images[0].name">Белый с тиснением.jpg</param>
 <param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2025-09-02/98840ee8-7cfa-11f0-8d50-00155da28800_d0842adf-7cfa-11f0-8d50-00155da28800/1.jpg</param>
 <param name="images[1].name">1.jpg</param>
-<param name="size.width">131.6</param>
-<param name="size.height">185</param>
-<param name="size.lenght">60</param>
-<param name="size.weight">70.3</param>
-<param name="packages.count">0</param>
-<param name="categoryes[0][0].id">37</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для гостиной</param>
-<param name="categoryes[0][1].id">39</param>
-<param name="categoryes[0][1].parentId">37</param>
-<param name="categoryes[0][1].name">Компьютерные столы</param>
-</offer>
-<offer id="129822" available="true">
-<name>Стол компьютерный Квартет-11 (Ф) (1850*1316*600)</name>
-<price>12158</price>
-<currencyId>RUR</currencyId>
-<vendor>Фант мебель</vendor>
-<vendorCode>407816</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-09-02/98840ee8-7cfa-11f0-8d50-00155da28800_d0842add-7cfa-11f0-8d50-00155da28800/kvartet-11_dub-sonoma_belyj-kopija.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-09-02/98840ee8-7cfa-11f0-8d50-00155da28800_d0842add-7cfa-11f0-8d50-00155da28800/kvartet-11_dub-sonoma_belyj_otkrytyj-kopija.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-09-02/98840ee8-7cfa-11f0-8d50-00155da28800_d0842add-7cfa-11f0-8d50-00155da28800/kvartet-11-belyj-sonoma.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-09-02/98840ee8-7cfa-11f0-8d50-00155da28800_d0842add-7cfa-11f0-8d50-00155da28800/1.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-09-02/98840ee8-7cfa-11f0-8d50-00155da28800_d0842add-7cfa-11f0-8d50-00155da28800/2.jpg</picture>
-<description>Стол компьютерный Квартет-11 дуб сонома/белый
-Размер: (ВхШхГ) 1850х1316х600
-Корпус: ЛДСП-Венге/Ясень Шимо/Дуб крафт золотой/Белый с тиснением
-Фасад: ЛДСП-Дуб Млечный/Дуб Сонома/Белый с тиснением/Белый с тиснением
-Ручки: Пластик.
-Ящик: Роликовые направляющие.
-Лицевая фурнитура в цвет корпуса.
-Опоры стола имеют пластиковые подпятники, предохраняющие напольные покрытия от повреждения.
-Сборка стола не универсальная.
-Товар поставляется в разобранном виде.
-Вес 70,3 кг</description>
-<param name="Остаток СПБ">3</param>
-<param name="Оптовая цена СПБ">6930</param>
-<param name="Розничная цена СПБ">12158</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">6930</param>
-<param name="Розничная цена Москва">12158</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">7178</param>
-<param name="Розничная цена Пятигорск">12158</param>
-<param name="id">129822</param>
-<param name="name">Стол компьютерный Квартет-11 (Ф) (1850*1316*600)</param>
-<param name="name2">дуб сонома/белый</param>
-<param name="sku">407816</param>
-<param name="vendor.id">62</param>
-<param name="vendor.name">Фант мебель</param>
-<param name="description">Стол компьютерный Квартет-11 дуб сонома/белый
-Размер: (ВхШхГ) 1850х1316х600
-Корпус: ЛДСП-Венге/Ясень Шимо/Дуб крафт золотой/Белый с тиснением
-Фасад: ЛДСП-Дуб Млечный/Дуб Сонома/Белый с тиснением/Белый с тиснением
-Ручки: Пластик.
-Ящик: Роликовые направляющие.
-Лицевая фурнитура в цвет корпуса.
-Опоры стола имеют пластиковые подпятники, предохраняющие напольные покрытия от повреждения.
-Сборка стола не универсальная.
-Товар поставляется в разобранном виде.
-Вес 70,3 кг</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">6930</param>
-<param name="price.spb.valueRetail">12158</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">6930</param>
-<param name="price.msk.valueRetail">12158</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">7178</param>
-<param name="price.ptg.valueRetail">12158</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2025-09-02/98840ee8-7cfa-11f0-8d50-00155da28800_d0842add-7cfa-11f0-8d50-00155da28800/kvartet-11_dub-sonoma_belyj-kopija.jpg</param>
-<param name="images[0].name">Квартет 11_дуб сонома_белый копия.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2025-09-02/98840ee8-7cfa-11f0-8d50-00155da28800_d0842add-7cfa-11f0-8d50-00155da28800/kvartet-11_dub-sonoma_belyj_otkrytyj-kopija.jpg</param>
-<param name="images[1].name">Квартет 11_дуб сонома_белый_открытый копия.jpg</param>
-<param name="images[2].url">https://lk.tdandrey.ru/upload/products/p2025-09-02/98840ee8-7cfa-11f0-8d50-00155da28800_d0842add-7cfa-11f0-8d50-00155da28800/kvartet-11-belyj-sonoma.jpg</param>
-<param name="images[2].name">Квартет-11 Белый, Сонома.jpg</param>
-<param name="images[3].url">https://lk.tdandrey.ru/upload/products/p2025-09-02/98840ee8-7cfa-11f0-8d50-00155da28800_d0842add-7cfa-11f0-8d50-00155da28800/1.jpg</param>
-<param name="images[3].name">1.jpg</param>
-<param name="images[4].url">https://lk.tdandrey.ru/upload/products/p2025-09-02/98840ee8-7cfa-11f0-8d50-00155da28800_d0842add-7cfa-11f0-8d50-00155da28800/2.jpg</param>
-<param name="images[4].name">2.jpg</param>
 <param name="size.width">131.6</param>
 <param name="size.height">185</param>
 <param name="size.lenght">60</param>
@@ -437301,7 +436886,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Сборка стола не универсальная.
 Товар поставляется в разобранном виде.
 Вес 67,0 кг</description>
-<param name="Остаток СПБ">7</param>
+<param name="Остаток СПБ">5</param>
 <param name="Оптовая цена СПБ">6230</param>
 <param name="Розничная цена СПБ">10930</param>
 <param name="Остаток Москва">0</param>
@@ -437328,7 +436913,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Товар поставляется в разобранном виде.
 Вес 67,0 кг</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">7</param>
+<param name="stock.spb.value">5</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -438035,10 +437620,10 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">9030</param>
 <param name="Розничная цена СПБ">15840</param>
-<param name="Остаток Москва">42</param>
+<param name="Остаток Москва">29</param>
 <param name="Оптовая цена Москва">9030</param>
 <param name="Розничная цена Москва">15840</param>
-<param name="Остаток Пятигорск">1</param>
+<param name="Остаток Пятигорск">0</param>
 <param name="Оптовая цена Пятигорск">9353</param>
 <param name="Розничная цена Пятигорск">15840</param>
 <param name="id">129889</param>
@@ -438057,9 +437642,9 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">42</param>
+<param name="stock.msk.value">29</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">1</param>
+<param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">9030</param>
 <param name="price.spb.valueRetail">15840</param>
@@ -440038,7 +439623,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Создаст полноценное рабочее место для школьника, студента или офисного сотрудника.
 Сборка возможна только так, как показано на фотографии.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">8</param>
+<param name="Остаток СПБ">6</param>
 <param name="Оптовая цена СПБ">4970</param>
 <param name="Розничная цена СПБ">8717</param>
 <param name="Остаток Москва">0</param>
@@ -440068,7 +439653,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Сборка возможна только так, как показано на фотографии.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">8</param>
+<param name="stock.spb.value">6</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -445700,7 +445285,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Создаст полноценное рабочее место для школьника, студента или офисного сотрудника.
 Сборка возможна только так, как показано на фотографии.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">34</param>
+<param name="Остаток СПБ">32</param>
 <param name="Оптовая цена СПБ">7210</param>
 <param name="Розничная цена СПБ">12650</param>
 <param name="Остаток Москва">43</param>
@@ -445729,7 +445314,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Сборка возможна только так, как показано на фотографии.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">34</param>
+<param name="stock.spb.value">32</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">43</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -445753,7 +445338,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">9520</param>
 <param name="Розничная цена СПБ">16700</param>
-<param name="Остаток Москва">91</param>
+<param name="Остаток Москва">88</param>
 <param name="Оптовая цена Москва">9520</param>
 <param name="Розничная цена Москва">16700</param>
 <param name="Остаток Пятигорск">25</param>
@@ -445769,7 +445354,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">91</param>
+<param name="stock.msk.value">88</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">25</param>
 <param name="price.spb.name">Санкт-Петербург</param>
