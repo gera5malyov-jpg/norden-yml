@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<yml_catalog date="2026-11-11T19:39:46+00:00">
+<yml_catalog date="2026-11-12T07:14:04+00:00">
   <shop>
     <name>TD Andrey</name>
     <company>TD Andrey</company>
@@ -3292,7 +3292,7 @@
 <param name="Остаток СПБ">5</param>
 <param name="Оптовая цена СПБ">7280</param>
 <param name="Розничная цена СПБ">12767</param>
-<param name="Остаток Москва">1</param>
+<param name="Остаток Москва">0</param>
 <param name="Оптовая цена Москва">7280</param>
 <param name="Розничная цена Москва">12767</param>
 <param name="Остаток Пятигорск">0</param>
@@ -3317,7 +3317,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">5</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">1</param>
+<param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -6085,7 +6085,7 @@
 В комплект входят навесы для крепления.
 Максимальная распределенная нагрузка на стеллаж - 20 кг.
 Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">17</param>
+<param name="Остаток СПБ">16</param>
 <param name="Оптовая цена СПБ">4102</param>
 <param name="Розничная цена СПБ">7198</param>
 <param name="Остаток Москва">0</param>
@@ -6110,7 +6110,7 @@
 Максимальная распределенная нагрузка на стеллаж - 20 кг.
 Товар поставляется в разобранном виде.</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">17</param>
+<param name="stock.spb.value">16</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -10028,7 +10028,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">1232</param>
 <param name="Розничная цена СПБ">2163</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">1232</param>
 <param name="Розничная цена Москва">2163</param>
 <param name="Остаток Пятигорск">0</param>
@@ -10044,7 +10044,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -78725,7 +78725,7 @@
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">7476</param>
 <param name="Розничная цена СПБ">13110</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">7476</param>
 <param name="Розничная цена Москва">13110</param>
 <param name="Остаток Пятигорск">0</param>
@@ -78752,7 +78752,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -79699,109 +79699,6 @@
 <param name="packages.items[0].height">9.4</param>
 <param name="packages.items[0].lenght">0</param>
 <param name="packages.items[0].weight">0</param>
-<param name="categoryes[0][0].id">175</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Офисная мебель</param>
-<param name="categoryes[0][1].id">181</param>
-<param name="categoryes[0][1].parentId">175</param>
-<param name="categoryes[0][1].name">Столы письменные и рабочие</param>
-<param name="categoryes[1][0].id">37</param>
-<param name="categoryes[1][0].parentId">0</param>
-<param name="categoryes[1][0].name">Мебель для гостиной</param>
-<param name="categoryes[1][1].id">39</param>
-<param name="categoryes[1][1].parentId">37</param>
-<param name="categoryes[1][1].name">Компьютерные столы</param>
-<param name="categoryes[2][0].id">37</param>
-<param name="categoryes[2][0].parentId">0</param>
-<param name="categoryes[2][0].name">Мебель для гостиной</param>
-<param name="categoryes[2][1].id">71</param>
-<param name="categoryes[2][1].parentId">37</param>
-<param name="categoryes[2][1].name">Письменные столы</param>
-</offer>
-<offer id="7536" available="true">
-<name>СТОЛ КОМПЬЮТЕРНЫЙ №6 (1,5х1,82х0,814)</name>
-<price>17719</price>
-<currencyId>RUR</currencyId>
-<vendor>Стендмебель</vendor>
-<vendorCode>040833</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-06-14/219ae1a2-b1cd-11e9-a8b2-00155d000a00_d8c793e9-040a-11ec-891c-00155d000a00/stol_06_ankor-svetlyj_zakr.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-06-14/219ae1a2-b1cd-11e9-a8b2-00155d000a00_d8c793e9-040a-11ec-891c-00155d000a00/stol_06_ankor-svetlyj_otkr.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-06-14/219ae1a2-b1cd-11e9-a8b2-00155d000a00_d8c793e9-040a-11ec-891c-00155d000a00/komputernyj-stol-6_ankor-svetlyj_01_001_m.jpg</picture>
-<description>Размер: (ШхВхГ) 1500x1820x814
-Размер под монитор: 816x460
-Корпус: ЛДСП - Дуб Анкор светлый
-Фасад: ЛДСП - Дуб анкор светлый
-Ручки: Пластик.
-Ящики: Роликовые направляющие.
-Удобный компьютерный стол впишется в любой интерьер квартиры и офиса.
-Компактный и вместительный.
-Кромка ПВХ 1 мм на столешнице.
-Создаст полноценное рабочее место для школьника, студента или офисного сотрудника.
-Сборка возможна только так, как показано на фотографии.
-Товар поставляется в разобранном виде.</description>
-<param name="Остаток СПБ">1</param>
-<param name="Оптовая цена СПБ">10101</param>
-<param name="Розничная цена СПБ">17719</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">10101</param>
-<param name="Розничная цена Москва">17719</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">10462</param>
-<param name="Розничная цена Пятигорск">17719</param>
-<param name="id">7536</param>
-<param name="name">СТОЛ КОМПЬЮТЕРНЫЙ №6 (1,5х1,82х0,814)</param>
-<param name="name2">анкор/анкор (СНЯТ С ПРО-ВА)</param>
-<param name="sku">040833</param>
-<param name="vendor.id">1</param>
-<param name="vendor.name">Стендмебель</param>
-<param name="description">Размер: (ШхВхГ) 1500x1820x814
-Размер под монитор: 816x460
-Корпус: ЛДСП - Дуб Анкор светлый
-Фасад: ЛДСП - Дуб анкор светлый
-Ручки: Пластик.
-Ящики: Роликовые направляющие.
-Удобный компьютерный стол впишется в любой интерьер квартиры и офиса.
-Компактный и вместительный.
-Кромка ПВХ 1 мм на столешнице.
-Создаст полноценное рабочее место для школьника, студента или офисного сотрудника.
-Сборка возможна только так, как показано на фотографии.
-Товар поставляется в разобранном виде.</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">1</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">10101</param>
-<param name="price.spb.valueRetail">17719</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">10101</param>
-<param name="price.msk.valueRetail">17719</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">10462</param>
-<param name="price.ptg.valueRetail">17719</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2024-06-14/219ae1a2-b1cd-11e9-a8b2-00155d000a00_d8c793e9-040a-11ec-891c-00155d000a00/stol_06_ankor-svetlyj_zakr.jpg</param>
-<param name="images[0].name">Стол_06_Анкор светлый_закр.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2024-06-14/219ae1a2-b1cd-11e9-a8b2-00155d000a00_d8c793e9-040a-11ec-891c-00155d000a00/stol_06_ankor-svetlyj_otkr.jpg</param>
-<param name="images[1].name">Стол_06_Анкор светлый_откр.jpg</param>
-<param name="images[2].url">https://lk.tdandrey.ru/upload/products/p2024-06-14/219ae1a2-b1cd-11e9-a8b2-00155d000a00_d8c793e9-040a-11ec-891c-00155d000a00/komputernyj-stol-6_ankor-svetlyj_01_001_m.jpg</param>
-<param name="images[2].name">Компьютерный стол №6_Анкор светлый_01_001_м.jpg</param>
-<param name="size.width">150</param>
-<param name="size.height">182</param>
-<param name="size.lenght">81.4</param>
-<param name="size.weight">73.6</param>
-<param name="packages.count">2</param>
-<param name="packages.items[0].name">Упаковка 1</param>
-<param name="packages.items[0].width">39.4</param>
-<param name="packages.items[0].height">10.6</param>
-<param name="packages.items[0].lenght">0</param>
-<param name="packages.items[0].weight">0</param>
-<param name="packages.items[1].name">Упаковка 2</param>
-<param name="packages.items[1].width">82.4</param>
-<param name="packages.items[1].height">8.2</param>
-<param name="packages.items[1].lenght">0</param>
-<param name="packages.items[1].weight">0</param>
 <param name="categoryes[0][0].id">175</param>
 <param name="categoryes[0][0].parentId">0</param>
 <param name="categoryes[0][0].name">Офисная мебель</param>
@@ -111368,7 +111265,7 @@
 <param name="Остаток СПБ">58</param>
 <param name="Оптовая цена СПБ">2052</param>
 <param name="Розничная цена СПБ">3599</param>
-<param name="Остаток Москва">5</param>
+<param name="Остаток Москва">4</param>
 <param name="Оптовая цена Москва">2052</param>
 <param name="Розничная цена Москва">3599</param>
 <param name="Остаток Пятигорск">0</param>
@@ -111384,7 +111281,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">58</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">5</param>
+<param name="stock.msk.value">4</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -192871,7 +192768,7 @@
 <param name="Остаток Москва">6</param>
 <param name="Оптовая цена Москва">7441</param>
 <param name="Розничная цена Москва">13051</param>
-<param name="Остаток Пятигорск">1</param>
+<param name="Остаток Пятигорск">0</param>
 <param name="Оптовая цена Пятигорск">7707</param>
 <param name="Розничная цена Пятигорск">13051</param>
 <param name="id">18287</param>
@@ -192893,7 +192790,7 @@
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">6</param>
 <param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">1</param>
+<param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
 <param name="price.spb.valueOpt">7441</param>
 <param name="price.spb.valueRetail">13051</param>
@@ -290665,6 +290562,77 @@
 <param name="size.weight">0</param>
 <param name="packages.count">0</param>
 </offer>
+<offer id="31064" available="true">
+<name>Шкаф-купе "Маэстро" (1700х2200х600)</name>
+<price>36147</price>
+<currencyId>RUR</currencyId>
+<vendor>БТС</vendor>
+<vendorCode>040242</vendorCode>
+<picture>https://lk.tdandrey.ru/upload/products/p2024-06-26/b94dfd6e-b986-11e7-80c8-1062ebdf3e34_ef0b10eb-e394-11ea-acc8-00155d000a00/jasen-belyj.jpg</picture>
+<picture>https://lk.tdandrey.ru/upload/products/p2024-06-26/b94dfd6e-b986-11e7-80c8-1062ebdf3e34_ef0b10eb-e394-11ea-acc8-00155d000a00/shkaf-maestro-jasen-belyj-napolnenie-min.jpg</picture>
+<picture>https://lk.tdandrey.ru/upload/products/p2024-06-26/b94dfd6e-b986-11e7-80c8-1062ebdf3e34_ef0b10eb-e394-11ea-acc8-00155d000a00/maestro-jasen-belyj.jpg</picture>
+<description>Шкаф-купе Маэстро
+Размер: (ШхВхГ) 1700х2200х594
+Корпус: ЛДСП-Венге/Ясень Шимо/Ясень Белый
+Фасад: Дуб атланта/Лоредо/Ясень Белый+Зеркало
+Ручки: Пластик.
+Ящики: Роликовые направляющие.
+Функциональный и компактный шкаф-купе Маэстро порадует своего нового обладателя новым трендовым цветовыми решениями. Завораживающий декор фасада в виде зеркал с фацет обработкой придает дополнительный шарм этой модели. 
+Используемый раздвижной механизм премиум-класса соответствует современным тенденциям. 
+Многочисленные полки, два платяных отделения и комод позволяют свободно разместить одежду в шкафу.
+Товар поставляется  в разобранном виде.</description>
+<param name="Остаток СПБ">1</param>
+<param name="Оптовая цена СПБ">20611</param>
+<param name="Розничная цена СПБ">36147</param>
+<param name="Остаток Москва">0</param>
+<param name="Оптовая цена Москва">20611</param>
+<param name="Розничная цена Москва">36147</param>
+<param name="Остаток Пятигорск">0</param>
+<param name="Оптовая цена Пятигорск">21347</param>
+<param name="Розничная цена Пятигорск">36147</param>
+<param name="id">31064</param>
+<param name="name">Шкаф-купе "Маэстро" (1700х2200х600)</param>
+<param name="name2">ясень белый</param>
+<param name="sku">040242</param>
+<param name="vendor.id">3</param>
+<param name="vendor.name">БТС</param>
+<param name="description">Шкаф-купе Маэстро
+Размер: (ШхВхГ) 1700х2200х594
+Корпус: ЛДСП-Венге/Ясень Шимо/Ясень Белый
+Фасад: Дуб атланта/Лоредо/Ясень Белый+Зеркало
+Ручки: Пластик.
+Ящики: Роликовые направляющие.
+Функциональный и компактный шкаф-купе Маэстро порадует своего нового обладателя новым трендовым цветовыми решениями. Завораживающий декор фасада в виде зеркал с фацет обработкой придает дополнительный шарм этой модели. 
+Используемый раздвижной механизм премиум-класса соответствует современным тенденциям. 
+Многочисленные полки, два платяных отделения и комод позволяют свободно разместить одежду в шкафу.
+Товар поставляется  в разобранном виде.</param>
+<param name="stock.spb.name">Санкт-Петербург</param>
+<param name="stock.spb.value">1</param>
+<param name="stock.msk.name">Москва</param>
+<param name="stock.msk.value">0</param>
+<param name="stock.ptg.name">Пятигорск</param>
+<param name="stock.ptg.value">0</param>
+<param name="price.spb.name">Санкт-Петербург</param>
+<param name="price.spb.valueOpt">20611</param>
+<param name="price.spb.valueRetail">36147</param>
+<param name="price.msk.name">Москва</param>
+<param name="price.msk.valueOpt">20611</param>
+<param name="price.msk.valueRetail">36147</param>
+<param name="price.ptg.name">Пятигорск</param>
+<param name="price.ptg.valueOpt">21347</param>
+<param name="price.ptg.valueRetail">36147</param>
+<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2024-06-26/b94dfd6e-b986-11e7-80c8-1062ebdf3e34_ef0b10eb-e394-11ea-acc8-00155d000a00/jasen-belyj.jpg</param>
+<param name="images[0].name">ясень-белый.jpg</param>
+<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2024-06-26/b94dfd6e-b986-11e7-80c8-1062ebdf3e34_ef0b10eb-e394-11ea-acc8-00155d000a00/shkaf-maestro-jasen-belyj-napolnenie-min.jpg</param>
+<param name="images[1].name">Шкаф-Маэстро-ясень-белый-наполнение-min.jpg</param>
+<param name="images[2].url">https://lk.tdandrey.ru/upload/products/p2024-06-26/b94dfd6e-b986-11e7-80c8-1062ebdf3e34_ef0b10eb-e394-11ea-acc8-00155d000a00/maestro-jasen-belyj.jpg</param>
+<param name="images[2].name">Маэстро-ясень-белый.jpg</param>
+<param name="size.width">0</param>
+<param name="size.height">0</param>
+<param name="size.lenght">0</param>
+<param name="size.weight">0</param>
+<param name="packages.count">0</param>
+</offer>
 <offer id="31105" available="true">
 <name>Обеденная зона "Милан" угловой модуль (550х755х550) (СНЯТО С ПРО-ВА)</name>
 <price>10945</price>
@@ -291218,78 +291186,6 @@
 <param name="categoryes[1][1].id">25151</param>
 <param name="categoryes[1][1].parentId">188</param>
 <param name="categoryes[1][1].name">Комоды</param>
-</offer>
-<offer id="31123" available="true">
-<name>Стеллаж (850х1866х288)</name>
-<price>5750</price>
-<currencyId>RUR</currencyId>
-<vendor>БТС</vendor>
-<vendorCode>240355</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-08-23/b297a3fa-ba19-11e7-80c8-1062ebdf3e34_b3fe32bc-1d15-11e8-80cb-1062ebdf3e34/stellazh-snimok.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-08-23/b297a3fa-ba19-11e7-80c8-1062ebdf3e34_b3fe32bc-1d15-11e8-80cb-1062ebdf3e34/stellazh-1-snimok.jpg</picture>
-<description>Размер: (ШхВхГ) 850х1866х288
-Материал корпуса: ЛДСП
-Цвет корпуса: Венге/Лоредо
-Стильный и компактный стеллаж будет эффектно смотреться в любом интерьере. 
-На открытых полках могут храниться элементы декора, любимые книги, фотографии близких, различные мелочи и аксессуары. 
-Данная модель будет прекрасно смотреться вдоль стены, а также может служить функциональной перегородкой, если нужно зонировать помещение. 
-Стеллаж имеет привлекательный дизайн, соответствует высокому качеству, а также отвечает высоким эксплуатационным характеристикам.
-Товар поставляется  в разобранном виде.
-Максимальная нагрузка на полку, кг : 10</description>
-<param name="Остаток СПБ">1</param>
-<param name="Оптовая цена СПБ">3279</param>
-<param name="Розничная цена СПБ">5750</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">3279</param>
-<param name="Розничная цена Москва">5750</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">0</param>
-<param name="Розничная цена Пятигорск">5750</param>
-<param name="id">31123</param>
-<param name="name">Стеллаж (850х1866х288)</param>
-<param name="name2">венге</param>
-<param name="sku">240355</param>
-<param name="vendor.id">3</param>
-<param name="vendor.name">БТС</param>
-<param name="description">Размер: (ШхВхГ) 850х1866х288
-Материал корпуса: ЛДСП
-Цвет корпуса: Венге/Лоредо
-Стильный и компактный стеллаж будет эффектно смотреться в любом интерьере. 
-На открытых полках могут храниться элементы декора, любимые книги, фотографии близких, различные мелочи и аксессуары. 
-Данная модель будет прекрасно смотреться вдоль стены, а также может служить функциональной перегородкой, если нужно зонировать помещение. 
-Стеллаж имеет привлекательный дизайн, соответствует высокому качеству, а также отвечает высоким эксплуатационным характеристикам.
-Товар поставляется  в разобранном виде.
-Максимальная нагрузка на полку, кг : 10</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">1</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">3279</param>
-<param name="price.spb.valueRetail">5750</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">3279</param>
-<param name="price.msk.valueRetail">5750</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">0</param>
-<param name="price.ptg.valueRetail">5750</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2024-08-23/b297a3fa-ba19-11e7-80c8-1062ebdf3e34_b3fe32bc-1d15-11e8-80cb-1062ebdf3e34/stellazh-snimok.jpg</param>
-<param name="images[0].name">стеллаж Снимок.JPG</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2024-08-23/b297a3fa-ba19-11e7-80c8-1062ebdf3e34_b3fe32bc-1d15-11e8-80cb-1062ebdf3e34/stellazh-1-snimok.jpg</param>
-<param name="images[1].name">стеллаж 1 Снимок.JPG</param>
-<param name="size.width">85</param>
-<param name="size.height">186.6</param>
-<param name="size.lenght">28.8</param>
-<param name="size.weight">24</param>
-<param name="packages.count">0</param>
-<param name="categoryes[0][0].id">206</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Шкафы</param>
-<param name="categoryes[0][1].id">211</param>
-<param name="categoryes[0][1].parentId">206</param>
-<param name="categoryes[0][1].name">Стеллажи</param>
 </offer>
 <offer id="31124" available="true">
 <name>Стеллаж (850х1866х288)</name>
@@ -301911,77 +301807,6 @@
 <param name="categoryes[2][1].id">210</param>
 <param name="categoryes[2][1].parentId">206</param>
 <param name="categoryes[2][1].name">Распашные шкафы</param>
-</offer>
-<offer id="38685" available="true">
-<name>Спальня "Наоми" ШК-21</name>
-<price>22468</price>
-<currencyId>RUR</currencyId>
-<vendor>БТС</vendor>
-<vendorCode>250389</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-10-31/c00f8fc4-14f4-11ea-87f9-00155d000a00_2f453566-1d0f-11ec-891c-00155d000a00/shkaf-uglovoj-naomi-shk-21-s-serym-fasadom.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-10-31/c00f8fc4-14f4-11ea-87f9-00155d000a00_2f453566-1d0f-11ec-891c-00155d000a00/shk-021-otkrytyj.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-10-31/c00f8fc4-14f4-11ea-87f9-00155d000a00_2f453566-1d0f-11ec-891c-00155d000a00/shk-21-interer-seryj.jpg</picture>
-<description>Размер: (ШхВхГ) 750х2176х750
-Цветовое решение: 
-Корпус: ЛДСП - Дуб Каньон
-Фасад: МДФ - Белый Глянец./Графит
-Опоры: Пластик
-Шкаф укомплектован полками и штангой.
-Товар поставляется  в разобранном виде.</description>
-<param name="Остаток СПБ">1</param>
-<param name="Оптовая цена СПБ">12813</param>
-<param name="Розничная цена СПБ">22468</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">12813</param>
-<param name="Розничная цена Москва">22468</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">0</param>
-<param name="Розничная цена Пятигорск">22468</param>
-<param name="id">38685</param>
-<param name="name">Спальня "Наоми" ШК-21</param>
-<param name="name2">дуб каньон/графит</param>
-<param name="sku">250389</param>
-<param name="vendor.id">3</param>
-<param name="vendor.name">БТС</param>
-<param name="description">Размер: (ШхВхГ) 750х2176х750
-Цветовое решение: 
-Корпус: ЛДСП - Дуб Каньон
-Фасад: МДФ - Белый Глянец./Графит
-Опоры: Пластик
-Шкаф укомплектован полками и штангой.
-Товар поставляется  в разобранном виде.</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">1</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">12813</param>
-<param name="price.spb.valueRetail">22468</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">12813</param>
-<param name="price.msk.valueRetail">22468</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">0</param>
-<param name="price.ptg.valueRetail">22468</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2024-10-31/c00f8fc4-14f4-11ea-87f9-00155d000a00_2f453566-1d0f-11ec-891c-00155d000a00/shkaf-uglovoj-naomi-shk-21-s-serym-fasadom.jpg</param>
-<param name="images[0].name">Шкаф-угловой-Наоми-ШК-21-с-серым-фасадом.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2024-10-31/c00f8fc4-14f4-11ea-87f9-00155d000a00_2f453566-1d0f-11ec-891c-00155d000a00/shk-021-otkrytyj.jpg</param>
-<param name="images[1].name">ШК-021-открытый.jpg</param>
-<param name="images[2].url">https://lk.tdandrey.ru/upload/products/p2024-10-31/c00f8fc4-14f4-11ea-87f9-00155d000a00_2f453566-1d0f-11ec-891c-00155d000a00/shk-21-interer-seryj.jpg</param>
-<param name="images[2].name">ШК-21-интерьер-серый.jpg</param>
-<param name="size.width">75</param>
-<param name="size.height">217.6</param>
-<param name="size.lenght">75</param>
-<param name="size.weight">74.6</param>
-<param name="packages.count">0</param>
-<param name="categoryes[0][0].id">125</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для спальни</param>
-<param name="categoryes[0][1].id">164</param>
-<param name="categoryes[0][1].parentId">125</param>
-<param name="categoryes[0][1].name">Шкафы</param>
 </offer>
 <offer id="38687" available="true">
 <name>Спальня "Наоми" ШК-22</name>
@@ -315249,7 +315074,7 @@
 <param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">15456</param>
 <param name="Розничная цена СПБ">27104</param>
-<param name="Остаток Москва">5</param>
+<param name="Остаток Москва">4</param>
 <param name="Оптовая цена Москва">15456</param>
 <param name="Розничная цена Москва">27104</param>
 <param name="Остаток Пятигорск">0</param>
@@ -315272,7 +315097,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">5</param>
+<param name="stock.msk.value">4</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -315322,7 +315147,7 @@
 <param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">15456</param>
 <param name="Розничная цена СПБ">27104</param>
-<param name="Остаток Москва">2</param>
+<param name="Остаток Москва">1</param>
 <param name="Оптовая цена Москва">15456</param>
 <param name="Розничная цена Москва">27104</param>
 <param name="Остаток Пятигорск">1</param>
@@ -315345,7 +315170,7 @@
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">2</param>
+<param name="stock.msk.value">1</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -379092,7 +378917,7 @@
 Пенополиуретан 2см
 Нагрузка на спальное место: 110 кг
 Степень жесткости: Средняя</description>
-<param name="Остаток СПБ">4</param>
+<param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">4652</param>
 <param name="Розничная цена СПБ">8158</param>
 <param name="Остаток Москва">0</param>
@@ -379117,7 +378942,7 @@
 Нагрузка на спальное место: 110 кг
 Степень жесткости: Средняя</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">4</param>
+<param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -390159,113 +389984,6 @@
 <param name="categoryes[0][1].parentId">125</param>
 <param name="categoryes[0][1].name">Комоды</param>
 </offer>
-<offer id="119765" available="true">
-<name>Хелен КМ 05 Комод 6 ящиков (1502х958х460)</name>
-<price>16934</price>
-<currencyId>RUR</currencyId>
-<vendor>Стендмебель</vendor>
-<vendorCode>381816</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-1.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-2.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-3.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-4.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-5.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-6.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-7.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-11.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-10.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-12.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-06-06/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/km-05-grafit.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-06-06/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/km-05-grafit-vn.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-8.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-9.jpg</picture>
-<description>Размер (ШхВхГ) 1500х960х465 мм</description>
-<param name="Остаток СПБ">0</param>
-<param name="Оптовая цена СПБ">9653</param>
-<param name="Розничная цена СПБ">16934</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">9653</param>
-<param name="Розничная цена Москва">16934</param>
-<param name="Остаток Пятигорск">1</param>
-<param name="Оптовая цена Пятигорск">9998</param>
-<param name="Розничная цена Пятигорск">16934</param>
-<param name="id">119765</param>
-<param name="name">Хелен КМ 05 Комод 6 ящиков (1502х958х460)</param>
-<param name="name2">серый графит/дуб крафт золото</param>
-<param name="sku">381816</param>
-<param name="vendor.id">1</param>
-<param name="vendor.name">Стендмебель</param>
-<param name="description">Размер (ШхВхГ) 1500х960х465 мм</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">0</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">1</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">9653</param>
-<param name="price.spb.valueRetail">16934</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">9653</param>
-<param name="price.msk.valueRetail">16934</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">9998</param>
-<param name="price.ptg.valueRetail">16934</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-1.jpg</param>
-<param name="images[0].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 1.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-2.jpg</param>
-<param name="images[1].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 2.jpg</param>
-<param name="images[2].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-3.jpg</param>
-<param name="images[2].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 3.jpg</param>
-<param name="images[3].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-4.jpg</param>
-<param name="images[3].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 4.jpg</param>
-<param name="images[4].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-5.jpg</param>
-<param name="images[4].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 5.jpg</param>
-<param name="images[5].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-6.jpg</param>
-<param name="images[5].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 6.jpg</param>
-<param name="images[6].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-7.jpg</param>
-<param name="images[6].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 7.jpg</param>
-<param name="images[7].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-11.jpg</param>
-<param name="images[7].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 11.jpg</param>
-<param name="images[8].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-10.jpg</param>
-<param name="images[8].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 10.jpg</param>
-<param name="images[9].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-12.jpg</param>
-<param name="images[9].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 12.jpg</param>
-<param name="images[10].url">https://lk.tdandrey.ru/upload/products/p2024-06-06/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/km-05-grafit.jpg</param>
-<param name="images[10].name">КМ 05 графит.jpg</param>
-<param name="images[11].url">https://lk.tdandrey.ru/upload/products/p2024-06-06/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/km-05-grafit-vn.jpg</param>
-<param name="images[11].name">КМ 05 графит ВН.jpg</param>
-<param name="images[12].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-8.jpg</param>
-<param name="images[12].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 8.jpg</param>
-<param name="images[13].url">https://lk.tdandrey.ru/upload/products/p2026-04-22/273d7f91-2636-11ee-967a-00155da28800_591f2c8a-e5be-11ee-8118-00155da28800/komod-helen-km-05-grafit-seryj-i-dub-kraft-zolotoj-mtda-9.jpg</param>
-<param name="images[13].name">Комод Хелен КМ 05 Графит Серый и Дуб Крафт Золотой МТДА 9.jpg</param>
-<param name="size.width">150</param>
-<param name="size.height">96</param>
-<param name="size.lenght">46.5</param>
-<param name="size.weight">71.6</param>
-<param name="packages.count">3</param>
-<param name="packages.items[0].name">Упаковка 1</param>
-<param name="packages.items[0].width">45.4</param>
-<param name="packages.items[0].height">15</param>
-<param name="packages.items[0].lenght">0</param>
-<param name="packages.items[0].weight">0</param>
-<param name="packages.items[1].name">Упаковка 2</param>
-<param name="packages.items[1].width">47</param>
-<param name="packages.items[1].height">6.7</param>
-<param name="packages.items[1].lenght">0</param>
-<param name="packages.items[1].weight">0</param>
-<param name="packages.items[2].name">Упаковка 3</param>
-<param name="packages.items[2].width">50.6</param>
-<param name="packages.items[2].height">7.4</param>
-<param name="packages.items[2].lenght">0</param>
-<param name="packages.items[2].weight">0</param>
-<param name="categoryes[0][0].id">125</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для спальни</param>
-<param name="categoryes[0][1].id">129</param>
-<param name="categoryes[0][1].parentId">125</param>
-<param name="categoryes[0][1].name">Комоды</param>
-</offer>
 <offer id="119767" available="true">
 <name>Хелен ШК 04 Шкаф угловой (0,748х2,100х0,748)</name>
 <price>16416</price>
@@ -390522,89 +390240,6 @@
 <param name="categoryes[0][2].id">36931</param>
 <param name="categoryes[0][2].parentId">130</param>
 <param name="categoryes[0][2].name">Кровати односпальные</param>
-</offer>
-<offer id="119770" available="true">
-<name>Хелен КМ 01 Комод 1202 (1.202х0.958х0.460)</name>
-<price>13210</price>
-<currencyId>RUR</currencyId>
-<vendor>Стендмебель</vendor>
-<vendorCode>381812</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-04-24/d45790ec-6bbf-11ed-acc9-00155da28800_3de632ec-e5be-11ee-8118-00155da28800/d45790ec_6bbf_11ed_acc9_00155da28800_8f02aa60_edca_11ee_9868_00155da28800.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-04-24/d45790ec-6bbf-11ed-acc9-00155da28800_3de632ec-e5be-11ee-8118-00155da28800/d45790ec_6bbf_11ed_acc9_00155da28800_8f02aa61_edca_11ee_9868_00155da28800.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2024-09-06/d45790ec-6bbf-11ed-acc9-00155da28800_3de632ec-e5be-11ee-8118-00155da28800/1da09daaa1607b68f6520a5c0977a400.jpg</picture>
-<description>Размер: (ШхВхГ) 1202х958х460
-Корпус: ЛДСП - Дуб Крафт золотой
-Фасад: ЛДСП - Cерый графит
-Комод Хелен это модуль сквозной коллекции, разработанной в скандинавском стиле.
-Наполнение: Полки, ящики.
-Ящики: Шариковые направляющие.
-Опоры: Пластик 20мм.
-Товар продается в разобранном виде.</description>
-<param name="Остаток СПБ">0</param>
-<param name="Оптовая цена СПБ">7532</param>
-<param name="Розничная цена СПБ">13210</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">7532</param>
-<param name="Розничная цена Москва">13210</param>
-<param name="Остаток Пятигорск">1</param>
-<param name="Оптовая цена Пятигорск">7801</param>
-<param name="Розничная цена Пятигорск">13210</param>
-<param name="id">119770</param>
-<param name="name">Хелен КМ 01 Комод 1202 (1.202х0.958х0.460)</param>
-<param name="name2">серый графит/дуб крафт золото</param>
-<param name="sku">381812</param>
-<param name="vendor.id">1</param>
-<param name="vendor.name">Стендмебель</param>
-<param name="description">Размер: (ШхВхГ) 1202х958х460
-Корпус: ЛДСП - Дуб Крафт золотой
-Фасад: ЛДСП - Cерый графит
-Комод Хелен это модуль сквозной коллекции, разработанной в скандинавском стиле.
-Наполнение: Полки, ящики.
-Ящики: Шариковые направляющие.
-Опоры: Пластик 20мм.
-Товар продается в разобранном виде.</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">0</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">1</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">7532</param>
-<param name="price.spb.valueRetail">13210</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">7532</param>
-<param name="price.msk.valueRetail">13210</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">7801</param>
-<param name="price.ptg.valueRetail">13210</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2024-04-24/d45790ec-6bbf-11ed-acc9-00155da28800_3de632ec-e5be-11ee-8118-00155da28800/d45790ec_6bbf_11ed_acc9_00155da28800_8f02aa60_edca_11ee_9868_00155da28800.jpg</param>
-<param name="images[0].name">d45790ec_6bbf_11ed_acc9_00155da28800_8f02aa60_edca_11ee_9868_00155da28800.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2024-04-24/d45790ec-6bbf-11ed-acc9-00155da28800_3de632ec-e5be-11ee-8118-00155da28800/d45790ec_6bbf_11ed_acc9_00155da28800_8f02aa61_edca_11ee_9868_00155da28800.jpg</param>
-<param name="images[1].name">d45790ec_6bbf_11ed_acc9_00155da28800_8f02aa61_edca_11ee_9868_00155da28800.jpg</param>
-<param name="images[2].url">https://lk.tdandrey.ru/upload/products/p2024-09-06/d45790ec-6bbf-11ed-acc9-00155da28800_3de632ec-e5be-11ee-8118-00155da28800/1da09daaa1607b68f6520a5c0977a400.jpg</param>
-<param name="images[2].name">1da09daaa1607b68f6520a5c0977a400.jpg</param>
-<param name="size.width">120.2</param>
-<param name="size.height">95.8</param>
-<param name="size.lenght">46</param>
-<param name="size.weight">56</param>
-<param name="packages.count">2</param>
-<param name="packages.items[0].name">Упаковка 1</param>
-<param name="packages.items[0].width">45.4</param>
-<param name="packages.items[0].height">12.2</param>
-<param name="packages.items[0].lenght">0</param>
-<param name="packages.items[0].weight">0</param>
-<param name="packages.items[1].name">Упаковка 2</param>
-<param name="packages.items[1].width">47</param>
-<param name="packages.items[1].height">9.7</param>
-<param name="packages.items[1].lenght">0</param>
-<param name="packages.items[1].weight">0</param>
-<param name="categoryes[0][0].id">125</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для спальни</param>
-<param name="categoryes[0][1].id">129</param>
-<param name="categoryes[0][1].parentId">125</param>
-<param name="categoryes[0][1].name">Комоды</param>
 </offer>
 <offer id="119771" available="true">
 <name>Хелен ПН 03 Пенал закрытый (0,400х2,100х0,460)</name>
@@ -430943,7 +430578,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Товар поставляется в разобранном виде.
 Вес	68.4 кг
 Объем	0.11</description>
-<param name="Остаток СПБ">3</param>
+<param name="Остаток СПБ">2</param>
 <param name="Оптовая цена СПБ">10150</param>
 <param name="Розничная цена СПБ">17802</param>
 <param name="Остаток Москва">0</param>
@@ -430971,7 +430606,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Вес	68.4 кг
 Объем	0.11</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
+<param name="stock.spb.value">2</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -431024,7 +430659,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">10150</param>
 <param name="Розничная цена СПБ">17802</param>
-<param name="Остаток Москва">4</param>
+<param name="Остаток Москва">2</param>
 <param name="Оптовая цена Москва">10150</param>
 <param name="Розничная цена Москва">17802</param>
 <param name="Остаток Пятигорск">0</param>
@@ -431051,7 +430686,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">4</param>
+<param name="stock.msk.value">2</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">0</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -431102,7 +430737,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="Остаток СПБ">4</param>
 <param name="Оптовая цена СПБ">10150</param>
 <param name="Розничная цена СПБ">17802</param>
-<param name="Остаток Москва">10</param>
+<param name="Остаток Москва">8</param>
 <param name="Оптовая цена Москва">10150</param>
 <param name="Розничная цена Москва">17802</param>
 <param name="Остаток Пятигорск">1</param>
@@ -431129,7 +430764,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">4</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">10</param>
+<param name="stock.msk.value">8</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">1</param>
 <param name="price.spb.name">Санкт-Петербург</param>
@@ -436057,7 +435692,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Сборка стола не универсальная.
 Товар поставляется в разобранном виде.
 Вес 67,0 кг</description>
-<param name="Остаток СПБ">3</param>
+<param name="Остаток СПБ">1</param>
 <param name="Оптовая цена СПБ">6230</param>
 <param name="Розничная цена СПБ">10930</param>
 <param name="Остаток Москва">0</param>
@@ -436084,7 +435719,7 @@ Cушилка для посуды в верхний шкаф с наружным
 Товар поставляется в разобранном виде.
 Вес 67,0 кг</param>
 <param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">3</param>
+<param name="stock.spb.value">1</param>
 <param name="stock.msk.name">Москва</param>
 <param name="stock.msk.value">0</param>
 <param name="stock.ptg.name">Пятигорск</param>
@@ -436772,88 +436407,6 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="categoryes[0][2].id">36927</param>
 <param name="categoryes[0][2].parentId">36926</param>
 <param name="categoryes[0][2].name">Антресоли прямые</param>
-</offer>
-<offer id="129891" available="true">
-<name>Хелен ШК 06 (Ф) Шкаф 3х створчатый (1200х2100х480)</name>
-<price>16575</price>
-<currencyId>RUR</currencyId>
-<vendor>Фант мебель</vendor>
-<vendorCode>407833</vendorCode>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-09-12/371bf626-8c85-11f0-b7ad-00155da28800_7f102e53-8c85-11f0-b7ad-00155da28800/helen_3h-stvorchatyj_grafitkraft-zoloto_zakr.jpg</picture>
-<picture>https://lk.tdandrey.ru/upload/products/p2025-09-12/371bf626-8c85-11f0-b7ad-00155da28800_7f102e53-8c85-11f0-b7ad-00155da28800/helen_3h-stvorchatyj_grafitkraft-zoloto_otkr.jpg</picture>
-<description>Хелен ШК 06 (Ф) Шкаф 3х створчатый (1200х2080х460)
-Размеры (ШxГxВ): 1200х2080х460
-Корпус: ЛДСП - Дуб крафт золото
-Фасад: ЛДСП - Серый
-Трёхстворчатый шкаф Хелен ШК 06 с двумя распашными створками неполной высоты, открывающиеся захватом снизу, укомплектованы хромированной штангой для одежды. В нижней части шкафа — три ящика полного выдвижения. Боковая секция модуля в виде глухого пенала открывается с помощью отталкивателя и оснащена полками.
-Словно воздушная, мебель коллекции Хелен выполнена в скандинавском стиле и, воплощая простоту и экологичность, выглядит изящно. Она органично впишется в светлые интерьеры комнаты, создавая особый уют и теплую атмосферу своими ровными и спокойными линиями без лишнего декора. Ее гармоничную поверхность не нарушают даже ручки, интегрированные внутри.
-При создании мебели Хелен были использованы исключительно высококачественные материалы и фурнитура, безопасные для вашего здоровья и гарантирующие долговечность службы с сохранением внешнего вида.
-Вес 97,8 кг</description>
-<param name="Остаток СПБ">1</param>
-<param name="Оптовая цена СПБ">9450</param>
-<param name="Розничная цена СПБ">16575</param>
-<param name="Остаток Москва">0</param>
-<param name="Оптовая цена Москва">9450</param>
-<param name="Розничная цена Москва">16575</param>
-<param name="Остаток Пятигорск">0</param>
-<param name="Оптовая цена Пятигорск">9788</param>
-<param name="Розничная цена Пятигорск">16575</param>
-<param name="id">129891</param>
-<param name="name">Хелен ШК 06 (Ф) Шкаф 3х створчатый (1200х2100х480)</param>
-<param name="name2">дуб крафт золотой/серый</param>
-<param name="sku">407833</param>
-<param name="vendor.id">62</param>
-<param name="vendor.name">Фант мебель</param>
-<param name="description">Хелен ШК 06 (Ф) Шкаф 3х створчатый (1200х2080х460)
-Размеры (ШxГxВ): 1200х2080х460
-Корпус: ЛДСП - Дуб крафт золото
-Фасад: ЛДСП - Серый
-Трёхстворчатый шкаф Хелен ШК 06 с двумя распашными створками неполной высоты, открывающиеся захватом снизу, укомплектованы хромированной штангой для одежды. В нижней части шкафа — три ящика полного выдвижения. Боковая секция модуля в виде глухого пенала открывается с помощью отталкивателя и оснащена полками.
-Словно воздушная, мебель коллекции Хелен выполнена в скандинавском стиле и, воплощая простоту и экологичность, выглядит изящно. Она органично впишется в светлые интерьеры комнаты, создавая особый уют и теплую атмосферу своими ровными и спокойными линиями без лишнего декора. Ее гармоничную поверхность не нарушают даже ручки, интегрированные внутри.
-При создании мебели Хелен были использованы исключительно высококачественные материалы и фурнитура, безопасные для вашего здоровья и гарантирующие долговечность службы с сохранением внешнего вида.
-Вес 97,8 кг</param>
-<param name="stock.spb.name">Санкт-Петербург</param>
-<param name="stock.spb.value">1</param>
-<param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">0</param>
-<param name="stock.ptg.name">Пятигорск</param>
-<param name="stock.ptg.value">0</param>
-<param name="price.spb.name">Санкт-Петербург</param>
-<param name="price.spb.valueOpt">9450</param>
-<param name="price.spb.valueRetail">16575</param>
-<param name="price.msk.name">Москва</param>
-<param name="price.msk.valueOpt">9450</param>
-<param name="price.msk.valueRetail">16575</param>
-<param name="price.ptg.name">Пятигорск</param>
-<param name="price.ptg.valueOpt">9788</param>
-<param name="price.ptg.valueRetail">16575</param>
-<param name="images[0].url">https://lk.tdandrey.ru/upload/products/p2025-09-12/371bf626-8c85-11f0-b7ad-00155da28800_7f102e53-8c85-11f0-b7ad-00155da28800/helen_3h-stvorchatyj_grafitkraft-zoloto_zakr.jpg</param>
-<param name="images[0].name">Хелен_3х створчатый_графит+крафт золото_закр.jpg</param>
-<param name="images[1].url">https://lk.tdandrey.ru/upload/products/p2025-09-12/371bf626-8c85-11f0-b7ad-00155da28800_7f102e53-8c85-11f0-b7ad-00155da28800/helen_3h-stvorchatyj_grafitkraft-zoloto_otkr.jpg</param>
-<param name="images[1].name">Хелен_3х створчатый_графит+крафт золото_откр.jpg</param>
-<param name="size.width">120</param>
-<param name="size.height">208</param>
-<param name="size.lenght">46</param>
-<param name="size.weight">97.8</param>
-<param name="packages.count">0</param>
-<param name="categoryes[0][0].id">125</param>
-<param name="categoryes[0][0].parentId">0</param>
-<param name="categoryes[0][0].name">Мебель для спальни</param>
-<param name="categoryes[0][1].id">164</param>
-<param name="categoryes[0][1].parentId">125</param>
-<param name="categoryes[0][1].name">Шкафы</param>
-<param name="categoryes[1][0].id">188</param>
-<param name="categoryes[1][0].parentId">0</param>
-<param name="categoryes[1][0].name">Прихожая</param>
-<param name="categoryes[1][1].id">205</param>
-<param name="categoryes[1][1].parentId">188</param>
-<param name="categoryes[1][1].name">Шкафы</param>
-<param name="categoryes[2][0].id">206</param>
-<param name="categoryes[2][0].parentId">0</param>
-<param name="categoryes[2][0].name">Шкафы</param>
-<param name="categoryes[2][1].id">210</param>
-<param name="categoryes[2][1].parentId">206</param>
-<param name="categoryes[2][1].name">Распашные шкафы</param>
 </offer>
 <offer id="129898" available="true">
 <name>Хелен ШК 05 (Цех 2) Шкаф 4х створчатый с ящиками</name>
@@ -444579,7 +444132,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="Остаток СПБ">0</param>
 <param name="Оптовая цена СПБ">9520</param>
 <param name="Розничная цена СПБ">16700</param>
-<param name="Остаток Москва">46</param>
+<param name="Остаток Москва">45</param>
 <param name="Оптовая цена Москва">9520</param>
 <param name="Розничная цена Москва">16700</param>
 <param name="Остаток Пятигорск">25</param>
@@ -444595,7 +444148,7 @@ Cушилка для посуды в верхний шкаф с наружным
 <param name="stock.spb.name">Санкт-Петербург</param>
 <param name="stock.spb.value">0</param>
 <param name="stock.msk.name">Москва</param>
-<param name="stock.msk.value">46</param>
+<param name="stock.msk.value">45</param>
 <param name="stock.ptg.name">Пятигорск</param>
 <param name="stock.ptg.value">25</param>
 <param name="price.spb.name">Санкт-Петербург</param>
