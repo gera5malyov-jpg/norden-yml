@@ -32,7 +32,7 @@ jobs:
     env:
       OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
       OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
-      DRY_RUN: 'true'
+      DRY_RUN: 'false'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
