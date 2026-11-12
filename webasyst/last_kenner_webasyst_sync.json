@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-11-11T12:10:29.796386+00:00",
+  "started_at": "2026-11-12T12:57:02.183524+00:00",
   "source": "Yandex KIT only",
   "routing_characteristic": "Webasyst=334",
   "type_name": "kennermebel-334",
@@ -8,17 +8,17 @@
   "webasyst_stock_id": "66",
   "kit_stock": "МСК",
   "kit_stock_id": "019a5a68-bc57-78c0-90ba-5727cfaccf49",
-  "kit_variants_scanned": 128,
-  "kit_webasyst_334_variants": 105,
+  "kit_variants_scanned": 134,
+  "kit_webasyst_334_variants": 111,
   "kit_duplicate_skus": 0,
   "webasyst_products": 88,
   "webasyst_duplicate_skus": 0,
   "processed": 88,
   "created": 0,
-  "updated_prices_stock": 21,
+  "updated_prices_stock": 19,
   "summaries_updated_from_kit": 0,
   "kit_variants_without_images": 1,
-  "unchanged": 67,
+  "unchanged": 69,
   "features_created": 0,
   "feature_values_written": 0,
   "file_urls_resolved": 1426,
@@ -53,6 +53,36 @@
     {
       "sku": "334-1914393561",
       "variant_id": "01a18c88-e41f-7f25-a145-3e21d53034bc",
+      "message": "invalid_param: Код kenner_7bee2e47a1be уже существует."
+    },
+    {
+      "sku": "334-320320",
+      "variant_id": "01a1cfd2-5973-7da2-b270-711eb8db5000",
+      "message": "invalid_param: Код kenner_7bee2e47a1be уже существует."
+    },
+    {
+      "sku": "334-320321",
+      "variant_id": "01a1cfd1-ff54-7b27-a9cd-f3b951b5ff7d",
+      "message": "invalid_param: Код kenner_7bee2e47a1be уже существует."
+    },
+    {
+      "sku": "334-320324",
+      "variant_id": "01a1cfd4-942e-73cc-90c2-44acf2046f3d",
+      "message": "invalid_param: Код kenner_7bee2e47a1be уже существует."
+    },
+    {
+      "sku": "334-320325",
+      "variant_id": "01a1cfd4-1a3e-7c86-9e65-fe58ffcc58ac",
+      "message": "invalid_param: Код kenner_7bee2e47a1be уже существует."
+    },
+    {
+      "sku": "334-320433",
+      "variant_id": "01a1cfd3-ac31-77cc-9e88-7761b0e17da0",
+      "message": "invalid_param: Код kenner_7bee2e47a1be уже существует."
+    },
+    {
+      "sku": "334-321152",
+      "variant_id": "01a1cfd3-1921-7749-8f96-18408cf01502",
       "message": "invalid_param: Код kenner_7bee2e47a1be уже существует."
     },
     {
@@ -114,33 +144,13 @@
   "sample_new": [],
   "sample_updates": [
     {
-      "sku": "334-320823",
-      "fields": [
-        "stock"
-      ],
-      "price": "18480.00",
-      "compare_price": "18480.00",
-      "stock": 28,
-      "images_in_summary": 15
-    },
-    {
-      "sku": "334-320827",
-      "fields": [
-        "stock"
-      ],
-      "price": "19760.00",
-      "compare_price": "19760.00",
-      "stock": 14,
-      "images_in_summary": 15
-    },
-    {
       "sku": "334-320828",
       "fields": [
         "stock"
       ],
       "price": "19760.00",
       "compare_price": "19760.00",
-      "stock": 18,
+      "stock": 14,
       "images_in_summary": 17
     },
     {
@@ -150,8 +160,18 @@
       ],
       "price": "20180.00",
       "compare_price": "20180.00",
-      "stock": 46,
+      "stock": 52,
       "images_in_summary": 16
+    },
+    {
+      "sku": "334-320831",
+      "fields": [
+        "stock"
+      ],
+      "price": "20180.00",
+      "compare_price": "20180.00",
+      "stock": 50,
+      "images_in_summary": 15
     },
     {
       "sku": "334-320833",
@@ -160,28 +180,38 @@
       ],
       "price": "20180.00",
       "compare_price": "20180.00",
-      "stock": 14,
+      "stock": 38,
       "images_in_summary": 16
     },
     {
-      "sku": "334-320834",
+      "sku": "334-320836",
       "fields": [
         "stock"
       ],
       "price": "16700.00",
       "compare_price": "16700.00",
       "stock": 18,
-      "images_in_summary": 21
+      "images_in_summary": 25
     },
     {
-      "sku": "334-320835",
+      "sku": "334-320837",
       "fields": [
         "stock"
       ],
       "price": "16700.00",
       "compare_price": "16700.00",
-      "stock": 8,
-      "images_in_summary": 24
+      "stock": 10,
+      "images_in_summary": 20
+    },
+    {
+      "sku": "334-320838",
+      "fields": [
+        "stock"
+      ],
+      "price": "21080.00",
+      "compare_price": "21080.00",
+      "stock": 9,
+      "images_in_summary": 13
     },
     {
       "sku": "334-320841",
@@ -190,18 +220,8 @@
       ],
       "price": "21080.00",
       "compare_price": "21080.00",
-      "stock": 22,
+      "stock": 24,
       "images_in_summary": 1
-    },
-    {
-      "sku": "334-320844",
-      "fields": [
-        "stock"
-      ],
-      "price": "26280.00",
-      "compare_price": "26280.00",
-      "stock": 28,
-      "images_in_summary": 16
     },
     {
       "sku": "334-320847",
@@ -210,18 +230,8 @@
       ],
       "price": "26280.00",
       "compare_price": "26280.00",
-      "stock": 104,
+      "stock": 164,
       "images_in_summary": 17
-    },
-    {
-      "sku": "334-320848",
-      "fields": [
-        "stock"
-      ],
-      "price": "26280.00",
-      "compare_price": "26280.00",
-      "stock": 108,
-      "images_in_summary": 12
     },
     {
       "sku": "334-320849",
@@ -230,7 +240,7 @@
       ],
       "price": "26280.00",
       "compare_price": "26280.00",
-      "stock": 88,
+      "stock": 92,
       "images_in_summary": 13
     },
     {
@@ -240,48 +250,58 @@
       ],
       "price": "17340.00",
       "compare_price": "17340.00",
-      "stock": 66,
+      "stock": 74,
       "images_in_summary": 16
     },
     {
-      "sku": "334-320854",
+      "sku": "334-320851",
       "fields": [
         "stock"
       ],
       "price": "17340.00",
       "compare_price": "17340.00",
-      "stock": 91,
-      "images_in_summary": 16
-    },
-    {
-      "sku": "334-321127",
-      "fields": [
-        "stock"
-      ],
-      "price": "10200.00",
-      "compare_price": "10200.00",
-      "stock": 12,
-      "images_in_summary": 12
-    },
-    {
-      "sku": "334-321927",
-      "fields": [
-        "stock"
-      ],
-      "price": "35400.00",
-      "compare_price": "58500.00",
-      "stock": 1,
+      "stock": 78,
       "images_in_summary": 17
     },
     {
-      "sku": "334-322300",
+      "sku": "334-320852",
       "fields": [
         "stock"
       ],
-      "price": "42850.00",
-      "compare_price": "96367.00",
-      "stock": 9,
-      "images_in_summary": 24
+      "price": "17340.00",
+      "compare_price": "17340.00",
+      "stock": 126,
+      "images_in_summary": 13
+    },
+    {
+      "sku": "334-321922",
+      "fields": [
+        "stock"
+      ],
+      "price": "32800.00",
+      "compare_price": "32800.00",
+      "stock": 16,
+      "images_in_summary": 21
+    },
+    {
+      "sku": "334-322381",
+      "fields": [
+        "stock"
+      ],
+      "price": "12240.00",
+      "compare_price": "12240.00",
+      "stock": 16,
+      "images_in_summary": 11
+    },
+    {
+      "sku": "334-323231",
+      "fields": [
+        "stock"
+      ],
+      "price": "37360.00",
+      "compare_price": "37360.00",
+      "stock": 5,
+      "images_in_summary": 28
     },
     {
       "sku": "334-323458",
@@ -290,33 +310,33 @@
       ],
       "price": "32430.00",
       "compare_price": "32430.00",
-      "stock": 9,
+      "stock": 8,
       "images_in_summary": 22
     },
     {
-      "sku": "334-323459",
+      "sku": "334-323468",
       "fields": [
         "stock"
       ],
-      "price": "31490.00",
-      "compare_price": "31490.00",
-      "stock": 33,
-      "images_in_summary": 13
+      "price": "46270.00",
+      "compare_price": "46270.00",
+      "stock": 13,
+      "images_in_summary": 29
     },
     {
-      "sku": "334-323715",
+      "sku": "334-323471",
       "fields": [
         "stock"
       ],
-      "price": "12240.00",
-      "compare_price": "12240.00",
-      "stock": 19,
-      "images_in_summary": 12
+      "price": "42050.00",
+      "compare_price": "42050.00",
+      "stock": 17,
+      "images_in_summary": 19
     }
   ],
   "complete": false,
   "webasyst_routing_feature_code": "kenner_f93046718124",
   "webasyst_334_products": 88,
-  "finished_at": "2026-11-11T13:02:51.331591+00:00",
+  "finished_at": "2026-11-12T13:47:39.909099+00:00",
   "status": "degraded"
 }
