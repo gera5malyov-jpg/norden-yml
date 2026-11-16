@@ -1,0 +1,29 @@
+name: Ozon TN VED allowed codes audit 2026-11-16
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-tnved-codes-allowed-20261116.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      DRY_RUN: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch category-specific code dictionary read-only
+        run: python ozon/tnved_codes_allowed_20261116.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tnved-allowed-20261116
+          path: ozon/tnved_codes_allowed_20261116.json
+          retention-days: 10
