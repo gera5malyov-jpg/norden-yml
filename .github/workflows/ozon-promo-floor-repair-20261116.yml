@@ -1,0 +1,31 @@
+name: Nov 16 Ozon remove under-floor promo strategy conflicts
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-promo-floor-repair-20261116.yml'
+permissions:
+  contents: read
+concurrency:
+  group: ozon-nov16-promo-changes
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Detach only below-minimum products from price strategy
+        run: python ozon/promo_strategy_floor_remediation_20261109.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: promo-nov16-floor-remediation
+          path: ozon/promo_strategy_floor_remediation_20261109.json
+          retention-days: 14
