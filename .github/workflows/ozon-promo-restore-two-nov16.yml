@@ -1,0 +1,25 @@
+name: Restore two seller minimum prices after Ozon promo strategy fix
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-promo-restore-two-nov16.yml'
+permissions:
+  contents: read
+concurrency:
+  group: ozon-nov16-promo-changes
+  cancel-in-progress: false
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore two original seller price floors and verify
+        run: python ozon/promo_restore_two_minimums_20261116.py
