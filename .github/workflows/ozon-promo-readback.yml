@@ -1,4 +1,5 @@
 name: Verify Ozon promotions against minimum prices
+# Strict independent post-write audit 2026-11-17 includes min_seller_price
 # Nov 16 independent validation after all actions and two minimum price restorations
 # Independent post-remediation audit after 27 MIN_EXT_PRICE detachments on 2026-11-12
 
@@ -70,7 +71,7 @@ jobs:
               pid=int(x.get("id") or x.get("product_id") or 0)
               master=bypid.get(pid)
               if not master:unknown+=1;continue
-              floor=money((master.get("price") or {}).get("min_price"))
+              floor=max(money((master.get("price") or {}).get("min_price")),money(x.get("min_seller_price")))
               ap=money(x.get("action_price"))
               if ap<=0:no_ap+=1;continue
               if floor>0 and ap<floor:
