@@ -4,8 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/repair-avalon-catalog-photos.yml'
-      - 'storefront/repair_avalon_catalog_photos.py'
+      - 'avalon-podstolya/catalog.yml'
 permissions:
   contents: read
 concurrency:
