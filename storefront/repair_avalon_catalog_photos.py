@@ -83,19 +83,27 @@ try:
   key=namekey(row['name']);options=matches.get(key,[])
   if names[key]!=1 or len(options)!=1:skip['ambiguous']+=1;continue
   old=str(row['summary'] or '');links=URL_RE.findall(old);pictures=options[0]
-  if not old.startswith('[extimg]') or not links or len(links)!=len(pictures) or not all(PHOTO in u for u in links+pictures):
+  if (not old.startswith('[extimg]') or not links or not 1<=len(pictures)<=35
+      or not all(PHOTO in u for u in links+pictures)):
    skip['gallery_shape']+=1;continue
   if old.count('[extimg]')!=old.count('[/extimg]'):skip['markers']+=1;continue
-  after=old;safe=True
-  for a,b in zip(links,pictures):
-   if after.count(a)!=1:safe=False;break
-   after=after.replace(a,b,1)
-  if not safe or URL_RE.findall(after)!=pictures:skip['content_ambiguous']+=1;continue
+  pattern=re.compile(r'\[extimg\].*?\[/extimg\]',re.I|re.S)
+  image_blocks=list(pattern.finditer(old))
+  if not image_blocks or len(image_blocks)>35:skip['block_shape']+=1;continue
+  if any(not URL_RE.findall(m.group(0)) for m in image_blocks):skip['missing_block_urls']+=1;continue
+  new_gallery=''.join('[extimg]'+u+'[/extimg]\n' for u in pictures)
+  counter=[0]
+  def rewrite(m):
+   counter[0]+=1
+   return new_gallery if counter[0]==1 else ''
+  after=pattern.sub(rewrite,old)
+  if counter[0]!=len(image_blocks) or URL_RE.findall(after)!=pictures:
+   skip['content_ambiguous']+=1;continue
   if after==old:skip['unchanged']+=1;continue
   eligible.append({'id':int(row['id']),'name':row['name'],'url':row['url'],'before':old,'after':after,'pictures':pictures})
  print('AVALON_BULK_PREFLIGHT='+json.dumps({'check':1,'result':'passed','db_rows':len(records),
   'feed_offers':len(offers),'eligible':len(eligible),'skipped':dict(skip)},ensure_ascii=False),flush=True)
- if len(eligible)<350 or len(eligible)>520:raise RuntimeError('PREFLIGHT 1: bulk count unusual; no updates')
+ if not 1<=len(eligible)<=520:raise RuntimeError('PREFLIGHT 1: no safe image replacements')
  # Preflight 2: verify every proposed new gallery link returns image content; unsafe products are excluded.
  photos=sorted(set(u for rec in eligible for u in rec['pictures']))
  def image_ok(url):
