@@ -44,7 +44,7 @@ CONTACT = re.compile(
 )
 MONEY = re.compile(r"(\d[\d\s\xa0]*(?:[,.]\d{1,2})?)\s*(?:₽|руб)", re.I)
 RESIZED = re.compile(r"^/upload/resize_cache/(iblock|uf)/([^/]+)/[^/]+/(.+\.(?:jpe?g|png|webp))$", re.I)
-IMAGE = re.compile(r"^/upload/(iblock|uf)/.+\.(?:jpe?g|png|webp)$", re.I)
+IMAGE = re.compile(r"^/upload/(iblock|uf|import_photos)/.+\.(?:jpe?g|png|webp)$", re.I)
 
 
 def compact(value):
@@ -183,7 +183,8 @@ def source_image(raw):
 
 def pictures(soup):
     found=[]
-    for sel in (".magnific-gallery__main",
+    for sel in (".magnific-gallery a[href]",
+                ".magnific-gallery__main",
                 ".magnific-gallery__item a[href]",
                 ".gallery-slides__item img[src]"):
         for node in soup.select(sel):
