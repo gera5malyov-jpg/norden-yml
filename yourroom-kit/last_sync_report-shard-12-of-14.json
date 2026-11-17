@@ -1,6 +1,6 @@
 {
   "status": "УСПЕШНО",
-  "started_at": "2026-11-03T12:58:25+00:00",
+  "started_at": "2026-11-17T14:50:26+00:00",
   "dry_run": false,
   "source": "https://yourroom.ru/",
   "supplier": "ВашаКомната",
@@ -20,25 +20,61 @@
   "missing_rule": "если URL исчез из полного sitemap — остаток 0",
   "description_rule": "упоминания ВашаКомната/Вашакомната.РФ/yourroom.ru удаляются",
   "photo_rule": "используются только изображения без водяного знака; сначала ищется чистый оригинал, затем пробуется программное удаление; без пригодного фото карточка не создается",
-  "sitemap_urls": 547,
-  "product_pages_requested": 547,
-  "product_cards_parsed": 547,
-  "created": 3,
-  "updated": 539,
-  "zeroed_missing": 11,
+  "sitemap_urls": 551,
+  "product_pages_requested": 551,
+  "product_cards_parsed": 551,
+  "created": 8,
+  "updated": 538,
+  "zeroed_missing": 15,
   "skipped_no_clean_photo": 5,
   "skipped_no_price": 0,
-  "price_updates": 542,
-  "stock_updates": 553,
-  "images_clean_original": 194,
-  "images_clean_alternate": 1652,
-  "images_watermark_removed": 14,
+  "price_updates": 546,
+  "stock_updates": 561,
+  "images_clean_original": 188,
+  "images_clean_alternate": 1682,
+  "images_watermark_removed": 13,
   "images_rejected_watermark_or_error": 38,
-  "images_uploaded": 114,
-  "image_upload_errors": 26,
+  "images_uploaded": 85,
+  "image_upload_errors": 35,
   "parse_errors": [],
   "errors": [],
   "warnings": [
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
     {
       "stage": "kit_image_upload",
       "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
@@ -230,8 +266,8 @@
     {
       "source_url": "https://yourroom.ru/products/zerkalo-navesnoe-zn-qvenetsiyaq",
       "name": "Зеркало навесное ЗН \"Венеция\" - Белый / Глянец жемчуг",
-      "customer_price": "5396",
-      "old_price": "6750",
+      "customer_price": "5854",
+      "old_price": "7320",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Спальни",
@@ -367,8 +403,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-nota-11-ldsp",
       "name": "Пенал однодверный \"Нота-11\" - венге/ясень шимо светлый",
-      "customer_price": "7530",
-      "old_price": "12550",
+      "customer_price": "7946",
+      "old_price": "13240",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -397,8 +433,8 @@
     {
       "source_url": "https://yourroom.ru/products/detskaya-krovat-yunior-9-18-mdf-belyj-glyanets--yasen-svetlyj-pravyj",
       "name": "Кровать детская \"Юниор-9\" 0,8*1,8 м - Белый глянец / Ясень шимо светлый (правый)",
-      "customer_price": "15503",
-      "old_price": "23850",
+      "customer_price": "16359",
+      "old_price": "25170",
       "manufacturer": "Регион 058",
       "category_path": [
         "Детская мебель",
@@ -508,8 +544,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-loft-16m09m",
       "name": "Модульная кухня \"Лофт\" 1,6*0,9м - Дуб крафт табачный + низ Графит",
-      "customer_price": "29783",
-      "old_price": "39710",
+      "customer_price": "31350",
+      "old_price": "41800",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -688,8 +724,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-loft-1214m-ugol-universalnyj",
       "name": "Модульная кухня \"Лофт\" 1,2*1,4м - Дуб крафт табачный + низ Графит",
-      "customer_price": "28690",
-      "old_price": "35860",
+      "customer_price": "30200",
+      "old_price": "37750",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -759,8 +795,8 @@
     {
       "source_url": "https://yourroom.ru/products/gostinaya-orkhideya-skandinavskij-dub-belyj--venge",
       "name": "Гостиная \"Орхидея\" - Венге / Скандинавский дуб белый",
-      "customer_price": "42644",
-      "old_price": "60920",
+      "customer_price": "45000",
+      "old_price": "64290",
       "manufacturer": "Регион 058",
       "category_path": [
         "Гостиные",
@@ -796,8 +832,8 @@
     {
       "source_url": "https://yourroom.ru/products/prikhozhaya-kseniya-2-ldsp-bez-otdelki-vengeyasen-shimo-svetlyj",
       "name": "Прихожая \"Ксения-2\" - Венге / Ясень Шимо светлый",
-      "customer_price": "10987",
-      "old_price": "16900",
+      "customer_price": "11594",
+      "old_price": "17840",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для прихожей",
@@ -827,8 +863,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhstvorchatyj-2-ldsp-yasen-shimo-temnyjyasen-shimo-svetlyj",
       "name": "Шкаф двустворчатый №2 ЛДСП - Ясень шимо темный / Ясень шимо светлый",
-      "customer_price": "10100",
-      "old_price": "13470",
+      "customer_price": "10658",
+      "old_price": "14210",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -1026,8 +1062,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-venetsiya-18m",
       "name": "Модульная кухня \"Венеция\" 1,8м - Ясень патина",
-      "customer_price": "32110",
-      "old_price": "43390",
+      "customer_price": "33800",
+      "old_price": "45680",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -1057,8 +1093,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-venetsiya-16m-14-m-s",
       "name": "Модульная угловая кухня \"Венеция\" 1,6*1,4м - Ясень патина",
-      "customer_price": "42484",
-      "old_price": "53780",
+      "customer_price": "44720",
+      "old_price": "56610",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -1368,8 +1404,8 @@
     {
       "source_url": "https://yourroom.ru/products/stol-zhurnalnyj-zhs-2-dub-kraft-belyj",
       "name": "Стол журнальный ЖС №2 - дуб крафт белый",
-      "customer_price": "4688",
-      "old_price": "7210",
+      "customer_price": "4947",
+      "old_price": "7610",
       "manufacturer": "Регион 058",
       "category_path": [
         "Столы",
@@ -1457,8 +1493,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-detskaya-delfin-6-mdf-16m-latte-p",
       "name": "Кровать детская \"Дельфин-6\" 0,8*1,6 м - Латте глянец / Ясень шимо светлый (правый)",
-      "customer_price": "14254",
-      "old_price": "19010",
+      "customer_price": "15041",
+      "old_price": "20050",
       "manufacturer": "Регион 058",
       "category_path": [
         "Детская мебель",
@@ -1492,8 +1528,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-detskaya-delfin-6-mdf-18m-latte-lkv",
       "name": "Кровать детская \"Дельфин-6\" 0,8*1,8 м - Латте глянец / Ясень шимо светлый (левый)",
-      "customer_price": "15566",
-      "old_price": "20750",
+      "customer_price": "16426",
+      "old_price": "21900",
       "manufacturer": "Регион 058",
       "category_path": [
         "Детская мебель",
@@ -1786,8 +1822,8 @@
     {
       "source_url": "https://yourroom.ru/products/tsentralnaya-sektsiya-nota-28",
       "name": "Центральная секция \"Нота-28\" - Дуб скандинавский бежевый+Графит / дуб эндгрейн+Ателье темный",
-      "customer_price": "27367",
-      "old_price": "36490",
+      "customer_price": "28879",
+      "old_price": "38510",
       "manufacturer": "Регион 058",
       "category_path": [
         "Гостиные",
@@ -2042,8 +2078,8 @@
     {
       "source_url": "https://yourroom.ru/products/kukhnya-gretsiya-20-m",
       "name": "Кухонный гарнитур \"Греция\" 2,0м без стекла - Белый (корпус) / Белый матовый (фасад)",
-      "customer_price": "28595",
-      "old_price": "40270",
+      "customer_price": "30100",
+      "old_price": "42390",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -2068,8 +2104,8 @@
     {
       "source_url": "https://yourroom.ru/products/kukhnya-velvet-20-m-grafit-softach",
       "name": "Кухонный гарнитур \"Вельвет\" 2,0м без стекла - Сонома (корпус) / Графит софтач (фасад)",
-      "customer_price": "30685",
-      "old_price": "42620",
+      "customer_price": "32300",
+      "old_price": "44860",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -2100,8 +2136,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-karina-3-0920-m-sandal-svetlyj",
       "name": "Кровать \"Карина-3\" 0,9*2,0 м - сандал светлый",
-      "customer_price": "10263",
-      "old_price": "13680",
+      "customer_price": "10830",
+      "old_price": "14440",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -2166,8 +2202,8 @@
     {
       "source_url": "https://yourroom.ru/products/kompyuternyj-stol-sk-16-artvud",
       "name": "Компьютерный стол \"СК-16\" - артвуд светлый/артвуд темный",
-      "customer_price": "8471",
-      "old_price": "13030",
+      "customer_price": "8939",
+      "old_price": "13750",
       "manufacturer": "Регион 058",
       "category_path": [
         "Столы",
@@ -2426,67 +2462,6 @@
       ]
     },
     {
-      "source_url": "https://yourroom.ru/products/tumba-napolnaya-tm-003-granzh-belyj-soft-matovyj",
-      "name": "Тумба напольная \"ГРАНЖ\" ТМ-003 - Белый (Шагрень) / Белый Софт матовый",
-      "customer_price": "5910",
-      "old_price": "9090",
-      "manufacturer": "МК Стиль",
-      "category_path": [
-        "Гостиные",
-        "ТВ-тумбы"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "1202x416x370 мм",
-        "Вес": "31 кг",
-        "Объем": "0.07 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Ширина ТВ ниши": "1200",
-        "Высота ТВ ниши": "2000",
-        "Нужна ли сборка": "Да",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый (Шагрень) / Белый Софт матовый"
-      },
-      "description_preview": "Описание: Тумба на регулируемых опорах. Внутреннее пространство поделено перегородкой на два равныхотделения. Накладной фасад МДФ с фрезеровкой. Без ручки. Открывание/закрывание при помощи отталкивателя — путём нажатия на фасад. Откидная створка на секретерных газ-лифтах. Не имеет видимых снаружи крепежей. Цветовая гамма: - Корпус - Белый (Шагрень) / Фасад МДФ - матовая Белый Софт - Корпус - Серый Шифер / Фасад МДФ - матовая Графит Софт - Кромка – в цвет корпуса. - Задняя стенка - Белая Использу",
-      "source_images": 5,
-      "clean_images": 5,
-      "clean_modes": [
-        "clean_original",
-        "clean_original",
-        "clean_original",
-        "clean_alternate",
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/tumba-podvesnaya-tm-002-granzh-belyj-soft-matovyj",
-      "name": "Тумба подвесная \"ГРАНЖ\" ТМ-002 - Белый (Шагрень) / Белый Софт матовый",
-      "customer_price": "4849",
-      "old_price": "6470",
-      "manufacturer": "МК Стиль",
-      "category_path": [
-        "Гостиные",
-        "ТВ-тумбы"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "902x416x350 мм",
-        "Вес": "31 кг",
-        "Объем": "0.05 м³",
-        "Материал каркаса": "ЛДСП",
-        "Высота ТВ ниши": "2200",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый (Шагрень) / Белый Софт матовый"
-      },
-      "description_preview": "Навес мебели в стоимость сборки не входит. Описание: Тумба подвесная на регулируемых навесах. Внутреннее пространство цельное, без перегородок и полок. Накладной фасад МДФ с фрезеровкой. Без ручки. Открывание/закрывание при помощи отталкивателя — путём нажатия на фасад. Откидная створка на секретерных газ-лифтах. Не имеет видимых снаружи крепежей. Цветовая гамма: - Корпус - Белый (Шагрень) / Фасад МДФ - матовая Белый Софт - Корпус - Серый Шифер / Фасад МДФ - матовая Графит Софт - Кромка – в цвет",
-      "source_images": 3,
-      "clean_images": 3,
-      "clean_modes": [
-        "clean_original",
-        "clean_original",
-        "clean_original"
-      ]
-    },
-    {
       "source_url": "https://yourroom.ru/products/stol-briz-1-s-yashchikami",
       "name": "Стол \"Бриз-1\" с ящиками - Ясень Анкор светлый",
       "customer_price": "12506",
@@ -2582,8 +2557,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-kupe-alyans-3-shimo-venge-2",
       "name": "Шкаф-купе \"Альянс-3\" NEW - Графит",
-      "customer_price": "32618",
-      "old_price": "81550",
+      "customer_price": "34526",
+      "old_price": "86320",
       "manufacturer": "Регион-58 (склад)",
       "category_path": [
         "Шкафы-купе"
@@ -2617,8 +2592,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-08-m-grafit",
       "name": "Шкаф двухдверный \"Бастион\" 0,8 м - графит",
-      "customer_price": "9944",
-      "old_price": "22100",
+      "customer_price": "10525",
+      "old_price": "23390",
       "manufacturer": "Регион-58 (склад)",
       "category_path": [
         "Распашные шкафы",
@@ -2649,8 +2624,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-1-akatsiya-g",
       "name": "Комод \"Акация\" №1 - графит",
-      "customer_price": "6335",
-      "old_price": "8800",
+      "customer_price": "6685",
+      "old_price": "9280",
       "manufacturer": "Регион 058",
       "category_path": [
         "Комоды"
@@ -2679,8 +2654,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-2-akatsiya-g",
       "name": "Комод \"Акация\" №2 - графит",
-      "customer_price": "9892",
-      "old_price": "13190",
+      "customer_price": "10438",
+      "old_price": "13920",
       "manufacturer": "Регион 058",
       "category_path": [
         "Комоды"
@@ -2711,8 +2686,8 @@
     {
       "source_url": "https://yourroom.ru/products/zerkalo-pion",
       "name": "Зеркало \"Пион\" - сандал светлый",
-      "customer_price": "4552",
-      "old_price": "5360",
+      "customer_price": "4804",
+      "old_price": "5650",
       "manufacturer": "Регион 058",
       "category_path": [
         "Спальни",
@@ -2820,8 +2795,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-3-kh-stvorchatyj-2-yasen-shimo-svetlyjtemnyj",
       "name": "Шкаф трехдверный №2 без зеркала - ясень шимо темный / ясень шимо светлый",
-      "customer_price": "14960",
-      "old_price": "24930",
+      "customer_price": "15786",
+      "old_price": "26310",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -2852,8 +2827,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-3-kh-stvorchatyj-2-yasen-shimo-svetlyj",
       "name": "Шкаф трехдверный №2 без зеркала - ясень шимо светлый",
-      "customer_price": "14960",
-      "old_price": "24930",
+      "customer_price": "15786",
+      "old_price": "26310",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -2907,8 +2882,8 @@
     {
       "source_url": "https://yourroom.ru/products/kukhnya-gretsiya-25-m-g",
       "name": "Кухонный гарнитур \"Греция\" 2,5м без стекла - Сонома (корпус) / Графит софтач (фасад)",
-      "customer_price": "40594",
-      "old_price": "53410",
+      "customer_price": "42730",
+      "old_price": "56220",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -3044,8 +3019,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-vizit-9-artvud",
       "name": "Пенал \"Визит-9\" 0,4 м - артвуд темный/артвуд светлый",
-      "customer_price": "7665",
-      "old_price": "13940",
+      "customer_price": "8089",
+      "old_price": "14710",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -3074,8 +3049,8 @@
     {
       "source_url": "https://yourroom.ru/products/veshalka-s-zerkalom-vizit-9-artvud",
       "name": "Вешалка с зеркалом \"Визит-9\" - артвуд темный/артвуд светлый",
-      "customer_price": "12706",
-      "old_price": "15880",
+      "customer_price": "13408",
+      "old_price": "16760",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для прихожей",
@@ -3194,8 +3169,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhstvorchatyj-2-ldsp-yasen",
       "name": "Шкаф двустворчатый №2 ЛДСП - Ясень шимо светлый",
-      "customer_price": "10100",
-      "old_price": "13470",
+      "customer_price": "10658",
+      "old_price": "14210",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -3249,8 +3224,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-pion-2-2-2",
       "name": "Пенал \"Пион\" с ящиками (Улучшенная фурнитура) - сандал светлый",
-      "customer_price": "15274",
-      "old_price": "30550",
+      "customer_price": "16118",
+      "old_price": "32240",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -3315,8 +3290,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-1-nota-11-ldsp-2",
       "name": "Шкаф двустворчатый \"Нота-11\" №1 с ящиками (Улучшенная фурнитура) - венге/ясень шимо светлый",
-      "customer_price": "14436",
-      "old_price": "19250",
+      "customer_price": "15234",
+      "old_price": "20310",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -3381,8 +3356,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bergen-shk-1200-2-2",
       "name": "Шкаф \"Берген\" ШК-1200 с зеркалами - Белое дерево",
-      "customer_price": "22959",
-      "old_price": "28700",
+      "customer_price": "24332",
+      "old_price": "30420",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -3547,8 +3522,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-2-nota-11-ldsp-2-2",
       "name": "Шкаф трехстворчатый \"Нота-11\" №2 с ящиками (Улучшенная фурнитура) - венге/ясень шимо светлый",
-      "customer_price": "20192",
-      "old_price": "33650",
+      "customer_price": "21308",
+      "old_price": "35510",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -3581,8 +3556,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-16-m-belyjdub",
       "name": "Шкаф четырехдверный \"Бастион\" 1,6 м - Дуб крафт золотой / Белый древесный",
-      "customer_price": "16570",
-      "old_price": "22090",
+      "customer_price": "17539",
+      "old_price": "23390",
       "manufacturer": "Регион-58 (склад)",
       "category_path": [
         "Распашные шкафы",
@@ -3771,8 +3746,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-12-m-s-antresolyu-belyj-dub",
       "name": "Шкаф трехдверный \"Бастион\" с антресолью 1,2 м - Дуб крафт золотой / Белый древесный",
-      "customer_price": "15664",
-      "old_price": "26110",
+      "customer_price": "16580",
+      "old_price": "27630",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -3801,8 +3776,8 @@
     {
       "source_url": "https://yourroom.ru/products/stol-tualetnyj-ronda-st-01-s-podsvetkoj-venge",
       "name": "Стол туалетный \"Ронда\" СТ-01 с подсветкой - венге / дуб белфорд",
-      "customer_price": "7319",
-      "old_price": "14640",
+      "customer_price": "8165",
+      "old_price": "16330",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Спальни",
@@ -3821,7 +3796,7 @@
         "Страна-производитель": "Россия",
         "Цвет": "венге / дуб белфорд"
       },
-      "description_preview": "Туалетный столик для модульной системы Ронда - Ручки пластик - Выдвижные ящики на роликовых направляющих - Зеркало 4 мм -В комплект входит светодиодная подсветка для зеркала -2 шт Внимание! Монтаж зеркал/стекол к фасадам производится самостоятельно ОБЯЗАТЕЛЬНО для крепления необходимо использовать монтажный клей «жидкие гвозди»",
+      "description_preview": "Состав комплекта Стол туалетный \"Ронда\" СТ-01 венге / дуб белфорд В комплекте 1 шт Габариты ШхГхВ (мм) 800 x 436 x 1445 Подсветка для зеркала В комплекте 1 шт Габариты ШхГхВ (мм) 25 x 25 x 2 Туалетный столик для модульной системы Ронда - Ручки пластик - Выдвижные ящики на роликовых направляющих - Зеркало 4 мм -В комплект входит светодиодная подсветка для зеркала -2 шт Внимание! Монтаж зеркал/стекол к фасадам производится самостоятельно ОБЯЗАТЕЛЬНО для крепления необходимо использовать монтажный ",
       "source_images": 4,
       "clean_images": 4,
       "clean_modes": [
@@ -3905,8 +3880,8 @@
     {
       "source_url": "https://yourroom.ru/products/kukhnya-masha-2-16m-belyj-2-2-2",
       "name": "Кухонный гарнитур \"Маша-2\" 1,6м со столешницей (Улучшенная фурнитура) - венге / дуб крафт белый",
-      "customer_price": "24564",
-      "old_price": "33650",
+      "customer_price": "28274",
+      "old_price": "38730",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -4251,8 +4226,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-nord-shk02-800-s-zerkalami-dub-sonoma",
       "name": "Шкаф двустворчатый \"Норд\" ШК02-800 с зеркалами - дуб сонома",
-      "customer_price": "18632",
-      "old_price": "31050",
+      "customer_price": "23885",
+      "old_price": "39810",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -4282,8 +4257,8 @@
     {
       "source_url": "https://yourroom.ru/products/polka-nord-line-pl03-1200",
       "name": "Полка Норд Line ПЛ03-1200 - дуб сонома / софт пломбир line",
-      "customer_price": "5845",
-      "old_price": "12180",
+      "customer_price": "6551",
+      "old_price": "13650",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -4311,8 +4286,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-berk-12-uluchshennaya-furnitura-artvud-svetlyjtemnyj",
       "name": "Комод \"Берк-12\" (Улучшенная фурнитура) - артвуд темный / артвуд светлый",
-      "customer_price": "14683",
-      "old_price": "26700",
+      "customer_price": "15495",
+      "old_price": "28170",
       "manufacturer": "Регион 058",
       "category_path": [
         "Комоды"
@@ -4345,8 +4320,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-berk-12-uluchshennaya-furnitura-belyj-drevesnyj",
       "name": "Комод \"Берк-12\" (Улучшенная фурнитура) - Белый древесный",
-      "customer_price": "13489",
-      "old_price": "20750",
+      "customer_price": "14234",
+      "old_price": "21900",
       "manufacturer": "Регион 058",
       "category_path": [
         "Комоды"
@@ -4729,8 +4704,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-prikrovatnaya-astra-belyj-softach--belyj-sonoma-2",
       "name": "Тумба прикроватная \"Астра\" - Дуб сонома, Белый / Белый глянец, Без подсветки",
-      "customer_price": "5358",
-      "old_price": "7880",
+      "customer_price": "5654",
+      "old_price": "8310",
       "manufacturer": "Регион 058",
       "category_path": [
         "Спальни",
@@ -4763,8 +4738,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-uglovoj-bastion-belyj-drevesnyj--belyj-drevesnyj",
       "name": "Шкаф угловой \"Бастион\" - Белый древесный",
-      "customer_price": "12815",
-      "old_price": "32040",
+      "customer_price": "13523",
+      "old_price": "33810",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -4793,8 +4768,8 @@
     {
       "source_url": "https://yourroom.ru/products/stoleshnitsa-kastillo-temnyj-h26-mm-800",
       "name": "Столешница Кастилло темный (h26 мм) - 800 мм",
-      "customer_price": "2344",
-      "old_price": "2600",
+      "customer_price": "2473",
+      "old_price": "2750",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -4817,8 +4792,8 @@
     {
       "source_url": "https://yourroom.ru/products/stoleshnitsa-kastillo-temnyj-h26-mm-1000",
       "name": "Столешница Кастилло темный (h26 мм) - 1000 мм",
-      "customer_price": "2968",
-      "old_price": "3300",
+      "customer_price": "3132",
+      "old_price": "3480",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -4841,8 +4816,8 @@
     {
       "source_url": "https://yourroom.ru/products/stoleshnitsa-kastillo-temnyj-h26-mm-3000",
       "name": "Столешница Кастилло темный (h26 мм) - 3000 мм",
-      "customer_price": "8932",
-      "old_price": "9920",
+      "customer_price": "9426",
+      "old_price": "10470",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -4865,8 +4840,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-detskaya-delfin-2-0816-m-garvish--belyj-drevesnyj",
       "name": "Кровать детская \"Дельфин-2\" 0,8*1,6 м - Гарвиш / Белый древесный",
-      "customer_price": "11919",
-      "old_price": "17030",
+      "customer_price": "12577",
+      "old_price": "17970",
       "manufacturer": "Регион 058",
       "category_path": [
         "Детская мебель",
@@ -4901,8 +4876,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-detskaya-delfin-2-0816-m-fistashka--belyj-drevesnyj",
       "name": "Кровать детская \"Дельфин-2\" 0,8*1,6 м - Фисташка / Белый древесный",
-      "customer_price": "11919",
-      "old_price": "17030",
+      "customer_price": "12577",
+      "old_price": "17970",
       "manufacturer": "Регион 058",
       "category_path": [
         "Детская мебель",
@@ -4937,8 +4912,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-1-astra-s-podsvetkoj-belyj-softach--belyj-sonoma",
       "name": "Комод \"Астра\" №1 - Дуб сонома, Белый / Белый глянец, Подсветка",
-      "customer_price": "12317",
-      "old_price": "17600",
+      "customer_price": "12998",
+      "old_price": "18570",
       "manufacturer": "Регион 058",
       "category_path": [
         "Комоды"
@@ -4998,8 +4973,8 @@
     {
       "source_url": "https://yourroom.ru/products/tsentralnaya-sektsiya-nota-11-uluchshennaya-furnitura-vengeyasen-shimo-svetlyj",
       "name": "Центральная секция \"Нота-11\" (Улучшенная фурнитура) - венге/ясень шимо светлый",
-      "customer_price": "21093",
-      "old_price": "29300",
+      "customer_price": "22258",
+      "old_price": "30910",
       "manufacturer": "Регион 058",
       "category_path": [
         "Гостиные",
@@ -5033,8 +5008,8 @@
     {
       "source_url": "https://yourroom.ru/products/kukhonnyj-garnitur-milena-20-m-makiato",
       "name": "Кухонный гарнитур \"Милена\" 2,0 м - Макиато",
-      "customer_price": "37676",
-      "old_price": "48300",
+      "customer_price": "41390",
+      "old_price": "53060",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -5073,8 +5048,8 @@
     {
       "source_url": "https://yourroom.ru/products/stenka-makarena-4-uluchshennaya-furnitura-venge--yasen-shimo-svetlyj",
       "name": "Стенка \"Макарена-4\" (Улучшенная фурнитура) - Венге / Ясень Шимо светлый",
-      "customer_price": "30600",
-      "old_price": "51000",
+      "customer_price": "32290",
+      "old_price": "53820",
       "manufacturer": "Регион 058",
       "category_path": [
         "Гостиные",
@@ -5267,8 +5242,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-dvukhyarusnaya-bembi-11-0818-m-garvish",
       "name": "Кровать двухъярусная \"Бемби-11\" 0,8*1,8 м - Гарвиш / Дуб Крафт белый",
-      "customer_price": "31648",
-      "old_price": "48690",
+      "customer_price": "33396",
+      "old_price": "51380",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -5303,8 +5278,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-dvukhyarusnaya-bembi-11-0818-m-lajm",
       "name": "Кровать двухъярусная \"Бемби-11\" 0,8*1,8 м - Лайм глянец / Дуб Крафт белый",
-      "customer_price": "31648",
-      "old_price": "48690",
+      "customer_price": "33396",
+      "old_price": "51380",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -5339,8 +5314,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-dvukhyarusnaya-bembi-11-0818-m-tsitrus",
       "name": "Кровать двухъярусная \"Бемби-11\" 0,8*1,8 м - Цитрус глянец / Дуб Крафт белый",
-      "customer_price": "31648",
-      "old_price": "48690",
+      "customer_price": "33396",
+      "old_price": "51380",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -5375,8 +5350,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-dvukhyarusnaya-bembi-11-0818-m-obrieta",
       "name": "Кровать двухъярусная \"Бемби-11\" 0,8*1,8 м - Обриета / Дуб Крафт белый",
-      "customer_price": "31648",
-      "old_price": "48690",
+      "customer_price": "33396",
+      "old_price": "51380",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -5411,8 +5386,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-dvukhyarusnaya-bembi-11-0818-m-erinus",
       "name": "Кровать двухъярусная \"Бемби-11\" 0,8*1,8 м - Эринус / Дуб Крафт белый",
-      "customer_price": "31648",
-      "old_price": "48690",
+      "customer_price": "33396",
+      "old_price": "51380",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -5447,8 +5422,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-dvukhyarusnaya-bembi-11-0818-m-latte-glyanets",
       "name": "Кровать двухъярусная \"Бемби-11\" 0,8*1,8 м - Латте глянец / Ясень шимо светлый",
-      "customer_price": "31648",
-      "old_price": "48690",
+      "customer_price": "33396",
+      "old_price": "51380",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -5620,8 +5595,8 @@
     {
       "source_url": "https://yourroom.ru/products/gostinaya-gamma-17-uluchshennaya-furnitura-venge--latte-glyanets",
       "name": "Гостиная \"Гамма-17\" (Улучшенная фурнитура) - Венге / Латте глянец",
-      "customer_price": "35542",
-      "old_price": "47390",
+      "customer_price": "37506",
+      "old_price": "50010",
       "manufacturer": "Регион 058",
       "category_path": [
         "Гостиные",
@@ -5726,8 +5701,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-2-kh-yarusnaya-bembi-0820-m-belyj-drevesnyj--myata",
       "name": "Кровать 2-х ярусная \"Бемби\" 0,8*2,0 м - Левая, Белый древесный / Мята",
-      "customer_price": "26471",
-      "old_price": "33090",
+      "customer_price": "27934",
+      "old_price": "34920",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -5760,8 +5735,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-2-kh-yarusnaya-bembi-0820-m-belyj-drevesnyj--limon-matovyj",
       "name": "Кровать 2-х ярусная \"Бемби\" 0,8*2,0 м - Левая, Белый древесный / Лимон матовый",
-      "customer_price": "26471",
-      "old_price": "47270",
+      "customer_price": "27934",
+      "old_price": "49880",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -6082,8 +6057,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-2-kh-yarusnaya-bembi-0820-m-yasen-shimo-svetlyj--fistashka",
       "name": "Кровать 2-х ярусная \"Бемби\" 0,8*2,0 м - Левая, Ясень шимо светлый / Фисташка",
-      "customer_price": "26471",
-      "old_price": "41360",
+      "customer_price": "27934",
+      "old_price": "43650",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -6116,8 +6091,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-2-kh-yarusnaya-bembi-0820-m-2-2",
       "name": "Кровать 2-х ярусная \"Бемби\" 0,8*2,0 м - Левая, Ясень шимо светлый / Темно-синий металлик",
-      "customer_price": "26471",
-      "old_price": "34830",
+      "customer_price": "27934",
+      "old_price": "36760",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -6150,8 +6125,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-2-kh-yarusnaya-bembi-0820-m-yasen-shimo-svetlyj--apelsin-metallik",
       "name": "Кровать 2-х ярусная \"Бемби\" 0,8*2,0 м - Левая, Ясень шимо светлый / Апельсин металлик",
-      "customer_price": "26471",
-      "old_price": "31510",
+      "customer_price": "27934",
+      "old_price": "33250",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -6256,8 +6231,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-uglovoj-bastion-uluchshennaya-furnitura-dub-kraft-zolotoj",
       "name": "Шкаф угловой \"Бастион\" (Улучшенная фурнитура) - Дуб крафт золотой",
-      "customer_price": "13469",
-      "old_price": "33670",
+      "customer_price": "14213",
+      "old_price": "35530",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -6450,8 +6425,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-08-m-s-antresolyu-kashemir",
       "name": "Шкаф двухдверный \"Бастион\" с антресолью 0,8 м - кашемир",
-      "customer_price": "12911",
-      "old_price": "17210",
+      "customer_price": "13666",
+      "old_price": "18220",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -6513,8 +6488,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bergen-shk-1600-beloe-derevo-s-zerkalami-uluchshennaya-furnitura",
       "name": "Шкаф четырехдверный \"Берген\" ШК-1600 с зеркалами (Улучшенная фурнитура) - Белое дерево",
-      "customer_price": "29626",
-      "old_price": "65840",
+      "customer_price": "32677",
+      "old_price": "72620",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -7319,8 +7294,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-astra-1-uluchshennaya-furnitura-dub-sonoma-belyj--belyj-glyanets-bez-podsvetki",
       "name": "Пенал \"Астра\" №1 (Улучшенная фурнитура) - Дуб сонома, Белый / Белый глянец, Без подсветки",
-      "customer_price": "13186",
-      "old_price": "20290",
+      "customer_price": "13915",
+      "old_price": "21410",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -7352,8 +7327,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-astra-2-uluchshennaya-furnitura-dub-sonoma-belyj--belyj-glyanets-podsvetka",
       "name": "Шкаф трехдверный \"Астра\" №2 с ящиками (Улучшенная фурнитура) - Дуб сонома, Белый / Белый глянец, Подсветка",
-      "customer_price": "31331",
-      "old_price": "62660",
+      "customer_price": "33062",
+      "old_price": "66120",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -7617,8 +7592,8 @@
     {
       "source_url": "https://yourroom.ru/products/kukhnya-bosko-2-16m-uluchshennaya-furnitura-dub-kraft-tabachnyj",
       "name": "Кухонный гарнитур \"Боско\" №2 1,6м со стеклом (Улучшенная фурнитура) - дуб крафт табачный",
-      "customer_price": "24570",
-      "old_price": "30710",
+      "customer_price": "25863",
+      "old_price": "32330",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -7647,8 +7622,8 @@
     {
       "source_url": "https://yourroom.ru/products/kukhnya-loft-20-m-uluchshennaya-furnitura-belyj--soft-tach-grafit",
       "name": "Кухонный гарнитур \"Лофт\" 2,0м без стекла (Улучшенная фурнитура) - Белый (корпус) / Белый (верх), Графит софтач (Низ)",
-      "customer_price": "33633",
-      "old_price": "44840",
+      "customer_price": "35403",
+      "old_price": "47200",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -7711,8 +7686,8 @@
     {
       "source_url": "https://yourroom.ru/products/kukhnya-nastya-20-m-uluchshennaya-furnitura-dub-kraft-tabachnyj--briz",
       "name": "Кухонный гарнитур \"Настя\" 2,0м без стекла (Улучшенная фурнитура) - Сонома (корпус) / Дуб крафт табачный, Бриз",
-      "customer_price": "33633",
-      "old_price": "45450",
+      "customer_price": "35403",
+      "old_price": "47840",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -7778,10 +7753,46 @@
       ]
     },
     {
+      "source_url": "https://yourroom.ru/products/kompyuternyj-stol-sk-17-yasen-shimo-temnyjyasen-shimo-svetlyj-2-2-2",
+      "name": "Компьютерный стол \"СК-17\" СЛ - ясень шимо темный/ясень шимо светлый",
+      "customer_price": "6790",
+      "old_price": "11320",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Столы",
+        "Компьютерные столы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1000x550x750 мм",
+        "Вес": "37 кг",
+        "Объем": "0.2 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Тип сборки": "Как на фото",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12 месяцев",
+        "Материал столешницы": "ЛДСП",
+        "Страна-производитель": "Россия",
+        "Цвет": "ясень шимо темный/ясень шимо светлый"
+      },
+      "description_preview": "Стол компьютерный СК-17 удобный и стильный. Тумба с вместительными ящиками. Основной элемент, столешница, имеет классическую прямоугольную форму. Эти элементы делают конструкцию современной и эстетически привлекательной. Данная модель стола будет интересна как для дома, так и для офиса. Компьютерный стол \"СК-17\" с Улучшенной фурнитурой",
+      "source_images": 7,
+      "clean_images": 7,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
       "source_url": "https://yourroom.ru/products/tumba-antero-tb-kashemir-ldsp--shampan-mdf-2",
       "name": "Тумба прикроватная \"Антеро\" ТБ СЛ - Кашемир (ЛДСП) / Шампань (МДФ)",
-      "customer_price": "3490",
-      "old_price": "4650",
+      "customer_price": "3790",
+      "old_price": "5050",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Спальни",
@@ -7842,8 +7853,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-germes-10-m-kashemir",
       "name": "Шкаф двухдверный \"Гермес\" 1,0 м - Кашемир",
-      "customer_price": "15629",
-      "old_price": "15629",
+      "customer_price": "16493",
+      "old_price": "16493",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8045,8 +8056,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-uglovoj-bastion-s-antresolyu-belyj-drevesnyj",
       "name": "Шкаф угловой \"Бастион\" с антресолью - Белый древесный",
-      "customer_price": "17267",
-      "old_price": "43170",
+      "customer_price": "18221",
+      "old_price": "45550",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8109,8 +8120,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-bergen-shk-1200-s-zerkalom-seryj-grafit",
       "name": "Шкаф трехдверный \"Берген\" ШК-1200 с зеркалом - Серый графит",
-      "customer_price": "19008",
-      "old_price": "23760",
+      "customer_price": "19466",
+      "old_price": "24330",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -8138,8 +8149,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-08-m-s-antresolyu-belyj-drevesnyj--belyj-glyanets",
       "name": "Шкаф двухдверный \"Бастион\" с антресолью 0,8 м - Белый древесный / Белый глянец",
-      "customer_price": "12911",
-      "old_price": "28690",
+      "customer_price": "13666",
+      "old_price": "30370",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8171,8 +8182,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-10-m-dub-kraft-zolotoj",
       "name": "Шкаф двухдверный \"Бастион\" 1,0 м - дуб крафт золотой",
-      "customer_price": "11403",
-      "old_price": "11403",
+      "customer_price": "12033",
+      "old_price": "12033",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8201,8 +8212,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-10-m-kashemir",
       "name": "Шкаф двухдверный \"Бастион\" 1,0 м - кашемир",
-      "customer_price": "12281",
-      "old_price": "12281",
+      "customer_price": "12959",
+      "old_price": "12959",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8231,8 +8242,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-10-m-uluchshennaya-furnitura-dub-kraft-zolotoj",
       "name": "Шкаф двухдверный \"Бастион\" 1,0 м (Улучшенная фурнитура) - дуб крафт золотой",
-      "customer_price": "13369",
-      "old_price": "13369",
+      "customer_price": "14108",
+      "old_price": "14108",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8262,8 +8273,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhstvorchatyj-bastion-15m-1-kashemir",
       "name": "Шкаф трехдверный \"Бастион\" №1 1,5 м - кашемир",
-      "customer_price": "15168",
-      "old_price": "25280",
+      "customer_price": "16055",
+      "old_price": "26760",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8324,8 +8335,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-15m-2-kashemir-2",
       "name": "Шкаф трехдверный \"Бастион\" №2 1,5 м (Улучшенная фурнитура) - кашемир",
-      "customer_price": "19040",
-      "old_price": "31730",
+      "customer_price": "20153",
+      "old_price": "33590",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8355,8 +8366,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-20-m-s-antresolyu-grafit-2-2",
       "name": "Шкаф четырехдверный \"Бастион\" с антресолью 2,0 м (Улучшенная фурнитура) - графит",
-      "customer_price": "31359",
-      "old_price": "57020",
+      "customer_price": "33193",
+      "old_price": "60350",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8385,8 +8396,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-20-m-s-antresolyu-dub-kraft-zolotoj--grafit-2",
       "name": "Шкаф четырехдверный \"Бастион\" с антресолью 2,0 м (Улучшенная фурнитура) - дуб крафт золотой / графит",
-      "customer_price": "31359",
-      "old_price": "57020",
+      "customer_price": "33193",
+      "old_price": "60350",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8445,8 +8456,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bastion-10-m-s-antresolyu-dub-kraft-zolotoj--belyj-drevesnyj-2",
       "name": "Шкаф двухдверный \"Бастион\" с антресолью 1,0 м (Улучшенная фурнитура) - дуб крафт золотой / белый древесный",
-      "customer_price": "17363",
-      "old_price": "17363",
+      "customer_price": "18322",
+      "old_price": "18322",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8476,8 +8487,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bergen-shk-400-s-antresolyu-i-zerkalom-seryj-grafit",
       "name": "Шкаф однодверный \"Берген\" ШК-400 с антресолью и зеркалом - Серый графит",
-      "customer_price": "12628",
-      "old_price": "15790",
+      "customer_price": "13086",
+      "old_price": "16360",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -8509,8 +8520,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhstvorchatyj-kord-12m-kashemir",
       "name": "Шкаф трехстворчатый \"Корд\" 1,2м - кашемир",
-      "customer_price": "18263",
-      "old_price": "18263",
+      "customer_price": "19272",
+      "old_price": "19272",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8622,8 +8633,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-bergen-km-1200",
       "name": "Комод \"Берген\" КМ-1200 - Белое дерево",
-      "customer_price": "9837",
-      "old_price": "9837",
+      "customer_price": "10744",
+      "old_price": "10744",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Комоды"
@@ -8837,8 +8848,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-bergen-0820-m-s-osnovaniem-dsp-kr-80-2-2-2",
       "name": "Кровать \"Берген\" 0,8*2,0 м с основанием ДСП (КР-80) - серый графит",
-      "customer_price": "5911",
-      "old_price": "5911",
+      "customer_price": "5997",
+      "old_price": "5997",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Кровати и тахты",
@@ -8911,8 +8922,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-bastion-04-m-belyj-drevesnyj--belyj-glyanets",
       "name": "Антресоль \"Бастион\" 0,4 м - Белый древесный / Белый глянец",
-      "customer_price": "2054",
-      "old_price": "2054",
+      "customer_price": "2168",
+      "old_price": "2168",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -8940,8 +8951,8 @@
     {
       "source_url": "https://yourroom.ru/products/prikhozhaya-bastion-kashemir",
       "name": "Прихожая \"Бастион\" - Кашемир",
-      "customer_price": "11611",
-      "old_price": "11611",
+      "customer_price": "12253",
+      "old_price": "12253",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для прихожей",
@@ -8972,8 +8983,8 @@
     {
       "source_url": "https://yourroom.ru/products/prikhozhaya-bastion-s-antresolyu-dub-kraft-zolotoj",
       "name": "Прихожая \"Бастион\" с антресолью - Дуб крафт золотой",
-      "customer_price": "13883",
-      "old_price": "13883",
+      "customer_price": "14650",
+      "old_price": "14650",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для прихожей",
@@ -9007,8 +9018,8 @@
     {
       "source_url": "https://yourroom.ru/products/prikhozhaya-bastion-s-antresolyu-belyj-drevesnyj",
       "name": "Прихожая \"Бастион\" с антресолью - Белый древесный",
-      "customer_price": "13883",
-      "old_price": "13883",
+      "customer_price": "14650",
+      "old_price": "14650",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для прихожей",
@@ -9042,8 +9053,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-bastion-2-dub-kraft-zolotoj--belyj-drevesnyj",
       "name": "Комод \"Бастион\" №2 - Дуб крафт золотой / Белый древесный",
-      "customer_price": "9122",
-      "old_price": "11400",
+      "customer_price": "9626",
+      "old_price": "12030",
       "manufacturer": "Регион 058",
       "category_path": [
         "Комоды"
@@ -9228,8 +9239,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvustvorchatyj-avis-08-m-dub-endrejn--belyj-softach",
       "name": "Шкаф двухдверный \"Авис\" 0,8 м - Дуб эндгрейн / Белый софтач",
-      "customer_price": "16290",
-      "old_price": "16290",
+      "customer_price": "17190",
+      "old_price": "17190",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9260,8 +9271,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-avis-10-m-dub-kraft-zolotoj--krema",
       "name": "Антресоль \"Авис\" 1,0 м - Дуб крафт золотой / Крема",
-      "customer_price": "4254",
-      "old_price": "4254",
+      "customer_price": "4489",
+      "old_price": "4489",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9289,8 +9300,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-avis-10-m-dub-endrejn--belyj-softach",
       "name": "Антресоль \"Авис\" 1,0 м - Дуб эндгрейн / Белый софтач",
-      "customer_price": "4570",
-      "old_price": "4570",
+      "customer_price": "4823",
+      "old_price": "4823",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9318,8 +9329,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-avis-15-m-1-dub-kraft-zolotoj--sapfir",
       "name": "Шкаф трехдверный \"Авис\" 1,5 м №1 - Дуб крафт золотой / Сапфир",
-      "customer_price": "25955",
-      "old_price": "25955",
+      "customer_price": "27389",
+      "old_price": "27389",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9350,8 +9361,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-avis-16-m-dub-kraft-zolotoj--grafit",
       "name": "Шкаф четырехдверный \"Авис\" 1,6 м - Дуб крафт золотой / Графит",
-      "customer_price": "29684",
-      "old_price": "29684",
+      "customer_price": "31324",
+      "old_price": "31324",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9382,8 +9393,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-avis-16-m-dub-endrejn--belyj-softach",
       "name": "Антресоль \"Авис\" 1,6 м - Дуб эндгрейн / Белый софтач",
-      "customer_price": "7575",
-      "old_price": "7575",
+      "customer_price": "7993",
+      "old_price": "7993",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9411,8 +9422,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-avis-20-m-dub-endrejn--krema",
       "name": "Антресоль \"Авис\" 2,0 м - Дуб эндгрейн / Крема",
-      "customer_price": "9059",
-      "old_price": "9059",
+      "customer_price": "9560",
+      "old_price": "9560",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9440,8 +9451,8 @@
     {
       "source_url": "https://yourroom.ru/products/prikhozhaya-bastion-molochnyj-shokolad",
       "name": "Прихожая \"Бастион\" - Молочный шоколад",
-      "customer_price": "12326",
-      "old_price": "12326",
+      "customer_price": "13007",
+      "old_price": "13007",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для прихожей",
@@ -9472,8 +9483,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-stellazh-floks-dub-kraft-zolotoj--belyj-glyanets",
       "name": "Пенал-стеллаж \"Флокс\" - Дуб крафт золотой / Белый глянец",
-      "customer_price": "5557",
-      "old_price": "5557",
+      "customer_price": "5864",
+      "old_price": "5864",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9532,8 +9543,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-avangard-12-m-chernyj",
       "name": "Шкаф трехдверный \"Авангард\" 1,2 м - Черный",
-      "customer_price": "21340",
-      "old_price": "21340",
+      "customer_price": "22519",
+      "old_price": "22519",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9597,8 +9608,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-kupe-alyans-10-17-m-bez-zerkal-sandal-svetlyj",
       "name": "Шкаф-купе \"Альянс-10\" 1,7 м без зеркал - Сандал светлый",
-      "customer_price": "24372",
-      "old_price": "24372",
+      "customer_price": "25718",
+      "old_price": "25718",
       "manufacturer": "Регион 058",
       "category_path": [
         "Шкафы-купе"
@@ -9627,8 +9638,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-kupe-alyans-10-15-m-bez-zerkal-sandal-svetlyj",
       "name": "Шкаф-купе \"Альянс-10\" 1,5 м без зеркал - Сандал светлый",
-      "customer_price": "22344",
-      "old_price": "22344",
+      "customer_price": "23579",
+      "old_price": "23579",
       "manufacturer": "Регион 058",
       "category_path": [
         "Шкафы-купе"
@@ -9657,8 +9668,8 @@
     {
       "source_url": "https://yourroom.ru/products/yashchiki-dlya-shkafov-bastion-05-m-belyj-drevesnyj",
       "name": "Ящики для шкафов \"Бастион\" 0,5 м - белый древесный",
-      "customer_price": "2806",
-      "old_price": "2806",
+      "customer_price": "2961",
+      "old_price": "2961",
       "manufacturer": "Регион 058",
       "category_path": [
         "Элементы модульных систем",
@@ -9685,8 +9696,8 @@
     {
       "source_url": "https://yourroom.ru/products/yashchiki-dlya-shkafov-bastion-2-15-m-belyj-drevesnyj",
       "name": "Ящики для шкафов \"Бастион\" 1,5м №2 - белый древесный",
-      "customer_price": "2796",
-      "old_price": "2796",
+      "customer_price": "2951",
+      "old_price": "2951",
       "manufacturer": "Регион 058",
       "category_path": [
         "Элементы модульных систем",
@@ -9713,8 +9724,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-stellazh-odnodvernyj-bergen-shk-l-650-s-zerkalom-levyj-seryj-grafit",
       "name": "Шкаф-стеллаж однодверный \"Берген\" ШК Л-650 с зеркалом (левый) - Серый графит",
-      "customer_price": "12186",
-      "old_price": "12186",
+      "customer_price": "12682",
+      "old_price": "12682",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -9745,8 +9756,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-tortsevoj-bergen-pts3ya-300-so-steklom-beloe-derevo--soft-chernyj",
       "name": "Пенал торцевой \"Берген\" ПТС3Я-300 со стеклом - Белое дерево / Софт черный",
-      "customer_price": "15442",
-      "old_price": "15442",
+      "customer_price": "17964",
+      "old_price": "17964",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -9780,8 +9791,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-tortsevoj-bergen-pts3ya-300-so-steklom-kashemir--soft-chernyj",
       "name": "Пенал торцевой \"Берген\" ПТС3Я-300 со стеклом - Кашемир / Софт черный",
-      "customer_price": "16044",
-      "old_price": "16044",
+      "customer_price": "18355",
+      "old_price": "18355",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -9815,8 +9826,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-akatsiya-2-dub-kraft-zolotoj--chernyj-2",
       "name": "Комод \"Акация\" №2 (Улучшенная фурнитура) - Дуб крафт золотой / Черный",
-      "customer_price": "10589",
-      "old_price": "14120",
+      "customer_price": "11174",
+      "old_price": "14900",
       "manufacturer": "Регион 058",
       "category_path": [
         "Комоды"
@@ -9847,8 +9858,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvustvorchatyj-armad-10-m-dub-kraft-zolotoj--belyj-drevesnyj",
       "name": "Шкаф двустворчатый \"Армад\" 1,0 м - Дуб крафт золотой / Белый древесный",
-      "customer_price": "13240",
-      "old_price": "13240",
+      "customer_price": "13972",
+      "old_price": "13972",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9878,8 +9889,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvustvorchatyj-armad-10-m-kashemir",
       "name": "Шкаф двустворчатый \"Армад\" 1,0 м - Кашемир",
-      "customer_price": "15068",
-      "old_price": "15068",
+      "customer_price": "15901",
+      "old_price": "15901",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9910,8 +9921,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-armad-12-m-dub-kraft-zolotoj--grafit",
       "name": "Шкаф трехдверный \"Армад\" 1,2 м - Дуб крафт золотой / Графит",
-      "customer_price": "14679",
-      "old_price": "14679",
+      "customer_price": "15490",
+      "old_price": "15490",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -9940,8 +9951,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-armad-16-m-belyj-drevesnyj",
       "name": "Шкаф четырехдверный \"Армад\" 1,6 м - Белый древесный",
-      "customer_price": "16978",
-      "old_price": "16978",
+      "customer_price": "17916",
+      "old_price": "17916",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -10036,9 +10047,10 @@
         "Цвет": "Графит софт / Дуб Галиано"
       },
       "description_preview": "Кухня \"Астра\" - современная и стильная кухня, которая станет украшением вашего дома. Верхние модули декорированы тонированным стеклом, что придает им элегантный и утонченный вид. Цвет верхних фасадов Графит или Красное дерево. Нижние модули выполнены в цвете Дуб Галиано, что создает гармоничное сочетание с верхними модулями и придает кухне уютный и теплый вид. Ящики на роликовых направляющих обеспечивают удобство и комфорт при использовании. Эта кухня идеально подойдет для тех, кто ценит стиль, ",
-      "source_images": 1,
-      "clean_images": 1,
+      "source_images": 2,
+      "clean_images": 2,
       "clean_modes": [
+        "clean_alternate",
         "clean_alternate"
       ]
     },
@@ -10152,8 +10164,8 @@
     {
       "source_url": "https://yourroom.ru/products/tsentralnaya-sektsiya-kukhni-avrora-2200-dub-sonoma--grafit",
       "name": "Центральная секция кухни \"Аврора\" 2200 - Дуб сонома / Графит",
-      "customer_price": "43529",
-      "old_price": "43529",
+      "customer_price": "45820",
+      "old_price": "45820",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -10186,8 +10198,8 @@
     {
       "source_url": "https://yourroom.ru/products/tsentralnaya-sektsiya-kukhni-avrora-2200-dub-sonoma--belyj-glyanets",
       "name": "Центральная секция кухни \"Аврора\" 2200 - Дуб сонома / Белый глянец",
-      "customer_price": "44726",
-      "old_price": "44726",
+      "customer_price": "47080",
+      "old_price": "47080",
       "manufacturer": "Регион 058",
       "category_path": [
         "Мебель для кухни",
@@ -10501,8 +10513,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-avis-08-m-s-antresolyu-dub-kraft-zolotoj--sapfir",
       "name": "Шкаф двухдверный \"Авис\" 0,8 м с антресолью - Дуб крафт золотой / Сапфир",
-      "customer_price": "19277",
-      "old_price": "19277",
+      "customer_price": "20342",
+      "old_price": "20342",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -10533,8 +10545,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-avis-08-m-s-antresolyu-dub-endgrejn--krema",
       "name": "Шкаф двухдверный \"Авис\" 0,8 м с антресолью - Дуб эндгрейн / Крема",
-      "customer_price": "20145",
-      "old_price": "20145",
+      "customer_price": "21258",
+      "old_price": "21258",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -10565,8 +10577,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-avis-08-m-s-antresolyu-dub-endgrejn--sapfir",
       "name": "Шкаф двухдверный \"Авис\" 0,8 м с антресолью - Дуб эндгрейн / Сапфир",
-      "customer_price": "20308",
-      "old_price": "20308",
+      "customer_price": "21430",
+      "old_price": "21430",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -10597,8 +10609,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-avis-10-m-s-antresolyu-dub-kraft-zolotoj--grafit",
       "name": "Шкаф двухдверный \"Авис\" 1,0 м с антресолью - Дуб крафт золотой / Графит",
-      "customer_price": "22516",
-      "old_price": "22516",
+      "customer_price": "23760",
+      "old_price": "23760",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -10930,8 +10942,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-avis-12-m-s-antresolyu-dub-endrejn--grin",
       "name": "Шкаф трехдверный \"Авис\" 1,2 м с антресолью - Дуб эндгрейн / Грин",
-      "customer_price": "28933",
-      "old_price": "36170",
+      "customer_price": "30531",
+      "old_price": "38160",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -10962,8 +10974,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-avis-12-m-s-antresolyu-dub-endrejn--belyj-softach",
       "name": "Шкаф трехдверный \"Авис\" 1,2 м с антресолью - Дуб эндгрейн / Белый софтач",
-      "customer_price": "28933",
-      "old_price": "36170",
+      "customer_price": "30531",
+      "old_price": "38160",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -10994,8 +11006,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-avis-16-m-s-antresolyu-dub-endrejn--grafit",
       "name": "Шкаф четырехдверный \"Авис\" 1,6 м с антресолью - Дуб эндгрейн / Графит",
-      "customer_price": "39159",
-      "old_price": "48950",
+      "customer_price": "41323",
+      "old_price": "51650",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -11026,8 +11038,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-avis-20-m-s-antresolyu-dub-endrejn--grin",
       "name": "Шкаф четырехдверный \"Авис\" 2,0 м с антресолью - Дуб эндгрейн / Грин",
-      "customer_price": "45748",
-      "old_price": "45748",
+      "customer_price": "48275",
+      "old_price": "48275",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -12839,8 +12851,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-spalnya-akatsiya-1-2-2-2",
       "name": "Модульная спальня \"Акация\" №4 - Кашемир",
-      "customer_price": "52816",
-      "old_price": "96030",
+      "customer_price": "55734",
+      "old_price": "101330",
       "manufacturer": "Регион 058",
       "category_path": [
         "Спальни",
@@ -13395,8 +13407,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-bastion-12-m-chernyj",
       "name": "Антресоль \"Бастион\" 1,2 м - Черный",
-      "customer_price": "4471",
-      "old_price": "5880",
+      "customer_price": "4718",
+      "old_price": "6210",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -13422,8 +13434,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-avangard-16-m-s-antresolyu-dub-kraft-zolotoj",
       "name": "Шкаф четырехдверный \"Авангард\" 1,6 м с антресолью - Дуб крафт золотой",
-      "customer_price": "30327",
-      "old_price": "30327",
+      "customer_price": "32002",
+      "old_price": "32002",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -13456,8 +13468,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-avangard-20-m-s-antresolyu-belyj-drevesnyj",
       "name": "Шкаф четырехдверный \"Авангард\" 2,0 м с антресолью - Белый древесный",
-      "customer_price": "34327",
-      "old_price": "34327",
+      "customer_price": "36223",
+      "old_price": "36223",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -13490,8 +13502,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-avangard-20-m-s-antresolyu-dub-kraft-zolotoj--belyj-drevesnyj",
       "name": "Шкаф четырехдверный \"Авангард\" 2,0 м с антресолью - Дуб крафт золотой / Белый древесный",
-      "customer_price": "34327",
-      "old_price": "34327",
+      "customer_price": "36223",
+      "old_price": "36223",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -14004,8 +14016,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-ankoridzh-dub-kraft-zolotoj--belyj-soft-tach",
       "name": "Шкаф двухдверный \"Анкоридж\" 0,9 м - Дуб крафт золотой / Белый софтач",
-      "customer_price": "19023",
-      "old_price": "22380",
+      "customer_price": "20074",
+      "old_price": "23620",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -14034,8 +14046,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-ankoridzh-dub-kraft-zolotoj--grin",
       "name": "Шкаф двухдверный \"Анкоридж\" 0,9 м - Дуб крафт золотой / Грин",
-      "customer_price": "19023",
-      "old_price": "22380",
+      "customer_price": "20074",
+      "old_price": "23620",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -14064,8 +14076,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-ankoridzh-dub-kraft-zolotoj--sapfir",
       "name": "Шкаф двухдверный \"Анкоридж\" 0,9 м - Дуб крафт золотой / Сапфир",
-      "customer_price": "19349",
-      "old_price": "22760",
+      "customer_price": "20418",
+      "old_price": "24020",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -14094,8 +14106,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-ankoridzh-09-m-dub-endgrejn--grin",
       "name": "Антресоль \"Анкоридж\" 0,9 м - Дуб эндгрейн / Грин",
-      "customer_price": "4462",
-      "old_price": "5250",
+      "customer_price": "4708",
+      "old_price": "5540",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -14123,8 +14135,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-ankoridzh-13-m-dub-kraft-zolotoj--belyj-soft-tach",
       "name": "Антресоль \"Анкоридж\" 1,3 м - Дуб крафт золотой / Белый софтач",
-      "customer_price": "5864",
-      "old_price": "6900",
+      "customer_price": "6188",
+      "old_price": "7280",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -14152,8 +14164,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-ankoridzh-17-m-dub-kraft-zolotoj--krema",
       "name": "Антресоль \"Анкоридж\" 1,7 м - Дуб крафт золотой / Крема",
-      "customer_price": "7267",
-      "old_price": "8550",
+      "customer_price": "7669",
+      "old_price": "9020",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -14286,8 +14298,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-avis-1-dub-endgrejn--sapfir",
       "name": "Комод \"Авис\" №1 - Дуб эндгрейн / Сапфир",
-      "customer_price": "8552",
-      "old_price": "9500",
+      "customer_price": "9025",
+      "old_price": "10030",
       "manufacturer": "Регион 058",
       "category_path": [
         "Комоды"
@@ -14315,8 +14327,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-avis-2-dub-kraft-zolotoj--grafit",
       "name": "Комод \"Авис\" №2 - Дуб крафт золотой / Графит",
-      "customer_price": "14009",
-      "old_price": "15570",
+      "customer_price": "14783",
+      "old_price": "16430",
       "manufacturer": "Регион 058",
       "category_path": [
         "Комоды"
@@ -14344,8 +14356,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-avis-08-m-grafit--grin",
       "name": "Шкаф двухдверный \"Авис\" 0,8 м - Графит / Грин",
-      "customer_price": "16100",
-      "old_price": "16100",
+      "customer_price": "16989",
+      "old_price": "16989",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -14376,8 +14388,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-avis-12-m-grafit--grin",
       "name": "Шкаф трехдверный \"Авис\" 1,2 м - Графит / Грин",
-      "customer_price": "23105",
-      "old_price": "23105",
+      "customer_price": "24381",
+      "old_price": "24381",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -14408,8 +14420,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-avis-20-m-grafit--sapfir",
       "name": "Шкаф четырехдверный \"Авис\" 2,0 м - Графит / Сапфир",
-      "customer_price": "36499",
-      "old_price": "36499",
+      "customer_price": "38515",
+      "old_price": "38515",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -14439,8 +14451,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-avis-10-m-grafit--krema",
       "name": "Антресоль \"Авис\" 1,0 м - Графит / Крема",
-      "customer_price": "4471",
-      "old_price": "4471",
+      "customer_price": "4718",
+      "old_price": "4718",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -14468,8 +14480,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-avis-16-m-grafit--grin",
       "name": "Антресоль \"Авис\" 1,6 м - Графит / Грин",
-      "customer_price": "7331",
-      "old_price": "7331",
+      "customer_price": "7736",
+      "old_price": "7736",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -15394,71 +15406,6 @@
       ]
     },
     {
-      "source_url": "https://yourroom.ru/products/divan-krovat-lavis-dkd-20001-0920-m-s-osnovaniem-ldsp-belyjbelyj-soft-lazur-soft",
-      "name": "Диван-кровать \"Лавис\" ДКД 2000.1 0,9*2,0 м с основанием ЛДСП - Белый/Белый софт-Лазурь софт",
-      "customer_price": "32916",
-      "old_price": "36570",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Кровати и тахты",
-        "Односпальные кровати"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "2032x950x930 мм",
-        "Вес": "100.06 кг",
-        "Объем": "1.77 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Ширина спального места": "900",
-        "Длина спального места": "2000",
-        "Основание": "Настил",
-        "Подъемный механизм": "Нет",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Материал обивки": "Без обивки",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт-Лазурь софт"
-      },
-      "description_preview": "Кровать-диван \"Лавис\" ДКД 2000.1 - это односпальная подростковая тахта с тремя спинками и встроенной системой хранения. Модель входит в состав одноименной модульной детской серии и совмещает функции полноценного спального места ночью и зоны для отдыха или приема гостей днем. Материалы и цветовое исполнение Корпус: выполнен из матового ЛДСП в чистом белом цвете. Рельефные фасады: спинки выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпуска",
-      "source_images": 1,
-      "clean_images": 1,
-      "clean_modes": [
-        "clean_alternate"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/tumba-prikrovatnaya-lavis-td-4001-belyjbelyj-soft",
-      "name": "Тумба прикроватная \"Лавис\" ТД 400.1 - Белый/Белый софт",
-      "customer_price": "5048",
-      "old_price": "5610",
-      "manufacturer": "ДСВ",
-      "category_path": [
-        "Спальни",
-        "Тумбы прикроватные"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "400x385x410 мм",
-        "Вес": "31 кг",
-        "Объем": "0.07 м³",
-        "Материал каркаса": "ЛДСП",
-        "Материал фасада": "МДФ",
-        "Тип направляющих ящиков": "Шариковые",
-        "Нужна ли сборка": "Да",
-        "Срок гарантии, месяцев": "18",
-        "Страна-производитель": "Россия",
-        "Цвет": "Белый/Белый софт"
-      },
-      "description_preview": "Прикроватная тумба \"Ки-Ки\" ТД 400.1 - это маленькая, аккуратная и очень удобная тумбочка с двумя выдвижными ящиками, созданная для детской или подростковой комнаты. Она ставится рядом с кроватью, чтобы у ребенка под рукой всегда было место для мобильного телефона, ночника или любимой книги. Применяемые материалы и палитра Рельефные фасады: ящики выполнены из качественного МДФ и украшены стильной вертикальной фрезеровкой. Богатая палитра: коллекция выпускается в широком разнообразии модных оттенк",
-      "source_images": 3,
-      "clean_images": 3,
-      "clean_modes": [
-        "clean_alternate",
-        "watermark_removed",
-        "clean_alternate"
-      ]
-    },
-    {
       "source_url": "https://yourroom.ru/products/stul-kantsler-2sht-grej-velyur",
       "name": "Стул \"Канцлер\" 2шт. - Грей (велюр)",
       "customer_price": "12301",
@@ -15565,8 +15512,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bastion-04m-s-zerkalom-dub-kraft-zolotoj--grafit",
       "name": "Шкаф однодверный \"Бастион\" 0,4м с зеркалом - Дуб крафт золотой / Графит",
-      "customer_price": "9258",
-      "old_price": "9258",
+      "customer_price": "9770",
+      "old_price": "9770",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -15596,8 +15543,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-bastion-16m-s-zerkalami-dub-kraft-zolotoj--belyj-drevesnyj",
       "name": "Шкаф четырехдверный \"Бастион\" 1,6м с зеркалами - Дуб крафт золотой / Белый древесный",
-      "customer_price": "25974",
-      "old_price": "34630",
+      "customer_price": "27409",
+      "old_price": "36550",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -15681,8 +15628,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bastion-04m-s-zerkalom-i-antresolyu-belyj-drevesnyj--belyj-glyanets",
       "name": "Шкаф однодверный \"Бастион\" 0,4м с зеркалом и антресолью - Белый древесный / Белый глянец",
-      "customer_price": "11313",
-      "old_price": "11313",
+      "customer_price": "11938",
+      "old_price": "11938",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -15713,8 +15660,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bastion-05m-s-zerkalom-i-antresolyu-dub-kraft-zolotoj--grafit",
       "name": "Шкаф однодверный \"Бастион\" 0,5м с зеркалом и антресолью - Дуб крафт золотой / Графит",
-      "customer_price": "13068",
-      "old_price": "13068",
+      "customer_price": "13790",
+      "old_price": "13790",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -15745,8 +15692,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-bastion-08m-s-zerkalami-i-antresolyu-dub-kraft-zolotoj--belyj-drevesnyj",
       "name": "Шкаф двухдверный \"Бастион\" 0,8м с зеркалами и антресолью - Дуб крафт золотой / Белый древесный",
-      "customer_price": "16444",
-      "old_price": "21930",
+      "customer_price": "17352",
+      "old_price": "23140",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -15778,8 +15725,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-bastion-08m-s-zerkalami-i-antresolyu-dub-kraft-zolotoj",
       "name": "Шкаф двухдверный \"Бастион\" 0,8м с зеркалами и антресолью - Дуб крафт золотой",
-      "customer_price": "16444",
-      "old_price": "21930",
+      "customer_price": "17352",
+      "old_price": "23140",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -15811,8 +15758,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-bastion-10m-s-zerkalami-i-antresolyu-belyj-drevesnyj--belyj-glyanets",
       "name": "Шкаф двухдверный \"Бастион\" 1,0м с зеркалами и антресолью - Белый древесный / Белый глянец",
-      "customer_price": "21150",
-      "old_price": "28200",
+      "customer_price": "22318",
+      "old_price": "29760",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -15844,8 +15791,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-bastion-12m-s-zerkalami-i-antresolyu-kashemir",
       "name": "Шкаф трехдверный \"Бастион\" 1,2м с зеркалами и антресолью - Кашемир",
-      "customer_price": "25358",
-      "old_price": "33810",
+      "customer_price": "26759",
+      "old_price": "35680",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -15877,8 +15824,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-bastion-15m-1-s-zerkalami-i-antresolyu-belyj-drevesnyj",
       "name": "Шкаф трехдверный \"Бастион\" 1,5м №1 с зеркалами и антресолью - Белый древесный",
-      "customer_price": "25736",
-      "old_price": "42890",
+      "customer_price": "27241",
+      "old_price": "45400",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -15910,8 +15857,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-avis-1420-m-s-osnovaniem-ldsp-dub-kraft-zolotoj--krema",
       "name": "Кровать \"Авис\" 1,4*2,0 м с основанием ЛДСП - Дуб крафт золотой / Крема",
-      "customer_price": "12561",
-      "old_price": "14780",
+      "customer_price": "13255",
+      "old_price": "15590",
       "manufacturer": "Регион 058",
       "category_path": [
         "Кровати и тахты",
@@ -15943,8 +15890,8 @@
     {
       "source_url": "https://yourroom.ru/products/prikrovatnaya-tumba-avis-zolotye-ruchki-dub-endgrejn--grin",
       "name": "Прикроватная тумба \"Авис\" Золотые ручки - Дуб эндгрейн / Грин",
-      "customer_price": "3611",
-      "old_price": "4250",
+      "customer_price": "3810",
+      "old_price": "4480",
       "manufacturer": "Регион 058",
       "category_path": [
         "Спальни",
@@ -15972,8 +15919,8 @@
     {
       "source_url": "https://yourroom.ru/products/prikrovatnaya-tumba-avis-zolotye-ruchki-dub-endgrejn--grafit",
       "name": "Прикроватная тумба \"Авис\" Золотые ручки - Дуб эндгрейн / Графит",
-      "customer_price": "3611",
-      "old_price": "4250",
+      "customer_price": "3810",
+      "old_price": "4480",
       "manufacturer": "Регион 058",
       "category_path": [
         "Спальни",
@@ -16001,8 +15948,8 @@
     {
       "source_url": "https://yourroom.ru/products/prikrovatnaya-tumba-avis-zolotye-ruchki-dub-kraft-zolotoj--krema",
       "name": "Прикроватная тумба \"Авис\" Золотые ручки - Дуб крафт золотой / Крема",
-      "customer_price": "3376",
-      "old_price": "3970",
+      "customer_price": "3562",
+      "old_price": "4190",
       "manufacturer": "Регион 058",
       "category_path": [
         "Спальни",
@@ -16030,8 +15977,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-pod-tv-avis-chernye-ruchki-dub-endgrejn--grin",
       "name": "Тумба под ТВ \"Авис\" Черные ручки - Дуб эндгрейн / Грин",
-      "customer_price": "12181",
-      "old_price": "14330",
+      "customer_price": "12854",
+      "old_price": "15120",
       "manufacturer": "Регион 058",
       "category_path": [
         "Гостиные",
@@ -16061,8 +16008,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-pod-tv-avis-chernye-ruchki-dub-kraft-zolotoj--belyj-softach",
       "name": "Тумба под ТВ \"Авис\" Черные ручки - Дуб крафт золотой / Белый софтач",
-      "customer_price": "11322",
-      "old_price": "13320",
+      "customer_price": "11947",
+      "old_price": "14060",
       "manufacturer": "Регион 058",
       "category_path": [
         "Гостиные",
@@ -16092,8 +16039,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-pod-tv-avis-zolotye-ruchki-dub-kraft-zolotoj--kashemir",
       "name": "Тумба под ТВ \"Авис\" Золотые ручки - Дуб крафт золотой / Кашемир",
-      "customer_price": "11322",
-      "old_price": "13320",
+      "customer_price": "11947",
+      "old_price": "14060",
       "manufacturer": "Регион 058",
       "category_path": [
         "Гостиные",
@@ -16123,8 +16070,8 @@
     {
       "source_url": "https://yourroom.ru/products/tumba-pod-tv-avis-zolotye-ruchki-dub-kraft-zolotoj--grafit",
       "name": "Тумба под ТВ \"Авис\" Золотые ручки - Дуб крафт золотой / Графит",
-      "customer_price": "11322",
-      "old_price": "13320",
+      "customer_price": "11947",
+      "old_price": "14060",
       "manufacturer": "Регион 058",
       "category_path": [
         "Гостиные",
@@ -16154,8 +16101,8 @@
     {
       "source_url": "https://yourroom.ru/products/komod-akatsiya-3-dub-kraft-zolotoj--grafit",
       "name": "Комод \"Акация\" №3 - Дуб крафт золотой / Графит",
-      "customer_price": "10951",
-      "old_price": "14600",
+      "customer_price": "11556",
+      "old_price": "15410",
       "manufacturer": "Регион 058",
       "category_path": [
         "Комоды"
@@ -16183,8 +16130,8 @@
     {
       "source_url": "https://yourroom.ru/products/kosmeticheskij-stol-akatsiya-dub-kraft-zolotoj--grafit",
       "name": "Косметический стол \"Акация\" - Дуб крафт золотой / Графит",
-      "customer_price": "3439",
-      "old_price": "5730",
+      "customer_price": "3629",
+      "old_price": "6050",
       "manufacturer": "Регион 058",
       "category_path": [
         "Спальни",
@@ -16214,8 +16161,8 @@
     {
       "source_url": "https://yourroom.ru/products/yashchiki-dlya-shkafov-bastion-20-m-kashemir",
       "name": "Ящики для шкафов \"Бастион\" 2,0 м - Кашемир",
-      "customer_price": "4525",
-      "old_price": "4525",
+      "customer_price": "4775",
+      "old_price": "4775",
       "manufacturer": "Регион 058",
       "category_path": [
         "Элементы модульных систем",
@@ -16242,8 +16189,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bastion-04-m-dub-kraft-zolotojmolochnyj-shokolad",
       "name": "Шкаф однодверный \"Бастион\" 0,4 м - Дуб крафт золотой / Молочный шоколад",
-      "customer_price": "8163",
-      "old_price": "8163",
+      "customer_price": "8614",
+      "old_price": "8614",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -16272,8 +16219,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-bastion-2-15-m-molochnyj-shokolad",
       "name": "Шкаф трехдверный \"Бастион\" №2 1,5 м - Молочный шоколад",
-      "customer_price": "22333",
-      "old_price": "37220",
+      "customer_price": "23639",
+      "old_price": "39400",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -16303,8 +16250,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-karina-6-h-20m-s-zerkalom-dub-sonoma--fistashka",
       "name": "Шкаф трехдверный \"Карина-6\" (h 2,0м) с зеркалом - Дуб сонома / Фисташка",
-      "customer_price": "29186",
-      "old_price": "48640",
+      "customer_price": "30799",
+      "old_price": "51330",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -16544,8 +16491,8 @@
     {
       "source_url": "https://yourroom.ru/products/stol-kompyuternyj-avis-chernye-ruchki-dub-endgrejn--grin",
       "name": "Стол компьютерный \"Авис\" Черные ручки - Дуб эндгрейн / Грин",
-      "customer_price": "10371",
-      "old_price": "11520",
+      "customer_price": "10944",
+      "old_price": "12160",
       "manufacturer": "Регион 058",
       "category_path": [
         "Столы",
@@ -16575,8 +16522,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-navesnoj-avangard-kashemir",
       "name": "Шкаф навесной \"Авангард\" - Кашемир",
-      "customer_price": "3086",
-      "old_price": "3430",
+      "customer_price": "3257",
+      "old_price": "3620",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -16611,8 +16558,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-avis-04-m-dub-kraft-zolotoj--sapfir",
       "name": "Антресоль \"Авис\" 0,4 м - Дуб крафт золотой / Сапфир",
-      "customer_price": "2199",
-      "old_price": "2199",
+      "customer_price": "2321",
+      "old_price": "2321",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -16640,8 +16587,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-avis-04-m-dub-kraft-zolotoj--kashemir",
       "name": "Антресоль \"Авис\" 0,4 м - Дуб крафт золотой / Кашемир",
-      "customer_price": "2199",
-      "old_price": "2199",
+      "customer_price": "2321",
+      "old_price": "2321",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -16669,8 +16616,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-avis-05-m-dub-endgrejn--belyj-softach",
       "name": "Антресоль \"Авис\" 0,5 м - Дуб эндгрейн / Белый софтач",
-      "customer_price": "2724",
-      "old_price": "2724",
+      "customer_price": "2875",
+      "old_price": "2875",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -16698,8 +16645,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-avis-04-m-dub-endgrejn--kashemir--chernye-ruchki",
       "name": "Шкаф однодверный \"Авис\" 0,4 м Черные ручки - Дуб эндгрейн / Кашемир",
-      "customer_price": "10951",
-      "old_price": "12170",
+      "customer_price": "11556",
+      "old_price": "12840",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -16728,8 +16675,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-avis-05-m-zolotye-ruchki-dub-endgrejn--sapfir",
       "name": "Шкаф однодверный \"Авис\" 0,5 м Золотые ручки - Дуб эндгрейн / Сапфир",
-      "customer_price": "12815",
-      "old_price": "14240",
+      "customer_price": "13523",
+      "old_price": "15030",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -16758,8 +16705,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-avis-05-m-zolotye-ruchki-dub-endgrejn--kashemir",
       "name": "Шкаф однодверный \"Авис\" 0,5 м Золотые ручки - Дуб эндгрейн / Кашемир",
-      "customer_price": "12815",
-      "old_price": "14240",
+      "customer_price": "13523",
+      "old_price": "15030",
       "manufacturer": "Регион 058",
       "category_path": [
         "Распашные шкафы",
@@ -17195,8 +17142,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-detskaya-avis-1",
       "name": "Модульная детская \"Авис\" №1 - Дуб крафт золотой / Сапфир",
-      "customer_price": "36933",
-      "old_price": "41040",
+      "customer_price": "38974",
+      "old_price": "43300",
       "manufacturer": "Регион 058",
       "category_path": [
         "Детская мебель",
@@ -17225,8 +17172,8 @@
     {
       "source_url": "https://yourroom.ru/products/stul-afon-okean-velyur--chernyj-muar-konus-2-2",
       "name": "Стул \"Афон\" SL - Океан (велюр) / Черный муар (конус)",
-      "customer_price": "9790",
-      "old_price": "16320",
+      "customer_price": "9290",
+      "old_price": "15480",
       "manufacturer": "СуперДома",
       "category_path": [
         "Стулья и табуреты",
@@ -17351,11 +17298,232 @@
         "clean_alternate",
         "clean_alternate"
       ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-05-m-h-300-mm-belyj-drevesnyj--belyj-glyanets",
+      "name": "Антресоль \"Бастион\" 0,5 м (h 300 мм) - Белый древесный / Белый глянец",
+      "customer_price": "2349",
+      "old_price": "2349",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "500x520x300 мм",
+        "Вес": "31 кг",
+        "Объем": "0.02 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Белый древесный / Белый глянец"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для однодверного шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над стандартным однодверным шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальнос",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/antresol-bastion-15-m-h-300-mm-belyj-drevesnyj",
+      "name": "Антресоль \"Бастион\" 1,5 м (h 300 мм) - Белый древесный",
+      "customer_price": "5081",
+      "old_price": "5081",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Антресоли для шкафов"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1500x520x300 мм",
+        "Вес": "37 кг",
+        "Объем": "0.3 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Белый древесный"
+      },
+      "description_preview": "Высота антресоли 300 мм. Антресоль для шкафа Бастион – это элегантное и функциональное решение для оптимизации пространства в вашем доме. Она предназначена для установки над шкафом, создавая дополнительное место для хранения вещей, которые используются не ежедневно. Это могут быть сезонная одежда, постельные принадлежности, коробки с обувью или другие предметы, которым не нашлось места в основном шкафу. Главное преимущество данной антресоли – её универсальность. В комплекте предусмотрены специал",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bastion-04-m-s-antresolyu-h-25m-belyj-drevesnyj--belyj-glyanets",
+      "name": "Шкаф однодверный \"Бастион\" 0,4 м с антресолью (h 2,5м) - Белый древесный / Белый глянец",
+      "customer_price": "9598",
+      "old_price": "9598",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Однодверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "400x520x2500 мм",
+        "Вес": "53 кг",
+        "Объем": "0.11 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Белый древесный / Белый глянец"
+      },
+      "description_preview": "Состав комплекта Шкаф однодверный \"Бастион\" 0,4 м Белый древесный / Белый глянец В комплекте 1 шт Габариты ШхГхВ (мм) 400 x 520 x 2200 Антресоль \"Бастион\" 0,4 м (h 300 мм) Белый древесный / Белый глянец В комплекте 1 шт Габариты ШхГхВ (мм) 400 x 520 x 300 Шкаф \"Бастион\" с антресолью - это функциональное и компактное решение для хранения вещей, идеально подходящее для небольших комнат, прихожих или узких ниш. Главная особенность модели - универсальное наполнение, конфигурацию которого вы выбирает",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bastion-04m-s-zerkalom-i-antresolyu-h-25-m-dub-kraft-zolotoj",
+      "name": "Шкаф однодверный \"Бастион\" 0,4м с зеркалом и антресолью (h 2,5 м) - Дуб крафт золотой",
+      "customer_price": "11193",
+      "old_price": "11193",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Однодверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "400x520x2500 мм",
+        "Вес": "59 кг",
+        "Объем": "0.12 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "Зеркало; ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб крафт золотой"
+      },
+      "description_preview": "Состав комплекта Зеркало фасадное для шкафов Бастион, Гермес, Авангард, Корд 260 мм (для 0,4м, 0,8м, 1,2м, 1,6м, ШКУ) В комплекте 1 шт Габариты ШхГхВ (мм) 260 x 4 x 1960 Шкаф однодверный \"Бастион\" 0,4 м Дуб крафт золотой В комплекте 1 шт Габариты ШхГхВ (мм) 400 x 520 x 2200 Антресоль \"Бастион\" 0,4 м (h 300 мм) Дуб крафт золотой В комплекте 1 шт Габариты ШхГхВ (мм) 400 x 520 x 300 Шкаф однодверный Бастион с зеркалом и антресолью – это универсальное решение, которое совмещает в себе практичность и",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bastion-05-m-s-antresolyu-belyj-drevesnyj--belyj-glyanets",
+      "name": "Шкаф однодверный \"Бастион\" 0,5 м с антресолью - Белый древесный / Белый глянец",
+      "customer_price": "10963",
+      "old_price": "10963",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Однодверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "500x520x2600 мм",
+        "Вес": "60 кг",
+        "Объем": "0.8 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Белый древесный / Белый глянец"
+      },
+      "description_preview": "Состав комплекта Шкаф однодверный \"Бастион\" 0,5 м Белый древесный / Белый глянец В комплекте 1 шт Габариты ШхГхВ (мм) 500 x 520 x 2200 Антресоль \"Бастион\" 0,5 м Белый древесный / Белый глянец В комплекте 1 шт Габариты ШхГхВ (мм) 500 x 520 x 400 Шкаф \"Бастион\" с антресолью - это функциональное и компактное решение для хранения вещей, идеально подходящее для небольших комнат, прихожих или узких ниш. Главная особенность модели - универсальное наполнение, конфигурацию которого вы выбираете сами во в",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-bastion-10-m-s-antresolyu-h-25-m-molochnyj-shokolad",
+      "name": "Шкаф двухдверный \"Бастион\" 1,0 м с антресолью (h 2,5 м) - Молочный шоколад",
+      "customer_price": "20332",
+      "old_price": "20332",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Двухдверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1000x520x2500 мм",
+        "Вес": "100.1 кг",
+        "Объем": "0.9 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Молочный шоколад"
+      },
+      "description_preview": "Состав комплекта Шкаф двухдверный \"Бастион\" 1,0 м Молочный шоколад В комплекте 1 шт Габариты ШхГхВ (мм) 1000 x 520 x 2200 Антресоль \"Бастион\" 1,0 м (h 300 мм) Молочный шоколад В комплекте 1 шт Габариты ШхГхВ (мм) 1000 x 520 x 300 Двухстворчатый распашной шкаф \"Бастион\" с антресолью - это универсальное и вместительное решение для оптимизации хранения в прихожей, спальне или гардеробной. Главное преимущество модели - трансформируемое внутреннее наполнение, планировку которого вы определяете индиви",
+      "source_images": 6,
+      "clean_images": 6,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-bastion-10-m-s-zerkalami-i-antresolyu-h-25-m-grafit",
+      "name": "Шкаф двухдверный \"Бастион\" 1,0 м с зеркалами и антресолью (h 2,5 м) - Графит",
+      "customer_price": "22404",
+      "old_price": "22404",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Двухдверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1000x520x2500 мм",
+        "Вес": "106.1 кг",
+        "Объем": "0.93 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "Зеркало; ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Графит"
+      },
+      "description_preview": "Состав комплекта Шкаф двухдверный \"Бастион\" 1,0 м графит В комплекте 1 шт Габариты ШхГхВ (мм) 1000 x 520 x 2200 Зеркало фасадное для шкафов Бастион, Гермес, Авангард, Корд 360 мм (для 0,5м, 1,0м, 1,5м, 2,0м, ШКУ) В комплекте 2 шт Габариты ШхГхВ (мм) 360 x 4 x 1960 Антресоль \"Бастион\" 1,0 м (h 300 мм) Графит В комплекте 1 шт Габариты ШхГхВ (мм) 1000 x 520 x 300 Двухстворчатый распашной шкаф \"Бастион\" с антресолью - это универсальное и вместительное решение для оптимизации хранения в прихожей, спа",
+      "source_images": 6,
+      "clean_images": 6,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
     }
   ],
   "complete": true,
-  "days_since_last_success": 27.93,
-  "sitemap_urls_total": 7709,
+  "days_since_last_success": 14.0,
+  "sitemap_urls_total": 7785,
   "warehouse_id": "019a5ab3-c024-706c-8b63-9059588d3d76",
-  "finished_at": "2026-11-03T14:44:33+00:00"
+  "finished_at": "2026-11-17T16:32:51+00:00"
 }
