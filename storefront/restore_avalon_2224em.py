@@ -78,7 +78,7 @@ try {
 }
 '''
 def run(args,timeout=24):
-    return subprocess.run(args,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=timeout)
+    return subprocess.run(args,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=timeout)
 with tempfile.NamedTemporaryFile('w',encoding='utf-8',prefix='avalon2224-',suffix='.php',dir='/tmp',delete=False) as f:
     f.write(PHP);phpfile=f.name
 os.chmod(phpfile,0o644)
