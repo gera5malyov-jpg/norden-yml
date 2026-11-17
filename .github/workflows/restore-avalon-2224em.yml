@@ -1,0 +1,27 @@
+name: Restore Avalon 2224EM product photos (guarded once)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'storefront/restore_avalon_2224em.py'
+permissions:
+  contents: read
+concurrency:
+  group: storefront-avalon-2224em-photo-restore
+  cancel-in-progress: false
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NETANGELS_API_KEY: ${{ secrets.NETANGELS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile one-product guarded patch
+        run: python -m py_compile storefront/restore_avalon_2224em.py
+      - name: Repair only 2224EM photo links with backup and rollback
+        run: python storefront/restore_avalon_2224em.py
