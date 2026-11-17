@@ -243,21 +243,6 @@ def parse_product(html,url):
     caption=soup.select_one(".sku__caption")
     description=sanitize(caption.get_text("\n",strip=True) if caption else "")
     images=pictures(soup)
-    # Existing official Avalon URLs are 404 for this exact SKU (2026-11-17).
-    # Preserve the verified external gallery when regenerating the weekly YML.
-    if urlparse(url).path.rstrip("/").lower() == "/catalog/podstole-dlya-stola/-2224em" and name == "Подстолье 2224EM":
-        images = [
-            "https://www.leomebel.ru/upload/iblock/ff4/xsgpo7olsftxaiuo4jy479txrp9q3kno.jpg",
-            "https://www.leomebel.ru/upload/iblock/ce0/osykpp9ihd8t6vxj2x8fuh58pd5wjhf2.jpg",
-            "https://www.leomebel.ru/upload/iblock/14c/i7sppyvevw273troo8bc2w77u5m1jqeq.jpg",
-            "https://www.leomebel.ru/upload/iblock/dc3/0zn2ihrhc5tc0e8ohz41furjn8vlff6p.jpg",
-            "https://www.leomebel.ru/upload/iblock/3ea/hty0l2tygugzvihcnld5bdfn1r9i4jm4.jpg",
-            "https://www.leomebel.ru/upload/iblock/b83/t8hbggecql3ebse0eadg16ydm6ns40na.jpg",
-            "https://www.leomebel.ru/upload/iblock/68a/821ue5mmjeh4ny9jgd429spzer8a0hwi.jpg",
-            "https://www.leomebel.ru/upload/iblock/1bb/zhk3ehk3qy31ima6ouktkdoblf83qn18.jpg",
-            "https://www.leomebel.ru/upload/iblock/fdb/zakliy29ka0pui733cbz2riz48wuqj6k.jpg",
-            "https://www.leomebel.ru/upload/iblock/1b9/4vp9sm0457izqd3a81ceyetqeaooz7vt.jpg",
-        ]
     if not images:
         raise RuntimeError("No source photos for "+url)
     return {"url":url,"name":name,"sku":sku,"price":price,
