@@ -146,7 +146,7 @@ try:
     folder=ROOT.parent/'storefront-backups'/('avalon2224-photo-'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+str(os.getpid()))
     folder.mkdir(parents=True,mode=0o700)
     backup=folder/'summary-before.txt'
-    backup.write_text(old,encoding='utf-8');os.chmod(backup,0o600)
+    backup.write_text(old,encoding='utf-8');os.chmod(str(backup),0o600)
     plan={'id':int(before['id']),'before':old,'after':after}
     fd,planfile=tempfile.mkstemp(prefix='avalon2224-plan-',suffix='.json',dir='/tmp')
     with os.fdopen(fd,'w',encoding='utf-8') as f:json.dump(plan,f,ensure_ascii=False)
