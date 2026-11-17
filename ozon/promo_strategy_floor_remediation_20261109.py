@@ -68,6 +68,49 @@ try:
             report["min_price_lowered"].append({"product_id":pid,"before":str(original),"after":str(current_min)})
         if current_min>0 and current_price<current_min:
             report["prices_still_below_minimum"].append({"product_id":pid,"min_price":str(current_min),"price":str(current_price),"offer_id":p.get("offer_id")})
+    # Ozon sometimes reduces the seller minimum when the external-price
+    # strategy is detached. Restore the exact previous floor and a safe
+    # current price for ONLY those affected products before new promotions.
+    to_restore = sorted(set(int(r["product_id"]) for r in report["min_price_lowered"]) |
+                        set(int(r["product_id"]) for r in report["prices_still_below_minimum"]))
+    report["restore_requests"] = []
+    for pid in to_restore:
+        original = before.get(pid)
+        current = after.get(pid)
+        if not original or not current:
+            raise RuntimeError(f"Cannot restore missing product {pid}")
+        original_floor = num((original.get("price") or {}).get("min_price"))
+        current_price = num((current.get("price") or {}).get("price"))
+        old_price = num((current.get("price") or {}).get("old_price"))
+        if original_floor <= 0:
+            raise RuntimeError(f"Original price floor missing for {pid}")
+        safe_price = max(current_price, original_floor + 1)
+        if old_price <= safe_price:
+            raise RuntimeError(f"Cannot restore {pid}: struck price not above safe price")
+        r = api("/v1/product/import/prices", {"prices":[{
+            "offer_id": original["offer_id"], "currency_code": "RUB",
+            "price": str(safe_price), "old_price": str(old_price),
+            "min_price": str(original_floor), "auto_action_enabled": "UNKNOWN"
+        }]})
+        info = (r.get("result") or [{}])[0]
+        if not info.get("updated") or info.get("errors"):
+            raise RuntimeError(f"Failed to restore {pid}: {info}")
+        report["restore_requests"].append({"product_id": pid, "minimum": str(original_floor),
+                                            "new_current_price": str(safe_price)})
+        print("RESTORED_SELLER_MIN", pid, original_floor, safe_price, flush=True)
+    if to_restore:
+        time.sleep(10)
+        after = load_prices()
+        report["min_price_lowered"] = []
+        report["prices_still_below_minimum"] = []
+        for pid in selected:
+            original = num((before[pid].get("price") or {}).get("min_price"))
+            current_min = num((after[pid].get("price") or {}).get("min_price"))
+            current_price = num((after[pid].get("price") or {}).get("price"))
+            if current_min < original:
+                report["min_price_lowered"].append({"product_id": pid, "before": str(original), "after": str(current_min)})
+            if original > 0 and current_price < original:
+                report["prices_still_below_minimum"].append({"product_id": pid, "min_price": str(original), "price": str(current_price)})
     final_participants,_,final_bad=active_prices_and_bad(actions,after)
     report["after_below"]=len(final_bad)
     report["remaining_by_action"]={str(aid):sum(1 for x in final_bad if x[0]==aid) for aid in action_counts}
@@ -75,7 +118,7 @@ try:
     report["status"]="COMPLETE"
     print("FINAL_STRATEGY_REPORT",json.dumps({k:v for k,v in report.items() if k not in ("remaining_sample","prices_still_below_minimum")},ensure_ascii=False),flush=True)
     print("STILL_BELOW_SAMPLE",json.dumps(report["remaining_sample"][:15],ensure_ascii=False),flush=True)
-    if report["strategy_still_linked"] or report["min_price_lowered"] or report["removal_errors"]:
+    if report["strategy_still_linked"] or report["min_price_lowered"] or report["prices_still_below_minimum"] or report["removal_errors"] or final_bad:
         raise RuntimeError("Incomplete strategy detach or seller minimum unexpectedly changed")
 finally:
     OUT.parent.mkdir(parents=True,exist_ok=True)
