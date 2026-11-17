@@ -128,7 +128,7 @@ try:
     source_html,source_status=get_html(SOURCE)
     if source_status!='200' or NAME not in source_html:
         raise RuntimeError('Exact alternative photo source unavailable')
-    if not all('/upload/iblock/' in url and url in source_html for url in NEW):
+    if not all('/upload/iblock/' in url and url.split('www.leomebel.ru',1)[1] in source_html for url in NEW):
         raise RuntimeError('Replacement images not present in the source product gallery')
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
         valid=list(pool.map(image_check,NEW))
