@@ -24,9 +24,9 @@ WORKERS = max(1, min(10, int(os.getenv("WORKERS", "5"))))
 MIN_PRODUCTS = int(os.getenv("MIN_PRODUCTS", "200"))
 TABLE_MIN_PRODUCTS = int(os.getenv("TABLE_MIN_PRODUCTS", "100"))
 CATEGORIES = (
-    {"url": CATEGORY, "prefix": PREFIX, "id": "1",
+    {"url": CATEGORY, "prefix": PREFIX, "id": "1", "sid": "2",
      "name": "Подстолья для столов", "min_products": MIN_PRODUCTS},
-    {"url": TABLE_CATEGORY, "prefix": TABLE_PREFIX, "id": "2",
+    {"url": TABLE_CATEGORY, "prefix": TABLE_PREFIX, "id": "2", "sid": "6",
      "name": "Столы для кафе", "min_products": TABLE_MIN_PRODUCTS},
 )
 TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "40"))
@@ -135,11 +135,27 @@ def discover_category(category):
           (category["id"], expected, pages), flush=True)
 
     def read_page(n):
-        links, total, pc = listing(
-            fetch(category["url"] + "?PAGEN_1=" + str(n)), category)
-        if total != expected or pc != pages:
-            raise RuntimeError("Changing category totals: %s page %d" %
-                               (category["url"], n))
+        # Current Avalon catalog paginates via /remote/ POST; a GET repeats page 1.
+        endpoint = BASE + "/remote/"
+        payload = {"action":"get-html","inc":"catalog",
+                   "filter[F][SID]":category["sid"], "order":"popularity",
+                   "count":"12", "PAGEN_1":str(n)}
+        response = client().post(endpoint, data=payload,
+            headers={"Referer":category["url"], "X-Requested-With":"XMLHttpRequest"},
+            timeout=TIMEOUT)
+        response.raise_for_status()
+        obj = response.json()
+        meta = obj.get("data") if obj.get("status") is True else None
+        if not isinstance(meta, dict) or int(meta.get("total") or 0)!=expected or int(meta.get("pages") or 0)!=pages:
+            raise RuntimeError("Ajax catalog changed: %s page %d" % (category["url"], n))
+        fragment = BeautifulSoup(meta.get("html") or "", "html.parser")
+        links = []
+        for anchor in fragment.select("a.product[href]"):
+            link = product_url(anchor.get("href"))
+            if link and product_category(link)["id"] == category["id"] and link not in links:
+                links.append(link)
+        if n < pages and len(links)!=12:
+            raise RuntimeError("Incomplete Ajax page %d (%d items)" % (n,len(links)))
         return n, links
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=min(WORKERS, 6)) as pool:
