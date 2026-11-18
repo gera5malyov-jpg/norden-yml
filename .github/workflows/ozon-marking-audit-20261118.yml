@@ -1,0 +1,29 @@
+name: Ozon marking management 37-product read-only audit 2026-11-18
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-marking-audit-20261118.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      DRY_RUN: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read exact marking products and Ozon dictionary without changes
+        run: python ozon/marking_37_audit_20261118.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: marking-37-audit
+          path: ozon/marking_audit_20261118.json
+          retention-days: 14
