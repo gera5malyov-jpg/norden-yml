@@ -1,0 +1,29 @@
+name: Final Ozon marking 37 SKUs independent readback Nov18
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-marking-final-37-readback-20261118.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+      DRY_RUN: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Independent 37-product readback
+        run: python ozon/marking_final_37_verify_20261118.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: marking-final-37
+          path: ozon/marking_final_37_20261118.json
+          retention-days: 14
