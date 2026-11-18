@@ -1,0 +1,22 @@
+name: Ozon marking TN VED category dictionary check Nov18
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ozon-marking-dictionary-20261118.yml'
+permissions:
+  contents: read
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+      OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate permitted Ozon category values
+        run: python ozon/marking_37_dictionary_20261118.py
