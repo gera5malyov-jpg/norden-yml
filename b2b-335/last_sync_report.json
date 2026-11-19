@@ -1,19 +1,17 @@
 {
   "status": "ok",
   "feed_url": "https://market-b2bfabrika.ru/bitrix/catalog_export/catalog-feed.xml",
-  "source_products": 160,
+  "source_products": 156,
   "price_articles": 164,
   "feed_duplicate_articles": [],
-  "created": 0,
-  "updated": 160,
-  "zeroed_missing_from_feed": 0,
-  "price_updates": 160,
-  "stock_updates": 320,
+  "created": 1,
+  "updated": 155,
+  "zeroed_missing_from_feed": 5,
+  "price_updates": 156,
+  "stock_updates": 322,
   "images_uploaded": 0,
-  "image_errors": 0,
+  "image_errors": 5,
   "missing_purchase_price": [
-    "Soho14",
-    "soho16",
     "2kdwmws1097",
     "dwmws1114",
     "dwmws1115",
@@ -24,14 +22,20 @@
     "dvmgs892",
     "dwmws854",
     "Soho008",
-    "soho010",
     "смф00806д1384",
-    "смф00807д1385"
+    "смф00807д1385",
+    "смф00801д1303"
   ],
   "missing_retail_price": [],
   "minimum_price_field": "minimum_price",
   "purchase_price_field": "purchase_price",
-  "warnings": [],
+  "warnings": [
+    "смф00801д1303: image https://market-b2bfabrika.ru/upload/iblock/4e2/dme2yijefs0s1le610piox92k5m2gj1p.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
+    "смф00801д1303: image https://market-b2bfabrika.ru/upload/iblock/b8c/jhpmqr6w3zvd8msv6ypdcqzia5mmovo4.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
+    "смф00801д1303: image https://market-b2bfabrika.ru/upload/iblock/932/ynelleqc7ckuwmxr7m8neiit7j3h5elt.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
+    "смф00801д1303: image https://market-b2bfabrika.ru/upload/iblock/9bb/w8zzqclfwvy0xx22vtk7m52jv21xvwsc.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files",
+    "смф00801д1303: image https://market-b2bfabrika.ru/upload/iblock/ffb/9ed9b06obzduzau825yk9u9dbh40nhva.png: 400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+  ],
   "errors": [],
   "sku_rule": "335-<KIT kit_id>",
   "brand": "Б2Б Фабрика",
@@ -47,6 +51,6 @@
     "before_discount": "retail",
     "minimum": "purchase * 1.20 (если есть закупочная цена)"
   },
-  "mapped_products": 160,
+  "mapped_products": 161,
   "complete": true
 }
