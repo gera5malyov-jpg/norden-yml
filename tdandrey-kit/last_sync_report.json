@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-11-19T12:04:53.577651+00:00",
+  "started_at": "2026-11-20T12:07:13.644516+00:00",
   "status": "ЗАВЕРШЕНО С ОШИБКАМИ",
   "mode": "daily",
   "dry_run": false,
@@ -20,84 +20,39 @@
   },
   "warnings": [
     {
-      "sku": "AND-090176",
+      "sku": "AND-090453",
       "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"ef3e7a986b3e068a466c773d849c76e3\"}"
+      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"555ce14ff8f348a8e0590da9972c5811\"}"
     },
     {
-      "sku": "AND-090176",
+      "sku": "AND-090453",
       "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"b0f200bee37f4d885bb18e6a5548aed0\"}"
+      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"6863bedf9574df9abfc2a07fad8be229\"}"
     },
     {
-      "sku": "AND-090177",
+      "sku": "AND-090453",
       "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"fd09f16350cf5023c81170adeb680adc\"}"
+      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"dcdf5aecd5535b16033a2be0d8241343\"}"
     },
     {
-      "sku": "AND-090177",
+      "sku": "AND-090567",
       "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"f0e90266b22c744f6cb6ab4b8533c84c\"}"
+      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"3dcd034f89830691cde45319097cceee\"}"
     },
     {
-      "sku": "AND-090177",
+      "sku": "AND-090567",
       "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"9280a8407b515a974d85b3c58361ce80\"}"
+      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"0e40ef4e9f7ff592aba368f4dac8b1ee\"}"
     },
     {
-      "sku": "AND-090178",
+      "sku": "AND-090567",
       "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"98cc96eefcc9afcdd518066c01c9da7e\"}"
+      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"720235fdf59e04b96e020898e144d194\"}"
     },
     {
-      "sku": "AND-090178",
+      "sku": "AND-090567",
       "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"f8d9f1a00e4c2329dcfa213cf567034d\"}"
-    },
-    {
-      "sku": "AND-090179",
-      "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"ac1aaee61e8e909d222c25b58185a4f4\"}"
-    },
-    {
-      "sku": "AND-090179",
-      "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"de5f1e6e9495a2338ac122f49e100a19\"}"
-    },
-    {
-      "sku": "AND-090179",
-      "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"0ee1ae385af4e0993aadb52cb378cf9b\"}"
-    },
-    {
-      "sku": "AND-090180",
-      "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"cdbd768a274d4fc9a8a1bc43900b35ed\"}"
-    },
-    {
-      "sku": "AND-090180",
-      "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"d1dcfaf7bae6693088583e55238b648e\"}"
-    },
-    {
-      "sku": "AND-090221",
-      "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"cf9a57c578bde353d9612f46ab06d6c0\"}"
-    },
-    {
-      "sku": "AND-090228",
-      "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"070abc7248d8c6ac9bb8a29848c92961\"}"
-    },
-    {
-      "sku": "AND-090228",
-      "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"2e10f495a0c21319997d0b6f5e79067b\"}"
-    },
-    {
-      "sku": "AND-090228",
-      "stage": "image",
-      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"b95544be96d1c6398dd4bbc8b6a207f5\"}"
+      "message": "KIT HTTP 400: {\"code\":\"LIMIT_EXCEEDED\",\"message\":\"Превышено максимальное количество файлов. Максимум — 300000.\",\"trace_id\":\"9d0d0245c969367528c9cfba4deb99a0\"}"
     }
   ],
   "errors": [
@@ -10100,10 +10055,355 @@
       "sku": "090402",
       "stage": "daily_new",
       "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090405",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "090408",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090409",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090410",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090411",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090412",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090413",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090414",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090415",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090416",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090417",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090418",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090419",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090420",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090421",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090422",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090423",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090424",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090432",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090434",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090455",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090456",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090489",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "090490",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "090491",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "090492",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090493",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "090511",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "090512",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090517",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090520",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090521",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090523",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090524",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090525",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090526",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090527",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "090532",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090533",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090534",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090535",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090536",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090537",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090539",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "090548",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090549",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090550",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090551",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090552",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090553",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090554",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090555",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090556",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090557",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090560",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090561",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090563",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090564",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "090565",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090566",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090568",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090569",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090570",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090573",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090592",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090597",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "090598",
+      "stage": "daily_new",
+      "message": "Нет положительной закупочной цены; новую карточку KIT пока не создаём"
+    },
+    {
+      "sku": "090599",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
+    },
+    {
+      "sku": "090600",
+      "stage": "daily_new",
+      "message": "В KIT несколько характеристик 'Ширина, см'"
     }
   ],
-  "images_uploaded": 3,
-  "image_errors": 16,
+  "images_uploaded": 0,
+  "image_errors": 7,
   "source_count_total": 110690,
   "source_unique_sku": 110313,
   "source_pages": 23,
@@ -10132,9 +10432,9 @@
   ],
   "webasyst": {
     "type_id": "126",
-    "products_in_type": 11518,
-    "matched": 6476,
-    "price_updates": 6476,
+    "products_in_type": 11519,
+    "matched": 6477,
+    "price_updates": 6477,
     "missing_zeroed": 2361,
     "errors": [
       {
@@ -15160,12 +15460,12 @@
     ]
   },
   "kit_updates": {
-    "price_updates": 5669,
-    "stock_updates": 11338,
+    "price_updates": 5770,
+    "stock_updates": 11540,
     "missing_zeroed": 0,
     "mapped_without_price": 0
   },
   "daily_new_created": 100,
-  "mapped_total": 5770,
-  "finished_at": "2026-11-19T15:41:43.095209+00:00"
+  "mapped_total": 5871,
+  "finished_at": "2026-11-20T15:15:39.583079+00:00"
 }
