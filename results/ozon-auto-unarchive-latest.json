@@ -1,17 +1,17 @@
 {
-  "started_at_utc": "2026-11-26T09:59:31.081262+00:00",
+  "started_at_utc": "2026-11-26T12:12:44.698643+00:00",
   "mode": "is_autoarchived_true_only",
   "max_restore_per_run": 100,
-  "archived_total_reported": 5045,
-  "archived_items_inspected": 5045,
-  "autoarchive_candidates_seen": 0,
-  "manual_or_other_archive_skipped": 5045,
+  "archived_total_reported": 7820,
+  "archived_items_inspected": 1371,
+  "autoarchive_candidates_seen": 100,
+  "manual_or_other_archive_skipped": 1271,
   "missing_info_skipped": 0,
-  "restored_count": 0,
+  "restored_count": 100,
   "failed_count": 0,
   "failures_by_reason": {},
-  "limit_hit": null,
-  "complete_for_this_run": true,
-  "outcome": "no_autoarchived_products",
-  "finished_at_utc": "2026-11-26T09:59:51.665893+00:00"
+  "limit_hit": "local_daily_safety_cap",
+  "complete_for_this_run": false,
+  "outcome": "run_cap_reached",
+  "finished_at_utc": "2026-11-26T12:14:04.406563+00:00"
 }
