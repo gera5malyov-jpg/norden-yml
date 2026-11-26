@@ -1,6 +1,6 @@
 {
   "status": "УСПЕШНО",
-  "started_at": "2026-11-12T13:57:30+00:00",
+  "started_at": "2026-11-26T15:42:02+00:00",
   "dry_run": false,
   "source": "https://yourroom.ru/",
   "supplier": "ВашаКомната",
@@ -20,25 +20,135 @@
   "missing_rule": "если URL исчез из полного sitemap — остаток 0",
   "description_rule": "упоминания ВашаКомната/Вашакомната.РФ/yourroom.ru удаляются",
   "photo_rule": "используются только изображения без водяного знака; сначала ищется чистый оригинал, затем пробуется программное удаление; без пригодного фото карточка не создается",
-  "sitemap_urls": 548,
-  "product_pages_requested": 548,
-  "product_cards_parsed": 548,
-  "created": 7,
-  "updated": 529,
-  "zeroed_missing": 26,
-  "skipped_no_clean_photo": 12,
+  "sitemap_urls": 561,
+  "product_pages_requested": 561,
+  "product_cards_parsed": 560,
+  "created": 12,
+  "updated": 535,
+  "zeroed_missing": 27,
+  "skipped_no_clean_photo": 13,
   "skipped_no_price": 0,
-  "price_updates": 536,
-  "stock_updates": 562,
-  "images_clean_original": 228,
-  "images_clean_alternate": 1658,
+  "price_updates": 547,
+  "stock_updates": 574,
+  "images_clean_original": 225,
+  "images_clean_alternate": 1704,
   "images_watermark_removed": 13,
   "images_rejected_watermark_or_error": 42,
-  "images_uploaded": 25,
-  "image_upload_errors": 19,
-  "parse_errors": [],
+  "images_uploaded": 37,
+  "image_upload_errors": 45,
+  "parse_errors": [
+    {
+      "url": "https://yourroom.ru/products/korob-kvadro-ldsp-yasen-shimo-svetlyj-2",
+      "status": 200,
+      "message": "не найдена цена"
+    }
+  ],
   "errors": [],
   "warnings": [
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
+    {
+      "stage": "kit_image_upload",
+      "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
+    },
     {
       "stage": "kit_image_upload",
       "message": "400 Client Error: Bad Request for url: https://api.kit.yandex.net/v1/files"
@@ -192,8 +302,8 @@
     {
       "source_url": "https://yourroom.ru/products/kukhnya-qmashaq-ldsp-20m",
       "name": "Кухонный гарнитур \"Маша\" 2,0м со столешницей - венге / дуб сонома",
-      "customer_price": "23975",
-      "old_price": "39300",
+      "customer_price": "28439",
+      "old_price": "46620",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -963,8 +1073,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-1-stvorchatyj-shk-1-ronda-uluchshennaya-furnitura-venge",
       "name": "Шкаф 1-створчатый ШК-1 \"РОНДА\" (Улучшенная фурнитура) - венге/дуб белфорд",
-      "customer_price": "8074",
-      "old_price": "10090",
+      "customer_price": "8055",
+      "old_price": "10070",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -1130,8 +1240,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-london-15kh15m-dub-grafit",
       "name": "Модульная угловая кухня \"Лондон\" 1,5х1,5м - Дуб графит",
-      "customer_price": "44266",
-      "old_price": "57490",
+      "customer_price": "44906",
+      "old_price": "58320",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -1165,8 +1275,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-london-15kh15m-dub-krem",
       "name": "Модульная угловая кухня \"Лондон\" 1,5х1,5м - Дуб крем",
-      "customer_price": "44266",
-      "old_price": "57490",
+      "customer_price": "44906",
+      "old_price": "58320",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -1200,8 +1310,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-kjoln-16kh16m-h-soft-toffi",
       "name": "Модульная угловая кухня \"Кёльн\" 1,6х1,6м (H) - Софт кармель",
-      "customer_price": "43222",
-      "old_price": "56130",
+      "customer_price": "43389",
+      "old_price": "56350",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -1236,8 +1346,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-kjoln-16x24-m-soft-blanzh",
       "name": "Модульная угловая кухня \"Кёльн\" 1,6x2,4 м (Н) - Софт айвори",
-      "customer_price": "64705",
-      "old_price": "84030",
+      "customer_price": "64882",
+      "old_price": "84260",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -1563,7 +1673,7 @@
         "Объем": "2.02 м³",
         "Тип сборки": "Универсальная",
         "Тип петель": "Без доводчиков",
-        "Тип направляющих ящиков": "Роликовые",
+        "Тип направляющих ящиков": "Шариковые",
         "Нужна ли сборка": "Да",
         "Срок гарантии, месяцев": "12",
         "Высота верхних шкафов, мм": "705",
@@ -2004,8 +2114,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-nord-line-16kh24-m-kamen-bezhsoft-dajmond",
       "name": "Модульная угловая кухня \"Норд Line\" 1,6х2,4 м - камень беж/софт пломбир",
-      "customer_price": "59661",
-      "old_price": "74580",
+      "customer_price": "61129",
+      "old_price": "76410",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -2039,8 +2149,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-nord-line-16kh24-m-soft-smoksoft-dajmond",
       "name": "Модульная угловая кухня \"Норд Line\" 1,6х2,4 м - софт маренго/софт пломбир",
-      "customer_price": "59661",
-      "old_price": "74580",
+      "customer_price": "61129",
+      "old_price": "76410",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -2247,8 +2357,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-nuvel-26-m-belyj",
       "name": "Модульная кухня \"Нувель\" 2,6 м - бетон белый",
-      "customer_price": "36524",
-      "old_price": "48700",
+      "customer_price": "37085",
+      "old_price": "49450",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -2330,33 +2440,6 @@
       "source_images": 2,
       "clean_images": 2,
       "clean_modes": [
-        "clean_original",
-        "clean_original"
-      ]
-    },
-    {
-      "source_url": "https://yourroom.ru/products/shkaf-navesnoj-shn-002-granzh-grafit-soft-matovyj",
-      "name": "Шкаф навесной \"ГРАНЖ\" ШН-002 - Серый Шифер / Графит Софт матовый",
-      "customer_price": "4407",
-      "old_price": "7350",
-      "manufacturer": "МК Стиль",
-      "category_path": [
-        "Распашные шкафы",
-        "Полки"
-      ],
-      "characteristics": {
-        "Габариты (ШхГхВ)": "602x320x600 мм",
-        "Вес": "31 кг",
-        "Объем": "0.03 м³",
-        "Материал каркаса": "ЛДСП",
-        "Страна-производитель": "Россия",
-        "Цвет": "Серый Шифер / Графит Софт матовый"
-      },
-      "description_preview": "Навес мебели в стоимость сборки не входит. Шкаф навесной на регулируемых навесах. Универсальная сборка. Внутреннее пространство поделено съемной полкой на два равных отделения. Накладной фасад МДФ с фрезеровкой. Без ручки. Открывание/закрывание при помощи отталкивателя — путём нажатия на фасад. Не имеет видимых снаружи крепежей. Цветовая гамма: - Корпус - Белый (Шагрень) / Фасад МДФ - матовая Белый Софт - Корпус - Серый Шифер / Фасад МДФ - матовая Графит Софт - Кромка – в цвет корпуса. - Задняя ",
-      "source_images": 3,
-      "clean_images": 3,
-      "clean_modes": [
-        "clean_original",
         "clean_original",
         "clean_original"
       ]
@@ -3062,7 +3145,7 @@
     },
     {
       "source_url": "https://yourroom.ru/products/stul-olimp-dzhns-velyur--chernyj-muar-konus",
-      "name": "Стул \"Олимп\" - Джнс (велюр) / Черный муар (конус)",
+      "name": "Стул \"Олимп\" - Джинс (велюр) / Черный муар (конус)",
       "customer_price": "10633",
       "old_price": "22150",
       "manufacturer": "СуперДома",
@@ -3081,7 +3164,7 @@
         "Срок гарантии, месяцев": "12",
         "Количество в комплекте, шт": "1",
         "Страна-производитель": "Россия",
-        "Цвет": "Джнс (велюр) / Черный муар (конус)"
+        "Цвет": "Джинс (велюр) / Черный муар (конус)"
       },
       "description_preview": "Стул Олимп - это прекрасный выбор для тех, кто хочет придать интерьеру яркую индивидуальность. Он не только позволяет организовать посадочные места, но является существенным декоративным элементом. С его помощью можно добавить помещению комфортности и уюта. Внести стильный акцент. Данная модель стула имеет металлокаркас - он служит хорошей опорой для тела и позволяет комфортно сидеть длительный период времени. Наполнение стула ППУ 30 мм, высокой плотности, за счет чего достигается отличная факту",
       "source_images": 7,
@@ -3582,8 +3665,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-prikhozhaya-boston-3-2",
       "name": "Модульная прихожая \"Бостон\" №3 - Дуб крафт серый / Бетонный камень",
-      "customer_price": "14535",
-      "old_price": "20760",
+      "customer_price": "15557",
+      "old_price": "22220",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для прихожей",
@@ -3615,8 +3698,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-spalnya-ronda-11-venge",
       "name": "Модульная спальня \"Ронда\" №11 - венге/дуб белфорд",
-      "customer_price": "35889",
-      "old_price": "51270",
+      "customer_price": "40588",
+      "old_price": "57980",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Спальни",
@@ -4113,8 +4196,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-nord-shk02-800-so-steklom-dub-sonoma--soft-chernyj",
       "name": "Шкаф двустворчатый \"Норд\" ШК02-800 со стеклом - дуб сонома / софт черный",
-      "customer_price": "29137",
-      "old_price": "66220",
+      "customer_price": "35898",
+      "old_price": "81590",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -5001,8 +5084,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-bruklin-1416-m-belyj",
       "name": "Модульная угловая кухня \"Бруклин\" 1,4*1,6 м - бетон белый",
-      "customer_price": "31658",
-      "old_price": "41110",
+      "customer_price": "32170",
+      "old_price": "41780",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -5182,8 +5265,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-prikhozhaya-stoubi-2-dub-kraft-zolotoj--seryj-grafit",
       "name": "Модульная прихожая \"Стоуби\" №2 - Дуб крафт золотой / Серый графит",
-      "customer_price": "23111",
-      "old_price": "30410",
+      "customer_price": "24658",
+      "old_price": "32440",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для прихожей",
@@ -6022,8 +6105,8 @@
     {
       "source_url": "https://yourroom.ru/products/gostinaya-emma-mini-uluchshennaya-furnitura-dub-kraft-seryjdub-kraft-belyj",
       "name": "Гостиная \"Эмма МИНИ\" (Улучшенная фурнитура) - дуб крафт серый/дуб крафт белый",
-      "customer_price": "18676",
-      "old_price": "23350",
+      "customer_price": "20080",
+      "old_price": "25100",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Гостиные",
@@ -6352,8 +6435,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-london-1618-m-dub-grafit",
       "name": "Модульная угловая кухня \"Лондон\" 1,6*1,8 м - Дуб графит",
-      "customer_price": "46137",
-      "old_price": "57670",
+      "customer_price": "46817",
+      "old_price": "58520",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -6388,8 +6471,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-london-1618-m-dub-izumrud",
       "name": "Модульная угловая кухня \"Лондон\" 1,6*1,8 м - Дуб изумруд",
-      "customer_price": "46137",
-      "old_price": "57670",
+      "customer_price": "46817",
+      "old_price": "58520",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -6426,8 +6509,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-london-1618-m-dub-krem",
       "name": "Модульная угловая кухня \"Лондон\" 1,6*1,8 м - Дуб крем",
-      "customer_price": "46137",
-      "old_price": "57670",
+      "customer_price": "46817",
+      "old_price": "58520",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -6855,9 +6938,11 @@
         "Страна-производитель": "Россия"
       },
       "description_preview": "",
-      "source_images": 0,
-      "clean_images": 0,
-      "clean_modes": []
+      "source_images": 1,
+      "clean_images": 1,
+      "clean_modes": [
+        "clean_alternate"
+      ]
     },
     {
       "source_url": "https://yourroom.ru/products/stoleshnitsa-strombly-grey-standart-h38-mm-2400-mm",
@@ -6877,9 +6962,11 @@
         "Страна-производитель": "Россия"
       },
       "description_preview": "",
-      "source_images": 0,
-      "clean_images": 0,
-      "clean_modes": []
+      "source_images": 1,
+      "clean_images": 1,
+      "clean_modes": [
+        "clean_alternate"
+      ]
     },
     {
       "source_url": "https://yourroom.ru/products/stoleshnitsa-strombly-grey-standart-h38-mm-2800-mm",
@@ -6899,9 +6986,11 @@
         "Страна-производитель": "Россия"
       },
       "description_preview": "",
-      "source_images": 0,
-      "clean_images": 0,
-      "clean_modes": []
+      "source_images": 1,
+      "clean_images": 1,
+      "clean_modes": [
+        "clean_alternate"
+      ]
     },
     {
       "source_url": "https://yourroom.ru/products/stoleshnitsa-chjornaya-sakhara-premium-h38-mm-2600-mm",
@@ -7089,8 +7178,8 @@
     {
       "source_url": "https://yourroom.ru/products/krovat-ronda-0820-m-kr-080-dub-kraft-seryj--belyj",
       "name": "Кровать \"РОНДА\" 0,8*2,0 м с основанием ДСП (КР-080) - Дуб крафт серый",
-      "customer_price": "6007",
-      "old_price": "9240",
+      "customer_price": "6656",
+      "old_price": "10240",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Кровати и тахты",
@@ -7126,8 +7215,8 @@
     {
       "source_url": "https://yourroom.ru/products/veshalka-s-zerkalom-vsh-1-vega-uluchshennaya-furnitura-dub-kraft-seryj--belyj",
       "name": "Вешалка \"Вега\" ВШ-1 с зеркалом (Улучшенная фурнитура) - Дуб крафт серый / Белый",
-      "customer_price": "11583",
-      "old_price": "15440",
+      "customer_price": "12380",
+      "old_price": "16510",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для прихожей",
@@ -7157,9 +7246,9 @@
     },
     {
       "source_url": "https://yourroom.ru/products/tumba-s-yashchikom-tb-1-vega-dub-kraft-seryj--belyj",
-      "name": "Тумба с ящиком ТБ-1 \"Вега\" - Дуб крафт серый / Белый",
-      "customer_price": "4221",
-      "old_price": "8120",
+      "name": "Тумба с ящиком \"Вега\" ТБ-1 - Дуб крафт серый / Белый",
+      "customer_price": "4584",
+      "old_price": "8820",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Комоды"
@@ -7308,8 +7397,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-oliva-15x15-m-belyj-metallik",
       "name": "Модульная угловая кухня \"Олива\" 1,5x1,5 м - Белый металлик",
-      "customer_price": "47546",
-      "old_price": "61750",
+      "customer_price": "48186",
+      "old_price": "62580",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -7597,8 +7686,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-spalnya-almeriya-2",
       "name": "Модульная спальня \"Альмерия\" №2 - Серый графит (ЛДСП) / Бархат серый (МДФ)",
-      "customer_price": "82627",
-      "old_price": "137710",
+      "customer_price": "83257",
+      "old_price": "138760",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Спальни",
@@ -7638,8 +7727,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-milena-1620m-shampan",
       "name": "Модульная угловая кухня \"Милена\" 1,6*2,0м - шампань",
-      "customer_price": "53456",
-      "old_price": "53456",
+      "customer_price": "54372",
+      "old_price": "54372",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -7675,8 +7764,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-milena-24m-makiato",
       "name": "Модульная кухня \"Милена\" 2,4м - макиато",
-      "customer_price": "37627",
-      "old_price": "37627",
+      "customer_price": "38169",
+      "old_price": "38169",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Мебель для кухни",
@@ -7744,8 +7833,8 @@
     {
       "source_url": "https://yourroom.ru/products/modulnaya-kukhnya-era-35-m",
       "name": "Модульная кухня \"Эра\" 3,5 м - Дуб горный / Белый / Мрамор черный",
-      "customer_price": "51545",
-      "old_price": "51545",
+      "customer_price": "49911",
+      "old_price": "49911",
       "manufacturer": "Эра",
       "category_path": [
         "Мебель для кухни",
@@ -7781,8 +7870,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bergen-shk-1600-kashemir",
       "name": "Шкаф четырехдверный \"Берген\" ШК-1600 - Кашемир",
-      "customer_price": "20683",
-      "old_price": "45960",
+      "customer_price": "21902",
+      "old_price": "48670",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -7907,8 +7996,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bergen-shk-800-s-zerkalami-seryj-grafit",
       "name": "Шкаф двухдверный \"Берген\" ШК-800 с зеркалами - Серый графит",
-      "customer_price": "17266",
-      "old_price": "21580",
+      "customer_price": "18181",
+      "old_price": "22730",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -7938,8 +8027,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bergen-shk-2000-seryj-grafit",
       "name": "Шкаф \"Берген\" ШК-2000 - Серый графит",
-      "customer_price": "24543",
-      "old_price": "49090",
+      "customer_price": "26022",
+      "old_price": "52040",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -8026,8 +8115,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-bergen-a-2000-kashemir",
       "name": "Антресоль \"Берген\" А-2000 - Кашемир",
-      "customer_price": "7417",
-      "old_price": "9270",
+      "customer_price": "7990",
+      "old_price": "9990",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -8056,8 +8145,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-s-zerkalami-i-yashchikami-bergen-shk-1600-beloe-derevo",
       "name": "Шкаф четырехдверный \"Берген\" ШК-1600 с зеркалами и ящиками - Белое дерево",
-      "customer_price": "30578",
-      "old_price": "67950",
+      "customer_price": "33406",
+      "old_price": "74240",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -8087,8 +8176,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bergen-pro-raspashnoj-dvustvorchatyj-shk-800-s-polkami-i-antresolyu-beloe-derevo",
       "name": "Шкаф двухдверный \"Берген\" ПРО ШК-800 с полками и антресолью - Белое дерево",
-      "customer_price": "17151",
-      "old_price": "21440",
+      "customer_price": "17433",
+      "old_price": "21790",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -8204,8 +8293,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-chetyrekhdvernyj-s-zerkalami-i-yashchikami-bergen-shk-1600-seryj-grafit",
       "name": "Шкаф четырехдверный \"Берген\" ШК-1600 с зеркалами и ящиками - Серый графит",
-      "customer_price": "30131",
-      "old_price": "66960",
+      "customer_price": "32331",
+      "old_price": "71850",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -8664,8 +8753,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-odnodvernyj-bergen-shk-400-s-antresolyu-i-zerkalom-beloe-derevo",
       "name": "Шкаф однодверный \"Берген\" ШК-400 с антресолью и зеркалом - Белое дерево",
-      "customer_price": "12834",
-      "old_price": "16040",
+      "customer_price": "13318",
+      "old_price": "16650",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -8698,8 +8787,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-bergen-shk-800-s-antresolyu-i-zerkalami-beloe-derevo",
       "name": "Шкаф двухдверный \"Берген\" ШК-800 с антресолью и зеркалами - Белое дерево",
-      "customer_price": "20813",
-      "old_price": "26020",
+      "customer_price": "21781",
+      "old_price": "27230",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -8764,8 +8853,8 @@
     {
       "source_url": "https://yourroom.ru/products/zerkalo-dlya-shkafa-shku-vega",
       "name": "Зеркало для шкафа ШКУ \"Вега\"",
-      "customer_price": "2741",
-      "old_price": "2741",
+      "customer_price": "3400",
+      "old_price": "3400",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Элементы модульных систем",
@@ -8854,8 +8943,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-bergen-pro-shk-800-s-yashchikami-seryj",
       "name": "Шкаф \"Берген\" ПРО ШК-800 с ящиками - Серый",
-      "customer_price": "13710",
-      "old_price": "17140",
+      "customer_price": "14230",
+      "old_price": "17790",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -8873,7 +8962,7 @@
         "Страна-производитель": "Россия",
         "Цвет": "Серый"
       },
-      "description_preview": "Состав комплекта Шкаф \"Берген\" ПРО ШК-800 Серый графит В комплекте 1 шт Габариты ШхГхВ (мм) 800 x 506 x 2216 Ящики \"Берген\" ВН2Я ПРО Серый Графит В комплекте 1 шт Габариты ШхГхВ (мм) 768 x 460 x 352 Комплект полок для шкафа \"Берген\" ПРО Серый графит В комплекте 1 шт Габариты ШхГхВ (мм) 768 x 490 x 16 Материал корпуса: ЛДСП Материал каркаса: ЛДСП Пенал Берген ПРО – отличный вариант для небольшой комнаты или прихожей. – Ручка: пластик. – Длина ручки: Н 1180 мм – Штанга горизонтальная Шкаф дополнит",
+      "description_preview": "Состав комплекта Шкаф \"Берген\" ПРО ШК-800 Серый графит В комплекте 1 шт Габариты ШхГхВ (мм) 800 x 506 x 2216 Ящики \"Берген\" ПРО ВН2Я Серый Графит В комплекте 1 шт Габариты ШхГхВ (мм) 768 x 460 x 352 Комплект полок для шкафа \"Берген\" ПРО Серый графит В комплекте 1 шт Габариты ШхГхВ (мм) 768 x 490 x 16 Материал корпуса: ЛДСП Материал каркаса: ЛДСП Пенал Берген ПРО – отличный вариант для небольшой комнаты или прихожей. – Ручка: пластик. – Длина ручки: Н 1180 мм – Штанга горизонтальная Шкаф дополнит",
       "source_images": 3,
       "clean_images": 3,
       "clean_modes": [
@@ -10148,8 +10237,8 @@
     {
       "source_url": "https://yourroom.ru/products/penal-tortsevoj-bergen-pt3ya-300-seryj-grafit",
       "name": "Пенал торцевой \"Берген\" ПТ3Я-300 - Серый графит",
-      "customer_price": "8576",
-      "old_price": "8576",
+      "customer_price": "9416",
+      "old_price": "9416",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -10182,8 +10271,8 @@
     {
       "source_url": "https://yourroom.ru/products/antresol-tortsevaya-bergen-ats-300-so-steklom-seryj-grafit--soft-chernyj",
       "name": "Антресоль торцевая \"Берген\" АТС-300 со стеклом - Серый графит / Софт черный",
-      "customer_price": "3298",
-      "old_price": "3298",
+      "customer_price": "3791",
+      "old_price": "3791",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -10250,8 +10339,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvustvorchatyj-bergen-shks-800-s-polkami-seryj-grafit--soft-chernyj",
       "name": "Шкаф двустворчатый \"Берген\" ШКС-800 с полками - Серый графит / Софт черный",
-      "customer_price": "28650",
-      "old_price": "28650",
+      "customer_price": "33731",
+      "old_price": "33731",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -10285,8 +10374,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvustvorchatyj-bergen-shks-800-s-yashchikami-i-polkami-beloe-derevo--soft-chernyj",
       "name": "Шкаф двустворчатый \"Берген\" ШКС-800 с ящиками и полками - Белое дерево / Софт черный",
-      "customer_price": "30207",
-      "old_price": "30207",
+      "customer_price": "35383",
+      "old_price": "35383",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -10305,7 +10394,7 @@
         "Страна-производитель": "Россия",
         "Цвет": "Белое дерево / Софт черный"
       },
-      "description_preview": "Состав комплекта Ящики \"Берген\" ВН2Я ПРО Белое дерево В комплекте 1 шт Габариты ШхГхВ (мм) 768 x 460 x 352 Комплект полок для шкафа \"Берген\" ПРО Белое дерево В комплекте 2 шт Габариты ШхГхВ (мм) 768 x 490 x 16 Шкаф двустворчатый \"Берген\" ШКС-800 со стеклом Белое дерево / Софт черный В комплекте 1 шт Габариты ШхГхВ (мм) 800 x 520 x 2200 Шкаф Берген представляет собой компактное мебельное решение, идеально подходящее для небольших помещений. Его конструкция позволяет эффективно организовать хранен",
+      "description_preview": "Состав комплекта Ящики \"Берген\" ПРО ВН2Я Белое дерево В комплекте 1 шт Габариты ШхГхВ (мм) 768 x 460 x 352 Комплект полок для шкафа \"Берген\" ПРО Белое дерево В комплекте 2 шт Габариты ШхГхВ (мм) 768 x 490 x 16 Шкаф двустворчатый \"Берген\" ШКС-800 со стеклом Белое дерево / Софт черный В комплекте 1 шт Габариты ШхГхВ (мм) 800 x 520 x 2200 Шкаф Берген представляет собой компактное мебельное решение, идеально подходящее для небольших помещений. Его конструкция позволяет эффективно организовать хранен",
       "source_images": 7,
       "clean_images": 7,
       "clean_modes": [
@@ -10321,8 +10410,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-dvustvorchatyj-bergen-shks-800-s-yashchikami-i-polkami-kashemir--soft-chernyj",
       "name": "Шкаф двустворчатый \"Берген\" ШКС-800 с ящиками и полками - Кашемир / Софт черный",
-      "customer_price": "31085",
-      "old_price": "31085",
+      "customer_price": "36166",
+      "old_price": "36166",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Распашные шкафы",
@@ -10341,7 +10430,7 @@
         "Страна-производитель": "Россия",
         "Цвет": "Кашемир / Софт черный"
       },
-      "description_preview": "Состав комплекта Ящики \"Берген\" ВН2Я ПРО Кашемир В комплекте 1 шт Габариты ШхГхВ (мм) 768 x 460 x 352 Комплект полок для шкафа \"Берген\" ПРО Кашемир В комплекте 2 шт Габариты ШхГхВ (мм) 768 x 490 x 16 Шкаф двустворчатый \"Берген\" ШКС-800 со стеклом Кашемир / Софт черный В комплекте 1 шт Габариты ШхГхВ (мм) 800 x 520 x 2200 Шкаф Берген представляет собой компактное мебельное решение, идеально подходящее для небольших помещений. Его конструкция позволяет эффективно организовать хранение вещей, обесп",
+      "description_preview": "Состав комплекта Ящики \"Берген\" ПРО ВН2Я Кашемир В комплекте 1 шт Габариты ШхГхВ (мм) 768 x 460 x 352 Комплект полок для шкафа \"Берген\" ПРО Кашемир В комплекте 2 шт Габариты ШхГхВ (мм) 768 x 490 x 16 Шкаф двустворчатый \"Берген\" ШКС-800 со стеклом Кашемир / Софт черный В комплекте 1 шт Габариты ШхГхВ (мм) 800 x 520 x 2200 Шкаф Берген представляет собой компактное мебельное решение, идеально подходящее для небольших помещений. Его конструкция позволяет эффективно организовать хранение вещей, обесп",
       "source_images": 7,
       "clean_images": 7,
       "clean_modes": [
@@ -13815,7 +13904,7 @@
         "Материал каркаса": "ЛДСП",
         "Материал фасада": "ЛДСП",
         "Тип петель": "Без доводчиков",
-        "Тип направляющих ящиков": "Роликовые",
+        "Тип направляющих ящиков": "Шариковые",
         "Нужна ли сборка": "Да",
         "Срок гарантии, месяцев": "12",
         "Страна-производитель": "Россия",
@@ -13904,7 +13993,7 @@
         "Материал каркаса": "ЛДСП",
         "Материал фасада": "ЛДСП",
         "Тип петель": "Без доводчиков",
-        "Тип направляющих ящиков": "Роликовые",
+        "Тип направляющих ящиков": "Шариковые",
         "Нужна ли сборка": "Да",
         "Срок гарантии, месяцев": "12",
         "Страна-производитель": "Россия",
@@ -14306,8 +14395,8 @@
     {
       "source_url": "https://yourroom.ru/products/shkaf-kupe-bergen-shk-1000-kashemir",
       "name": "Шкаф-купе \"Берген\" ШК-1000 - Кашемир",
-      "customer_price": "17543",
-      "old_price": "19490",
+      "customer_price": "19415",
+      "old_price": "21570",
       "manufacturer": "Интерьер-Центр",
       "category_path": [
         "Шкафы-купе"
@@ -17051,8 +17140,8 @@
     {
       "source_url": "https://yourroom.ru/products/povorotnyj-stul-kantri-360-zheltyj-velyur--chernyj-muar-konus-2-2-2",
       "name": "Поворотный стул \"Кантри-360\" SL - Желтый (велюр) / Черный муар (конус)",
-      "customer_price": "7990",
-      "old_price": "14530",
+      "customer_price": "7490",
+      "old_price": "13620",
       "manufacturer": "СуперДома",
       "category_path": [
         "Стулья и табуреты",
@@ -17325,11 +17414,404 @@
         "clean_alternate",
         "clean_alternate"
       ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-rich-shk-002-dub-kraft-zolotoj--belyj-gladkij--sumerechnyj-goluboj",
+      "name": "Шкаф двухдверный \"RICH\" ШК-002 - Дуб Крафт золотой / Белый (гладкий) / Сумеречный голубой",
+      "customer_price": "15354",
+      "old_price": "21930",
+      "manufacturer": "МК Стиль",
+      "category_path": [
+        "Распашные шкафы",
+        "Двухдверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1086x462x2011 мм",
+        "Вес": "87 кг",
+        "Объем": "0.16 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "24",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб Крафт золотой / Белый (гладкий) / Сумеречный голубой"
+      },
+      "description_preview": "\"Безопасность\" и \"Комфорт\" - эти слова сразу приходят на ум, когда речь заходит о модульной детской Rich. Прибавим к этому широкую модульную линейку из 13 функциональных предметов гарнитура и получим ту детскую, за которую ребенок точно скажет вам «Спасибо». Шкаф ШК-002 имеет две распашных створки из ЛДСП 16 мм двух цветов. В верхних створках произведена фрезеровка, заменяющая ручку. Длина фрезеровки 284 мм. Створки внутренние. Корпус шкафа ЛДСП 16 мм в кромке 2,0 по видимой стороне в цвет корпу",
+      "source_images": 4,
+      "clean_images": 4,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/obuvnitsa-innes-6-2",
+      "name": "Обувница \"Иннэс-6\" СЛ - Бодега белая/Сандал белый СЛ",
+      "customer_price": "6806",
+      "old_price": "8510",
+      "manufacturer": "Диал",
+      "category_path": [
+        "Мебель для прихожей",
+        "Обувницы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "600x390x750 мм",
+        "Вес": "26.68 кг",
+        "Объем": "0.04 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "МДФ",
+        "Тип петель": "Без доводчиков",
+        "Тип направляющих ящиков": "Шариковые",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "24",
+        "Страна-производитель": "Россия"
+      },
+      "description_preview": "Обувница с выдвижным ящиком для мелких предметов и нишей с откидной створкой удобна и проста в использовании. Она поможет организовать аккуратное и компактное хранение обуви, надёжно защитит её от физического воздействия. Материал ручек (цвет): Пластик (Антик/Белый) Тип направляющих ящиков: Шариковые направляющие полного выдвижения Особенность: Откидная створка",
+      "source_images": 4,
+      "clean_images": 4,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-bastion-10-m-s-antresolyu-h-25-m-grafit",
+      "name": "Шкаф двухдверный \"Бастион\" 1,0 м с антресолью (h 2,5 м) - Графит",
+      "customer_price": "16751",
+      "old_price": "16751",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Двухдверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1000x520x2500 мм",
+        "Вес": "100.1 кг",
+        "Объем": "0.9 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Графит"
+      },
+      "description_preview": "Состав комплекта Шкаф двухдверный \"Бастион\" 1,0 м графит В комплекте 1 шт Габариты ШхГхВ (мм) 1000 x 520 x 2200 Антресоль \"Бастион\" 1,0 м (h 300 мм) Графит В комплекте 1 шт Габариты ШхГхВ (мм) 1000 x 520 x 300 Двухстворчатый распашной шкаф \"Бастион\" с антресолью - это универсальное и вместительное решение для оптимизации хранения в прихожей, спальне или гардеробной. Главное преимущество модели - трансформируемое внутреннее наполнение, планировку которого вы определяете индивидуально на этапе сбо",
+      "source_images": 6,
+      "clean_images": 6,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-dvukhdvernyj-bastion-10-m-s-zerkalami-i-antresolyu-h-25-m-dub-kraft-zolotoj--belyj-drevesnyj",
+      "name": "Шкаф двухдверный \"Бастион\" 1,0 м с зеркалами и антресолью (h 2,5 м) - Дуб крафт золотой / Белый древесный",
+      "customer_price": "21010",
+      "old_price": "21010",
+      "manufacturer": "Регион 058",
+      "category_path": [
+        "Распашные шкафы",
+        "Двухдверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1000x520x2500 мм",
+        "Вес": "106.1 кг",
+        "Объем": "0.93 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "Зеркало; ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб крафт золотой / Белый древесный"
+      },
+      "description_preview": "Состав комплекта Шкаф двухдверный \"Бастион\" 1,0 м дуб крафт золотой / белый древесный В комплекте 1 шт Габариты ШхГхВ (мм) 1000 x 520 x 2200 Зеркало фасадное для шкафов Бастион, Гермес, Авангард, Корд 360 мм (для 0,5м, 1,0м, 1,5м, 2,0м, ШКУ) В комплекте 2 шт Габариты ШхГхВ (мм) 360 x 4 x 1960 Антресоль \"Бастион\" 1,0 м (h 300 мм) Дуб крафт золотой / Белый древесный В комплекте 1 шт Габариты ШхГхВ (мм) 1000 x 520 x 300 Двухстворчатый распашной шкаф \"Бастион\" с антресолью - это универсальное и вмес",
+      "source_images": 6,
+      "clean_images": 6,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/namatrasnik-polikoton-barashki-8001400-mm-2",
+      "name": "Наматрасник с синтепоном (поликотон) СЛ - 800х1400 мм СЛ",
+      "customer_price": "594",
+      "old_price": "1980",
+      "manufacturer": "Виктория",
+      "category_path": [
+        "Матрасы, наматрасники",
+        "Наматрасники для матраса"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "800x1400x200 мм",
+        "Вес": "31 кг",
+        "Объем": "0 м³",
+        "Страна-производитель": "Россия"
+      },
+      "description_preview": "",
+      "source_images": 1,
+      "clean_images": 1,
+      "clean_modes": [
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/matras-klassik-1400kh2000-mm-17h-2-2-2",
+      "name": "Матрас Классик h17 см СЛ - 1400х2000 мм СЛ",
+      "customer_price": "6570",
+      "old_price": "21900",
+      "manufacturer": "Виктория",
+      "category_path": [
+        "Матрасы, наматрасники",
+        "Матрасы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1400x2000x170 мм",
+        "Вес": "31 кг",
+        "Объем": "0.5 м³",
+        "Срок гарантии, месяцев": "12 месяцев",
+        "Ширина спального места": "1400",
+        "Длина спального места": "2000",
+        "Материал чехла": "Текстиль",
+        "Страна-производитель": "Россия"
+      },
+      "description_preview": "Высота изделия - 170 мм. Жесткость - средняя; Максимальный вес на 1 спальное место - 90 кг. Состав: Ткань жаккард стег. на 100 г синтепона, ППУ 1 см, фетр, пруж. блок боннель, фетр, ППУ 1 см. без ппу отбортовки, усиление пружинного блока по углам.",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/komplekt-matras--topper-h20-sm-1800kh2000-mm-2-2-2-2",
+      "name": "Комплект комфорт (Матрас + Топпер) h20 см СЛ - 1800х2000 мм СЛ",
+      "customer_price": "10440",
+      "old_price": "34800",
+      "manufacturer": "Виктория",
+      "category_path": [
+        "Матрасы, наматрасники",
+        "Матрасы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1800x2000x200 мм",
+        "Вес": "80 кг",
+        "Объем": "0 м³",
+        "Срок гарантии, месяцев": "12 месяцев",
+        "Ширина спального места": "1800",
+        "Длина спального места": "2000",
+        "Материал чехла": "Текстиль",
+        "Страна-производитель": "Россия"
+      },
+      "description_preview": "Комплект комфорт (Матрас + Топпер) h20 см -Матрас - Беспружинный материал холкон, высота 16 см -Топпер - Беспружинный материал холкон, высота 3 см, резинки по углам Ткань жаккард стеганный 100 гр синтепона Максимальный вес на 1-го человека: 100 кг Жесткость 1-й стороны: Средняя *Холкон - нетканый синтетический материал, который путем термической обработки получают из мельчайшего витого полиэфирного волокна, напоминающего пружинки, с внутренними полостями.",
+      "source_images": 1,
+      "clean_images": 1,
+      "clean_modes": [
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/matras-standart-ppu-1400kh2000-mm-h10-sm-2-2",
+      "name": "Матрас Стандарт (ППУ) h10 см СЛ - 1400х2000 мм СЛ",
+      "customer_price": "5080",
+      "old_price": "16930",
+      "manufacturer": "Виктория",
+      "category_path": [
+        "Матрасы, наматрасники",
+        "Матрасы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1400x2000x100 мм",
+        "Вес": "31 кг",
+        "Объем": "0.2 м³",
+        "Срок гарантии, месяцев": "12 месяцев",
+        "Ширина спального места": "1400",
+        "Длина спального места": "2000",
+        "Материал чехла": "Текстиль",
+        "Страна-производитель": "Россия"
+      },
+      "description_preview": "Классический беспружинный матрас на основе современного эргоформ 100 мм и стеганного жаккарда. Идеальный вариант для загородного отдыха. Состав: ППУ h 10 см (эрголатекс), бязь стеганная на 100 г. синтепона Высота изделия - 100 мм. Обратите внимание! Под воздействием низких температур при транспортировке ППУ может уменьшаться в объёме на 10 см2. В комнатной температуре изделие приходит в норму в течение 2-3 суток.",
+      "source_images": 2,
+      "clean_images": 2,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/matras-komfort-miks-h11-sm-800kh2000-mm-2-2-2-2-2",
+      "name": "Матрас Комфорт Микс h11 см СЛ - 800х2000 мм СЛ",
+      "customer_price": "2790",
+      "old_price": "9300",
+      "manufacturer": "Виктория",
+      "category_path": [
+        "Матрасы, наматрасники",
+        "Матрасы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "800x2000x110 мм",
+        "Вес": "31 кг",
+        "Объем": "0.18 м³",
+        "Ширина спального места": "800",
+        "Длина спального места": "2000",
+        "Материал чехла": "Текстиль",
+        "Страна-производитель": "Россия"
+      },
+      "description_preview": "Матрас \"Комфорт Микс\" идеально подойдет для сна Вашего ребенка. Имеет две стороны жесткости. Одна сторона - кокосовая койра, вторая - синтепон со стеганой бязью. Подойдет как для здоровой осанки малыша, так и для любителей долго поспать. Высота матраса 11см. Уровень жесткости - средний.",
+      "source_images": 1,
+      "clean_images": 1,
+      "clean_modes": [
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-servant-modo-06-m-sl-artizanchernyj-matovyj-sl",
+      "name": "Шкаф-сервант \"MODO\" 0,6 м СЛ - Артизан/Черный матовый СЛ",
+      "customer_price": "13225",
+      "old_price": "22040",
+      "manufacturer": "НК-Мебель",
+      "category_path": [
+        "Распашные шкафы",
+        "Однодверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "600x410x1950 мм",
+        "Вес": "31 кг",
+        "Объем": "0.48 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "МДФ; Стекло",
+        "Тип петель": "Петли с доводчиком",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "24",
+        "Страна-производитель": "Россия",
+        "Цвет": "Артизан/Черный матовый СЛ"
+      },
+      "description_preview": "Помимо современного стиля и новых трендовых цветов (сочетание рустикального дерева и матовых однотонных фасадов), у системы есть ряд конкурентных преимуществ: - долговечные МДФ фасады окутанные матовой ПВХ пленкой. - петли с доводчиком - закалённое стекло витрин и стеклянных полок Комплект состоит из: MODO шкаф сервант (корпус) Артизан MODO шкаф сервант (фасад) Черный",
+      "source_images": 5,
+      "clean_images": 5,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-palmera-shk-003-belyj-gladkij--belyj-glyanets",
+      "name": "Шкаф трехдверный \"Пальмера\" ШК-003 - Белый (Гладкий) / Белый глянец",
+      "customer_price": "26221",
+      "old_price": "29130",
+      "manufacturer": "МК Стиль",
+      "category_path": [
+        "Распашные шкафы",
+        "Трехдверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1499x510x2300 мм",
+        "Вес": "149 кг",
+        "Объем": "0.26 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "МДФ",
+        "Тип петель": "Без доводчиков",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "24",
+        "Страна-производитель": "Россия"
+      },
+      "description_preview": "Трехстворчатый распашной шкаф \"ПАЛЬМЕРА\" - вместительная система хранения без лишних деталей. Лаконичный трехстворчатый шкаф с продуманным зонированием поможет аккуратно разместить гардероб всей семьи. Гладкие фасады без выступающих ручек, акцентная вставка в оттенке \"Дуб Крафт золотой\" позволяют модели легко вписаться в современный интерьер спальни, прихожей или гостиной. Внутреннее наполнение разделено на три функциональных уровня для вещей разного формата: Два отделения для одежды на плечиках",
+      "source_images": 4,
+      "clean_images": 4,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-vega-1200-bez-zerkala-belyj-gladkij--grafit",
+      "name": "Шкаф трехдверный \"Вега\" 1200 без зеркала - Белый гладкий / Графит",
+      "customer_price": "12502",
+      "old_price": "14710",
+      "manufacturer": "Эра",
+      "category_path": [
+        "Распашные шкафы",
+        "Трехдверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1200x510x1980 мм",
+        "Вес": "98.6 кг",
+        "Объем": "0.03 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Тип направляющих ящиков": "Шариковые",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Белый гладкий / Графит"
+      },
+      "description_preview": "Трёхстворчатый шкаф \"Вега\" 1200 - практичное решение для организации хранения вещей и текстиля. Лаконичный дизайн с глухими фасадами гармонично дополнит интерьер спальни, гостиной или детской комнаты. Продуманное внутреннее наполнение: Три вместительных выдвижных ящика в нижней части позволяют удобно рассортировать бельё, аксессуары, документы и мелкие вещи. Платяное отделение со штангой предназначено для бережного хранения верхней одежды, платьев и костюмов на вешалках. Бельевая секция с полкам",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
+    },
+    {
+      "source_url": "https://yourroom.ru/products/shkaf-trekhdvernyj-vega-1200-bez-zerkala-dub-votan--belyj-gladkij",
+      "name": "Шкаф трехдверный \"Вега\" 1200 без зеркала - Дуб Вотан / Белый гладкий",
+      "customer_price": "12502",
+      "old_price": "14710",
+      "manufacturer": "Эра",
+      "category_path": [
+        "Распашные шкафы",
+        "Трехдверные шкафы"
+      ],
+      "characteristics": {
+        "Габариты (ШхГхВ)": "1200x510x1980 мм",
+        "Вес": "98.6 кг",
+        "Объем": "0.03 м³",
+        "Материал каркаса": "ЛДСП",
+        "Материал фасада": "ЛДСП",
+        "Тип петель": "Без доводчиков",
+        "Тип направляющих ящиков": "Шариковые",
+        "Нужна ли сборка": "Да",
+        "Срок гарантии, месяцев": "12",
+        "Страна-производитель": "Россия",
+        "Цвет": "Дуб Вотан / Белый гладкий"
+      },
+      "description_preview": "Трёхстворчатый шкаф \"Вега\" 1200 - практичное решение для организации хранения вещей и текстиля. Лаконичный дизайн с глухими фасадами гармонично дополнит интерьер спальни, гостиной или детской комнаты. Продуманное внутреннее наполнение: Три вместительных выдвижных ящика в нижней части позволяют удобно рассортировать бельё, аксессуары, документы и мелкие вещи. Платяное отделение со штангой предназначено для бережного хранения верхней одежды, платьев и костюмов на вешалках. Бельевая секция с полкам",
+      "source_images": 3,
+      "clean_images": 3,
+      "clean_modes": [
+        "clean_alternate",
+        "clean_alternate",
+        "clean_alternate"
+      ]
     }
   ],
   "complete": true,
   "days_since_last_success": 14.01,
-  "sitemap_urls_total": 7754,
+  "sitemap_urls_total": 7857,
   "warehouse_id": "019a5ab3-c024-706c-8b63-9059588d3d76",
-  "finished_at": "2026-11-12T15:34:44+00:00"
+  "finished_at": "2026-11-26T17:38:51+00:00"
 }
