@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<yml_catalog date="2026-11-27 11:30">
+<yml_catalog date="2026-11-27 23:05">
   <shop>
     <name>Tetchair.ru</name>
     <company>Tetchair</company>
@@ -276,7 +276,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>ВЕШАЛКИ</collection>
-        <qty>40</qty>
+        <qty>37</qty>
         <weight>8,5</weight>
         <volume>0,028215</volume>
         <param name="Материал">металл/хром/мрамор</param>
@@ -475,7 +475,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>51</qty>
+        <qty>53</qty>
         <weight>12</weight>
         <volume>0,1536</volume>
         <param name="Материал">велюр/букле</param>
@@ -546,7 +546,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>33</qty>
+        <qty>35</qty>
         <weight>15,5</weight>
         <volume>0,2688</volume>
         <param name="Материал">велюр/букле</param>
@@ -554,14 +554,6 @@
         <param name="Страна производства">РОССИЯ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
-        <param name="Ширина сиденья">80</param>
-        <param name="Максимальная нагрузка">150</param>
-        <param name="Тип сиденья (жесткий/мягкий)">Мягкий</param>
-        <param name="Тип спинки (жесткий/мягкий)">Мягкий</param>
-        <param name="Требует сборки">Нет</param>
-        <param name="Коллекция">Modern РФ/Модерн РФ (обеденная группа)</param>
-        <param name="Высота от пола до верхней точки спинки">42</param>
-        <param name="Материал наполнения">рециклированное волокно</param>
         <param name="Материал обивки">велюр/букле</param>
         <param name="Цвет обивки">бежевый</param>
         <param name="Страна-Производитель">РОССИЯ</param>
@@ -571,6 +563,14 @@
         <param name="Высота от пола до сиденья">24</param>
         <param name="Высота спинки">20</param>
         <param name="Глубина сиденья">56</param>
+        <param name="Ширина сиденья">80</param>
+        <param name="Максимальная нагрузка">150</param>
+        <param name="Тип сиденья (жесткий/мягкий)">Мягкий</param>
+        <param name="Тип спинки (жесткий/мягкий)">Мягкий</param>
+        <param name="Требует сборки">Нет</param>
+        <param name="Коллекция">Modern РФ/Модерн РФ (обеденная группа)</param>
+        <param name="Высота от пола до верхней точки спинки">42</param>
+        <param name="Материал наполнения">рециклированное волокно</param>
         <param name="Высота" unit="cm">42</param>
         <param name="Ширина" unit="cm">80</param>
         <param name="Глубина" unit="cm">80</param>
@@ -1930,8 +1930,6 @@
         <param name="Страна производства">РОССИЯ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
-        <param name="Материал обивки спинки">велюр</param>
-        <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота от пола до верха подлокотника (в самом низком положении подлокотника)">64-73</param>
         <param name="Высота кресла (от пола до самой верхней точки кресла)">64-73</param>
         <param name="Высота от пола до верха сиденья">46-55</param>
@@ -1960,6 +1958,8 @@
         <param name="Материал каркаса">дерево</param>
         <param name="Требует сборки">Да</param>
         <param name="Коллекция">Кресла TETCHAIR</param>
+        <param name="Материал обивки спинки">велюр</param>
+        <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">73</param>
         <param name="Ширина" unit="cm">68</param>
         <param name="Глубина" unit="cm">62</param>
@@ -2985,7 +2985,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>29</qty>
+        <qty>30</qty>
         <weight>9,5</weight>
         <volume>0,146949</volume>
         <param name="Материал">флок </param>
@@ -4057,7 +4057,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>23</qty>
+        <qty>21</qty>
         <weight>18,2</weight>
         <volume>0,17696</volume>
         <param name="Материал">кож/зам/ткань</param>
@@ -4385,7 +4385,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>29</qty>
+        <qty>26</qty>
         <weight>18,3</weight>
         <volume>0,17696</volume>
         <param name="Материал">кож/зам</param>
@@ -4423,89 +4423,6 @@
         <param name="Требует сборки">Да</param>
         <param name="Коллекция">Кресла TETCHAIR</param>
         <param name="Страна-Производитель">РОССИЯ</param>
-        <param name="Высота" unit="cm">126</param>
-        <param name="Ширина" unit="cm">67</param>
-        <param name="Глубина" unit="cm">73</param>
-        <dimensions>67/73/126</dimensions>
-      </offer>
-      <offer id="19372" available="true">
-        <vendorCode>19372</vendorCode>
-        <categoryId>7451975</categoryId>
-        <name>Кресло Бергамо/Bergamo хром (22) флок , коричневый, 6</name>
-        <barcode>4610095492466</barcode>
-        <url>https://tetchair.ru/products/kreslo-bergamo-hrom-22-flok-korichnevyy-6.html</url>
-        <country_of_origin>РОССИЯ</country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>1 шт. в 1 упак.</packages_count>
-        <transport-unit>1</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/960631/387408/48458_b05d69a6d0df2f898f3ae94ce65f451b.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-36035f33ff63c4d18b8fbbcc4320651a.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-510cd9c48b4cab999eed929a7e878148.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-ec892de2a428252c1baa486f2bdc1a95.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-fe111cd6417d47ebc234fba4c39f6641.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-5428df97bb4fd7d86208c6cde72d62b7.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-9a18293d0e87303e9445fc9f6fb2517e.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-cff28cf439eaa5d9888d55ddffbfcca2.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-3ea2bfe5bff35110c4f9338e4c643efd.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-9ae64ac646135117af3b0f0c83ac5e8b.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-e29c8fa59b94ef9c1b2637710c1cbfdf.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-12d4191f3bbd64ad4501a47da87d2288.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-08b9cbb4726cd122184b7384b891e6ea.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-6250e834869ac7169db2212e8976c637.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-5f56bdfb8c34e5ca8f4c99e43be83ae1.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-d34d4fe9fdab12eda3f0cc64f8cd1b04.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-99cd46cdf1f70f1f74aa87e6527e291d.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-6aa4cf4c18f46909467e845c2db47811.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-314ebbb58d0cde1310d8c34f73eecccd.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/48458/48458-5ae8ce1c7693409d5e1889cf3950f774.jpg</picture>
-        <video>https://rutube.ru/video/dc92570c83103a8243ab1d845f41cbf5/</video>
-        <description>Стильный дизайн кресла Бергамо/Bergamo хром (22) из коллекции Офис/Office станет прекрасным дополнением в интерьере офиса, переговорной комнаты или кабинета руководителя. Модель, имеющая привлекательный дизайн и элегантный внешний вид, понравится даже самому требовательному владельцу. Надежный каркас выполнен из усиленной фанеры толщиной более 10 мм. Такой материал отличается практичностью, прочностью и основательностью. Сиденье и спинка с мягким наполнителем из пенополиуретана (до 35 кг/м2) стандартной плотности обладают долгим сроком службы, не деформируются, пропускают воздух, отводят влагу и не накапливают пыль. Хромированная крестовина устойчива, способна выдерживать большие нагрузки. Офисное кресло регулируется по высоте и наклону с фиксацией в одном положении. Бесшумные полиуретановые колесики с прорезиненными вставками  позволяют легко перемещаться с места на место, не повреждая ламинат или паркет. Ролики и крестовина в креслах бренда Тетчейр/Tetchair соответствуют стандарту Бифма/Bifma.  Во всех креслах бренда Тетчейр/Tetchair используются газлифты 3 класса, он способен выдерживать вес до 120 кг. Фиксированные пластиковые подлокотники с мягкими накладками помогут снять напряжение с плеч и шеи при длительной работе. Благодаря обивке из износостойкой высокопрочной экокожи и прочного флока модель не требует сложного ухода, не теряет своего первоначального вида долгие годы, обладает отличными эксплуатационными качествами. Экокожа, используемая при изготовлении кресла, выдерживает до 50 000 циклов на истирание по Мартиндейлу, ткань флок также выдерживает до 50 000 циклов. Ткани с прочностью более 35 000 циклов являются самыми долговечными. Компьютерное кресло Бергамо/Bergamo хром (22) изготавливается в коричневом, черном, бежевом, сером, синем и белом цветах. Эргономичная модель подчеркнет безупречный вкус владельца, будет радовать своей долговечностью, красотой и практичностью продолжительное время. Офисное кресло поставляется в разобранном виде. Необходима простая сборка по прилагаемой инструкции. Максимальная нагрузка 120 кг.</description>
-        <price>18620</price>
-        <retail_price>18620</retail_price><purchase_price>13965</purchase_price><catalog_url>https://price.tetchair.ru/catalog/2943/?p=19372</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>Кресла TETCHAIR</collection>
-        <qty>13</qty>
-        <weight>18,3</weight>
-        <volume>0,17696</volume>
-        <param name="Материал">флок </param>
-        <param name="Цвет">коричневый</param>
-        <param name="Страна производства">РОССИЯ</param>
-        <param name="Бренд">Tetchair</param>
-        <param name="Упакован">Нет</param>
-        <param name="Страна-Производитель">РОССИЯ</param>
-        <param name="Материал каркаса">дерево</param>
-        <param name="Требует сборки">Да</param>
-        <param name="Коллекция">Кресла TETCHAIR</param>
-        <param name="Материал обивки спинки">велюр</param>
-        <param name="Материал обивки сиденья">велюр</param>
-        <param name="Высота от пола до верха подлокотника (в самом низком положении подлокотника)">68-79</param>
-        <param name="Высота кресла (от пола до самой верхней точки кресла)">117-126</param>
-        <param name="Высота от пола до верха сиденья">48-57</param>
-        <param name="Высота от верха сиденья до верха подлокотника (2 числа, если регулируемый)">24</param>
-        <param name="Ширина кресла по внешним сторонам подлокотников">67</param>
-        <param name="Габаритная глубина кресла (от крайней задней точки спинки до передней точки сиденья)">73</param>
-        <param name="Ширина сиденья (расстояние между внутренними точками подлокотников)">53</param>
-        <param name="Глубина сиденья в самой глубокой части (до спинки)">48</param>
-        <param name="Ширина спинки">51</param>
-        <param name="Толщина сиденья">10</param>
-        <param name="Длина спинки (не путать с высотой)">79</param>
-        <param name="Диаметр крестовины">70</param>
-        <param name="Наполнение спинки">ППУ</param>
-        <param name="Наполнение сиденья">ППУ</param>
-        <param name="Тип механизма">Топ-ган</param>
-        <param name="Тип подлокотников">фиксированный, с мягкой накладкой</param>
-        <param name="Поясничная поддержка">Нет</param>
-        <param name="Подголовник">Да</param>
-        <param name="Регулировка подголовника">Нет</param>
-        <param name="Слайдер (регулировка глубины сиденья)">нет</param>
-        <param name="Подставка под ноги">Нет</param>
-        <param name="Материал крестовины">металл</param>
-        <param name="Газовый лифт, класс">3</param>
-        <param name="Ролик (колесо) диаметр ролика и диаметр штока">50/11</param>
         <param name="Высота" unit="cm">126</param>
         <param name="Ширина" unit="cm">67</param>
         <param name="Глубина" unit="cm">73</param>
@@ -4634,7 +4551,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>7</qty>
+        <qty>6</qty>
         <weight>16,3</weight>
         <volume>0,185334</volume>
         <param name="Материал">кож/зам</param>
@@ -4718,7 +4635,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>181</qty>
+        <qty>179</qty>
         <weight>16,3</weight>
         <volume>0,185334</volume>
         <param name="Материал">кож/зам</param>
@@ -4885,7 +4802,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>26</qty>
+        <qty>25</qty>
         <weight>16,3</weight>
         <volume>0,185334</volume>
         <param name="Материал">флок </param>
@@ -4968,7 +4885,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>89</qty>
+        <qty>88</qty>
         <weight>16,3</weight>
         <volume>0,185334</volume>
         <param name="Материал">флок </param>
@@ -5052,7 +4969,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>11</qty>
+        <qty>10</qty>
         <weight>16,35</weight>
         <volume>0,185334</volume>
         <param name="Материал">флок </param>
@@ -5473,7 +5390,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>111</qty>
+        <qty>106</qty>
         <weight>15,7</weight>
         <volume>0,17696</volume>
         <param name="Материал">кож/зам/ткань</param>
@@ -5787,7 +5704,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>97</qty>
+        <qty>96</qty>
         <weight>15,7</weight>
         <volume>0,17696</volume>
         <param name="Материал">флок/ткань</param>
@@ -7898,7 +7815,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>14</qty>
+        <qty>10</qty>
         <weight>13,9</weight>
         <volume>0,22528</volume>
         <param name="Материал" />
@@ -8056,7 +7973,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>15</qty>
+        <qty>14</qty>
         <weight>18,5</weight>
         <volume>0,19296</volume>
         <param name="Материал">ткань</param>
@@ -8157,18 +8074,6 @@
         <param name="Страна производства">РОССИЯ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
-        <param name="Наполнение спинки">ППУ</param>
-        <param name="Наполнение сиденья">ППУ</param>
-        <param name="Тип механизма">Топ-ган люкс</param>
-        <param name="Тип подлокотников">5D</param>
-        <param name="Поясничная поддержка">Нет</param>
-        <param name="Подголовник">Нет</param>
-        <param name="Регулировка подголовника">Нет</param>
-        <param name="Слайдер (регулировка глубины сиденья)">нет</param>
-        <param name="Подставка под ноги">Нет</param>
-        <param name="Материал крестовины">металл</param>
-        <param name="Газовый лифт, класс">3</param>
-        <param name="Ролик (колесо) диаметр ролика и диаметр штока">50/11</param>
         <param name="Страна-Производитель">РОССИЯ</param>
         <param name="Материал каркаса">металл, дерево</param>
         <param name="Требует сборки">Да</param>
@@ -8187,6 +8092,18 @@
         <param name="Толщина сиденья">8</param>
         <param name="Длина спинки (не путать с высотой)">79</param>
         <param name="Диаметр крестовины">70</param>
+        <param name="Наполнение спинки">ППУ</param>
+        <param name="Наполнение сиденья">ППУ</param>
+        <param name="Тип механизма">Топ-ган люкс</param>
+        <param name="Тип подлокотников">5D</param>
+        <param name="Поясничная поддержка">Нет</param>
+        <param name="Подголовник">Нет</param>
+        <param name="Регулировка подголовника">Нет</param>
+        <param name="Слайдер (регулировка глубины сиденья)">нет</param>
+        <param name="Подставка под ноги">Нет</param>
+        <param name="Материал крестовины">металл</param>
+        <param name="Газовый лифт, класс">3</param>
+        <param name="Ролик (колесо) диаметр ролика и диаметр штока">50/11</param>
         <param name="Высота" unit="cm">132</param>
         <param name="Ширина" unit="cm">69</param>
         <param name="Глубина" unit="cm">70</param>
@@ -8509,7 +8426,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>13</qty>
+        <qty>11</qty>
         <weight>14,4</weight>
         <volume>0,22528</volume>
         <param name="Материал">велюр/букле (HYP)</param>
@@ -9226,7 +9143,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>10</qty>
+        <qty>9</qty>
         <weight>15,7</weight>
         <volume>0,17696</volume>
         <param name="Материал">кож/зам/ткань</param>
@@ -9675,85 +9592,6 @@
         <param name="Глубина" unit="cm">68</param>
         <dimensions>72/68/95</dimensions>
       </offer>
-      <offer id="26039" available="true">
-        <vendorCode>26039</vendorCode>
-        <categoryId>7451975</categoryId>
-        <name>Кресло Флаффи/Fluffy вельвет, серый</name>
-        <barcode>4640511840762</barcode>
-        <url>https://tetchair.ru/products/kreslo-fluffy-flaffi-vel-vet-seryy.html</url>
-        <country_of_origin>РОССИЯ</country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>1 шт. в 1 упак.</packages_count>
-        <transport-unit>1</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/284/300/27966v1667_00.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-d57de648544a17435dd2b6779b5b90e7.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-c37dc24f76a1532ed8cb372508695973.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-d41df1bfe60f856aa55cc9347f61a974.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-f49d30bb342c1b2f46da903a1b75245a.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-4959e761ff3f7f15ce92eaef473e489e.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-15aea64f59541cbbf080d2118de1a8f4.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-c947fc0de8bf8d5a6b7078b0d3633b0a.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-c5f748a740a5988bf7e1debdb5ce5588.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-abaefed05aeca5e6486e2be5a4cb6cb1.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-46d2b2469d1e1b715f4c3d3f72d574c9.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-4d7d64a24b88a7c5934cc4fc7b89abfe.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-5873623d886d499cfb864f7097031cbc.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-e65c2a22873f7f3b2028d0f8cddc1da2.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-782bcf0811f39822ff36911b723151e6.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-464bd9b8a118bb3d43bb31f33951e391.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73843/73843-f3f370c80beb8c2c8ae128fc98bd88d2.jpg</picture>
-        <description>Уютное и мягкое компьютерное кресло Флаффи/Fluffy для дома и офиса, созданное для комфортной работы и отдыха. Благодаря продуманным материалам и эргономичной форме, это офисное кресло для работы за компьютером обеспечивает приятные ощущения даже при длительном использовании. Отличный выбор для тех, кто хочет купить удобное компьютерное кресло по доступной цене.    Основные преимущества:   Максимальный комфорт &amp;mdash; многослойное наполнение, как у эргономичного кресла для работы.   Современный дизайн &amp;mdash; стильное кресло для офиса и дома.   Износостойкая обивка &amp;mdash; до 50 000 циклов (идеально как кресло для ежедневной работы).   Надежная конструкция &amp;mdash; прочное компьютерное кресло с металлическим каркасом.   Плавная регулировка &amp;mdash; кресло с механизмом качания топ ган.   Комфорт и материалы.    Сиденье выполнено на основе прочного каркаса с многослойным наполнением: ППУ высокой и стандартной плотности дополнен периотеком. Это делает модель отличным вариантом, если вы ищете мягкое компьютерное кресло или удобное кресло для длительной работы за компьютером.    Спинка сочетает ППУ и аэропух, благодаря чему кресло можно назвать комфортным офисным креслом с мягкой спинкой, создающим эффект &amp;laquo;обволакивания&amp;raquo;.    Обивка из плотной ткани приятна на ощупь и подходит тем, кто выбирает износостойкое компьютерное кресло для дома или офиса.    Конструкция и надежность.  Металлический каркас спинки с порошковым покрытием.  Черная стальная крестовина &amp;Oslash;640 мм (стандарт BIFMA).  Газлифт 3 класса &amp;mdash; кресло с регулировкой высоты.  Прорезиненные ролики &amp;mdash; практичное офисное кресло на колесах.  Механизм и управление.    Кресло оснащено механизмом топ-ган, что делает его удобным компьютерным креслом с регулировкой:    функция качания для расслабления,   фиксация положения спинки,   настройка жесткости под пользователя.     Кресло Флаффи/Fluffy&amp;mdash; это удобное компьютерное кресло для дома, которое также отлично подойдет как офисное кресло недорого. Идеальный вариант для тех, кто хочет купить кресло для работы за компьютером с акцентом на мягкость и комфорт.</description>
-        <price>14700</price>
-        <retail_price>14700</retail_price><purchase_price>11025</purchase_price><catalog_url>https://price.tetchair.ru/catalog/2943/?p=26039</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>Кресла TETCHAIR</collection>
-        <qty>1</qty>
-        <weight>14,4</weight>
-        <volume>0,22528</volume>
-        <param name="Материал">вельвет</param>
-        <param name="Цвет">серый</param>
-        <param name="Страна производства">РОССИЯ</param>
-        <param name="Бренд">Tetchair</param>
-        <param name="Упакован">Нет</param>
-        <param name="Страна-Производитель">РОССИЯ</param>
-        <param name="Материал каркаса">металл, дерево</param>
-        <param name="Требует сборки">Да</param>
-        <param name="Ролик (колесо) диаметр ролика и диаметр штока">50/11</param>
-        <param name="Подголовник">Нет</param>
-        <param name="Регулировка подголовника">Нет</param>
-        <param name="Слайдер (регулировка глубины сиденья)">нет</param>
-        <param name="Подставка под ноги">Нет</param>
-        <param name="Материал крестовины">металл</param>
-        <param name="Газовый лифт, класс">3</param>
-        <param name="Диаметр крестовины">66</param>
-        <param name="Наполнение спинки">ППУ, периотек</param>
-        <param name="Наполнение сиденья">ППУ, аэропух</param>
-        <param name="Тип механизма">Топ-ган</param>
-        <param name="Тип подлокотников">фиксированный</param>
-        <param name="Поясничная поддержка">Нет</param>
-        <param name="Габаритная глубина кресла (от крайней задней точки спинки до передней точки сиденья)">68</param>
-        <param name="Ширина сиденья (расстояние между внутренними точками подлокотников)">54</param>
-        <param name="Глубина сиденья в самой глубокой части (до спинки)">40</param>
-        <param name="Ширина спинки">59</param>
-        <param name="Толщина сиденья">11</param>
-        <param name="Длина спинки (не путать с высотой)">45</param>
-        <param name="Высота от пола до верха подлокотника (в самом низком положении подлокотника)">68-77</param>
-        <param name="Высота кресла (от пола до самой верхней точки кресла)">86-95</param>
-        <param name="Высота от пола до верха сиденья">46-55</param>
-        <param name="Высота от верха сиденья до верха подлокотника (2 числа, если регулируемый)">20</param>
-        <param name="Ширина кресла по внешним сторонам подлокотников">72</param>
-        <param name="Коллекция">Кресла TETCHAIR</param>
-        <param name="Материал обивки спинки">вельвет</param>
-        <param name="Материал обивки сиденья">вельвет</param>
-        <param name="Высота" unit="cm">95</param>
-        <param name="Ширина" unit="cm">72</param>
-        <param name="Глубина" unit="cm">68</param>
-        <dimensions>72/68/95</dimensions>
-      </offer>
       <offer id="26220" available="true">
         <vendorCode>26220</vendorCode>
         <categoryId>7451975</categoryId>
@@ -9784,7 +9622,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>58</qty>
+        <qty>57</qty>
         <weight>24,1</weight>
         <volume>0,19296</volume>
         <param name="Материал">кож/зам</param>
@@ -10098,7 +9936,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>72</qty>
+        <qty>69</qty>
         <weight>12</weight>
         <volume>0,16835</volume>
         <param name="Материал">ткань/кож/зам</param>
@@ -10638,7 +10476,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>113</qty>
+        <qty>109</qty>
         <weight>10,1</weight>
         <volume>0,08352</volume>
         <param name="Материал">флок/ткань</param>
@@ -10756,54 +10594,6 @@
         <param name="Ширина" unit="cm">55</param>
         <param name="Глубина" unit="cm">59</param>
         <dimensions>55/59/101</dimensions>
-      </offer>
-      <offer id="21416" available="true">
-        <vendorCode>21416</vendorCode>
-        <categoryId>7451994</categoryId>
-        <name>Кресло Практик Плт/Practic Plt ткань/кож/зам, серый/металлик, TW-12/W-12/36</name>
-        <barcode>4610095494057</barcode>
-        <url>https://tetchair.ru/products/kreslo-practic-plt-tkan-kozh-zam-seryy-metallik-tw-12-w-12-36.html</url>
-        <country_of_origin>РОССИЯ</country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>1 шт. в 1 упак.</packages_count>
-        <transport-unit>1</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/284/300/24725v18219_01.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-7fed16b208f0da72053dbc7d7296ee24.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-de8a2a74a3628528e5145c4ce30594e7.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-5337d46bb4e5dce762f52e6698b2fa97.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-7dc9866c011f231578bdf6eeb872534f.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-2c7437a635569efb89f67f15de86dbc0.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-4aaaefd257174bd79cb04fd390b9b07a.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-70c602ac236729a54c0947bed3f3f8f7.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-f39f8d4275d1db48ba3ef25eaa1086b4.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-eb343746df7afb9ce154ef20730bc781.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-2d6a61a185d4e790d0d852ff9a372dcd.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-3cf6d0ed4a0389d2455de25bfad9e451.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/54463/54463-7bec9529895ac332fd9b9f94560af815.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/960631/387408/Kreslo_Practic.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/960631/387408/Kreslo_Practic__0.jpg</picture>
-        <video>https://rutube.ru/video/851b9689f131b5fd56b5c2b733010d43/</video>
-        <description>Практичное компьютерное кресло Практик Плт/Practic Plt &amp;ndash; стильное решение для создания идеального интерьера в рабочем кабинете офиса или городской квартиры или загородного дома. Прочная 5-лучевая полиамидная крестовина диаметром 650 мм надежна и устойчива к усиленной эксплуатации. Подлокотники Т-образные с регулировкой по высоте, накладка из текстурированного пластика, механизм регулировки высоты сиденья и угла наклона до 15 градусов позволят принять комфортную позу и снять напряжение с позвоночника. Интегрированный в чехол подголовник сделает длительное времяпрепровождение за компьютером комфортным и приятным. Модель оборудована газлифтом 3 класса с ходом 100 мм. Мягкое сиденье с наполнителем из пенополиуретана плотностью не менее 30 кг/м3 обладает высокими эксплуатационными качествами, не меняет форму на протяжении длительного времени. Благодаря высококачественным полиамидным роликам кресло легко перемещается из одного помещения в другое. Колесики дополнительно прорезинены, не царапают напольное покрытие и подходят для использования на паркете и ламинате. Диаметр штока ролика &amp;ndash; 11 мм. Анатомическая спинка и удобная посадка модели максимально точно подстраиваются под физические особенности тела человека. Компьютерное кресло обито сеткой плотностью 280 г/м2, обеспечивающей вентиляцию в летний период времени, а также износостойкой высококачественной искусственной кожей, не требующей сложного ухода. Сетка, используемая при изготовлении кресла, выдерживает до 25 000 циклов на истирание по Мартиндейлу, экокожа 50 000 циклов. Модель черного цвета выглядит стильно и необычно, подчеркнет безупречный вкус владельца, будет радовать своей долговечностью, красотой и практичностью продолжительное время. Кресло поставляется в разобранном виде. Необходима простая сборка по прилагаемой инструкции. Максимальная нагрузка 120 кг.</description>
-        <price>9930</price>
-        <retail_price>9930</retail_price><purchase_price>7445</purchase_price><catalog_url>https://price.tetchair.ru/catalog/3598/?p=21416</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>Кресла TETCHAIR</collection>
-        <qty>1</qty>
-        <weight>12</weight>
-        <volume>0,16835</volume>
-        <param name="Материал">ткань/кож/зам</param>
-        <param name="Цвет">серый/металлик</param>
-        <param name="Страна производства">РОССИЯ</param>
-        <param name="Бренд">Tetchair</param>
-        <param name="Упакован">Нет</param>
-        <param name="Высота" unit="cm">122</param>
-        <param name="Ширина" unit="cm">61</param>
-        <param name="Глубина" unit="cm">52.5</param>
-        <dimensions>61/52.5/122</dimensions>
       </offer>
       <offer id="21417" available="true">
         <vendorCode>21417</vendorCode>
@@ -11202,7 +10992,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>15</qty>
+        <qty>14</qty>
         <weight>10,1</weight>
         <volume>0,08352</volume>
         <param name="Материал">флок/ткань</param>
@@ -11276,7 +11066,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>60</qty>
+        <qty>59</qty>
         <weight>10,55</weight>
         <volume>0,08352</volume>
         <param name="Материал">флок </param>
@@ -11354,7 +11144,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>38</qty>
+        <qty>37</qty>
         <weight>12,65</weight>
         <volume>0,1326</volume>
         <param name="Материал">флок, ткань </param>
@@ -11447,7 +11237,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>91</qty>
+        <qty>111</qty>
         <weight>10,5</weight>
         <volume>0,04307295</volume>
         <param name="Материал">флок </param>
@@ -11517,7 +11307,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>70</qty>
+        <qty>68</qty>
         <weight>10,5</weight>
         <volume>0,04307295</volume>
         <param name="Материал">флок </param>
@@ -11664,7 +11454,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>7</qty>
+        <qty>5</qty>
         <weight>8,9</weight>
         <volume>0,049088</volume>
         <param name="Материал">флок </param>
@@ -11672,12 +11462,6 @@
         <param name="Страна производства">РОССИЯ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
-        <param name="Страна-Производитель">РОССИЯ</param>
-        <param name="Материал каркаса">металл, дерево</param>
-        <param name="Требует сборки">Да</param>
-        <param name="Коллекция">Кресла TETCHAIR</param>
-        <param name="Материал обивки спинки">велюр</param>
-        <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота от пола до верха подлокотника (в самом низком положении подлокотника)">46-55</param>
         <param name="Высота кресла (от пола до самой верхней точки кресла)">85-94</param>
         <param name="Высота от пола до верха сиденья">46-55</param>
@@ -11702,6 +11486,12 @@
         <param name="Материал крестовины">металл</param>
         <param name="Газовый лифт, класс">3</param>
         <param name="Ролик (колесо) диаметр ролика и диаметр штока">50/11</param>
+        <param name="Страна-Производитель">РОССИЯ</param>
+        <param name="Материал каркаса">металл, дерево</param>
+        <param name="Требует сборки">Да</param>
+        <param name="Коллекция">Кресла TETCHAIR</param>
+        <param name="Материал обивки спинки">велюр</param>
+        <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">94</param>
         <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">56</param>
@@ -11739,7 +11529,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>32</qty>
+        <qty>31</qty>
         <weight>8,9</weight>
         <volume>0,049088</volume>
         <param name="Материал">флок </param>
@@ -12044,7 +11834,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>26</qty>
+        <qty>18</qty>
         <weight>12,95</weight>
         <volume>0,146888</volume>
         <param name="Материал">ткань</param>
@@ -12433,7 +12223,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR</collection>
-        <qty>6</qty>
+        <qty>5</qty>
         <weight>10,5</weight>
         <volume>0,04307295</volume>
         <param name="Материал">кож/зам</param>
@@ -14899,7 +14689,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>14</qty>
+        <qty>11</qty>
         <weight>17,8</weight>
         <volume>0,36972</volume>
         <param name="Материал">рогожка</param>
@@ -15348,6 +15138,14 @@
         <param name="Страна производства">РОССИЯ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
+        <param name="Материал обивки">букле</param>
+        <param name="Цвет обивки">бежевый</param>
+        <param name="Страна-Производитель">РОССИЯ</param>
+        <param name="Ширина">118</param>
+        <param name="Глубина">81</param>
+        <param name="Высота">82</param>
+        <param name="Высота от пола до верхней точки подлокотников">53</param>
+        <param name="Высота от пола до сиденья">46</param>
         <param name="Высота спинки">50</param>
         <param name="Глубина сиденья">56</param>
         <param name="Ширина сиденья">114</param>
@@ -15359,14 +15157,6 @@
         <param name="Раскладывается или нет?">Нет</param>
         <param name="Цвет опор">белый</param>
         <param name="Наличие ящика для белья">Нет</param>
-        <param name="Материал обивки">букле</param>
-        <param name="Цвет обивки">бежевый</param>
-        <param name="Страна-Производитель">РОССИЯ</param>
-        <param name="Ширина">118</param>
-        <param name="Глубина">81</param>
-        <param name="Высота">82</param>
-        <param name="Высота от пола до верхней точки подлокотников">53</param>
-        <param name="Высота от пола до сиденья">46</param>
         <param name="Высота" unit="cm">82</param>
         <param name="Ширина" unit="cm">118</param>
         <param name="Глубина" unit="cm">81</param>
@@ -15523,7 +15313,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>11</qty>
+        <qty>9</qty>
         <weight>17,8</weight>
         <volume>0,36972</volume>
         <param name="Материал" />
@@ -16366,7 +16156,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>9</qty>
+        <qty>8</qty>
         <weight>16,5</weight>
         <volume>0,302697</volume>
         <param name="Материал">рогожка/металл</param>
@@ -16788,7 +16578,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>88</qty>
+        <qty>89</qty>
         <weight>11,7</weight>
         <volume>0,087516</volume>
         <param name="Материал">рогожка</param>
@@ -17051,7 +16841,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>14</qty>
+        <qty>11</qty>
         <weight>12,3</weight>
         <volume>0,17342325</volume>
         <param name="Материал">рогожка</param>
@@ -17111,7 +16901,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>61</qty>
+        <qty>60</qty>
         <weight>12,3</weight>
         <volume>0,17342325</volume>
         <param name="Материал">рогожка</param>
@@ -17513,7 +17303,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>7</qty>
+        <qty>6</qty>
         <weight>11,7</weight>
         <volume>0,087516</volume>
         <param name="Материал">велюр/букле</param>
@@ -19040,8 +18830,8 @@
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
         <qty>9</qty>
-        <weight>13,1</weight>
-        <volume>0,23868</volume>
+        <weight>13,5</weight>
+        <volume>0,227331</volume>
         <param name="Материал">букле</param>
         <param name="Цвет">бежевый</param>
         <param name="Страна производства">РОССИЯ</param>
@@ -19104,14 +18894,13 @@
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
         <qty>9</qty>
-        <weight>13,1</weight>
-        <volume>0,23868</volume>
+        <weight>13,5</weight>
+        <volume>0,227331</volume>
         <param name="Материал">букле</param>
         <param name="Цвет">оливковый</param>
         <param name="Страна производства">РОССИЯ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
-        <param name="Цвет обивки">оливковый</param>
         <param name="Страна-Производитель">РОССИЯ</param>
         <param name="Ширина">63</param>
         <param name="Глубина">75</param>
@@ -19127,7 +18916,6 @@
         <param name="Тип спинки (жесткий/мягкий)">Мягкий</param>
         <param name="Требует сборки">Да</param>
         <param name="Коллекция">Modern РФ/Модерн РФ (обеденная группа)</param>
-        <param name="Цвет опор">черный</param>
         <param name="Высота кресла от пола до сиденья">42-49</param>
         <param name="Подлокотники">Нет</param>
         <param name="Высота" unit="cm">72-79</param>
@@ -20866,7 +20654,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>JARDIN (ковка)</collection>
-        <qty>54</qty>
+        <qty>53</qty>
         <weight>9,9</weight>
         <volume>0,052655625</volume>
         <param name="Материал">алюминиевый сплав</param>
@@ -21771,7 +21559,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR импорт</collection>
-        <qty>24</qty>
+        <qty>93</qty>
         <weight>21,85</weight>
         <volume>0,168896</volume>
         <param name="Материал">металл/пластик/PU</param>
@@ -22973,7 +22761,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR импорт</collection>
-        <qty>113</qty>
+        <qty>389</qty>
         <weight>6,14</weight>
         <volume>0,123596928</volume>
         <param name="Материал">металл/пластик/PU</param>
@@ -23248,7 +23036,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Кресла TETCHAIR импорт</collection>
-        <qty>8</qty>
+        <qty>7</qty>
         <weight>8,45</weight>
         <volume>0,08352</volume>
         <param name="Материал" />
@@ -23318,7 +23106,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>70</qty>
+        <qty>69</qty>
         <weight>16,5</weight>
         <volume>0,11016</volume>
         <param name="Материал">флок </param>
@@ -23360,7 +23148,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>93</qty>
+        <qty>113</qty>
         <weight>16,5</weight>
         <volume>0,11016</volume>
         <param name="Материал">флок </param>
@@ -23402,7 +23190,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>7</qty>
+        <qty>5</qty>
         <weight>15,6</weight>
         <volume>0,11016</volume>
         <param name="Материал">флок </param>
@@ -23512,7 +23300,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>ДЕЛЬФИЙСКАЯ (обеденная группа)</collection>
-        <qty>114</qty>
+        <qty>113</qty>
         <weight>35,5</weight>
         <volume>0,20916</volume>
         <param name="Материал">массив сосны</param>
@@ -24562,7 +24350,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN plastic (мебель)</collection>
-        <qty>51</qty>
+        <qty>49</qty>
         <weight>15,98</weight>
         <volume>0,19008</volume>
         <param name="Материал">металл/пластик</param>
@@ -24741,7 +24529,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN plastic (мебель)</collection>
-        <qty>33</qty>
+        <qty>29</qty>
         <weight>15,7</weight>
         <volume>0,18502</volume>
         <param name="Материал">металл/пластик</param>
@@ -25003,10 +24791,10 @@
         <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
         <param name="Требует сборки">Нет</param>
         <param name="Коллекция">MODERN plastic (мебель)</param>
-        <param name="Высота" unit="cm">88</param>
+        <param name="Высота" unit="cm">88,5</param>
         <param name="Ширина" unit="cm">40,5</param>
         <param name="Глубина" unit="cm">49</param>
-        <dimensions>40,5/49/88</dimensions>
+        <dimensions>40,5/49/88,5</dimensions>
       </offer>
       <offer id="19416" available="false">
         <vendorCode>19416</vendorCode>
@@ -25530,7 +25318,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN plastic (мебель)</collection>
-        <qty>208</qty>
+        <qty>200</qty>
         <weight>4,6</weight>
         <volume>0,122435</volume>
         <param name="Материал">металл/пластик</param>
@@ -25761,7 +25549,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN plastic (мебель)</collection>
-        <qty>134</qty>
+        <qty>118</qty>
         <weight>4,44</weight>
         <volume>0,123596928</volume>
         <param name="Материал">металл/пластик</param>
@@ -25939,7 +25727,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>503</qty>
+        <qty>1315</qty>
         <weight>14,26</weight>
         <volume>0,123596928</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -25997,7 +25785,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>14</qty>
+        <qty>64</qty>
         <weight>14,26</weight>
         <volume>0,123596928</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -26055,7 +25843,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>82</qty>
+        <qty>157</qty>
         <weight>14,26</weight>
         <volume>0,123596928</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -26113,7 +25901,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>49</qty>
+        <qty>111</qty>
         <weight>14,26</weight>
         <volume>0,123596928</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -26195,10 +25983,10 @@
         <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
         <param name="Требует сборки">Нет</param>
         <param name="Коллекция">MODERN plastic (мебель)</param>
-        <param name="Высота" unit="cm">88</param>
+        <param name="Высота" unit="cm">88,5</param>
         <param name="Ширина" unit="cm">40,5</param>
         <param name="Глубина" unit="cm">49</param>
-        <dimensions>40,5/49/88</dimensions>
+        <dimensions>40,5/49/88,5</dimensions>
       </offer>
       <offer id="20048" available="true">
         <vendorCode>20048</vendorCode>
@@ -26334,7 +26122,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>28</qty>
+        <qty>65</qty>
         <weight>18,8</weight>
         <volume>0,18</volume>
         <param name="Материал">дерево/пластик/экокожа</param>
@@ -26393,7 +26181,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>13</qty>
+        <qty>50</qty>
         <weight>18,8</weight>
         <volume>0,18</volume>
         <param name="Материал">дерево/пластик/экокожа</param>
@@ -26511,7 +26299,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>113</qty>
+        <qty>263</qty>
         <weight>5,15</weight>
         <volume>0,105</volume>
         <param name="Материал">дерево/пластик/экокожа</param>
@@ -26570,7 +26358,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>53</qty>
+        <qty>203</qty>
         <weight>5,15</weight>
         <volume>0,105</volume>
         <param name="Материал">дерево/пластик/экокожа</param>
@@ -26578,6 +26366,7 @@
         <param name="Страна производства">КИТАЙ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Да</param>
+        <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Ширина">47,5</param>
         <param name="Глубина">55</param>
         <param name="Высота">80</param>
@@ -26592,7 +26381,6 @@
         <param name="Требует сборки">Да</param>
         <param name="Коллекция">MODERN (обеденная группа)</param>
         <param name="Материал обивки сиденья">Экокожа</param>
-        <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Высота" unit="cm">80</param>
         <param name="Ширина" unit="cm">47,5</param>
         <param name="Глубина" unit="cm">55</param>
@@ -26789,7 +26577,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>67</qty>
+        <qty>267</qty>
         <weight>4,38</weight>
         <volume>0,105</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -26847,7 +26635,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>196</qty>
+        <qty>446</qty>
         <weight>4,38</weight>
         <volume>0,105</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -26905,7 +26693,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>331</qty>
+        <qty>631</qty>
         <weight>4,38</weight>
         <volume>0,105</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -27164,6 +26952,122 @@
         <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
         <param name="Требует сборки">Да</param>
         <param name="Коллекция">MODERN (обеденная группа)</param>
+        <param name="Высота" unit="cm">82</param>
+        <param name="Ширина" unit="cm">45</param>
+        <param name="Глубина" unit="cm">51</param>
+        <dimensions>45/51/82</dimensions>
+      </offer>
+      <offer id="20657" available="true">
+        <vendorCode>20657</vendorCode>
+        <categoryId>7452062</categoryId>
+        <name>Стул Синди Имс/Cindy Eames (мод.1801) дерево бук/металл/сиденье пластик, 45х51х82см, оранжевый  (Комплект из 4 шт.)</name>
+        <barcode>4660118815031</barcode>
+        <url>https://tetchair.ru/products/stul-cindy-eames-mod-1801-derevo-buk-metall-siden-e-plastik-45x51x82-sm-orange-oranzhevyy-.html</url>
+        <country_of_origin>КИТАЙ</country_of_origin>
+        <tag name="Контроль цен">true</tag>
+        <packages_count>4 шт. в 1 упак.</packages_count>
+        <transport-unit>4</transport-unit>
+        <picture>https://tetchair.ru/netcat_files/284/300/24547v15283_01.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-80acf103ec3bf6aa311cc27858edb401.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-ae7b4f59b12afc9f382224285fdbd68f.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-3acb6ef3648202c8d5b3318cfce5deca.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-bc70b36c2294a75f61148d7b41863c88.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-9b2d4bce233e0ef9deb051636f03b570.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-ce7aacf6412d699cf319fbbf326d7fb4.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-4f86896cc8009cc639c24d3f60be4efd.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-96706bb01a1c6eeaa97217e1e1770317.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/20657.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/20657_badge.jpg</picture>
+        <video>https://rutube.ru/video/99c945bb899047e23f4c797b9e6ce3cd/</video>
+        <description>Стильный стул Синди Чейр/Cindy Chair из коллекции Модерн/Modern, созданный в стиле знаменитого стула Имз ДСВ/Eames DSW супругов Имз, украсит собой любую домашнюю обстановку. Этот удобный и легкий стул будет отличным украшением городской квартиры, загородного дома, кафе или ресторана. Сочетание оранжевого пластикового сиденья, ножек из массива бука и классического металлического крепления придает стулу особенную красоту и оригинальность. Эргономичная спинка и удобное сиденье позволят комфортно расположиться на продолжительное время. Конструкция изделия разработана с учетом равномерного распределения нагрузки. Пластик и массив бука &amp;ndash; прочные и долговечные материалы, не требующие специального ухода, способные выдерживать большую нагрузку. Стул будет радовать вас своим первоначальным видом долгие годы. Стул хорошо подойдет для гостиной, для кухни, для террасы, для дачи, для ресторана или для кафе. Стул очень прост в сборке, инструкция по сборке прилагается.</description>
+        <price>7760</price>
+        <retail_price>7760</retail_price><purchase_price>1455</purchase_price><catalog_url>https://price.tetchair.ru/catalog/3827/?p=20657</catalog_url><currencyId>RUR</currencyId>
+        <store>true</store>
+        <pickup>true</pickup>
+        <delivery>true</delivery>
+        <brand>Tetchair</brand>
+        <manufacturer_warranty>true</manufacturer_warranty>
+        <collection>MODERN (обеденная группа)</collection>
+        <qty>37</qty>
+        <weight>14,26</weight>
+        <volume>0,123596928</volume>
+        <param name="Материал">дерево бук/металл/сиденье пластик</param>
+        <param name="Цвет">оранжевый</param>
+        <param name="Страна производства">КИТАЙ</param>
+        <param name="Бренд">Tetchair</param>
+        <param name="Упакован">Нет</param>
+        <param name="Тип сиденья (жесткий/мягкий)">Жесткий</param>
+        <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
+        <param name="Требует сборки">Да</param>
+        <param name="Коллекция">MODERN (обеденная группа)</param>
+        <param name="Высота от пола до сиденья">45</param>
+        <param name="Высота спинки">37</param>
+        <param name="Глубина сиденья">38</param>
+        <param name="Ширина сиденья">45</param>
+        <param name="Максимальная нагрузка">100</param>
+        <param name="Материал опор">массив бука</param>
+        <param name="Страна-Производитель">КИТАЙ</param>
+        <param name="Ширина">45</param>
+        <param name="Глубина">51</param>
+        <param name="Высота">82</param>
+        <param name="Высота" unit="cm">82</param>
+        <param name="Ширина" unit="cm">45</param>
+        <param name="Глубина" unit="cm">51</param>
+        <dimensions>45/51/82</dimensions>
+      </offer>
+      <offer id="20658" available="true">
+        <vendorCode>20658</vendorCode>
+        <categoryId>7452062</categoryId>
+        <name>Стул Синди Имс/Cindy Eames (мод.1801) дерево бук/металл/сиденье пластик, 45х51х82см, красный  (Комплект из 4 шт.)</name>
+        <barcode>4660118815048</barcode>
+        <url>https://tetchair.ru/products/stul-cindy-eames-mod-1801-derevo-buk-metall-siden-e-plastik-45x51x82-sm-red-krasnyy-.html</url>
+        <country_of_origin>КИТАЙ</country_of_origin>
+        <tag name="Контроль цен">true</tag>
+        <packages_count>4 шт. в 1 упак.</packages_count>
+        <transport-unit>4</transport-unit>
+        <picture>https://tetchair.ru/netcat_files/284/300/24545v15437_01.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-5ec77e25d1e1c525853afdcc7e553d27.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-0072b43f062785b16e25b4721ac936a3.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-064b0a1cc2e0d4811414daf632c7594b.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-6c03c66b73e1af12d23a7dc3d616f8c7.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-4b2bac9843c3558179dcd01cd44df81b.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-488fa082a3387ba7b95eaf46ea29d254.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-0a42a7b41d921df98d9163380a8abe19.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-5401ac6d5d9586f7501e9631cfd5b204.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/20658.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/20658_badge.jpg</picture>
+        <video>https://rutube.ru/video/99c945bb899047e23f4c797b9e6ce3cd/</video>
+        <description>Стильный стул Синди Имс/Cindy Chair из коллекции Модерн/Modern, созданный в стиле знаменитого стула Имз ДСВ/Eames DSW супругов Имз, украсит собой любую домашнюю обстановку. Этот удобный и легкий стул будет отличным украшением городской квартиры, загородного дома, кафе или ресторана. Сочетание красного пластикового сиденья, ножек из массива бука и классического металлического крепления придает стулу особенную красоту и оригинальность. Эргономичная спинка и удобное сиденье позволят комфортно расположиться на продолжительное время. Конструкция изделия разработана с учетом равномерного распределения нагрузки. Пластик и массив бука &amp;ndash; прочные и долговечные материалы, не требующие специального ухода, способные выдерживать большую нагрузку. Стул будет радовать вас своим первоначальным видом долгие годы. Стул хорошо подойдет для гостиной, для кухни, для террасы, для дачи, для ресторана или для кафе. Стул очень прост в сборке, инструкция по сборке прилагается.</description>
+        <price>7840</price>
+        <retail_price>7840</retail_price><purchase_price>1470</purchase_price><catalog_url>https://price.tetchair.ru/catalog/3827/?p=20658</catalog_url><currencyId>RUR</currencyId>
+        <store>true</store>
+        <pickup>true</pickup>
+        <delivery>true</delivery>
+        <brand>Tetchair</brand>
+        <manufacturer_warranty>true</manufacturer_warranty>
+        <collection>MODERN (обеденная группа)</collection>
+        <qty>28</qty>
+        <weight>14,26</weight>
+        <volume>0,123596928</volume>
+        <param name="Материал">дерево бук/металл/сиденье пластик</param>
+        <param name="Цвет">красный</param>
+        <param name="Страна производства">КИТАЙ</param>
+        <param name="Бренд">Tetchair</param>
+        <param name="Упакован">Нет</param>
+        <param name="Коллекция">MODERN (обеденная группа)</param>
+        <param name="Ширина сиденья">45</param>
+        <param name="Максимальная нагрузка">100</param>
+        <param name="Материал опор">массив бука</param>
+        <param name="Тип сиденья (жесткий/мягкий)">Жесткий</param>
+        <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
+        <param name="Требует сборки">Да</param>
+        <param name="Ширина">45</param>
+        <param name="Глубина">51</param>
+        <param name="Высота">82</param>
+        <param name="Высота от пола до сиденья">45</param>
+        <param name="Высота спинки">37</param>
+        <param name="Глубина сиденья">38</param>
+        <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Высота" unit="cm">82</param>
         <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">51</param>
@@ -27497,7 +27401,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>261</qty>
+        <qty>262</qty>
         <weight>4,28</weight>
         <volume>0,08418</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -27519,6 +27423,122 @@
         <param name="Глубина">51</param>
         <param name="Высота">82</param>
         <param name="Высота от пола до сиденья">45</param>
+        <param name="Высота" unit="cm">82</param>
+        <param name="Ширина" unit="cm">45</param>
+        <param name="Глубина" unit="cm">51</param>
+        <dimensions>45/51/82</dimensions>
+      </offer>
+      <offer id="21374" available="true">
+        <vendorCode>21374</vendorCode>
+        <categoryId>7452062</categoryId>
+        <name>Стул Синди Имс/Cindy Eames (мод.1801)/1 шт. в упаковке дерево бук/металл/сиденье пластик, 45х51х82см, оранжевый </name>
+        <barcode>4660118816274</barcode>
+        <url>https://tetchair.ru/products/stul-cindy-eames-mod-1801-1-sht-v-upakovke-derevo-buk-metall-siden-e-plastik-45x51x82-sm-orange-oranzhevyy-.html</url>
+        <country_of_origin>КИТАЙ</country_of_origin>
+        <tag name="Контроль цен">true</tag>
+        <packages_count>1 шт. в 1 упак.</packages_count>
+        <transport-unit>1</transport-unit>
+        <picture>https://tetchair.ru/netcat_files/284/300/24547v15283_01.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-80acf103ec3bf6aa311cc27858edb401.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-ae7b4f59b12afc9f382224285fdbd68f.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-3acb6ef3648202c8d5b3318cfce5deca.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-bc70b36c2294a75f61148d7b41863c88.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-9b2d4bce233e0ef9deb051636f03b570.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-ce7aacf6412d699cf319fbbf326d7fb4.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-4f86896cc8009cc639c24d3f60be4efd.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/53366-96706bb01a1c6eeaa97217e1e1770317.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/20657.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53366/20657_badge.jpg</picture>
+        <video>https://rutube.ru/video/99c945bb899047e23f4c797b9e6ce3cd/</video>
+        <description>Стильный стул Синди Чейр/Cindy Chair из коллекции Модерн/Modern, созданный в стиле знаменитого стула Имз ДСВ/Eames DSW супругов Имз, украсит собой любую домашнюю обстановку. Этот удобный и легкий стул будет отличным украшением городской квартиры, загородного дома, кафе или ресторана. Сочетание оранжевого пластикового сиденья, ножек из массива бука и классического металлического крепления придает стулу особенную красоту и оригинальность. Эргономичная спинка и удобное сиденье позволят комфортно расположиться на продолжительное время. Конструкция изделия разработана с учетом равномерного распределения нагрузки. Пластик и массив бука &amp;ndash; прочные и долговечные материалы, не требующие специального ухода, способные выдерживать большую нагрузку. Стул будет радовать вас своим первоначальным видом долгие годы. Стул хорошо подойдет для гостиной, для кухни, для террасы, для дачи, для ресторана или для кафе. Стул очень прост в сборке, инструкция по сборке прилагается.</description>
+        <price>2100</price>
+        <retail_price>2100</retail_price><currencyId>RUR</currencyId>
+        <store>true</store>
+        <pickup>true</pickup>
+        <delivery>true</delivery>
+        <brand>Tetchair</brand>
+        <manufacturer_warranty>true</manufacturer_warranty>
+        <collection>MODERN (обеденная группа)</collection>
+        <qty>150</qty>
+        <weight>4,38</weight>
+        <volume>0,105</volume>
+        <param name="Материал">дерево бук/металл/сиденье пластик</param>
+        <param name="Цвет">оранжевый</param>
+        <param name="Страна производства">КИТАЙ</param>
+        <param name="Бренд">Tetchair</param>
+        <param name="Упакован">Да</param>
+        <param name="Страна-Производитель">КИТАЙ</param>
+        <param name="Ширина">45</param>
+        <param name="Глубина">51</param>
+        <param name="Высота">82</param>
+        <param name="Высота от пола до сиденья">45</param>
+        <param name="Высота спинки">37</param>
+        <param name="Глубина сиденья">38</param>
+        <param name="Ширина сиденья">45</param>
+        <param name="Максимальная нагрузка">100</param>
+        <param name="Материал опор">массив бука</param>
+        <param name="Тип сиденья (жесткий/мягкий)">Жесткий</param>
+        <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
+        <param name="Требует сборки">Да</param>
+        <param name="Коллекция">MODERN (обеденная группа)</param>
+        <param name="Высота" unit="cm">82</param>
+        <param name="Ширина" unit="cm">45</param>
+        <param name="Глубина" unit="cm">51</param>
+        <dimensions>45/51/82</dimensions>
+      </offer>
+      <offer id="21375" available="true">
+        <vendorCode>21375</vendorCode>
+        <categoryId>7452062</categoryId>
+        <name>Стул Синди Имс/Cindy Eames (мод.1801)/1 шт. в упаковке дерево бук/металл/сиденье пластик, 45х51х82см, красный </name>
+        <barcode>4660118816281</barcode>
+        <url>https://tetchair.ru/products/stul-cindy-eames-mod-1801-1-sht-v-upakovke-derevo-buk-metall-siden-e-plastik-45x51x82-sm-red-krasnyy-.html</url>
+        <country_of_origin>КИТАЙ</country_of_origin>
+        <tag name="Контроль цен">true</tag>
+        <packages_count>1 шт. в 1 упак.</packages_count>
+        <transport-unit>1</transport-unit>
+        <picture>https://tetchair.ru/netcat_files/284/300/24545v15437_01.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-5ec77e25d1e1c525853afdcc7e553d27.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-0072b43f062785b16e25b4721ac936a3.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-064b0a1cc2e0d4811414daf632c7594b.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-6c03c66b73e1af12d23a7dc3d616f8c7.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-4b2bac9843c3558179dcd01cd44df81b.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-488fa082a3387ba7b95eaf46ea29d254.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-0a42a7b41d921df98d9163380a8abe19.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-5401ac6d5d9586f7501e9631cfd5b204.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/20658.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/20658_badge.jpg</picture>
+        <video>https://rutube.ru/video/99c945bb899047e23f4c797b9e6ce3cd/</video>
+        <description>Стильный стул Синди Имс/Cindy Chair из коллекции Модерн/Modern, созданный в стиле знаменитого стула Имз ДСВ/Eames DSW супругов Имз, украсит собой любую домашнюю обстановку. Этот удобный и легкий стул будет отличным украшением городской квартиры, загородного дома, кафе или ресторана. Сочетание красного пластикового сиденья, ножек из массива бука и классического металлического крепления придает стулу особенную красоту и оригинальность. Эргономичная спинка и удобное сиденье позволят комфортно расположиться на продолжительное время. Конструкция изделия разработана с учетом равномерного распределения нагрузки. Пластик и массив бука &amp;ndash; прочные и долговечные материалы, не требующие специального ухода, способные выдерживать большую нагрузку. Стул будет радовать вас своим первоначальным видом долгие годы. Стул хорошо подойдет для гостиной, для кухни, для террасы, для дачи, для ресторана или для кафе. Стул очень прост в сборке, инструкция по сборке прилагается.</description>
+        <price>2100</price>
+        <retail_price>2100</retail_price><currencyId>RUR</currencyId>
+        <store>true</store>
+        <pickup>true</pickup>
+        <delivery>true</delivery>
+        <brand>Tetchair</brand>
+        <manufacturer_warranty>true</manufacturer_warranty>
+        <collection>MODERN (обеденная группа)</collection>
+        <qty>114</qty>
+        <weight>4,38</weight>
+        <volume>0,105</volume>
+        <param name="Материал">дерево бук/металл/сиденье пластик</param>
+        <param name="Цвет">красный</param>
+        <param name="Страна производства">КИТАЙ</param>
+        <param name="Бренд">Tetchair</param>
+        <param name="Упакован">Да</param>
+        <param name="Страна-Производитель">КИТАЙ</param>
+        <param name="Ширина">45</param>
+        <param name="Глубина">51</param>
+        <param name="Высота">82</param>
+        <param name="Высота от пола до сиденья">45</param>
+        <param name="Высота спинки">37</param>
+        <param name="Глубина сиденья">38</param>
+        <param name="Ширина сиденья">45</param>
+        <param name="Максимальная нагрузка">100</param>
+        <param name="Материал опор">массив бука</param>
+        <param name="Тип сиденья (жесткий/мягкий)">Жесткий</param>
+        <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
+        <param name="Требует сборки">Да</param>
+        <param name="Коллекция">MODERN (обеденная группа)</param>
         <param name="Высота" unit="cm">82</param>
         <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">51</param>
@@ -27814,10 +27834,10 @@
         <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
         <param name="Требует сборки">Да</param>
         <param name="Коллекция">Modern РФ/Модерн РФ (обеденная группа)</param>
-        <param name="Высота" unit="cm">84</param>
-        <param name="Ширина" unit="cm">46</param>
+        <param name="Высота" unit="cm">85</param>
+        <param name="Ширина" unit="cm">43</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>46/56/84</dimensions>
+        <dimensions>43/56/85</dimensions>
       </offer>
       <offer id="24282" available="true">
         <vendorCode>24282</vendorCode>
@@ -28197,7 +28217,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>58</qty>
+        <qty>133</qty>
         <weight>9,34</weight>
         <volume>0,14976</volume>
         <param name="Материал">дерево/пластик/экокожа</param>
@@ -28256,7 +28276,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>26</qty>
+        <qty>101</qty>
         <weight>9,34</weight>
         <volume>0,14976</volume>
         <param name="Материал">дерево/пластик/экокожа</param>
@@ -28432,7 +28452,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>30</qty>
+        <qty>130</qty>
         <weight>7,63</weight>
         <volume>0,08418</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -28490,7 +28510,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>165</qty>
+        <qty>315</qty>
         <weight>7,63</weight>
         <volume>0,08418</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -28548,7 +28568,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>98</qty>
+        <qty>223</qty>
         <weight>7,63</weight>
         <volume>0,08418</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -28693,7 +28713,7 @@
         <param name="Глубина" unit="cm">51</param>
         <dimensions>45/51/82</dimensions>
       </offer>
-      <offer id="24426" available="false">
+      <offer id="24426" available="true">
         <vendorCode>24426</vendorCode>
         <categoryId>7452062</categoryId>
         <name>Стул Синди Имс/Cindy Eames (мод.1801)/2 шт. в упаковке дерево бук/металл/сиденье пластик, 45х51х82см, оранжевый  (Комплект из 2 шт.)</name>
@@ -28724,7 +28744,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>1</qty>
+        <qty>76</qty>
         <weight>7,63</weight>
         <volume>0,08418</volume>
         <param name="Материал">дерево бук/металл/сиденье пластик</param>
@@ -28746,6 +28766,64 @@
         <param name="Ширина сиденья">45</param>
         <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Ширина">45</param>
+        <param name="Высота" unit="cm">82</param>
+        <param name="Ширина" unit="cm">45</param>
+        <param name="Глубина" unit="cm">51</param>
+        <dimensions>45/51/82</dimensions>
+      </offer>
+      <offer id="24427" available="true">
+        <vendorCode>24427</vendorCode>
+        <categoryId>7452062</categoryId>
+        <name>Стул Синди Имс/Cindy Eames (мод.1801)/2 шт. в упаковке дерево бук/металл/сиденье пластик, 45х51х82см, красный  (Комплект из 2 шт.)</name>
+        <barcode>4660118819480</barcode>
+        <url>https://tetchair.ru/products/stul-cindy-eames-mod-1801-2-sht-v-upakovke-derevo-buk-metall-siden-e-plastik-45x51x82-sm-red-krasnyy-.html</url>
+        <country_of_origin>КИТАЙ</country_of_origin>
+        <tag name="Контроль цен">true</tag>
+        <packages_count>2 шт. в 1 упак.</packages_count>
+        <transport-unit>2</transport-unit>
+        <picture>https://tetchair.ru/netcat_files/284/300/24545v15437_01.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-5ec77e25d1e1c525853afdcc7e553d27.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-0072b43f062785b16e25b4721ac936a3.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-064b0a1cc2e0d4811414daf632c7594b.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-6c03c66b73e1af12d23a7dc3d616f8c7.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-4b2bac9843c3558179dcd01cd44df81b.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-488fa082a3387ba7b95eaf46ea29d254.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-0a42a7b41d921df98d9163380a8abe19.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/53360-5401ac6d5d9586f7501e9631cfd5b204.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/20658.jpg</picture>
+        <picture>https://tetchair.ru/netcat_files/multifile/268/53360/20658_badge.jpg</picture>
+        <video>https://rutube.ru/video/99c945bb899047e23f4c797b9e6ce3cd/</video>
+        <description>Стильный стул Синди Имс/Cindy Chair из коллекции Модерн/Modern, созданный в стиле знаменитого стула Имз ДСВ/Eames DSW супругов Имз, украсит собой любую домашнюю обстановку. Этот удобный и легкий стул будет отличным украшением городской квартиры, загородного дома, кафе или ресторана. Сочетание красного пластикового сиденья, ножек из массива бука и классического металлического крепления придает стулу особенную красоту и оригинальность. Эргономичная спинка и удобное сиденье позволят комфортно расположиться на продолжительное время. Конструкция изделия разработана с учетом равномерного распределения нагрузки. Пластик и массив бука &amp;ndash; прочные и долговечные материалы, не требующие специального ухода, способные выдерживать большую нагрузку. Стул будет радовать вас своим первоначальным видом долгие годы. Стул хорошо подойдет для гостиной, для кухни, для террасы, для дачи, для ресторана или для кафе. Стул очень прост в сборке, инструкция по сборке прилагается.</description>
+        <price>4060</price>
+        <retail_price>4060</retail_price><currencyId>RUR</currencyId>
+        <store>true</store>
+        <pickup>true</pickup>
+        <delivery>true</delivery>
+        <brand>Tetchair</brand>
+        <manufacturer_warranty>true</manufacturer_warranty>
+        <collection>MODERN (обеденная группа)</collection>
+        <qty>57</qty>
+        <weight>7,63</weight>
+        <volume>0,08418</volume>
+        <param name="Материал">дерево бук/металл/сиденье пластик</param>
+        <param name="Цвет">красный</param>
+        <param name="Страна производства">КИТАЙ</param>
+        <param name="Бренд">Tetchair</param>
+        <param name="Упакован">Да</param>
+        <param name="Страна-Производитель">КИТАЙ</param>
+        <param name="Ширина">45</param>
+        <param name="Глубина">51</param>
+        <param name="Высота">82</param>
+        <param name="Высота от пола до сиденья">45</param>
+        <param name="Высота спинки">37</param>
+        <param name="Глубина сиденья">38</param>
+        <param name="Ширина сиденья">45</param>
+        <param name="Максимальная нагрузка">100</param>
+        <param name="Материал опор">массив бука</param>
+        <param name="Тип сиденья (жесткий/мягкий)">Жесткий</param>
+        <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
+        <param name="Требует сборки">Да</param>
+        <param name="Коллекция">MODERN (обеденная группа)</param>
         <param name="Высота" unit="cm">82</param>
         <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">51</param>
@@ -29184,7 +29262,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN plastic (мебель)</collection>
-        <qty>110</qty>
+        <qty>106</qty>
         <weight>8,6</weight>
         <volume>0,14976</volume>
         <param name="Материал">металл/пластик</param>
@@ -29325,10 +29403,10 @@
         <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
         <param name="Требует сборки">Да</param>
         <param name="Коллекция">MODERN plastic (мебель)</param>
-        <param name="Высота" unit="cm">84</param>
-        <param name="Ширина" unit="cm">46</param>
+        <param name="Высота" unit="cm">85</param>
+        <param name="Ширина" unit="cm">43</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>46/56/84</dimensions>
+        <dimensions>43/56/85</dimensions>
       </offer>
       <offer id="24558" available="true">
         <vendorCode>24558</vendorCode>
@@ -29369,6 +29447,10 @@
         <param name="Страна производства">КИТАЙ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Да</param>
+        <param name="Тип сиденья (жесткий/мягкий)">Жесткий</param>
+        <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
+        <param name="Требует сборки">Да</param>
+        <param name="Коллекция">MODERN (обеденная группа)</param>
         <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Ширина">60</param>
         <param name="Глубина">53</param>
@@ -29379,10 +29461,6 @@
         <param name="Ширина сиденья">44</param>
         <param name="Максимальная нагрузка">100</param>
         <param name="Материал опор">массив бука</param>
-        <param name="Тип сиденья (жесткий/мягкий)">Жесткий</param>
-        <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
-        <param name="Требует сборки">Да</param>
-        <param name="Коллекция">MODERN (обеденная группа)</param>
         <param name="Высота" unit="cm">75</param>
         <param name="Ширина" unit="cm">60</param>
         <param name="Глубина" unit="cm">53</param>
@@ -29652,7 +29730,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN plastic (мебель)</collection>
-        <qty>68</qty>
+        <qty>60</qty>
         <weight>7,84</weight>
         <volume>0,14976</volume>
         <param name="Материал">металл/пластик</param>
@@ -30389,7 +30467,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN plastic (мебель)</collection>
-        <qty>46</qty>
+        <qty>45</qty>
         <weight>2,9</weight>
         <volume>0,0375</volume>
         <param name="Материал">металл/пластик</param>
@@ -31250,10 +31328,10 @@
         <param name="Высота спинки">44</param>
         <param name="Глубина сиденья">41,5</param>
         <param name="Страна-Производитель">РОССИЯ</param>
-        <param name="Высота" unit="cm">84</param>
-        <param name="Ширина" unit="cm">46</param>
+        <param name="Высота" unit="cm">85</param>
+        <param name="Ширина" unit="cm">43</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>46/56/84</dimensions>
+        <dimensions>43/56/85</dimensions>
       </offer>
       <offer id="20097" available="true">
         <vendorCode>20097</vendorCode>
@@ -32146,7 +32224,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>576</qty>
+        <qty>578</qty>
         <weight>5,23</weight>
         <volume>0,048</volume>
         <param name="Материал">каркас: металл, сиденье/спинка: экокожа</param>
@@ -32280,7 +32358,6 @@
         <param name="Страна производства">КИТАЙ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
-        <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Ширина">46,5</param>
         <param name="Глубина">48</param>
         <param name="Высота">75</param>
@@ -32294,6 +32371,7 @@
         <param name="Тип спинки (жесткий/мягкий)">Жесткий</param>
         <param name="Требует сборки">Нет</param>
         <param name="Коллекция">MODERN (обеденная группа)</param>
+        <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Высота" unit="cm">75</param>
         <param name="Ширина" unit="cm">46,5</param>
         <param name="Глубина" unit="cm">48</param>
@@ -33042,7 +33120,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>ГОЛЛАНДСКАЯ (обеденная группа)</collection>
-        <qty>52</qty>
+        <qty>47</qty>
         <weight>14</weight>
         <volume>0,132</volume>
         <param name="Материал">металл/дерево/экокожа</param>
@@ -33182,10 +33260,10 @@
         <param name="Коллекция">Барные стулья</param>
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
-        <param name="Высота" unit="cm">104</param>
-        <param name="Ширина" unit="cm">50</param>
+        <param name="Высота" unit="cm">82</param>
+        <param name="Ширина" unit="cm">53</param>
         <param name="Глубина" unit="cm">44</param>
-        <dimensions>50/44/104</dimensions>
+        <dimensions>53/44/82</dimensions>
       </offer>
       <offer id="15090" available="false">
         <vendorCode>15090</vendorCode>
@@ -33578,22 +33656,22 @@
         <param name="Страна производства">РОССИЯ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Да</param>
-        <param name="Страна-Производитель">РОССИЯ</param>
-        <param name="Ширина">50</param>
-        <param name="Глубина">44</param>
-        <param name="Высота">104</param>
-        <param name="Высота от пола до сиденья">76</param>
-        <param name="Материал опор">металл</param>
         <param name="Тип сиденья (жесткий/мягкий)">Мягкий</param>
         <param name="Тип спинки (жесткий/мягкий)">Мягкий</param>
         <param name="Требует сборки">Да</param>
         <param name="Коллекция">Барные стулья</param>
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
-        <param name="Высота" unit="cm">104</param>
-        <param name="Ширина" unit="cm">50</param>
+        <param name="Страна-Производитель">РОССИЯ</param>
+        <param name="Ширина">50</param>
+        <param name="Глубина">44</param>
+        <param name="Высота">104</param>
+        <param name="Высота от пола до сиденья">76</param>
+        <param name="Материал опор">металл</param>
+        <param name="Высота" unit="cm">82</param>
+        <param name="Ширина" unit="cm">53</param>
         <param name="Глубина" unit="cm">44</param>
-        <dimensions>50/44/104</dimensions>
+        <dimensions>53/44/82</dimensions>
       </offer>
       <offer id="19656" available="true">
         <vendorCode>19656</vendorCode>
@@ -33748,7 +33826,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Барные стулья</collection>
-        <qty>28</qty>
+        <qty>29</qty>
         <weight>8,61</weight>
         <volume>0,11016</volume>
         <param name="Материал">металл/экокожа</param>
@@ -34158,7 +34236,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>ГОЛЛАНДСКАЯ (обеденная группа)</collection>
-        <qty>47</qty>
+        <qty>45</qty>
         <weight>14</weight>
         <volume>0,132</volume>
         <param name="Материал">металл/дерево/ткань</param>
@@ -34403,7 +34481,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>36</qty>
+        <qty>35</qty>
         <weight>6,65</weight>
         <volume>0,04512</volume>
         <param name="Материал">велюр</param>
@@ -34696,69 +34774,6 @@
         <param name="Глубина" unit="cm">56</param>
         <dimensions>45/56/113</dimensions>
       </offer>
-      <offer id="24912" available="true">
-        <vendorCode>24912</vendorCode>
-        <categoryId>7452061</categoryId>
-        <name>Стул барный Медео/Medeo экокожа, черный, 45х56х113см</name>
-        <barcode>4610095496372</barcode>
-        <url>https://tetchair.ru/products/barnyy-stul-medeo-medeo-ekokozha-chernyy-45h56h113-sm.html</url>
-        <country_of_origin>РОССИЯ</country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>1 шт. в 1 упак.</packages_count>
-        <transport-unit>1</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/284/300/70924_56c3a8354aa4735f8ab63261fc1cab16.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/70924/70924-730b49ecc38c0f130750cd8f85aca371.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/70924/70924-75614203dc1a7edcf9eca222c6de37e7.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/70924/70924-1880c42ee58a118fba8bdd4230c5c78a.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/70924/70924-c5b01ff7cf1db48969028a9844ceb328.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/70924/70924-39cb6c11ab7c8c447be1c2ba65d3b5dd.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/70924/70924-bc2682035da0b6191f344ce91c57ce69.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/70924/70924-2faf7d56b3f571b75a6b1c6b516497cf.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/70924/70924-02db079cdfe81f837c63932b0798b327.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/70924/70924-45ef1e8e39f0127ca6706683aaa3b952.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/70924/70924-9822f0f77e2c99a7314b287fe176bd16.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/284/300/Barnyy_Medeo_1_2_.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/284/300/Barnyy_Medeo_2_1_.jpg</picture>
-        <video>https://rutube.ru/video/aa850804a0176bd6022c6090b3585f70/</video>
-        <description>Барный стул Медео/Medeo станет отличным решением для любого помещения в доме или квартире, сочетая в себе функциональность, комфорт и привлекательный внешний вид. Модель с наполнителем из пенополиуретана (ППУ) плотностью 35-45 кг/м&amp;sup3; гарантирует высокий уровень удобства, что делает его подходящим для длительного использования. Основание сиденья выполнено из гнутоклееного шпона толщиной 10 мм. Металлический каркас спинки придает стулу прочность и основательность, обеспечивает оптимальную поддержку спины и поясницы. Конусообразные металлические опоры диаметром 26/16 мм с толщиной металла 1,2 мм долговечны и устойчивы к усиленной эксплуатации. Модель обита износостойким материалом. Такой материал практичен, прост в уходе, приятен на ощупь. Барный стул Медео обладает привлекательным внешним видом, способен украсить любое помещение, поможет создать в доме атмосферу уюта и комфорта. Модель поставляется в разобранном виде, необходима простая сборка по прилагаемой инструкции. </description>
-        <oldprice>5880</oldprice>
-        <price>5290</price>
-        <retail_price>5290</retail_price><purchase_price>3969</purchase_price><catalog_url>https://price.tetchair.ru/catalog/3829/?p=24912</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>4</qty>
-        <weight>7,05</weight>
-        <volume>0,05464875</volume>
-        <param name="Материал">экокожа </param>
-        <param name="Цвет">черный</param>
-        <param name="Страна производства">РОССИЯ</param>
-        <param name="Бренд">Tetchair</param>
-        <param name="Упакован">Нет</param>
-        <param name="Страна-Производитель">РОССИЯ</param>
-        <param name="Ширина">45</param>
-        <param name="Глубина">56</param>
-        <param name="Высота">113</param>
-        <param name="Высота от пола до сиденья">82</param>
-        <param name="Высота спинки">31</param>
-        <param name="Глубина сиденья">43</param>
-        <param name="Ширина сиденья">45</param>
-        <param name="Максимальная нагрузка">150</param>
-        <param name="Материал опор">металл</param>
-        <param name="Тип сиденья (жесткий/мягкий)">Мягкий</param>
-        <param name="Тип спинки (жесткий/мягкий)">Мягкий</param>
-        <param name="Требует сборки">Да</param>
-        <param name="Коллекция">Modern РФ/Модерн РФ (обеденная группа)</param>
-        <param name="Материал обивки спинки">Экокожа</param>
-        <param name="Материал обивки сиденья">Экокожа</param>
-        <param name="Высота" unit="cm">113</param>
-        <param name="Ширина" unit="cm">45</param>
-        <param name="Глубина" unit="cm">56</param>
-        <dimensions>45/56/113</dimensions>
-      </offer>
       <offer id="24913" available="true">
         <vendorCode>24913</vendorCode>
         <categoryId>7452061</categoryId>
@@ -34928,7 +34943,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>19</qty>
+        <qty>18</qty>
         <weight>6,4</weight>
         <volume>0,04512</volume>
         <param name="Материал">экокожа </param>
@@ -35060,7 +35075,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>66</qty>
+        <qty>65</qty>
         <weight>7,45</weight>
         <volume>0,05464875</volume>
         <param name="Материал">велюр</param>
@@ -35126,7 +35141,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>3</qty>
+        <qty>1</qty>
         <weight>7,45</weight>
         <volume>0,05464875</volume>
         <param name="Материал">велюр</param>
@@ -35673,10 +35688,10 @@
         <param name="Коллекция">MODERN (обеденная группа)</param>
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
-        <param name="Высота" unit="cm">80</param>
-        <param name="Ширина" unit="cm">56</param>
+        <param name="Высота" unit="cm">78</param>
+        <param name="Ширина" unit="cm">55</param>
         <param name="Глубина" unit="cm">51</param>
-        <dimensions>56/51/80</dimensions>
+        <dimensions>55/51/78</dimensions>
       </offer>
       <offer id="14332" available="false">
         <vendorCode>14332</vendorCode>
@@ -35734,10 +35749,10 @@
         <param name="Коллекция">MODERN (обеденная группа)</param>
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
-        <param name="Высота" unit="cm">80</param>
-        <param name="Ширина" unit="cm">56</param>
+        <param name="Высота" unit="cm">78</param>
+        <param name="Ширина" unit="cm">55</param>
         <param name="Глубина" unit="cm">51</param>
-        <dimensions>56/51/80</dimensions>
+        <dimensions>55/51/78</dimensions>
       </offer>
       <offer id="14333" available="false">
         <vendorCode>14333</vendorCode>
@@ -38023,6 +38038,8 @@
         <param name="Страна производства">КИТАЙ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
+        <param name="Материал обивки спинки">велюр</param>
+        <param name="Материал обивки сиденья">велюр</param>
         <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Ширина">44</param>
         <param name="Глубина">53</param>
@@ -38037,8 +38054,6 @@
         <param name="Тип спинки (жесткий/мягкий)">Мягкий</param>
         <param name="Требует сборки">Да</param>
         <param name="Коллекция">MODERN (обеденная группа)</param>
-        <param name="Материал обивки спинки">велюр</param>
-        <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">86</param>
         <param name="Ширина" unit="cm">44</param>
         <param name="Глубина" unit="cm">53</param>
@@ -38204,6 +38219,7 @@
         <param name="Страна производства">КИТАЙ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
+        <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Ширина">44</param>
         <param name="Глубина">53</param>
         <param name="Высота">86</param>
@@ -38219,7 +38235,6 @@
         <param name="Коллекция">MODERN (обеденная группа)</param>
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
-        <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Высота" unit="cm">86</param>
         <param name="Ширина" unit="cm">44</param>
         <param name="Глубина" unit="cm">53</param>
@@ -40584,7 +40599,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>49</qty>
+        <qty>48</qty>
         <weight>8,97</weight>
         <volume>0,065472</volume>
         <param name="Материал">металл, флок</param>
@@ -41197,12 +41212,6 @@
         <param name="Страна производства">КИТАЙ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Да</param>
-        <param name="Тип сиденья (жесткий/мягкий)">Мягкий</param>
-        <param name="Тип спинки (жесткий/мягкий)">Мягкий</param>
-        <param name="Требует сборки">Да</param>
-        <param name="Коллекция">MODERN (обеденная группа)</param>
-        <param name="Материал обивки спинки">велюр</param>
-        <param name="Материал обивки сиденья">велюр</param>
         <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Ширина">44</param>
         <param name="Глубина">53</param>
@@ -41213,6 +41222,12 @@
         <param name="Ширина сиденья">44</param>
         <param name="Максимальная нагрузка">100</param>
         <param name="Материал опор">металл</param>
+        <param name="Тип сиденья (жесткий/мягкий)">Мягкий</param>
+        <param name="Тип спинки (жесткий/мягкий)">Мягкий</param>
+        <param name="Требует сборки">Да</param>
+        <param name="Коллекция">MODERN (обеденная группа)</param>
+        <param name="Материал обивки спинки">велюр</param>
+        <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">86</param>
         <param name="Ширина" unit="cm">44</param>
         <param name="Глубина" unit="cm">53</param>
@@ -42109,8 +42124,6 @@
         <param name="Страна производства">КИТАЙ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Да</param>
-        <param name="Материал обивки спинки">велюр</param>
-        <param name="Материал обивки сиденья">велюр</param>
         <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Ширина">44,5</param>
         <param name="Глубина">52,5</param>
@@ -42125,6 +42138,8 @@
         <param name="Тип спинки (жесткий/мягкий)">Мягкий</param>
         <param name="Требует сборки">Да</param>
         <param name="Коллекция">MODERN (обеденная группа)</param>
+        <param name="Материал обивки спинки">велюр</param>
+        <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">88</param>
         <param name="Ширина" unit="cm">44,5</param>
         <param name="Глубина" unit="cm">52,5</param>
@@ -43378,9 +43393,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="24793" available="true">
         <vendorCode>24793</vendorCode>
@@ -43449,9 +43464,9 @@
         <param name="Максимальная нагрузка">150</param>
         <param name="Материал опор">металл</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="24794" available="true">
         <vendorCode>24794</vendorCode>
@@ -43520,9 +43535,9 @@
         <param name="Высота спинки">43</param>
         <param name="Страна-Производитель">РОССИЯ</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="24795" available="true">
         <vendorCode>24795</vendorCode>
@@ -43658,9 +43673,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="24798" available="true">
         <vendorCode>24798</vendorCode>
@@ -43727,9 +43742,9 @@
         <param name="Высота спинки">42</param>
         <param name="Страна-Производитель">РОССИЯ</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="24799" available="true">
         <vendorCode>24799</vendorCode>
@@ -43795,9 +43810,9 @@
         <param name="Максимальная нагрузка">150</param>
         <param name="Материал опор">металл</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="24800" available="true">
         <vendorCode>24800</vendorCode>
@@ -43839,7 +43854,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>140</qty>
+        <qty>138</qty>
         <weight>5,65</weight>
         <volume>0,04512</volume>
         <param name="Материал">флок </param>
@@ -43864,9 +43879,9 @@
         <param name="Материал обивки спинки">флок</param>
         <param name="Материал обивки сиденья">флок</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="24801" available="true">
         <vendorCode>24801</vendorCode>
@@ -43933,9 +43948,9 @@
         <param name="Материал обивки спинки">флок</param>
         <param name="Материал обивки сиденья">флок</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="24802" available="true">
         <vendorCode>24802</vendorCode>
@@ -44002,9 +44017,9 @@
         <param name="Глубина">55</param>
         <param name="Высота">89</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="24803" available="true">
         <vendorCode>24803</vendorCode>
@@ -44322,7 +44337,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>334</qty>
+        <qty>327</qty>
         <weight>5,2</weight>
         <volume>0,04512</volume>
         <param name="Материал">велюр</param>
@@ -44416,9 +44431,9 @@
         <param name="Максимальная нагрузка">150</param>
         <param name="Материал опор">металл</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">45</param>
+        <param name="Ширина" unit="cm">47</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>45/56/89</dimensions>
+        <dimensions>47/56/89</dimensions>
       </offer>
       <offer id="24809" available="true">
         <vendorCode>24809</vendorCode>
@@ -44482,9 +44497,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">45</param>
+        <param name="Ширина" unit="cm">47</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>45/56/89</dimensions>
+        <dimensions>47/56/89</dimensions>
       </offer>
       <offer id="24810" available="true">
         <vendorCode>24810</vendorCode>
@@ -44552,9 +44567,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">45</param>
+        <param name="Ширина" unit="cm">47</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>45/56/89</dimensions>
+        <dimensions>47/56/89</dimensions>
       </offer>
       <offer id="24811" available="true">
         <vendorCode>24811</vendorCode>
@@ -44618,9 +44633,9 @@
         <param name="Материал обивки спинки">флок</param>
         <param name="Материал обивки сиденья">флок</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">45</param>
+        <param name="Ширина" unit="cm">47</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>45/56/89</dimensions>
+        <dimensions>47/56/89</dimensions>
       </offer>
       <offer id="24812" available="true">
         <vendorCode>24812</vendorCode>
@@ -44682,9 +44697,9 @@
         <param name="Материал обивки спинки">флок</param>
         <param name="Материал обивки сиденья">флок</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">45</param>
+        <param name="Ширина" unit="cm">47</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>45/56/89</dimensions>
+        <dimensions>47/56/89</dimensions>
       </offer>
       <offer id="24814" available="true">
         <vendorCode>24814</vendorCode>
@@ -44817,9 +44832,9 @@
         <param name="Ширина">49</param>
         <param name="Глубина">51</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="24840" available="true">
         <vendorCode>24840</vendorCode>
@@ -44888,9 +44903,9 @@
         <param name="Материал обивки спинки">Экокожа</param>
         <param name="Материал обивки сиденья">Экокожа</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="24841" available="true">
         <vendorCode>24841</vendorCode>
@@ -44957,9 +44972,9 @@
         <param name="Материал обивки спинки">Экокожа</param>
         <param name="Материал обивки сиденья">Экокожа</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="24842" available="true">
         <vendorCode>24842</vendorCode>
@@ -45026,9 +45041,9 @@
         <param name="Материал обивки спинки">Экокожа</param>
         <param name="Материал обивки сиденья">Экокожа</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="24843" available="true">
         <vendorCode>24843</vendorCode>
@@ -45208,7 +45223,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>42</qty>
+        <qty>41</qty>
         <weight>11,5</weight>
         <volume>0,05464875</volume>
         <param name="Материал">велюр</param>
@@ -45553,7 +45568,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>76</qty>
+        <qty>75</qty>
         <weight>11,5</weight>
         <volume>0,05464875</volume>
         <param name="Материал">экокожа </param>
@@ -46521,6 +46536,7 @@
         <param name="Страна производства">РОССИЯ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
+        <param name="Материал обивки сиденья">велюр</param>
         <param name="Страна-Производитель">РОССИЯ</param>
         <param name="Ширина">46</param>
         <param name="Глубина">55</param>
@@ -46536,7 +46552,6 @@
         <param name="Требует сборки">Да</param>
         <param name="Коллекция">Modern РФ/Модерн РФ (обеденная группа)</param>
         <param name="Материал обивки спинки">велюр</param>
-        <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">89</param>
         <param name="Ширина" unit="cm">46</param>
         <param name="Глубина" unit="cm">55</param>
@@ -47011,7 +47026,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>38</qty>
+        <qty>34</qty>
         <weight>11,9</weight>
         <volume>0,22528</volume>
         <param name="Материал">велюр/букле (HYP)</param>
@@ -47077,7 +47092,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>38</qty>
+        <qty>36</qty>
         <weight>11,9</weight>
         <volume>0,22528</volume>
         <param name="Материал">велюр/букле (HYP)</param>
@@ -47237,9 +47252,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">45</param>
+        <param name="Ширина" unit="cm">47</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>45/56/89</dimensions>
+        <dimensions>47/56/89</dimensions>
       </offer>
       <offer id="25225" available="false">
         <vendorCode>25225</vendorCode>
@@ -47303,9 +47318,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">45</param>
+        <param name="Ширина" unit="cm">47</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>45/56/89</dimensions>
+        <dimensions>47/56/89</dimensions>
       </offer>
       <offer id="25226" available="true">
         <vendorCode>25226</vendorCode>
@@ -47373,9 +47388,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">45</param>
+        <param name="Ширина" unit="cm">47</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>45/56/89</dimensions>
+        <dimensions>47/56/89</dimensions>
       </offer>
       <offer id="25228" available="false">
         <vendorCode>25228</vendorCode>
@@ -47437,9 +47452,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">45</param>
+        <param name="Ширина" unit="cm">47</param>
         <param name="Глубина" unit="cm">56</param>
-        <dimensions>45/56/89</dimensions>
+        <dimensions>47/56/89</dimensions>
       </offer>
       <offer id="25231" available="true">
         <vendorCode>25231</vendorCode>
@@ -47550,7 +47565,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>9</qty>
+        <qty>8</qty>
         <weight>12,4</weight>
         <volume>0,093574</volume>
         <param name="Материал">велюр</param>
@@ -47575,9 +47590,9 @@
         <param name="Высота">93</param>
         <param name="Высота от пола до сиденья">50</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="25233" available="true">
         <vendorCode>25233</vendorCode>
@@ -47646,9 +47661,9 @@
         <param name="Максимальная нагрузка">120</param>
         <param name="Материал опор">металл</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="25234" available="true">
         <vendorCode>25234</vendorCode>
@@ -47717,9 +47732,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="25235" available="true">
         <vendorCode>25235</vendorCode>
@@ -47788,9 +47803,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="25236" available="true">
         <vendorCode>25236</vendorCode>
@@ -47859,9 +47874,9 @@
         <param name="Материал обивки спинки">Экокожа</param>
         <param name="Материал обивки сиденья">Экокожа</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="25237" available="true">
         <vendorCode>25237</vendorCode>
@@ -47930,9 +47945,9 @@
         <param name="Материал обивки спинки">Экокожа</param>
         <param name="Материал обивки сиденья">Экокожа</param>
         <param name="Высота" unit="cm">93</param>
-        <param name="Ширина" unit="cm">49</param>
-        <param name="Глубина" unit="cm">51</param>
-        <dimensions>49/51/93</dimensions>
+        <param name="Ширина" unit="cm">50</param>
+        <param name="Глубина" unit="cm">55</param>
+        <dimensions>50/55/93</dimensions>
       </offer>
       <offer id="25238" available="true">
         <vendorCode>25238</vendorCode>
@@ -47974,7 +47989,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>9</qty>
+        <qty>8</qty>
         <weight>12,5</weight>
         <volume>0,093574</volume>
         <param name="Материал">велюр</param>
@@ -47999,9 +48014,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="25239" available="true">
         <vendorCode>25239</vendorCode>
@@ -48067,9 +48082,9 @@
         <param name="Максимальная нагрузка">150</param>
         <param name="Материал опор">металл</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="25240" available="true">
         <vendorCode>25240</vendorCode>
@@ -48136,9 +48151,9 @@
         <param name="Максимальная нагрузка">150</param>
         <param name="Материал опор">металл</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="25241" available="true">
         <vendorCode>25241</vendorCode>
@@ -48205,9 +48220,9 @@
         <param name="Материал обивки спинки">велюр</param>
         <param name="Материал обивки сиденья">велюр</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="25243" available="true">
         <vendorCode>25243</vendorCode>
@@ -48274,9 +48289,9 @@
         <param name="Максимальная нагрузка">150</param>
         <param name="Материал опор">металл</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="25244" available="true">
         <vendorCode>25244</vendorCode>
@@ -48343,75 +48358,9 @@
         <param name="Материал обивки спинки">Экокожа</param>
         <param name="Материал обивки сиденья">Экокожа</param>
         <param name="Высота" unit="cm">89</param>
-        <param name="Ширина" unit="cm">41</param>
+        <param name="Ширина" unit="cm">45</param>
         <param name="Глубина" unit="cm">55</param>
-        <dimensions>41/55/89</dimensions>
-      </offer>
-      <offer id="25381" available="true">
-        <vendorCode>25381</vendorCode>
-        <categoryId>7451981</categoryId>
-        <name>Стул обеденный Лайт/Lite (4шт.в упаковке) велюр/букле, vt шейп серый (Комплект из 4 шт.)</name>
-        <barcode>4610095498611</barcode>
-        <url>https://tetchair.ru/products/stul-obedennyy-lite-velyur-bukle-vt-shape-silver.html</url>
-        <country_of_origin>РОССИЯ</country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>4 шт. в 1 упак.</packages_count>
-        <transport-unit>4</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/284/300/27914v28_00.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-faf3a2104f8f353fe8f3a671fcd8dee0.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-51b5b2d691b98d1dc84cf0aba709ccb0.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-2c9bc8fd94e7f5d51fce9b4860c8bfde.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-67e22ebce4c94b9a1fec53e19511e040.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-6cf111a8fa7a3e74d81c32539e220d92.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-828c9d7bc8cd723ae900ce80d6f92dad.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-1b88a98fae5ee0d230c54d4da8c2be8f.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-63d8fca57c37ee7c73f79bc383690256.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-0d921299200de859eb487cf8e1d39fe9.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-c9e114d4afe5af44fac0ed3aecfe6ba1.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-be897548d865f656b1d71448197da97c.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-eb11a55da62324a7ccd1db697b899d59.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-bac26962f2d4555142d731b546a0d20e.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/73551-b387b5b5c5f01374ea50fa52e73e4825.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/25381.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73551/25381_badge.jpg</picture>
-        <description>Стул обеденный Лайт/Lite выполнен в современном стиле и отлично впишется в интерьер кухни, столовой или кафе. Лаконичный дизайн с мягкой обивкой и чёрным металлическим каркасом делает модель универсальной и визуально лёгкой.  Каркас стула прочный, металлический, с износостойким порошковым покрытием, которое защищает опоры от повреждений и продлевает срок службы. Для защиты напольного покрытия предусмотрены пластиковые подпятники.  Комфорт обеспечивается мягким наполнителем: в спинке используется ППУ плотностью 22&amp;ndash;30 кг/м&amp;sup3; толщиной 22&amp;ndash;30 мм, а в сиденье &amp;mdash; более плотный ППУ 18&amp;ndash;60 кг/м&amp;sup3; толщиной 55 мм. Такое сочетание делает посадку удобной даже при длительном использовании. Обивка отличается высокой износостойкостью &amp;mdash; до 50 000 циклов, что особенно важно при ежедневной эксплуатации.  Стул имеет продуманную эргономику. Дополнительным преимуществом является возможность штабелирования &amp;mdash; стулья удобно хранить и экономить пространство.  Стул Лайт/Lite &amp;mdash; это практичное решение для дома и квартиры.</description>
-        <oldprice>22960</oldprice>
-        <price>21840</price>
-        <retail_price>21840</retail_price><purchase_price>4095</purchase_price><catalog_url>https://price.tetchair.ru/catalog/3833/?p=25381</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>5</qty>
-        <weight>21,4</weight>
-        <volume>0,110837</volume>
-        <param name="Материал">велюр/букле</param>
-        <param name="Цвет">серый</param>
-        <param name="Страна производства">РОССИЯ</param>
-        <param name="Бренд">Tetchair</param>
-        <param name="Упакован">Нет</param>
-        <param name="Страна-Производитель">РОССИЯ</param>
-        <param name="Ширина">44</param>
-        <param name="Глубина">48</param>
-        <param name="Высота">78</param>
-        <param name="Высота от пола до сиденья">49</param>
-        <param name="Высота спинки">44</param>
-        <param name="Глубина сиденья">45</param>
-        <param name="Ширина сиденья">45</param>
-        <param name="Максимальная нагрузка">150</param>
-        <param name="Материал опор">металл</param>
-        <param name="Тип сиденья (жесткий/мягкий)">Мягкий</param>
-        <param name="Тип спинки (жесткий/мягкий)">Мягкий</param>
-        <param name="Требует сборки">Да</param>
-        <param name="Коллекция">Modern РФ/Модерн РФ (обеденная группа)</param>
-        <param name="Материал обивки спинки">букле</param>
-        <param name="Материал обивки сиденья">букле</param>
-        <param name="Высота" unit="cm">78</param>
-        <param name="Ширина" unit="cm">44</param>
-        <param name="Глубина" unit="cm">48</param>
-        <dimensions>44/48/78</dimensions>
+        <dimensions>45/55/89</dimensions>
       </offer>
       <offer id="25405" available="true">
         <vendorCode>25405</vendorCode>
@@ -48448,7 +48397,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>31</qty>
+        <qty>30</qty>
         <weight>12,3</weight>
         <volume>0,249856</volume>
         <param name="Материал">велюр/букле</param>
@@ -48718,7 +48667,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>5</qty>
+        <qty>6</qty>
         <weight>22,3</weight>
         <volume>0,22528</volume>
         <param name="Материал">велюр</param>
@@ -49299,74 +49248,6 @@
         <param name="Глубина" unit="cm">55</param>
         <dimensions>44/55/78</dimensions>
       </offer>
-      <offer id="25485" available="false">
-        <vendorCode>25485</vendorCode>
-        <categoryId>7451981</categoryId>
-        <name>Стул обеденный Лайт/Lite (4шт.в упаковке) велюр/букле, vt шейп бежевый (Комплект из 4 шт.)</name>
-        <barcode>4610095498864</barcode>
-        <url>https://tetchair.ru/products/stul-obedennyy-lite-4-sht-v-upakovke-velyur-bukle-vt-shape-latte.html</url>
-        <country_of_origin>РОССИЯ</country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>4 шт. в 1 упак.</packages_count>
-        <transport-unit>4</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/284/300/27911v17932_00.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-4341a0db60316242d69c82d30c866499.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-b52f32e9592de5eaafb2dc48b16e9d82.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-83fc46a974593eb9612d9d522d4076ce.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-9adb080e559ad747d5ac6550e197035a.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-d4e77813fea89c8d153c179c93c1901e.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-49c301ff5e6f6b279b092457a21ac5a0.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-60e26ffaadba11de97b1bb120ed13d22.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-37dd249b92956132829888f721a5b245.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-2c039fea682671005fffe8746cabb11c.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-7352ab650822e9b33d1f19d703825a83.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-0143af6227ce7a84576ddb9518c13b4a.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-423c4217ac7e64c1c2245ac0cb648280.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-10003e9812af083b161e5aa8e5122b5e.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/73542-70d5076fcc31cdb2b47a02f43c4e1dce.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/25485.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/73542/25485_badge.jpg</picture>
-        <description>Стул обеденный Лайт/Lite выполнен в современном стиле и отлично впишется в интерьер кухни, столовой или кафе. Лаконичный дизайн с мягкой обивкой и чёрным металлическим каркасом делает модель универсальной и визуально лёгкой.  Каркас стула прочный, металлический, с износостойким порошковым покрытием, которое защищает опоры от повреждений и продлевает срок службы. Для защиты напольного покрытия предусмотрены пластиковые подпятники.  Комфорт обеспечивается мягким наполнителем: в спинке используется ППУ плотностью 22&amp;ndash;30 кг/м&amp;sup3; толщиной 22&amp;ndash;30 мм, а в сиденье &amp;mdash; более плотный ППУ 18&amp;ndash;60 кг/м&amp;sup3; толщиной 55 мм. Такое сочетание делает посадку удобной даже при длительном использовании. Обивка отличается высокой износостойкостью &amp;mdash; до 50 000 циклов, что особенно важно при ежедневной эксплуатации.  Стул имеет продуманную эргономику. Дополнительным преимуществом является возможность штабелирования &amp;mdash; стулья удобно хранить и экономить пространство.  Стул Лайт/Lite &amp;mdash; это практичное решение для дома и квартиры.</description>
-        <oldprice>22960</oldprice>
-        <price>21840</price>
-        <retail_price>21840</retail_price><purchase_price>4095</purchase_price><catalog_url>https://price.tetchair.ru/catalog/3833/?p=25485</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>1</qty>
-        <weight>21,4</weight>
-        <volume>0,110837</volume>
-        <param name="Материал">велюр/букле</param>
-        <param name="Цвет">бежевый</param>
-        <param name="Страна производства">РОССИЯ</param>
-        <param name="Бренд">Tetchair</param>
-        <param name="Упакован">Нет</param>
-        <param name="Цвет обивки">бежевый</param>
-        <param name="Страна-Производитель">РОССИЯ</param>
-        <param name="Ширина">44</param>
-        <param name="Глубина">55</param>
-        <param name="Высота">78</param>
-        <param name="Высота от пола до сиденья">50</param>
-        <param name="Высота спинки">31</param>
-        <param name="Глубина сиденья">44</param>
-        <param name="Ширина сиденья">44</param>
-        <param name="Максимальная нагрузка">150</param>
-        <param name="Материал опор">металл</param>
-        <param name="Тип сиденья (жесткий/мягкий)">Мягкий</param>
-        <param name="Тип спинки (жесткий/мягкий)">Мягкий</param>
-        <param name="Требует сборки">Да</param>
-        <param name="Коллекция">Modern РФ/Модерн РФ (обеденная группа)</param>
-        <param name="Цвет опор">черный</param>
-        <param name="Материал обивки спинки">велюр</param>
-        <param name="Материал обивки сиденья">велюр</param>
-        <param name="Высота" unit="cm">78</param>
-        <param name="Ширина" unit="cm">44</param>
-        <param name="Глубина" unit="cm">55</param>
-        <dimensions>44/55/78</dimensions>
-      </offer>
       <offer id="25487" available="false">
         <vendorCode>25487</vendorCode>
         <categoryId>7451981</categoryId>
@@ -49464,7 +49345,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>63</qty>
+        <qty>62</qty>
         <weight>5,6</weight>
         <volume>0,04512</volume>
         <param name="Материал">велюр</param>
@@ -49843,7 +49724,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>40</qty>
+        <qty>34</qty>
         <weight>11,7</weight>
         <volume>0,22528</volume>
         <param name="Материал">велюр/букле (HYP)</param>
@@ -50876,7 +50757,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>6</qty>
+        <qty>4</qty>
         <weight>12,3</weight>
         <volume>0,249856</volume>
         <param name="Материал">вельвет</param>
@@ -51486,7 +51367,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>28</qty>
+        <qty>27</qty>
         <weight>12,3</weight>
         <volume>0,249856</volume>
         <param name="Материал">букле</param>
@@ -52761,7 +52642,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>ДАТСКАЯ (обеденная группа)</collection>
-        <qty>61</qty>
+        <qty>60</qty>
         <weight>10,9</weight>
         <volume>0,06851</volume>
         <param name="Материал">каркас бук, сиденье, спинка - мдф</param>
@@ -52819,7 +52700,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>ДАТСКАЯ (обеденная группа)</collection>
-        <qty>51</qty>
+        <qty>47</qty>
         <weight>10,9</weight>
         <volume>0,06851</volume>
         <param name="Материал">каркас бук, сиденье, спинка - мдф</param>
@@ -52950,51 +52831,6 @@
         <param name="Ширина" unit="cm">48,5</param>
         <param name="Глубина" unit="cm">54,5</param>
         <dimensions>48,5/54,5/86</dimensions>
-      </offer>
-      <offer id="10609" available="false">
-        <vendorCode>10609</vendorCode>
-        <categoryId>7452003</categoryId>
-        <name>Стул Пикассо/Picasso (PC-SC) дерево гевея, 45х53х97см, коричневый, ткань прованс №11 (Комплект из 2 шт.)</name>
-        <barcode>4607192074824</barcode>
-        <url>https://tetchair.ru/products/stul-picasso-pc-sc-derevo-geveya-45h53h97sm-maf-brown-tkan-provans-11.html</url>
-        <country_of_origin>МАЛАЙЗИЯ </country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>2 шт. в 1 упак.</packages_count>
-        <transport-unit>2</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/960631/387408/1939_59bd4e0e49796e32311a98c72a27e1cb.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/1939/1939-c74aad3ad0d7eb78fda5c5019a047986.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/1939/1939-1479bbe90c3b83c7ec4c15dc3035491c.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/1939/1939-4f647530713e99359f5959a62f857603.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/1939/1939-e99d50bbc74b917d269aa79a561f17a8.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/1939/1939-0bf24ce1c285b5d0c1bb143771e2d020.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/1939/1939-7584e4009494ed9a2be70603fe358bb9.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/1939/1939-c01ceded3751cc9cf2d1e2acf42410ab.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/1939/1939-0eefd55099ea4384d37aa6383563f64a.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/1939/1939-88ffff0c16c6980246d640fad0d23774.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/1939/10609.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/1939/10609_badge.jpg</picture>
-        <description>Классический деревянный стул Picasso/Пикассо из Миланской коллекции отлично дополнит интерьер гостиной, столовой или кухни. Устойчивый каркас модели изготовлен из массива гевеи - прочной и надежной древесины с красивым природным рисунком. Удобная спинка и мягкое сиденье позволят комфортно разместиться и расслабиться после тяжелого дня. Мягкое сиденье обито прочной обивочной тканью, которая не меняет форму со временем и не требует сложного ухода. Каркас модели цвета коричневый в рыжину (Maf Brown) отлично сочетается с универсальной обивкой с рисунком Прованс, что позволяет использовать стул в любом интерьере загородного дома, городской квартиры,кафе или ресторана. Классический стул Picasso/Пикассо из коллекции Миланской идеально подходит к обеденным столам Modena/Модена (Modena) и Solerno/Солерно (Solerno). Модель поставляется в разобранном виде, необходима несложная сборка по прилагаемой инструкции.</description>
-        <oldprice>13160</oldprice>
-        <price>9860</price>
-        <retail_price>9860</retail_price><purchase_price>3696</purchase_price><catalog_url>https://price.tetchair.ru/catalog/3834/?p=10609</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>МИЛАНСКАЯ (обеденная группа)</collection>
-        <qty>1</qty>
-        <weight>10</weight>
-        <volume>0,1512</volume>
-        <param name="Материал">дерево гевея</param>
-        <param name="Цвет">MAF Brown</param>
-        <param name="Страна производства">МАЛАЙЗИЯ </param>
-        <param name="Бренд">Tetchair</param>
-        <param name="Упакован">Нет</param>
-        <param name="Высота" unit="cm">97</param>
-        <param name="Ширина" unit="cm">45</param>
-        <param name="Глубина" unit="cm">53</param>
-        <dimensions>45/53/97</dimensions>
       </offer>
       <offer id="10977" available="true">
         <vendorCode>10977</vendorCode>
@@ -53778,137 +53614,6 @@
         <param name="Ширина" unit="cm">54,5</param>
         <param name="Глубина" unit="cm">56</param>
         <dimensions>54,5/56/74</dimensions>
-      </offer>
-      <offer id="15844" available="true">
-        <vendorCode>15844</vendorCode>
-        <categoryId>7452003</categoryId>
-        <name>Стул Синди Софт/Cindy Soft (мод.C1021F1)/1 шт. в упаковке вельвет/дерево бук, 53х45х81см, зеленый /натуральный</name>
-        <barcode>4660118804240</barcode>
-        <url>https://tetchair.ru/products/stul-secret-de-maison-cindy-soft-mod-c1021f1--1-sht-v-upakovke-vel-vet-derevo-53-h-45-h-81-sm-zelenyy-hlr-54-natural-nyy-.html</url>
-        <country_of_origin>КИТАЙ</country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>1 шт. в 1 упак.</packages_count>
-        <transport-unit>1</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/284/300/21734v276_01.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37514/37514-6cf7a45b52da3b504ce7f660bb92dfc6.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37514/37514-d8d4cd96cbfc0ce1af20fe616dca5aa2.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37514/37514-c6c3546ce23d751d24b415cb171f0edb.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37514/37514-9d0b4738248520653237bea21e5f40ae.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37514/37514-9d6f003054abf178acd5f238d2187a3d.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37514/37514-648874edda9d09f650e6c395aed3d303.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37514/37514-e24f0cbd7d881107811ab6ef47bb3e0c.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37514/37514-21b036555f40b71d16b57962584ac279.jpg</picture>
-        <video>https://rutube.ru/video/c1a32b8e97367f7751d49f77ba026701/</video>
-        <description>Великолепный стул CINDY SOFT из коллекции Modern выполнен по мотивам творений американских дизайнеров супругов Имз. Удобный мягкий стул станет не только предметом мебели, на котором будет приятно посидеть и почитать интересную книгу, но и важным аксессуаром интерьера для создания настроения целой комнаты. Удобная форма сиденья и спинки стула CINDY SOFT обеспечит комфортную посадку на протяжении продолжительного времени. Широко поставленные прочные ножки из дерева делают модель устойчивой и основательной. Мягкая обивка из вельвета благородного зеленого цвета восхищает своей красотой. Стул станет ярким акцентом в вашем интерьере. Тканевая обивка обладает повышенной износостойкостью, не мнётся, не меняет форму, способна на долгие годы сохранить свой первоначальный цвет, не протираясь и не выцветая. Стул хорошо подойдет для гостиной, для кухни, для спальни, для ресторана или для кафе. Стул очень прост в сборке, инструкция по сборке прилагается.</description>
-        <oldprice>5050</oldprice>
-        <price>2620</price>
-        <retail_price>2620</retail_price><purchase_price>1963</purchase_price><catalog_url>https://price.tetchair.ru/catalog/3834/?p=15844</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>MODERN (обеденная группа)</collection>
-        <qty>1</qty>
-        <weight>6</weight>
-        <volume>0,123596928</volume>
-        <param name="Материал">вельвет/дерево бук</param>
-        <param name="Цвет">зеленый (HLR 54)/натуральный </param>
-        <param name="Страна производства">КИТАЙ</param>
-        <param name="Бренд">Tetchair</param>
-        <param name="Упакован">Да</param>
-        <param name="Высота" unit="cm">81</param>
-        <param name="Ширина" unit="cm">53</param>
-        <param name="Глубина" unit="cm">45</param>
-        <dimensions>53/45/81</dimensions>
-      </offer>
-      <offer id="15849" available="true">
-        <vendorCode>15849</vendorCode>
-        <categoryId>7452003</categoryId>
-        <name>Стул Тулип Софт/Tulip Soft (мод.74)/1 шт. в упаковке вельвет/дерево, 54х47х83см, коралловый /натуральный</name>
-        <barcode>4660118804295</barcode>
-        <url>https://tetchair.ru/products/stul-secret-de-maison-tulip-soft-mod-74--1-sht-v-upakovke-vel-vet-derevo-54-h-47-h-83-sm-korallovyy-hlr-44-natural-nyy-.html</url>
-        <country_of_origin>КИТАЙ</country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>1 шт. в 1 упак.</packages_count>
-        <transport-unit>1</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/284/300/22149v276_01.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/38231/38231-d04ce8e8c9673c8135016877ce724650.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/38231/38231-05746407960adb9c14bff8f22c0f834a.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/38231/38231-eeee1f29c77f721e722c3fa0ffb3690c.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/38231/38231-e50a8335282a34600695a872d45f00dd.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/38231/38231-07d2b19d8ea95d23d1558bfd06628c5b.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/38231/38231-1345458eb440f3b8b67931030870d9d7.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/38231/38231-9e8c7c96b94ab4f4a9fa68499131655d.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/38231/38231-9ae0e13f3df8fea26de368b89e024594.jpg</picture>
-        <video>https://rutube.ru/video/5154a1ef1e8da309135204d86debaf3a/</video>
-        <description>Дизайн изумительного по красоте стула Tulip Soft/Тулип Софт из коллекции Modern вдохновлен работами американского архитектора Ээро Сааринена, который в середине двадцатого века создал знаменитый стул Tulip/Тулип. Одновременно простая и привлекательная форма стула позволяет поставить его в любой комнате: кухне, гостиной, спальне, детской. Мягкая обивка из вельвета кораллового цвета восхищает своей красотой. Стул всегда будет находиться в центре внимания в вашем интерьере. Цельная спинка и сиденье обеспечат удобную посадку на протяжении длительного времени. Бархатистая и приятная на ощупь поверхность обивки подарит максимальный комфорт и уют. Благодаря четырем деревянным ножкам модель устойчива и надежна. Вельвет обладает повышенной износостойкостью, не мнётся, не меняет форму, способен на долгие годы сохранить свой первоначальный цвет, не протираясь и не выцветая. Стул хорошо подойдет для гостиной, для кухни, для спальни, для ресторана или для кафе. Стул очень прост в сборке, инструкция по сборке прилагается.</description>
-        <oldprice>5120</oldprice>
-        <price>2640</price>
-        <retail_price>2640</retail_price><purchase_price>1985</purchase_price><catalog_url>https://price.tetchair.ru/catalog/3834/?p=15849</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>MODERN (обеденная группа)</collection>
-        <qty>1</qty>
-        <weight>4,7</weight>
-        <volume>0,123596928</volume>
-        <param name="Материал">вельвет/дерево </param>
-        <param name="Цвет">коралловый (HLR 44)/натуральный </param>
-        <param name="Страна производства">КИТАЙ</param>
-        <param name="Бренд">Tetchair</param>
-        <param name="Упакован">Да</param>
-        <param name="Высота" unit="cm">83</param>
-        <param name="Ширина" unit="cm">54</param>
-        <param name="Глубина" unit="cm">47</param>
-        <dimensions>54/47/83</dimensions>
-      </offer>
-      <offer id="15851" available="true">
-        <vendorCode>15851</vendorCode>
-        <categoryId>7452003</categoryId>
-        <name>Стул Тулип Софт/Tulip Soft (мод.74)/1 шт. в упаковке вельвет/дерево, 54х47х83см, светло-серый /натуральный</name>
-        <barcode>4660118804318</barcode>
-        <url>https://tetchair.ru/products/stul-secret-de-maison-tulip-soft-mod-74--1-sht-v-upakovke-vel-vet-derevo-54-h-47-h-83-sm-svetlo-seryy-hlr19-natural-nyy-.html</url>
-        <country_of_origin>КИТАЙ</country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>1 шт. в 1 упак.</packages_count>
-        <transport-unit>1</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/284/300/21736v276_01.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37522/37522-73374f2b47d27ae0246af8c7496de37a.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37522/37522-02d03c320fd716f826c02ba7269ba5b2.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37522/37522-068c51fe42aee235279a8d4f56ebea80.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37522/37522-befee0bc7ab565e9e5f9c77b216588b8.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37522/37522-6c0c151b6b5c6c918117ccd00ac30366.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37522/37522-77a1ca59752c2e22e7bc5336e3755b1f.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37522/37522-b43cd33cb4170d7a7c4264fffb10b153.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37522/37522-ee6b62bd090b3c09612db8390247318d.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37522/15214.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/37522/15214_badge.jpg</picture>
-        <video>https://rutube.ru/video/66e0bee654fb3c6f8e3c4f77df09698d/</video>
-        <description>Дизайн изумительного по красоте стула Tulip Soft/Тулип Софт из коллекции Modern/Модерн вдохновлен работами американского архитектора Ээро Сааринена, который в середине двадцатого века создал знаменитый стул Tulip/Тулип. Одновременно простая и привлекательная форма стула позволяет поставить его в любой комнате: кухне, гостиной, спальне, детской. Мягкая обивка из вельвета светло-серого цвета восхищает своей красотой. Стул всегда будет находиться в центре внимания в вашем интерьере. Цельная спинка и сиденье обеспечат удобную посадку на протяжении длительного времени. Бархатистая и приятная на ощупь поверхность обивки подарит максимальный комфорт и уют. Благодаря четырем деревянным ножкам модель устойчива и надежна. Вельвет обладает повышенной износостойкостью, не мнётся, не меняет форму, способен на долгие годы сохранить свой первоначальный цвет, не протираясь и не выцветая. Стул хорошо подойдет для гостиной, для кухни, для спальни, для ресторана или для кафе. Стул очень прост в сборке, инструкция по сборке прилагается.</description>
-        <oldprice>5120</oldprice>
-        <price>2640</price>
-        <retail_price>2640</retail_price><purchase_price>1985</purchase_price><catalog_url>https://price.tetchair.ru/catalog/3834/?p=15851</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>MODERN (обеденная группа)</collection>
-        <qty>1</qty>
-        <weight>4,7</weight>
-        <volume>0,123596928</volume>
-        <param name="Материал">вельвет/дерево </param>
-        <param name="Цвет">светло-серый (HLR19)/натуральный </param>
-        <param name="Страна производства">КИТАЙ</param>
-        <param name="Бренд">Tetchair</param>
-        <param name="Упакован">Да</param>
-        <param name="Высота" unit="cm">83</param>
-        <param name="Ширина" unit="cm">54</param>
-        <param name="Глубина" unit="cm">47</param>
-        <dimensions>54/47/83</dimensions>
       </offer>
       <offer id="17222" available="true">
         <vendorCode>17222</vendorCode>
@@ -55054,7 +54759,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>ДЕЛЬФИЙСКАЯ (обеденная группа)</collection>
-        <qty>82</qty>
+        <qty>79</qty>
         <weight>11,3</weight>
         <volume>0,069888</volume>
         <param name="Материал">Многослойный березовый шпон</param>
@@ -55079,10 +54784,10 @@
         <param name="Коллекция">ДЕЛЬФИЙСКАЯ (обеденная группа)</param>
         <param name="Цвет опор">белый</param>
         <param name="Материал обивки сиденья">велюр</param>
-        <param name="Высота" unit="cm">98</param>
-        <param name="Ширина" unit="cm">38,5</param>
-        <param name="Глубина" unit="cm">48</param>
-        <dimensions>38,5/48/98</dimensions>
+        <param name="Высота" unit="cm">84</param>
+        <param name="Ширина" unit="cm">46</param>
+        <param name="Глубина" unit="cm">56</param>
+        <dimensions>46/56/84</dimensions>
       </offer>
       <offer id="21830" available="true">
         <vendorCode>21830</vendorCode>
@@ -55176,7 +54881,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>ГОЛЛАНДСКАЯ (обеденная группа)</collection>
-        <qty>38</qty>
+        <qty>37</qty>
         <weight>10,95</weight>
         <volume>0,163625</volume>
         <param name="Материал">дерево / ткань</param>
@@ -56192,7 +55897,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>ДЕЛЬФИЙСКАЯ (обеденная группа)</collection>
-        <qty>84</qty>
+        <qty>83</qty>
         <weight>11</weight>
         <volume>0,07102</volume>
         <param name="Материал">массив сосны</param>
@@ -56252,7 +55957,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>ДЕЛЬФИЙСКАЯ (обеденная группа)</collection>
-        <qty>99</qty>
+        <qty>98</qty>
         <weight>11</weight>
         <volume>0,07102</volume>
         <param name="Материал">массив сосны</param>
@@ -56882,7 +56587,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>10</qty>
+        <qty>9</qty>
         <weight>43,05</weight>
         <volume>0,204156</volume>
         <param name="Материал">ЛДСП/HPL/металл</param>
@@ -58293,12 +57998,6 @@
         <param name="Страна производства">МАЛАЙЗИЯ </param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
-        <param name="Материал опор стола">массив бука</param>
-        <param name="Толщина столешницы">1,8</param>
-        <param name="Цвет опор стола">натуральный</param>
-        <param name="Количество опор у стола">4</param>
-        <param name="Материал каркаса, подстолья">массив бука</param>
-        <param name="Цвет каркаса, подстолья">натуральный</param>
         <param name="Страна-Производитель">МАЛАЙЗИЯ</param>
         <param name="Ширина">120</param>
         <param name="Глубина">80</param>
@@ -58309,6 +58008,12 @@
         <param name="Цвет столешницы">белый</param>
         <param name="Раскладывается или нет?">Да</param>
         <param name="Ширина стола в разложенном виде">150</param>
+        <param name="Материал опор стола">массив бука</param>
+        <param name="Толщина столешницы">1,8</param>
+        <param name="Цвет опор стола">натуральный</param>
+        <param name="Количество опор у стола">4</param>
+        <param name="Материал каркаса, подстолья">массив бука</param>
+        <param name="Цвет каркаса, подстолья">натуральный</param>
         <param name="Высота" unit="cm">75</param>
         <param name="Ширина" unit="cm">120</param>
         <param name="Глубина" unit="cm">80</param>
@@ -58468,6 +58173,8 @@
         <param name="Страна производства">КИТАЙ</param>
         <param name="Бренд">Tetchair</param>
         <param name="Упакован">Нет</param>
+        <param name="Цвет каркаса, подстолья">черный</param>
+        <param name="Максимальная нагрузка на поверхность стола">50</param>
         <param name="Страна-Производитель">КИТАЙ</param>
         <param name="Ширина">80</param>
         <param name="Глубина">80</param>
@@ -58486,8 +58193,6 @@
         <param name="Цвет опор стола">бежевый</param>
         <param name="Количество опор у стола">4</param>
         <param name="Материал каркаса, подстолья">металл</param>
-        <param name="Цвет каркаса, подстолья">черный</param>
-        <param name="Максимальная нагрузка на поверхность стола">50</param>
         <param name="Высота" unit="cm">75</param>
         <param name="Ширина" unit="cm">80</param>
         <param name="Глубина" unit="cm">80</param>
@@ -58777,62 +58482,6 @@
         <param name="Глубина" unit="cm">90</param>
         <param name="Ширина в разложенном виде" unit="cm">90</param>
         <dimensions>90/90/75</dimensions>
-      </offer>
-      <offer id="14119" available="true">
-        <vendorCode>14119</vendorCode>
-        <categoryId>7452048</categoryId>
-        <name>Стол обеденный раздвижной Стефано/Stefano круглый бук, МДФ, Д90х90-120х77см, коричневый</name>
-        <barcode>4610030669267</barcode>
-        <url>https://tetchair.ru/products/stol-stefano-kruglyy-buk-mdf-d90-30x77sm-tobacco.html</url>
-        <country_of_origin>РОССИЯ</country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>1 шт. в 2 упак.</packages_count>
-        <transport-unit>1</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/63/71/21070v5625_1.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/25003/21070v5625_2.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/25003/21070v5625_3.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/25003/21070v5625_4.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/25003/21070v5625_5.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/25003/21070v5625_6.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/25003/21070v5625_7.jpg</picture>
-        <description>Элегантный обеденный стол Стефано/Stefano с круглой столешницей создаст атмосферу комфорта, спокойствия и уюта в вашем доме. Данная модель станет замечательным интерьерным акцентом в любой обстановке. Устойчивая ножка стола выполнена из массива бука, благодаря чему модель прочна, надежна и основательна. Круглая форма столешницы способствует долгому и комфортному времяпрепровождению. Раздвижной механизм позволяет удобно разместить от четырех до шести человек. Модель не требует специального ухода, устойчива к изменению температуры и влаги. Круглый стол Стефано/Stefano ─ роскошный предмет интерьера, который впишется в любой комнате вашего дома и будет радовать своей оригинальностью и элегантностью в течение длительного времени. Стол подходит для кухни, для гостиной, для дачи. Стол очень прост в сборке, инструкция по сборке прилагается.</description>
-        <price>32970</price>
-        <retail_price>32970</retail_price><purchase_price>24728</purchase_price><catalog_url>https://price.tetchair.ru/catalog/3832/?p=14119</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>МИЛАНСКАЯ (обеденная группа)</collection>
-        <qty>1</qty>
-        <weight>25</weight>
-        <volume>0,10062</volume>
-        <param name="Материал">бук, мдф</param>
-        <param name="Цвет">Tobacco</param>
-        <param name="Страна производства">РОССИЯ</param>
-        <param name="Бренд">Tetchair</param>
-        <param name="Упакован">Нет</param>
-        <param name="Страна-Производитель">РОССИЯ</param>
-        <param name="Ширина">90</param>
-        <param name="Высота">77</param>
-        <param name="Требует сборки">Да</param>
-        <param name="Коллекция">МИЛАНСКАЯ (обеденная группа)</param>
-        <param name="Материал столешницы">МДФ</param>
-        <param name="Цвет столешницы">темно-коричневый</param>
-        <param name="Раскладывается или нет?">Да</param>
-        <param name="Материал вставки (если есть)">МДФ</param>
-        <param name="Цвет вставки (если есть)">темно-коричневый</param>
-        <param name="Ширина вставки (если есть)">30</param>
-        <param name="Ширина стола в разложенном виде">120</param>
-        <param name="Механизм трансформации">раздвижной</param>
-        <param name="Материал опор стола">массив бука</param>
-        <param name="Цвет опор стола">темно-коричневый</param>
-        <param name="Количество опор у стола">1</param>
-        <param name="Высота" unit="cm">77</param>
-        <param name="Ширина" unit="cm">90</param>
-        <param name="Глубина" unit="cm">90</param>
-        <param name="Ширина в разложенном виде" unit="cm">120</param>
-        <dimensions>90/90/77</dimensions>
       </offer>
       <offer id="14120" available="true">
         <vendorCode>14120</vendorCode>
@@ -59266,7 +58915,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>40</qty>
+        <qty>39</qty>
         <weight>10,3</weight>
         <volume>0,10115</volume>
         <param name="Материал">МДФ/дерево</param>
@@ -59708,7 +59357,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>MODERN (обеденная группа)</collection>
-        <qty>93</qty>
+        <qty>91</qty>
         <weight>11,15</weight>
         <volume>0,110916</volume>
         <param name="Материал">металл / МДФ</param>
@@ -61010,7 +60659,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>ДАТСКАЯ (обеденная группа)</collection>
-        <qty>14</qty>
+        <qty>13</qty>
         <weight>25</weight>
         <volume>0,12</volume>
         <param name="Материал" />
@@ -61441,7 +61090,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Modern РФ/Модерн РФ (обеденная группа)</collection>
-        <qty>16</qty>
+        <qty>15</qty>
         <weight>5,2</weight>
         <volume>0,04299625</volume>
         <param name="Материал">металл</param>
@@ -65079,7 +64728,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>City/Сити (мебель)</collection>
-        <qty>6</qty>
+        <qty>7</qty>
         <weight>40</weight>
         <volume>0,5472</volume>
         <param name="Материал">металл/дерево акация</param>
@@ -65466,7 +65115,7 @@
         <brand>Tetchair</brand>
         <manufacturer_warranty>true</manufacturer_warranty>
         <collection>Loft wood/Лофт вуд (мебель)</collection>
-        <qty>3</qty>
+        <qty>4</qty>
         <weight>17</weight>
         <volume>0,265</volume>
         <param name="Материал">дерево акация/метaлл</param>
@@ -66036,55 +65685,6 @@
         <param name="Ширина" unit="cm">100</param>
         <param name="Глубина" unit="cm">35</param>
         <dimensions>100/35/195</dimensions>
-      </offer>
-      <offer id="10942" available="true">
-        <vendorCode>10942</vendorCode>
-        <categoryId>7452042</categoryId>
-        <name>Стол обеденный Secret de Maison Авиньон/Avignon (мод. PRO-D05-ROUND) массив акации, 77х100 135 х100см, натуральный антик</name>
-        <barcode>4607192078594</barcode>
-        <url>https://tetchair.ru/products/stol-obedennyy-secret-de-maison-avignon-mod-pro-d05-round-derevo-akatsiya-77h100-135-h100sm-natural-nyy-brushed-ash-color-.html</url>
-        <country_of_origin>ВЬЕТНАМ</country_of_origin>
-        <tag name="Контроль цен">true</tag>
-        <packages_count>1 шт. в 2 упак.</packages_count>
-        <transport-unit>1</transport-unit>
-        <picture>https://tetchair.ru/netcat_files/960631/387408/962_fe5ea22a65b9d90ef9086a1d86bd6edd.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-96870bb0792871a79a35c4c6437946b7.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-042da6cfda61c9300808b57372c3e085.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-55009228ef5011b7c21435d321e97456.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-4cac43fd4c0347ad59496a235046c1ca.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-fe6dcfafb7b335a01633246b264daa0d.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-e2e55b92e12c21060d9ba7f185712fb2.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-f08c951a1bc965212faa66fae3637209.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-8cfff3d97faf8b024d546d35eb36d051.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-de6eaf13e305104f5bf1d2b21b5ef49a.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-e528b8836a56d3c536e61bb6b46acc7d.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-466b3f7cbf95efdbc4ccb457b45b5bf7.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-0b968619269898aab804934d5eaf298f.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-4b3aadadbe95a4fb00a26e31327b8966.jpg</picture>
-        <picture>https://tetchair.ru/netcat_files/multifile/268/962/962-42c6dbb1d72e111b9a16b15531c89965.jpg</picture>
-        <description>Стильный обеденный стол Secret De Maison из французской коллекции Avignon/Авиньон &amp;ndash; идеальное решение даже для небольшого помещения. Принципы удобства и лаконичности ярко прослеживаются в модели стола. Раздвижная конструкция позволяет грамотно организовать пространство и комфортно разместить от четырех до восьми человек. Стол изготовлен из массива тропической акации, браширование и покрытие из натурального твердого воска идеально подчеркивают природную красоту древесины. Обработанное по данной технологии дерево обладает повышенной прочностью, долговечностью, устойчиво к воздействию влаги, пыли и загрязнениям, способно многие годы не утрачивать своей первоначальной привлекательности. Модель идеально сочетается с мебелью из коллекции Avignon/Авиньон, поставляется в разобранном виде.</description>
-        <oldprice>194600</oldprice>
-        <price>155800</price>
-        <retail_price>155800</retail_price><purchase_price>81793</purchase_price><catalog_url>https://price.tetchair.ru/catalog/4066/?p=10942</catalog_url><currencyId>RUR</currencyId>
-        <store>true</store>
-        <pickup>true</pickup>
-        <delivery>true</delivery>
-        <brand>Tetchair</brand>
-        <manufacturer_warranty>true</manufacturer_warranty>
-        <collection>Avignon/Авиньон (мебель)</collection>
-        <qty>2</qty>
-        <weight>20</weight>
-        <volume>0,605</volume>
-        <param name="Материал">дерево акация</param>
-        <param name="Цвет">Натуральный (Brushed Ash color)</param>
-        <param name="Страна производства">ВЬЕТНАМ</param>
-        <param name="Бренд">Secret de Maison</param>
-        <param name="Упакован">Нет</param>
-        <param name="Высота" unit="cm">77</param>
-        <param name="Ширина" unit="cm">102</param>
-        <param name="Глубина" unit="cm">100</param>
-        <param name="Ширина в разложенном виде" unit="cm">135</param>
-        <dimensions>102/100/77</dimensions>
       </offer>
       <offer id="10946" available="true">
         <vendorCode>10946</vendorCode>
